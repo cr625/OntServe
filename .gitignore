@@ -1,0 +1,48 @@
+# Python standard ignores
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.env
+*.venv
+venv/
+ENV/
+env/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project-specific ignores
+docs/
+CLAUDE.md
+
+# Cache
+cache/
+
+# Other
+*.bak
+*.swp
+*.tmp
+
+# Ignore storage metadata and versions
+storage/metadata/
+storage/versions/
+
+# Ignore OntServe cache and storage
+OntServe/cache/
+OntServe/storage/
