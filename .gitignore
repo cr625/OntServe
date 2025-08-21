@@ -47,3 +47,5 @@ storage/versions/
 # Ignore OntServe cache and storage
 OntServe/cache/
 OntServe/storage/
+# Web-specific virtual environment
+web/venv/
