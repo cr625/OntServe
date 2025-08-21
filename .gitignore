@@ -30,6 +30,7 @@ Thumbs.db
 # Project-specific ignores
 docs/
 CLAUDE.md
+scratch/
 
 # Cache
 cache/
