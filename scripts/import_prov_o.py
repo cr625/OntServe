@@ -28,9 +28,9 @@ def main():
     config = {
         'storage_type': 'file',
         'storage_config': {
-            'storage_dir': os.path.join(os.path.dirname(__file__), 'storage', 'ontologies')
+            'storage_dir': '../storage'
         },
-        'cache_dir': os.path.join(os.path.dirname(__file__), 'cache'),
+        'cache_dir': '../cache',
         'log_level': 'INFO'
     }
     

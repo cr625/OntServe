@@ -32,9 +32,9 @@ def initialize_default_ontologies():
     config = {
         'storage_type': 'file',
         'storage_config': {
-            'storage_dir': 'OntServe/storage/ontologies'
+            'storage_dir': '../storage'
         },
-        'cache_dir': 'OntServe/cache',
+        'cache_dir': '../cache',
         'log_level': 'INFO'
     }
     

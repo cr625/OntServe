@@ -24,9 +24,9 @@ def main():
     config = {
         'storage_type': 'file',
         'storage_config': {
-            'storage_dir': './ontology_storage'
+            'storage_dir': '../storage'
         },
-        'cache_dir': './ontology_cache',
+        'cache_dir': '../cache',
         'log_level': 'INFO'
     }
     

@@ -28,9 +28,9 @@ def main():
     config = {
         'storage_type': 'file',
         'storage_config': {
-            'storage_dir': './storage'
+            'storage_dir': '../storage'
         },
-        'cache_dir': './cache',
+        'cache_dir': '../cache',
         'log_level': 'INFO'
     }
     
@@ -121,7 +121,7 @@ def import_to_database():
         ontology_config = {
             'storage_type': 'file',
             'storage_config': {
-                'storage_dir': app.config['ONTSERVE_STORAGE_DIR']
+                'storage_dir': '../storage'
             },
             'cache_dir': app.config['ONTSERVE_CACHE_DIR'],
             'log_level': 'INFO'
