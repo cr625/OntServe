@@ -1,0 +1,48 @@
+# Enhanced OntServe Requirements with Owlready2 Support
+# Core dependencies
+rdflib>=6.3.2
+requests>=2.31.0
+flask>=2.3.2
+flask-sqlalchemy>=3.0.0
+sqlalchemy>=1.4.0
+psycopg2-binary>=2.9.6
+
+# Enhanced ontology processing
+owlready2>=0.43
+# Java is required for Owlready2 reasoners (HermiT, Pellet)
+# Install Java JDK 8+ separately: apt-get install openjdk-11-jdk
+
+# Web interface
+bootstrap-flask>=2.2.0
+wtforms>=3.0.1
+
+# Search and similarity
+numpy>=1.24.0
+scikit-learn>=1.3.0
+sentence-transformers>=2.2.2
+
+# Optional: pgvector for semantic search (if using PostgreSQL with vector support)
+pgvector>=0.2.0
+
+# Development and testing
+pytest>=7.4.0
+pytest-flask>=1.2.0
+
+# Logging and monitoring
+python-json-logger>=2.0.7
+
+# File handling
+python-magic>=0.4.27
+
+# Date/time handling
+python-dateutil>=2.8.2
+
+# Configuration
+python-dotenv>=1.0.0
+
+# Command line interface
+click>=8.1.0
+
+# Performance monitoring (optional)
+memory-profiler>=0.61.0
+psutil>=5.9.5

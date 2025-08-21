@@ -7,7 +7,11 @@
     <title>{{ page_title }} - OntServe</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/cytoscape@3.21.0/dist/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/cytoscape-dagre@2.4.0/cytoscape-dagre.js"></script>
+    <script src="https://unpkg.com/cytoscape-cose-bilkent@4.1.0/cytoscape-cose-bilkent.js"></script>
+    <script src="https://unpkg.com/cytoscape-fcose@2.1.0/cytoscape-fcose.js"></script>
+    <script src="https://unpkg.com/cytoscape-elk@2.0.2/cytoscape-elk.js"></script>
     <style>
         .visualization-container {
             background: #f8f9fa;
@@ -21,45 +25,60 @@
             top: 20px;
         }
 
-        /* Ontology hierarchy styles */
-        .link {
-            fill: none;
-            stroke: #999;
-            stroke-opacity: 0.6;
-            stroke-width: 2px;
+        /* Cytoscape container styles */
+        #cy {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: #fafafa;
         }
 
-        .node circle {
-            cursor: pointer;
-            stroke: #fff;
-            stroke-width: 2px;
+        .cy-node-selected {
+            border-width: 3px !important;
+            border-color: #ff6b6b !important;
         }
 
-        .node text {
-            font: 12px sans-serif;
-            pointer-events: none;
-            user-select: none;
+        .cy-edge-selected {
+            line-color: #ff6b6b !important;
+            target-arrow-color: #ff6b6b !important;
+            width: 4px !important;
         }
 
-        /* Entity type colors */
-        .node.bfo circle {
-            fill: #4A90E2;
+        /* Layout control styles */
+        .layout-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
         }
 
-        .node.bfo-aligned circle {
-            fill: #7ED321;
+        .layout-btn {
+            margin: 2px;
+            padding: 5px 10px;
+            font-size: 12px;
         }
 
-        .node.prov circle {
-            fill: #F5A623;
+        .layout-btn.active {
+            background-color: #007bff;
+            color: white;
         }
 
-        .node.custom circle {
-            fill: #BD10E0;
-        }
-
-        .node.external circle {
-            fill: #9013FE;
+        /* Minimap styles */
+        .cy-navigator {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 200px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
 
         /* Entity type specific colors */
@@ -164,6 +183,62 @@
             font-size: 0.8rem;
             color: #6c757d;
         }
+
+        /* Additional Cytoscape styling for highlighting */
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            pointer-events: none;
+            max-width: 300px;
+            z-index: 100;
+            font-size: 13px;
+            display: none;
+        }
+
+        /* Highlighting styles */
+        .cy-node.highlighted {
+            border-width: 4px !important;
+            border-color: #ff6b6b !important;
+        }
+
+        .cy-node.connected {
+            border-width: 3px !important;
+            border-color: #4CAF50 !important;
+        }
+
+        .cy-node.dimmed {
+            opacity: 0.3 !important;
+        }
+
+        .cy-edge.highlighted {
+            line-color: #ff6b6b !important;
+            target-arrow-color: #ff6b6b !important;
+            width: 4px !important;
+        }
+
+        .cy-edge.dimmed {
+            opacity: 0.2 !important;
+        }
+
+        .cy-node.search-match {
+            border-width: 4px !important;
+            border-color: #FFD700 !important;
+            background-color: #FFEB3B !important;
+        }
+
+        .cy-node.search-highlight {
+            border-width: 5px !important;
+            border-color: #FF5722 !important;
+            background-color: #FF8A65 !important;
+        }
+
+        .cy-node.highlight-restrictions {
+            border-color: #F5A623 !important;
+            border-width: 4px !important;
+        }
     </style>
 </head>
 
@@ -194,14 +269,14 @@
                 </div>
                 <div class="col-md-4">
                     <div class="d-flex justify-content-end gap-2">
-                        <button class="btn btn-outline-primary btn-sm" onclick="expandAllNodes()">
-                            <i class="fas fa-expand-arrows-alt me-1"></i>Expand All
+                        <button class="btn btn-outline-primary btn-sm" onclick="fitToScreen()">
+                            <i class="fas fa-expand-arrows-alt me-1"></i>Fit Screen
                         </button>
-                        <button class="btn btn-outline-primary btn-sm" onclick="collapseAllNodes()">
-                            <i class="fas fa-compress-arrows-alt me-1"></i>Collapse All
+                        <button class="btn btn-outline-primary btn-sm" onclick="resetZoom()">
+                            <i class="fas fa-search-minus me-1"></i>Reset Zoom
                         </button>
                         <button class="btn btn-outline-success btn-sm" onclick="exportVisualization()">
-                            <i class="fas fa-download me-1"></i>Export
+                            <i class="fas fa-download me-1"></i>Export PNG
                         </button>
                     </div>
                 </div>
@@ -217,12 +292,28 @@
                     <h6><i class="fas fa-filter me-2"></i>Visualization Controls</h6>
 
                     <div class="mb-3">
-                        <label class="form-label">Entity Type</label>
+                        <label class="form-label">Layout Algorithm</label>
+                        <select class="form-select form-select-sm" id="layoutSelector">
+                            <option value="dagre" selected>Hierarchical (Dagre)</option>
+                            <option value="breadthfirst">Breadth First</option>
+                            <option value="cose">Force Directed (COSE)</option>
+                            <option value="fcose">Fast COSE</option>
+                            <option value="elk">ELK Layered</option>
+                            <option value="circle">Circular</option>
+                            <option value="grid">Grid</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm mt-2 w-100" onclick="applyLayout()">
+                            <i class="fas fa-project-diagram me-1"></i>Apply Layout
+                        </button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Entity Type Filter</label>
                         <select class="form-select form-select-sm" id="filterType">
                             <option value="all">All Types</option>
-                            <option value="class" selected>Classes</option>
-                            <option value="property">Properties</option>
-                            <option value="individual">Individuals</option>
+                            <option value="class" selected>Classes Only</option>
+                            <option value="property">Properties Only</option>
+                            <option value="individual">Individuals Only</option>
                         </select>
                     </div>
 
@@ -231,21 +322,21 @@
                         <input type="text" class="form-control form-control-sm" id="searchBox"
                             placeholder="Enter search term...">
                         <button class="btn btn-primary btn-sm mt-2 w-100" onclick="performSemanticSearch()">
-                            <i class="fas fa-search me-1"></i>Semantic Search
+                            <i class="fas fa-search me-1"></i>Search & Highlight
                         </button>
                     </div>
 
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="showBFOClasses" checked>
-                        <label class="form-check-label" for="showBFOClasses">
-                            Show BFO Classes
+                        <input class="form-check-input" type="checkbox" id="showInferred" checked>
+                        <label class="form-check-label" for="showInferred">
+                            Show Inferred Relations
                         </label>
                     </div>
 
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="highlightBFOAligned" checked>
-                        <label class="form-check-label" for="highlightBFOAligned">
-                            Highlight BFO-Aligned
+                        <input class="form-check-input" type="checkbox" id="showRestrictions">
+                        <label class="form-check-label" for="showRestrictions">
+                            Show Restrictions
                         </label>
                     </div>
 
@@ -267,12 +358,12 @@
                     <h6><i class="fas fa-chart-bar me-2"></i>Statistics</h6>
                     <div id="hierarchyStats">
                         <div class="d-flex justify-content-between">
-                            <small>Total Entities:</small>
-                            <strong id="totalEntities">-</strong>
+                            <small>Total Nodes:</small>
+                            <strong id="totalNodes">-</strong>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <small>Max Depth:</small>
-                            <strong id="maxDepth">-</strong>
+                            <small>Total Edges:</small>
+                            <strong id="totalEdges">-</strong>
                         </div>
                         <div class="d-flex justify-content-between">
                             <small>Classes:</small>
@@ -282,19 +373,46 @@
                             <small>Properties:</small>
                             <strong id="propertyCount">-</strong>
                         </div>
+                        <div class="d-flex justify-content-between">
+                            <small>Inferred:</small>
+                            <strong id="inferredCount">-</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small>Consistent:</small>
+                            <strong id="consistencyStatus">-</strong>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Visualization Area -->
             <div class="col-md-6">
-                <div class="visualization-container" id="hierarchyTree">
+                <div class="visualization-container" style="position: relative;">
                     <div id="loadingIndicator" class="d-flex justify-content-center align-items-center h-100">
                         <div class="text-center">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <div class="mt-2">Loading ontology hierarchy...</div>
+                            <div class="mt-2">Loading ontology visualization...</div>
+                        </div>
+                    </div>
+                    <div id="cy" style="display: none;"></div>
+
+                    <!-- Layout Controls Overlay -->
+                    <div class="layout-controls">
+                        <div class="btn-group-vertical">
+                            <button class="btn btn-sm btn-outline-secondary layout-btn" onclick="zoomIn()">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary layout-btn" onclick="zoomOut()">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary layout-btn" onclick="fitToScreen()">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary layout-btn" onclick="centerGraph()">
+                                <i class="fas fa-crosshairs"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -325,28 +443,172 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Global variables
-        let hierarchyData;
+        let cy; // Cytoscape instance
+        let currentLayout = 'dagre';
+        let ontologyData;
         let currentEntityData;
-        let tree;
-        let svg;
-        let g;
+        let originalElements; // Store original elements for filtering
         const ontologyId = "{{ ontology_id }}";
 
         // Initialize visualization on load
         document.addEventListener('DOMContentLoaded', function () {
             setupEventListeners();
+            initializeCytoscape();
             loadOntologyData();
         });
 
         function setupEventListeners() {
             document.getElementById('filterType').addEventListener('change', applyFilters);
-            document.getElementById('showBFOClasses').addEventListener('change', applyFilters);
-            document.getElementById('highlightBFOAligned').addEventListener('change', applyFilters);
+            document.getElementById('showInferred').addEventListener('change', applyFilters);
+            document.getElementById('showRestrictions').addEventListener('change', applyFilters);
+            document.getElementById('layoutSelector').addEventListener('change', function () {
+                currentLayout = this.value;
+            });
 
             document.getElementById('searchBox').addEventListener('keyup', function (e) {
                 if (e.key === 'Enter') {
                     performSemanticSearch();
                 }
+            });
+        }
+
+        function initializeCytoscape() {
+            cy = cytoscape({
+                container: document.getElementById('cy'),
+
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#4A90E2',
+                            'label': 'data(label)',
+                            'width': 60,
+                            'height': 60,
+                            'color': '#333',
+                            'text-valign': 'center',
+                            'text-halign': 'center',
+                            'font-size': '10px',
+                            'font-weight': 'bold',
+                            'border-width': 2,
+                            'border-color': '#fff',
+                            'text-wrap': 'wrap',
+                            'text-max-width': '80px'
+                        }
+                    },
+                    {
+                        selector: 'node.inferred',
+                        style: {
+                            'background-color': '#7ED321',
+                            'border-style': 'dashed',
+                            'border-width': 3
+                        }
+                    },
+                    {
+                        selector: 'node.has-restrictions',
+                        style: {
+                            'border-color': '#F5A623',
+                            'border-width': 3
+                        }
+                    },
+                    {
+                        selector: 'node:selected',
+                        style: {
+                            'border-color': '#ff6b6b',
+                            'border-width': 4
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 2,
+                            'line-color': '#999',
+                            'target-arrow-color': '#999',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier',
+                            'arrow-scale': 1.2
+                        }
+                    },
+                    {
+                        selector: 'edge.inferred',
+                        style: {
+                            'line-color': '#7ED321',
+                            'target-arrow-color': '#7ED321',
+                            'line-style': 'dashed',
+                            'width': 3
+                        }
+                    },
+                    {
+                        selector: 'edge:selected',
+                        style: {
+                            'line-color': '#ff6b6b',
+                            'target-arrow-color': '#ff6b6b',
+                            'width': 4
+                        }
+                    },
+                    // Namespace-based colors
+                    {
+                        selector: 'node.ns-bfo',
+                        style: {
+                            'background-color': '#8E24AA'
+                        }
+                    },
+                    {
+                        selector: 'node.ns-prov',
+                        style: {
+                            'background-color': '#F57F17'
+                        }
+                    },
+                    {
+                        selector: 'node.ns-proethica',
+                        style: {
+                            'background-color': '#D32F2F'
+                        }
+                    }
+                ],
+
+                layout: {
+                    name: 'dagre',
+                    rankDir: 'TB',
+                    animate: true,
+                    animationDuration: 500
+                },
+
+                // Interaction options
+                zoomingEnabled: true,
+                userZoomingEnabled: true,
+                panningEnabled: true,
+                userPanningEnabled: true,
+                boxSelectionEnabled: true,
+                selectionType: 'single',
+
+                // Performance
+                textureOnViewport: false,
+                motionBlur: true,
+                wheelSensitivity: 0.2
+            });
+
+            // Event handlers
+            cy.on('tap', 'node', function (evt) {
+                const node = evt.target;
+                showNodeDetails(node);
+                highlightConnectedNodes(node);
+            });
+
+            cy.on('tap', function (evt) {
+                if (evt.target === cy) {
+                    // Clicked on background - clear selection
+                    clearHighlights();
+                    hideEntityDetails();
+                }
+            });
+
+            cy.on('mouseover', 'node', function (evt) {
+                const node = evt.target;
+                showTooltip(evt, node);
+            });
+
+            cy.on('mouseout', 'node', function (evt) {
+                hideTooltip();
             });
         }
 
@@ -363,12 +625,14 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        hierarchyData = data.hierarchy;
-                        visualizeHierarchy(hierarchyData);
+                        ontologyData = data;
+                        originalElements = convertHierarchyToCytoscape(data.hierarchy);
+                        loadDataIntoGraph(originalElements);
                         updateStatistics(data.stats);
 
-                        // Hide loading indicator
+                        // Hide loading indicator and show graph
                         document.getElementById('loadingIndicator').style.display = 'none';
+                        document.getElementById('cy').style.display = 'block';
                     } else {
                         throw new Error(data.error || 'Unknown error');
                     }
@@ -383,201 +647,251 @@
                 });
         }
 
-        function visualizeHierarchy(data) {
-            // Clear previous visualization
-            document.getElementById('hierarchyTree').innerHTML = '';
+        function convertHierarchyToCytoscape(hierarchy) {
+            const elements = [];
+            const processedNodes = new Set();
 
-            // Set dimensions
-            const container = document.getElementById('hierarchyTree');
-            const width = container.clientWidth;
-            const height = 600;
-            const margin = { top: 20, right: 120, bottom: 20, left: 120 };
+            function processNode(node, parentId = null) {
+                if (!node || processedNodes.has(node.uri || node.name)) return;
 
-            // Create SVG
-            svg = d3.select('#hierarchyTree')
-                .append('svg')
-                .attr('width', width)
-                .attr('height', height);
+                const nodeId = node.uri || node.name;
+                processedNodes.add(nodeId);
 
-            g = svg.append('g')
-                .attr('transform', `translate(${margin.left},${margin.top})`);
+                // Add node
+                const nodeData = {
+                    group: 'nodes',
+                    data: {
+                        id: nodeId,
+                        label: node.label || node.name,
+                        name: node.name,
+                        uri: node.uri,
+                        type: node.entity_type || node.type || 'class',
+                        description: node.description || node.comment,
+                        is_inferred: node.is_inferred || false,
+                        restrictions: node.restrictions || 0,
+                        namespace: getNamespaceFromURI(node.uri)
+                    },
+                    classes: getNodeClasses(node)
+                };
+                elements.push(nodeData);
 
-            // Create tree layout
-            tree = d3.tree()
-                .size([height - margin.top - margin.bottom, width - margin.left - margin.right]);
-
-            // Create hierarchy
-            const root = d3.hierarchy(data);
-            tree(root);
-
-            // Add links
-            const links = g.selectAll('.link')
-                .data(root.links())
-                .enter()
-                .append('path')
-                .attr('class', 'link')
-                .attr('d', d3.linkHorizontal()
-                    .x(d => d.y)
-                    .y(d => d.x));
-
-            // Add nodes
-            const nodes = g.selectAll('.node')
-                .data(root.descendants())
-                .enter()
-                .append('g')
-                .attr('class', d => {
-                    let classes = 'node';
-                    if (d.data.type) {
-                        classes += ` ${d.data.type}`;
-                    }
-                    if (d.children) {
-                        classes += ' node--internal';
-                    } else {
-                        classes += ' node--leaf';
-                    }
-                    return classes;
-                })
-                .attr('transform', d => `translate(${d.y},${d.x})`)
-                .on('click', toggleNode);
-
-            // Add circles
-            nodes.append('circle')
-                .attr('r', 6);
-
-            // Add labels
-            nodes.append('text')
-                .attr('dy', 3)
-                .attr('x', d => d.children ? -8 : 8)
-                .style('text-anchor', d => d.children ? 'end' : 'start')
-                .text(d => d.data.name);
-
-            // Initially collapse deep nodes
-            root.descendants().forEach(d => {
-                if (d.depth >= 3) {
-                    toggleChildren(d);
+                // Add edge to parent
+                if (parentId && parentId !== nodeId) {
+                    const edgeData = {
+                        group: 'edges',
+                        data: {
+                            id: `${nodeId}_${parentId}`,
+                            source: nodeId,
+                            target: parentId,
+                            type: 'subClassOf',
+                            is_inferred: node.is_inferred || false
+                        },
+                        classes: node.is_inferred ? 'inferred' : 'explicit'
+                    };
+                    elements.push(edgeData);
                 }
-            });
 
-            update(root);
-        }
-
-        function toggleNode(event, d) {
-            if (d.children || d._children) {
-                toggleChildren(d);
-                update(d3.hierarchy(hierarchyData));
-            }
-
-            showEntityDetails(d.data);
-            event.stopPropagation();
-        }
-
-        function toggleChildren(d) {
-            if (d.children) {
-                d._children = d.children;
-                d.children = null;
-            } else {
-                d.children = d._children;
-                d._children = null;
-            }
-        }
-
-        function expandAllNodes() {
-            expandCollapseAll(d3.hierarchy(hierarchyData), true);
-            update(d3.hierarchy(hierarchyData));
-        }
-
-        function collapseAllNodes() {
-            expandCollapseAll(d3.hierarchy(hierarchyData), false);
-            update(d3.hierarchy(hierarchyData));
-        }
-
-        function expandCollapseAll(d, expand) {
-            if (d.children || d._children) {
-                if (expand) {
-                    if (d._children) {
-                        d.children = d._children;
-                        d._children = null;
-                    }
-                    if (d.children) {
-                        d.children.forEach(child => expandCollapseAll(child, expand));
-                    }
-                } else {
-                    if (d.children) {
-                        d.children.forEach(child => expandCollapseAll(child, expand));
-                    }
-                    if (d.depth > 0) {
-                        d._children = d.children;
-                        d.children = null;
-                    }
+                // Process children
+                if (node.children && Array.isArray(node.children)) {
+                    node.children.forEach(child => processNode(child, nodeId));
                 }
             }
+
+            processNode(hierarchy);
+            return elements;
         }
 
-        function update(source) {
-            tree(source);
+        function getNamespaceFromURI(uri) {
+            if (!uri) return '';
 
-            const nodes = g.selectAll('.node');
-            nodes.attr('transform', d => `translate(${d.y},${d.x})`);
+            if (uri.includes('bfo')) return 'bfo';
+            if (uri.includes('prov')) return 'prov';
+            if (uri.includes('proethica')) return 'proethica';
 
-            g.selectAll('.link')
-                .attr('d', d3.linkHorizontal()
-                    .x(d => d.y)
-                    .y(d => d.x));
+            // Extract domain from URI
+            const match = uri.match(/https?:\/\/([^\/]+)/);
+            return match ? match[1].replace(/\./g, '-') : '';
         }
 
-        function showEntityDetails(entityData) {
-            currentEntityData = entityData;
+        function getNodeClasses(node) {
+            const classes = ['class-node'];
+
+            if (node.is_inferred) {
+                classes.push('inferred');
+            }
+
+            if (node.restrictions && node.restrictions > 0) {
+                classes.push('has-restrictions');
+            }
+
+            const namespace = getNamespaceFromURI(node.uri);
+            if (namespace) {
+                classes.push(`ns-${namespace}`);
+            }
+
+            return classes.join(' ');
+        }
+
+        function loadDataIntoGraph(elements) {
+            // Clear existing elements
+            cy.elements().remove();
+
+            // Add new elements
+            cy.add(elements);
+
+            // Apply initial layout
+            applyLayout();
+        }
+
+        function applyLayout() {
+            const layoutName = currentLayout;
+            const nodeCount = cy.nodes().length;
+
+            let layoutConfig = { name: layoutName, animate: true, animationDuration: 1000 };
+
+            // Configure layout based on type and size
+            switch (layoutName) {
+                case 'dagre':
+                    layoutConfig = {
+                        ...layoutConfig,
+                        rankDir: 'TB',
+                        spacingFactor: 1.2,
+                        nodeSep: 50,
+                        edgeSep: 10,
+                        rankSep: 100
+                    };
+                    break;
+
+                case 'cose':
+                    layoutConfig = {
+                        ...layoutConfig,
+                        nodeRepulsion: nodeCount < 100 ? 400000 : 800000,
+                        nodeOverlap: 20,
+                        idealEdgeLength: 80,
+                        edgeElasticity: 200
+                    };
+                    break;
+
+                case 'fcose':
+                    layoutConfig = {
+                        ...layoutConfig,
+                        quality: 'default',
+                        randomize: false,
+                        animate: true,
+                        nodeRepulsion: 4500,
+                        idealEdgeLength: 50,
+                        edgeElasticity: 0.45
+                    };
+                    break;
+
+                case 'breadthfirst':
+                    layoutConfig = {
+                        ...layoutConfig,
+                        directed: true,
+                        spacingFactor: 1.5
+                    };
+                    break;
+
+                case 'circle':
+                    layoutConfig = {
+                        ...layoutConfig,
+                        radius: Math.min(300, nodeCount * 10),
+                        spacingFactor: 1.2
+                    };
+                    break;
+
+                case 'grid':
+                    layoutConfig = {
+                        ...layoutConfig,
+                        rows: Math.ceil(Math.sqrt(nodeCount)),
+                        spacingFactor: 1.2
+                    };
+                    break;
+            }
+
+            const layout = cy.layout(layoutConfig);
+            layout.run();
+        }
+
+        // New Cytoscape-based functions
+        function showNodeDetails(node) {
+            const nodeData = node.data();
+            currentEntityData = nodeData;
+
             const detailsElement = document.getElementById('entityDetails');
             const detailsCard = document.getElementById('entityDetailsCard');
             const findSimilarBtn = document.getElementById('findSimilarBtn');
 
-            if (!entityData || entityData.type === 'root') {
-                detailsCard.style.display = 'none';
-                return;
+            let html = `<div class="entity-header">${nodeData.label || nodeData.name}</div>`;
+
+            if (nodeData.uri) {
+                html += `<div class="entity-uri">${nodeData.uri}</div>`;
             }
 
-            let html = `<div class="entity-header">${entityData.name}</div>`;
-
-            if (entityData.uri) {
-                html += `<div class="entity-uri">${entityData.uri}</div>`;
-            }
-
-            if (entityData.description) {
+            if (nodeData.description) {
                 html += `
                     <div class="entity-property">
                         <span class="entity-property-name">Description:</span>
-                        <div class="entity-property-value">${entityData.description}</div>
+                        <div class="entity-property-value">${nodeData.description}</div>
                     </div>
                 `;
             }
 
-            if (entityData.entity_type) {
+            if (nodeData.type) {
                 html += `
                     <div class="entity-property">
                         <span class="entity-property-name">Type:</span>
                         <div class="entity-property-value">
-                            <span class="badge bg-secondary entity-${entityData.entity_type}">
-                                ${entityData.entity_type}
+                            <span class="badge bg-secondary entity-${nodeData.type}">
+                                ${nodeData.type}
                             </span>
                         </div>
                     </div>
                 `;
             }
 
-            if (entityData.properties && Object.keys(entityData.properties).length > 0) {
+            if (nodeData.is_inferred) {
                 html += `
                     <div class="entity-property">
-                        <span class="entity-property-name">Properties:</span>
+                        <span class="entity-property-name">Inferred:</span>
                         <div class="entity-property-value">
-                            <ul class="list-unstyled">
+                            <span class="badge bg-success">Yes</span>
+                        </div>
+                    </div>
                 `;
+            }
 
-                for (const [key, value] of Object.entries(entityData.properties)) {
-                    html += `<li><strong>${key}:</strong> ${Array.isArray(value) ? value.join(', ') : value}</li>`;
-                }
-
+            if (nodeData.restrictions > 0) {
                 html += `
-                            </ul>
+                    <div class="entity-property">
+                        <span class="entity-property-name">Restrictions:</span>
+                        <div class="entity-property-value">${nodeData.restrictions}</div>
+                    </div>
+                `;
+            }
+
+            // Show connections
+            const connectedEdges = node.connectedEdges();
+            const parents = connectedEdges.filter(edge => edge.target().id() === node.id()).sources();
+            const children = connectedEdges.filter(edge => edge.source().id() === node.id()).targets();
+
+            if (parents.length > 0) {
+                html += `
+                    <div class="entity-property">
+                        <span class="entity-property-name">Parents:</span>
+                        <div class="entity-property-value">
+                            ${parents.map(p => `<small class="d-block">${p.data('label')}</small>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (children.length > 0) {
+                html += `
+                    <div class="entity-property">
+                        <span class="entity-property-name">Children:</span>
+                        <div class="entity-property-value">
+                            ${children.map(c => `<small class="d-block">${c.data('label')}</small>`).join('')}
                         </div>
                     </div>
                 `;
@@ -585,7 +899,86 @@
 
             detailsElement.innerHTML = html;
             detailsCard.style.display = 'block';
-            findSimilarBtn.style.display = entityData.uri ? 'block' : 'none';
+            findSimilarBtn.style.display = nodeData.uri ? 'block' : 'none';
+        }
+
+        function highlightConnectedNodes(node) {
+            // Reset all styling
+            clearHighlights();
+
+            // Highlight the selected node
+            node.addClass('highlighted');
+
+            // Highlight connected nodes and edges
+            const connectedEdges = node.connectedEdges();
+            const connectedNodes = connectedEdges.connectedNodes();
+
+            connectedEdges.addClass('highlighted');
+            connectedNodes.addClass('connected');
+
+            // Dim non-connected elements
+            cy.elements().not(node).not(connectedNodes).not(connectedEdges).addClass('dimmed');
+        }
+
+        function clearHighlights() {
+            cy.elements().removeClass('highlighted connected dimmed');
+        }
+
+        function hideEntityDetails() {
+            document.getElementById('entityDetailsCard').style.display = 'none';
+        }
+
+        function showTooltip(evt, node) {
+            // Create or update tooltip
+            let tooltip = document.getElementById('node-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.id = 'node-tooltip';
+                tooltip.className = 'tooltip';
+                document.body.appendChild(tooltip);
+            }
+
+            const nodeData = node.data();
+            tooltip.innerHTML = `
+                <strong>${nodeData.label || nodeData.name}</strong><br>
+                <small>${nodeData.type}</small>
+                ${nodeData.is_inferred ? '<br><small class="text-success">Inferred</small>' : ''}
+            `;
+
+            // Position tooltip
+            const pos = node.renderedPosition();
+            tooltip.style.left = (pos.x + 10) + 'px';
+            tooltip.style.top = (pos.y - 10) + 'px';
+            tooltip.style.display = 'block';
+        }
+
+        function hideTooltip() {
+            const tooltip = document.getElementById('node-tooltip');
+            if (tooltip) {
+                tooltip.style.display = 'none';
+            }
+        }
+
+        // Control functions
+        function zoomIn() {
+            cy.zoom(cy.zoom() * 1.2);
+        }
+
+        function zoomOut() {
+            cy.zoom(cy.zoom() * 0.8);
+        }
+
+        function fitToScreen() {
+            cy.fit();
+        }
+
+        function resetZoom() {
+            cy.zoom(1);
+            cy.center();
+        }
+
+        function centerGraph() {
+            cy.center();
         }
 
         function performSemanticSearch() {
@@ -595,6 +988,10 @@
                 return;
             }
 
+            // Search in current graph first (client-side)
+            searchInGraph(query);
+
+            // Also perform server-side semantic search
             const url = `/editor/api/entities/search?query=${encodeURIComponent(query)}&ontology_id=${ontologyId}&limit=10`;
 
             fetch(url)
@@ -603,13 +1000,35 @@
                     if (data.success) {
                         displaySearchResults(data.results, query);
                     } else {
-                        alert('Search failed: ' + data.error);
+                        console.warn('Server search failed: ' + data.error);
                     }
                 })
                 .catch(error => {
                     console.error('Search error:', error);
-                    alert('Search failed: ' + error.message);
                 });
+        }
+
+        function searchInGraph(query) {
+            clearHighlights();
+
+            const matchingNodes = cy.nodes().filter(node => {
+                const data = node.data();
+                const searchString = (data.label + ' ' + data.name + ' ' + (data.description || '')).toLowerCase();
+                return searchString.includes(query.toLowerCase());
+            });
+
+            if (matchingNodes.length > 0) {
+                // Highlight matching nodes
+                matchingNodes.addClass('search-match');
+
+                // Fit to matching nodes
+                cy.fit(matchingNodes, 50);
+
+                // Show details of first match
+                showNodeDetails(matchingNodes[0]);
+            } else {
+                alert('No matching entities found in current view');
+            }
         }
 
         function displaySearchResults(results, query) {
@@ -617,7 +1036,7 @@
             const resultsContainer = document.getElementById('searchResults');
 
             if (results.length === 0) {
-                resultsContainer.innerHTML = '<div class="text-muted">No results found</div>';
+                resultsContainer.innerHTML = '<div class="text-muted">No server results found</div>';
             } else {
                 let html = '';
                 results.forEach(result => {
@@ -637,24 +1056,22 @@
         }
 
         function highlightEntity(uri) {
-            // Find and highlight entity in visualization
-            g.selectAll('.node').each(function (d) {
-                if (d.data.uri === uri) {
-                    d3.select(this).select('circle')
-                        .transition()
-                        .duration(500)
-                        .attr('r', 12)
-                        .style('stroke', '#ff0000')
-                        .style('stroke-width', '3px')
-                        .transition()
-                        .duration(500)
-                        .attr('r', 6)
-                        .style('stroke', '#fff')
-                        .style('stroke-width', '2px');
+            // Find and highlight entity in Cytoscape graph
+            const targetNode = cy.nodes().filter(node => node.data('uri') === uri);
 
-                    showEntityDetails(d.data);
-                }
-            });
+            if (targetNode.length > 0) {
+                clearHighlights();
+                targetNode.addClass('search-highlight');
+                cy.animate({
+                    center: { eles: targetNode },
+                    zoom: 1.5
+                }, {
+                    duration: 500
+                });
+                showNodeDetails(targetNode[0]);
+            } else {
+                console.warn('Entity not found in current graph:', uri);
+            }
         }
 
         function findSimilarEntities() {
@@ -669,52 +1086,92 @@
 
         function applyFilters() {
             const filterType = document.getElementById('filterType').value;
-            const showBFO = document.getElementById('showBFOClasses').checked;
-            const highlightBFOAligned = document.getElementById('highlightBFOAligned').checked;
+            const showInferred = document.getElementById('showInferred').checked;
+            const showRestrictions = document.getElementById('showRestrictions').checked;
 
-            // Reload hierarchy with new filter
-            if (filterType !== 'all') {
+            if (!originalElements) {
+                // If no data loaded yet, reload
                 loadOntologyData();
                 return;
             }
 
-            // Apply visual filters
-            g.selectAll('.node').style('display', function () {
-                const d = d3.select(this).datum();
+            // Filter elements based on criteria
+            let filteredElements = [...originalElements];
 
-                if (!showBFO && d.data.type === 'bfo') {
-                    return 'none';
-                }
-
-                return null;
-            });
-
-            // Apply highlight
-            if (highlightBFOAligned) {
-                g.selectAll('.node circle').attr('r', function () {
-                    const d = d3.select(this.parentNode).datum();
-                    if (d.data.type === 'bfo' || d.data.type === 'bfo-aligned') {
-                        return 8;
-                    }
-                    return 6;
+            // Filter by entity type
+            if (filterType !== 'all') {
+                filteredElements = filteredElements.filter(element => {
+                    if (element.group === 'edges') return true; // Keep all edges for now
+                    return element.data.type === filterType;
                 });
-            } else {
-                g.selectAll('.node circle').attr('r', 6);
+
+                // Remove edges where either source or target is filtered out
+                const nodeIds = new Set(filteredElements.filter(e => e.group === 'nodes').map(e => e.data.id));
+                filteredElements = filteredElements.filter(element => {
+                    if (element.group === 'nodes') return true;
+                    return nodeIds.has(element.data.source) && nodeIds.has(element.data.target);
+                });
             }
+
+            // Filter inferred relationships
+            if (!showInferred) {
+                filteredElements = filteredElements.filter(element => {
+                    return !element.data.is_inferred;
+                });
+            }
+
+            // Apply filters to graph
+            cy.elements().remove();
+            cy.add(filteredElements);
+
+            // Update styling based on restrictions filter
+            if (showRestrictions) {
+                cy.nodes().forEach(node => {
+                    if (node.data('restrictions') > 0) {
+                        node.addClass('highlight-restrictions');
+                    }
+                });
+            }
+
+            // Re-apply layout
+            applyLayout();
         }
 
         function updateStatistics(stats) {
             if (stats) {
-                document.getElementById('totalEntities').textContent = stats.total_entities || 0;
-                document.getElementById('maxDepth').textContent = stats.max_depth || 0;
+                document.getElementById('totalNodes').textContent = cy ? cy.nodes().length : (stats.total_entities || 0);
+                document.getElementById('totalEdges').textContent = cy ? cy.edges().length : 0;
                 document.getElementById('classCount').textContent = stats.entity_type_counts?.class || 0;
                 document.getElementById('propertyCount').textContent = stats.entity_type_counts?.property || 0;
+                document.getElementById('inferredCount').textContent = stats.inferred_count || 0;
+                document.getElementById('consistencyStatus').textContent = stats.consistency_check !== undefined ?
+                    (stats.consistency_check ? 'Yes' : 'No') : 'Unknown';
             }
         }
 
         function exportVisualization() {
-            // Implementation for exporting visualization
-            console.log('Export functionality to be implemented');
+            if (!cy) {
+                alert('No visualization loaded to export');
+                return;
+            }
+
+            // Export as PNG
+            const pngBlob = cy.png({
+                output: 'blob',
+                bg: '#ffffff',
+                full: true,
+                scale: 2 // High resolution
+            });
+
+            // Create download link
+            const url = URL.createObjectURL(pngBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${ontologyId}_visualization.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>

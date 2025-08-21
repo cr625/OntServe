@@ -23,6 +23,8 @@ import rdflib
 from config import config
 from models import db, init_db, Ontology, OntologyEntity, OntologyVersion
 from core.ontology_manager import OntologyManager
+from editor.routes import create_editor_blueprint
+from storage.file_storage import FileStorage
 
 
 def create_app(config_name=None):
@@ -65,6 +67,16 @@ def create_app(config_name=None):
     
     # Register routes
     register_routes(app)
+    
+    # Register enhanced editor blueprint
+    storage_backend = FileStorage({'storage_dir': app.config['ONTSERVE_STORAGE_DIR']})
+    editor_config = {
+        'require_auth': False,
+        'admin_only': False,
+        'storage': {'storage_dir': app.config['ONTSERVE_STORAGE_DIR']}
+    }
+    editor_blueprint = create_editor_blueprint(storage_backend, editor_config)
+    app.register_blueprint(editor_blueprint)
     
     return app
 

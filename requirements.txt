@@ -1,0 +1,52 @@
+# OntServe Enhanced Requirements
+# Core dependencies for enhanced ontology processing with Owlready2 and Cytoscape.js visualization
+
+# ===== Core RDF and Ontology Processing =====
+rdflib>=6.3.2
+owlready2>=0.43
+# Note: Java JDK 8+ required for Owlready2 reasoners (HermiT, Pellet)
+# Install with: apt-get install openjdk-11-jdk
+
+# ===== Web Framework =====
+flask>=2.3.2
+flask-sqlalchemy>=3.0.0
+bootstrap-flask>=2.2.0
+wtforms>=3.0.1
+
+# ===== Database =====
+sqlalchemy>=1.4.0
+psycopg2-binary>=2.9.6
+
+# ===== Search and Similarity =====
+numpy>=1.24.0
+scikit-learn>=1.3.0
+sentence-transformers>=2.2.2
+
+# ===== Optional: Vector Search (PostgreSQL with pgvector) =====
+pgvector>=0.2.0
+
+# ===== HTTP Requests =====
+requests>=2.31.0
+
+# ===== File Handling =====
+python-magic>=0.4.27
+
+# ===== Date/Time =====
+python-dateutil>=2.8.2
+
+# ===== Configuration =====
+python-dotenv>=1.0.0
+
+# ===== Command Line Interface =====
+click>=8.1.0
+
+# ===== Development and Testing =====
+pytest>=7.4.0
+pytest-flask>=1.2.0
+
+# ===== Logging and Monitoring =====
+python-json-logger>=2.0.7
+
+# ===== Performance Monitoring (Optional) =====
+memory-profiler>=0.61.0
+psutil>=5.9.5

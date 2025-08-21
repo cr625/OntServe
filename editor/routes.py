@@ -13,8 +13,9 @@ from typing import Dict, Any, Optional
 from flask import Blueprint, request, jsonify, render_template, current_app, flash
 from werkzeug.exceptions import BadRequest, NotFound
 
-from ..web.models import db, Ontology, OntologyEntity, OntologyVersion
-from ..storage.file_storage import FileStorage
+from models import db, Ontology, OntologyEntity, OntologyVersion
+from storage.file_storage import FileStorage
+from core.enhanced_processor import EnhancedOntologyProcessor, ProcessingOptions
 from .services import OntologyEntityService, OntologyValidationService
 from .utils import EntityTypeMapper, HierarchyBuilder, SearchHelper
 
@@ -47,6 +48,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
     # Initialize services
     entity_service = OntologyEntityService(storage_backend)
     validation_service = OntologyValidationService(storage_backend)
+    enhanced_processor = EnhancedOntologyProcessor(storage_backend)
     
     @bp.route('/')
     def index():
@@ -517,6 +519,310 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             
         except Exception as e:
             logger.error(f"Error extracting entities for {ontology_id}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    # ===== ENHANCED PROCESSOR ENDPOINTS =====
+    
+    @bp.route('/api/enhanced/process/<ontology_id>', methods=['POST'])
+    def enhanced_process_ontology(ontology_id: str):
+        """Process ontology with enhanced processor (reasoning + embeddings)."""
+        try:
+            # Get processing options from request
+            data = request.get_json() or {}
+            
+            options = ProcessingOptions(
+                use_reasoning=data.get('use_reasoning', True),
+                reasoner_type=data.get('reasoner_type', 'hermit'),
+                validate_consistency=data.get('validate_consistency', True),
+                include_inferred=data.get('include_inferred', True),
+                extract_restrictions=data.get('extract_restrictions', True),
+                generate_embeddings=data.get('generate_embeddings', True),
+                cache_reasoning=data.get('cache_reasoning', True),
+                force_refresh=data.get('force_refresh', False)
+            )
+            
+            # Process with enhanced processor
+            result = enhanced_processor.process_ontology(ontology_id, options)
+            
+            return jsonify({
+                'success': result.success,
+                'processing_result': result.to_dict(),
+                'message': f"Enhanced processing {'completed' if result.success else 'failed'}"
+            })
+            
+        except Exception as e:
+            logger.error(f"Error in enhanced processing for {ontology_id}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/api/enhanced/validate/<ontology_id>')
+    def enhanced_validate_ontology(ontology_id: str):
+        """Enhanced validation with reasoning and consistency checking."""
+        try:
+            validation_result = enhanced_processor.validate_ontology_enhanced(ontology_id)
+            
+            return jsonify({
+                'success': True,
+                'validation': validation_result
+            })
+            
+        except Exception as e:
+            logger.error(f"Error in enhanced validation for {ontology_id}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/api/enhanced/search')
+    def enhanced_search_entities():
+        """Enhanced semantic search with reasoning integration."""
+        try:
+            # Get search parameters
+            query = request.args.get('query', '').strip()
+            ontology_id = request.args.get('ontology_id')
+            entity_type = request.args.get('entity_type')
+            include_reasoning = request.args.get('include_reasoning', 'true').lower() == 'true'
+            limit = int(request.args.get('limit', 10))
+            
+            if not query:
+                raise BadRequest("Query parameter is required")
+            
+            # Perform enhanced semantic search
+            results = enhanced_processor.search_entities_enhanced(
+                query, ontology_id, entity_type, include_reasoning, limit
+            )
+            
+            # Add display information
+            for result in results:
+                result['display_name'] = EntityTypeMapper.get_display_name(result.get('entity_type', 'unknown'))
+                result['css_class'] = EntityTypeMapper.get_css_class(result.get('entity_type', 'unknown'))
+                result['icon'] = EntityTypeMapper.get_icon(result.get('entity_type', 'unknown'))
+                result['color'] = EntityTypeMapper.get_entity_color(result.get('entity_type', 'unknown'), result.get('uri', ''))
+            
+            return jsonify({
+                'success': True,
+                'results': results,
+                'query': query,
+                'total_count': len(results),
+                'reasoning_included': include_reasoning
+            })
+            
+        except Exception as e:
+            logger.error(f"Error in enhanced search: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/api/enhanced/entity/<ontology_id>/<path:entity_uri>')
+    def enhanced_get_entity_data(ontology_id: str, entity_uri: str):
+        """Get enhanced entity data with reasoning information."""
+        try:
+            include_reasoning = request.args.get('include_reasoning', 'true').lower() == 'true'
+            
+            # Get enhanced entity data
+            entity_data = enhanced_processor.get_enhanced_entity_data(
+                ontology_id, entity_uri, include_reasoning
+            )
+            
+            if not entity_data:
+                raise NotFound(f"Entity {entity_uri} not found in {ontology_id}")
+            
+            # Add display information
+            if 'entity_type' in entity_data:
+                entity_data['display_name'] = EntityTypeMapper.get_display_name(entity_data['entity_type'])
+                entity_data['css_class'] = EntityTypeMapper.get_css_class(entity_data['entity_type'])
+                entity_data['icon'] = EntityTypeMapper.get_icon(entity_data['entity_type'])
+                entity_data['color'] = EntityTypeMapper.get_entity_color(entity_data['entity_type'], entity_uri)
+                entity_data['is_bfo_aligned'] = EntityTypeMapper.is_bfo_aligned(entity_uri)
+            
+            return jsonify({
+                'success': True,
+                'entity': entity_data,
+                'reasoning_included': include_reasoning
+            })
+            
+        except Exception as e:
+            logger.error(f"Error getting enhanced entity data for {entity_uri}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/api/enhanced/visualization/<ontology_id>')
+    def enhanced_visualization_data(ontology_id: str):
+        """Get enhanced visualization data optimized for Cytoscape.js with reasoning."""
+        try:
+            # Get query parameters
+            include_reasoning = request.args.get('include_reasoning', 'true').lower() == 'true'
+            layout_type = request.args.get('layout', 'hierarchical')
+            entity_limit = int(request.args.get('limit', 1000))
+            
+            # Check if we have cached visualization data from enhanced processing
+            ontology = db.session.query(Ontology).filter_by(ontology_id=ontology_id).first()
+            if not ontology:
+                raise NotFound(f"Ontology {ontology_id} not found")
+            
+            # Get entities with enhanced metadata
+            entities_query = db.session.query(OntologyEntity).filter_by(ontology_id=ontology.id)
+            entities = entities_query.limit(entity_limit).all()
+            
+            # Build nodes for Cytoscape.js
+            nodes = []
+            edges = []
+            
+            for entity in entities:
+                # Create node
+                node_data = {
+                    'id': entity.uri,
+                    'label': entity.label or entity.uri.split('#')[-1].split('/')[-1],
+                    'type': entity.entity_type,
+                    'uri': entity.uri,
+                    'comment': entity.comment or '',
+                }
+                
+                # Add reasoning information if available
+                if include_reasoning and entity.properties:
+                    reasoning_info = entity.properties.get('reasoning', {})
+                    node_data.update({
+                        'is_inferred': reasoning_info.get('is_inferred', False),
+                        'consistency_status': reasoning_info.get('consistency_status', 'unknown'),
+                        'has_inferred_relationships': len(reasoning_info.get('inferred_relationships', [])) > 0
+                    })
+                
+                # Add display styling
+                node_data['display_name'] = EntityTypeMapper.get_display_name(entity.entity_type)
+                node_data['color'] = EntityTypeMapper.get_entity_color(entity.entity_type, entity.uri)
+                
+                nodes.append({
+                    'data': node_data,
+                    'classes': f"entity-node {entity.entity_type}" + (' inferred' if node_data.get('is_inferred') else ' explicit')
+                })
+                
+                # Create edges for parent relationships
+                if entity.parent_uri:
+                    edge_id = f"{entity.uri}-subClassOf-{entity.parent_uri}"
+                    edges.append({
+                        'data': {
+                            'id': edge_id,
+                            'source': entity.uri,
+                            'target': entity.parent_uri,
+                            'type': 'subClassOf',
+                            'is_inferred': node_data.get('is_inferred', False)
+                        },
+                        'classes': 'hierarchy-edge' + (' inferred' if node_data.get('is_inferred') else ' explicit')
+                    })
+            
+            # Get layout configuration
+            layout_options = {
+                'hierarchical': {'name': 'dagre', 'rankDir': 'TB'},
+                'circular': {'name': 'circle'},
+                'force': {'name': 'cose', 'nodeRepulsion': 400000},
+                'breadthfirst': {'name': 'breadthfirst', 'directed': True}
+            }
+            
+            # Get style configuration
+            style_options = [
+                {
+                    'selector': 'node',
+                    'style': {
+                        'label': 'data(label)',
+                        'width': '60px',
+                        'height': '60px',
+                        'background-color': 'data(color)',
+                        'border-width': '2px',
+                        'border-color': '#fff',
+                        'color': '#333',
+                        'text-valign': 'center',
+                        'text-halign': 'center',
+                        'font-size': '10px'
+                    }
+                },
+                {
+                    'selector': 'node.inferred',
+                    'style': {
+                        'border-style': 'dashed',
+                        'border-color': '#7ED321'
+                    }
+                },
+                {
+                    'selector': 'edge',
+                    'style': {
+                        'width': '2px',
+                        'line-color': '#999',
+                        'target-arrow-color': '#999',
+                        'target-arrow-shape': 'triangle',
+                        'curve-style': 'bezier'
+                    }
+                },
+                {
+                    'selector': 'edge.inferred',
+                    'style': {
+                        'line-color': '#7ED321',
+                        'target-arrow-color': '#7ED321',
+                        'line-style': 'dashed'
+                    }
+                }
+            ]
+            
+            return jsonify({
+                'success': True,
+                'visualization': {
+                    'nodes': nodes,
+                    'edges': edges,
+                    'layout_options': layout_options.get(layout_type, layout_options['hierarchical']),
+                    'style_options': style_options
+                },
+                'stats': {
+                    'node_count': len(nodes),
+                    'edge_count': len(edges),
+                    'inferred_nodes': len([n for n in nodes if n['data'].get('is_inferred')]),
+                    'inferred_edges': len([e for e in edges if e['data'].get('is_inferred')])
+                },
+                'ontology': ontology.to_dict()
+            })
+            
+        except Exception as e:
+            logger.error(f"Error generating enhanced visualization for {ontology_id}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/api/enhanced/capabilities')
+    def enhanced_capabilities():
+        """Get information about enhanced processor capabilities."""
+        try:
+            # Check processor capabilities
+            has_reasoning = hasattr(enhanced_processor, 'owlready_importer') and enhanced_processor.owlready_importer is not None
+            has_embeddings = enhanced_processor.embedding_model is not None
+            
+            return jsonify({
+                'success': True,
+                'capabilities': {
+                    'reasoning': has_reasoning,
+                    'embeddings': has_embeddings,
+                    'consistency_checking': has_reasoning,
+                    'semantic_search': has_embeddings,
+                    'bfo_validation': True,
+                    'visualization': True,
+                    'enhanced_processing': True
+                },
+                'processor_info': {
+                    'reasoning_available': has_reasoning,
+                    'embeddings_available': has_embeddings,
+                    'supported_reasoners': ['hermit', 'pellet'] if has_reasoning else [],
+                    'supported_formats': ['turtle', 'xml', 'n3', 'nt']
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"Error getting enhanced capabilities: {e}")
             return jsonify({
                 'success': False,
                 'error': str(e)
