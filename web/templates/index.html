@@ -87,8 +87,16 @@
                         <td>
                             <div class="btn-group btn-group-sm" role="group">
                                 <a href="{{ url_for('ontology_detail', ontology_id=ontology.ontology_id) }}" 
-                                   class="btn btn-outline-primary" title="View">
-                                    <i class="bi bi-eye"></i>
+                                   class="btn btn-outline-primary" title="View Details">
+                                    <i class="bi bi-info-circle"></i>
+                                </a>
+                                <a href="{{ url_for('edit_ontology', ontology_id=ontology.ontology_id) }}" 
+                                   class="btn btn-outline-warning" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_id=ontology.ontology_id) }}" 
+                                   class="btn btn-outline-success" title="Visualize">
+                                    <i class="bi bi-eye-fill"></i>
                                 </a>
                                 <a href="{{ url_for('ontology_content', ontology_id=ontology.ontology_id) }}" 
                                    class="btn btn-outline-secondary" title="Raw TTL" target="_blank">
