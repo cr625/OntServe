@@ -12,7 +12,7 @@ services:
       POSTGRES_PASSWORD: ${ONTSERVE_DB_PASSWORD:-ontserve_development_password}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5433:5432" # Use port 5433 to avoid conflict with system PostgreSQL
+      - "5435:5432" # Use port 5435 to avoid conflict with system PostgreSQL
     volumes:
       - ontserve_pgdata:/var/lib/postgresql/data
       - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -71,9 +71,9 @@ services:
       ONTSERVE_QUERY_TIMEOUT: 300
 
       # Feature flags
-      ONTSERVE_ENABLE_VECTOR_SEARCH: true
-      ONTSERVE_ENABLE_AUDIT_LOG: true
-      ONTSERVE_ENABLE_CACHING: true
+      ONTSERVE_ENABLE_VECTOR_SEARCH: "true"
+      ONTSERVE_ENABLE_AUDIT_LOG: "true"
+      ONTSERVE_ENABLE_CACHING: "true"
     ports:
       - "8082:8082"
     depends_on:
@@ -105,4 +105,4 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.25.0.0/16
