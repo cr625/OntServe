@@ -72,11 +72,11 @@
                     {% for ontology in ontologies %}
                     <tr>
                         <td>
-                            <a href="{{ url_for('ontology_detail', ontology_id=ontology.ontology_id) }}">
+                            <a href="{{ url_for('ontology_detail', ontology_name=ontology.name) }}">
                                 <strong>{{ ontology.name }}</strong>
                             </a>
                         </td>
-                        <td><code>{{ ontology.ontology_id }}</code></td>
+                        <td><code>{{ ontology.base_uri }}</code></td>
                         <td>{{ ontology.description[:100] if ontology.description else '-' }}
                             {% if ontology.description and ontology.description|length > 100 %}...{% endif %}
                         </td>
@@ -86,19 +86,19 @@
                         <td>{{ ontology.created_at.strftime('%Y-%m-%d') if ontology.created_at else '-' }}</td>
                         <td>
                             <div class="btn-group btn-group-sm" role="group">
-                                <a href="{{ url_for('ontology_detail', ontology_id=ontology.ontology_id) }}" 
+                                <a href="{{ url_for('ontology_detail', ontology_name=ontology.name) }}" 
                                    class="btn btn-outline-primary" title="View Details">
                                     <i class="bi bi-info-circle"></i>
                                 </a>
-                                <a href="{{ url_for('edit_ontology', ontology_id=ontology.ontology_id) }}" 
+                                <a href="{{ url_for('edit_ontology', ontology_name=ontology.name) }}" 
                                    class="btn btn-outline-warning" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_id=ontology.ontology_id) }}" 
+                                <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}" 
                                    class="btn btn-outline-success" title="Visualize">
                                     <i class="bi bi-eye-fill"></i>
                                 </a>
-                                <a href="{{ url_for('ontology_content', ontology_id=ontology.ontology_id) }}" 
+                                <a href="{{ url_for('ontology_content', ontology_name=ontology.name) }}" 
                                    class="btn btn-outline-secondary" title="Raw TTL" target="_blank">
                                     <i class="bi bi-file-code"></i>
                                 </a>

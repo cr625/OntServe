@@ -102,10 +102,10 @@ def register_routes(app):
                              ontologies=ontologies,
                              pagination=pagination)
     
-    @app.route('/ontology/<ontology_id>')
-    def ontology_detail(ontology_id):
+    @app.route('/ontology/<ontology_name>')
+    def ontology_detail(ontology_name):
         """Detail view for a specific ontology."""
-        ontology = Ontology.query.filter_by(ontology_id=ontology_id).first_or_404()
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
         
         # Get entities grouped by type
         entities = {
@@ -133,11 +133,14 @@ def register_routes(app):
                              entities=entities,
                              versions=versions)
     
-    @app.route('/ontology/<ontology_id>/content')
-    def ontology_content(ontology_id):
+    @app.route('/ontology/<ontology_name>/content')
+    def ontology_content(ontology_name):
         """Return raw TTL content of an ontology."""
-        ontology = Ontology.query.filter_by(ontology_id=ontology_id).first_or_404()
-        return ontology.content, 200, {'Content-Type': 'text/plain; charset=utf-8'}
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        content = ontology.current_content
+        if content is None:
+            return "No content available for this ontology", 404
+        return content, 200, {'Content-Type': 'text/plain; charset=utf-8'}
     
     @app.route('/import', methods=['GET', 'POST'])
     def import_ontology():
@@ -249,10 +252,10 @@ def register_routes(app):
                              search_type=search_type,
                              results=results)
     
-    @app.route('/ontology/<ontology_id>/edit')
-    def edit_ontology(ontology_id):
+    @app.route('/ontology/<ontology_name>/edit')
+    def edit_ontology(ontology_name):
         """Edit an ontology using ACE editor."""
-        ontology = Ontology.query.filter_by(ontology_id=ontology_id).first_or_404()
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
         
         # Get the content from file storage
         try:
@@ -285,10 +288,10 @@ def register_routes(app):
                              content=content,
                              page_title=f"Edit {ontology.name}")
     
-    @app.route('/ontology/<ontology_id>/save', methods=['POST'])
-    def save_ontology(ontology_id):
+    @app.route('/ontology/<ontology_name>/save', methods=['POST'])
+    def save_ontology(ontology_name):
         """Save a new version of an ontology."""
-        ontology = Ontology.query.filter_by(ontology_id=ontology_id).first_or_404()
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
         
         data = request.get_json()
         content = data.get('content', '')
@@ -336,10 +339,10 @@ def register_routes(app):
             app.logger.error(f"Error saving ontology: {e}")
             return jsonify({'success': False, 'message': str(e)}), 500
     
-    @app.route('/ontology/<ontology_id>/save-draft', methods=['POST'])
-    def save_draft(ontology_id):
+    @app.route('/ontology/<ontology_name>/save-draft', methods=['POST'])
+    def save_draft(ontology_name):
         """Save a draft of an ontology (no version created)."""
-        ontology = Ontology.query.filter_by(ontology_id=ontology_id).first_or_404()
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
         
         data = request.get_json()
         content = data.get('content', '')
@@ -408,8 +411,8 @@ def register_routes(app):
                 'errors': [str(e)]
             })
     
-    @app.route('/editor/ontology/<ontology_id>/validate', methods=['POST'])
-    def validate_ontology_editor(ontology_id):
+    @app.route('/editor/ontology/<ontology_name>/validate', methods=['POST'])
+    def validate_ontology_editor(ontology_name):
         """Validate an ontology for the editor interface."""
         data = request.get_json()
         content = data.get('content', '')
@@ -452,8 +455,8 @@ def register_routes(app):
                 }
             })
     
-    @app.route('/editor/ontology/<ontology_id>/version/<version_id>')
-    def get_editor_version(ontology_id, version_id):
+    @app.route('/editor/ontology/<ontology_name>/version/<version_id>')
+    def get_editor_version(ontology_name, version_id):
         """Get a specific version of an ontology for the editor."""
         version = OntologyVersion.query.get_or_404(version_id)
         
@@ -465,10 +468,10 @@ def register_routes(app):
             'created_at': version.created_at.isoformat() if version.created_at else None
         })
     
-    @app.route('/editor/ontology/<ontology_id>/save', methods=['POST'])
-    def save_ontology_editor(ontology_id):
+    @app.route('/editor/ontology/<ontology_name>/save', methods=['POST'])
+    def save_ontology_editor(ontology_name):
         """Save a new version of an ontology from the editor."""
-        ontology = Ontology.query.filter_by(ontology_id=ontology_id).first_or_404()
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
         
         data = request.get_json()
         content = data.get('content', '')
@@ -541,10 +544,10 @@ def register_routes(app):
                 }
             }), 500
     
-    @app.route('/editor/api/extract-entities/<ontology_id>', methods=['POST'])
-    def extract_entities_editor(ontology_id):
+    @app.route('/editor/api/extract-entities/<ontology_name>', methods=['POST'])
+    def extract_entities_editor(ontology_name):
         """Extract entities from an ontology for the editor."""
-        ontology = Ontology.query.filter_by(ontology_id=ontology_id).first_or_404()
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
         
         try:
             # Get ontology content
@@ -638,8 +641,8 @@ def register_routes(app):
                 'error': str(e)
             }), 500
     
-    @app.route('/ontology/<ontology_id>/version/<version_id>')
-    def get_version(ontology_id, version_id):
+    @app.route('/ontology/<ontology_name>/version/<version_id>')
+    def get_version(ontology_name, version_id):
         """Get a specific version of an ontology."""
         version = OntologyVersion.query.get_or_404(version_id)
         
@@ -656,10 +659,10 @@ def register_routes(app):
         ontologies = Ontology.query.all()
         return jsonify([ont.to_dict() for ont in ontologies])
     
-    @app.route('/api/ontology/<ontology_id>')
-    def api_ontology_detail(ontology_id):
+    @app.route('/api/ontology/<ontology_name>')
+    def api_ontology_detail(ontology_name):
         """API endpoint for ontology details."""
-        ontology = Ontology.query.filter_by(ontology_id=ontology_id).first_or_404()
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
         data = ontology.to_dict()
         
         # Add entity counts
@@ -697,8 +700,14 @@ if __name__ == '__main__':
         db.create_all()
     
     # Run the application
+    host = app.config.get('HOST', '0.0.0.0')
+    port = int(os.environ.get('ONTSERVE_PORT', app.config.get('PORT', 5003)))
+    debug = app.config.get('DEBUG', False)
+    
+    print(f"Starting OntServe Flask Web Server on {host}:{port} (debug={debug})")
+    
     app.run(
-        host=app.config['HOST'],
-        port=app.config['PORT'],
-        debug=app.config['DEBUG']
+        host=host,
+        port=port,
+        debug=debug
     )

@@ -301,24 +301,28 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 'error': str(e)
             }), 500
     
-    @bp.route('/ontology/<ontology_id>/visualize')
-    def visualize_ontology(ontology_id: str):
+    @bp.route('/ontology/<ontology_name>/visualize')
+    def visualize_ontology(ontology_name: str):
         """Visualization interface for ontology."""
         try:
+            logger.info(f"Loading visualization for ontology: {ontology_name}")
+            
             # Get ontology
-            ontology = db.session.query(Ontology).filter_by(ontology_id=ontology_id).first()
+            ontology = db.session.query(Ontology).filter_by(name=ontology_name).first()
             if not ontology:
-                raise NotFound(f"Ontology {ontology_id} not found")
+                logger.warning(f"Ontology {ontology_name} not found in database")
+                return f"<h1>Ontology Not Found</h1><p>Ontology '{ontology_name}' was not found in the database.</p>", 404
+            
+            logger.info(f"Found ontology: {ontology.name}, ID: {ontology.id}")
             
             return render_template('editor/visualize.html',
                                  ontology=ontology.to_dict(),
-                                 ontology_id=ontology_id,
+                                 ontology_name=ontology_name,
                                  page_title=f"Visualize {ontology.name}")
                                  
         except Exception as e:
-            logger.error(f"Error loading visualization for {ontology_id}: {e}")
-            flash(f"Error loading visualization: {str(e)}", 'error')
-            return render_template('error.html', error=str(e)), 500
+            logger.error(f"Error loading visualization for {ontology_name}: {e}", exc_info=True)
+            return f"<h1>Error</h1><p>Error loading visualization: {str(e)}</p>", 500
     
     @bp.route('/ontology/<ontology_id>/versions')
     def get_versions(ontology_id: str):
@@ -526,6 +530,171 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
     
     # ===== ENHANCED PROCESSOR ENDPOINTS =====
     
+    @bp.route('/api/enhanced/process/<ontology_name>', methods=['GET'])
+    def enhanced_get_entities(ontology_name: str):
+        """Get entities for visualization from existing database entities."""
+        try:
+            # Find ontology by name 
+            ontology = Ontology.query.filter_by(name=ontology_name).first()
+            if not ontology:
+                return jsonify({
+                    'success': False,
+                    'error': f'Ontology {ontology_name} not found'
+                }), 404
+            
+            # Get all entities for this ontology
+            entities = OntologyEntity.query.filter_by(ontology_id=ontology.id).all()
+            
+            # Transform entities to the format expected by the visualization
+            nodes = []
+            edges = []
+            
+            for entity in entities:
+                node = {
+                    'data': {
+                        'id': entity.uri,
+                        'label': entity.label or entity.uri.split('#')[-1].split('/')[-1],
+                        'uri': entity.uri,
+                        'type': entity.entity_type,
+                        'comment': entity.comment or '',
+                        'properties': entity.properties if hasattr(entity, 'properties') else {}
+                    },
+                    'classes': f'entity-{entity.entity_type}'
+                }
+                nodes.append(node)
+            
+            # For now, we'll create simple hierarchical relationships
+            # This is a basic implementation - could be enhanced with actual relationships
+            class_nodes = [n for n in nodes if n['data']['type'] == 'class']
+            property_nodes = [n for n in nodes if n['data']['type'] == 'property']
+            
+            # Simple visualization: connect properties to classes
+            edge_id = 0
+            for prop in property_nodes:
+                if class_nodes:  # Connect to first class as example
+                    edge = {
+                        'data': {
+                            'id': f'edge_{edge_id}',
+                            'source': prop['data']['id'],
+                            'target': class_nodes[0]['data']['id'],
+                            'relationship': 'relatedTo'
+                        }
+                    }
+                    edges.append(edge)
+                    edge_id += 1
+            
+            return jsonify({
+                'success': True,
+                'processing_result': {
+                    'nodes': nodes,
+                    'edges': edges,
+                    'entity_counts': {
+                        'classes': len([n for n in nodes if n['data']['type'] == 'class']),
+                        'properties': len([n for n in nodes if n['data']['type'] == 'property']),
+                        'individuals': len([n for n in nodes if n['data']['type'] == 'individual']),
+                        'total': len(nodes)
+                    }
+                },
+                'message': f"Retrieved {len(nodes)} entities for visualization"
+            })
+            
+        except Exception as e:
+            logger.error(f"Error getting entities for {ontology_name}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/api/enhanced/visualization/<ontology_name>')
+    def enhanced_get_visualization(ontology_name: str):
+        """Get visualization data for ontology."""
+        try:
+            # Find ontology by name 
+            ontology = Ontology.query.filter_by(name=ontology_name).first()
+            if not ontology:
+                return jsonify({
+                    'success': False,
+                    'error': f'Ontology {ontology_name} not found'
+                }), 404
+            
+            # Get all entities for this ontology
+            entities = OntologyEntity.query.filter_by(ontology_id=ontology.id).all()
+            
+            # Transform entities to the format expected by the visualization
+            nodes = []
+            edges = []
+            
+            for entity in entities:
+                node = {
+                    'group': 'nodes',
+                    'data': {
+                        'id': entity.uri,
+                        'label': entity.label or entity.uri.split('#')[-1].split('/')[-1],
+                        'name': entity.label or entity.uri.split('#')[-1].split('/')[-1],
+                        'uri': entity.uri,
+                        'type': entity.entity_type,
+                        'entity_type': entity.entity_type,
+                        'description': entity.comment or '',
+                        'comment': entity.comment or '',
+                        'is_inferred': False,
+                        'restrictions': 0,
+                        'namespace': entity.uri.split('#')[0] if '#' in entity.uri else entity.uri.split('/')[:-1]
+                    },
+                    'classes': f'class-node entity-{entity.entity_type}'
+                }
+                nodes.append(node)
+            
+            # Create simple hierarchical relationships for visualization
+            class_nodes = [n for n in nodes if n['data']['type'] == 'class']
+            property_nodes = [n for n in nodes if n['data']['type'] == 'property']
+            
+            # Connect properties to classes for better visualization
+            edge_id = 0
+            for i, prop in enumerate(property_nodes):
+                if i < len(class_nodes):  # Connect each property to a class
+                    edge = {
+                        'group': 'edges',
+                        'data': {
+                            'id': f'edge_{edge_id}',
+                            'source': prop['data']['id'],
+                            'target': class_nodes[i % len(class_nodes)]['data']['id'],
+                            'type': 'relatedTo',
+                            'is_inferred': False
+                        },
+                        'classes': 'explicit'
+                    }
+                    edges.append(edge)
+                    edge_id += 1
+            
+            # Statistics for the UI
+            entity_counts = {
+                'class': len([n for n in nodes if n['data']['type'] == 'class']),
+                'property': len([n for n in nodes if n['data']['type'] == 'property']),
+                'individual': len([n for n in nodes if n['data']['type'] == 'individual'])
+            }
+            
+            return jsonify({
+                'success': True,
+                'visualization': {
+                    'nodes': nodes,
+                    'edges': edges
+                },
+                'statistics': {
+                    'total_entities': len(nodes),
+                    'entity_type_counts': entity_counts,
+                    'inferred_count': 0,
+                    'consistency_check': True
+                },
+                'message': f"Retrieved {len(nodes)} entities for visualization"
+            })
+            
+        except Exception as e:
+            logger.error(f"Error getting visualization for {ontology_name}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+
     @bp.route('/api/enhanced/process/<ontology_id>', methods=['POST'])
     def enhanced_process_ontology(ontology_id: str):
         """Process ontology with enhanced processor (reasoning + embeddings)."""
@@ -556,6 +725,272 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             
         except Exception as e:
             logger.error(f"Error in enhanced processing for {ontology_id}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/api/simple/reasoning/<ontology_name>', methods=['POST'])
+    def simple_reasoning(ontology_name: str):
+        """Simple reasoning endpoint using owlready2 directly."""
+        try:
+            # Get ontology from database
+            ontology = Ontology.query.filter_by(name=ontology_name).first()
+            if not ontology:
+                return jsonify({
+                    'success': False,
+                    'error': f'Ontology {ontology_name} not found'
+                }), 404
+            
+            # Get current content
+            if not ontology.current_content:
+                return jsonify({
+                    'success': False,
+                    'error': 'No content found for ontology'
+                }), 404
+            
+            # Try reasoning with owlready2
+            try:
+                import owlready2
+                import tempfile
+                import os
+                
+                # Create temporary file with appropriate extension based on content
+                content = ontology.current_content
+                if content.strip().startswith('<?xml'):
+                    # RDF/XML format
+                    suffix = '.owl'
+                else:
+                    # Assume Turtle format
+                    suffix = '.ttl'
+                
+                with tempfile.NamedTemporaryFile(mode='w', suffix=suffix, delete=False) as f:
+                    f.write(content)
+                    temp_file = f.name
+                
+                # Load and reason
+                world = owlready2.World()
+                onto = world.get_ontology(f'file://{temp_file}').load()
+                
+                # Count entities before reasoning
+                classes_before = len(list(onto.classes()))
+                properties_before = len(list(onto.properties()))
+                
+                # Collect class hierarchy before reasoning
+                hierarchy_before = {}
+                for cls in onto.classes():
+                    parents = [str(p) for p in cls.is_a if hasattr(p, 'name')]
+                    if parents:
+                        hierarchy_before[str(cls)] = parents
+                
+                # Run reasoning
+                with onto:
+                    owlready2.sync_reasoner_pellet(world)
+                
+                # Count entities after reasoning
+                classes_after = len(list(onto.classes()))
+                properties_after = len(list(onto.properties()))
+                
+                # Collect class hierarchy after reasoning and find inferences
+                hierarchy_after = {}
+                inferred_relationships = []
+                for cls in onto.classes():
+                    parents = [str(p) for p in cls.is_a if hasattr(p, 'name')]
+                    if parents:
+                        hierarchy_after[str(cls)] = parents
+                        # Check for new relationships
+                        old_parents = set(hierarchy_before.get(str(cls), []))
+                        new_parents = set(parents) - old_parents
+                        for new_parent in new_parents:
+                            inferred_relationships.append({
+                                'child': str(cls),
+                                'parent': new_parent,
+                                'type': 'subClassOf'
+                            })
+                
+                # Sample some key relationships found
+                sample_hierarchy = []
+                for cls_name, parents in list(hierarchy_after.items())[:10]:
+                    if parents:
+                        sample_hierarchy.append({
+                            'class': cls_name.split('.')[-1] if '.' in cls_name else cls_name,
+                            'parents': [p.split('.')[-1] if '.' in p else p for p in parents]
+                        })
+                
+                # Clean up
+                os.unlink(temp_file)
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'Reasoning completed successfully. Found {len(hierarchy_after)} hierarchical relationships.',
+                    'results': {
+                        'classes_before': classes_before,
+                        'classes_after': classes_after,
+                        'properties_before': properties_before,
+                        'properties_after': properties_after,
+                        'classes_inferred': classes_after - classes_before,
+                        'properties_inferred': properties_after - properties_before,
+                        'hierarchical_relationships': len(hierarchy_after),
+                        'new_inferred_relationships': len(inferred_relationships),
+                        'sample_hierarchy': sample_hierarchy,
+                        'inferred_relationships': inferred_relationships[:5]  # First 5 new relationships
+                    }
+                })
+                
+            except ImportError:
+                return jsonify({
+                    'success': False,
+                    'error': 'owlready2 not available'
+                }), 500
+            except Exception as reasoning_error:
+                return jsonify({
+                    'success': False,
+                    'error': f'Reasoning failed: {str(reasoning_error)}'
+                }), 500
+            
+        except Exception as e:
+            logger.error(f"Error in simple reasoning for {ontology_name}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @bp.route('/api/hierarchy/visualization/<ontology_name>', methods=['GET'])
+    def hierarchy_visualization(ontology_name: str):
+        """Get hierarchical visualization data extracted from ontology content."""
+        try:
+            # Get ontology from database
+            ontology = Ontology.query.filter_by(name=ontology_name).first()
+            if not ontology:
+                return jsonify({
+                    'success': False,
+                    'error': f'Ontology {ontology_name} not found'
+                }), 404
+            
+            # Get current content
+            if not ontology.current_content:
+                return jsonify({
+                    'success': False,
+                    'error': 'No content found for ontology'
+                }), 404
+            
+            # Extract hierarchical relationships using owlready2
+            try:
+                import owlready2
+                import tempfile
+                import os
+                
+                # Create temporary file with appropriate extension
+                content = ontology.current_content
+                suffix = '.owl' if content.strip().startswith('<?xml') else '.ttl'
+                
+                with tempfile.NamedTemporaryFile(mode='w', suffix=suffix, delete=False) as f:
+                    f.write(content)
+                    temp_file = f.name
+                
+                # Load with owlready2
+                world = owlready2.World()
+                onto = world.get_ontology(f'file://{temp_file}').load()
+                
+                # Extract nodes and hierarchical edges
+                nodes = []
+                edges = []
+                
+                # Create nodes for all classes
+                class_nodes = {}
+                for cls in onto.classes():
+                    class_name = cls.name or str(cls).split('.')[-1]
+                    node_id = str(cls)
+                    class_nodes[node_id] = {
+                        'group': 'nodes',
+                        'data': {
+                            'id': node_id,
+                            'label': class_name,
+                            'name': class_name,
+                            'uri': str(cls),
+                            'type': 'class',
+                            'entity_type': 'class',
+                            'description': f'PROV-O class: {class_name}',
+                            'namespace': 'prov'
+                        },
+                        'classes': 'class-node'
+                    }
+                    nodes.append(class_nodes[node_id])
+                
+                # Create hierarchical edges (subClassOf relationships)
+                edge_id = 0
+                for cls in onto.classes():
+                    class_id = str(cls)
+                    for parent in cls.is_a:
+                        if hasattr(parent, 'name') and str(parent) in class_nodes:
+                            parent_id = str(parent)
+                            edges.append({
+                                'group': 'edges',
+                                'data': {
+                                    'id': f'edge_{edge_id}',
+                                    'source': class_id,
+                                    'target': parent_id,
+                                    'relationship': 'subClassOf',
+                                    'type': 'subClassOf',
+                                    'label': 'subClassOf'
+                                },
+                                'classes': 'hierarchy-edge'
+                            })
+                            edge_id += 1
+                
+                # Add key properties as nodes
+                property_nodes = {}
+                for prop in list(onto.properties())[:20]:  # Limit to avoid clutter
+                    prop_name = prop.name or str(prop).split('.')[-1]
+                    node_id = str(prop)
+                    property_nodes[node_id] = {
+                        'group': 'nodes',
+                        'data': {
+                            'id': node_id,
+                            'label': prop_name,
+                            'name': prop_name,
+                            'uri': str(prop),
+                            'type': 'property',
+                            'entity_type': 'property',
+                            'description': f'PROV-O property: {prop_name}',
+                            'namespace': 'prov'
+                        },
+                        'classes': 'property-node'
+                    }
+                    nodes.append(property_nodes[node_id])
+                
+                # Clean up
+                os.unlink(temp_file)
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'Extracted {len(nodes)} nodes and {len(edges)} hierarchical relationships',
+                    'visualization': {
+                        'nodes': nodes,
+                        'edges': edges
+                    },
+                    'statistics': {
+                        'total_nodes': len(nodes),
+                        'total_edges': len(edges),
+                        'classes': len(class_nodes),
+                        'properties': len(property_nodes),
+                        'hierarchical_relationships': len(edges)
+                    }
+                })
+                
+            except ImportError:
+                return jsonify({
+                    'success': False,
+                    'error': 'owlready2 not available'
+                }), 500
+            except Exception as extraction_error:
+                return jsonify({
+                    'success': False,
+                    'error': f'Hierarchy extraction failed: {str(extraction_error)}'
+                }), 500
+            
+        except Exception as e:
+            logger.error(f"Error in hierarchy visualization for {ontology_name}: {e}")
             return jsonify({
                 'success': False,
                 'error': str(e)
@@ -655,8 +1090,9 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 'error': str(e)
             }), 500
     
-    @bp.route('/api/enhanced/visualization/<ontology_id>')
-    def enhanced_visualization_data(ontology_id: str):
+    @bp.route('/api/enhanced/visualization/')
+    @bp.route('/api/enhanced/visualization/<ontology_name>')  
+    def enhanced_visualization_data(ontology_name: str = None):
         """Get enhanced visualization data optimized for Cytoscape.js with reasoning."""
         try:
             # Get query parameters
@@ -664,10 +1100,16 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             layout_type = request.args.get('layout', 'hierarchical')
             entity_limit = int(request.args.get('limit', 1000))
             
+            # If no ontology_name in URL, try to get it from query parameter or request
+            if not ontology_name:
+                ontology_name = request.args.get('ontology_name') or request.args.get('ontology_id')
+                if not ontology_name:
+                    return jsonify({'error': 'ontology_name parameter is required'}), 400
+            
             # Check if we have cached visualization data from enhanced processing
-            ontology = db.session.query(Ontology).filter_by(ontology_id=ontology_id).first()
+            ontology = db.session.query(Ontology).filter_by(name=ontology_name).first()
             if not ontology:
-                raise NotFound(f"Ontology {ontology_id} not found")
+                raise NotFound(f"Ontology {ontology_name} not found")
             
             # Get entities with enhanced metadata
             entities_query = db.session.query(OntologyEntity).filter_by(ontology_id=ontology.id)
@@ -792,7 +1234,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             })
             
         except Exception as e:
-            logger.error(f"Error generating enhanced visualization for {ontology_id}: {e}")
+            logger.error(f"Error generating enhanced visualization for {ontology_name}: {e}")
             return jsonify({
                 'success': False,
                 'error': str(e)

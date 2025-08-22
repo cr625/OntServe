@@ -449,7 +449,7 @@ class EnhancedOntologyProcessor:
     
     def _get_ontology_record(self, ontology_id: str) -> Optional[Ontology]:
         """Get ontology record from database."""
-        return self.db_session.query(Ontology).filter_by(ontology_id=ontology_id).first()
+        return self.db_session.query(Ontology).filter_by(name=ontology_id).first()
     
     def _load_ontology_content(self, ontology_id: str) -> str:
         """Load ontology content from storage with database fallback."""
@@ -461,10 +461,10 @@ class EnhancedOntologyProcessor:
             logger.warning(f"File storage failed for {ontology_id}: {e}")
             # Fallback to database
             try:
-                ontology_record = self.db_session.query(Ontology).filter_by(ontology_id=ontology_id).first()
-                if ontology_record and ontology_record.content:
+                ontology_record = self.db_session.query(Ontology).filter_by(name=ontology_id).first()
+                if ontology_record and ontology_record.current_content:
                     logger.info(f"Using database content for {ontology_id}")
-                    return ontology_record.content
+                    return ontology_record.current_content
                 else:
                     raise ValueError(f"No content found in database for {ontology_id}")
             except Exception as db_error:

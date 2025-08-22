@@ -343,6 +343,14 @@
                     <button class="btn btn-outline-primary btn-sm w-100" onclick="applyFilters()">
                         <i class="fas fa-filter me-1"></i>Apply Filters
                     </button>
+                    
+                    <button class="btn btn-outline-success btn-sm w-100 mt-2" onclick="runInference()" id="inferenceBtn">
+                        <i class="fas fa-brain me-1"></i>Run Reasoning
+                    </button>
+                    
+                    <button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="loadOntologyData()" id="refreshBtn">
+                        <i class="fas fa-sync me-1"></i>Refresh View
+                    </button>
                 </div>
 
                 <!-- Semantic Search Results -->
@@ -444,11 +452,114 @@
     <script>
         // Global variables
         let cy; // Cytoscape instance
-        let currentLayout = 'dagre';
         let ontologyData;
         let currentEntityData;
         let originalElements; // Store original elements for filtering
-        const ontologyId = "{{ ontology_id }}";
+        const ontologyId = "{{ ontology_name }}";
+        
+        // Use hierarchical layout by default for hierarchical ontologies
+        const isHierarchicalOntology = ontologyId.includes('prov-o') || ontologyId.includes('bfo');
+        let currentLayout = isHierarchicalOntology ? 'dagre' : 'cose';
+
+        function runInference() {
+            const button = document.getElementById('inferenceBtn');
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Running Inference...';
+            
+            // Use the simple reasoning endpoint
+            fetch(`/editor/api/simple/reasoning/${ontologyId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    include_reasoning: true,
+                    force_refresh: true,
+                    reasoner_type: 'pellet'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const results = data.results || {};
+                    const classesInferred = results.classes_inferred || 0;
+                    const propertiesInferred = results.properties_inferred || 0;
+                    const hierarchicalRels = results.hierarchical_relationships || 0;
+                    const newInferredRels = results.new_inferred_relationships || 0;
+                    const sampleHierarchy = results.sample_hierarchy || [];
+                    
+                    let message = `Reasoning completed successfully!\n\n`;
+                    message += `📊 Results:\n`;
+                    message += `• ${results.classes_before || 0} classes, ${results.properties_before || 0} properties loaded\n`;
+                    message += `• ${hierarchicalRels} hierarchical relationships discovered\n`;
+                    
+                    if (classesInferred > 0 || propertiesInferred > 0) {
+                        message += `• ${classesInferred} new classes, ${propertiesInferred} new properties inferred\n`;
+                    }
+                    
+                    if (newInferredRels > 0) {
+                        message += `• ${newInferredRels} new logical relationships inferred\n`;
+                    }
+                    
+                    if (sampleHierarchy.length > 0) {
+                        message += `\n🏗️ Sample Class Hierarchy:\n`;
+                        sampleHierarchy.slice(0, 5).forEach(item => {
+                            message += `• ${item.class} ← ${item.parents.join(', ')}\n`;
+                        });
+                    }
+                    
+                    alert(message);
+                } else {
+                    alert('Reasoning failed: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Reasoning error:', error);
+                alert('Reasoning failed. This may be due to the enhanced processor configuration. Check console for details.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+        }
+
+        function showHierarchy() {
+            const button = document.getElementById('hierarchyBtn');
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Loading Hierarchy...';
+            
+            // Fetch hierarchical visualization data
+            fetch(`/editor/api/hierarchy/visualization/${ontologyId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Replace current visualization with hierarchical view
+                    const elements = [...data.visualization.nodes, ...data.visualization.edges];
+                    originalElements = elements;
+                    
+                    loadDataIntoGraph(elements);
+                    updateStatistics(data.statistics);
+                    
+                    // Use hierarchical layout
+                    currentLayout = 'dagre';
+                    applyLayout();
+                    
+                    alert(`Hierarchical view loaded!\n\n📊 ${data.statistics.classes} classes with ${data.statistics.hierarchical_relationships} subClassOf relationships\n\n🏗️ This shows the true PROV-O class hierarchy.`);
+                } else {
+                    alert('Failed to load hierarchy: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Hierarchy loading error:', error);
+                alert('Failed to load hierarchy. Check console for details.');
+            })
+            .finally(() => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+        }
 
         function triggerProcessing() {
             const button = event.target;
@@ -496,7 +607,11 @@
             document.getElementById('showRestrictions').addEventListener('change', applyFilters);
             document.getElementById('layoutSelector').addEventListener('change', function () {
                 currentLayout = this.value;
+                applyLayout(); // Apply the layout immediately when changed
             });
+            
+            // Set the dropdown to match the current default layout
+            document.getElementById('layoutSelector').value = currentLayout;
 
             document.getElementById('searchBox').addEventListener('keyup', function (e) {
                 if (e.key === 'Enter') {
@@ -656,8 +771,13 @@
 
         function loadOntologyData() {
             const entityType = document.getElementById('filterType').value;
-            const includeReasoning = document.getElementById('reasoningToggle')?.checked || false;
-            const url = `/editor/api/enhanced/visualization/${ontologyId}?include_reasoning=${includeReasoning}&limit=1000`;
+            const includeReasoning = document.getElementById('showInferred')?.checked || false;
+            
+            // Use hierarchical view by default for ontologies with hierarchical structure
+            const useHierarchical = isHierarchicalOntology;
+            const url = useHierarchical 
+                ? `/editor/api/hierarchy/visualization/${ontologyId}`
+                : `/editor/api/enhanced/visualization/${ontologyId}?include_reasoning=${includeReasoning}&limit=1000`;
 
             fetch(url)
                 .then(response => {
@@ -669,7 +789,7 @@
                 .then(data => {
                     if (data.success && data.visualization) {
                         ontologyData = data;
-                        // Enhanced visualization already provides cytoscape-ready format
+                        // Both endpoints provide cytoscape-ready format
                         const elements = [...data.visualization.nodes, ...data.visualization.edges];
                         originalElements = elements;
                         
@@ -687,7 +807,14 @@
                             `;
                         } else {
                             loadDataIntoGraph(elements);
-                            updateStatistics(data.stats);
+                            updateStatistics(data.stats || data.statistics);
+                            
+                            // Use hierarchical layout by default for hierarchical ontologies
+                            if (useHierarchical) {
+                                currentLayout = 'dagre';
+                                applyLayout();
+                            }
+                            
                             // Hide loading indicator and show graph
                             document.getElementById('loadingIndicator').style.display = 'none';
                             document.getElementById('cy').style.display = 'block';
@@ -1228,6 +1355,12 @@
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         }
+
+        // Initialize visualization when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load ontology data on page load
+            loadOntologyData();
+        });
     </script>
 </body>
 

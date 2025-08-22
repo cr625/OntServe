@@ -14,13 +14,13 @@ class Config:
     # Flask settings
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
-    # Database settings - using OntExtract's PostgreSQL on port 5434
+    # Database settings - using OntServe's PostgreSQL on port 5435
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://postgres:PASS@localhost:5434/ontserve_db'
+        'postgresql://ontserve_user:ontserve_development_password@localhost:5435/ontserve'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Application settings
-    PORT = 8000
+    PORT = 5003
     HOST = '0.0.0.0'
     DEBUG = False
     
