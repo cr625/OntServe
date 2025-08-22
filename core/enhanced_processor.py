@@ -452,12 +452,23 @@ class EnhancedOntologyProcessor:
         return self.db_session.query(Ontology).filter_by(ontology_id=ontology_id).first()
     
     def _load_ontology_content(self, ontology_id: str) -> str:
-        """Load ontology content from storage."""
+        """Load ontology content from storage with database fallback."""
         try:
+            # Try file storage first
             result = self.storage.retrieve(ontology_id)
             return result['content']
         except Exception as e:
-            raise ValueError(f"Failed to load ontology {ontology_id}: {e}")
+            logger.warning(f"File storage failed for {ontology_id}: {e}")
+            # Fallback to database
+            try:
+                ontology_record = self.db_session.query(Ontology).filter_by(ontology_id=ontology_id).first()
+                if ontology_record and ontology_record.content:
+                    logger.info(f"Using database content for {ontology_id}")
+                    return ontology_record.content
+                else:
+                    raise ValueError(f"No content found in database for {ontology_id}")
+            except Exception as db_error:
+                raise ValueError(f"Failed to load ontology {ontology_id} from both file storage ({e}) and database ({db_error})")
     
     def _parse_with_rdflib(self, content: str, ontology_id: str) -> Graph:
         """Parse ontology content with RDFLib."""

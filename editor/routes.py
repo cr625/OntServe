@@ -544,8 +544,9 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 force_refresh=data.get('force_refresh', False)
             )
             
-            # Process with enhanced processor (db session will be lazy-loaded)
-            result = enhanced_processor.process_ontology(ontology_id, options)
+            # Create fresh enhanced processor for this request to ensure proper app context
+            fresh_processor = EnhancedOntologyProcessor(storage_backend, db_session=db.session)
+            result = fresh_processor.process_ontology(ontology_id, options)
             
             return jsonify({
                 'success': result.success,
