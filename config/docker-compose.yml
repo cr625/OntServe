@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # PostgreSQL database for OntServe
   ontserve-db:
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg17
     container_name: ontserve-postgres
     restart: unless-stopped
     environment:
@@ -46,58 +46,10 @@ services:
     networks:
       - ontserve-network
 
-  # OntServe MCP Server (optional - can also be run standalone)
-  ontserve-mcp:
-    build:
-      context: ..
-      dockerfile: config/Dockerfile
-    container_name: ontserve-mcp
-    restart: unless-stopped
-    environment:
-      # Database configuration
-      ONTSERVE_DB_URL: postgresql://ontserve_user:${ONTSERVE_DB_PASSWORD:-ontserve_development_password}@ontserve-db:5432/ontserve
-
-      # Redis configuration (optional)
-      ONTSERVE_REDIS_URL: redis://ontserve-redis:6379
-
-      # Server configuration
-      ONTSERVE_HOST: 0.0.0.0
-      ONTSERVE_MCP_PORT: 8082
-      ONTSERVE_DEBUG: ${ONTSERVE_DEBUG:-false}
-
-      # Performance tuning
-      ONTSERVE_MAX_CONNECTIONS: 50
-      ONTSERVE_CONNECTION_TIMEOUT: 30
-      ONTSERVE_QUERY_TIMEOUT: 300
-
-      # Feature flags
-      ONTSERVE_ENABLE_VECTOR_SEARCH: "true"
-      ONTSERVE_ENABLE_AUDIT_LOG: "true"
-      ONTSERVE_ENABLE_CACHING: "true"
-    ports:
-      - "8082:8082"
-    depends_on:
-      ontserve-db:
-        condition: service_healthy
-      ontserve-redis:
-        condition: service_healthy
-    volumes:
-      - ontserve_logs:/app/logs
-    networks:
-      - ontserve-network
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8082/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
 volumes:
   ontserve_pgdata:
     driver: local
   ontserve_redis_data:
-    driver: local
-  ontserve_logs:
     driver: local
 
 networks:

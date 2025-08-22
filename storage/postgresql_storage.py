@@ -43,9 +43,10 @@ class PostgreSQLStorage(StorageBackend):
                 - timeout: Query timeout in seconds (default: 30)
                 - enable_vector_search: Enable pgvector features (default: True)
         """
-        super().__init__(config)
+        # Set config first
+        self.config = config or {}
         
-        # Database configuration
+        # Database configuration - set before calling super().__init__()
         self.db_url = self.config.get('db_url') or os.environ.get(
             'ONTSERVE_DB_URL',
             'postgresql://ontserve_user:ontserve_development_password@localhost:5433/ontserve'
@@ -61,6 +62,9 @@ class PostgreSQLStorage(StorageBackend):
         self._async_pool = None
         
         logger.info(f"PostgreSQL storage initialized with pool size {self.pool_size}")
+        
+        # Now call super to trigger _initialize()
+        super().__init__(config)
     
     def _initialize(self):
         """Initialize database connections and verify schema."""
@@ -160,13 +164,17 @@ class PostgreSQLStorage(StorageBackend):
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
                 cursor.execute(query, params)
                 
+                result = None
                 if fetch_one:
-                    return cursor.fetchone()
+                    result = cursor.fetchone()
                 elif fetch_all:
-                    return cursor.fetchall()
+                    result = cursor.fetchall()
                 else:
-                    conn.commit()
-                    return cursor.rowcount
+                    result = cursor.rowcount
+                
+                # Always commit the transaction
+                conn.commit()
+                return result
                     
         except Exception as e:
             if conn:
