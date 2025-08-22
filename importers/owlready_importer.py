@@ -295,12 +295,37 @@ class OwlreadyImporter(BaseImporter):
             original_classes = set(onto.classes())
             original_relationships = self._count_relationships(onto)
             
-            # Apply reasoner
+            # Apply reasoner with comprehensive inference options
             with onto:
                 if self.reasoner_type == 'hermit':
-                    sync_reasoner(reasoner=HermiT, infer_property_values=True)
+                    sync_reasoner(
+                        reasoner=HermiT,
+                        infer_property_values=True,
+                        infer_data_property_values=True,
+                        debug=False
+                    )
                 else:
-                    sync_reasoner(reasoner=Pellet, infer_property_values=True)
+                    sync_reasoner(
+                        reasoner=Pellet,
+                        infer_property_values=True, 
+                        infer_data_property_values=True,
+                        debug=False
+                    )
+                
+                # Additional reasoning passes for complex inferences
+                self.logger.info(f"Running additional inference passes for {ontology_id}")
+                
+                # Run reasoner multiple times to catch complex inferences
+                for pass_num in range(2):
+                    try:
+                        if self.reasoner_type == 'hermit':
+                            sync_reasoner(reasoner=HermiT, infer_property_values=True)
+                        else:
+                            sync_reasoner(reasoner=Pellet, infer_property_values=True)
+                        self.logger.debug(f"Completed reasoning pass {pass_num + 1}")
+                    except Exception as e:
+                        self.logger.warning(f"Reasoning pass {pass_num + 1} failed: {e}")
+                        break
             
             # Calculate inferred data
             inferred_classes = set(onto.classes()) - original_classes

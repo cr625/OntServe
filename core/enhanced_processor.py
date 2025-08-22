@@ -481,7 +481,7 @@ class EnhancedOntologyProcessor:
             raise ValueError(f"Failed to parse RDF content: {e}")
     
     def _apply_reasoning(self, content: str, ontology_id: str, options: ProcessingOptions) -> Dict[str, Any]:
-        """Apply reasoning using Owlready2."""
+        """Apply enhanced reasoning using Owlready2 with aggressive inference."""
         if not self.owlready_importer:
             return {}
         
@@ -492,20 +492,195 @@ class EnhancedOntologyProcessor:
             return self.reasoning_cache[cache_key]
         
         try:
-            # Use the Owlready2 importer for reasoning
+            logger.info(f"Applying enhanced reasoning to {ontology_id} with {options.reasoner_type}")
+            
+            # Set up enhanced reasoning configuration
+            enhanced_options = ProcessingOptions(
+                use_reasoning=True,
+                reasoner_type=options.reasoner_type,
+                validate_consistency=True,
+                include_inferred=True,
+                extract_restrictions=True,
+                generate_embeddings=options.generate_embeddings,
+                cache_reasoning=options.cache_reasoning,
+                force_refresh=options.force_refresh
+            )
+            
+            # Configure the owlready importer for aggressive reasoning
+            original_include_inferred = self.owlready_importer.include_inferred
+            
+            self.owlready_importer.include_inferred = True
+            
+            # Apply reasoning with the enhanced importer
             reasoning_result = self.owlready_importer._import_from_content(
                 content, f"temp://{ontology_id}", ontology_id, None, None, 'turtle'
             )
             
+            # Restore original settings
+            self.owlready_importer.include_inferred = original_include_inferred
+            
+            extracted_reasoning = reasoning_result.get('reasoning_result', {})
+            
+            # Apply additional post-processing reasoning if we have owlready2 access
+            if OWLREADY2_AVAILABLE and extracted_reasoning.get('reasoning_applied'):
+                enhanced_reasoning = self._apply_additional_reasoning(content, ontology_id, options)
+                extracted_reasoning.update(enhanced_reasoning)
+            
             # Cache results
             if options.cache_reasoning:
-                self.reasoning_cache[cache_key] = reasoning_result.get('reasoning_result', {})
+                self.reasoning_cache[cache_key] = extracted_reasoning
             
-            return reasoning_result.get('reasoning_result', {})
+            logger.info(f"Enhanced reasoning completed for {ontology_id}: "
+                       f"consistent={extracted_reasoning.get('is_consistent')}, "
+                       f"inferred={extracted_reasoning.get('inferred_count', 0)}")
+            
+            return extracted_reasoning
             
         except Exception as e:
-            logger.error(f"Reasoning failed for {ontology_id}: {e}")
+            logger.error(f"Enhanced reasoning failed for {ontology_id}: {e}")
             return {'reasoning_applied': False, 'error': str(e)}
+    
+    def _apply_additional_reasoning(self, content: str, ontology_id: str, options: ProcessingOptions) -> Dict[str, Any]:
+        """Apply additional comprehensive reasoning passes."""
+        try:
+            # Create temporary file for owlready2 processing
+            temp_file = os.path.join(self.temp_dir, f"{ontology_id}_reasoning.ttl")
+            with open(temp_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+            
+            # Load with owlready2 for direct reasoning access
+            onto = owlready2.get_ontology(f"file://{temp_file}").load()
+            
+            initial_count = len(list(onto.get_triples()))
+            logger.debug(f"Initial triple count for {ontology_id}: {initial_count}")
+            
+            # Apply multiple reasoning passes with different configurations
+            reasoning_results = {
+                'additional_inferences': 0,
+                'consistency_verified': True,
+                'reasoning_passes': []
+            }
+            
+            # Pass 1: Property hierarchy reasoning
+            with onto:
+                try:
+                    if options.reasoner_type == 'hermit':
+                        from owlready2.reasoning import sync_reasoner_hermit as sync_reasoner
+                    else:
+                        from owlready2.reasoning import sync_reasoner_pellet as sync_reasoner
+                    
+                    # Comprehensive inference configuration
+                    sync_reasoner(
+                        x=onto,
+                        infer_property_values=True,
+                        infer_data_property_values=True,
+                        debug=False
+                    )
+                    
+                    pass1_count = len(list(onto.get_triples()))
+                    pass1_inferred = pass1_count - initial_count
+                    reasoning_results['reasoning_passes'].append({
+                        'pass': 1,
+                        'type': 'property_hierarchy',
+                        'inferred_count': pass1_inferred
+                    })
+                    
+                    logger.debug(f"Pass 1 - Property hierarchy: {pass1_inferred} new inferences")
+                    
+                except Exception as e:
+                    logger.warning(f"Reasoning pass 1 failed: {e}")
+                    reasoning_results['consistency_verified'] = False
+            
+            # Pass 2: Class hierarchy and equivalence reasoning
+            with onto:
+                try:
+                    # Force class hierarchy completion
+                    for cls in onto.classes():
+                        # Trigger parent/child relationship inference
+                        list(cls.ancestors())
+                        list(cls.descendants())
+                    
+                    # Apply reasoner again to capture hierarchy inferences
+                    if options.reasoner_type == 'hermit':
+                        from owlready2.reasoning import sync_reasoner_hermit as sync_reasoner
+                    else:
+                        from owlready2.reasoning import sync_reasoner_pellet as sync_reasoner
+                    
+                    sync_reasoner(
+                        x=onto,
+                        infer_property_values=True,
+                        infer_data_property_values=True,
+                        debug=False
+                    )
+                    
+                    pass2_count = len(list(onto.get_triples()))
+                    pass2_inferred = pass2_count - pass1_count
+                    reasoning_results['reasoning_passes'].append({
+                        'pass': 2,
+                        'type': 'class_hierarchy',
+                        'inferred_count': pass2_inferred
+                    })
+                    
+                    logger.debug(f"Pass 2 - Class hierarchy: {pass2_inferred} new inferences")
+                    
+                except Exception as e:
+                    logger.warning(f"Reasoning pass 2 failed: {e}")
+                    reasoning_results['consistency_verified'] = False
+            
+            # Pass 3: Domain/Range reasoning for properties
+            with onto:
+                try:
+                    # Force property domain/range inference
+                    for prop in onto.properties():
+                        # Access domain and range to trigger inference
+                        list(prop.domain)
+                        list(prop.range)
+                        if hasattr(prop, 'inverse_property'):
+                            list(prop.inverse_property)
+                    
+                    # Final reasoner pass
+                    if options.reasoner_type == 'hermit':
+                        from owlready2.reasoning import sync_reasoner_hermit as sync_reasoner
+                    else:
+                        from owlready2.reasoning import sync_reasoner_pellet as sync_reasoner
+                    
+                    sync_reasoner(
+                        x=onto,
+                        infer_property_values=True,
+                        infer_data_property_values=True,
+                        debug=False
+                    )
+                    
+                    final_count = len(list(onto.get_triples()))
+                    pass3_inferred = final_count - pass2_count
+                    reasoning_results['reasoning_passes'].append({
+                        'pass': 3,
+                        'type': 'property_domain_range',
+                        'inferred_count': pass3_inferred
+                    })
+                    
+                    reasoning_results['additional_inferences'] = final_count - initial_count
+                    
+                    logger.debug(f"Pass 3 - Property domain/range: {pass3_inferred} new inferences")
+                    logger.info(f"Total additional inferences for {ontology_id}: {reasoning_results['additional_inferences']}")
+                    
+                except Exception as e:
+                    logger.warning(f"Reasoning pass 3 failed: {e}")
+                    reasoning_results['consistency_verified'] = False
+            
+            # Clean up temporary file
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+            
+            return reasoning_results
+            
+        except Exception as e:
+            logger.error(f"Additional reasoning failed for {ontology_id}: {e}")
+            return {
+                'additional_inferences': 0,
+                'consistency_verified': False,
+                'error': str(e)
+            }
     
     def _extract_enhanced_entities(self, rdf_graph: Graph, reasoning_result: Dict,
                                  ontology_record: Ontology, options: ProcessingOptions) -> List[OntologyEntity]:

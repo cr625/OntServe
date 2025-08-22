@@ -46,13 +46,10 @@
         </div>
         
         <!-- Quick actions -->
-        <div class="btn-group mb-4" role="group">
+        <div class="mb-4">
             <a href="{{ url_for('import_ontology') }}" class="btn btn-success">
                 <i class="bi bi-plus-circle"></i> Import Ontology
             </a>
-            <button type="button" class="btn btn-primary" onclick="importPROVO()">
-                <i class="bi bi-cloud-download"></i> Import PROV-O
-            </button>
         </div>
         
         <!-- Ontologies table -->
@@ -157,42 +154,4 @@
     </div>
 </div>
 
-<script>
-function importPROVO() {
-    if (confirm('Import the W3C PROV-O ontology?')) {
-        // Create a form and submit it
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ url_for("import_ontology") }}';
-        
-        const sourceInput = document.createElement('input');
-        sourceInput.type = 'hidden';
-        sourceInput.name = 'source';
-        sourceInput.value = 'https://www.w3.org/ns/prov.ttl';
-        
-        const typeInput = document.createElement('input');
-        typeInput.type = 'hidden';
-        typeInput.name = 'source_type';
-        typeInput.value = 'url';
-        
-        const nameInput = document.createElement('input');
-        nameInput.type = 'hidden';
-        nameInput.name = 'name';
-        nameInput.value = 'W3C Provenance Ontology (PROV-O)';
-        
-        const descInput = document.createElement('input');
-        descInput.type = 'hidden';
-        descInput.name = 'description';
-        descInput.value = 'The PROV Ontology provides classes, properties, and restrictions for representing provenance information';
-        
-        form.appendChild(sourceInput);
-        form.appendChild(typeInput);
-        form.appendChild(nameInput);
-        form.appendChild(descInput);
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-</script>
 {% endblock %}
