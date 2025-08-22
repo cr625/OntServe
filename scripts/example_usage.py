@@ -26,7 +26,7 @@ def main():
         'storage_config': {
             'storage_dir': '../storage'
         },
-        'cache_dir': '../cache',
+        'cache_dir': '../storage/cache/downloads',
         'log_level': 'INFO'
     }
     

@@ -41,7 +41,7 @@ class Config:
     
     # OntServe integration
     ONTSERVE_STORAGE_DIR = str(basedir.parent / 'storage')
-    ONTSERVE_CACHE_DIR = str(basedir.parent / 'cache')
+    ONTSERVE_CACHE_DIR = str(basedir.parent / 'storage' / 'cache' / 'downloads')
 
 
 class DevelopmentConfig(Config):
