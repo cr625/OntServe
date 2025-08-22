@@ -18,15 +18,19 @@ import tempfile
 try:
     import owlready2
     from owlready2 import get_ontology, sync_reasoner, Ontology, Thing, ObjectProperty, DataProperty
-    from owlready2 import HermiT, Pellet
-    from owlready2.reasoning import InconsistentOntologyError
+    # HermiT and Pellet are not directly importable, they're used via sync_reasoner
+    try:
+        from owlready2.reasoning import InconsistentOntologyError
+    except ImportError:
+        # Fallback for different owlready2 versions
+        InconsistentOntologyError = Exception
     OWLREADY2_AVAILABLE = True
 except ImportError:
     OWLREADY2_AVAILABLE = False
     logging.warning("owlready2 not available. OwlreadyImporter will be disabled.")
     # Create stub classes for graceful degradation
     get_ontology = sync_reasoner = Ontology = Thing = ObjectProperty = DataProperty = None
-    HermiT = Pellet = InconsistentOntologyError = None
+    InconsistentOntologyError = None
 
 try:
     import rdflib

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Test Web Integration for Enhanced Processor
 
@@ -6,6 +7,8 @@ by directly testing the API endpoints and functionality.
 
 Usage:
     python test_web_integration.py
+    OR
+    source venv/bin/activate && python test_web_integration.py
 """
 
 import sys
@@ -28,11 +31,33 @@ def test_web_integration():
     try:
         # Import Flask components
         from flask import Flask
-        from web.models import db, init_db, Ontology, OntologyEntity, OntologyVersion
-        from web.config import Config
+        
+        # Check if web module exists
+        web_path = Path(__file__).parent / 'web'
+        if not web_path.exists():
+            print(f"❌ Web module not found at {web_path}")
+            print("💡 Make sure you're running from the OntServe directory")
+            return False
+            
+        # Add web to path for imports
+        sys.path.insert(0, str(web_path))
+        
+        from models import db, init_db, Ontology, OntologyEntity, OntologyVersion
+        from config import Config
+        
+        # Import other components
         from storage.file_storage import FileStorage
         from core.enhanced_processor import EnhancedOntologyProcessor, ProcessingOptions
-        from editor.routes import create_editor_blueprint
+        
+        # Check if editor module exists
+        editor_path = Path(__file__).parent / 'editor'
+        if editor_path.exists() and (editor_path / 'routes.py').exists():
+            sys.path.insert(0, str(editor_path))
+            from routes import create_editor_blueprint
+            has_editor = True
+        else:
+            has_editor = False
+            print("⚠️  Editor module not found, skipping editor tests")
         
         print("✅ Successfully imported all web components")
         

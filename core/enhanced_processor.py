@@ -27,8 +27,12 @@ from rdflib.namespace import RDF, RDFS, OWL
 try:
     import owlready2
     from owlready2 import get_ontology, sync_reasoner, Thing, ObjectProperty, DataProperty
-    from owlready2 import HermiT, Pellet
-    from owlready2.reasoning import InconsistentOntologyError
+    # HermiT and Pellet are not directly importable, they're used via sync_reasoner
+    try:
+        from owlready2.reasoning import InconsistentOntologyError
+    except ImportError:
+        # Fallback for different owlready2 versions
+        InconsistentOntologyError = Exception
     OWLREADY2_AVAILABLE = True
 except ImportError:
     OWLREADY2_AVAILABLE = False
@@ -43,9 +47,9 @@ except ImportError:
     logging.warning("sentence-transformers not available. Semantic search will be disabled.")
 
 # OntServe Components
-from ..storage.base import StorageBackend
-from ..web.models import db, Ontology, OntologyEntity, OntologyVersion
-from ..importers.owlready_importer import OwlreadyImporter
+from storage.base import StorageBackend
+from web.models import db, Ontology, OntologyEntity, OntologyVersion
+from importers.owlready_importer import OwlreadyImporter
 
 
 # Configure logging
@@ -147,7 +151,7 @@ class EnhancedOntologyProcessor:
             db_session: Database session (defaults to app context)
         """
         self.storage = storage_backend
-        self.db_session = db_session or db.session
+        self._db_session = db_session  # Store but don't evaluate db.session yet
         
         # Initialize components
         self.owlready_importer = OwlreadyImporter(storage_backend) if OWLREADY2_AVAILABLE else None
@@ -161,6 +165,21 @@ class EnhancedOntologyProcessor:
         self.entity_cache: Dict[str, List[OntologyEntity]] = {}
         
         logger.info(f"Enhanced processor initialized with reasoning: {OWLREADY2_AVAILABLE}, embeddings: {EMBEDDINGS_AVAILABLE}")
+    
+    @property
+    def db_session(self):
+        """Get database session, with lazy loading for Flask app context."""
+        if self._db_session is not None:
+            return self._db_session
+        try:
+            return db.session
+        except RuntimeError as e:
+            if "application context" in str(e):
+                raise RuntimeError(
+                    "Enhanced processor requires Flask application context for database operations. "
+                    "Make sure to call within a Flask route or use app.app_context()."
+                ) from e
+            raise
     
     def process_ontology(self, ontology_id: str, options: Optional[ProcessingOptions] = None) -> ProcessingResult:
         """

@@ -544,7 +544,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 force_refresh=data.get('force_refresh', False)
             )
             
-            # Process with enhanced processor
+            # Process with enhanced processor (db session will be lazy-loaded)
             result = enhanced_processor.process_ontology(ontology_id, options)
             
             return jsonify({
@@ -676,6 +676,9 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             nodes = []
             edges = []
             
+            # Create a set of all entity URIs for filtering edges
+            entity_uris = {entity.uri for entity in entities}
+            
             for entity in entities:
                 # Create node
                 node_data = {
@@ -704,8 +707,8 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                     'classes': f"entity-node {entity.entity_type}" + (' inferred' if node_data.get('is_inferred') else ' explicit')
                 })
                 
-                # Create edges for parent relationships
-                if entity.parent_uri:
+                # Create edges for parent relationships - only if target exists in current ontology
+                if entity.parent_uri and entity.parent_uri in entity_uris:
                     edge_id = f"{entity.uri}-subClassOf-{entity.parent_uri}"
                     edges.append({
                         'data': {

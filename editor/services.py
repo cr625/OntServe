@@ -15,8 +15,23 @@ from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, OWL
 from sentence_transformers import SentenceTransformer
 
-from ..web.models import db, Ontology, OntologyEntity, OntologyVersion
-from ..storage.base import StorageBackend
+# Handle imports based on context
+try:
+    # Try absolute import first (when running from project root)
+    from web.models import db, Ontology, OntologyEntity, OntologyVersion
+    from storage.base import StorageBackend
+except ImportError:
+    # Fallback to relative imports (when used as a package)
+    try:
+        from ..web.models import db, Ontology, OntologyEntity, OntologyVersion
+        from ..storage.base import StorageBackend
+    except ImportError:
+        # Last resort - assume we're in web context
+        from models import db, Ontology, OntologyEntity, OntologyVersion
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from storage.base import StorageBackend
 
 
 # Configure logging
