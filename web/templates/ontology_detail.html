@@ -38,6 +38,9 @@
                 <a href="{{ url_for('edit_ontology', ontology_id=ontology.ontology_id) }}" class="btn btn-primary">
                     <i class="bi bi-pencil-square"></i> Edit
                 </a>
+                <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_id=ontology.ontology_id) }}" class="btn btn-success">
+                    <i class="bi bi-diagram-3"></i> Visualize
+                </a>
                 <a href="{{ url_for('ontology_content', ontology_id=ontology.ontology_id) }}"
                     class="btn btn-outline-secondary" target="_blank">
                     <i class="bi bi-file-code"></i> View Raw TTL
