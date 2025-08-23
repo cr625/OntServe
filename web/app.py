@@ -279,6 +279,39 @@ def register_routes(app):
         
         return render_template('import.html')
     
+    @app.route('/drafts')
+    def drafts():
+        """View all draft ontologies."""
+        page = request.args.get('page', 1, type=int)
+        per_page = 10
+        
+        # Get draft ontologies with version info
+        draft_query = db.session.query(Ontology, OntologyVersion).join(
+            OntologyVersion, Ontology.id == OntologyVersion.ontology_id
+        ).filter(
+            OntologyVersion.is_draft == True
+        ).order_by(OntologyVersion.created_at.desc())
+        
+        pagination = draft_query.paginate(
+            page=page,
+            per_page=per_page,
+            error_out=False
+        )
+        
+        # Get entity counts for each draft
+        draft_data = []
+        for ont, version in pagination.items:
+            entity_count = OntologyEntity.query.filter_by(ontology_id=ont.id).count()
+            draft_data.append({
+                'ontology': ont,
+                'version': version,
+                'entity_count': entity_count
+            })
+        
+        return render_template('drafts.html', 
+                             drafts=draft_data,
+                             pagination=pagination)
+    
     @app.route('/search')
     def search():
         """Search for ontologies and entities."""
@@ -848,14 +881,97 @@ def register_routes(app):
             db.session.add(version)
             db.session.commit()
             
-            return jsonify({
-                'success': True,
-                'ontology_name': ontology_name,
-                'version_id': version.id,
-                'version_number': version.version_number,
-                'concepts_count': len(concepts),
-                'message': f'Draft ontology created with {len(concepts)} concepts'
-            })
+            # Parse RDF content and extract entities into ontology_entities table
+            try:
+                g = rdflib.Graph()
+                g.parse(data=rdf_content, format='turtle')
+                
+                from rdflib import RDF, RDFS, OWL
+                
+                # Clear existing entities for this ontology (in case of recreate)
+                OntologyEntity.query.filter_by(ontology_id=ontology.id).delete()
+                
+                entity_counts = {'class': 0, 'property': 0, 'individual': 0}
+                
+                # Extract classes
+                for cls in g.subjects(RDF.type, OWL.Class):
+                    label = next(g.objects(cls, RDFS.label), None)
+                    comment = next(g.objects(cls, RDFS.comment), None)
+                    subclass_of = list(g.objects(cls, RDFS.subClassOf))
+                    
+                    entity = OntologyEntity(
+                        ontology_id=ontology.id,
+                        entity_type='class',
+                        uri=str(cls),
+                        label=str(label) if label else None,
+                        comment=str(comment) if comment else None,
+                        parent_uri=str(subclass_of[0]) if subclass_of else None
+                    )
+                    db.session.add(entity)
+                    entity_counts['class'] += 1
+                
+                # Extract properties
+                for prop in g.subjects(RDF.type, OWL.ObjectProperty):
+                    label = next(g.objects(prop, RDFS.label), None)
+                    comment = next(g.objects(prop, RDFS.comment), None)
+                    domain = next(g.objects(prop, RDFS.domain), None)
+                    range_val = next(g.objects(prop, RDFS.range), None)
+                    
+                    entity = OntologyEntity(
+                        ontology_id=ontology.id,
+                        entity_type='property',
+                        uri=str(prop),
+                        label=str(label) if label else None,
+                        comment=str(comment) if comment else None,
+                        domain={'uri': str(domain)} if domain else None,
+                        range={'uri': str(range_val)} if range_val else None
+                    )
+                    db.session.add(entity)
+                    entity_counts['property'] += 1
+                
+                for prop in g.subjects(RDF.type, OWL.DatatypeProperty):
+                    label = next(g.objects(prop, RDFS.label), None)
+                    comment = next(g.objects(prop, RDFS.comment), None)
+                    domain = next(g.objects(prop, RDFS.domain), None)
+                    range_val = next(g.objects(prop, RDFS.range), None)
+                    
+                    entity = OntologyEntity(
+                        ontology_id=ontology.id,
+                        entity_type='property',
+                        uri=str(prop),
+                        label=str(label) if label else None,
+                        comment=str(comment) if comment else None,
+                        domain={'uri': str(domain)} if domain else None,
+                        range={'uri': str(range_val)} if range_val else None
+                    )
+                    db.session.add(entity)
+                    entity_counts['property'] += 1
+                
+                db.session.commit()
+                
+                app.logger.info(f"Extracted {entity_counts['class']} classes and {entity_counts['property']} properties for draft ontology {ontology_name}")
+                
+                return jsonify({
+                    'success': True,
+                    'ontology_name': ontology_name,
+                    'version_id': version.id,
+                    'version_number': version.version_number,
+                    'concepts_count': len(concepts),
+                    'entities_extracted': entity_counts,
+                    'message': f'Draft ontology created with {len(concepts)} concepts and {sum(entity_counts.values())} extracted entities'
+                })
+                
+            except Exception as parse_error:
+                app.logger.error(f"Error parsing RDF content for entity extraction: {parse_error}")
+                # Return success anyway since the ontology was created, just mention the parsing issue
+                return jsonify({
+                    'success': True,
+                    'ontology_name': ontology_name,
+                    'version_id': version.id,
+                    'version_number': version.version_number,
+                    'concepts_count': len(concepts),
+                    'message': f'Draft ontology created with {len(concepts)} concepts (entity extraction failed: {parse_error})'
+                })
             
         except Exception as e:
             db.session.rollback()
