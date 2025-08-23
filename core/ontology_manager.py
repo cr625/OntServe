@@ -98,6 +98,7 @@ class OntologyManager:
                        name: Optional[str] = None,
                        description: Optional[str] = None,
                        format: Optional[str] = None,
+                       source_type: Optional[str] = None,
                        force_refresh: bool = False) -> Dict[str, Any]:
         """
         Import an ontology from a URL or file.
@@ -109,6 +110,7 @@ class OntologyManager:
             name: Optional human-readable name
             description: Optional description
             format: Optional RDF format
+            source_type: Optional explicit source type ('url' or 'file')
             force_refresh: Force re-import even if cached
             
         Returns:
@@ -120,7 +122,8 @@ class OntologyManager:
             raise ImportError(f"Unknown importer type: {importer_type}")
         
         # Determine if source is URL or file
-        if source.startswith('http://') or source.startswith('https://'):
+        # Use explicit source_type if provided, otherwise auto-detect
+        if source_type == 'url' or (source_type is None and (source.startswith('http://') or source.startswith('https://'))):
             result = importer.import_from_url(
                 source, ontology_id, name, description, format, force_refresh
             )

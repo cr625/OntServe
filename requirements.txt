@@ -10,6 +10,9 @@ owlready2>=0.43
 # ===== Web Framework =====
 flask>=2.3.2
 flask-sqlalchemy>=3.0.0
+flask-migrate>=4.0.0
+flask-login>=0.6.2
+flask-cors>=4.0.0
 bootstrap-flask>=2.2.0
 wtforms>=3.0.1
 
@@ -20,6 +23,7 @@ aiofiles>=23.1.0
 # ===== Database =====
 sqlalchemy>=1.4.0
 psycopg2-binary>=2.9.6
+asyncpg>=0.28.0
 
 # ===== Search and Similarity =====
 numpy>=1.24.0

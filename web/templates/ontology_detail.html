@@ -217,7 +217,7 @@
                         <div class="entity-list list-group">
                             {% for entity in entities.classes %}
                             <div class="list-group-item">
-                                <strong>{{ entity.label or entity.uri.split('#')[-1].split('/')[-1] }}</strong>
+                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
                                 {% if entity.comment %}
                                 <br><small class="text-muted">{{ entity.comment[:100] }}...</small>
                                 {% endif %}
@@ -236,7 +236,7 @@
                         <div class="entity-list list-group">
                             {% for entity in entities.properties %}
                             <div class="list-group-item">
-                                <strong>{{ entity.label or entity.uri.split('#')[-1].split('/')[-1] }}</strong>
+                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
                                 {% if entity.comment %}
                                 <br><small class="text-muted">{{ entity.comment[:100] }}...</small>
                                 {% endif %}
@@ -255,7 +255,7 @@
                         <div class="entity-list list-group">
                             {% for entity in entities.individuals %}
                             <div class="list-group-item">
-                                <strong>{{ entity.label or entity.uri.split('#')[-1].split('/')[-1] }}</strong>
+                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
                                 {% if entity.comment %}
                                 <br><small class="text-muted">{{ entity.comment[:100] }}...</small>
                                 {% endif %}
@@ -283,9 +283,9 @@
                                         {% if entity.parent_uri %}
                                         <div class="relationship-item mb-2 p-2 border-start border-2 border-secondary">
                                             <div class="d-flex align-items-center">
-                                                <span class="badge bg-light text-dark me-2">{{ entity.label or entity.uri.split('#')[-1].split('/')[-1] }}</span>
+                                                <span class="badge bg-light text-dark me-2">{{ entity.label or entity.uri|extract_name }}</span>
                                                 <i class="bi bi-arrow-right text-muted mx-2"></i>
-                                                <span class="badge bg-secondary">{{ entity.parent_uri.split('#')[-1].split('/')[-1] }}</span>
+                                                <span class="badge bg-secondary">{{ entity.parent_uri|extract_name }}</span>
                                             </div>
                                             <small class="text-muted d-block mt-1">
                                                 <code>{{ entity.uri }}</code> ⊆ <code>{{ entity.parent_uri }}</code>
@@ -312,17 +312,17 @@
                                     {% for entity in entities.properties %}
                                         {% if entity.domain or entity.range %}
                                         <div class="relationship-item mb-2 p-2 border-start border-2 border-info">
-                                            <div class="fw-bold">{{ entity.label or entity.uri.split('#')[-1].split('/')[-1] }}</div>
+                                            <div class="fw-bold">{{ entity.label or entity.uri|extract_name }}</div>
                                             {% if entity.domain %}
                                             <div class="mt-1">
                                                 <span class="badge bg-info me-1">Domain:</span>
-                                                <span class="badge bg-light text-dark">{{ entity.domain.split('#')[-1].split('/')[-1] if entity.domain else 'Not specified' }}</span>
+                                                <span class="badge bg-light text-dark">{{ entity.domain|extract_name if entity.domain else 'Not specified' }}</span>
                                             </div>
                                             {% endif %}
                                             {% if entity.range %}
                                             <div class="mt-1">
                                                 <span class="badge bg-success me-1">Range:</span>
-                                                <span class="badge bg-light text-dark">{{ entity.range.split('#')[-1].split('/')[-1] if entity.range else 'Not specified' }}</span>
+                                                <span class="badge bg-light text-dark">{{ entity.range|extract_name if entity.range else 'Not specified' }}</span>
                                             </div>
                                             {% endif %}
                                             <small class="text-muted d-block mt-1">
@@ -521,20 +521,20 @@
                                     <tr class="relationship-row" data-type="{{ rel.type }}" 
                                         data-child="{{ rel.child }}" data-parent="{{ rel.parent }}">
                                         <td>
-                                            <code class="text-primary clean-uri" data-full-uri="{{ rel.child }}">{{ rel.child.split('.')[-1] if '.' in rel.child else rel.child.split('#')[-1] if '#' in rel.child else rel.child }}</code>
+                                            <code class="text-primary clean-uri" data-full-uri="{{ rel.child }}">{{ rel.child|extract_name }}</code>
                                             <br><small class="text-muted full-uri">{{ rel.child }}</small>
                                         </td>
                                         <td>
                                             <span class="badge bg-secondary">{{ rel.type }}</span>
                                         </td>
                                         <td>
-                                            <code class="text-success clean-uri" data-full-uri="{{ rel.parent }}">{{ rel.parent.split('.')[-1] if '.' in rel.parent else rel.parent.split('#')[-1] if '#' in rel.parent else rel.parent }}</code>
+                                            <code class="text-success clean-uri" data-full-uri="{{ rel.parent }}">{{ rel.parent|extract_name }}</code>
                                             <br><small class="text-muted full-uri">{{ rel.parent }}</small>
                                         </td>
                                         <td>
                                             <small class="text-muted relationship-description" data-child="{{ rel.child }}" data-parent="{{ rel.parent }}" data-type="{{ rel.type }}">
                                                 {% if rel.type == 'subClassOf' %}
-                                                "{{ rel.child.split('.')[-1] if '.' in rel.child else rel.child.split('#')[-1] if '#' in rel.child else rel.child }}" is a subclass of "{{ rel.parent.split('.')[-1] if '.' in rel.parent else rel.parent.split('#')[-1] if '#' in rel.parent else rel.parent }}"
+                                                "{{ rel.child|extract_name }}" is a subclass of "{{ rel.parent|extract_name }}"
                                                 {% else %}
                                                 Inferred {{ rel.type }} relationship
                                                 {% endif %}
