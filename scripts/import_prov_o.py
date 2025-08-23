@@ -45,7 +45,7 @@ class ProvOImporter:
         # Get database URL from environment
         self.db_url = os.environ.get(
             'ONTSERVE_DB_URL',
-            'postgresql://ontserve_user:ontserve_development_password@localhost:5433/ontserve'
+            'postgresql://ontserve_user:ontserve_development_password@localhost:5432/ontserve'
         )
         
         # Initialize storage backend

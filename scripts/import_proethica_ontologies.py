@@ -20,7 +20,7 @@ from datetime import datetime
 def get_db_connection():
     return psycopg2.connect(
         host='localhost',
-        port=5435,
+        port=5432,
         database='ontserve',
         user='ontserve_user',
         password='ontserve_development_password'

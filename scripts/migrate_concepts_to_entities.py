@@ -231,7 +231,7 @@ def main():
     # Get database URL from environment
     db_url = os.environ.get(
         'ONTSERVE_DB_URL',
-        'postgresql://ontserve_user:ontserve_development_password@localhost:5435/ontserve'
+        'postgresql://ontserve_user:ontserve_development_password@localhost:5432/ontserve'
     )
     
     migrator = ConceptToEntityMigrator(db_url)

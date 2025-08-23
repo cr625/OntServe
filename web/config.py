@@ -16,7 +16,7 @@ class Config:
     
     # Database settings - using OntServe's PostgreSQL on port 5435
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://ontserve_user:ontserve_development_password@localhost:5435/ontserve'
+        'postgresql://ontserve_user:ontserve_development_password@localhost:5432/ontserve'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Application settings
