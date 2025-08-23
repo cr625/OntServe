@@ -265,8 +265,28 @@
                     <h1 class="h3 mb-0">
                         <i class="fas fa-project-diagram me-2"></i>
                         {{ ontology.name }}
+                        {% if ontology.current_version %}
+                        <span class="badge bg-secondary ms-2">v{{ ontology.current_version.version_number }}</span>
+                        {% if ontology.current_version.version_tag and 'reasoned' in ontology.current_version.version_tag %}
+                        <span class="badge bg-info ms-1">
+                            <i class="fas fa-brain"></i> Inferred
+                        </span>
+                        {% endif %}
+                        {% endif %}
                     </h1>
-                    <small class="text-muted">Ontology Visualization with Semantic Search</small>
+                    <small class="text-muted">
+                        Ontology Visualization with Semantic Search
+                        {% if ontology.current_version %}
+                        <span class="mx-2">•</span>
+                        Version {{ ontology.current_version.version_number }}
+                        {% if ontology.current_version.version_tag %}
+                        ({{ ontology.current_version.version_tag }})
+                        {% endif %}
+                        {% if ontology.current_version.created_at %}
+                        - {{ ontology.current_version.created_at.strftime('%Y-%m-%d') }}
+                        {% endif %}
+                        {% endif %}
+                    </small>
                 </div>
                 <div class="col-md-4">
                     <div class="d-flex justify-content-end gap-2">
@@ -284,6 +304,20 @@
             </div>
         </div>
     </div>
+
+    <!-- Version Info Banner for Inferred Versions -->
+    {% if ontology.current_version and ontology.current_version.meta_data and ontology.current_version.meta_data.reasoning %}
+    <div class="container-fluid">
+        <div class="alert alert-info alert-dismissible fade show mb-2" role="alert" style="margin-top: 0.5rem;">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Viewing inferred version:</strong> 
+            This visualization includes {{ ontology.current_version.meta_data.reasoning.inferred_relationships|length if ontology.current_version.meta_data.reasoning.inferred_relationships else 0 }} additional relationships 
+            discovered by {{ ontology.current_version.meta_data.reasoning.reasoner_type }} reasoning 
+            on {{ ontology.current_version.created_at.strftime('%Y-%m-%d') if ontology.current_version.created_at else 'unknown date' }}.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="container-fluid mt-3">
         <div class="row">

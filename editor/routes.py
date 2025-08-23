@@ -860,7 +860,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 
                 # Save as new version if requested
                 version_info = None
-                if save_as_version and len(inferred_relationships) > 0:
+                if save_as_version:
                     try:
                         # Save the ontology with inferred relationships back to RDF/XML
                         onto.save(temp_file, format='rdfxml')
@@ -886,6 +886,16 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                         current_version = ontology.current_version
                         next_version_number = (current_version.version_number + 1) if current_version else 1
                         
+                        # Create change summary based on what was done
+                        if len(inferred_relationships) > 0:
+                            change_summary = (f'Applied {reasoner_type} reasoning. Added {len(inferred_relationships)} inferred relationships: '
+                                           f'{classes_after - classes_before} new classes, '
+                                           f'{properties_after - properties_before} new properties.')
+                        else:
+                            change_summary = (f'Applied {reasoner_type} reasoning. No new relationships inferred. '
+                                           f'URI prefixes normalized and ontology structure validated. '
+                                           f'Found {len(hierarchy_after)} existing hierarchical relationships.')
+                        
                         # Create new version with reasoning results
                         new_version = OntologyVersion(
                             ontology_id=ontology.id,
@@ -893,9 +903,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                             version_tag=f'v{next_version_number}.0-reasoned-{reasoner_type}',
                             content=enriched_content,
                             content_hash=hashlib.sha256(enriched_content.encode()).hexdigest(),
-                            change_summary=f'Applied {reasoner_type} reasoning. Added {len(inferred_relationships)} inferred relationships: '
-                                         f'{classes_after - classes_before} new classes, '
-                                         f'{properties_after - properties_before} new properties.',
+                            change_summary=change_summary,
                             created_by='reasoning-engine',
                             created_at=datetime.now(timezone.utc),
                             is_current=False,  # Don't automatically make it current
@@ -917,13 +925,19 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                         db.session.add(new_version)
                         db.session.commit()
                         
+                        # Create version info with appropriate message
+                        if len(inferred_relationships) > 0:
+                            version_message = f'Created version {next_version_number} with {len(inferred_relationships)} inferred relationships'
+                        else:
+                            version_message = f'Created version {next_version_number} with normalized URIs and validated structure'
+                        
                         version_info = {
                             'version_created': True,
                             'version_number': next_version_number,
                             'version_tag': new_version.version_tag,
                             'version_id': new_version.id,
                             'is_draft': True,
-                            'message': f'Created version {next_version_number} with reasoning results'
+                            'message': version_message
                         }
                         
                         logger.info(f"Created version {next_version_number} for {ontology_name} with reasoning results")

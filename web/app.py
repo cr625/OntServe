@@ -187,6 +187,23 @@ def register_routes(app):
             ).all()
         }
         
+        # Count relationship instances
+        relationships = {
+            'hierarchical': OntologyEntity.query.filter_by(
+                ontology_id=ontology.id, 
+                entity_type='class'
+            ).filter(OntologyEntity.parent_uri.isnot(None)).count(),
+            'domain': OntologyEntity.query.filter_by(
+                ontology_id=ontology.id, 
+                entity_type='property'
+            ).filter(OntologyEntity.domain.isnot(None)).count(),
+            'range': OntologyEntity.query.filter_by(
+                ontology_id=ontology.id, 
+                entity_type='property'
+            ).filter(OntologyEntity.range.isnot(None)).count()
+        }
+        relationships['total'] = relationships['hierarchical'] + relationships['domain'] + relationships['range']
+        
         # Get versions
         versions = OntologyVersion.query.filter_by(
             ontology_id=ontology.id
@@ -195,6 +212,7 @@ def register_routes(app):
         return render_template('ontology_detail.html',
                              ontology=ontology,
                              entities=entities,
+                             relationships=relationships,
                              versions=versions)
     
     @app.route('/ontology/<ontology_name>/content')
@@ -299,6 +317,77 @@ def register_routes(app):
             }
         })
     
+    def _extract_entities_from_content(ontology, content):
+        """Helper function to extract entities from ontology content."""
+        from rdflib import RDF, RDFS, OWL
+        
+        # Parse content
+        g = rdflib.Graph()
+        g.parse(data=content, format='turtle')
+        
+        # Clear existing entities for this ontology
+        OntologyEntity.query.filter_by(ontology_id=ontology.id).delete()
+        
+        entity_counts = {'class': 0, 'property': 0, 'individual': 0}
+        
+        # Extract classes
+        for cls in g.subjects(RDF.type, OWL.Class):
+            label = next(g.objects(cls, RDFS.label), None)
+            comment = next(g.objects(cls, RDFS.comment), None)
+            subclass_of = list(g.objects(cls, RDFS.subClassOf))
+            
+            entity = OntologyEntity(
+                ontology_id=ontology.id,
+                entity_type='class',
+                uri=str(cls),
+                label=str(label) if label else None,
+                comment=str(comment) if comment else None,
+                parent_uri=str(subclass_of[0]) if subclass_of else None
+            )
+            db.session.add(entity)
+            entity_counts['class'] += 1
+        
+        # Extract properties
+        for prop in g.subjects(RDF.type, OWL.ObjectProperty):
+            label = next(g.objects(prop, RDFS.label), None)
+            comment = next(g.objects(prop, RDFS.comment), None)
+            domain = next(g.objects(prop, RDFS.domain), None)
+            range_val = next(g.objects(prop, RDFS.range), None)
+            
+            entity = OntologyEntity(
+                ontology_id=ontology.id,
+                entity_type='property',
+                uri=str(prop),
+                label=str(label) if label else None,
+                comment=str(comment) if comment else None,
+                domain=str(domain) if domain else None,
+                range=str(range_val) if range_val else None
+            )
+            db.session.add(entity)
+            entity_counts['property'] += 1
+        
+        for prop in g.subjects(RDF.type, OWL.DatatypeProperty):
+            label = next(g.objects(prop, RDFS.label), None)
+            comment = next(g.objects(prop, RDFS.comment), None)
+            domain = next(g.objects(prop, RDFS.domain), None)
+            range_val = next(g.objects(prop, RDFS.range), None)
+            
+            entity = OntologyEntity(
+                ontology_id=ontology.id,
+                entity_type='property',
+                uri=str(prop),
+                label=str(label) if label else None,
+                comment=str(comment) if comment else None,
+                domain=str(domain) if domain else None,
+                range=str(range_val) if range_val else None
+            )
+            db.session.add(entity)
+            entity_counts['property'] += 1
+        
+        # Note: class_count and property_count are computed properties, no need to set them
+        
+        return entity_counts
+
     @app.route('/api/versions/<int:version_id>/make-current', methods=['POST'])
     def make_version_current(version_id):
         """Make a version the current version."""
@@ -316,15 +405,24 @@ def register_routes(app):
             version.is_draft = False
             version.workflow_status = 'published'
             
+            # Re-extract entities from the new current version content
+            entities_updated = False
+            try:
+                entity_counts = _extract_entities_from_content(ontology, version.content)
+                total_entities = sum(entity_counts.values())
+                entities_updated = True
+                app.logger.info(f"Re-extracted {total_entities} entities for ontology {ontology.name} version {version.version_number}")
+            except Exception as e:
+                app.logger.warning(f"Failed to re-extract entities when making version current: {e}")
+                # Don't fail the version change if entity extraction fails
+            
             # Commit the changes
             db.session.commit()
             
-            # Also update entities if needed
-            # This could trigger re-extraction of entities from the new version
-            
             return jsonify({
                 'success': True,
-                'message': f'Version {version.version_number} is now the current version'
+                'message': f'Version {version.version_number} is now the current version',
+                'entities_updated': entities_updated
             })
             
         except Exception as e:
@@ -702,78 +800,21 @@ def register_routes(app):
         ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
         
         try:
-            # Get ontology content
-            ont_data = app.ontology_manager.get_ontology(ontology_name)
-            content = ont_data.get('content', ontology.content)
+            # Get ontology content (use current version content)
+            content = ontology.current_content
+            if not content:
+                # Fallback to ontology manager if no content in database
+                ont_data = app.ontology_manager.get_ontology(ontology_name)
+                content = ont_data.get('content', ontology.content)
             
-            # Parse and extract entities
-            g = rdflib.Graph()
-            g.parse(data=content, format='turtle')
+            if not content:
+                return jsonify({
+                    'success': False,
+                    'error': 'No content available for entity extraction'
+                }), 400
             
-            from rdflib import RDF, RDFS, OWL
-            
-            # Clear existing entities for this ontology
-            OntologyEntity.query.filter_by(ontology_id=ontology.id).delete()
-            
-            entity_counts = {'class': 0, 'property': 0, 'individual': 0}
-            
-            # Extract classes
-            for cls in g.subjects(RDF.type, OWL.Class):
-                label = next(g.objects(cls, RDFS.label), None)
-                comment = next(g.objects(cls, RDFS.comment), None)
-                subclass_of = list(g.objects(cls, RDFS.subClassOf))
-                
-                entity = OntologyEntity(
-                    ontology_id=ontology.id,
-                    entity_type='class',
-                    uri=str(cls),
-                    label=str(label) if label else None,
-                    comment=str(comment) if comment else None,
-                    parent_uri=str(subclass_of[0]) if subclass_of else None
-                )
-                db.session.add(entity)
-                entity_counts['class'] += 1
-            
-            # Extract properties
-            for prop in g.subjects(RDF.type, OWL.ObjectProperty):
-                label = next(g.objects(prop, RDFS.label), None)
-                comment = next(g.objects(prop, RDFS.comment), None)
-                domain = next(g.objects(prop, RDFS.domain), None)
-                range_val = next(g.objects(prop, RDFS.range), None)
-                
-                entity = OntologyEntity(
-                    ontology_id=ontology.id,
-                    entity_type='property',
-                    uri=str(prop),
-                    label=str(label) if label else None,
-                    comment=str(comment) if comment else None,
-                    domain=str(domain) if domain else None,
-                    range=str(range_val) if range_val else None
-                )
-                db.session.add(entity)
-                entity_counts['property'] += 1
-            
-            for prop in g.subjects(RDF.type, OWL.DatatypeProperty):
-                label = next(g.objects(prop, RDFS.label), None)
-                comment = next(g.objects(prop, RDFS.comment), None)
-                domain = next(g.objects(prop, RDFS.domain), None)
-                range_val = next(g.objects(prop, RDFS.range), None)
-                
-                entity = OntologyEntity(
-                    ontology_id=ontology.id,
-                    entity_type='property',
-                    uri=str(prop),
-                    label=str(label) if label else None,
-                    comment=str(comment) if comment else None,
-                    domain=str(domain) if domain else None,
-                    range=str(range_val) if range_val else None
-                )
-                db.session.add(entity)
-                entity_counts['property'] += 1
-            
-            # Update ontology counts
-            ontology.class_count = entity_counts['class']
-            ontology.property_count = entity_counts['property']
+            # Use the helper function for extraction
+            entity_counts = _extract_entities_from_content(ontology, content)
             
             db.session.commit()
             

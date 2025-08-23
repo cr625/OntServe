@@ -1,0 +1,33 @@
+[Unit]
+Description=OntServe MCP Server
+After=network.target postgresql.service
+Requires=postgresql.service
+PartOf=ontserve.target
+
+[Service]
+Type=exec
+User=chris
+Group=chris
+WorkingDirectory=/opt/ontserve
+Environment=PATH=/opt/ontserve/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=ONTSERVE_DB_URL=postgresql://ontserve_user:ONTSERVE_PASS_HERE@localhost:5432/ontserve
+Environment=ONTSERVE_MCP_PORT=8083
+Environment=LOG_LEVEL=INFO
+ExecStart=/opt/ontserve/venv/bin/python servers/mcp_server.py
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ontserve-mcp
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/ontserve/uploads /opt/ontserve/logs
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=ontserve.target

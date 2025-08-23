@@ -92,7 +92,7 @@
         {% endif %}
 
         <!-- Statistics -->
-        <div class="row mb-4">
+        <div class="row mb-3">
             <div class="col-md-3">
                 <div class="card">
                     <div class="card-body text-center">
@@ -126,6 +126,45 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Relationship Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">
+                            <i class="bi bi-arrow-left-right"></i> Relationships
+                        </h5>
+                        <h3 class="text-danger">{{ relationships.total }}</h3>
+                        <small class="text-muted">
+                            {{ relationships.hierarchical }} hierarchical,
+                            {{ relationships.domain + relationships.range }} property constraints
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Relationship Breakdown</h6>
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <span class="badge bg-secondary me-1">{{ relationships.hierarchical }}</span>
+                                <small>Hierarchical (subClassOf)</small>
+                            </div>
+                            <div class="col-md-4">
+                                <span class="badge bg-info me-1">{{ relationships.domain }}</span>
+                                <small>Domain constraints</small>
+                            </div>
+                            <div class="col-md-4">
+                                <span class="badge bg-success me-1">{{ relationships.range }}</span>
+                                <small>Range constraints</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Tabs for different views -->
         <ul class="nav nav-tabs" id="ontologyTabs" role="tablist">
@@ -133,6 +172,12 @@
                 <button class="nav-link active" id="entities-tab" data-bs-toggle="tab" data-bs-target="#entities"
                     type="button">
                     <i class="bi bi-diagram-2"></i> Entities
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="relationships-tab" data-bs-toggle="tab" data-bs-target="#relationships"
+                    type="button">
+                    <i class="bi bi-arrow-left-right"></i> Relationships ({{ relationships.total }})
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -220,6 +265,79 @@
                             {% if not entities.individuals %}
                             <div class="list-group-item text-muted">No individuals found</div>
                             {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relationships Tab -->
+            <div class="tab-pane fade" id="relationships" role="tabpanel">
+                <div class="row">
+                    <!-- Hierarchical Relationships -->
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-diagram-3"></i> Hierarchical Relationships ({{ relationships.hierarchical }})</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="relationship-list" style="max-height: 400px; overflow-y: auto;">
+                                    {% for entity in entities.classes %}
+                                        {% if entity.parent_uri %}
+                                        <div class="relationship-item mb-2 p-2 border-start border-2 border-secondary">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-light text-dark me-2">{{ entity.label or entity.uri.split('#')[-1].split('/')[-1] }}</span>
+                                                <i class="bi bi-arrow-right text-muted mx-2"></i>
+                                                <span class="badge bg-secondary">{{ entity.parent_uri.split('#')[-1].split('/')[-1] }}</span>
+                                            </div>
+                                            <small class="text-muted d-block mt-1">
+                                                <code>{{ entity.uri }}</code> ⊆ <code>{{ entity.parent_uri }}</code>
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if relationships.hierarchical == 0 %}
+                                    <div class="text-muted text-center py-3">
+                                        <i class="bi bi-info-circle"></i> No hierarchical relationships found
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Property Constraints -->
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-arrow-left-right"></i> Property Constraints ({{ relationships.domain + relationships.range }})</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="relationship-list" style="max-height: 400px; overflow-y: auto;">
+                                    {% for entity in entities.properties %}
+                                        {% if entity.domain or entity.range %}
+                                        <div class="relationship-item mb-2 p-2 border-start border-2 border-info">
+                                            <div class="fw-bold">{{ entity.label or entity.uri.split('#')[-1].split('/')[-1] }}</div>
+                                            {% if entity.domain %}
+                                            <div class="mt-1">
+                                                <span class="badge bg-info me-1">Domain:</span>
+                                                <span class="badge bg-light text-dark">{{ entity.domain.split('#')[-1].split('/')[-1] if entity.domain else 'Not specified' }}</span>
+                                            </div>
+                                            {% endif %}
+                                            {% if entity.range %}
+                                            <div class="mt-1">
+                                                <span class="badge bg-success me-1">Range:</span>
+                                                <span class="badge bg-light text-dark">{{ entity.range.split('#')[-1].split('/')[-1] if entity.range else 'Not specified' }}</span>
+                                            </div>
+                                            {% endif %}
+                                            <small class="text-muted d-block mt-1">
+                                                <code>{{ entity.uri }}</code>
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if (relationships.domain + relationships.range) == 0 %}
+                                    <div class="text-muted text-center py-3">
+                                        <i class="bi bi-info-circle"></i> No property constraints found
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -514,7 +632,11 @@ function makeVersionCurrent(versionId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Version successfully made current!');
+            let message = 'Version successfully made current!';
+            if (data.entities_updated) {
+                message += '\n\nEntities have been re-extracted from the new version content. The visualization will now show updated relationships.';
+            }
+            alert(message);
             location.reload();
         } else {
             alert('Failed to make version current: ' + (data.error || 'Unknown error'));
