@@ -140,6 +140,8 @@ class OntologyVersion(db.Model):
     created_by = db.Column(db.String(255))
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     is_current = db.Column(db.Boolean, default=False)
+    is_draft = db.Column(db.Boolean, default=True)  # True for draft versions, False for published
+    workflow_status = db.Column(db.String(20), default='draft')  # draft, review, published
     meta_data = db.Column('metadata', db.JSON, default={})
     
     # Relationships

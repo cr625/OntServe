@@ -81,6 +81,70 @@ def create_app(config_name=None):
     return app
 
 
+def generate_rdf_from_concepts(ontology_name, concepts, base_imports):
+    """Generate RDF/Turtle content from extracted concepts."""
+    from datetime import datetime
+    
+    # Base prefixes
+    prefixes = """@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix proethica: <http://proethica.org/ontology/> .
+
+"""
+    
+    # Ontology declaration
+    base_uri = f'http://proethica.org/ontology/{ontology_name}'
+    ontology_declaration = f"""<{base_uri}> 
+    a owl:Ontology ;
+    rdfs:comment "Extracted concepts from ProEthica guideline analysis" ;
+    owl:versionInfo "1.0-draft" ;
+    proethica:extractedAt "{datetime.utcnow().isoformat()}"^^xsd:dateTime"""
+    
+    # Add imports
+    for import_ont in base_imports:
+        ontology_declaration += f' ;\n    owl:imports <http://proethica.org/ontology/{import_ont}>'
+    
+    ontology_declaration += " .\n\n"
+    
+    # Generate concept triples
+    concept_triples = ""
+    for concept in concepts:
+        concept_uri = f"<{base_uri}#{concept.get('label', '').replace(' ', '')}>"
+        concept_type = concept.get('type', 'class').lower()
+        
+        # Map ProEthica types to intermediate ontology classes
+        type_mapping = {
+            'role': 'http://proethica.org/ontology/intermediate#Role',
+            'principle': 'http://proethica.org/ontology/intermediate#Principle', 
+            'obligation': 'http://proethica.org/ontology/intermediate#Obligation',
+            'state': 'http://proethica.org/ontology/intermediate#State',
+            'resource': 'http://proethica.org/ontology/intermediate#Resource',
+            'action': 'http://proethica.org/ontology/intermediate#Action',
+            'event': 'http://proethica.org/ontology/intermediate#Event',
+            'capability': 'http://proethica.org/ontology/intermediate#Capability',
+            'constraint': 'http://proethica.org/ontology/intermediate#Constraint'
+        }
+        
+        parent_class = type_mapping.get(concept_type, 'owl:Thing')
+        
+        concept_triples += f"""{concept_uri} 
+    a owl:Class ;
+    rdfs:subClassOf <{parent_class}> ;
+    rdfs:label "{concept.get('label', '')}" """
+        
+        if concept.get('description'):
+            concept_triples += f';\n    rdfs:comment "{concept.get('description')}"'
+        
+        if concept.get('confidence'):
+            concept_triples += f';\n    proethica:extractionConfidence "{concept.get('confidence')}"^^xsd:float'
+        
+        concept_triples += " .\n\n"
+    
+    return prefixes + ontology_declaration + concept_triples
+
+
 def register_routes(app):
     """Register all application routes."""
     
@@ -551,7 +615,7 @@ def register_routes(app):
         
         try:
             # Get ontology content
-            ont_data = app.ontology_manager.get_ontology(ontology_id)
+            ont_data = app.ontology_manager.get_ontology(ontology_name)
             content = ont_data.get('content', ontology.content)
             
             # Parse and extract entities
@@ -679,6 +743,179 @@ def register_routes(app):
         }
         
         return jsonify(data)
+    
+    @app.route('/editor/api/ontologies/<ontology_name>/entities')
+    def api_ontology_entities(ontology_name):
+        """API endpoint for ProEthica integration - get entities for an ontology."""
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        
+        # Get all entities for this ontology
+        entities = OntologyEntity.query.filter_by(ontology_id=ontology.id).all()
+        
+        # Organize entities by category for ProEthica format
+        entities_by_category = {}
+        
+        for entity in entities:
+            category = entity.entity_type
+            if category not in entities_by_category:
+                entities_by_category[category] = []
+            
+            # Format entity to match ProEthica expectations
+            entity_data = {
+                "id": entity.uri,
+                "uri": entity.uri,
+                "label": entity.label or entity.uri.split('#')[-1].split('/')[-1],
+                "description": entity.comment or "",
+                "category": category,
+                "type": category,
+                "from_base": True,
+                "parent_class": entity.domain if entity.entity_type == 'property' else None
+            }
+            
+            # Add additional properties for roles/capabilities if needed
+            if category == 'role':
+                entity_data["capabilities"] = []
+            
+            entities_by_category[category].append(entity_data)
+        
+        # Return in ProEthica expected format
+        return jsonify({
+            "entities": entities_by_category,
+            "is_mock": False,
+            "source": "ontserve",
+            "total_entities": len(entities),
+            "ontology_name": ontology_name
+        })
+    
+    # ================================
+    # Draft Ontology Management APIs
+    # ================================
+    
+    @app.route('/editor/api/ontologies/<ontology_name>/draft', methods=['POST'])
+    def create_draft_ontology(ontology_name):
+        """Create a new draft ontology from extracted concepts."""
+        try:
+            data = request.get_json()
+            concepts = data.get('concepts', [])
+            base_imports = data.get('base_imports', [])
+            metadata = data.get('metadata', {})
+            created_by = data.get('created_by', 'system')
+            
+            # Check if ontology already exists
+            ontology = Ontology.query.filter_by(name=ontology_name).first()
+            
+            if ontology:
+                # Check if there's already a draft version
+                existing_draft = OntologyVersion.query.filter_by(
+                    ontology_id=ontology.id,
+                    is_draft=True
+                ).first()
+                
+                if existing_draft:
+                    return jsonify({
+                        'success': False,
+                        'error': f'Draft version already exists for {ontology_name}'
+                    }), 409
+            else:
+                # Create new ontology
+                ontology = Ontology(
+                    name=ontology_name,
+                    base_uri=f'http://proethica.org/ontology/{ontology_name}',
+                    description=f'Extracted concepts ontology: {ontology_name}',
+                    is_base=False,
+                    is_editable=True,
+                    meta_data=metadata
+                )
+                db.session.add(ontology)
+                db.session.flush()  # Get the ID
+            
+            # Generate RDF content from concepts
+            rdf_content = generate_rdf_from_concepts(ontology_name, concepts, base_imports)
+            
+            # Create draft version
+            version = OntologyVersion(
+                ontology_id=ontology.id,
+                version_number=1,
+                version_tag='v1.0-draft',
+                content=rdf_content,
+                change_summary='Initial draft from concept extraction',
+                created_by=created_by,
+                is_current=True,
+                is_draft=True,
+                workflow_status='draft',
+                meta_data=metadata
+            )
+            db.session.add(version)
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'ontology_name': ontology_name,
+                'version_id': version.id,
+                'version_number': version.version_number,
+                'concepts_count': len(concepts),
+                'message': f'Draft ontology created with {len(concepts)} concepts'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error creating draft ontology: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @app.route('/editor/api/ontologies/<ontology_name>/draft', methods=['DELETE'])
+    def delete_draft_ontology(ontology_name):
+        """Delete draft ontology (replaces Clear Pending functionality)."""
+        try:
+            ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+            
+            # Find all draft versions
+            draft_versions = OntologyVersion.query.filter_by(
+                ontology_id=ontology.id,
+                is_draft=True
+            ).all()
+            
+            if not draft_versions:
+                return jsonify({
+                    'success': False,
+                    'error': f'No draft versions found for {ontology_name}'
+                }), 404
+            
+            # Delete all draft versions
+            for version in draft_versions:
+                db.session.delete(version)
+            
+            # Check if this ontology has any published versions
+            published_versions = OntologyVersion.query.filter_by(
+                ontology_id=ontology.id,
+                is_draft=False
+            ).count()
+            
+            # If no published versions, delete the entire ontology
+            if published_versions == 0:
+                # Also delete any extracted entities
+                OntologyEntity.query.filter_by(ontology_id=ontology.id).delete()
+                db.session.delete(ontology)
+            
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'ontology_name': ontology_name,
+                'draft_versions_deleted': len(draft_versions),
+                'ontology_deleted': published_versions == 0,
+                'message': f'Deleted {len(draft_versions)} draft versions'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error deleting draft ontology: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
     
     @app.errorhandler(404)
     def not_found(error):
