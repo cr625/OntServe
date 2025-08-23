@@ -345,8 +345,15 @@
                     </button>
                     
                     <button class="btn btn-outline-success btn-sm w-100 mt-2" onclick="runInference()" id="inferenceBtn">
-                        <i class="fas fa-brain me-1"></i>Run Reasoning
+                        <i class="fas fa-brain me-1"></i><span id="inferenceButtonText">Run Inference</span>
                     </button>
+                    
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="saveReasoningAsVersion" checked>
+                        <label class="form-check-label small" for="saveReasoningAsVersion">
+                            Save inference results as new version
+                        </label>
+                    </div>
                     
                     <button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="loadOntologyData()" id="refreshBtn">
                         <i class="fas fa-sync me-1"></i>Refresh View
@@ -460,12 +467,30 @@
         // Use hierarchical layout by default for hierarchical ontologies
         const isHierarchicalOntology = ontologyId.includes('prov-o') || ontologyId.includes('bfo');
         let currentLayout = isHierarchicalOntology ? 'dagre' : 'cose';
+        
+        // Check if current version has reasoning and update button text
+        function updateInferenceButtonText() {
+            // This will be set by the template based on current version metadata
+            const hasInferenceData = {{ 'true' if ontology.current_version and ontology.current_version.meta_data and ontology.current_version.meta_data.reasoning else 'false' }};
+            const buttonText = document.getElementById('inferenceButtonText');
+            if (hasInferenceData && buttonText) {
+                buttonText.textContent = 'Re-run Inference';
+            }
+        }
+        
+        // Initialize button text on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateInferenceButtonText();
+        });
 
         function runInference() {
             const button = document.getElementById('inferenceBtn');
             const originalText = button.innerHTML;
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Running Inference...';
+            
+            // Check if we should save as version
+            const saveAsVersion = document.getElementById('saveReasoningAsVersion').checked;
             
             // Use the simple reasoning endpoint
             fetch(`/editor/api/simple/reasoning/${ontologyId}`, {
@@ -476,7 +501,8 @@
                 body: JSON.stringify({
                     include_reasoning: true,
                     force_refresh: true,
-                    reasoner_type: 'pellet'
+                    reasoner_type: 'pellet',
+                    save_as_version: saveAsVersion
                 })
             })
             .then(response => response.json())
@@ -489,7 +515,7 @@
                     const newInferredRels = results.new_inferred_relationships || 0;
                     const sampleHierarchy = results.sample_hierarchy || [];
                     
-                    let message = `Reasoning completed successfully!\n\n`;
+                    let message = `Inference completed successfully!\n\n`;
                     message += `📊 Results:\n`;
                     message += `• ${results.classes_before || 0} classes, ${results.properties_before || 0} properties loaded\n`;
                     message += `• ${hierarchicalRels} hierarchical relationships discovered\n`;
@@ -509,14 +535,32 @@
                         });
                     }
                     
+                    // Add version creation info if present
+                    if (data.version && data.version.version_created) {
+                        message += `\n✅ Version Created:\n`;
+                        message += `• Version ${data.version.version_number} (${data.version.version_tag})\n`;
+                        message += `• Status: Draft - ready for review\n`;
+                        message += `• You can switch to this version in the Versions tab\n`;
+                        
+                        // Update button text after creating a new version
+                        setTimeout(() => {
+                            const buttonText = document.getElementById('inferenceButtonText');
+                            if (buttonText) {
+                                buttonText.textContent = 'Re-run Inference';
+                            }
+                        }, 100);
+                    } else if (data.version && !data.version.version_created) {
+                        message += `\n⚠️ Version creation failed: ${data.version.error}\n`;
+                    }
+                    
                     alert(message);
                 } else {
-                    alert('Reasoning failed: ' + (data.error || 'Unknown error'));
+                    alert('Inference failed: ' + (data.error || 'Unknown error'));
                 }
             })
             .catch(error => {
-                console.error('Reasoning error:', error);
-                alert('Reasoning failed. This may be due to the enhanced processor configuration. Check console for details.');
+                console.error('Inference error:', error);
+                alert('Inference failed. This may be due to the enhanced processor configuration. Check console for details.');
             })
             .finally(() => {
                 button.disabled = false;

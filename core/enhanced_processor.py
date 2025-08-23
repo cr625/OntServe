@@ -543,10 +543,13 @@ class EnhancedOntologyProcessor:
     def _apply_additional_reasoning(self, content: str, ontology_id: str, options: ProcessingOptions) -> Dict[str, Any]:
         """Apply additional comprehensive reasoning passes."""
         try:
-            # Create temporary file for owlready2 processing
-            temp_file = os.path.join(self.temp_dir, f"{ontology_id}_reasoning.ttl")
-            with open(temp_file, 'w', encoding='utf-8') as f:
-                f.write(content)
+            # Parse content with rdflib first to handle Turtle format
+            g = Graph()
+            g.parse(data=content, format='turtle')
+            
+            # Convert to RDF/XML for owlready2
+            temp_file = os.path.join(self.temp_dir, f"{ontology_id}_reasoning.owl")
+            g.serialize(destination=temp_file, format='xml')
             
             # Load with owlready2 for direct reasoning access
             onto = owlready2.get_ontology(f"file://{temp_file}").load()
@@ -830,7 +833,7 @@ class EnhancedOntologyProcessor:
                          reasoning_result: Dict, entity_count: int) -> Dict[str, Any]:
         """Generate enhanced metadata."""
         return {
-            'ontology_id': ontology_record.ontology_id,
+            'ontology_id': ontology_record.name,
             'name': ontology_record.name,
             'description': ontology_record.description,
             'triple_count': len(rdf_graph),

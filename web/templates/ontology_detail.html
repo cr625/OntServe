@@ -24,13 +24,34 @@
         <!-- Ontology header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1>{{ ontology.name }}</h1>
+                <h1>
+                    {{ ontology.name }}
+                    {% if ontology.current_version %}
+                    <span class="badge bg-secondary ms-2">v{{ ontology.current_version.version_number }}</span>
+                    {% if ontology.current_version.version_tag %}
+                        {% if 'reasoned' in ontology.current_version.version_tag %}
+                        <span class="badge bg-info ms-1">
+                            <i class="bi bi-brain"></i> Reasoned
+                        </span>
+                        {% endif %}
+                    {% endif %}
+                    {% endif %}
+                </h1>
                 <p class="text-muted">
                     <code>{{ ontology.base_uri }}</code>
                     {% if ontology.source_url %}
                     | <a href="{{ ontology.source_url }}" target="_blank">
                         <i class="bi bi-link-45deg"></i> Source URL
                     </a>
+                    {% endif %}
+                    {% if ontology.current_version %}
+                    | <small>
+                        Version {{ ontology.current_version.version_number }}
+                        {% if ontology.current_version.version_tag %}
+                        ({{ ontology.current_version.version_tag }})
+                        {% endif %}
+                        - {{ ontology.current_version.created_at.strftime('%Y-%m-%d') if ontology.current_version.created_at else 'Unknown date' }}
+                    </small>
                     {% endif %}
                 </p>
             </div>
@@ -52,6 +73,21 @@
         {% if ontology.description %}
         <div class="alert alert-light">
             {{ ontology.description }}
+        </div>
+        {% endif %}
+        
+        <!-- Version Info Alert for Reasoned Versions -->
+        {% if ontology.current_version and ontology.current_version.meta_data and ontology.current_version.meta_data.reasoning %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill"></i> <strong>This is a reasoned version</strong>
+            <br>
+            <small>
+                Applied {{ ontology.current_version.meta_data.reasoning.reasoner_type }} reasoning on {{ ontology.current_version.created_at.strftime('%Y-%m-%d %H:%M') if ontology.current_version.created_at else 'unknown date' }}
+                <br>
+                Inferred: {{ ontology.current_version.meta_data.reasoning.classes_after - ontology.current_version.meta_data.reasoning.classes_before }} new classes, 
+                {{ ontology.current_version.meta_data.reasoning.properties_after - ontology.current_version.meta_data.reasoning.properties_before }} new properties,
+                {{ ontology.current_version.meta_data.reasoning.inferred_relationships|length if ontology.current_version.meta_data.reasoning.inferred_relationships else 0 }} new relationships
+            </small>
         </div>
         {% endif %}
 
@@ -110,6 +146,14 @@
                     <i class="bi bi-clock-history"></i> Versions ({{ versions|length }})
                 </button>
             </li>
+            {% if ontology.current_version and ontology.current_version.meta_data and ontology.current_version.meta_data.reasoning %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reasoning-tab" data-bs-toggle="tab" data-bs-target="#reasoning"
+                    type="button">
+                    <i class="bi bi-brain"></i> Inferred Relationships ({{ ontology.current_version.meta_data.reasoning.inferred_relationships|length if ontology.current_version.meta_data.reasoning.inferred_relationships else 0 }})
+                </button>
+            </li>
+            {% endif %}
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata"
                     type="button">
@@ -202,23 +246,86 @@
             <div class="tab-pane fade" id="versions" role="tabpanel">
                 {% if versions %}
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-hover">
                         <thead>
                             <tr>
                                 <th>Version</th>
+                                <th>Tag</th>
+                                <th>Status</th>
                                 <th>Created</th>
-                                <th>Message</th>
-                                <th>Triple Count</th>
+                                <th>Created By</th>
+                                <th>Summary</th>
+                                <th>Reasoning</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for version in versions %}
-                            <tr>
-                                <td><code>{{ version.version }}</code></td>
-                                <td>{{ version.created_at.strftime('%Y-%m-%d %H:%M') if version.created_at else '-' }}
+                            <tr class="{% if version.is_current %}table-success{% elif version.is_draft %}table-warning{% endif %}">
+                                <td>
+                                    <strong>v{{ version.version_number }}</strong>
+                                    {% if version.is_current %}
+                                    <span class="badge bg-success ms-1">Current</span>
+                                    {% endif %}
                                 </td>
-                                <td>{{ version.commit_message or '-' }}</td>
-                                <td>{{ version.triple_count or '-' }}</td>
+                                <td>
+                                    {% if version.version_tag %}
+                                    <code>{{ version.version_tag }}</code>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if version.is_draft %}
+                                    <span class="badge bg-warning">Draft</span>
+                                    {% else %}
+                                    <span class="badge bg-primary">Published</span>
+                                    {% endif %}
+                                    {% if version.workflow_status %}
+                                    <br><small>{{ version.workflow_status }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>{{ version.created_at.strftime('%Y-%m-%d %H:%M') if version.created_at else '-' }}</td>
+                                <td>{{ version.created_by or '-' }}</td>
+                                <td>
+                                    {% if version.change_summary %}
+                                    <small>{{ version.change_summary[:100] }}{% if version.change_summary|length > 100 %}...{% endif %}</small>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if version.meta_data and version.meta_data.reasoning %}
+                                    <span class="badge bg-info">
+                                        <i class="bi bi-brain"></i> 
+                                        {{ version.meta_data.reasoning.reasoner_type }}
+                                    </span>
+                                    <br>
+                                    <small>
+                                        +{{ version.meta_data.reasoning.classes_after - version.meta_data.reasoning.classes_before }} classes<br>
+                                        +{{ version.meta_data.reasoning.properties_after - version.meta_data.reasoning.properties_before }} props
+                                    </small>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-outline-primary" onclick="viewVersion({{ version.id }})" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        {% if not version.is_current %}
+                                        <button class="btn btn-outline-success" onclick="makeVersionCurrent({{ version.id }})" title="Make Current">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
+                                        {% endif %}
+                                        {% if version.meta_data and version.meta_data.reasoning %}
+                                        <button class="btn btn-outline-info" onclick="showReasoningDetails({{ version.id }})" title="Reasoning Details">
+                                            <i class="bi bi-info-circle"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -228,6 +335,111 @@
                 <div class="alert alert-info">No version history available</div>
                 {% endif %}
             </div>
+
+            <!-- Inferred Relationships Tab -->
+            {% if ontology.current_version and ontology.current_version.meta_data and ontology.current_version.meta_data.reasoning %}
+            <div class="tab-pane fade" id="reasoning" role="tabpanel">
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="alert alert-info">
+                            <h5><i class="bi bi-info-circle-fill"></i> Reasoning Summary</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Reasoner Used:</strong><br>
+                                    <span class="badge bg-primary">{{ ontology.current_version.meta_data.reasoning.reasoner_type }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Classes Added:</strong><br>
+                                    <span class="badge bg-success">+{{ ontology.current_version.meta_data.reasoning.classes_after - ontology.current_version.meta_data.reasoning.classes_before }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Properties Added:</strong><br>
+                                    <span class="badge bg-info">+{{ ontology.current_version.meta_data.reasoning.properties_after - ontology.current_version.meta_data.reasoning.properties_before }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Relationships:</strong><br>
+                                    <span class="badge bg-warning">{{ ontology.current_version.meta_data.reasoning.hierarchical_relationships }} total</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if ontology.current_version.meta_data.reasoning.inferred_relationships %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-arrow-left-right"></i> Inferred Relationships ({{ ontology.current_version.meta_data.reasoning.inferred_relationships|length }})</h5>
+                        <p class="mb-0 text-muted">These relationships were automatically discovered by the reasoner</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="relationshipSearch" 
+                                       placeholder="Search relationships..." onkeyup="filterRelationships()">
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-select" id="relationshipTypeFilter" onchange="filterRelationships()">
+                                    <option value="">All relationship types</option>
+                                    {% set relationship_types = ontology.current_version.meta_data.reasoning.inferred_relationships | map(attribute='type') | unique %}
+                                    {% for rel_type in relationship_types %}
+                                    <option value="{{ rel_type }}">{{ rel_type }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="relationshipsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Subject (Child)</th>
+                                        <th>Relationship</th>
+                                        <th>Object (Parent)</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for rel in ontology.current_version.meta_data.reasoning.inferred_relationships %}
+                                    <tr class="relationship-row" data-type="{{ rel.type }}" 
+                                        data-child="{{ rel.child }}" data-parent="{{ rel.parent }}">
+                                        <td>
+                                            <code class="text-primary clean-uri" data-full-uri="{{ rel.child }}">{{ rel.child.split('.')[-1] if '.' in rel.child else rel.child.split('#')[-1] if '#' in rel.child else rel.child }}</code>
+                                            <br><small class="text-muted full-uri">{{ rel.child }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ rel.type }}</span>
+                                        </td>
+                                        <td>
+                                            <code class="text-success clean-uri" data-full-uri="{{ rel.parent }}">{{ rel.parent.split('.')[-1] if '.' in rel.parent else rel.parent.split('#')[-1] if '#' in rel.parent else rel.parent }}</code>
+                                            <br><small class="text-muted full-uri">{{ rel.parent }}</small>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted relationship-description" data-child="{{ rel.child }}" data-parent="{{ rel.parent }}" data-type="{{ rel.type }}">
+                                                {% if rel.type == 'subClassOf' %}
+                                                "{{ rel.child.split('.')[-1] if '.' in rel.child else rel.child.split('#')[-1] if '#' in rel.child else rel.child }}" is a subclass of "{{ rel.parent.split('.')[-1] if '.' in rel.parent else rel.parent.split('#')[-1] if '#' in rel.parent else rel.parent }}"
+                                                {% else %}
+                                                Inferred {{ rel.type }} relationship
+                                                {% endif %}
+                                            </small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-3" id="relationshipCount">
+                            Showing {{ ontology.current_version.meta_data.reasoning.inferred_relationships|length }} relationships
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> No detailed relationship information available for this reasoning session.
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
 
             <!-- Metadata Tab -->
             <div class="tab-pane fade" id="metadata" role="tabpanel">
@@ -273,4 +485,163 @@
         </div>
     </div>
 </div>
+
+<script>
+function viewVersion(versionId) {
+    // For now, show an alert with version info
+    // In the future, this could open a modal or redirect to a version view
+    fetch(`/api/versions/${versionId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Version ${data.version.version_number}\n\n${data.version.change_summary}\n\nCreated: ${data.version.created_at}\nBy: ${data.version.created_by}`);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function makeVersionCurrent(versionId) {
+    if (!confirm('Are you sure you want to make this version the current version? This will replace the current ontology content.')) {
+        return;
+    }
+    
+    fetch(`/api/versions/${versionId}/make-current`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Version successfully made current!');
+            location.reload();
+        } else {
+            alert('Failed to make version current: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to make version current');
+    });
+}
+
+function showReasoningDetails(versionId) {
+    // Fetch version details and show reasoning information
+    fetch(`/api/versions/${versionId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.version.meta_data && data.version.meta_data.reasoning) {
+                const reasoning = data.version.meta_data.reasoning;
+                const inferredRels = reasoning.inferred_relationships || [];
+                
+                let message = `Reasoning Details for Version ${data.version.version_number}\n`;
+                message += `${'='.repeat(50)}\n\n`;
+                message += `Reasoner: ${reasoning.reasoner_type}\n`;
+                message += `Classes: ${reasoning.classes_before} → ${reasoning.classes_after} (+${reasoning.classes_after - reasoning.classes_before})\n`;
+                message += `Properties: ${reasoning.properties_before} → ${reasoning.properties_after} (+${reasoning.properties_after - reasoning.properties_before})\n`;
+                message += `Hierarchical Relationships: ${reasoning.hierarchical_relationships}\n`;
+                
+                if (inferredRels.length > 0) {
+                    message += `\nSample Inferred Relationships:\n`;
+                    inferredRels.slice(0, 5).forEach(rel => {
+                        message += `  • ${rel.child} ${rel.type} ${rel.parent}\n`;
+                    });
+                    if (inferredRels.length > 5) {
+                        message += `  ... and ${inferredRels.length - 5} more\n`;
+                    }
+                }
+                
+                alert(message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function filterRelationships() {
+    const searchTerm = document.getElementById('relationshipSearch').value.toLowerCase();
+    const typeFilter = document.getElementById('relationshipTypeFilter').value;
+    const rows = document.querySelectorAll('#relationshipsTable .relationship-row');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const child = row.getAttribute('data-child').toLowerCase();
+        const parent = row.getAttribute('data-parent').toLowerCase();
+        const type = row.getAttribute('data-type');
+        
+        const matchesSearch = child.includes(searchTerm) || parent.includes(searchTerm);
+        const matchesType = !typeFilter || type === typeFilter;
+        
+        if (matchesSearch && matchesType) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('relationshipCount').textContent = `Showing ${visibleCount} relationships`;
+}
+
+function cleanURI(uri) {
+    // Common namespace mappings for ProEthica ontologies
+    const namespaces = {
+        'http://proethica.org/ontology/intermediate#': 'proethica:',
+        'http://proethica.org/ontology/engineering-ethics#': 'ethics:',
+        'http://www.w3.org/2002/07/owl#': 'owl:',
+        'http://www.w3.org/1999/02/22-rdf-syntax-ns#': 'rdf:',
+        'http://www.w3.org/2000/01/rdf-schema#': 'rdfs:',
+        'http://purl.obolibrary.org/obo/': 'obo:'
+    };
+    
+    // First try to match known namespaces
+    for (const [namespace, prefix] of Object.entries(namespaces)) {
+        if (uri.startsWith(namespace)) {
+            return prefix + uri.substring(namespace.length);
+        }
+    }
+    
+    // Extract the fragment after # or the last part after /
+    const fragment = uri.split('#').pop() || uri.split('/').pop();
+    return fragment || uri;
+}
+
+function updateURIDisplays() {
+    // Clean up class names in the relationships table
+    document.querySelectorAll('.clean-uri').forEach(element => {
+        const fullUri = element.getAttribute('data-full-uri');
+        const cleanName = cleanURI(fullUri);
+        element.textContent = cleanName;
+    });
+    
+    // Update full URIs to show cleaned versions
+    document.querySelectorAll('.full-uri').forEach(element => {
+        const originalUri = element.textContent;
+        const cleanName = cleanURI(originalUri);
+        // Show both the clean name and original URI
+        element.innerHTML = `<strong>${cleanName}</strong><br><span style="font-size: 0.8em;">${originalUri}</span>`;
+    });
+    
+    // Update relationship descriptions
+    document.querySelectorAll('.relationship-description').forEach(element => {
+        const child = element.getAttribute('data-child');
+        const parent = element.getAttribute('data-parent');
+        const type = element.getAttribute('data-type');
+        
+        const cleanChild = cleanURI(child);
+        const cleanParent = cleanURI(parent);
+        
+        if (type === 'subClassOf') {
+            element.textContent = `"${cleanChild}" is a subclass of "${cleanParent}"`;
+        } else {
+            element.textContent = `Inferred ${type} relationship: ${cleanChild} → ${cleanParent}`;
+        }
+    });
+}
+
+// Run URI cleanup when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    updateURIDisplays();
+});
+</script>
 {% endblock %}

@@ -75,6 +75,17 @@
                             <a href="{{ url_for('ontology_detail', ontology_name=ontology.name) }}">
                                 <strong>{{ ontology.name }}</strong>
                             </a>
+                            {% if ontology.current_version %}
+                            <br>
+                            <small class="text-muted">
+                                v{{ ontology.current_version.version_number }}
+                                {% if ontology.current_version.version_tag and 'reasoned' in ontology.current_version.version_tag %}
+                                <span class="badge bg-info ms-1" style="font-size: 0.7em;">
+                                    <i class="bi bi-brain"></i> Reasoned
+                                </span>
+                                {% endif %}
+                            </small>
+                            {% endif %}
                         </td>
                         <td><code>{{ ontology.base_uri }}</code></td>
                         <td>{{ ontology.description[:100] if ontology.description else '-' }}

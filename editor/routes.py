@@ -316,7 +316,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             logger.info(f"Found ontology: {ontology.name}, ID: {ontology.id}")
             
             return render_template('editor/visualize.html',
-                                 ontology=ontology.to_dict(),
+                                 ontology=ontology,
                                  ontology_name=ontology_name,
                                  page_title=f"Visualize {ontology.name}")
                                  
@@ -734,6 +734,11 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
     def simple_reasoning(ontology_name: str):
         """Simple reasoning endpoint using owlready2 directly."""
         try:
+            # Get request data
+            data = request.get_json() or {}
+            save_as_version = data.get('save_as_version', False)
+            reasoner_type = data.get('reasoner_type', 'pellet')
+            
             # Get ontology from database
             ontology = Ontology.query.filter_by(name=ontology_name).first()
             if not ontology:
@@ -757,14 +762,17 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 
                 # Create temporary file with appropriate extension based on content
                 content = ontology.current_content
-                if content.strip().startswith('<?xml'):
-                    # RDF/XML format
-                    suffix = '.owl'
-                else:
-                    # Assume Turtle format
-                    suffix = '.ttl'
                 
-                with tempfile.NamedTemporaryFile(mode='w', suffix=suffix, delete=False) as f:
+                # Convert Turtle to RDF/XML if needed for owlready2
+                if not content.strip().startswith('<?xml'):
+                    # Content is in Turtle format, convert to RDF/XML
+                    import rdflib
+                    g = rdflib.Graph()
+                    g.parse(data=content, format='turtle')
+                    content = g.serialize(format='xml')
+                
+                # Now content is in RDF/XML format
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.owl', delete=False) as f:
                     f.write(content)
                     temp_file = f.name
                 
@@ -791,36 +799,146 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 classes_after = len(list(onto.classes()))
                 properties_after = len(list(onto.properties()))
                 
+                def clean_owlready_uri(uri_str, ontology_base_uri="http://proethica.org/ontology/intermediate#"):
+                    """Clean up owlready2 temporary URIs and convert them to proper ontology URIs."""
+                    if not uri_str:
+                        return uri_str
+                    
+                    # If it's already a proper URI, return it
+                    if uri_str.startswith('http://'):
+                        return uri_str
+                    
+                    # Handle owlready2 class references like 'tmpxxx.ClassName'
+                    if '.' in uri_str:
+                        parts = uri_str.split('.')
+                        if len(parts) == 2 and parts[0].startswith('tmp'):
+                            class_name = parts[1]
+                            return f"{ontology_base_uri}{class_name}"
+                    
+                    # Handle bare class names
+                    if '#' not in uri_str and '/' not in uri_str:
+                        return f"{ontology_base_uri}{uri_str}"
+                    
+                    return uri_str
+                
+                # Get the ontology base URI
+                ontology_base_uri = ontology.base_uri or "http://proethica.org/ontology/intermediate#"
+                
                 # Collect class hierarchy after reasoning and find inferences
                 hierarchy_after = {}
                 inferred_relationships = []
                 for cls in onto.classes():
                     parents = [str(p) for p in cls.is_a if hasattr(p, 'name')]
                     if parents:
-                        hierarchy_after[str(cls)] = parents
+                        clean_child_uri = clean_owlready_uri(str(cls), ontology_base_uri)
+                        clean_parent_uris = [clean_owlready_uri(p, ontology_base_uri) for p in parents]
+                        
+                        hierarchy_after[clean_child_uri] = clean_parent_uris
+                        
                         # Check for new relationships
                         old_parents = set(hierarchy_before.get(str(cls), []))
                         new_parents = set(parents) - old_parents
                         for new_parent in new_parents:
+                            clean_parent_uri = clean_owlready_uri(new_parent, ontology_base_uri)
                             inferred_relationships.append({
-                                'child': str(cls),
-                                'parent': new_parent,
+                                'child': clean_child_uri,
+                                'parent': clean_parent_uri,
                                 'type': 'subClassOf'
                             })
                 
                 # Sample some key relationships found
                 sample_hierarchy = []
-                for cls_name, parents in list(hierarchy_after.items())[:10]:
-                    if parents:
+                for cls_uri, parent_uris in list(hierarchy_after.items())[:10]:
+                    if parent_uris:
+                        # Extract clean names from the URIs
+                        class_name = cls_uri.split('#')[-1] if '#' in cls_uri else cls_uri.split('/')[-1]
+                        parent_names = [p.split('#')[-1] if '#' in p else p.split('/')[-1] for p in parent_uris]
                         sample_hierarchy.append({
-                            'class': cls_name.split('.')[-1] if '.' in cls_name else cls_name,
-                            'parents': [p.split('.')[-1] if '.' in p else p for p in parents]
+                            'class': class_name,
+                            'parents': parent_names
                         })
+                
+                # Save as new version if requested
+                version_info = None
+                if save_as_version and len(inferred_relationships) > 0:
+                    try:
+                        # Save the ontology with inferred relationships back to RDF/XML
+                        onto.save(temp_file, format='rdfxml')
+                        
+                        # Read the saved content
+                        with open(temp_file, 'r', encoding='utf-8') as f:
+                            enriched_content = f.read()
+                        
+                        # Convert back to Turtle if original was Turtle
+                        original_content = ontology.current_content
+                        if not original_content.strip().startswith('<?xml'):
+                            # Original was Turtle, convert back
+                            import rdflib
+                            g = rdflib.Graph()
+                            g.parse(data=enriched_content, format='xml')
+                            enriched_content = g.serialize(format='turtle')
+                        
+                        # Get the next version number
+                        from models import OntologyVersion
+                        import hashlib
+                        from datetime import datetime, timezone
+                        
+                        current_version = ontology.current_version
+                        next_version_number = (current_version.version_number + 1) if current_version else 1
+                        
+                        # Create new version with reasoning results
+                        new_version = OntologyVersion(
+                            ontology_id=ontology.id,
+                            version_number=next_version_number,
+                            version_tag=f'v{next_version_number}.0-reasoned-{reasoner_type}',
+                            content=enriched_content,
+                            content_hash=hashlib.sha256(enriched_content.encode()).hexdigest(),
+                            change_summary=f'Applied {reasoner_type} reasoning. Added {len(inferred_relationships)} inferred relationships: '
+                                         f'{classes_after - classes_before} new classes, '
+                                         f'{properties_after - properties_before} new properties.',
+                            created_by='reasoning-engine',
+                            created_at=datetime.now(timezone.utc),
+                            is_current=False,  # Don't automatically make it current
+                            is_draft=True,      # Mark as draft for review
+                            workflow_status='review',
+                            meta_data={
+                                'reasoning': {
+                                    'reasoner_type': reasoner_type,
+                                    'classes_before': classes_before,
+                                    'classes_after': classes_after,
+                                    'properties_before': properties_before,
+                                    'properties_after': properties_after,
+                                    'inferred_relationships': inferred_relationships,
+                                    'hierarchical_relationships': len(hierarchy_after)
+                                }
+                            }
+                        )
+                        
+                        db.session.add(new_version)
+                        db.session.commit()
+                        
+                        version_info = {
+                            'version_created': True,
+                            'version_number': next_version_number,
+                            'version_tag': new_version.version_tag,
+                            'version_id': new_version.id,
+                            'is_draft': True,
+                            'message': f'Created version {next_version_number} with reasoning results'
+                        }
+                        
+                        logger.info(f"Created version {next_version_number} for {ontology_name} with reasoning results")
+                        
+                    except Exception as version_error:
+                        logger.error(f"Failed to create version: {version_error}")
+                        version_info = {
+                            'version_created': False,
+                            'error': str(version_error)
+                        }
                 
                 # Clean up
                 os.unlink(temp_file)
                 
-                return jsonify({
+                response_data = {
                     'success': True,
                     'message': f'Reasoning completed successfully. Found {len(hierarchy_after)} hierarchical relationships.',
                     'results': {
@@ -835,7 +953,13 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                         'sample_hierarchy': sample_hierarchy,
                         'inferred_relationships': inferred_relationships[:5]  # First 5 new relationships
                     }
-                })
+                }
+                
+                # Add version info if created
+                if version_info:
+                    response_data['version'] = version_info
+                
+                return jsonify(response_data)
                 
             except ImportError:
                 return jsonify({
@@ -882,9 +1006,17 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 
                 # Create temporary file with appropriate extension
                 content = ontology.current_content
-                suffix = '.owl' if content.strip().startswith('<?xml') else '.ttl'
                 
-                with tempfile.NamedTemporaryFile(mode='w', suffix=suffix, delete=False) as f:
+                # Convert Turtle to RDF/XML if needed for owlready2
+                if not content.strip().startswith('<?xml'):
+                    # Content is in Turtle format, convert to RDF/XML
+                    import rdflib
+                    g = rdflib.Graph()
+                    g.parse(data=content, format='turtle')
+                    content = g.serialize(format='xml')
+                
+                # Now content is in RDF/XML format
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.owl', delete=False) as f:
                     f.write(content)
                     temp_file = f.name
                 

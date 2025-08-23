@@ -279,6 +279,61 @@ def register_routes(app):
         
         return render_template('import.html')
     
+    @app.route('/api/versions/<int:version_id>')
+    def get_version_api(version_id):
+        """Get version details via API."""
+        version = OntologyVersion.query.get_or_404(version_id)
+        return jsonify({
+            'success': True,
+            'version': {
+                'id': version.id,
+                'version_number': version.version_number,
+                'version_tag': version.version_tag,
+                'change_summary': version.change_summary,
+                'created_at': version.created_at.isoformat() if version.created_at else None,
+                'created_by': version.created_by,
+                'is_current': version.is_current,
+                'is_draft': version.is_draft,
+                'workflow_status': version.workflow_status,
+                'meta_data': version.meta_data
+            }
+        })
+    
+    @app.route('/api/versions/<int:version_id>/make-current', methods=['POST'])
+    def make_version_current(version_id):
+        """Make a version the current version."""
+        try:
+            version = OntologyVersion.query.get_or_404(version_id)
+            ontology = version.ontology
+            
+            # Set all versions to not current
+            OntologyVersion.query.filter_by(
+                ontology_id=ontology.id
+            ).update({'is_current': False})
+            
+            # Make this version current
+            version.is_current = True
+            version.is_draft = False
+            version.workflow_status = 'published'
+            
+            # Commit the changes
+            db.session.commit()
+            
+            # Also update entities if needed
+            # This could trigger re-extraction of entities from the new version
+            
+            return jsonify({
+                'success': True,
+                'message': f'Version {version.version_number} is now the current version'
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
     @app.route('/drafts')
     def drafts():
         """View all draft ontologies."""
@@ -739,7 +794,7 @@ def register_routes(app):
             }), 500
     
     @app.route('/ontology/<ontology_name>/version/<version_id>')
-    def get_version(ontology_name, version_id):
+    def get_ontology_version(ontology_name, version_id):
         """Get a specific version of an ontology."""
         version = OntologyVersion.query.get_or_404(version_id)
         
