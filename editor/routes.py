@@ -13,7 +13,7 @@ from typing import Dict, Any, Optional
 from flask import Blueprint, request, jsonify, render_template, current_app, flash
 from werkzeug.exceptions import BadRequest, NotFound
 
-from models import db, Ontology, OntologyEntity, OntologyVersion
+from web.models import db, Ontology, OntologyEntity, OntologyVersion
 from storage.file_storage import FileStorage
 from core.enhanced_processor import EnhancedOntologyProcessor, ProcessingOptions
 from .services import OntologyEntityService, OntologyValidationService

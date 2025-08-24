@@ -67,6 +67,10 @@ class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
+    
+    # Storage directories for testing
+    ONTSERVE_STORAGE_DIR = '/tmp/ontserve_test_storage'
+    ONTSERVE_CACHE_DIR = '/tmp/ontserve_test_cache'
 
 
 config = {

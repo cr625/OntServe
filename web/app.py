@@ -22,7 +22,7 @@ from werkzeug.exceptions import RequestEntityTooLarge
 import rdflib
 
 from config import config
-from models import db, init_db, Ontology, OntologyEntity, OntologyVersion, User
+from web.models import db, init_db, Ontology, OntologyEntity, OntologyVersion, User
 from core.ontology_manager import OntologyManager
 from core.ontology_merger import OntologyMergerService
 from editor.routes import create_editor_blueprint
@@ -1848,5 +1848,5 @@ if __name__ == '__main__':
         debug=debug
     )
 else:
-    # Create app instance for WSGI servers (like gunicorn)
+    # Create app instance for WSGI servers (like gunicorn) and VSCode launch tasks
     app = create_app()
