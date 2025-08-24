@@ -52,3 +52,7 @@ web/venv/
 
 # Ignore ontologies and large data stored on production (managed outside git)
 /storage/ontologies/
+
+# local backups
+*.local
+*.backup
