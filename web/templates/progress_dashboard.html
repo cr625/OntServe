@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProEthica Intermediate Ontology Upgrade Progress</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 2.2em;
+        }
+
+        .header .project-info {
+            color: #6c757d;
+            margin-top: 10px;
+            font-size: 1.1em;
+        }
+
+        .progress-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .progress-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .progress-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 1.3em;
+        }
+
+        .progress-circle {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px;
+            position: relative;
+            border-radius: 50%;
+            background: conic-gradient(#4CAF50 var(--progress, 0%), #ffffff20 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-circle::before {
+            content: '';
+            width: 90px;
+            height: 90px;
+            background: inherit;
+            border-radius: 50%;
+            position: absolute;
+            background: #667eea;
+        }
+
+        .progress-text {
+            position: relative;
+            z-index: 1;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .section {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .section h2 {
+            margin: 0 0 20px 0;
+            color: #2c3e50;
+            font-size: 1.4em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .entity-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .entity-card {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .entity-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .entity-unaligned {
+            background: #ffebee;
+            color: #c62828;
+            border: 2px solid #ef5350;
+        }
+
+        .entity-partial {
+            background: #fff3e0;
+            color: #ef6c00;
+            border: 2px solid #ff9800;
+        }
+
+        .entity-complete {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 2px solid #4caf50;
+        }
+
+        .milestone-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .milestone-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 4px solid #dee2e6;
+        }
+
+        .milestone-not-started {
+            border-left-color: #6c757d;
+        }
+
+        .milestone-in-progress {
+            border-left-color: #ffc107;
+            background: #fffbee;
+        }
+
+        .milestone-completed {
+            border-left-color: #28a745;
+            background: #e8f5e8;
+        }
+
+        .milestone-info {
+            flex: 1;
+        }
+
+        .milestone-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .milestone-date {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .milestone-progress {
+            width: 80px;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-left: 15px;
+        }
+
+        .milestone-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #81C784);
+            transition: width 0.3s ease;
+        }
+
+        .validation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .validation-item {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .validation-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .validation-passed {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .validation-failed {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .activity-log {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #007bff;
+        }
+
+        .activity-timestamp {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+
+        .activity-action {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .phase-progress {
+            margin-bottom: 20px;
+        }
+
+        .phase-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .phase-name {
+            width: 150px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .phase-bar-container {
+            flex: 1;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 15px;
+        }
+
+        .phase-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            transition: width 0.3s ease;
+        }
+
+        .phase-percentage {
+            width: 60px;
+            text-align: right;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .refresh-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-size: 1em;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .refresh-button:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .entity-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .validation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>{{ project_info.name }}</h1>
+            <div class="project-info">
+                Phase: {{ project_info.current_phase|replace('_', ' ')|title }} |
+                Day {{ project_info.days_elapsed }} of {{ project_info.days_elapsed +
+                project_info.estimated_days_remaining }} |
+                Target: {{ project_info.target_completion }}
+            </div>
+        </div>
+
+        <div class="progress-overview">
+            <div class="progress-card">
+                <h3>Overall Progress</h3>
+                <div class="progress-circle" style="--progress: {{ project_info.overall_progress }}%">
+                    <div class="progress-text">{{ "%.1f"|format(project_info.overall_progress) }}%</div>
+                </div>
+                <div>{{ tasks.overall.completed_tasks }} / {{ tasks.overall.total_tasks }} tasks completed</div>
+            </div>
+
+            <div class="progress-card">
+                <h3>BFO Alignment</h3>
+                <div class="progress-circle" style="--progress: {{ bfo_alignment.alignment_percentage }}%">
+                    <div class="progress-text">{{ bfo_alignment.aligned_entities }}/{{ bfo_alignment.total_entities }}
+                    </div>
+                </div>
+                <div>Entities aligned with BFO</div>
+            </div>
+
+            <div class="progress-card">
+                <h3>Current Phase</h3>
+                <div class="progress-circle"
+                    style="--progress: {{ tasks.get(project_info.current_phase, {}).get('completion_percentage', 0) }}%">
+                    <div class="progress-text">{{ "%.0f"|format(tasks.get(project_info.current_phase,
+                        {}).get('completion_percentage', 0))
+                        }}%</div>
+                </div>
+                <div>{{ project_info.current_phase|replace('_', ' ')|title }}</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="section">
+                    <h2>BFO Entity Alignment Status</h2>
+                    <div class="entity-grid">
+                        {% for entity in bfo_alignment.entity_details %}
+                        <div class="entity-card entity-{{ entity.alignment_status }}">
+                            <div>{{ entity.entity_name }}</div>
+                            <div style="font-size: 0.8em; margin-top: 8px;">
+                                → {{ entity.target_bfo_parent if entity.target_bfo_parent is string else
+                                entity.target_bfo_parent[0] if entity.target_bfo_parent else 'Unknown' }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if bfo_alignment.next_entity_to_migrate %}
+                    <div
+                        style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 6px; text-align: center;">
+                        <strong>Next to migrate:</strong> {{ bfo_alignment.next_entity_to_migrate }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="section">
+                    <h2>Phase Progress</h2>
+                    {% for phase_name, phase_data in phase_breakdown.items() %}
+                    <div class="phase-progress">
+                        <div class="phase-bar">
+                            <div class="phase-name">{{ phase_data.name }}</div>
+                            <div class="phase-bar-container">
+                                <div class="phase-bar-fill"
+                                    style="width: {{ (phase_data.completed_tasks / phase_data.total_tasks * 100) if phase_data.total_tasks > 0 else 0 }}%">
+                                </div>
+                            </div>
+                            <div class="phase-percentage">{{ "%.0f"|format((phase_data.completed_tasks /
+                                phase_data.total_tasks * 100) if phase_data.total_tasks > 0 else 0) }}%</div>
+                        </div>
+                        <div style="font-size: 0.9em; color: #6c757d; margin-left: 150px;">
+                            {{ phase_data.completed_tasks }} / {{ phase_data.total_tasks }} tasks | Status: {{
+                            phase_data.status|replace('_', ' ')|title }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="section">
+                    <h2>Validation Status</h2>
+                    <div class="validation-grid">
+                        <div
+                            class="validation-item validation-{{ validation_status.bfo_compliance.status.replace('pending_analysis', 'pending') }}">
+                            <div><strong>BFO Compliance</strong></div>
+                            <div>{{ validation_status.bfo_compliance.compliant_entities }}/{{
+                                validation_status.bfo_compliance.total_entities }} entities</div>
+                        </div>
+                        <div
+                            class="validation-item validation-{{ validation_status.owl_profile.status.replace('pending_analysis', 'pending') }}">
+                            <div><strong>OWL 2 EL Profile</strong></div>
+                            <div>{{ validation_status.owl_profile.profile }}</div>
+                        </div>
+                        <div
+                            class="validation-item validation-{{ validation_status.annotation_quality.status.replace('pending_analysis', 'pending') }}">
+                            <div><strong>Annotation Quality</strong></div>
+                            <div>{{ validation_status.annotation_quality.entities_with_definitions }} entities with
+                                definitions</div>
+                        </div>
+                        <div
+                            class="validation-item validation-{{ validation_status.reasoning_consistency.status.replace('pending_analysis', 'pending') }}">
+                            <div><strong>Reasoning</strong></div>
+                            <div>{{ validation_status.reasoning_consistency.reasoner|upper }} reasoner</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="section">
+                    <h2>Milestone Timeline</h2>
+                    <div class="milestone-timeline">
+                        {% for milestone in milestones %}
+                        <div class="milestone-item milestone-{{ milestone.status.replace('_', '-') }}">
+                            <div class="milestone-info">
+                                <div class="milestone-name">{{ milestone.name }}</div>
+                                <div class="milestone-date">Target: {{ milestone.target_date }}</div>
+                                {% if milestone.actual_completion_date %}
+                                <div class="milestone-date">Completed: {{ milestone.actual_completion_date[:10] }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="milestone-progress">
+                                <div class="milestone-progress-bar"
+                                    style="width: {{ milestone.completion_percentage }}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Recent Activity</h2>
+                    <div class="activity-log">
+                        {% for activity in recent_activity %}
+                        <div class="activity-item">
+                            <div class="activity-timestamp">{{ activity.timestamp[:19]|replace('T', ' ') }}</div>
+                            <div class="activity-action">{{ activity.action }}</div>
+                            <div>{{ activity.details }}</div>
+                        </div>
+                        {% endfor %}
+                        {% if not recent_activity %}
+                        <div style="text-align: center; color: #6c757d; padding: 20px;">
+                            No activity recorded yet. Implementation will begin shortly.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Quick Stats</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center;">
+                        <div style="padding: 10px; background: #e3f2fd; border-radius: 6px;">
+                            <div style="font-size: 1.5em; font-weight: bold; color: #1976d2;">{{
+                                bfo_alignment.total_entities }}</div>
+                            <div style="font-size: 0.9em; color: #424242;">Core Entities</div>
+                        </div>
+                        <div style="padding: 10px; background: #f3e5f5; border-radius: 6px;">
+                            <div style="font-size: 1.5em; font-weight: bold; color: #7b1fa2;">{{ milestones|length }}
+                            </div>
+                            <div style="font-size: 0.9em; color: #424242;">Milestones</div>
+                        </div>
+                        <div style="padding: 10px; background: #e8f5e8; border-radius: 6px;">
+                            <div style="font-size: 1.5em; font-weight: bold; color: #388e3c;">{{
+                                tasks.overall.completed_tasks }}</div>
+                            <div style="font-size: 0.9em; color: #424242;">Tasks Done</div>
+                        </div>
+                        <div style="padding: 10px; background: #fff3e0; border-radius: 6px;">
+                            <div style="font-size: 1.5em; font-weight: bold; color: #f57c00;">{{
+                                project_info.estimated_days_remaining }}</div>
+                            <div style="font-size: 0.9em; color: #424242;">Days Left</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="refresh-button" onclick="location.reload()">
+        🔄 Refresh
+    </button>
+
+    <script>
+        // Auto-refresh every 30 seconds
+        setTimeout(function () {
+            location.reload();
+        }, 30000);
+
+        // Real-time updates via WebSocket (if available)
+        function setupWebSocket() {
+            const ws = new WebSocket('ws://localhost:8000/progress-updates');
+
+            ws.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+                if (data.type === 'progress_update') {
+                    updateProgressDisplay(data);
+                }
+            };
+        }
+
+        function updateProgressDisplay(data) {
+            // Update progress circles and bars dynamically
+            document.querySelectorAll('.progress-circle').forEach(circle => {
+                if (data.overall_progress) {
+                    circle.style.setProperty('--progress', data.overall_progress + '%');
+                }
+            });
+        }
+
+        // Initialize WebSocket connection
+        // setupWebSocket();
+    </script>
+</body>
+
+</html>

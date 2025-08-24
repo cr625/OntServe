@@ -759,19 +759,33 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 import owlready2
                 import tempfile
                 import os
+                import rdflib
                 
-                # Create temporary file with appropriate extension based on content
+                # Parse the ontology to remove import statements for local processing
                 content = ontology.current_content
+                g = rdflib.Graph()
                 
-                # Convert Turtle to RDF/XML if needed for owlready2
+                # Parse the content
                 if not content.strip().startswith('<?xml'):
-                    # Content is in Turtle format, convert to RDF/XML
-                    import rdflib
-                    g = rdflib.Graph()
+                    # Content is in Turtle format
                     g.parse(data=content, format='turtle')
-                    content = g.serialize(format='xml')
+                else:
+                    # Content is in RDF/XML format
+                    g.parse(data=content, format='xml')
                 
-                # Now content is in RDF/XML format
+                # Remove owl:imports statements to avoid external resolution issues
+                # These imports are not needed for reasoning on the local content
+                from rdflib import OWL
+                imports_removed = []
+                for s, p, o in list(g.triples((None, OWL.imports, None))):
+                    g.remove((s, p, o))
+                    imports_removed.append(str(o))
+                    logger.info(f"Removed import: {o}")
+                
+                # Convert to RDF/XML for owlready2
+                content = g.serialize(format='xml')
+                
+                # Save to temporary file
                 with tempfile.NamedTemporaryFile(mode='w', suffix='.owl', delete=False) as f:
                     f.write(content)
                     temp_file = f.name
@@ -799,7 +813,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 classes_after = len(list(onto.classes()))
                 properties_after = len(list(onto.properties()))
                 
-                def clean_owlready_uri(uri_str, ontology_base_uri="http://proethica.org/ontology/intermediate#"):
+                def clean_owlready_uri(uri_str, ontology_base_uri):
                     """Clean up owlready2 temporary URIs and convert them to proper ontology URIs."""
                     if not uri_str:
                         return uri_str
@@ -821,8 +835,12 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                     
                     return uri_str
                 
-                # Get the ontology base URI
-                ontology_base_uri = ontology.base_uri or "http://proethica.org/ontology/intermediate#"
+                # Get the ontology base URI - use a sensible default based on the ontology name
+                if ontology.base_uri:
+                    ontology_base_uri = ontology.base_uri
+                else:
+                    # Create a base URI using the ontology name
+                    ontology_base_uri = f"http://ontserve.local/ontology/{ontology_name}#"
                 
                 # Collect class hierarchy after reasoning and find inferences
                 hierarchy_after = {}

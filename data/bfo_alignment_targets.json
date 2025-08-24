@@ -1,0 +1,99 @@
+{
+  "Role": {
+    "target_bfo_class": "bfo:Role",
+    "target_category": "Realizable Entity \u2192 Specifically Dependent Continuant",
+    "pattern": "EngineerRole \u2291 bfo:Role \u2293 (inheres_in only bfo:MaterialEntity)",
+    "key_properties": [
+      "RO:has_role",
+      "RO:inheres_in"
+    ],
+    "note": "Roles are not Occurrents, and not Organizations"
+  },
+  "Principle": {
+    "target_bfo_class": "iao:InformationContentEntity",
+    "target_category": "Generically Dependent Continuant",
+    "pattern": "IntegrityPrinciple \u2291 iao:InformationContentEntity \u2293 (is_about some EthicalConduct)",
+    "key_properties": [
+      "iao:is_about"
+    ],
+    "note": "Ethical principles and standards as information content"
+  },
+  "Obligation": {
+    "target_bfo_class": "iao:InformationContentEntity",
+    "target_category": "Deontic ICE",
+    "pattern": "Obligation \u2291 DeonticStatement \u2293 (constrains some bfo:Role) \u2293 (prescribes some ActionType)",
+    "alternative_pattern": "ProfessionalObligation \u2291 bfo:Disposition (inheres in ProfessionalRole, realized by processes)",
+    "key_properties": [
+      "constrains",
+      "appliesToRole",
+      "prescribes"
+    ],
+    "note": "Can model as ICE constraining actions OR as realizable entity - pick one approach consistently"
+  },
+  "State": {
+    "target_bfo_class": "bfo:Quality",
+    "target_category": "Specifically Dependent Continuant",
+    "pattern": "SafetyHazardState \u2291 bfo:Quality (inheres in system)",
+    "alternative_for_rules": "BudgetConstraint \u2291 iao:InformationContentEntity (documented rule)",
+    "key_properties": [
+      "bfo:inheres_in"
+    ],
+    "note": "Context-dependent: use Quality for states, ICE for documented rules"
+  },
+  "Resource": {
+    "target_bfo_class": [
+      "bfo:MaterialEntity",
+      "iao:InformationContentEntity"
+    ],
+    "target_category": "Bifurcated Model",
+    "pattern": "Resource (abstract) \u2192 MaterialResource \u2291 bfo:MaterialEntity + InformationResource \u2291 iao:ICE",
+    "key_properties": [
+      "disjointness between Material and Information"
+    ],
+    "note": "Split into two disjoint children based on physical vs informational nature"
+  },
+  "Action": {
+    "target_bfo_class": "bfo:Process",
+    "target_category": "Occurrent",
+    "pattern": "Action \u2291 bfo:Process \u2293 (has_agent some AgentiveMaterialEntity)",
+    "key_properties": [
+      "ro:has_agent",
+      "ro:has_participant",
+      "ro:occurs_in"
+    ],
+    "note": "Action := process with an agent participant; agentivity as differentia"
+  },
+  "Event": {
+    "target_bfo_class": "bfo:Process",
+    "target_category": "Occurrent",
+    "pattern": "ClientMeetingEvent \u2291 bfo:Process \u2293 (has_participant some Engineer) \u2293 (has_participant some Client)",
+    "key_properties": [
+      "ro:has_participant",
+      "ro:occurs_in"
+    ],
+    "note": "Event can be neutral (no required agent), Action is subclass with agent requirement"
+  },
+  "Capability": {
+    "target_bfo_class": "bfo:Disposition",
+    "target_category": "Realizable Entity \u2192 Specifically Dependent Continuant",
+    "pattern": "RiskAssessmentCapability \u2291 bfo:Disposition \u2293 (inheres_in some Engineer)",
+    "key_properties": [
+      "bfo:inheres_in",
+      "bfo:realized_in"
+    ],
+    "note": "Realized by actions/processes: (realized_in some RiskAssessmentAction)"
+  },
+  "Constraint": {
+    "target_bfo_class": [
+      "bfo:Quality",
+      "iao:InformationContentEntity"
+    ],
+    "target_category": "Context-Dependent",
+    "pattern_for_rules": "LicenseRequirement \u2291 iao:InformationContentEntity (rule/text)",
+    "pattern_for_limitations": "LoadLimit \u2291 bfo:Quality (limitation borne by system with numeric properties)",
+    "key_properties": [
+      "context-dependent based on constraint type"
+    ],
+    "note": "If rule/text \u2192 ICE; if limitation borne by system \u2192 disposition/quality with data properties"
+  }
+}

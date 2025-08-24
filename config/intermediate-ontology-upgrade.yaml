@@ -1,0 +1,359 @@
+# ProEthica Intermediate Ontology Upgrade Configuration
+# OntServe module configuration for BFO alignment workflow
+
+name: "proethica-intermediate-upgrade"
+version: "2.0.0"
+description: "BFO-Aligned Intermediate Ontology for Professional Ethics - Upgrade Configuration"
+
+# Foundation ontology dependencies
+foundation_ontologies:
+  - ontology_id: "bfo-2.0"
+    uri: "http://purl.obolibrary.org/obo/bfo.owl"
+    local_path: "foundation/bfo-2.0.owl"
+    role: "foundational"
+    validation_priority: 1
+    auto_load: true
+    
+  - ontology_id: "ro-2015"
+    uri: "http://purl.obolibrary.org/obo/ro.owl"
+    local_path: "foundation/ro-2015.owl"
+    role: "relations"
+    validation_priority: 2
+    auto_load: true
+    
+  - ontology_id: "iao-2020"
+    uri: "http://purl.obolibrary.org/obo/iao.owl"
+    local_path: "foundation/iao-2020.owl"
+    role: "information_artifacts"
+    validation_priority: 2
+    auto_load: true
+
+# Target intermediate ontology configuration
+target_ontology:
+  ontology_id: "proethica-intermediate"
+  current_file: "proethica/ontologies/proethica-intermediate.ttl"
+  backup_file: "proethica/ontologies/proethica-intermediate-backup-20250824.ttl"
+  namespace: "http://proethica.org/ontology/intermediate#"
+  output_file: "proethica-intermediate-v2.ttl"
+  
+  # Import structure for upgraded ontology
+  import_files:
+    - "intermediate-imports.ttl"
+    - "intermediate-deprecated.ttl"
+  shapes_file: "intermediate-shapes.ttl"
+
+# BFO alignment configuration
+bfo_alignment:
+  # Entity type mappings for automatic alignment
+  entity_mappings:
+    role_entities:
+      target_parent: "bfo:Role"
+      pattern_match: ["*Role", "*role"]
+      validation_rules:
+        - has_proper_inheritance
+        - has_restriction_patterns
+        - inheres_in_material_entity
+      examples: ["EngineerRole", "ClientRole", "ProfessionalRole"]
+      
+    principle_entities:
+      target_parent: "iao:InformationContentEntity"
+      pattern_match: ["*Principle", "*principle"]
+      validation_rules:
+        - has_is_about_restriction
+        - has_proper_definition
+        - subclass_of_ice
+      examples: ["IntegrityPrinciple", "PublicWelfarePrinciple"]
+      
+    obligation_entities:
+      target_parent: "iao:InformationContentEntity"  # Primary pattern
+      alternative_parent: "bfo:Disposition"  # Alternative realizable pattern
+      pattern_match: ["*Obligation", "*obligation", "*Permission", "*Prohibition"]
+      validation_rules:
+        - constrains_actions
+        - applies_to_roles
+        - has_deontic_nature
+      examples: ["PublicSafetyObligation", "ConfidentialityObligation"]
+      
+    action_entities:
+      target_parent: "bfo:Process"
+      pattern_match: ["*Action", "*action"]
+      validation_rules:
+        - has_agent_restriction
+        - subclass_of_process
+        - participates_in_events
+      examples: ["DesignAction", "AssessmentAction", "ReportingAction"]
+      
+    event_entities:
+      target_parent: "bfo:Process"
+      pattern_match: ["*Event", "*event", "*Incident"]
+      validation_rules:
+        - subclass_of_process
+        - occurs_in_time
+      examples: ["SafetyIncident", "ContractualEvent", "MilestoneEvent"]
+      
+    capability_entities:
+      target_parent: "bfo:Disposition"
+      pattern_match: ["*Capability", "*capability", "*Skill", "*Competence"]
+      validation_rules:
+        - inheres_in_agent
+        - realized_by_actions
+        - subclass_of_disposition
+      examples: ["TechnicalCapability", "RiskAssessmentCapability"]
+      
+    state_entities:
+      target_parent: "bfo:Quality"
+      pattern_match: ["*State", "*state", "*Condition"]
+      validation_rules:
+        - inheres_in_entity
+        - subclass_of_quality
+      examples: ["SafetyHazardState", "OperationalState"]
+      
+    resource_material:
+      target_parent: "bfo:MaterialEntity"
+      pattern_match: ["*Tool", "*Equipment", "*Material", "*Infrastructure"]
+      validation_rules:
+        - subclass_of_material_entity
+        - physical_resource
+      examples: ["Tool", "Equipment"]
+      
+    resource_information:
+      target_parent: "iao:InformationContentEntity"
+      pattern_match: ["*Specification", "*Report", "*Document", "*Standard"]
+      validation_rules:
+        - subclass_of_ice
+        - information_bearer
+      examples: ["TechnicalSpecification", "Report"]
+      
+    constraint_rule:
+      target_parent: "iao:InformationContentEntity"
+      pattern_match: ["*Requirement", "*Standard", "*Regulation"]
+      validation_rules:
+        - subclass_of_ice
+        - constrains_behavior
+      examples: ["LicensureRequirement", "SafetyStandard"]
+      
+    constraint_system:
+      target_parent: "bfo:Quality"
+      pattern_match: ["*Limit", "*Constraint"]
+      validation_rules:
+        - inheres_in_system
+        - represents_limitation
+      examples: ["LoadLimitConstraint", "BudgetLimitConstraint"]
+
+# Processing and validation settings
+processing:
+  # Reasoning configuration
+  reasoning:
+    enabled: true
+    default_reasoner: "pellet"
+    fast_reasoner: "elk"  # For quick classification during editing
+    consistency_check: true
+    classification: true
+    real_time: false  # Set to true for live editing feedback
+    save_reasoning_results: true
+    
+  # Validation pipeline
+  validation:
+    owl_profile: "EL"
+    profile_strict_mode: true
+    bfo_compliance: true
+    custom_validation_rules: true
+    shacl_validation: true
+    annotation_completeness: true
+    
+  # Entity extraction and analysis  
+  entity_extraction:
+    enabled: true
+    force_refresh: false
+    generate_embeddings: true
+    semantic_search: true
+    similarity_threshold: 0.7
+    
+  # Migration settings
+  migration:
+    batch_processing: true
+    backup_before_changes: true
+    incremental_migration: true
+    rollback_capability: true
+    change_tracking: true
+
+# Editor integration settings
+editor:
+  # UI features
+  ui_features:
+    entity_browser: true
+    hierarchy_view: true
+    semantic_search_box: true
+    bfo_alignment_assistant: true
+    validation_panel: true
+    migration_wizard: true
+    
+  # Workflow settings
+  workflow:
+    auto_save: false
+    validation_on_save: true
+    reasoning_on_demand: true
+    batch_migration: true
+    version_control: true
+    visual_diff: true
+    
+  # Visualization configuration
+  visualization:
+    layout: "hierarchical"
+    show_bfo_hierarchy: true
+    highlight_non_compliant: true
+    color_by_entity_type: true
+    edge_style_by_relation: true
+
+# API endpoints configuration
+api:
+  base_path: "/api/intermediate-ontology-upgrade"
+  
+  endpoints:
+    # Import and setup
+    import_current: "/import-current"
+    import_foundation: "/import-foundation"
+    
+    # Analysis and validation
+    analyze_compliance: "/analyze-bfo-compliance"
+    validate_profile: "/validate-profile"
+    check_consistency: "/check-consistency"
+    
+    # Migration operations
+    execute_migration: "/execute-migration"
+    batch_migrate: "/batch-migrate"
+    rollback_changes: "/rollback"
+    
+    # Search and discovery
+    search_bfo_candidates: "/search-bfo-candidates"
+    semantic_search: "/semantic-search"
+    
+    # Reasoning and classification
+    run_reasoning: "/run-reasoning"
+    classify_entities: "/classify-entities"
+    
+    # Export and deployment
+    export_upgraded: "/export-upgraded"
+    deploy_to_proethica: "/deploy-to-proethica"
+
+# Integration settings
+integrations:
+  # ProEthica compatibility
+  proethica:
+    enabled: true
+    api_base: "http://localhost:5000/api"
+    compatibility_check: true
+    sync_on_completion: true
+    maintain_legacy_support: true
+    
+  # Version control
+  git:
+    enabled: true
+    auto_commit: true
+    commit_message_template: "BFO alignment: {change_summary}"
+    create_branches: true
+    
+  # Notification system
+  notifications:
+    enabled: true
+    email_on_completion: false
+    slack_webhook: null
+    progress_updates: true
+
+# Workflow phases configuration
+workflow_phases:
+  phase_1_foundation:
+    name: "Foundation Setup"
+    description: "Load foundation ontologies and prepare environment"
+    tasks:
+      - load_bfo_ontology
+      - load_ro_ontology  
+      - load_iao_ontology
+      - import_current_intermediate
+      - extract_current_entities
+      - generate_baseline_report
+    validation_gates:
+      - all_foundations_loaded
+      - entities_extracted_successfully
+      - baseline_compliance_assessed
+      
+  phase_2_migration:
+    name: "BFO Entity Migration"
+    description: "Migrate entities to proper BFO alignment"
+    tasks:
+      - analyze_entity_patterns
+      - generate_migration_suggestions
+      - execute_batch_migrations
+      - validate_each_migration
+      - run_consistency_checks
+    validation_gates:
+      - all_entities_aligned
+      - consistency_maintained
+      - no_reasoning_errors
+      
+  phase_3_properties:
+    name: "Property Alignment"
+    description: "Align properties with RO and validate chains"
+    tasks:
+      - map_properties_to_ro
+      - validate_property_chains
+      - check_el_compliance
+      - test_reasoning_performance
+    validation_gates:
+      - properties_properly_aligned
+      - el_profile_compliant
+      - reasoning_performance_acceptable
+      
+  phase_4_quality:
+    name: "Quality Assurance"
+    description: "Final validation and quality checks"
+    tasks:
+      - validate_owl_profile
+      - run_shacl_validation
+      - execute_competency_queries
+      - generate_final_report
+      - create_deployment_package
+    validation_gates:
+      - all_validations_pass
+      - competency_queries_successful
+      - deployment_ready
+      
+# Logging and monitoring
+logging:
+  level: "INFO"
+  file: "logs/intermediate-ontology-upgrade.log"
+  rotation: "daily"
+  retention_days: 30
+  include_reasoning_logs: true
+  include_migration_details: true
+  
+monitoring:
+  metrics:
+    - entities_migrated
+    - validation_errors
+    - reasoning_time
+    - compliance_percentage
+  dashboards:
+    - migration_progress
+    - validation_status
+    - performance_metrics
+  alerts:
+    - migration_failures
+    - validation_errors
+    - performance_degradation
+
+# Performance tuning
+performance:
+  # Memory settings
+  memory_limit: "4GB"
+  cache_size: "512MB"
+  
+  # Processing settings
+  parallel_processing: true
+  batch_size: 50
+  timeout_seconds: 300
+  
+  # Optimization flags
+  lazy_loading: false
+  incremental_reasoning: true
+  cache_reasoning_results: true

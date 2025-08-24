@@ -1,0 +1,156 @@
+{
+  "project_info": {
+    "name": "ProEthica Intermediate Ontology BFO Alignment",
+    "version": "2.0.0",
+    "start_date": "2025-08-24",
+    "target_completion": "2025-10-19"
+  },
+  "phase_1_foundation_setup": {
+    "name": "Foundation Setup",
+    "weeks": 2,
+    "tasks": [
+      {
+        "id": "F1.1",
+        "name": "Verify OntServe installation and configuration",
+        "status": "not_started",
+        "dependencies": [],
+        "estimated_hours": 2
+      },
+      {
+        "id": "F1.2",
+        "name": "Set up OntServe database with intermediate ontology schema",
+        "status": "not_started",
+        "dependencies": [
+          "F1.1"
+        ],
+        "estimated_hours": 4
+      },
+      {
+        "id": "F1.3",
+        "name": "Configure OntServe editor with BFO validation rules",
+        "status": "not_started",
+        "dependencies": [
+          "F1.2"
+        ],
+        "estimated_hours": 3
+      },
+      {
+        "id": "F1.4",
+        "name": "Test OntServe entity extraction and semantic search",
+        "status": "not_started",
+        "dependencies": [
+          "F1.3"
+        ],
+        "estimated_hours": 2
+      },
+      {
+        "id": "F2.1",
+        "name": "Load BFO 2.0 ontology into OntServe storage",
+        "status": "not_started",
+        "dependencies": [
+          "F1.4"
+        ],
+        "estimated_hours": 1
+      },
+      {
+        "id": "F2.2",
+        "name": "Load RO (Relations Ontology) into OntServe",
+        "status": "not_started",
+        "dependencies": [
+          "F2.1"
+        ],
+        "estimated_hours": 1
+      },
+      {
+        "id": "F2.3",
+        "name": "Load IAO (Information Artifact Ontology) into OntServe",
+        "status": "not_started",
+        "dependencies": [
+          "F2.2"
+        ],
+        "estimated_hours": 1
+      },
+      {
+        "id": "F2.4",
+        "name": "Configure foundation ontology cross-references",
+        "status": "not_started",
+        "dependencies": [
+          "F2.3"
+        ],
+        "estimated_hours": 2
+      },
+      {
+        "id": "F3.1",
+        "name": "Import current proethica-intermediate.ttl into OntServe",
+        "status": "not_started",
+        "dependencies": [
+          "F2.4"
+        ],
+        "estimated_hours": 1
+      },
+      {
+        "id": "F3.2",
+        "name": "Run OntServe entity extraction on current ontology",
+        "status": "not_started",
+        "dependencies": [
+          "F3.1"
+        ],
+        "estimated_hours": 1
+      },
+      {
+        "id": "F3.3",
+        "name": "Generate baseline entity hierarchy visualization",
+        "status": "not_started",
+        "dependencies": [
+          "F3.2"
+        ],
+        "estimated_hours": 2
+      },
+      {
+        "id": "F3.4",
+        "name": "Create initial BFO compliance assessment report",
+        "status": "not_started",
+        "dependencies": [
+          "F3.3"
+        ],
+        "estimated_hours": 3
+      },
+      {
+        "id": "F4.1",
+        "name": "Configure BFO compliance validation rules",
+        "status": "not_started",
+        "dependencies": [
+          "F3.4"
+        ],
+        "estimated_hours": 3
+      },
+      {
+        "id": "F4.2",
+        "name": "Set up OWL 2 EL profile validation pipeline",
+        "status": "not_started",
+        "dependencies": [
+          "F4.1"
+        ],
+        "estimated_hours": 2
+      },
+      {
+        "id": "F4.3",
+        "name": "Enable real-time reasoning with ELK/Pellet integration",
+        "status": "not_started",
+        "dependencies": [
+          "F4.2"
+        ],
+        "estimated_hours": 4
+      },
+      {
+        "id": "F4.4",
+        "name": "Configure automatic version control and change tracking",
+        "status": "not_started",
+        "dependencies": [
+          "F4.3"
+        ],
+        "estimated_hours": 2
+      }
+    ]
+  }
+}

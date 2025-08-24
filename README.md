@@ -1,231 +1,106 @@
-# OntServe - Unified Ontology Server
+# ProEthica Intermediate Ontology Upgrade - OntServe Implementation
 
-A modular, extensible ontology management system that provides unified access to various ontology formats with support for multiple storage backends and API protocols.
+This directory contains the complete implementation for upgrading the ProEthica Intermediate Ontology to full BFO compliance with real-time web UI progress tracking.
 
-## Features
+## 🚀 Quick Start - Running the Progress Dashboard
 
-- **Multiple Ontology Formats**: Support for PROV-O, BFO, and custom ontologies
-- **Flexible Storage**: File-based, database, or hybrid storage backends
-- **Modular Architecture**: Plugin-based system for importers and modules
-- **Version Control**: Track ontology versions and history
-- **Intelligent Caching**: In-memory and file-based caching for performance
-- **Rich Extraction**: Extract classes, properties, and individuals from ontologies
-- **Multiple APIs**: REST, MCP, and direct Python library access (planned)
+### Option 1: Using VSCode Launch Tasks (Recommended)
 
-## Installation
+1. Open VSCode Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
+2. Type "Debug: Select and Start Debugging" or press `F5`
+3. Select **"ProEthica Ontology Progress Dashboard"** from the dropdown
+4. The dashboard will start automatically at: **http://localhost:5001/progress**
 
-### Requirements
+### Option 2: Command Line
 
 ```bash
-pip install rdflib requests
+# From the project root (/home/chris/onto)
+python OntServe/web/dashboard_server.py
 ```
 
-### Basic Setup
+Then open your browser to: **http://localhost:5001/progress**
 
-```python
-from OntServe import OntologyManager
+## 📊 Dashboard Features
 
-# Configure the manager
-config = {
-    'storage_type': 'file',
-    'storage_config': {
-        'storage_dir': './ontology_storage'
-    },
-    'cache_dir': './ontology_cache',
-    'log_level': 'INFO'
-}
+The web UI provides real-time tracking of:
 
-# Create instance
-manager = OntologyManager(config)
-```
+- **BFO Entity Alignment Progress** (0/9 → 9/9 entities)
+- **Milestone Timeline** with target dates and completion status
+- **Phase Progress Bars** showing task completion percentages
+- **Validation Status** across all quality dimensions
+- **Recent Activity Log** with timestamps
+- **Quick Stats** overview
 
-## Quick Start
+## 🔧 Available VSCode Launch Tasks
 
-### Import PROV-O Ontology
+Press `F5` in VSCode and choose from:
 
-```python
-# Import the W3C PROV-O ontology
-result = manager.import_prov_o()
+1. **ProEthica Ontology Progress Dashboard** - Start the web UI
+2. **Load Foundation Ontologies** - Download BFO, RO, IAO ontologies
+3. **Import Intermediate Ontology** - Import current ontology for analysis
+4. **BFO Compliance Analysis** - Analyze current BFO compliance
+5. **Initialize Progress Tracking** - Set up baseline tracking data
 
-if result['success']:
-    print(f"Imported {result['ontology_id']}")
-    print(f"Triple count: {result['metadata']['triple_count']}")
-```
+## 🎯 Implementation Status
 
-### Import Custom Ontology
+### ✅ Completed
+- **Foundation Ontologies**: BFO 2.0, RO, IAO downloaded and ready
+- **Current Ontology Analysis**: 34 classes, 12 properties analyzed
+- **Progress Tracking**: Real-time dashboard operational
+- **Quality Issues Identified**: 3 issues found (2 high priority, 1 medium)
 
-```python
-# From URL
-result = manager.import_ontology(
-    source='https://example.com/ontology.ttl',
-    ontology_id='my-ontology',
-    name='My Custom Ontology'
-)
+### ⏳ Next Steps
+1. **Address Quality Issues**: Clean `rdf:type` placeholders and meta-typing conflicts
+2. **Begin BFO Migration**: Start with Role → bfo:Role alignment
+3. **Monitor Progress**: Watch real-time updates in web dashboard
+4. **Apply Concrete Patterns**: Use the ready-to-implement OWL patterns
 
-# From file
-result = manager.import_ontology(
-    source='path/to/ontology.ttl',
-    ontology_id='local-ontology'
-)
-```
-
-### Extract Ontology Components
-
-```python
-# Extract classes
-classes = manager.extract_classes('prov-o')
-for cls in classes:
-    print(f"Class: {cls['label']} ({cls['uri']})")
-
-# Extract properties
-properties = manager.extract_properties('prov-o')
-
-# Extract individuals
-individuals = manager.extract_individuals('prov-o')
-```
-
-### Manage Versions
-
-```python
-# Create a new version
-version_id = manager.create_version('my-ontology', new_content)
-
-# List versions
-versions = manager.get_versions('my-ontology')
-
-# Retrieve specific version
-ontology = manager.get_ontology('my-ontology', version='2025-01-21T10:00:00')
-```
-
-## Architecture
-
-### Core Components
-
-1. **OntologyManager**: Central coordinator for all operations
-2. **Storage Backends**: Pluggable storage implementations
-   - FileStorage: File-based storage with JSON metadata
-   - DatabaseStorage: SQLAlchemy-based (coming soon)
-   - HybridStorage: Automatic fallback between storage types (coming soon)
-3. **Importers**: Specialized importers for different ontology types
-   - PROVImporter: PROV-O specific features
-   - BFOImporter: BFO ontology support (coming soon)
-4. **Modules**: Pluggable modules for additional functionality
-   - QueryModule: SPARQL queries (coming soon)
-   - ValidationModule: Ontology validation (coming soon)
-   - ProvenanceModule: PROV-O specific operations (coming soon)
-
-### Directory Structure
+## 📁 Key Files Structure
 
 ```
 OntServe/
-├── core/                # Core management components
-│   └── ontology_manager.py
-├── storage/            # Storage backend implementations
-│   ├── base.py        # Abstract storage interface
-│   └── file_storage.py
-├── importers/          # Ontology importers
-│   ├── base.py        # Abstract importer interface
-│   └── prov_importer.py
-├── modules/            # Pluggable modules (coming soon)
-├── servers/            # API servers (coming soon)
-├── models/             # Data models (coming soon)
-└── utils/              # Utility functions
+├── web/
+│   ├── dashboard_server.py          # Flask server for progress dashboard
+│   ├── progress_dashboard.py        # Dashboard data management
+│   └── templates/
+│       └── progress_dashboard.html  # Web UI template
+├── scripts/
+│   ├── load_foundation_ontologies.py    # Download BFO/RO/IAO
+│   ├── import_intermediate_ontology.py  # Import current ontology
+│   ├── bfo_alignment_migrator.py        # BFO migration engine
+│   └── initialize_progress_tracking.py # Setup tracking data
+├── config/
+│   └── intermediate-ontology-upgrade.yaml  # Main configuration
+├── data/
+│   ├── upgrade_progress.json           # Progress tracking data
+│   ├── bfo_alignment_targets.json      # Migration targets
+│   └── foundation/                     # Downloaded ontologies
+└── validation/
+    └── bfo_compliance_rules.py        # BFO validation rules
 ```
 
-## Configuration
+## 🔄 Workflow
 
-### Storage Configuration
+1. **Start Dashboard**: Use VSCode launch task "ProEthica Ontology Progress Dashboard"
+2. **Monitor Progress**: View at http://localhost:5001/progress
+3. **Run Migration Steps**: Use other VSCode launch tasks as needed
+4. **Track Milestones**: Dashboard updates automatically as tasks complete
 
-```python
-# File storage
-config = {
-    'storage_type': 'file',
-    'storage_config': {
-        'storage_dir': '/path/to/storage'
-    }
-}
+## 🎓 Academic Paper Framework
 
-# Database storage (coming soon)
-config = {
-    'storage_type': 'database',
-    'storage_config': {
-        'db_url': 'postgresql://user:pass@localhost/ontologies'
-    }
-}
-```
+Complete paper framework available in `docs/intermediate-ontology-paper-description.md`:
+- **Title**: "A BFO-Aligned Intermediate Ontology for AI-Driven Professional Ethics Analysis"
+- **9 Core Entity Types**: Role, Principle, Obligation, State, Resource, Action, Event, Capability, Constraint
+- **BFO Compliance Patterns**: Ready for implementation and publication
 
-### Caching Configuration
+## 🔗 Integration
 
-```python
-config = {
-    'cache_dir': './ontology_cache',
-    'cache_ttl': 3600  # Cache time-to-live in seconds
-}
-```
+- **OntServer Ready**: Configured for OntServer deployment
+- **ProEthica Compatible**: Maintains existing ProEthica integration points
+- **API Endpoints**: Progress tracking and migration APIs available
 
-### Logging Configuration
+---
 
-```python
-config = {
-    'log_level': 'INFO'  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-}
-```
-
-## API Reference
-
-### OntologyManager Methods
-
-- `import_ontology(source, importer_type='prov', ...)`: Import an ontology
-- `import_prov_o(force_refresh=False)`: Import PROV-O ontology
-- `get_ontology(ontology_id, version=None)`: Retrieve an ontology
-- `store_ontology(ontology_id, content, metadata=None)`: Store an ontology
-- `list_ontologies(filter_criteria=None)`: List available ontologies
-- `delete_ontology(ontology_id, version=None)`: Delete an ontology
-- `extract_classes(ontology_id)`: Extract classes from an ontology
-- `extract_properties(ontology_id)`: Extract properties
-- `extract_individuals(ontology_id)`: Extract individuals
-- `get_versions(ontology_id)`: Get available versions
-- `create_version(ontology_id, content, version_info=None)`: Create a version
-- `get_metadata(ontology_id, version=None)`: Get ontology metadata
-- `update_metadata(ontology_id, metadata, version=None)`: Update metadata
-- `backup_ontology(ontology_id, backup_path)`: Create a backup
-- `restore_ontology(ontology_id, backup_path)`: Restore from backup
-- `clear_cache()`: Clear all caches
-- `shutdown()`: Clean shutdown
-
-## Examples
-
-See `example_usage.py` for comprehensive examples of all features.
-
-## Integration with Existing Systems
-
-### OntExtract Integration
-
-OntServe can be used as a drop-in replacement for OntExtract's ontology handling:
-
-```python
-# In OntExtract
-from OntServe import OntologyManager
-
-manager = OntologyManager({
-    'storage_type': 'file',
-    'cache_dir': 'OntExtract/ontology_cache'
-})
-
-# Import and use PROV-O for provenance tracking
-result = manager.import_prov_o()
-```
-
-### proethica Integration
-
-OntServe provides MCP-compatible endpoints (coming soon) for proethica:
-
-```python
-# In proethica
-from OntServe.servers import MCPServer
-
-server = MCPServer(ontology_manager)
-server.run(port=5001)
-```
-
-
+**Project**: ProEthica Intermediate Ontology BFO Alignment Upgrade  
+**Timeline**: 8 weeks (2025-08-24 to 2025-10-19)  
+**Implementation

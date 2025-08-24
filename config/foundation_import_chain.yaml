@@ -1,0 +1,35 @@
+import_chain:
+  chain:
+  - imports: []
+    ontology: bfo
+    order: 1
+    required: true
+    role: upper_ontology
+  - imports:
+    - bfo
+    ontology: ro
+    order: 2
+    required: true
+    role: relations
+  - imports:
+    - bfo
+    - ro
+    ontology: iao
+    order: 3
+    required: true
+    role: information_entities
+  - imports:
+    - bfo
+    - ro
+    - iao
+    ontology: proethica-intermediate
+    order: 4
+    required: true
+    role: domain_bridge
+  created: '2025-08-24T18:13:06.147149'
+  description: Clean import chain for ProEthica intermediate ontology upgrade
+  name: ProEthica Foundation Chain
+mireot_config:
+  strategy: minimal_ancestors
+  target_file: intermediate-imports.owl
+  third_party_terms: []
