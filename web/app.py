@@ -276,9 +276,127 @@ def register_routes(app):
                              pagination=pagination)
     
     @app.route('/ontology/<ontology_name>')
-    def ontology_detail(ontology_name):
-        """Detail view for a specific ontology."""
+    def ontology_detail_or_uri_resolution(ontology_name):
+        """
+        Unified endpoint for ontology detail view and URI resolution.
+        
+        - Browser requests (Accept: text/html) → Detail page
+        - Semantic web clients (Accept: text/turtle, etc.) → Ontology content
+        """
+        # Check Accept header to determine response type
+        accept_header = request.headers.get('Accept', '')
+        user_agent = request.headers.get('User-Agent', '')
+        
+        # Determine if this is a semantic web client request
+        semantic_formats = [
+            'text/turtle', 'application/rdf+xml', 'application/ld+json',
+            'application/n-triples', 'text/n3', 'application/rdf+json'
+        ]
+        
+        is_semantic_request = any(fmt in accept_header for fmt in semantic_formats)
+        is_browser = 'Mozilla' in user_agent and 'text/html' in accept_header and not is_semantic_request
+        
         ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        
+        # Handle semantic web client requests (content negotiation)
+        if is_semantic_request or (not is_browser and not 'text/html' in accept_header):
+            app.logger.info(f"URI resolution request for {ontology_name}: Accept={accept_header}")
+            
+            content = ontology.current_content
+            if content is None:
+                return jsonify({
+                    'error': 'No content available for this ontology',
+                    'ontology': ontology_name,
+                    'uri': ontology.base_uri
+                }), 404
+            
+            # Determine response format based on Accept header
+            if 'application/rdf+xml' in accept_header or 'application/xml' in accept_header:
+                # Convert to RDF/XML
+                try:
+                    from rdflib import Graph
+                    g = Graph()
+                    g.parse(data=content, format='turtle')
+                    rdf_xml_content = g.serialize(format='xml')
+                    
+                    response = app.response_class(
+                        rdf_xml_content,
+                        mimetype='application/rdf+xml',
+                        headers={
+                            'Content-Disposition': f'inline; filename="{ontology_name}.rdf"',
+                            'Link': f'<{ontology.base_uri}>; rel="canonical"',
+                            'Access-Control-Allow-Origin': '*'
+                        }
+                    )
+                    app.logger.info(f"Served ontology {ontology_name} as RDF/XML")
+                    return response
+                except Exception as e:
+                    app.logger.error(f"Error converting to RDF/XML: {e}")
+                    # Fallback to turtle
+            
+            elif 'application/ld+json' in accept_header or 'application/json' in accept_header:
+                # Convert to JSON-LD
+                try:
+                    from rdflib import Graph
+                    g = Graph()
+                    g.parse(data=content, format='turtle')
+                    jsonld_content = g.serialize(format='json-ld')
+                    
+                    response = app.response_class(
+                        jsonld_content,
+                        mimetype='application/ld+json',
+                        headers={
+                            'Content-Disposition': f'inline; filename="{ontology_name}.jsonld"',
+                            'Link': f'<{ontology.base_uri}>; rel="canonical"',
+                            'Access-Control-Allow-Origin': '*'
+                        }
+                    )
+                    app.logger.info(f"Served ontology {ontology_name} as JSON-LD")
+                    return response
+                except Exception as e:
+                    app.logger.error(f"Error converting to JSON-LD: {e}")
+                    # Fallback to turtle
+            
+            elif 'application/n-triples' in accept_header:
+                # Convert to N-Triples
+                try:
+                    from rdflib import Graph
+                    g = Graph()
+                    g.parse(data=content, format='turtle')
+                    nt_content = g.serialize(format='nt')
+                    
+                    response = app.response_class(
+                        nt_content,
+                        mimetype='application/n-triples',
+                        headers={
+                            'Content-Disposition': f'inline; filename="{ontology_name}.nt"',
+                            'Link': f'<{ontology.base_uri}>; rel="canonical"',
+                            'Access-Control-Allow-Origin': '*'
+                        }
+                    )
+                    app.logger.info(f"Served ontology {ontology_name} as N-Triples")
+                    return response
+                except Exception as e:
+                    app.logger.error(f"Error converting to N-Triples: {e}")
+                    # Fallback to turtle
+            
+            # Default to Turtle format for semantic web clients
+            response = app.response_class(
+                content,
+                mimetype='text/turtle',
+                headers={
+                    'Content-Disposition': f'inline; filename="{ontology_name}.ttl"',
+                    'Link': f'<{ontology.base_uri}>; rel="canonical"',
+                    'Access-Control-Allow-Origin': '*',
+                    'Vary': 'Accept'
+                }
+            )
+            
+            app.logger.info(f"Served ontology {ontology_name} as Turtle to semantic web client")
+            return response
+        
+        # Browser request - show detail page
+        app.logger.info(f"Browser request for {ontology_name}, showing detail page")
         
         # Get entities grouped by type
         entities = {
@@ -333,64 +451,389 @@ def register_routes(app):
             return "No content available for this ontology", 404
         return content, 200, {'Content-Type': 'text/plain; charset=utf-8'}
     
+    
+    @app.route('/ontology/<ontology_name>.<format_ext>')
+    def ontology_format_specific(ontology_name, format_ext):
+        """
+        Format-specific ontology endpoints for explicit format requests.
+        
+        Examples:
+        - /ontology/w3c-prov-o.ttl -> Turtle
+        - /ontology/w3c-prov-o.rdf -> RDF/XML
+        - /ontology/w3c-prov-o.jsonld -> JSON-LD
+        """
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        content = ontology.current_content
+        
+        if content is None:
+            return jsonify({
+                'error': 'No content available for this ontology',
+                'ontology': ontology_name
+            }), 404
+        
+        # Format mapping
+        format_mapping = {
+            'ttl': ('turtle', 'text/turtle'),
+            'rdf': ('xml', 'application/rdf+xml'),
+            'xml': ('xml', 'application/rdf+xml'),
+            'jsonld': ('json-ld', 'application/ld+json'),
+            'json': ('json-ld', 'application/ld+json'),
+            'nt': ('nt', 'application/n-triples'),
+            'n3': ('n3', 'text/n3')
+        }
+        
+        if format_ext not in format_mapping:
+            return jsonify({'error': f'Unsupported format: {format_ext}'}), 400
+        
+        rdf_format, mime_type = format_mapping[format_ext]
+        
+        try:
+            # Convert content to requested format
+            from rdflib import Graph
+            g = Graph()
+            g.parse(data=content, format='turtle')
+            
+            if rdf_format == 'turtle':
+                output_content = content  # Already in turtle
+            else:
+                output_content = g.serialize(format=rdf_format)
+            
+            response = app.response_class(
+                output_content,
+                mimetype=mime_type,
+                headers={
+                    'Content-Disposition': f'attachment; filename="{ontology_name}.{format_ext}"',
+                    'Link': f'<{ontology.base_uri}>; rel="canonical"',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            )
+            
+            app.logger.info(f"Served ontology {ontology_name} as {format_ext} format")
+            return response
+            
+        except Exception as e:
+            app.logger.error(f"Error converting ontology to {format_ext}: {e}")
+            return jsonify({
+                'error': f'Error converting to {format_ext} format',
+                'details': str(e)
+            }), 500
+    
+    @app.route('/ontology/<ontology_name>', methods=['DELETE'])
+    @login_required
+    def delete_ontology(ontology_name):
+        """Delete an ontology and all its related data."""
+        # Check if user has admin/delete permissions
+        if not current_user.can_perform_action('delete'):
+            return jsonify({
+                'success': False,
+                'error': 'You do not have permission to delete ontologies'
+            }), 403
+        
+        try:
+            ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+            
+            app.logger.info(f"Admin {current_user.username} is deleting ontology: {ontology_name}")
+            
+            # Count what we're deleting for logging
+            entity_count = OntologyEntity.query.filter_by(ontology_id=ontology.id).count()
+            version_count = OntologyVersion.query.filter_by(ontology_id=ontology.id).count()
+            
+            # Delete in proper order to avoid foreign key constraints
+            
+            # 1. Delete all entities
+            OntologyEntity.query.filter_by(ontology_id=ontology.id).delete()
+            
+            # 2. Delete all versions
+            OntologyVersion.query.filter_by(ontology_id=ontology.id).delete()
+            
+            # 3. Clean up file storage if using file backend
+            try:
+                app.ontology_manager.delete_ontology(ontology_name)
+            except Exception as storage_error:
+                app.logger.warning(f"File storage cleanup failed for {ontology_name}: {storage_error}")
+                # Don't fail the deletion if file cleanup fails
+            
+            # 4. Delete the ontology itself
+            ontology_id = ontology.id
+            db.session.delete(ontology)
+            
+            # Commit all changes
+            db.session.commit()
+            
+            app.logger.info(f"Successfully deleted ontology {ontology_name} (ID: {ontology_id}) with {entity_count} entities and {version_count} versions")
+            
+            return jsonify({
+                'success': True,
+                'message': f'Ontology "{ontology_name}" deleted successfully',
+                'deleted_data': {
+                    'ontology_name': ontology_name,
+                    'entities_deleted': entity_count,
+                    'versions_deleted': version_count
+                }
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error deleting ontology {ontology_name}: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
     @app.route('/import', methods=['GET', 'POST'])
     @login_required
     def import_ontology():
-        """Import a new ontology from URL or file."""
+        """Import a new ontology from URL or file upload."""
         # Check if user can import ontologies
         if not current_user.can_perform_action('import'):
             flash('You do not have permission to import ontologies', 'error')
             return redirect(url_for('index'))
         if request.method == 'POST':
-            source = request.form.get('source')
             source_type = request.form.get('source_type', 'url')
             name = request.form.get('name')
             description = request.form.get('description')
+            format_hint = request.form.get('format', '')
+            use_reasoning = request.form.get('use_reasoning') == 'on'
+            reasoner_type = request.form.get('reasoner_type', 'pellet')
+            
+            source = None
+            content = None
+            filename = None
             
             try:
-                # Resolve file paths relative to the workspace root if needed
-                if source_type == 'file' and source and not source.startswith('/'):
-                    # Handle relative paths like "OntExtract/ontologies/bfo.ttl"
-                    workspace_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                    potential_path = os.path.join(workspace_root, '..', source)
-                    if os.path.exists(potential_path):
-                        source = os.path.abspath(potential_path)
-                        app.logger.info(f"Resolved relative path to: {source}")
+                # Handle different source types
+                if source_type == 'url':
+                    source = request.form.get('source_url')
+                    if not source:
+                        flash('Please provide a URL', 'error')
+                        return render_template('import.html')
+                    
+                    # Fetch content from URL
+                    import requests
+                    app.logger.info(f"Fetching ontology from URL: {source}")
+                    
+                    headers = {
+                        'Accept': 'text/turtle, application/rdf+xml, application/n-triples, application/ld+json, text/n3, */*',
+                        'User-Agent': 'OntServe/1.0 (ontology importer)'
+                    }
+                    
+                    response = requests.get(source, headers=headers, timeout=30)
+                    response.raise_for_status()
+                    content = response.text
+                    filename = source.split('/')[-1] or 'ontology'
+                    
+                elif source_type == 'upload':
+                    uploaded_file = request.files.get('ontology_file')
+                    if not uploaded_file or uploaded_file.filename == '':
+                        flash('Please select a file to upload', 'error')
+                        return render_template('import.html')
+                    
+                    # Read file content
+                    content = uploaded_file.read().decode('utf-8')
+                    filename = uploaded_file.filename
+                    source = f"uploaded://{filename}"
+                    app.logger.info(f"Processing uploaded file: {filename}")
+                else:
+                    flash('Invalid source type', 'error')
+                    return render_template('import.html')
                 
-                # Import using OntologyManager
-                result = app.ontology_manager.import_ontology(
-                    source=source,
-                    source_type=source_type,
-                    name=name,
-                    description=description
-                )
+                # Auto-detect format if not specified
+                if not format_hint:
+                    if filename:
+                        if filename.endswith('.ttl'):
+                            format_hint = 'turtle'
+                        elif filename.endswith('.rdf') or filename.endswith('.xml') or filename.endswith('.owl'):
+                            format_hint = 'xml'
+                        elif filename.endswith('.n3'):
+                            format_hint = 'n3'
+                        elif filename.endswith('.jsonld') or filename.endswith('.json'):
+                            format_hint = 'json-ld'
+                        elif filename.endswith('.nt'):
+                            format_hint = 'nt'
+                    
+                    # Content-based detection if still no format
+                    if not format_hint:
+                        if '@prefix' in content or '@base' in content:
+                            format_hint = 'turtle'
+                        elif '<?xml' in content or '<rdf:RDF' in content or 'xmlns:rdf' in content:
+                            format_hint = 'xml'
+                        elif content.strip().startswith('{'):
+                            format_hint = 'json-ld'
+                        else:
+                            format_hint = 'turtle'  # Default fallback
+                
+                app.logger.info(f"Detected format: {format_hint}")
+                
+                # Check if content needs vocabulary conversion
+                from utils.vocabulary_converter import VocabularyConverter, is_vocabulary_convertible
+                
+                needs_conversion = False
+                original_content = content
+                
+                try:
+                    if is_vocabulary_convertible(content, format_hint):
+                        app.logger.info("Detected non-OWL vocabulary that needs conversion")
+                        
+                        converter = VocabularyConverter()
+                        ontology_uri = f"http://example.org/{name.lower().replace(' ', '-')}" if name else None
+                        
+                        converted_content = converter.convert_vocabulary_content(
+                            content,
+                            input_format=format_hint,
+                            output_format='turtle',
+                            ontology_uri=ontology_uri
+                        )
+                        
+                        content = converted_content
+                        format_hint = 'turtle'  # Converted output is always turtle
+                        needs_conversion = True
+                        
+                        app.logger.info(f"Successfully converted vocabulary to OWL (original: {len(original_content)} chars, converted: {len(content)} chars)")
+                        
+                except Exception as conversion_error:
+                    app.logger.warning(f"Vocabulary conversion failed: {conversion_error}. Proceeding with original content.")
+                    content = original_content
+                
+                # Use OwlreadyImporter for enhanced processing if reasoning is enabled
+                if use_reasoning:
+                    from importers.owlready_importer import OwlreadyImporter
+                    
+                    importer = OwlreadyImporter()
+                    importer.use_reasoner = True
+                    importer.reasoner_type = reasoner_type
+                    importer.validate_consistency = True
+                    importer.include_inferred = True
+                    
+                    app.logger.info(f"Using OwlreadyImporter with {reasoner_type} reasoning")
+                    
+                    # Import with reasoning
+                    if source_type == 'url':
+                        result = importer.import_from_url(
+                            source,
+                            name=name,
+                            description=description,
+                            format=format_hint
+                        )
+                    else:
+                        # For uploads, create temporary file for OwlreadyImporter
+                        import tempfile
+                        with tempfile.NamedTemporaryFile(mode='w', suffix=f'.{format_hint}', delete=False) as temp_file:
+                            temp_file.write(content)
+                            temp_path = temp_file.name
+                        
+                        try:
+                            result = importer.import_from_file(
+                                temp_path,
+                                name=name,
+                                description=description,
+                                format=format_hint
+                            )
+                        finally:
+                            os.unlink(temp_path)  # Clean up temp file
+                    
+                else:
+                    # Use basic OntologyManager for faster processing
+                    app.logger.info("Using basic OntologyManager (no reasoning)")
+                    
+                    # For content-based imports, we need to create a temporary file
+                    if source_type == 'upload':
+                        # Create temporary file for uploaded content
+                        import tempfile
+                        with tempfile.NamedTemporaryFile(mode='w', suffix=f'.{format_hint}', delete=False) as temp_file:
+                            temp_file.write(content)
+                            temp_path = temp_file.name
+                        
+                        try:
+                            # Import using file path
+                            result = app.ontology_manager.import_ontology(
+                                source=temp_path,
+                                importer_type='prov',  # Use PROV importer as default
+                                name=name,
+                                description=description,
+                                format=format_hint,
+                                source_type='file'
+                            )
+                            # Add content to result since OntologyManager might not include it
+                            if result.get('success'):
+                                result['content'] = content
+                        finally:
+                            os.unlink(temp_path)  # Clean up temp file
+                    else:
+                        # URL-based import
+                        result = app.ontology_manager.import_ontology(
+                            source=source,
+                            importer_type='prov',  # Use PROV importer as default
+                            name=name,
+                            description=description,
+                            format=format_hint,
+                            source_type='url'
+                        )
+                        # Add content to result
+                        if result.get('success'):
+                            result['content'] = content
                 
                 if result['success']:
-                    # Check if ontology already exists
+                    # Check if ontology already exists and normalize name for URI safety
                     ontology_name = name or result['metadata'].get('name', 'Unnamed')
-                    existing_ontology = Ontology.query.filter_by(name=ontology_name).first()
+                    
+                    # Create URI-safe name by replacing spaces and special characters
+                    uri_safe_name = ontology_name.lower().replace(' ', '-').replace('&', 'and').replace('/', '-').replace('\\', '-')
+                    # Remove any remaining non-alphanumeric characters except hyphens
+                    import re
+                    uri_safe_name = re.sub(r'[^a-z0-9\-]', '', uri_safe_name)
+                    # Remove multiple consecutive hyphens
+                    uri_safe_name = re.sub(r'-+', '-', uri_safe_name).strip('-')
+                    
+                    existing_ontology = Ontology.query.filter_by(name=uri_safe_name).first()
                     
                     if existing_ontology:
-                        flash(f"Ontology '{ontology_name}' already exists", 'warning')
-                        return redirect(url_for('ontology_detail', ontology_name=ontology_name))
+                        flash(f"Ontology '{uri_safe_name}' already exists", 'warning')
+                        return redirect(url_for('ontology_detail_or_uri_resolution', ontology_name=uri_safe_name))
                     
-                    # Create new ontology
+                    # Generate base URI using configured domain
+                    default_base_uri = app.config['ONTOLOGY_NAMESPACE_TEMPLATE'].format(
+                        base_uri=app.config['ONTOLOGY_BASE_URI'],
+                        name=uri_safe_name
+                    )
+                    
+                    # Create new ontology with URI-safe name
                     ontology = Ontology(
-                        name=ontology_name,
-                        base_uri=result['metadata'].get('namespace', f"http://example.org/{ontology_name}#"),
+                        name=uri_safe_name,
+                        base_uri=result['metadata'].get('namespace', default_base_uri),
                         description=description or result['metadata'].get('description', ''),
-                        meta_data=result['metadata']
+                        meta_data={
+                            **result['metadata'],
+                            'original_name': ontology_name,  # Preserve original name
+                            'display_name': ontology_name    # For display purposes
+                        }
                     )
                     db.session.add(ontology)
                     db.session.flush()  # Get the ID
+                    
+                    # Get content - different handling for OwlreadyImporter vs basic manager
+                    if use_reasoning and 'enhanced_data' in result:
+                        # OwlreadyImporter result
+                        content = content or result.get('rdf_content', '')
+                        reasoning_metadata = {
+                            'reasoning_applied': True,
+                            'reasoner_type': reasoner_type,
+                            'inferred_relationships': result.get('reasoning_result', {}).get('inferred_count', 0),
+                            'consistency_check': result.get('reasoning_result', {}).get('is_consistent'),
+                        }
+                        change_summary = f"Initial import with {reasoner_type} reasoning"
+                    else:
+                        # Basic import result
+                        content = content or result.get('content', '')
+                        reasoning_metadata = {'reasoning_applied': False}
+                        change_summary = "Initial import"
                     
                     # Create initial version with content
                     version = OntologyVersion(
                         ontology_id=ontology.id,
                         version_number=1,
                         version_tag="1.0.0",
-                        content=result.get('content', ''),
-                        change_summary="Initial import",
+                        content=content,
+                        change_summary=change_summary,
                         created_by="web-import",
                         is_current=True,
                         is_draft=False,
@@ -398,42 +841,69 @@ def register_routes(app):
                         meta_data={
                             'source': source,
                             'source_type': source_type,
-                            'format': result['metadata'].get('format', 'turtle'),
-                            'import_date': datetime.now(timezone.utc).isoformat()
+                            'format': result['metadata'].get('format', format_hint),
+                            'import_date': datetime.now(timezone.utc).isoformat(),
+                            **reasoning_metadata
                         }
                     )
                     db.session.add(version)
                     
                     # Extract and save entities
-                    classes = app.ontology_manager.extract_classes(result['ontology_id'])
-                    for cls in classes:
-                        entity = OntologyEntity(
-                            ontology_id=ontology.id,
-                            entity_type='class',
-                            uri=cls['uri'],
-                            label=cls.get('label'),
-                            comment=cls.get('comment'),
-                            parent_uri=cls.get('subclass_of', [None])[0] if cls.get('subclass_of') else None
-                        )
-                        db.session.add(entity)
-                    
-                    properties = app.ontology_manager.extract_properties(result['ontology_id'])
-                    for prop in properties:
-                        entity = OntologyEntity(
-                            ontology_id=ontology.id,
-                            entity_type='property',
-                            uri=prop['uri'],
-                            label=prop.get('label'),
-                            comment=prop.get('comment'),
-                            domain=prop.get('domain'),
-                            range=prop.get('range')
-                        )
-                        db.session.add(entity)
+                    if use_reasoning and 'enhanced_data' in result:
+                        # Use enhanced data from OwlreadyImporter
+                        enhanced_data = result['enhanced_data']
+                        
+                        # Import classes
+                        for cls in enhanced_data.get('classes', []):
+                            entity = OntologyEntity(
+                                ontology_id=ontology.id,
+                                entity_type='class',
+                                uri=cls['uri'],
+                                label=cls.get('label', [None])[0] if cls.get('label') else None,
+                                comment=cls.get('comment', [None])[0] if cls.get('comment') else None,
+                                parent_uri=cls.get('parents', [None])[0] if cls.get('parents') else None
+                            )
+                            db.session.add(entity)
+                        
+                        # Import properties
+                        for prop in enhanced_data.get('properties', []):
+                            entity = OntologyEntity(
+                                ontology_id=ontology.id,
+                                entity_type='property',
+                                uri=prop['uri'],
+                                label=prop.get('label', [None])[0] if prop.get('label') else None,
+                                comment=prop.get('comment', [None])[0] if prop.get('comment') else None,
+                                domain=prop.get('domain', [None])[0] if prop.get('domain') else None,
+                                range=prop.get('range', [None])[0] if prop.get('range') else None
+                            )
+                            db.session.add(entity)
+                        
+                        # Import individuals
+                        for ind in enhanced_data.get('individuals', []):
+                            entity = OntologyEntity(
+                                ontology_id=ontology.id,
+                                entity_type='individual',
+                                uri=ind['uri'],
+                                label=ind.get('label', [None])[0] if ind.get('label') else None,
+                                comment=ind.get('comment', [None])[0] if ind.get('comment') else None
+                            )
+                            db.session.add(entity)
+                    else:
+                        # Use basic content parsing for entity extraction
+                        entity_counts = _extract_entities_from_content(ontology, content, format_hint)
+                        app.logger.info(f"Extracted {sum(entity_counts.values())} entities using basic parsing")
                     
                     db.session.commit()
                     
-                    flash(f"Successfully imported ontology: {ontology_name}", 'success')
-                    return redirect(url_for('ontology_detail', ontology_name=ontology_name))
+                    success_msg = f"Successfully imported ontology: {ontology_name}"
+                    if use_reasoning:
+                        reasoning_result = result.get('reasoning_result', {})
+                        inferred_count = reasoning_result.get('inferred_count', 0)
+                        consistency = reasoning_result.get('is_consistent', 'unknown')
+                        success_msg += f" (Reasoning: {inferred_count} inferred relationships, consistency: {consistency})"
+                    
+                    flash(success_msg, 'success')
+                    return redirect(url_for('ontology_detail_or_uri_resolution', ontology_name=uri_safe_name))
                 else:
                     flash(f"Import failed: {result.get('message', 'Unknown error')}", 'error')
                     
@@ -463,13 +933,39 @@ def register_routes(app):
             }
         })
     
-    def _extract_entities_from_content(ontology, content):
+    def _extract_entities_from_content(ontology, content, format_hint='turtle'):
         """Helper function to extract entities from ontology content."""
         from rdflib import RDF, RDFS, OWL
         
-        # Parse content
+        # Auto-detect format if needed
+        if not format_hint or format_hint == 'turtle':
+            if '<?xml' in content or '<rdf:RDF' in content or 'xmlns:rdf' in content:
+                format_hint = 'xml'
+            elif '@prefix' in content or '@base' in content:
+                format_hint = 'turtle'
+            else:
+                format_hint = 'turtle'  # Default fallback
+        
+        # Parse content with detected format
         g = rdflib.Graph()
-        g.parse(data=content, format='turtle')
+        try:
+            g.parse(data=content, format=format_hint)
+        except Exception as parse_error:
+            # Try alternative formats if parsing fails
+            if format_hint == 'turtle':
+                try:
+                    g.parse(data=content, format='xml')
+                    format_hint = 'xml'
+                except:
+                    raise parse_error
+            elif format_hint == 'xml':
+                try:
+                    g.parse(data=content, format='turtle')
+                    format_hint = 'turtle'
+                except:
+                    raise parse_error
+            else:
+                raise parse_error
         
         # Clear existing entities for this ontology
         OntologyEntity.query.filter_by(ontology_id=ontology.id).delete()
@@ -655,7 +1151,7 @@ def register_routes(app):
         # Check if user can edit ontologies
         if not current_user.can_perform_action('edit'):
             flash('You do not have permission to edit ontologies', 'error')
-            return redirect(url_for('ontology_detail', ontology_name=ontology_name))
+            return redirect(url_for('ontology_detail_or_uri_resolution', ontology_name=ontology_name))
         ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
         
         # Get the content from file storage

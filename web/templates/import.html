@@ -8,39 +8,89 @@
         <h1 class="mb-4">
             <i class="bi bi-cloud-upload"></i> Import Ontology
         </h1>
-        
+
         <div class="card">
             <div class="card-body">
-                <form method="POST" action="{{ url_for('import_ontology') }}">
+                <form method="POST" action="{{ url_for('import_ontology') }}" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="source_type" class="form-label">Source Type</label>
                         <select class="form-select" id="source_type" name="source_type" onchange="toggleSourceInput()">
                             <option value="url">URL</option>
-                            <option value="file">File Path</option>
+                            <option value="upload">File Upload</option>
                         </select>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="source" class="form-label">Source</label>
-                        <input type="text" class="form-control" id="source" name="source" 
-                               placeholder="https://example.com/ontology.ttl" required>
+
+                    <!-- URL Input -->
+                    <div class="mb-3" id="url_input">
+                        <label for="source_url" class="form-label">Ontology URL</label>
+                        <input type="url" class="form-control" id="source_url" name="source_url"
+                            placeholder="https://www.w3.org/ns/prov.ttl">
                         <div class="form-text">
-                            Enter the URL or file path to the ontology (TTL, RDF, OWL formats supported)
+                            Enter the URL to fetch the ontology (TTL, RDF, OWL, N3, JSON-LD formats supported)
                         </div>
                     </div>
-                    
+
+                    <!-- File Upload Input -->
+                    <div class="mb-3" id="file_input" style="display: none;">
+                        <label for="ontology_file" class="form-label">Upload Ontology File</label>
+                        <input type="file" class="form-control" id="ontology_file" name="ontology_file"
+                            accept=".ttl,.rdf,.owl,.n3,.jsonld,.json,.xml">
+                        <div class="form-text">
+                            Upload an ontology file (TTL, RDF/XML, OWL, N3, JSON-LD formats supported)
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="format" class="form-label">Format (Auto-detect if not specified)</label>
+                        <select class="form-select" id="format" name="format">
+                            <option value="">Auto-detect</option>
+                            <option value="turtle">Turtle (.ttl)</option>
+                            <option value="xml">RDF/XML (.rdf, .xml)</option>
+                            <option value="n3">Notation3 (.n3)</option>
+                            <option value="json-ld">JSON-LD (.jsonld)</option>
+                            <option value="nt">N-Triples (.nt)</option>
+                        </select>
+                    </div>
+
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="name" name="name" 
-                               placeholder="My Ontology" required>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="My Ontology"
+                            required>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" 
-                                  rows="3" placeholder="Brief description of the ontology..."></textarea>
+                        <textarea class="form-control" id="description" name="description" rows="3"
+                            placeholder="Brief description of the ontology..."></textarea>
                     </div>
-                    
+
+                    <!-- Advanced Options -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Advanced Options</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="use_reasoning" name="use_reasoning">
+                                <label class="form-check-label" for="use_reasoning">
+                                    Apply Automated Reasoning
+                                </label>
+                                <div class="form-text">
+                                    Use OWL reasoner (Pellet/HermiT) to infer additional relationships.
+                                    This may take longer but provides more complete ontology analysis.
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <label for="reasoner_type" class="form-label">Reasoner Type</label>
+                                <select class="form-select" id="reasoner_type" name="reasoner_type" disabled>
+                                    <option value="pellet">Pellet (Recommended)</option>
+                                    <option value="hermit">HermiT</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-cloud-upload"></i> Import Ontology
@@ -50,7 +100,7 @@
                 </form>
             </div>
         </div>
-        
+
         <!-- Quick import suggestions -->
         <div class="card mt-4">
             <div class="card-header">
@@ -58,15 +108,30 @@
             </div>
             <div class="card-body">
                 <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action" 
-                       onclick="fillForm('https://www.w3.org/ns/prov.ttl', 'W3C PROV-O', 'The PROV Ontology provides classes, properties, and restrictions for representing provenance information')">
+                    <a href="#" class="list-group-item list-group-item-action"
+                        onclick="fillForm('https://www.w3.org/ns/prov.ttl', 'W3C PROV-O', 'The PROV Ontology provides classes, properties, and restrictions for representing provenance information', 'url')">
                         <h6 class="mb-1">PROV-O (W3C Provenance Ontology)</h6>
                         <small>Standard for representing provenance information</small>
                     </a>
                     <a href="#" class="list-group-item list-group-item-action"
-                       onclick="fillForm('OntExtract/ontologies/bfo.ttl', 'Basic Formal Ontology', 'BFO is a top-level ontology designed for use in supporting information retrieval, analysis and integration in scientific and other domains', 'file')">
+                        onclick="fillForm('http://purl.obolibrary.org/obo/bfo.owl', 'Basic Formal Ontology', 'BFO is a top-level ontology designed for use in supporting information retrieval, analysis and integration in scientific and other domains', 'url')">
                         <h6 class="mb-1">BFO (Basic Formal Ontology)</h6>
                         <small>Top-level ontology for scientific domains</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action"
+                        onclick="fillForm('http://xmlns.com/foaf/spec/index.rdf', 'FOAF', 'Friend of a Friend vocabulary for describing people and their relationships', 'url')">
+                        <h6 class="mb-1">FOAF (Friend of a Friend)</h6>
+                        <small>Vocabulary for describing people and relationships</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action"
+                        onclick="fillForm('https://www.dublincore.org/schemas/rdfs/', 'Dublin Core', 'Metadata vocabulary for describing digital resources', 'url')">
+                        <h6 class="mb-1">Dublin Core Terms</h6>
+                        <small>Metadata vocabulary for describing resources</small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action"
+                        onclick="fillForm('https://www.w3.org/2009/08/skos-reference/skos.rdf', 'SKOS', 'Simple Knowledge Organization System for thesauri, taxonomies, and classification schemes', 'url')">
+                        <h6 class="mb-1">SKOS (Simple Knowledge Organization System)</h6>
+                        <small>For knowledge organization systems</small>
                     </a>
                 </div>
             </div>
@@ -75,23 +140,42 @@
 </div>
 
 <script>
-function toggleSourceInput() {
-    const sourceType = document.getElementById('source_type').value;
-    const sourceInput = document.getElementById('source');
-    
-    if (sourceType === 'url') {
-        sourceInput.placeholder = 'https://example.com/ontology.ttl';
-    } else {
-        sourceInput.placeholder = '/path/to/ontology.ttl';
-    }
-}
+    function toggleSourceInput() {
+        const sourceType = document.getElementById('source_type').value;
+        const urlInput = document.getElementById('url_input');
+        const fileInput = document.getElementById('file_input');
 
-function fillForm(source, name, description, type='url') {
-    document.getElementById('source_type').value = type;
-    document.getElementById('source').value = source;
-    document.getElementById('name').value = name;
-    document.getElementById('description').value = description;
-    toggleSourceInput();
-}
+        if (sourceType === 'url') {
+            urlInput.style.display = 'block';
+            fileInput.style.display = 'none';
+            document.getElementById('source_url').required = true;
+            document.getElementById('ontology_file').required = false;
+        } else {
+            urlInput.style.display = 'none';
+            fileInput.style.display = 'block';
+            document.getElementById('source_url').required = false;
+            document.getElementById('ontology_file').required = true;
+        }
+    }
+
+    function fillForm(source, name, description, type = 'url') {
+        document.getElementById('source_type').value = type;
+        if (type === 'url') {
+            document.getElementById('source_url').value = source;
+        }
+        document.getElementById('name').value = name;
+        document.getElementById('description').value = description;
+        toggleSourceInput();
+    }
+
+    // Enable/disable reasoner type based on reasoning checkbox
+    document.getElementById('use_reasoning').addEventListener('change', function () {
+        document.getElementById('reasoner_type').disabled = !this.checked;
+    });
+
+    // Initialize form state
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleSourceInput();
+    });
 </script>
 {% endblock %}

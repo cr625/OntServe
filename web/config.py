@@ -42,6 +42,10 @@ class Config:
     # OntServe integration
     ONTSERVE_STORAGE_DIR = str(basedir.parent / 'storage')
     ONTSERVE_CACHE_DIR = str(basedir.parent / 'storage' / 'cache' / 'downloads')
+    
+    # Ontology URI settings
+    ONTOLOGY_BASE_URI = os.environ.get('ONTOLOGY_BASE_URI') or 'https://ontserve.ontorealm.net/'
+    ONTOLOGY_NAMESPACE_TEMPLATE = os.environ.get('ONTOLOGY_NAMESPACE_TEMPLATE') or '{base_uri}ontology/{name}#'
 
 
 class DevelopmentConfig(Config):

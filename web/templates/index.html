@@ -8,7 +8,7 @@
         <h1 class="mb-4">
             <i class="bi bi-diagram-3"></i> Ontology Repository
         </h1>
-        
+
         <!-- Statistics cards -->
         <div class="row mb-4">
             <div class="col-md-3">
@@ -44,14 +44,14 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Quick actions -->
         <div class="mb-4">
             <a href="{{ url_for('import_ontology') }}" class="btn btn-success">
                 <i class="bi bi-plus-circle"></i> Import Ontology
             </a>
         </div>
-        
+
         <!-- Ontologies table -->
         {% if ontologies %}
         <div class="table-responsive">
@@ -72,14 +72,15 @@
                     {% for ontology in ontologies %}
                     <tr>
                         <td>
-                            <a href="{{ url_for('ontology_detail', ontology_name=ontology.name) }}">
+                            <a href="{{ url_for('ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}">
                                 <strong>{{ ontology.name }}</strong>
                             </a>
                             {% if ontology.current_version %}
                             <br>
                             <small class="text-muted">
                                 v{{ ontology.current_version.version_number }}
-                                {% if ontology.current_version.version_tag and 'reasoned' in ontology.current_version.version_tag %}
+                                {% if ontology.current_version.version_tag and 'reasoned' in
+                                ontology.current_version.version_tag %}
                                 <span class="badge bg-info ms-1" style="font-size: 0.7em;">
                                     <i class="bi bi-brain"></i> Reasoned
                                 </span>
@@ -97,20 +98,20 @@
                         <td>{{ ontology.created_at.strftime('%Y-%m-%d') if ontology.created_at else '-' }}</td>
                         <td>
                             <div class="btn-group btn-group-sm" role="group">
-                                <a href="{{ url_for('ontology_detail', ontology_name=ontology.name) }}" 
-                                   class="btn btn-outline-primary" title="View Details">
+                                <a href="{{ url_for('ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}"
+                                    class="btn btn-outline-primary" title="View Details">
                                     <i class="bi bi-info-circle"></i>
                                 </a>
-                                <a href="{{ url_for('edit_ontology', ontology_name=ontology.name) }}" 
-                                   class="btn btn-outline-warning" title="Edit">
+                                <a href="{{ url_for('edit_ontology', ontology_name=ontology.name) }}"
+                                    class="btn btn-outline-warning" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}" 
-                                   class="btn btn-outline-success" title="Visualize">
+                                <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}"
+                                    class="btn btn-outline-success" title="Visualize">
                                     <i class="bi bi-eye-fill"></i>
                                 </a>
-                                <a href="{{ url_for('ontology_content', ontology_name=ontology.name) }}" 
-                                   class="btn btn-outline-secondary" title="Raw TTL" target="_blank">
+                                <a href="{{ url_for('ontology_content', ontology_name=ontology.name) }}"
+                                    class="btn btn-outline-secondary" title="Raw TTL" target="_blank">
                                     <i class="bi bi-file-code"></i>
                                 </a>
                             </div>
@@ -120,7 +121,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         <!-- Pagination -->
         {% if pagination and pagination.pages > 1 %}
         <nav aria-label="Page navigation">
@@ -130,25 +131,25 @@
                     <a class="page-link" href="{{ url_for('index', page=pagination.prev_num) }}">Previous</a>
                 </li>
                 {% endif %}
-                
+
                 {% for page_num in pagination.iter_pages(left_edge=1, left_current=1, right_current=2, right_edge=1) %}
-                    {% if page_num %}
-                        {% if page_num != pagination.page %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ url_for('index', page=page_num) }}">{{ page_num }}</a>
-                        </li>
-                        {% else %}
-                        <li class="page-item active">
-                            <span class="page-link">{{ page_num }}</span>
-                        </li>
-                        {% endif %}
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
-                    {% endif %}
+                {% if page_num %}
+                {% if page_num != pagination.page %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('index', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% endif %}
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+                {% endif %}
                 {% endfor %}
-                
+
                 {% if pagination.has_next %}
                 <li class="page-item">
                     <a class="page-link" href="{{ url_for('index', page=pagination.next_num) }}">Next</a>
@@ -157,7 +158,7 @@
             </ul>
         </nav>
         {% endif %}
-        
+
         {% else %}
         <div class="alert alert-info" role="alert">
             <h4 class="alert-heading">No ontologies yet!</h4>
