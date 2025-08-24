@@ -75,7 +75,7 @@
                     {% for entity in results.entities %}
                     <tr onclick="window.location='{{ url_for('ontology_detail', ontology_id=entity.ontology.ontology_id) }}'" style="cursor: pointer;">
                         <td>
-                            <strong>{{ entity.label or entity.uri.split('#')[-1].split('/')[-1] }}</strong>
+                            <strong>{{ entity.label or entity.uri|extract_name }}</strong>
                             {% if entity.comment %}
                             <br><small class="text-muted">{{ entity.comment[:100] }}...</small>
                             {% endif %}

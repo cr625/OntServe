@@ -75,7 +75,7 @@ class OntServeMCPServer:
             # Database URL from environment
             self.db_url = os.environ.get(
                 'ONTSERVE_DB_URL', 
-                'postgresql://ontserve_user:ontserve_development_password@localhost:5435/ontserve'
+                'postgresql://ontserve_user:ontserve_development_password@localhost:5432/ontserve'
             )
             
             logger.info(f"Initializing PostgreSQL storage: {self.db_url}")

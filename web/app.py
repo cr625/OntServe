@@ -8,7 +8,7 @@ import os
 import sys
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Add parent directory to path to import OntServe modules
@@ -16,12 +16,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 from flask_migrate import Migrate
+from flask_login import LoginManager, login_required, current_user
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 import rdflib
 
 from config import config
-from models import db, init_db, Ontology, OntologyEntity, OntologyVersion
+from models import db, init_db, Ontology, OntologyEntity, OntologyVersion, User
 from core.ontology_manager import OntologyManager
 from editor.routes import create_editor_blueprint
 from storage.file_storage import FileStorage
@@ -65,6 +66,21 @@ def create_app(config_name=None):
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         )
     
+    # Initialize Flask-Login
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Please log in to access this page.'
+    login_manager.login_message_category = 'info'
+    
+    @login_manager.user_loader
+    def load_user(user_id):
+        """Load user by ID for Flask-Login"""
+        return db.session.get(User, int(user_id))
+    
+    # Register authentication routes
+    register_auth_routes(app)
+    
     # Register routes
     register_routes(app)
     
@@ -77,6 +93,34 @@ def create_app(config_name=None):
     }
     editor_blueprint = create_editor_blueprint(storage_backend, editor_config)
     app.register_blueprint(editor_blueprint)
+    
+    # Add custom template filters for safe URI handling
+    @app.template_filter('extract_name')
+    def extract_name_filter(uri):
+        """Safely extract a name from a URI, handling lists and None values."""
+        if not uri:
+            return 'Unknown'
+        
+        # Handle case where uri might be a list
+        if isinstance(uri, list):
+            if not uri:
+                return 'Unknown'
+            uri = uri[0] if uri[0] else 'Unknown'
+        
+        # Ensure uri is a string
+        uri = str(uri)
+        
+        # Extract the last part after # or /
+        if '#' in uri:
+            return uri.split('#')[-1]
+        elif '/' in uri:
+            return uri.split('/')[-1]
+        else:
+            return uri
+    
+    # Initialize CLI commands
+    from cli import init_cli
+    init_cli(app)
     
     return app
 
@@ -143,6 +187,71 @@ def generate_rdf_from_concepts(ontology_name, concepts, base_imports):
         concept_triples += " .\n\n"
     
     return prefixes + ontology_declaration + concept_triples
+
+
+def register_auth_routes(app):
+    """Register authentication routes"""
+    from flask import Blueprint
+    
+    auth_bp = Blueprint('auth', __name__)
+    
+    @auth_bp.route('/login', methods=['GET', 'POST'])
+    def login():
+        """User login"""
+        if current_user.is_authenticated:
+            return redirect(url_for('index'))
+        
+        if request.method == 'POST':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            remember = bool(request.form.get('remember'))
+            
+            if not username or not password:
+                flash('Please enter both username and password', 'error')
+                return render_template('auth/login.html')
+            
+            user = User.query.filter_by(username=username).first()
+            
+            if user and user.check_password(password) and user.is_active:
+                from flask_login import login_user
+                login_user(user, remember=remember)
+                
+                # Update last login with timezone-aware datetime
+                user.last_login = datetime.now(timezone.utc)
+                db.session.commit()
+                
+                # Log successful login
+                app.logger.info(f"User {username} logged in successfully")
+                
+                next_page = request.args.get('next')
+                if next_page:
+                    return redirect(next_page)
+                return redirect(url_for('index'))
+            else:
+                app.logger.warning(f"Failed login attempt for username: {username}")
+                flash('Invalid username or password', 'error')
+        
+        return render_template('auth/login.html')
+    
+    @auth_bp.route('/logout')
+    @login_required
+    def logout():
+        """User logout"""
+        username = current_user.username if current_user.is_authenticated else 'Unknown'
+        from flask_login import logout_user
+        logout_user()
+        app.logger.info(f"User {username} logged out")
+        flash('You have been logged out', 'info')
+        return redirect(url_for('auth.login'))
+    
+    @auth_bp.route('/profile')
+    @login_required  
+    def profile():
+        """User profile page"""
+        return render_template('auth/profile.html', user=current_user)
+    
+    # Register blueprint
+    app.register_blueprint(auth_bp, url_prefix='/auth')
 
 
 def register_routes(app):
@@ -225,8 +334,13 @@ def register_routes(app):
         return content, 200, {'Content-Type': 'text/plain; charset=utf-8'}
     
     @app.route('/import', methods=['GET', 'POST'])
+    @login_required
     def import_ontology():
         """Import a new ontology from URL or file."""
+        # Check if user can import ontologies
+        if not current_user.can_perform_action('import'):
+            flash('You do not have permission to import ontologies', 'error')
+            return redirect(url_for('index'))
         if request.method == 'POST':
             source = request.form.get('source')
             source_type = request.form.get('source_type', 'url')
@@ -234,29 +348,61 @@ def register_routes(app):
             description = request.form.get('description')
             
             try:
+                # Resolve file paths relative to the workspace root if needed
+                if source_type == 'file' and source and not source.startswith('/'):
+                    # Handle relative paths like "OntExtract/ontologies/bfo.ttl"
+                    workspace_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                    potential_path = os.path.join(workspace_root, '..', source)
+                    if os.path.exists(potential_path):
+                        source = os.path.abspath(potential_path)
+                        app.logger.info(f"Resolved relative path to: {source}")
+                
                 # Import using OntologyManager
                 result = app.ontology_manager.import_ontology(
                     source=source,
+                    source_type=source_type,
                     name=name,
                     description=description
                 )
                 
                 if result['success']:
-                    # Save to database
+                    # Check if ontology already exists
+                    ontology_name = name or result['metadata'].get('name', 'Unnamed')
+                    existing_ontology = Ontology.query.filter_by(name=ontology_name).first()
+                    
+                    if existing_ontology:
+                        flash(f"Ontology '{ontology_name}' already exists", 'warning')
+                        return redirect(url_for('ontology_detail', ontology_name=ontology_name))
+                    
+                    # Create new ontology
                     ontology = Ontology(
-                        ontology_id=result['ontology_id'],
-                        name=name or result['metadata'].get('name', 'Unnamed'),
+                        name=ontology_name,
+                        base_uri=result['metadata'].get('namespace', f"http://example.org/{ontology_name}#"),
                         description=description or result['metadata'].get('description', ''),
-                        content=result.get('content', ''),
-                        format=result['metadata'].get('format', 'turtle'),
-                        source_url=source if source_type == 'url' else None,
-                        source_file=source if source_type == 'file' else None,
-                        triple_count=result['metadata'].get('triple_count'),
-                        class_count=result['metadata'].get('class_count'),
-                        property_count=result['metadata'].get('property_count'),
                         meta_data=result['metadata']
                     )
                     db.session.add(ontology)
+                    db.session.flush()  # Get the ID
+                    
+                    # Create initial version with content
+                    version = OntologyVersion(
+                        ontology_id=ontology.id,
+                        version_number=1,
+                        version_tag="1.0.0",
+                        content=result.get('content', ''),
+                        change_summary="Initial import",
+                        created_by="web-import",
+                        is_current=True,
+                        is_draft=False,
+                        workflow_status='published',
+                        meta_data={
+                            'source': source,
+                            'source_type': source_type,
+                            'format': result['metadata'].get('format', 'turtle'),
+                            'import_date': datetime.now(timezone.utc).isoformat()
+                        }
+                    )
+                    db.session.add(version)
                     
                     # Extract and save entities
                     classes = app.ontology_manager.extract_classes(result['ontology_id'])
@@ -286,8 +432,8 @@ def register_routes(app):
                     
                     db.session.commit()
                     
-                    flash(f"Successfully imported ontology: {result['ontology_id']}", 'success')
-                    return redirect(url_for('ontology_detail', ontology_id=result['ontology_id']))
+                    flash(f"Successfully imported ontology: {ontology_name}", 'success')
+                    return redirect(url_for('ontology_detail', ontology_name=ontology_name))
                 else:
                     flash(f"Import failed: {result.get('message', 'Unknown error')}", 'error')
                     
@@ -503,8 +649,13 @@ def register_routes(app):
                              results=results)
     
     @app.route('/ontology/<ontology_name>/edit')
+    @login_required
     def edit_ontology(ontology_name):
         """Edit an ontology using ACE editor."""
+        # Check if user can edit ontologies
+        if not current_user.can_perform_action('edit'):
+            flash('You do not have permission to edit ontologies', 'error')
+            return redirect(url_for('ontology_detail', ontology_name=ontology_name))
         ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
         
         # Get the content from file storage
@@ -539,8 +690,12 @@ def register_routes(app):
                              page_title=f"Edit {ontology.name}")
     
     @app.route('/ontology/<ontology_name>/save', methods=['POST'])
+    @login_required
     def save_ontology(ontology_name):
         """Save a new version of an ontology."""
+        # Check if user can edit ontologies
+        if not current_user.can_perform_action('edit'):
+            return jsonify({'success': False, 'message': 'Permission denied'}), 403
         ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
         
         data = request.get_json()
@@ -893,7 +1048,7 @@ def register_routes(app):
             entity_data = {
                 "id": entity.uri,
                 "uri": entity.uri,
-                "label": entity.label or entity.uri.split('#')[-1].split('/')[-1],
+                "label": entity.label or (entity.uri.split('#')[-1] if '#' in str(entity.uri) else str(entity.uri).split('/')[-1]),
                 "description": entity.comment or "",
                 "category": category,
                 "type": category,

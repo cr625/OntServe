@@ -266,6 +266,7 @@ class BFOImporter(BaseImporter):
                 'ontology_id': ontology_id,
                 'metadata': metadata,
                 'graph': g,
+                'content': g.serialize(format='turtle'),
                 'message': f"Successfully imported ontology {ontology_id}"
             }
             
