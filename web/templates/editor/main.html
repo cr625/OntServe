@@ -1,377 +1,242 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page_title }} - OntServe</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .ontology-card {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+{% block title %}{{ page_title }} - OntServe{% endblock %}
 
-        .ontology-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+{% block extra_css %}
+<style>
+    .ontology-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
 
-        .entity-stats {
-            font-size: 0.9em;
-            color: #666;
-        }
+    .ontology-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-        .toolbar {
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            padding: 1rem 0;
-        }
+    .entity-stats {
+        font-size: 0.9em;
+        color: #666;
+    }
 
-        .search-box {
-            max-width: 400px;
-        }
-    </style>
-</head>
+    .toolbar {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem 0;
+    }
 
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-project-diagram me-2"></i>
-                OntServe Editor
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">
-                            <i class="fas fa-home me-1"></i>Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/search">
-                            <i class="fas fa-search me-1"></i>Search
-                        </a>
-                    </li>
-                </ul>
+    .search-box {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="h3 mb-0">
+                    <i class="bi bi-pencil-square me-2"></i>
+                    Ontology Editor
+                </h1>
+                <small class="text-muted">Create, edit, and visualize ontologies with semantic search</small>
             </div>
-        </div>
-    </nav>
-
-    <div class="toolbar">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h1 class="h3 mb-0">
-                        <i class="fas fa-edit me-2"></i>
-                        Ontology Editor
-                    </h1>
-                    <small class="text-muted">Create, edit, and visualize ontologies with semantic search</small>
-                </div>
-                <div class="col-md-6">
-                    <div class="d-flex justify-content-end gap-2">
-                        <button class="btn btn-success" onclick="createNewOntology()">
-                            <i class="fas fa-plus me-1"></i>New Ontology
-                        </button>
-                        <button class="btn btn-outline-primary" onclick="refreshOntologies()">
-                            <i class="fas fa-sync me-1"></i>Refresh
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-filter me-2"></i>Filter & Search
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <input type="text" class="form-control search-box" id="searchOntologies"
-                                placeholder="Search ontologies...">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Entity Type</label>
-                            <select class="form-select" id="filterEntityType">
-                                <option value="">All Types</option>
-                                <option value="class">Classes</option>
-                                <option value="property">Properties</option>
-                                <option value="individual">Individuals</option>
-                                <option value="role">Roles</option>
-                                <option value="condition">Conditions</option>
-                                <option value="resource">Resources</option>
-                                <option value="action">Actions</option>
-                                <option value="event">Events</option>
-                                <option value="capability">Capabilities</option>
-                            </select>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showBFOOnly">
-                            <label class="form-check-label" for="showBFOOnly">
-                                BFO-aligned only
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h6 class="card-title mb-0">
-                            <i class="fas fa-chart-bar me-2"></i>Statistics
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div id="ontologyStats">
-                            <div class="d-flex justify-content-between">
-                                <small>Total Ontologies:</small>
-                                <strong id="totalOntologies">{{ ontologies|length }}</strong>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <small>Total Entities:</small>
-                                <strong id="totalEntities">-</strong>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <small>Foundation Ontologies:</small>
-                                <strong id="foundationCount">-</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-9">
-                <div id="ontologyGrid" class="row">
-                    {% for ontology in ontologies %}
-                    <div class="col-md-6 col-lg-4 mb-4 ontology-item" data-name="{{ ontology.name|lower }}"
-                        data-id="{{ ontology.ontology_id }}">
-                        <div class="card ontology-card h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h6 class="card-title mb-0">{{ ontology.name }}</h6>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                        data-bs-toggle="dropdown">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="/editor/ontology/{{ ontology.ontology_id }}">
-                                                <i class="fas fa-edit me-2"></i>Edit
-                                            </a></li>
-                                        <li><a class="dropdown-item"
-                                                href="/editor/ontology/{{ ontology.ontology_id }}/visualize">
-                                                <i class="fas fa-project-diagram me-2"></i>Visualize
-                                            </a></li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li><a class="dropdown-item" href="#"
-                                                onclick="extractEntities('{{ ontology.ontology_id }}')">
-                                                <i class="fas fa-sync me-2"></i>Extract Entities
-                                            </a></li>
-                                        <li><a class="dropdown-item text-danger" href="#"
-                                                onclick="deleteOntology('{{ ontology.ontology_id }}')">
-                                                <i class="fas fa-trash me-2"></i>Delete
-                                            </a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                {% if ontology.description %}
-                                <p class="card-text small text-muted">{{ ontology.description[:100] }}{% if
-                                    ontology.description|length > 100 %}...{% endif %}</p>
-                                {% endif %}
-
-                                <div class="entity-stats">
-                                    <div class="row text-center">
-                                        <div class="col">
-                                            <strong>{{ ontology.class_count or 0 }}</strong><br>
-                                            <small>Classes</small>
-                                        </div>
-                                        <div class="col">
-                                            <strong>{{ ontology.property_count or 0 }}</strong><br>
-                                            <small>Properties</small>
-                                        </div>
-                                        <div class="col">
-                                            <strong>{{ ontology.triple_count or 0 }}</strong><br>
-                                            <small>Triples</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="/editor/ontology/{{ ontology.ontology_id }}" class="btn btn-primary">
-                                            <i class="fas fa-edit me-1"></i>Edit
-                                        </a>
-                                        <a href="/editor/ontology/{{ ontology.ontology_id }}/visualize"
-                                            class="btn btn-outline-primary">
-                                            <i class="fas fa-project-diagram me-1"></i>View
-                                        </a>
-                                    </div>
-                                    <small class="text-muted">
-                                        {% if ontology.version_count %}{{ ontology.version_count }} versions{% endif %}
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-
-                {% if not ontologies %}
-                <div class="text-center py-5">
-                    <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                    <h4>No Ontologies Found</h4>
-                    <p class="text-muted">Get started by creating your first ontology or importing existing ones.</p>
-                    <button class="btn btn-primary" onclick="createNewOntology()">
-                        <i class="fas fa-plus me-1"></i>Create New Ontology
+            <div class="col-md-6">
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-success" onclick="createNewOntology()">
+                        <i class="bi bi-plus-circle me-1"></i>New Ontology
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="refreshOntologies()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
                     </button>
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Create New Ontology Modal -->
-    <div class="modal fade" id="createOntologyModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create New Ontology</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-funnel me-2"></i>Filter & Search
+                    </h5>
                 </div>
-                <div class="modal-body">
-                    <form id="createOntologyForm">
-                        <div class="mb-3">
-                            <label for="ontologyName" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="ontologyName" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="ontologyId" class="form-label">ID</label>
-                            <input type="text" class="form-control" id="ontologyId" required>
-                            <div class="form-text">Unique identifier (e.g., my-ontology)</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="ontologyDescription" class="form-label">Description</label>
-                            <textarea class="form-control" id="ontologyDescription" rows="3"></textarea>
-                        </div>
-                    </form>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <input type="text" class="form-control search-box" id="searchOntologies"
+                            placeholder="Search ontologies...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Entity Type</label>
+                        <select class="form-select" id="filterEntityType">
+                            <option value="">All Types</option>
+                            <option value="class">Classes</option>
+                            <option value="property">Properties</option>
+                            <option value="individual">Individuals</option>
+                            <option value="role">Roles</option>
+                        </select>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="filterFoundationOnly">
+                        <label class="form-check-label" for="filterFoundationOnly">
+                            BFO-aligned only
+                        </label>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="submitCreateOntology()">Create</button>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-bar-chart me-2"></i>Statistics
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="ontologyStats">
+                        <div class="d-flex justify-content-between">
+                            <small>Total Ontologies:</small>
+                            <strong id="totalOntologies">{{ ontologies|length }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small>Total Entities:</small>
+                            <strong id="totalEntities">-</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small>Foundation Ontologies:</small>
+                            <strong id="foundationCount">-</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="col-md-9">
+            <div id="ontologyGrid" class="row">
+                {% for ontology in ontologies %}
+                <div class="col-md-6 col-lg-4 mb-4 ontology-item" data-name="{{ ontology.name|lower }}"
+                    data-id="{{ ontology.ontology_id or ontology.id }}">
+                    <div class="card ontology-card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="card-title mb-0">{{ ontology.name }}</h6>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                    data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ url_for('edit_ontology', ontology_name=ontology.name) }}">
+                                            <i class="bi bi-pencil me-2"></i>Edit Content
+                                        </a></li>
+                                    <li><a class="dropdown-item"
+                                            href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}">
+                                            <i class="bi bi-diagram-3 me-2"></i>Visualize
+                                        </a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="#"
+                                            onclick="extractEntities('{{ ontology.ontology_id or ontology.id }}')">
+                                            <i class="bi bi-arrow-clockwise me-2"></i>Extract Entities
+                                        </a></li>
+                                    <li><a class="dropdown-item text-danger" href="#"
+                                            onclick="deleteOntology('{{ ontology.ontology_id or ontology.id }}')">
+                                            <i class="bi bi-trash me-2"></i>Delete
+                                        </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {% if ontology.description %}
+                            <p class="card-text small text-muted">{{ ontology.description[:100] }}{% if
+                                ontology.description|length > 100 %}...{% endif %}</p>
+                            {% endif %}
+
+                            <div class="entity-stats">
+                                <div class="row text-center">
+                                    <div class="col">
+                                        <strong>{{ ontology.class_count or 0 }}</strong><br>
+                                        <small>Classes</small>
+                                    </div>
+                                    <div class="col">
+                                        <strong>{{ ontology.property_count or 0 }}</strong><br>
+                                        <small>Properties</small>
+                                    </div>
+                                    <div class="col">
+                                        <strong>{{ ontology.triple_count or 0 }}</strong><br>
+                                        <small>Triples</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ url_for('edit_ontology', ontology_name=ontology.name) }}" class="btn btn-primary">
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    </a>
+                                    <a href="{{ url_for('ontology_detail', ontology_name=ontology.name) }}"
+                                        class="btn btn-outline-primary">
+                                        <i class="bi bi-info-circle me-1"></i>Details
+                                    </a>
+                                    <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}"
+                                        class="btn btn-success">
+                                        <i class="bi bi-diagram-3 me-1"></i>Visualize
+                                    </a>
+                                </div>
+                                <small class="text-muted">
+                                    {% if ontology.version_count %}
+                                        {{ ontology.version_count }} version{{ 's' if ontology.version_count != 1 else '' }}
+                                    {% else %}
+                                        No versions
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Search functionality
-        document.getElementById('searchOntologies').addEventListener('input', function () {
-            const searchTerm = this.value.toLowerCase();
-            filterOntologies();
-        });
+<script>
+function createNewOntology() {
+    window.location.href = '{{ url_for("import_ontology") }}';
+}
 
-        document.getElementById('filterEntityType').addEventListener('change', filterOntologies);
-        document.getElementById('showBFOOnly').addEventListener('change', filterOntologies);
+function refreshOntologies() {
+    window.location.reload();
+}
 
-        function filterOntologies() {
-            const searchTerm = document.getElementById('searchOntologies').value.toLowerCase();
-            const entityTypeFilter = document.getElementById('filterEntityType').value;
-            const bfoOnly = document.getElementById('showBFOOnly').checked;
+function extractEntities(ontologyId) {
+    console.log('Extract entities for:', ontologyId);
+    // Implement extract entities functionality
+}
 
-            const ontologyItems = document.querySelectorAll('.ontology-item');
+function deleteOntology(ontologyId) {
+    if (confirm('Are you sure you want to delete this ontology?')) {
+        console.log('Delete ontology:', ontologyId);
+        // Implement delete functionality
+    }
+}
 
-            ontologyItems.forEach(item => {
-                const name = item.dataset.name;
-                const ontologyId = item.dataset.id;
-
-                let show = true;
-
-                // Text search
-                if (searchTerm && !name.includes(searchTerm)) {
-                    show = false;
-                }
-
-                // BFO filter (simplified check)
-                if (bfoOnly && !ontologyId.includes('bfo') && !ontologyId.includes('prov') && !ontologyId.includes('proethica')) {
-                    show = false;
-                }
-
-                item.style.display = show ? 'block' : 'none';
-            });
+// Search functionality
+document.getElementById('searchOntologies').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const ontologyItems = document.querySelectorAll('.ontology-item');
+    
+    ontologyItems.forEach(item => {
+        const name = item.dataset.name;
+        if (name.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
         }
-
-        function createNewOntology() {
-            const modal = new bootstrap.Modal(document.getElementById('createOntologyModal'));
-            modal.show();
-        }
-
-        function submitCreateOntology() {
-            // Implementation for creating new ontology
-            console.log('Create ontology functionality to be implemented');
-        }
-
-        function extractEntities(ontologyId) {
-            if (confirm('Extract entities for ' + ontologyId + '? This may take a moment.')) {
-                fetch(`/editor/api/extract-entities/${ontologyId}`, { method: 'POST' })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(`Successfully extracted ${data.total_entities} entities`);
-                            location.reload();
-                        } else {
-                            alert('Error: ' + data.error);
-                        }
-                    })
-                    .catch(error => {
-                        alert('Error: ' + error.message);
-                    });
-            }
-        }
-
-        function deleteOntology(ontologyId) {
-            if (confirm('Are you sure you want to delete this ontology?')) {
-                // Implementation for deleting ontology
-                console.log('Delete ontology functionality to be implemented');
-            }
-        }
-
-        function refreshOntologies() {
-            location.reload();
-        }
-
-        // Calculate statistics on load
-        window.addEventListener('load', function () {
-            calculateStats();
-        });
-
-        function calculateStats() {
-            // Calculate and display statistics
-            const ontologyItems = document.querySelectorAll('.ontology-item');
-            document.getElementById('totalOntologies').textContent = ontologyItems.length;
-
-            // Count foundation ontologies
-            let foundationCount = 0;
-            ontologyItems.forEach(item => {
-                const id = item.dataset.id;
-                if (id.includes('bfo') || id.includes('prov') || id.includes('proethica')) {
-                    foundationCount++;
-                }
-            });
-            document.getElementById('foundationCount').textContent = foundationCount;
-        }
-    </script>
-</body>
-
-</html>
+    });
+});
+</script>
+{% endblock %}

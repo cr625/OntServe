@@ -111,6 +111,7 @@ class Ontology(db.Model):
         """Convert ontology to dictionary representation."""
         return {
             'id': self.id,
+            'ontology_id': self.id,  # Include both 'id' and 'ontology_id' for template compatibility
             'uuid': str(self.uuid),
             'domain_id': self.domain_id,
             'name': self.name,
@@ -121,7 +122,11 @@ class Ontology(db.Model):
             'metadata': self.meta_data if self.meta_data else {},
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'version_count': len(self.versions) if hasattr(self, 'versions') else 0
+            'version_count': len(self.versions) if hasattr(self, 'versions') else 0,
+            # Include computed properties for template display
+            'class_count': self.class_count,
+            'property_count': self.property_count,
+            'triple_count': self.triple_count
         }
 
 

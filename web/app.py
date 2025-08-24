@@ -660,10 +660,10 @@ def register_routes(app):
         
         # Get the content from file storage
         try:
-            ont_data = app.ontology_manager.get_ontology(ontology_id)
+            ont_data = app.ontology_manager.get_ontology(ontology_name)
             content = ont_data.get('content', '')
         except:
-            content = ontology.content or ''
+            content = ontology.current_content or ''
         
         # Get versions with proper formatting
         versions = OntologyVersion.query.filter_by(

@@ -14,7 +14,7 @@ class Config:
     # Flask settings
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
-    # Database settings - using OntServe's PostgreSQL on port 5435
+    # Database settings - using local PostgreSQL on port 5432
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'postgresql://ontserve_user:ontserve_development_password@localhost:5432/ontserve'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
