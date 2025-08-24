@@ -1,0 +1,52 @@
+"""
+Example configuration for OntServe Web Application
+This file is safe to commit and contains no secrets.
+Copy to `web/config.py` and adjust environment variables on the server.
+"""
+
+import os
+from pathlib import Path
+
+basedir = Path(__file__).parent.absolute()
+
+
+class Config:
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'change-me')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///ontserve.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    PORT = 5003
+    HOST = '0.0.0.0'
+    DEBUG = False
+    ONTOLOGIES_PER_PAGE = 20
+    ENTITIES_PER_PAGE = 50
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+    ALLOWED_EXTENSIONS = {'ttl', 'rdf', 'owl', 'n3', 'nt', 'json'}
+    CACHE_TYPE = 'simple'
+    CACHE_DEFAULT_TIMEOUT = 300
+    EMBEDDING_DIMENSION = 384
+    ONTSERVE_STORAGE_DIR = str(basedir.parent / 'storage')
+    ONTSERVE_CACHE_DIR = str(basedir.parent / 'storage' / 'cache' / 'downloads')
+
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    SQLALCHEMY_ECHO = True
+
+
+class ProductionConfig(Config):
+    DEBUG = False
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    WTF_CSRF_ENABLED = False
+
+
+config = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'testing': TestingConfig,
+    'default': DevelopmentConfig
+}

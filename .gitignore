@@ -46,3 +46,9 @@ storage/metadata/
 storage/versions/
 # Web-specific virtual environment
 web/venv/
+
+# Production server local config
+/web/config.py
+
+# Ignore ontologies and large data stored on production (managed outside git)
+/storage/ontologies/
