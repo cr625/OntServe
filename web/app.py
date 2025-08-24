@@ -1315,3 +1315,6 @@ if __name__ == '__main__':
         port=port,
         debug=debug
     )
+else:
+    # Create app instance for WSGI servers (like gunicorn)
+    app = create_app()
