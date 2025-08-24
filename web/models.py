@@ -53,6 +53,10 @@ class Ontology(db.Model):
     is_base = db.Column(db.Boolean, default=False)
     is_editable = db.Column(db.Boolean, default=True)
     
+    # Parent-child relationship for derived ontologies
+    parent_ontology_id = db.Column(db.Integer, db.ForeignKey('ontologies.id'), nullable=True)
+    ontology_type = db.Column(db.String(20), default='base')  # 'base', 'derived', 'composite'
+    
     # JSON metadata field for flexible storage
     meta_data = db.Column('metadata', db.JSON, default={})  # Map to 'metadata' column in DB
     
@@ -65,6 +69,9 @@ class Ontology(db.Model):
                               cascade='all, delete-orphan')
     entities = db.relationship('OntologyEntity', back_populates='ontology',
                               cascade='all, delete-orphan')
+    
+    # Parent-child relationships
+    parent = db.relationship('Ontology', remote_side=[id], backref='children')
     
     @property
     def current_content(self):
@@ -104,6 +111,37 @@ class Ontology(db.Model):
             entity_type='property'
         ).count()
     
+    @property
+    def has_children(self):
+        """Check if this ontology has any derived children."""
+        return len(self.children) > 0
+    
+    @property
+    def is_derived(self):
+        """Check if this is a derived ontology (has a parent)."""
+        return self.parent_ontology_id is not None
+    
+    @property
+    def root_ontology(self):
+        """Get the root (base) ontology in the hierarchy."""
+        if self.parent_ontology_id is None:
+            return self
+        return self.parent.root_ontology
+    
+    def get_all_descendants(self):
+        """Get all derived ontologies in the hierarchy below this one."""
+        descendants = []
+        for child in self.children:
+            descendants.append(child)
+            descendants.extend(child.get_all_descendants())
+        return descendants
+    
+    def get_hierarchy_path(self):
+        """Get the full hierarchy path from root to this ontology."""
+        if self.parent_ontology_id is None:
+            return [self]
+        return self.parent.get_hierarchy_path() + [self]
+    
     def __repr__(self):
         return f'<Ontology {self.name}>'
     
@@ -119,6 +157,10 @@ class Ontology(db.Model):
             'description': self.description,
             'is_base': self.is_base,
             'is_editable': self.is_editable,
+            'parent_ontology_id': self.parent_ontology_id,
+            'ontology_type': self.ontology_type,
+            'is_derived': self.is_derived,
+            'has_children': self.has_children,
             'metadata': self.meta_data if self.meta_data else {},
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,

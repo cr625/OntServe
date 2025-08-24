@@ -24,6 +24,7 @@ import rdflib
 from config import config
 from models import db, init_db, Ontology, OntologyEntity, OntologyVersion, User
 from core.ontology_manager import OntologyManager
+from core.ontology_merger import OntologyMergerService
 from editor.routes import create_editor_blueprint
 from storage.file_storage import FileStorage
 
@@ -58,6 +59,9 @@ def create_app(config_name=None):
         'log_level': 'INFO'
     }
     app.ontology_manager = OntologyManager(ontology_config)
+    
+    # Initialize OntologyMergerService
+    app.ontology_merger = OntologyMergerService(logger=logging.getLogger('ontology_merger'))
     
     # Setup logging
     if not app.debug:
@@ -302,7 +306,26 @@ def register_routes(app):
         if is_semantic_request or (not is_browser and not 'text/html' in accept_header):
             app.logger.info(f"URI resolution request for {ontology_name}: Accept={accept_header}")
             
-            content = ontology.current_content
+            # Check if merged ontology is requested
+            include_derived = request.args.get('include_derived', 'false').lower() == 'true'
+            include_drafts = request.args.get('include_drafts', 'false').lower() == 'true'
+            
+            if include_derived and ontology.has_children:
+                try:
+                    # Use merger service to get combined ontology
+                    merged_content, merge_metadata = app.ontology_merger.merge_ontology_with_children(
+                        ontology, include_drafts=include_drafts
+                    )
+                    content = merged_content
+                    
+                    app.logger.info(f"Serving merged ontology {ontology_name} with {len(merge_metadata['merged_children'])} children")
+                except Exception as e:
+                    app.logger.error(f"Failed to merge ontology {ontology_name}: {e}")
+                    # Fallback to base ontology only
+                    content = ontology.current_content
+            else:
+                content = ontology.current_content
+            
             if content is None:
                 return jsonify({
                     'error': 'No content available for this ontology',
@@ -1580,6 +1603,7 @@ def register_routes(app):
             base_imports = data.get('base_imports', [])
             metadata = data.get('metadata', {})
             created_by = data.get('created_by', 'system')
+            parent_ontology_name = data.get('parent_ontology', None)  # New parameter for parent relationship
             
             # Check if ontology already exists
             ontology = Ontology.query.filter_by(name=ontology_name).first()
@@ -1597,13 +1621,25 @@ def register_routes(app):
                         'error': f'Draft version already exists for {ontology_name}'
                     }), 409
             else:
-                # Create new ontology
+                # Resolve parent ontology if specified
+                parent_ontology_id = None
+                if parent_ontology_name:
+                    parent_ontology = Ontology.query.filter_by(name=parent_ontology_name).first()
+                    if parent_ontology:
+                        parent_ontology_id = parent_ontology.id
+                        app.logger.info(f"Creating derived ontology {ontology_name} with parent {parent_ontology_name}")
+                    else:
+                        app.logger.warning(f"Parent ontology {parent_ontology_name} not found for {ontology_name}")
+                
+                # Create new ontology with parent relationship
                 ontology = Ontology(
                     name=ontology_name,
                     base_uri=f'http://proethica.org/ontology/{ontology_name}',
                     description=f'Extracted concepts ontology: {ontology_name}',
                     is_base=False,
                     is_editable=True,
+                    parent_ontology_id=parent_ontology_id,
+                    ontology_type='derived' if parent_ontology_id else 'base',
                     meta_data=metadata
                 )
                 db.session.add(ontology)
