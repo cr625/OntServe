@@ -389,6 +389,13 @@
                         </label>
                     </div>
                     
+                    <div class="form-check mt-1">
+                        <input class="form-check-input" type="checkbox" id="autoPromoteSignificant" checked>
+                        <label class="form-check-label small" for="autoPromoteSignificant">
+                            Auto-load significant inferences (≥1 new relationship)
+                        </label>
+                    </div>
+                    
                     <button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="loadOntologyData()" id="refreshBtn">
                         <i class="fas fa-sync me-1"></i>Refresh View
                     </button>
@@ -523,8 +530,9 @@
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Running Inference...';
             
-            // Check if we should save as version
+            // Check if we should save as version and auto-promote
             const saveAsVersion = document.getElementById('saveReasoningAsVersion').checked;
+            const autoPromoteSignificant = document.getElementById('autoPromoteSignificant').checked;
             
             // Use the simple reasoning endpoint
             fetch(`/editor/api/simple/reasoning/${ontologyId}`, {
@@ -536,7 +544,8 @@
                     include_reasoning: true,
                     force_refresh: true,
                     reasoner_type: 'pellet',
-                    save_as_version: saveAsVersion
+                    save_as_version: saveAsVersion,
+                    auto_promote_significant: autoPromoteSignificant && saveAsVersion
                 })
             })
             .then(response => response.json())
@@ -587,9 +596,9 @@
                         message += `\n⚠️ Version creation failed: ${data.version.error}\n`;
                     }
                     
-                    alert(message);
+                    showInferenceResultsModal(data, message);
                 } else {
-                    alert('Inference failed: ' + (data.error || 'Unknown error'));
+                    showInferenceErrorModal(data.error || 'Unknown error');
                 }
             })
             .catch(error => {
@@ -1434,12 +1443,176 @@
             URL.revokeObjectURL(url);
         }
 
+        // Modal functions for inference results
+        function showInferenceResultsModal(data, message) {
+            const modal = document.getElementById('inferenceResultsModal');
+            const modalBody = document.getElementById('inferenceResultsContent');
+            const loadVersionBtn = document.getElementById('loadVersionBtn');
+            
+            // Format the results for better display
+            const results = data.results || {};
+            const classesInferred = results.classes_inferred || 0;
+            const propertiesInferred = results.properties_inferred || 0;
+            const hierarchicalInferred = results.hierarchical_inferred || 0;
+            const relationshipsInferred = results.relationships_inferred || 0;
+            const totalInferred = results.total_inferred || (classesInferred + propertiesInferred + hierarchicalInferred + relationshipsInferred);
+            
+            let htmlContent = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-sitemap text-primary"></i> Inference Results</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Classes Inferred:</strong> ${classesInferred}</li>
+                            <li><strong>Properties Inferred:</strong> ${propertiesInferred}</li>
+                            <li><strong>Hierarchical:</strong> ${hierarchicalInferred}</li>
+                            <li><strong>Total New:</strong> ${totalInferred}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-check-circle text-success"></i> Status</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Consistent:</strong> ${results.is_consistent ? '✅ Yes' : '❌ No'}</li>
+                            <li><strong>Reasoner:</strong> ${results.reasoner_type || 'Pellet'}</li>
+                            <li><strong>Duration:</strong> ${results.processing_time || 'N/A'}</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            // Add version information if created
+            if (data.version && data.version.version_created) {
+                const isAutoPromoted = data.version.auto_promoted || data.version.is_current;
+                const statusText = isAutoPromoted ? 'Current Version (Auto-promoted)' : 'Draft - ready for review';
+                const statusClass = isAutoPromoted ? 'alert-info' : 'alert-success';
+                
+                htmlContent += `
+                    <div class="alert ${statusClass} mt-3">
+                        <h6><i class="fas fa-code-branch text-${isAutoPromoted ? 'info' : 'success'}"></i> New Version Created</h6>
+                        <ul class="list-unstyled mb-0">
+                            <li><strong>Version:</strong> ${data.version.version_number} (${data.version.version_tag})</li>
+                            <li><strong>Status:</strong> ${statusText}</li>
+                            ${isAutoPromoted ? '<li><strong>Note:</strong> Version automatically promoted due to significant inferences</li>' : ''}
+                        </ul>
+                    </div>
+                `;
+                
+                // Show different button behavior based on promotion status
+                if (isAutoPromoted) {
+                    // Already current, just show reload button
+                    loadVersionBtn.textContent = 'Reload Page';
+                    loadVersionBtn.innerHTML = '<i class="fas fa-sync me-1"></i>Reload Page';
+                    loadVersionBtn.style.display = 'inline-block';
+                    loadVersionBtn.onclick = () => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('inferenceResultsModal'));
+                        modal.hide();
+                        setTimeout(() => location.reload(), 500);
+                    };
+                } else {
+                    // Show the "Load New Version" button
+                    loadVersionBtn.innerHTML = '<i class="fas fa-code-branch me-1"></i>Load New Version';
+                    loadVersionBtn.style.display = 'inline-block';
+                    loadVersionBtn.onclick = () => loadNewVersion(data.version.version_id);
+                }
+            } else {
+                loadVersionBtn.style.display = 'none';
+            }
+            
+            modalBody.innerHTML = htmlContent;
+            
+            // Show the modal
+            const bootstrapModal = new bootstrap.Modal(modal);
+            bootstrapModal.show();
+        }
+        
+        function showInferenceErrorModal(error) {
+            const modal = document.getElementById('inferenceResultsModal');
+            const modalBody = document.getElementById('inferenceResultsContent');
+            const loadVersionBtn = document.getElementById('loadVersionBtn');
+            
+            modalBody.innerHTML = `
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-exclamation-triangle"></i> Inference Failed</h6>
+                    <p class="mb-0">${error}</p>
+                </div>
+            `;
+            
+            loadVersionBtn.style.display = 'none';
+            
+            // Show the modal
+            const bootstrapModal = new bootstrap.Modal(modal);
+            bootstrapModal.show();
+        }
+        
+        function loadNewVersion(versionId) {
+            // First make the version current
+            fetch(`/api/versions/${versionId}/make-current`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('inferenceResultsModal'));
+                    modal.hide();
+                    
+                    // Show loading indicator
+                    const loadingIndicator = document.getElementById('loadingIndicator');
+                    loadingIndicator.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                            Loading reasoned version...
+                        </div>
+                    `;
+                    loadingIndicator.style.display = 'block';
+                    
+                    // Reload the page to show the new current version with entities
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    alert('Failed to load new version: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error loading new version:', error);
+                alert('Failed to load new version. Check console for details.');
+            });
+        }
+
         // Initialize visualization when page loads
         document.addEventListener('DOMContentLoaded', function() {
             // Load ontology data on page load
             loadOntologyData();
         });
     </script>
+    
+    <!-- Inference Results Modal -->
+    <div class="modal fade" id="inferenceResultsModal" tabindex="-1" aria-labelledby="inferenceResultsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="inferenceResultsModalLabel">
+                        <i class="fas fa-brain text-primary me-2"></i>Inference Results
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="inferenceResultsContent">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Close
+                    </button>
+                    <button type="button" class="btn btn-primary" id="loadVersionBtn" style="display: none;">
+                        <i class="fas fa-code-branch me-1"></i>Load New Version
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

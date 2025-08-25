@@ -799,6 +799,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             data = request.get_json() or {}
             save_as_version = data.get('save_as_version', False)
             reasoner_type = data.get('reasoner_type', 'pellet')
+            auto_promote_significant = data.get('auto_promote_significant', False)
             
             # Get ontology from database
             ontology = Ontology.query.filter_by(name=ontology_name).first()
@@ -1002,11 +1003,42 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                         )
                         
                         db.session.add(new_version)
+                        db.session.flush()  # Get the version ID
+                        
+                        # Check if we should auto-promote significant inferences
+                        auto_promoted = False
+                        if auto_promote_significant and len(inferred_relationships) > 0:
+                            # Set all versions to not current
+                            OntologyVersion.query.filter_by(
+                                ontology_id=ontology.id
+                            ).update({'is_current': False})
+                            
+                            # Make this version current
+                            new_version.is_current = True
+                            new_version.is_draft = False
+                            new_version.workflow_status = 'published'
+                            auto_promoted = True
+                            
+                            logger.info(f"Auto-promoted version {next_version_number} to current due to {len(inferred_relationships)} inferred relationships")
+                            
+                            # Re-extract entities from the new current version content
+                            try:
+                                # Import the helper function from web.app
+                                from web.app import _extract_entities_from_content
+                                entity_counts = _extract_entities_from_content(ontology, enriched_content)
+                                total_entities = sum(entity_counts.values())
+                                logger.info(f"Re-extracted {total_entities} entities for auto-promoted version {next_version_number}")
+                            except Exception as e:
+                                logger.warning(f"Failed to re-extract entities during auto-promotion: {e}")
+                                # Don't fail the auto-promotion if entity extraction fails
+                        
                         db.session.commit()
                         
                         # Create version info with appropriate message
                         if len(inferred_relationships) > 0:
                             version_message = f'Created version {next_version_number} with {len(inferred_relationships)} inferred relationships'
+                            if auto_promoted:
+                                version_message += ' (Auto-promoted to current)'
                         else:
                             version_message = f'Created version {next_version_number} with normalized URIs and validated structure'
                         
@@ -1015,7 +1047,9 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                             'version_number': next_version_number,
                             'version_tag': new_version.version_tag,
                             'version_id': new_version.id,
-                            'is_draft': True,
+                            'is_draft': not auto_promoted,
+                            'is_current': auto_promoted,
+                            'auto_promoted': auto_promoted,
                             'message': version_message
                         }
                         
