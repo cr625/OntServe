@@ -2,23 +2,34 @@
 
 This directory contains the complete implementation for upgrading the ProEthica Intermediate Ontology to full BFO compliance with real-time web UI progress tracking.
 
-## 🚀 Quick Start - Running the Progress Dashboard
+## 🚀 Quick Start - Running Both OntServe and Progress Dashboard
 
-### Option 1: Using VSCode Launch Tasks (Recommended)
-
-1. Open VSCode Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
-2. Type "Debug: Select and Start Debugging" or press `F5`
-3. Select **"ProEthica Ontology Progress Dashboard"** from the dropdown
-4. The dashboard will start automatically at: **http://localhost:5001/progress**
-
-### Option 2: Command Line
-
+### **Main OntServe Application** (Primary Editor)
 ```bash
-# From the project root (/home/chris/onto)
+# Start main OntServe on port 5003
+cd OntServe/web
+./run.sh
+```
+Access at: **http://localhost:5003/editor**
+
+### **Progress Dashboard** (BFO Upgrade Tracking)
+
+**Option 1: VSCode Launch Task (Recommended)**
+1. Press `F5` in VSCode
+2. Select **"ProEthica Ontology Progress Dashboard"**
+3. Dashboard opens at: **http://localhost:5002/progress**
+
+**Option 2: Command Line**
+```bash
+# From project root (/home/chris/onto)
 python OntServe/web/dashboard_server.py
 ```
+Access at: **http://localhost:5002/progress**
 
-Then open your browser to: **http://localhost:5001/progress**
+### **Running Both Simultaneously**
+You can run both applications at the same time:
+- **OntServe Editor**: http://localhost:5003/editor (main ontology editing)
+- **Progress Dashboard**: http://localhost:5002/progress (BFO upgrade tracking)
 
 ## 📊 Dashboard Features
 
