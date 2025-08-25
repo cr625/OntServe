@@ -13,6 +13,7 @@
         height: 600px;
         font-size: 14px;
     }
+
     .editor-toolbar {
         background-color: #f8f9fa;
         border: 1px solid #dee2e6;
@@ -20,17 +21,21 @@
         border-radius: 0.25rem 0.25rem 0 0;
         padding: 10px;
     }
+
     .version-panel {
         max-height: 400px;
         overflow-y: auto;
     }
+
     .entity-preview {
         max-height: 300px;
         overflow-y: auto;
     }
+
     .validation-message {
         font-size: 0.875rem;
     }
+
     .stats-badge {
         font-size: 0.875rem;
         margin-right: 10px;
@@ -44,11 +49,13 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('ontology_detail', ontology_id=ontology.ontology_id) }}">{{ ontology.name }}</a></li>
+                <li class="breadcrumb-item"><a
+                        href="{{ url_for('ontology_detail', ontology_id=ontology.ontology_id) }}">{{ ontology.name
+                        }}</a></li>
                 <li class="breadcrumb-item active">Edit</li>
             </ol>
         </nav>
-        
+
         <h1 class="mb-4">
             <i class="bi bi-pencil-square"></i> Edit Ontology
         </h1>
@@ -78,7 +85,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Editor Toolbar -->
             <div class="editor-toolbar">
                 <div class="row">
@@ -105,19 +112,19 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- CodeMirror Editor -->
             <div class="card-body p-0">
                 <textarea id="ontology-editor" name="content">{{ content }}</textarea>
             </div>
-            
+
             <!-- Validation Messages -->
             <div id="validation-panel" class="card-footer" style="display: none;">
                 <div id="validation-messages"></div>
             </div>
         </div>
     </div>
-    
+
     <!-- Side Panel -->
     <div class="col-md-4">
         <!-- Save Version Modal Form -->
@@ -129,8 +136,8 @@
                 <form id="save-version-form">
                     <div class="mb-3">
                         <label for="commit-message" class="form-label">Commit Message</label>
-                        <textarea class="form-control" id="commit-message" rows="3" 
-                                  placeholder="Describe your changes..." required></textarea>
+                        <textarea class="form-control" id="commit-message" rows="3"
+                            placeholder="Describe your changes..." required></textarea>
                     </div>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-success">
@@ -143,7 +150,7 @@
                 </form>
             </div>
         </div>
-        
+
         <!-- Entity Preview -->
         <div class="card mb-3">
             <div class="card-header">
@@ -155,7 +162,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Version History -->
         <div class="card">
             <div class="card-header">
@@ -164,17 +171,17 @@
             <div class="card-body version-panel">
                 <div class="list-group list-group-flush">
                     {% for version in versions %}
-                    <a href="#" class="list-group-item list-group-item-action version-item" 
-                       data-version-id="{{ version.id }}">
+                    <a href="#" class="list-group-item list-group-item-action version-item"
+                        data-version-id="{{ version.id }}">
                         <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">v{{ version.version }}</h6>
+                            <h6 class="mb-1">v{{ version.version_number }}</h6>
                             <small>{{ version.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
                         </div>
                         <p class="mb-1">{{ version.commit_message or 'No message' }}</p>
                         <small class="text-muted">by {{ version.created_by or 'system' }}</small>
                     </a>
                     {% endfor %}
-                    
+
                     {% if not versions %}
                     <p class="text-muted">No version history yet.</p>
                     {% endif %}
@@ -227,20 +234,20 @@
         extraKeys: {
             "Ctrl-/": "toggleComment",
             "Cmd-/": "toggleComment",
-            "Ctrl-S": function(cm) { saveDraft(); },
-            "Cmd-S": function(cm) { saveDraft(); }
+            "Ctrl-S": function (cm) { saveDraft(); },
+            "Cmd-S": function (cm) { saveDraft(); }
         }
     });
-    
+
     // Auto-save draft every 30 seconds
     let autoSaveInterval = setInterval(saveDraft, 30000);
     let lastSavedContent = editor.getValue();
-    
+
     // Save draft function
     function saveDraft() {
         const content = editor.getValue();
         if (content === lastSavedContent) return;
-        
+
         fetch('{{ url_for("save_draft", ontology_id=ontology.ontology_id) }}', {
             method: 'POST',
             headers: {
@@ -248,33 +255,33 @@
             },
             body: JSON.stringify({ content: content })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                lastSavedContent = content;
-                showNotification('Draft saved', 'success');
-            }
-        })
-        .catch(error => {
-            console.error('Error saving draft:', error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    lastSavedContent = content;
+                    showNotification('Draft saved', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving draft:', error);
+            });
     }
-    
+
     // Save version
-    document.getElementById('btn-save-version').addEventListener('click', function() {
+    document.getElementById('btn-save-version').addEventListener('click', function () {
         document.getElementById('save-version-card').style.display = 'block';
     });
-    
-    document.getElementById('btn-cancel-save').addEventListener('click', function() {
+
+    document.getElementById('btn-cancel-save').addEventListener('click', function () {
         document.getElementById('save-version-card').style.display = 'none';
     });
-    
-    document.getElementById('save-version-form').addEventListener('submit', function(e) {
+
+    document.getElementById('save-version-form').addEventListener('submit', function (e) {
         e.preventDefault();
-        
+
         const content = editor.getValue();
         const commitMessage = document.getElementById('commit-message').value;
-        
+
         fetch('{{ url_for("save_ontology", ontology_id=ontology.ontology_id) }}', {
             method: 'POST',
             headers: {
@@ -285,30 +292,30 @@
                 commit_message: commitMessage
             })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification('Version saved successfully', 'success');
-                document.getElementById('save-version-card').style.display = 'none';
-                document.getElementById('commit-message').value = '';
-                lastSavedContent = content;
-                
-                // Reload version history
-                location.reload();
-            } else {
-                showNotification('Error saving version: ' + data.message, 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('Error saving version', 'danger');
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Version saved successfully', 'success');
+                    document.getElementById('save-version-card').style.display = 'none';
+                    document.getElementById('commit-message').value = '';
+                    lastSavedContent = content;
+
+                    // Reload version history
+                    location.reload();
+                } else {
+                    showNotification('Error saving version: ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error saving version', 'danger');
+            });
     });
-    
+
     // Validate ontology
-    document.getElementById('btn-validate').addEventListener('click', function() {
+    document.getElementById('btn-validate').addEventListener('click', function () {
         const content = editor.getValue();
-        
+
         fetch('{{ url_for("validate_ontology") }}', {
             method: 'POST',
             headers: {
@@ -316,15 +323,15 @@
             },
             body: JSON.stringify({ content: content })
         })
-        .then(response => response.json())
-        .then(data => {
-            const panel = document.getElementById('validation-panel');
-            const messages = document.getElementById('validation-messages');
-            
-            panel.style.display = 'block';
-            
-            if (data.valid) {
-                messages.innerHTML = `
+            .then(response => response.json())
+            .then(data => {
+                const panel = document.getElementById('validation-panel');
+                const messages = document.getElementById('validation-messages');
+
+                panel.style.display = 'block';
+
+                if (data.valid) {
+                    messages.innerHTML = `
                     <div class="alert alert-success validation-message mb-0">
                         <i class="bi bi-check-circle"></i> Ontology is valid!
                         <ul class="mb-0 mt-2">
@@ -334,13 +341,13 @@
                         </ul>
                     </div>
                 `;
-                
-                // Update entity preview
-                if (data.entities) {
-                    updateEntityPreview(data.entities);
-                }
-            } else {
-                messages.innerHTML = `
+
+                    // Update entity preview
+                    if (data.entities) {
+                        updateEntityPreview(data.entities);
+                    }
+                } else {
+                    messages.innerHTML = `
                     <div class="alert alert-danger validation-message mb-0">
                         <i class="bi bi-exclamation-triangle"></i> Validation errors:
                         <ul class="mb-0 mt-2">
@@ -348,20 +355,20 @@
                         </ul>
                     </div>
                 `;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('Error validating ontology', 'danger');
-        });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error validating ontology', 'danger');
+            });
     });
-    
+
     // Update entity preview
     function updateEntityPreview(entities) {
         const preview = document.getElementById('entity-preview-content');
-        
+
         let html = '';
-        
+
         if (entities.classes && entities.classes.length > 0) {
             html += `<h6>Classes (${entities.classes.length})</h6><ul class="small">`;
             entities.classes.slice(0, 5).forEach(cls => {
@@ -372,7 +379,7 @@
             }
             html += '</ul>';
         }
-        
+
         if (entities.properties && entities.properties.length > 0) {
             html += `<h6>Properties (${entities.properties.length})</h6><ul class="small">`;
             entities.properties.slice(0, 5).forEach(prop => {
@@ -383,22 +390,22 @@
             }
             html += '</ul>';
         }
-        
+
         preview.innerHTML = html || '<p class="text-muted">No entities found.</p>';
     }
-    
+
     // Show notification
     function showNotification(message, type) {
         // You can implement a toast notification here
         console.log(`[${type}] ${message}`);
     }
-    
+
     // Version history click
     document.querySelectorAll('.version-item').forEach(item => {
-        item.addEventListener('click', function(e) {
+        item.addEventListener('click', function (e) {
             e.preventDefault();
             const versionId = this.dataset.versionId;
-            
+
             // Load version content for comparison
             fetch(`{{ url_for("get_version", ontology_id=ontology.ontology_id) }}/${versionId}`)
                 .then(response => response.json())

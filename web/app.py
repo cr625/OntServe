@@ -1192,11 +1192,11 @@ def register_routes(app):
         version_list = []
         for v in versions:
             version_list.append({
-                'version': str(v.version),
+                'version': str(v.version_number),
                 'created_at': v.created_at.isoformat() if v.created_at else '',
                 'created_by': v.created_by or 'system',
-                'commit_message': v.commit_message or '',
-                'triple_count': v.triple_count
+                'commit_message': v.change_summary or '',
+                'triple_count': 0  # This field doesn't exist on OntologyVersion
             })
         
         ontology_data = ontology.to_dict()
@@ -1249,9 +1249,9 @@ def register_routes(app):
             # Create version record
             version = OntologyVersion(
                 ontology_id=ontology.id,
-                version=OntologyVersion.query.filter_by(ontology_id=ontology.id).count() + 1,
+                version_number=OntologyVersion.query.filter_by(ontology_id=ontology.id).count() + 1,
                 content=content,
-                commit_message=commit_message,
+                change_summary=commit_message,
                 created_at=datetime.now()
             )
             db.session.add(version)
@@ -1387,8 +1387,8 @@ def register_routes(app):
         return jsonify({
             'success': True,
             'content': version.content,
-            'version': version.version,
-            'commit_message': version.commit_message,
+            'version': version.version_number,
+            'commit_message': version.change_summary,
             'created_at': version.created_at.isoformat() if version.created_at else None
         })
     
@@ -1430,11 +1430,10 @@ def register_routes(app):
             # Create version record
             version = OntologyVersion(
                 ontology_id=ontology.id,
-                version=OntologyVersion.query.filter_by(ontology_id=ontology.id).count() + 1,
+                version_number=OntologyVersion.query.filter_by(ontology_id=ontology.id).count() + 1,
                 content=content,
-                commit_message=commit_message,
-                created_at=datetime.now(),
-                triple_count=ontology.triple_count
+                change_summary=commit_message,
+                created_at=datetime.now()
             )
             db.session.add(version)
             db.session.commit()
@@ -1442,7 +1441,7 @@ def register_routes(app):
             response_data = {
                 'success': True, 
                 'version_id': version.id,
-                'version': version.version
+                'version': version.version_number
             }
             
             # If requested, extract entities (simplified for now)
@@ -1515,8 +1514,8 @@ def register_routes(app):
         
         return jsonify({
             'content': version.content,
-            'version': version.version,
-            'commit_message': version.commit_message,
+            'version': version.version_number,
+            'commit_message': version.change_summary,
             'created_at': version.created_at.isoformat() if version.created_at else None
         })
     

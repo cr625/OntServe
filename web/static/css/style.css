@@ -1,0 +1,300 @@
+/* OntServe Basic Styles */
+
+/* Bootstrap override and custom styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+/* Card improvements */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.15s ease-in-out;
+    position: relative;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Ontology card specific styling */
+.ontology-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 1.5rem;
+}
+
+.ontology-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Fix dropdown menu z-index and positioning - ABSOLUTE SOLUTION */
+.ontology-card {
+    position: relative;
+    z-index: auto;
+}
+
+/* Set dropdown to use absolute positioning with very high z-index */
+.ontology-card .dropdown {
+    position: relative;
+}
+
+.ontology-card .dropdown-menu {
+    z-index: 999999 !important;
+    min-width: 200px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: none;
+    position: absolute !important;
+    right: 0 !important;
+    left: auto !important;
+    top: 100% !important;
+    transform: none !important;
+}
+
+/* When dropdown is shown, make sure it's above everything */
+.ontology-card .dropdown.show .dropdown-menu {
+    z-index: 999999 !important;
+    position: absolute !important;
+    right: 0 !important;
+    left: auto !important;
+}
+
+/* Disable ALL overflow hiding that could clip dropdowns */
+.row,
+.col-md-6,
+.col-lg-4,
+.container,
+.container-fluid,
+.card,
+.card-header,
+.ontology-card {
+    overflow: visible !important;
+}
+
+/* Make sure Bootstrap grid doesn't interfere */
+#ontologyGrid {
+    overflow: visible !important;
+}
+
+#ontologyGrid .col-md-6,
+#ontologyGrid .col-lg-4 {
+    overflow: visible !important;
+    position: static !important;
+}
+
+/* Ensure dropdown button positioning */
+.ontology-card .card-header .dropdown {
+    position: relative;
+    z-index: 1000;
+}
+
+.ontology-card .dropdown-toggle {
+    border: none;
+    background: transparent;
+}
+
+.ontology-card .dropdown-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Card footer improvements */
+.ontology-card .card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 0.75rem 1rem;
+}
+
+.ontology-card .card-footer .btn-group {
+    margin-bottom: 0.5rem;
+}
+
+.ontology-card .card-footer .btn-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+}
+
+/* Improve button spacing in card footer */
+.card-footer .d-flex {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.card-footer .btn-group-sm .btn {
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Version info styling */
+.version-info {
+    font-size: 0.75rem;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+/* Button improvements */
+.btn {
+    border-radius: 0.375rem;
+    font-weight: 500;
+}
+
+/* CodeMirror editor improvements */
+.CodeMirror {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    line-height: 1.5;
+}
+
+/* Entity list improvements */
+.entity-list .list-group-item {
+    border-left: 3px solid transparent;
+    transition: border-left-color 0.2s ease;
+}
+
+.entity-list .list-group-item:hover {
+    border-left-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+/* Badge improvements */
+.badge {
+    font-weight: 500;
+}
+
+/* Table improvements */
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Form improvements */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Ontology detail page improvements */
+.ontology-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 0.5rem;
+}
+
+/* Version history styling */
+.version-item {
+    transition: all 0.2s ease;
+}
+
+.version-item:hover {
+    background-color: #e9ecef;
+    border-left: 3px solid #007bff;
+}
+
+/* Statistics cards */
+.stats-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.stats-card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error states */
+.error-message {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.success-message {
+    color: #28a745;
+    font-weight: 500;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .ontology-header {
+        padding: 1rem;
+    }
+
+    .stats-card h3 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Editor specific styles */
+.editor-toolbar {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+}
+
+.validation-panel {
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 1rem;
+}
+
+/* Foundation ontology highlighting */
+.foundation-ontology {
+    border-left: 4px solid #17a2b8;
+}
+
+.foundation-ontology .card-header {
+    background-color: #e1f5fe;
+}
+
+/* BFO alignment status */
+.bfo-aligned {
+    border-left: 4px solid #28a745;
+}
+
+.bfo-needs-alignment {
+    border-left: 4px solid #ffc107;
+}
+
+.bfo-not-aligned {
+    border-left: 4px solid #dc3545;
+}
