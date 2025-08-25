@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:iao="http://purl.obolibrary.org/obo/IAO_"
+    xmlns:bfo="http://purl.obolibrary.org/obo/BFO_"
+    xmlns:ro="http://purl.obolibrary.org/obo/RO_"
+    xmlns:time="http://www.w3.org/2006/time#"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:proeth="http://proethica.org/ontology/core#"
+    xml:base="http://proethica.org/ontology/core">
+
+  <!-- Ontology Declaration -->
+  <owl:Ontology rdf:about="http://proethica.org/ontology/core">
+    <rdfs:label xml:lang="en">ProEthica Core Ontology</rdfs:label>
+    <dc:creator xml:lang="en">ProEthica AI</dc:creator>
+    <dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2025-08-25</dc:date>
+    <rdfs:comment xml:lang="en">Lightweight upper module defining only the highest-level tuple concepts and relations for professional ethics. Designed to simplify imports for derived ontologies across domains.</rdfs:comment>
+    <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1.0.0</owl:versionInfo>
+    <owl:imports rdf:resource="http://purl.obolibrary.org/obo/bfo.owl"/>
+    <owl:imports rdf:resource="http://purl.obolibrary.org/obo/iao.owl"/>
+    <owl:imports rdf:resource="http://purl.obolibrary.org/obo/ro.owl"/>
+    <skos:note xml:lang="en">This core module provides the minimal conceptual framework corresponding to the ProEthica formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs). Domain-specific ontologies should import this module and extend these concepts as needed.</skos:note>
+  </owl:Ontology>
+
+  <!-- ================================================================= -->
+  <!-- Core Tuple Concepts - D=(R,P,O,S,Rs,A,E,Ca,Cs) Formal Specification -->
+  <!-- ================================================================= -->
+
+  <!-- R (Roles) - BFO:Role alignment -->
+  <owl:Class rdf:about="http://proethica.org/ontology/core#Role">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/BFO_0000023"/>
+    <rdfs:label xml:lang="en">Role</rdfs:label>
+    <skos:definition xml:lang="en">A role that can be realized by processes involving professional duties and ethical obligations. This is the R component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs).</skos:definition>
+    <skos:note xml:lang="en">Abstract concept - domain ontologies should subclass for specific role types (e.g., EngineerRole, LawyerRole).</skos:note>
+  </owl:Class>
+
+  <!-- P (Principles) - IAO:Information Content Entity alignment -->
+  <owl:Class rdf:about="http://proethica.org/ontology/core#Principle">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/IAO_0000030"/>
+    <rdfs:label xml:lang="en">Principle</rdfs:label>
+    <skos:definition xml:lang="en">An information content entity representing ethical values and guidelines for conduct. This is the P component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs).</skos:definition>
+    <skos:note xml:lang="en">Abstract concept - domain ontologies should subclass for specific principles (e.g., PublicSafetyPrinciple, PrivacyPrinciple).</skos:note>
+  </owl:Class>
+
+  <!-- O (Obligations) - IAO:Information Content Entity alignment -->
+  <owl:Class rdf:about="http://proethica.org/ontology/core#Obligation">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/IAO_0000030"/>
+    <rdfs:label xml:lang="en">Obligation</rdfs:label>
+    <skos:definition xml:lang="en">An information content entity expressing required actions or behaviors in professional contexts. This is the O component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs).</skos:definition>
+    <skos:note xml:lang="en">Abstract concept - domain ontologies should subclass for specific obligation types (e.g., ReportingObligation, SafetyObligation).</skos:note>
+  </owl:Class>
+
+  <!-- S (States) - BFO:Quality alignment -->
+  <owl:Class rdf:about="http://proethica.org/ontology/core#State">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/BFO_0000019"/>
+    <rdfs:label xml:lang="en">State</rdfs:label>
+    <skos:definition xml:lang="en">A quality representing conditions that affect ethical decisions and professional conduct. This is the S component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs).</skos:definition>
+    <skos:note xml:lang="en">Abstract concept - domain ontologies should subclass for specific states (e.g., EmergencyState, ConflictState).</skos:note>
+  </owl:Class>
+
+  <!-- Rs (Resources) - BFO:Continuant alignment -->
+  <owl:Class rdf:about="http://proethica.org/ontology/core#Resource">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/BFO_0000002"/>
+    <rdfs:label xml:lang="en">Resource</rdfs:label>
+    <skos:definition xml:lang="en">A continuant entity that serves as input or reference for professional activities. This is the Rs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs).</skos:definition>
+    <skos:note xml:lang="en">Abstract concept - domain ontologies should subclass for specific resources (e.g., TechnicalResource, InformationResource).</skos:note>
+  </owl:Class>
+
+  <!-- A (Actions) - BFO:Process alignment -->
+  <owl:Class rdf:about="http://proethica.org/ontology/core#Action">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/BFO_0000015"/>
+    <rdfs:label xml:lang="en">Action</rdfs:label>
+    <skos:definition xml:lang="en">A process directed toward achieving specific goals in professional contexts. This is the A component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs).</skos:definition>
+    <skos:note xml:lang="en">Abstract concept - domain ontologies should subclass for specific actions (e.g., DesignAction, ConsultationAction).</skos:note>
+  </owl:Class>
+
+  <!-- E (Events) - BFO:Process alignment -->
+  <owl:Class rdf:about="http://proethica.org/ontology/core#Event">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/BFO_0000015"/>
+    <rdfs:label xml:lang="en">Event</rdfs:label>
+    <skos:definition xml:lang="en">A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs).</skos:definition>
+    <skos:note xml:lang="en">Abstract concept - domain ontologies should subclass for specific events (e.g., ViolationEvent, ComplianceEvent).</skos:note>
+  </owl:Class>
+
+  <!-- Ca (Capabilities) - BFO:Disposition alignment -->
+  <owl:Class rdf:about="http://proethica.org/ontology/core#Capability">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/BFO_0000016"/>
+    <rdfs:label xml:lang="en">Capability</rdfs:label>
+    <skos:definition xml:lang="en">A disposition that can be realized by specific types of actions or processes in professional contexts. This is the Ca component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs).</skos:definition>
+    <skos:note xml:lang="en">Abstract concept - domain ontologies should subclass for specific capabilities (e.g., TechnicalCapability, LeadershipCapability).</skos:note>
+  </owl:Class>
+
+  <!-- Cs (Constraints) - Distributed across other components -->
+  <!-- Note: Constraints are integrated throughout the framework rather than being a separate class hierarchy -->
+
+  <!-- ================================================================= -->
+  <!-- Core Supporting Classes -->
+  <!-- ================================================================= -->
+
+  <!-- Agent - BFO:Material Entity alignment -->
+  <owl:Class rdf:about="http://proethica.org/ontology/core#Agent">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/BFO_0000040"/>
+    <rdfs:label xml:lang="en">Agent</rdfs:label>
+    <skos:definition xml:lang="en">A material entity capable of bearing roles and performing intentional actions in professional contexts.</skos:definition>
+    <skos:note xml:lang="en">Abstract concept - domain ontologies should subclass for specific agent types (e.g., Professional, Organization, System).</skos:note>
+  </owl:Class>
+
+  <!-- ================================================================= -->
+  <!-- Core Object Properties -->
+  <!-- ================================================================= -->
+
+  <!-- Role Relations -->
+  <owl:ObjectProperty rdf:about="http://proethica.org/ontology/core#hasRole">
+    <rdfs:subPropertyOf rdf:resource="http://purl.obolibrary.org/obo/RO_0000087"/>
+    <rdfs:domain rdf:resource="http://proethica.org/ontology/core#Agent"/>
+    <rdfs:range rdf:resource="http://proethica.org/ontology/core#Role"/>
+    <rdfs:label xml:lang="en">has role</rdfs:label>
+    <skos:definition xml:lang="en">Relates an agent to a role it bears.</skos:definition>
+  </owl:ObjectProperty>
+
+  <!-- Principle Relations -->
+  <owl:ObjectProperty rdf:about="http://proethica.org/ontology/core#adheresToPrinciple">
+    <rdfs:subPropertyOf rdf:resource="http://purl.obolibrary.org/obo/IAO_0000136"/>
+    <rdfs:domain rdf:resource="http://proethica.org/ontology/core#Role"/>
+    <rdfs:range rdf:resource="http://proethica.org/ontology/core#Principle"/>
+    <rdfs:label xml:lang="en">adheres to principle</rdfs:label>
+    <skos:definition xml:lang="en">Relates a role to principles that guide its conduct.</skos:definition>
+  </owl:ObjectProperty>
+
+  <!-- Obligation Relations -->
+  <owl:ObjectProperty rdf:about="http://proethica.org/ontology/core#hasObligation">
+    <rdfs:domain rdf:resource="http://proethica.org/ontology/core#Role"/>
+    <rdfs:range rdf:resource="http://proethica.org/ontology/core#Obligation"/>
+    <rdfs:label xml:lang="en">has obligation</rdfs:label>
+    <skos:definition xml:lang="en">Relates a role to its professional obligations.</skos:definition>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="http://proethica.org/ontology/core#fulfillsObligation">
+    <rdfs:subPropertyOf rdf:resource="http://purl.obolibrary.org/obo/RO_0000057"/>
+    <rdfs:domain rdf:resource="http://proethica.org/ontology/core#Action"/>
+    <rdfs:range rdf:resource="http://proethica.org/ontology/core#Obligation"/>
+    <rdfs:label xml:lang="en">fulfills obligation</rdfs:label>
+    <skos:definition xml:lang="en">Relates an action to obligations it fulfills.</skos:definition>
+  </owl:ObjectProperty>
+
+  <!-- State Relations -->
+  <owl:ObjectProperty rdf:about="http://proethica.org/ontology/core#hasState">
+    <rdfs:subPropertyOf rdf:resource="http://purl.obolibrary.org/obo/BFO_0000051"/>
+    <rdfs:domain rdf:resource="http://proethica.org/ontology/core#Action"/>
+    <rdfs:range rdf:resource="http://proethica.org/ontology/core#State"/>
+    <rdfs:label xml:lang="en">has state</rdfs:label>
+    <skos:definition xml:lang="en">Relates an action to contextual states that affect its evaluation.</skos:definition>
+  </owl:ObjectProperty>
+
+  <!-- Resource Relations -->
+  <owl:ObjectProperty rdf:about="http://proethica.org/ontology/core#usesResource">
+    <rdfs:domain rdf:resource="http://proethica.org/ontology/core#Action"/>
+    <rdfs:range rdf:resource="http://proethica.org/ontology/core#Resource"/>
+    <rdfs:label xml:lang="en">uses resource</rdfs:label>
+    <skos:definition xml:lang="en">Relates an action to resources it utilizes.</skos:definition>
+  </owl:ObjectProperty>
+
+  <!-- Action Relations -->
+  <owl:ObjectProperty rdf:about="http://proethica.org/ontology/core#performsAction">
+    <rdfs:subPropertyOf rdf:resource="http://purl.obolibrary.org/obo/RO_0000056"/>
+    <rdfs:domain rdf:resource="http://proethica.org/ontology/core#Agent"/>
+    <rdfs:range rdf:resource="http://proethica.org/ontology/core#Action"/>
+    <rdfs:label xml:lang="en">performs action</rdfs:label>
+    <skos:definition xml:lang="en">Relates an agent to actions they perform.</skos:definition>
+  </owl:ObjectProperty>
+
+  <!-- Event Relations -->
+  <owl:ObjectProperty rdf:about="http://proethica.org/ontology/core#triggersEvent">
+    <rdfs:subPropertyOf rdf:resource="http://purl.obolibrary.org/obo/RO_0000012"/>
+    <rdfs:domain rdf:resource="http://proethica.org/ontology/core#Action"/>
+    <rdfs:range rdf:resource="http://proethica.org/ontology/core#Event"/>
+    <rdfs:label xml:lang="en">triggers event</rdfs:label>
+    <skos:definition xml:lang="en">Relates an action to events it causes or initiates.</skos:definition>
+  </owl:ObjectProperty>
+
+  <!-- Capability Relations -->
+  <owl:ObjectProperty rdf:about="http://proethica.org/ontology/core#hasCapability">
+    <rdfs:domain rdf:resource="http://proethica.org/ontology/core#Agent"/>
+    <rdfs:range rdf:resource="http://proethica.org/ontology/core#Capability"/>
+    <rdfs:label xml:lang="en">has capability</rdfs:label>
+    <skos:definition xml:lang="en">Relates an agent to capabilities they possess.</skos:definition>
+  </owl:ObjectProperty>
+
+  <owl:ObjectProperty rdf:about="http://proethica.org/ontology/core#realizesCapability">
+    <rdfs:subPropertyOf rdf:resource="http://purl.obolibrary.org/obo/BFO_0000054"/>
+    <rdfs:domain rdf:resource="http://proethica.org/ontology/core#Action"/>
+    <rdfs:range rdf:resource="http://proethica.org/ontology/core#Capability"/>
+    <rdfs:label xml:lang="en">realizes capability</rdfs:label>
+    <skos:definition xml:lang="en">Relates an action to capabilities it realizes.</skos:definition>
+  </owl:ObjectProperty>
+
+  <!-- ================================================================= -->
+  <!-- Core Disjointness Axioms -->
+  <!-- ================================================================= -->
+
+  <!-- Tuple components are conceptually distinct -->
+  <owl:AllDisjointClasses>
+    <owl:members rdf:parseType="Collection">
+      <rdf:Description rdf:about="http://proethica.org/ontology/core#Role"/>
+      <rdf:Description rdf:about="http://proethica.org/ontology/core#Principle"/>
+      <rdf:Description rdf:about="http://proethica.org/ontology/core#Obligation"/>
+      <rdf:Description rdf:about="http://proethica.org/ontology/core#State"/>
+      <rdf:Description rdf:about="http://proethica.org/ontology/core#Resource"/>
+    </owl:members>
+  </owl:AllDisjointClasses>
+
+  <!-- Processes are distinct -->
+  <owl:AllDisjointClasses>
+    <owl:members rdf:parseType="Collection">
+      <rdf:Description rdf:about="http://proethica.org/ontology/core#Action"/>
+      <rdf:Description rdf:about="http://proethica.org/ontology/core#Event"/>
+    </owl:members>
+  </owl:AllDisjointClasses>
+
+  <!-- BFO foundational disjointness preserved -->
+  <owl:AllDisjointClasses>
+    <owl:members rdf:parseType="Collection">
+      <rdf:Description rdf:about="http://purl.obolibrary.org/obo/BFO_0000002"/>
+      <rdf:Description rdf:about="http://purl.obolibrary.org/obo/BFO_0000003"/>
+    </owl:members>
+  </owl:AllDisjointClasses>
+
+  <!-- ================================================================= -->
+  <!-- Usage Guidelines (as annotations) -->
+  <!-- ================================================================= -->
+
+  <owl:AnnotationProperty rdf:about="http://proethica.org/ontology/core#usageGuideline">
+    <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2004/02/skos/core#note"/>
+    <rdfs:label xml:lang="en">Usage Guideline</rdfs:label>
+    <skos:definition xml:lang="en">Provides guidance for extending and using this core ontology in domain-specific contexts.</skos:definition>
+  </owl:AnnotationProperty>
+
+  <!-- Usage guidelines for the ontology -->
+  <rdf:Description rdf:about="http://proethica.org/ontology/core">
+    <proeth:usageGuideline xml:lang="en">Import this core module in domain-specific ontologies using: owl:imports &lt;http://proethica.org/ontology/core&gt; .</proeth:usageGuideline>
+    <proeth:usageGuideline xml:lang="en">Extend core classes for domain-specific concepts: eng:EngineerRole rdfs:subClassOf proeth:Role .</proeth:usageGuideline>
+    <proeth:usageGuideline xml:lang="en">Use namespace prefix 'proeth' for this core ontology when importing.</proeth:usageGuideline>
+    <proeth:usageGuideline xml:lang="en">This core ontology is designed to be lightweight - complex domain-specific features should be added in extensions.</proeth:usageGuideline>
+  </rdf:Description>
+
+</rdf:RDF>

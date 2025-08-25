@@ -1,0 +1,233 @@
+@prefix : <http://proethica.org/ontology/intermediate#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix iao: <http://purl.obolibrary.org/obo/> .
+@prefix ro: <http://purl.obolibrary.org/obo/> .
+@base <http://proethica.org/ontology/intermediate> .
+
+#################################################################
+#    Ontology Declaration
+#################################################################
+
+<http://proethica.org/ontology/intermediate> rdf:type owl:Ontology ;
+    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
+    owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
+    owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
+    rdfs:label "ProEthica Intermediate Ontology"@en ;
+    rdfs:comment "BFO-aligned intermediate ontology for professional ethics"@en ;
+    owl:versionInfo "2.0.0" ;
+    dc:creator "ProEthica AI"@en ;
+    dc:date "2025-08-25"^^xsd:date .
+
+#################################################################
+#    BFO-Aligned Core Entity Types
+#################################################################
+
+# Role → BFO:Role (Realizable Entity)
+:Role rdf:type owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000023 ; # role
+    rdfs:label "Professional Role"@en ;
+    iao:definition "A role that inheres in a material entity and can be realized by processes involving professional duties and ethical obligations."@en .
+
+:ProfessionalRole rdf:type owl:Class ;
+    rdfs:subClassOf :Role ,
+        [ a owl:Restriction ;
+          owl:onProperty bfo:BFO_0000052 ; # inheres_in
+          owl:someValuesFrom bfo:BFO_0000040 ] ; # material entity
+    rdfs:label "Professional Role"@en ;
+    iao:definition "A professional role with formal obligations and accountability."@en .
+
+# Principle → IAO:Information Content Entity  
+:Principle rdf:type owl:Class ;
+    rdfs:subClassOf iao:IAO_0000030 ; # information content entity
+    rdfs:label "Ethical Principle"@en ;
+    iao:definition "An information content entity that represents fundamental ethical values and guidelines for conduct."@en .
+
+:IntegrityPrinciple rdf:type owl:Class ;
+    rdfs:subClassOf :Principle ;
+    rdfs:label "Integrity Principle"@en ;
+    iao:definition "A principle that guides honest and truthful professional conduct."@en .
+
+# Obligation → Deontic ICEs
+:DeonticStatement rdf:type owl:Class ;
+    rdfs:subClassOf iao:IAO_0000030 ; # information content entity
+    rdfs:label "Deontic Statement"@en ;
+    iao:definition "An information content entity that expresses permissions, obligations, or prohibitions."@en .
+
+:Obligation rdf:type owl:Class ;
+    rdfs:subClassOf :DeonticStatement ;
+    rdfs:label "Professional Obligation"@en ;
+    iao:definition "A deontic statement specifying professional duties and responsibilities."@en .
+
+:Permission rdf:type owl:Class ;
+    rdfs:subClassOf :DeonticStatement ;
+    rdfs:label "Permission"@en ;
+    iao:definition "A deontic statement allowing specific actions or states."@en .
+
+:Prohibition rdf:type owl:Class ;
+    rdfs:subClassOf :DeonticStatement ;
+    rdfs:label "Prohibition"@en ;
+    iao:definition "A deontic statement forbidding specific actions or states."@en .
+
+# State → BFO:Quality
+:State rdf:type owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000019 ; # quality
+    rdfs:label "Contextual State"@en ;
+    iao:definition "A quality that inheres in an entity and affects ethical decisions."@en .
+
+:SafetyHazardState rdf:type owl:Class ;
+    rdfs:subClassOf :State ,
+        [ a owl:Restriction ;
+          owl:onProperty bfo:BFO_0000052 ; # inheres_in
+          owl:someValuesFrom bfo:BFO_0000040 ] ; # material entity
+    rdfs:label "Safety Hazard State"@en ;
+    iao:definition "A quality indicating the presence of safety hazards in a system."@en .
+
+# Resource → Bifurcated Model
+:Resource rdf:type owl:Class ;
+    rdfs:label "Resource"@en ;
+    iao:definition "An entity that serves as input or reference for professional activities."@en .
+
+:MaterialResource rdf:type owl:Class ;
+    rdfs:subClassOf :Resource, bfo:BFO_0000040 ; # material entity
+    rdfs:label "Material Resource"@en ;
+    iao:definition "A physical resource used in professional activities."@en .
+
+:InformationResource rdf:type owl:Class ;
+    rdfs:subClassOf :Resource, iao:IAO_0000030 ; # information content entity
+    rdfs:label "Information Resource"@en ;
+    iao:definition "An information resource used in professional activities."@en .
+
+# Action → BFO:Process with Agent
+:Event rdf:type owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000015 ; # process
+    rdfs:label "Event"@en ;
+    iao:definition "A process that occurs in ethical scenarios."@en .
+
+:Action rdf:type owl:Class ;
+    rdfs:subClassOf :Event ,
+        [ a owl:Restriction ;
+          owl:onProperty ro:RO_0002218 ; # has_agent  
+          owl:someValuesFrom bfo:BFO_0000040 ] ; # material entity
+    rdfs:label "Intentional Action"@en ;
+    iao:definition "A process that has an agent participant and is directed toward achieving specific goals."@en .
+
+# Capability → BFO:Disposition
+:Capability rdf:type owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000016 ; # disposition
+    rdfs:label "Professional Capability"@en ;
+    iao:definition "A disposition that inheres in an agent and can be realized by specific types of actions or processes."@en .
+
+:RiskAssessmentCapability rdf:type owl:Class ;
+    rdfs:subClassOf :Capability ,
+        [ a owl:Restriction ;
+          owl:onProperty bfo:BFO_0000052 ; # inheres_in
+          owl:someValuesFrom :Engineer ] ,
+        [ a owl:Restriction ;
+          owl:onProperty bfo:BFO_0000054 ; # realized_in
+          owl:someValuesFrom :RiskAssessmentAction ] ;
+    rdfs:label "Risk Assessment Capability"@en ;
+    iao:definition "The disposition to perform risk assessment activities."@en .
+
+# Constraint → Context-Dependent
+:LicensureRequirement rdf:type owl:Class ;
+    rdfs:subClassOf iao:IAO_0000030 ; # information content entity
+    rdfs:label "Licensure Requirement"@en ;
+    iao:definition "An information content entity specifying professional licensing requirements."@en .
+
+:LoadLimitConstraint rdf:type owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000019 , # quality
+        [ a owl:Restriction ;
+          owl:onProperty bfo:BFO_0000052 ; # inheres_in
+          owl:someValuesFrom :EngineeringSystem ] ;
+    rdfs:label "Load Limit Constraint"@en ;
+    iao:definition "A quality representing the maximum load capacity of a system."@en .
+
+#################################################################
+#    Supporting Classes
+#################################################################
+
+:Engineer rdf:type owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000040 ; # material entity
+    rdfs:label "Engineer"@en ;
+    iao:definition "A professional agent with engineering expertise and responsibilities."@en .
+
+:EngineeringSystem rdf:type owl:Class ;
+    rdfs:subClassOf bfo:BFO_0000040 ; # material entity  
+    rdfs:label "Engineering System"@en ;
+    iao:definition "A material entity designed and constructed for engineering purposes."@en .
+
+:RiskAssessmentAction rdf:type owl:Class ;
+    rdfs:subClassOf :Action ;
+    rdfs:label "Risk Assessment Action"@en ;
+    iao:definition "An action involving the evaluation and analysis of potential risks."@en .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+:hasRole rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf ro:RO_0000087 ; # has_role
+    rdfs:domain bfo:BFO_0000040 ; # material entity
+    rdfs:range :Role ;
+    rdfs:label "has role"@en ;
+    iao:definition "Relates an entity to a role it bears."@en .
+
+:hasObligation rdf:type owl:ObjectProperty ;
+    rdfs:domain :Role ;
+    rdfs:range :Obligation ;
+    rdfs:label "has obligation"@en ;
+    iao:definition "Relates a role to the professional obligations borne by entities bearing that role."@en .
+
+:adheresToPrinciple rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf iao:IAO_0000136 ; # is_about (inverse)
+    rdfs:domain :Role ;
+    rdfs:range :Principle ;
+    rdfs:label "adheres to principle"@en ;
+    iao:definition "Relates a role to ethical principles that normatively govern that role."@en .
+
+:fulfillsObligation rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf ro:RO_0002211 ; # realizes
+    rdfs:domain :Action ;
+    rdfs:range :Obligation ;
+    rdfs:label "fulfills obligation"@en ;
+    iao:definition "Relates an action to an obligation it fulfills."@en .
+
+:constrains rdf:type owl:ObjectProperty ;
+    rdfs:domain :DeonticStatement ;
+    rdfs:range :Action ;
+    rdfs:label "constrains"@en ;
+    iao:definition "Relates a deontic statement to actions it constrains."@en .
+
+:appliesToRole rdf:type owl:ObjectProperty ;
+    rdfs:domain :DeonticStatement ;
+    rdfs:range :Role ;
+    rdfs:label "applies to role"@en ;
+    iao:definition "Relates a deontic statement to roles it applies to."@en .
+
+#################################################################
+#    Systematic Disjointness Axioms
+#################################################################
+
+# Continuant vs Occurrent disjointness
+[] a owl:Axiom ;
+   owl:disjointClasses ( bfo:BFO_0000002 bfo:BFO_0000003 ) . # continuant vs occurrent
+
+# Material vs Information Resource disjointness  
+[] a owl:Axiom ;
+   owl:disjointClasses ( :MaterialResource :InformationResource ) .
+
+# Deontic statement types disjointness
+[] a owl:Axiom ;
+   owl:disjointClasses ( :Obligation :Permission ) .
+   
+[] a owl:Axiom ;
+   owl:disjointClasses ( :Obligation :Prohibition ) .
+   
+[] a owl:Axiom ;
+   owl:disjointClasses ( :Permission :Prohibition ) .

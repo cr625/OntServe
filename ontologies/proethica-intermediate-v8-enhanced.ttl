@@ -1,0 +1,830 @@
+@prefix : <http://proethica.org/ontology/intermediate#> .
+@prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix iao: <http://purl.obolibrary.org/obo/IAO_> .
+@prefix ro: <http://purl.obolibrary.org/obo/RO_> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+# Ontology Declaration
+<http://proethica.org/ontology/intermediate> a owl:Ontology ;
+    rdfs:label "ProEthica Intermediate Ontology"@en ;
+    dc:creator "ProEthica AI"@en ;
+    dc:date "2025-08-25"^^xsd:date ;
+    rdfs:comment "Enhanced BFO-aligned ontology for professional ethics with class-instance boundaries, temporal scope, evaluation criteria, and advanced constraints"@en ;
+    owl:versionInfo "8.0.0"^^xsd:string ;
+    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
+    owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
+    owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
+    owl:imports <http://www.w3.org/2006/time> ;
+    skos:note "This ontology defines abstract class hierarchies. Instances should be modeled in domain-specific extensions."@en .
+
+###############################################################
+# Annotation Properties for Class-Instance Boundary Clarity
+###############################################################
+
+proeth:classificationGuidance a owl:AnnotationProperty ;
+    rdfs:subPropertyOf skos:scopeNote ;
+    rdfs:label "Classification Guidance"@en ;
+    iao:0000115 "Provides guidance on when to model as a class versus an individual."@en .
+
+proeth:instanceExample a owl:AnnotationProperty ;
+    rdfs:subPropertyOf skos:example ;
+    rdfs:label "Instance Example"@en ;
+    iao:0000115 "Provides example of how instances of this class would be created."@en .
+
+proeth:operationalizationNote a owl:AnnotationProperty ;
+    rdfs:subPropertyOf skos:note ;
+    rdfs:label "Operationalization Note"@en ;
+    iao:0000115 "Guidance for operationalizing this concept in SHACL, SWRL, or other tools."@en .
+
+###############################################################
+# Core Parent Classes (Enhanced with Clear Instance Guidance)
+###############################################################
+
+# Role - aligned with BFO:Role
+proeth:Role a owl:Class ;
+    rdfs:subClassOf bfo:0000023 ;  # BFO:role
+    rdfs:label "Professional Role"@en ;
+    iao:0000115 "A role that inheres in a material entity and can be realized by processes involving professional duties and ethical obligations."@en ;
+    proeth:classificationGuidance "Model as class for role types (e.g., Engineer, Lawyer). Create individuals for specific role instances (e.g., senior_engineer_alice_123)."@en ;
+    proeth:instanceExample "Individual: eng:alice_senior_engineer_role_2025 rdf:type proeth:ProfessionalEngineerRole"@en ;
+    proeth:operationalizationNote "Use SHACL to enforce that role instances must have exactly one bearer agent."@en .
+
+# Principle - aligned with IAO:Information Content Entity
+proeth:Principle a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty iao:0000136 ;  # is about
+                      owl:someValuesFrom proeth:EthicalConduct ] ;
+    rdfs:label "Ethical Principle"@en ;
+    iao:0000115 "An information content entity that represents fundamental ethical values and guidelines for conduct."@en ;
+    proeth:classificationGuidance "Model as class for principle types (e.g., IntegrityPrinciple). Create individuals for specific principle statements (e.g., nspe_integrity_principle_1)."@en ;
+    proeth:instanceExample "Individual: eng:nspe_public_safety_principle rdf:type proeth:PublicSafetyPrinciple"@en ;
+    proeth:operationalizationNote "Link principle individuals to specific text content and authoritative sources using IAO properties."@en .
+
+# DeonticStatement - parent for Obligation/Permission/Prohibition
+proeth:DeonticStatement a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasTemporalScope ;
+                      owl:someValuesFrom time:Interval ] ;
+    rdfs:label "Deontic Statement"@en ;
+    iao:0000115 "An information content entity that expresses permissions, obligations, or prohibitions with temporal validity."@en ;
+    proeth:classificationGuidance "Model as class for deontic types. Create individuals for specific obligations/permissions/prohibitions (e.g., reporting_obligation_123)."@en ;
+    proeth:instanceExample "Individual: eng:report_safety_hazard_obligation_1 rdf:type proeth:PublicSafetyObligation"@en ;
+    proeth:operationalizationNote "Use SHACL cardinality constraints to enforce obligation structure and temporal bounds."@en .
+
+# Action - aligned with BFO:Process
+proeth:Action a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # BFO:process
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty ro:0000057 ;  # has participant
+                      owl:someValuesFrom proeth:Agent ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty bfo:0000008 ;  # occurs during
+                      owl:someValuesFrom time:Interval ] ;
+    rdfs:label "Intentional Action"@en ;
+    iao:0000115 "A process that has an agent participant and is directed toward achieving specific goals within a temporal interval."@en ;
+    proeth:classificationGuidance "Model as class for action types. Create individuals for specific action instances with temporal bounds."@en ;
+    proeth:instanceExample "Individual: eng:bridge_inspection_2025_03_15 rdf:type proeth:RiskAssessmentAction"@en .
+
+# Event - aligned with BFO:Process
+proeth:Event a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # BFO:process
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty bfo:0000008 ;  # occurs during
+                      owl:someValuesFrom time:Interval ] ;
+    rdfs:label "Event"@en ;
+    iao:0000115 "A process that occurs in ethical scenarios within a specific temporal interval, which may or may not involve intentional agency."@en ;
+    proeth:classificationGuidance "Model as class for event types. Create individuals for specific event instances with precise temporal intervals."@en .
+
+# State - aligned with BFO:Quality
+proeth:State a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # BFO:quality
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty bfo:0000008 ;  # occurs during
+                      owl:someValuesFrom time:Interval ] ;
+    rdfs:label "State"@en ;
+    iao:0000115 "A quality that represents conditions affecting ethical decisions, with temporal validity."@en ;
+    proeth:classificationGuidance "Model as class for state types. Create individuals for specific state instances with temporal bounds."@en .
+
+# Capability - aligned with BFO:Disposition
+proeth:Capability a owl:Class ;
+    rdfs:subClassOf bfo:0000016 ;  # BFO:disposition
+    rdfs:label "Professional Capability"@en ;
+    iao:0000115 "A disposition that inheres in an agent and can be realized by specific types of actions or processes."@en ;
+    proeth:classificationGuidance "Model as class for capability types. Create individuals for specific capability instances with training/competency links."@en ;
+    proeth:instanceExample "Individual: eng:alice_structural_analysis_capability rdf:type proeth:TechnicalCompetency"@en .
+
+# Resource - aligned with BFO continuant
+proeth:Resource a owl:Class ;
+    rdfs:subClassOf bfo:0000002 ;  # BFO:continuant
+    rdfs:label "Resource"@en ;
+    iao:0000115 "A continuant entity that serves as input or reference for professional activities."@en ;
+    proeth:classificationGuidance "Model as class for resource types. Create individuals for specific resource instances."@en .
+
+# Agent - aligned with BFO:Material Entity
+proeth:Agent a owl:Class ;
+    rdfs:subClassOf bfo:0000040 ;  # BFO:material entity
+    rdfs:label "Agent"@en ;
+    iao:0000115 "A material entity capable of bearing roles and performing intentional actions."@en ;
+    proeth:classificationGuidance "Model as class for agent types. Create individuals for specific people, organizations, or AI systems."@en .
+
+# EthicalConduct - for principle alignment
+proeth:EthicalConduct a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # BFO:process
+    rdfs:label "Ethical Conduct"@en ;
+    iao:0000115 "Processes and behaviors that align with ethical principles."@en .
+
+###############################################################
+# Temporal and Modal Scope Framework
+###############################################################
+
+# Time Interval Extensions
+proeth:EthicalTimeframe a owl:Class ;
+    rdfs:subClassOf time:Interval ;
+    rdfs:label "Ethical Timeframe"@en ;
+    iao:0000115 "A temporal interval relevant to ethical obligations, decisions, or evaluations."@en ;
+    proeth:operationalizationNote "Use OWL-Time properties to specify start/end times for temporal obligations."@en .
+
+proeth:DecisionTimeframe a owl:Class ;
+    rdfs:subClassOf proeth:EthicalTimeframe ;
+    rdfs:label "Decision Timeframe"@en ;
+    iao:0000115 "A temporal interval within which a professional decision must be made."@en .
+
+proeth:ComplianceTimeframe a owl:Class ;
+    rdfs:subClassOf proeth:EthicalTimeframe ;
+    rdfs:label "Compliance Timeframe"@en ;
+    iao:0000115 "A temporal interval during which compliance with obligations is required."@en .
+
+proeth:PrecedentTimeframe a owl:Class ;
+    rdfs:subClassOf proeth:EthicalTimeframe ;
+    rdfs:label "Precedent Timeframe"@en ;
+    iao:0000115 "A temporal interval during which a case precedent is considered valid and applicable."@en .
+
+###############################################################
+# Evaluation Criteria and Assessment Framework
+###############################################################
+
+proeth:EthicalAssessment a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:assessesAction ;
+                      owl:someValuesFrom proeth:Action ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty iao:0000136 ;  # is about
+                      owl:someValuesFrom proeth:EthicalOutcome ] ;
+    rdfs:label "Ethical Assessment"@en ;
+    iao:0000115 "An information content entity representing evaluative output from ethical analysis, linking actions to outcomes."@en ;
+    proeth:classificationGuidance "Create individuals for specific assessment instances from ProEthica AI system outputs."@en ;
+    proeth:instanceExample "Individual: assessment_bridge_inspection_2025_001 rdf:type proeth:EthicalAssessment"@en ;
+    proeth:operationalizationNote "Link assessment individuals to ProfessionalDecision outcomes for traceability."@en .
+
+proeth:EthicalOutcome a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Ethical Outcome"@en ;
+    iao:0000115 "An information content entity describing the ethical consequences or results of professional actions."@en .
+
+proeth:AssessmentCriteria a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Assessment Criteria"@en ;
+    iao:0000115 "An information content entity specifying the criteria used for ethical evaluation."@en .
+
+proeth:EthicalScore a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasScoreValue ;
+                      owl:someValuesFrom xsd:decimal ] ;
+    rdfs:label "Ethical Score"@en ;
+    iao:0000115 "A quantitative assessment score from ethical analysis systems."@en .
+
+###############################################################
+# Enhanced Agent Framework - Improvement Suggestion 4
+###############################################################
+
+proeth:EthicsReviewer a owl:Class ;
+    rdfs:subClassOf proeth:Agent ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasRole ;
+                      owl:someValuesFrom proeth:EthicsReviewerRole ] ;
+    rdfs:label "Ethics Reviewer"@en ;
+    iao:0000115 "An agent who has the role and competency to review ethical assessments and decisions."@en .
+
+proeth:AIAdvisor a owl:Class ;
+    rdfs:subClassOf proeth:Agent ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasCapability ;
+                      owl:someValuesFrom proeth:EthicalAnalysisCapability ] ;
+    rdfs:label "AI Advisor"@en ;
+    iao:0000115 "An artificial agent capable of providing ethical guidance and analysis."@en .
+
+proeth:EthicsReviewerRole a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalRole ;
+    rdfs:label "Ethics Reviewer Role"@en ;
+    iao:0000115 "A professional role involving the review and evaluation of ethical decisions and conduct."@en .
+
+proeth:EthicalAnalysisCapability a owl:Class ;
+    rdfs:subClassOf proeth:Capability ;
+    rdfs:label "Ethical Analysis Capability"@en ;
+    iao:0000115 "The capability to perform systematic ethical analysis and reasoning."@en .
+
+###############################################################
+# Enhanced Action Framework - Improvement Suggestion 4
+###############################################################
+
+proeth:EthicallyRequiredAction a owl:Class ;
+    rdfs:subClassOf proeth:Action ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:fulfillsObligation ;
+                      owl:someValuesFrom proeth:Obligation ] ;
+    rdfs:label "Ethically Required Action"@en ;
+    iao:0000115 "An action that is mandated by ethical obligations and must be performed."@en ;
+    proeth:operationalizationNote "Use SHACL to enforce that these actions must be linked to specific obligations."@en .
+
+proeth:EthicallyOptionalAction a owl:Class ;
+    rdfs:subClassOf proeth:Action ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:enabledByPermission ;
+                      owl:someValuesFrom proeth:Permission ] ;
+    rdfs:label "Ethically Optional Action"@en ;
+    iao:0000115 "An action that is permitted but not required by ethical considerations."@en .
+
+proeth:EthicallyProhibitedAction a owl:Class ;
+    rdfs:subClassOf proeth:Action ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:violatesProhibition ;
+                      owl:someValuesFrom proeth:Prohibition ] ;
+    rdfs:label "Ethically Prohibited Action"@en ;
+    iao:0000115 "An action that violates ethical prohibitions and should not be performed."@en .
+
+###############################################################
+# Enhanced Case Precedent Framework - Improvement Suggestion 4
+###############################################################
+
+proeth:CasePrecedent a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasLegalStanding ;
+                      owl:someValuesFrom proeth:LegalStanding ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:applicableInJurisdiction ;
+                      owl:someValuesFrom proeth:Jurisdiction ] ;
+    rdfs:label "Case Precedent"@en ;
+    iao:0000115 "An information content entity documenting a previous professional decision with legal standing and jurisdictional scope."@en .
+
+proeth:LegalStanding a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Legal Standing"@en ;
+    iao:0000115 "The legal authority or precedential value of a case or decision."@en .
+
+proeth:Jurisdiction a owl:Class ;
+    rdfs:subClassOf bfo:0000029 ;  # BFO:site
+    rdfs:label "Jurisdiction"@en ;
+    iao:0000115 "A spatial region with defined legal or professional authority boundaries."@en .
+
+###############################################################
+# Enhanced Event Framework - Improvement Suggestion 4
+###############################################################
+
+proeth:ViolationEvent a owl:Class ;
+    rdfs:subClassOf proeth:Event ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasSeverityLevel ;
+                      owl:someValuesFrom proeth:SeverityLevel ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:violatesObligation ;
+                      owl:someValuesFrom proeth:Obligation ] ;
+    rdfs:label "Violation Event"@en ;
+    iao:0000115 "An event involving the breach of professional obligations with specified severity level."@en .
+
+proeth:SeverityLevel a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Severity Level"@en ;
+    iao:0000115 "A classification of the seriousness or impact of a violation or risk."@en .
+
+###############################################################
+# Enhanced Capability Framework - Improvement Suggestion 4
+###############################################################
+
+proeth:TechnicalCompetency a owl:Class ;
+    rdfs:subClassOf proeth:Capability ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:requiresTrainingIn ;
+                      owl:someValuesFrom proeth:ContinuingEducationEvent ] ;
+    rdfs:label "Technical Competency"@en ;
+    iao:0000115 "A professional capability related to technical skills and knowledge, requiring ongoing training."@en ;
+    proeth:operationalizationNote "Link to specific training events and assessment records for competency validation."@en .
+
+proeth:EthicalCompetency a owl:Class ;
+    rdfs:subClassOf proeth:Capability ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:requiresTrainingIn ;
+                      owl:someValuesFrom proeth:ContinuingEducationEvent ] ;
+    rdfs:label "Ethical Competency"@en ;
+    iao:0000115 "A professional capability related to ethical reasoning and decision-making."@en .
+
+proeth:LeadershipCompetency a owl:Class ;
+    rdfs:subClassOf proeth:Capability ;
+    rdfs:label "Leadership Competency"@en ;
+    iao:0000115 "A professional capability related to leading teams and organizations ethically."@en .
+
+###############################################################
+# Professional Standards Framework (Enhanced)
+###############################################################
+
+proeth:ProfessionalStandard a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Professional Standard"@en ;
+    iao:0000115 "An information content entity that specifies professional requirements, guidelines, or best practices for a domain."@en .
+
+proeth:Code a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalStandard ;
+    rdfs:label "Professional Code"@en ;
+    iao:0000115 "A formal code of ethics or conduct established by a professional organization."@en .
+
+proeth:Regulation a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalStandard ;
+    rdfs:label "Professional Regulation"@en ;
+    iao:0000115 "A legally mandated standard governing professional practice."@en .
+
+proeth:Guideline a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalStandard ;
+    rdfs:label "Professional Guideline"@en ;
+    iao:0000115 "A recommended practice or procedure for professional activities."@en .
+
+###############################################################
+# Enhanced Principle Taxonomy
+###############################################################
+
+proeth:FundamentalPrinciple a owl:Class ;
+    rdfs:subClassOf proeth:Principle ;
+    rdfs:label "Fundamental Principle"@en ;
+    iao:0000115 "A basic ethical principle that serves as a foundation for professional conduct across domains."@en .
+
+proeth:ProfessionalPrinciple a owl:Class ;
+    rdfs:subClassOf proeth:Principle ;
+    rdfs:label "Professional Principle"@en ;
+    iao:0000115 "An ethical principle specific to professional practice and occupational roles."@en .
+
+proeth:AccountabilityPrinciple a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalPrinciple ;
+    rdfs:label "Accountability Principle"@en ;
+    iao:0000115 "The principle that professionals must take responsibility for their decisions and actions."@en .
+
+proeth:TransparencyPrinciple a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalPrinciple ;
+    rdfs:label "Transparency Principle"@en ;
+    iao:0000115 "The principle of maintaining openness and honesty in professional communications and processes."@en .
+
+###############################################################
+# Comprehensive State Modeling Framework
+###############################################################
+
+proeth:ContextualState a owl:Class ;
+    rdfs:subClassOf proeth:State ;
+    rdfs:label "Contextual State"@en ;
+    iao:0000115 "A quality that represents environmental, organizational, or situational conditions affecting professional decisions."@en .
+
+proeth:EnvironmentalState a owl:Class ;
+    rdfs:subClassOf proeth:ContextualState ;
+    rdfs:label "Environmental State"@en ;
+    iao:0000115 "A quality representing external environmental conditions affecting professional practice."@en .
+
+proeth:OrganizationalState a owl:Class ;
+    rdfs:subClassOf proeth:ContextualState ;
+    rdfs:label "Organizational State"@en ;
+    iao:0000115 "A quality representing the state of an organization or institutional context."@en .
+
+proeth:LegalState a owl:Class ;
+    rdfs:subClassOf proeth:ContextualState ;
+    rdfs:label "Legal State"@en ;
+    iao:0000115 "A quality representing the legal or regulatory context of a professional situation."@en .
+
+proeth:TechnicalState a owl:Class ;
+    rdfs:subClassOf proeth:ContextualState ;
+    rdfs:label "Technical State"@en ;
+    iao:0000115 "A quality representing technical conditions or system states relevant to professional decisions."@en .
+
+proeth:UncertaintyState a owl:Class ;
+    rdfs:subClassOf proeth:ContextualState ;
+    rdfs:label "Uncertainty State"@en ;
+    iao:0000115 "A quality representing incomplete information or ambiguous conditions affecting professional judgment."@en .
+
+proeth:EmergencyState a owl:Class ;
+    rdfs:subClassOf proeth:EnvironmentalState ;
+    rdfs:label "Emergency State"@en ;
+    iao:0000115 "A quality representing urgent conditions requiring immediate professional response."@en .
+
+###############################################################
+# Enhanced DeonticStatement Framework with Cardinality Constraints
+###############################################################
+
+proeth:Obligation a owl:Class ;
+    rdfs:subClassOf proeth:DeonticStatement ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:constrains ;
+                      owl:someValuesFrom proeth:Action ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:appliesToRole ;
+                      owl:someValuesFrom proeth:Role ] ;
+    rdfs:label "Professional Obligation"@en ;
+    iao:0000115 "A deontic statement expressing required actions or behaviors."@en .
+
+proeth:ConditionalObligation a owl:Class ;
+    rdfs:subClassOf proeth:Obligation ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:conditionallyAppliesWhen ;
+                      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                      owl:onClass proeth:State ] ;
+    rdfs:label "Conditional Obligation"@en ;
+    iao:0000115 "An obligation that applies only when specific conditions or states are present."@en ;
+    proeth:operationalizationNote "SHACL constraint: Every ConditionalObligation must have exactly one triggering State."@en .
+
+proeth:OverridingObligation a owl:Class ;
+    rdfs:subClassOf proeth:Obligation ;
+    rdfs:label "Overriding Obligation"@en ;
+    iao:0000115 "An obligation that takes precedence over conflicting obligations in specific contexts."@en .
+
+proeth:PrimafacieObligation a owl:Class ;
+    rdfs:subClassOf proeth:Obligation ;
+    rdfs:label "Prima facie Obligation"@en ;
+    iao:0000115 "An obligation that holds generally but may be overridden by stronger moral considerations."@en ;
+    skos:note "From W.D. Ross's moral philosophy - duties that are binding unless overridden."@en .
+
+proeth:Permission a owl:Class ;
+    rdfs:subClassOf proeth:DeonticStatement ;
+    rdfs:label "Permission"@en ;
+    iao:0000115 "A deontic statement expressing allowed actions or behaviors."@en .
+
+proeth:ExplicitPermission a owl:Class ;
+    rdfs:subClassOf proeth:Permission ;
+    rdfs:label "Explicit Permission"@en ;
+    iao:0000115 "A permission that is explicitly granted by authority or regulation."@en .
+
+proeth:ImplicitPermission a owl:Class ;
+    rdfs:subClassOf proeth:Permission ;
+    rdfs:label "Implicit Permission"@en ;
+    iao:0000115 "A permission that is implied by the absence of prohibition and presence of capability."@en .
+
+proeth:Prohibition a owl:Class ;
+    rdfs:subClassOf proeth:DeonticStatement ;
+    rdfs:label "Prohibition"@en ;
+    iao:0000115 "A deontic statement expressing forbidden actions or behaviors."@en .
+
+proeth:AbsoluteProhibition a owl:Class ;
+    rdfs:subClassOf proeth:Prohibition ;
+    rdfs:label "Absolute Prohibition"@en ;
+    iao:0000115 "A prohibition that admits no exceptions and overrides all other considerations."@en .
+
+proeth:ConditionalProhibition a owl:Class ;
+    rdfs:subClassOf proeth:Prohibition ;
+    rdfs:label "Conditional Prohibition"@en ;
+    iao:0000115 "A prohibition that applies only under specific conditions or contexts."@en .
+
+###############################################################
+# Event and Trigger Framework
+###############################################################
+
+proeth:TriggeringEvent a owl:Class ;
+    rdfs:subClassOf proeth:Event ;
+    rdfs:label "Triggering Event"@en ;
+    iao:0000115 "An event that initiates or activates professional obligations, permissions, or prohibitions."@en .
+
+proeth:EthicalTrigger a owl:Class ;
+    rdfs:subClassOf proeth:TriggeringEvent ;
+    rdfs:label "Ethical Trigger"@en ;
+    iao:0000115 "An event that creates an ethical decision point requiring professional judgment."@en .
+
+proeth:ComplianceEvent a owl:Class ;
+    rdfs:subClassOf proeth:Event ;
+    rdfs:label "Compliance Event"@en ;
+    iao:0000115 "An event demonstrating adherence to professional obligations or ethical standards."@en .
+
+proeth:CompetencyAssessmentEvent a owl:Class ;
+    rdfs:subClassOf proeth:Event ;
+    rdfs:label "Competency Assessment Event"@en ;
+    iao:0000115 "An event involving the evaluation of professional competencies or qualifications."@en .
+
+proeth:ContinuingEducationEvent a owl:Class ;
+    rdfs:subClassOf proeth:Event ;
+    rdfs:label "Continuing Education Event"@en ;
+    iao:0000115 "An event involving professional development or educational activities."@en .
+
+###############################################################
+# Specific Professional Classes
+###############################################################
+
+proeth:ProfessionalRole a owl:Class ;
+    rdfs:subClassOf proeth:Role ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty bfo:0000052 ;  # inheres in
+                      owl:someValuesFrom bfo:0000040 ] ;  # material entity
+    rdfs:label "Professional Role"@en ;
+    iao:0000115 "A professional role with formal obligations and accountability."@en .
+
+proeth:Engineer a owl:Class ;
+    rdfs:subClassOf proeth:Agent ;
+    rdfs:label "Engineer"@en ;
+    iao:0000115 "An agent who bears engineering-related professional roles."@en .
+
+proeth:EngineeringSystem a owl:Class ;
+    rdfs:subClassOf bfo:0000040 ;  # BFO:material entity
+    rdfs:label "Engineering System"@en ;
+    iao:0000115 "A material entity that is an engineered system or artifact."@en .
+
+proeth:IntegrityPrinciple a owl:Class ;
+    rdfs:subClassOf proeth:Principle ;
+    rdfs:label "Integrity Principle"@en ;
+    iao:0000115 "A principle that guides honest and truthful professional conduct."@en .
+
+proeth:PublicSafetyObligation a owl:Class ;
+    rdfs:subClassOf proeth:Obligation ;
+    rdfs:label "Public Safety Obligation"@en ;
+    iao:0000115 "An obligation to prioritize public safety in professional activities."@en .
+
+###############################################################
+# Resource Framework
+###############################################################
+
+proeth:MaterialResource a owl:Class ;
+    rdfs:subClassOf proeth:Resource ;
+    rdfs:subClassOf bfo:0000040 ;  # BFO:material entity
+    rdfs:label "Material Resource"@en ;
+    iao:0000115 "A physical resource used in professional activities."@en .
+
+proeth:InformationResource a owl:Class ;
+    rdfs:subClassOf proeth:Resource ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Information Resource"@en ;
+    iao:0000115 "An informational resource used in professional activities."@en .
+
+###############################################################
+# Enhanced Object Properties
+###############################################################
+
+# Temporal Properties
+proeth:hasTemporalScope a owl:ObjectProperty ;
+    rdfs:subPropertyOf bfo:0000008 ;  # occurs during
+    rdfs:domain proeth:DeonticStatement ;
+    rdfs:range time:Interval ;
+    rdfs:label "has temporal scope"@en ;
+    iao:0000115 "Relates a deontic statement to its temporal validity period."@en .
+
+proeth:validDuring a owl:ObjectProperty ;
+    rdfs:subPropertyOf proeth:hasTemporalScope ;
+    rdfs:domain proeth:Obligation ;
+    rdfs:range time:Interval ;
+    rdfs:label "valid during"@en ;
+    iao:0000115 "Specifies the temporal interval during which an obligation is in effect."@en .
+
+# Assessment Properties
+proeth:assessesAction a owl:ObjectProperty ;
+    rdfs:domain proeth:EthicalAssessment ;
+    rdfs:range proeth:Action ;
+    rdfs:label "assesses action"@en ;
+    iao:0000115 "Relates an ethical assessment to the action it evaluates."@en .
+
+proeth:hasAssessmentOutcome a owl:ObjectProperty ;
+    rdfs:domain proeth:EthicalAssessment ;
+    rdfs:range proeth:EthicalOutcome ;
+    rdfs:label "has assessment outcome"@en ;
+    iao:0000115 "Links an ethical assessment to its evaluated outcome."@en .
+
+proeth:basedOnCriteria a owl:ObjectProperty ;
+    rdfs:domain proeth:EthicalAssessment ;
+    rdfs:range proeth:AssessmentCriteria ;
+    rdfs:label "based on criteria"@en ;
+    iao:0000115 "Relates an assessment to the criteria used for evaluation."@en .
+
+proeth:linkedToProfessionalDecision a owl:ObjectProperty ;
+    rdfs:domain proeth:EthicalAssessment ;
+    rdfs:range proeth:ProfessionalDecision ;
+    rdfs:label "linked to professional decision"@en ;
+    iao:0000115 "Links an ethical assessment to professional decisions for traceability."@en .
+
+# Legal Standing and Jurisdictional Properties
+proeth:hasLegalStanding a owl:ObjectProperty ;
+    rdfs:domain proeth:CasePrecedent ;
+    rdfs:range proeth:LegalStanding ;
+    rdfs:label "has legal standing"@en ;
+    iao:0000115 "Relates a case precedent to its legal authority or precedential value."@en .
+
+proeth:applicableInJurisdiction a owl:ObjectProperty ;
+    rdfs:domain proeth:CasePrecedent ;
+    rdfs:range proeth:Jurisdiction ;
+    rdfs:label "applicable in jurisdiction"@en ;
+    iao:0000115 "Specifies the jurisdictions where a case precedent applies."@en .
+
+# Training and Competency Properties
+proeth:requiresTrainingIn a owl:ObjectProperty ;
+    rdfs:domain proeth:Capability ;
+    rdfs:range proeth:ContinuingEducationEvent ;
+    rdfs:label "requires training in"@en ;
+    iao:0000115 "Links a professional capability to required training events."@en .
+
+# Enhanced Deontic Properties
+proeth:enabledByPermission a owl:ObjectProperty ;
+    rdfs:domain proeth:EthicallyOptionalAction ;
+    rdfs:range proeth:Permission ;
+    rdfs:label "enabled by permission"@en ;
+    iao:0000115 "Links an optional action to the permission that enables it."@en .
+
+proeth:violatesProhibition a owl:ObjectProperty ;
+    rdfs:domain proeth:EthicallyProhibitedAction ;
+    rdfs:range proeth:Prohibition ;
+    rdfs:label "violates prohibition"@en ;
+    iao:0000115 "Links a prohibited action to the prohibition it violates."@en .
+
+proeth:violatesObligation a owl:ObjectProperty ;
+    rdfs:domain proeth:ViolationEvent ;
+    rdfs:range proeth:Obligation ;
+    rdfs:label "violates obligation"@en ;
+    iao:0000115 "Links a violation event to the obligation that was breached."@en .
+
+# Core Professional Properties (preserved from previous version)
+proeth:hasRole a owl:ObjectProperty ;
+    rdfs:subPropertyOf ro:0000087 ;  # has role
+    rdfs:label "has role"@en ;
+    iao:0000115 "Relates an entity to a role it bears."@en .
+
+proeth:fulfillsObligation a owl:ObjectProperty ;
+    rdfs:subPropertyOf ro:0000057 ;  # has participant
+    rdfs:domain proeth:Action ;
+    rdfs:range proeth:Obligation ;
+    rdfs:label "fulfills obligation"@en ;
+    iao:0000115 "Relates an action to an obligation it fulfills."@en .
+
+proeth:adheresToPrinciple a owl:ObjectProperty ;
+    rdfs:subPropertyOf iao:0000136 ;  # is about
+    rdfs:domain proeth:Role ;
+    rdfs:range proeth:Principle ;
+    rdfs:label "adheres to principle"@en ;
+    iao:0000115 "Relates a role to ethical principles that normatively govern that role."@en .
+
+proeth:constrains a owl:ObjectProperty ;
+    rdfs:domain proeth:DeonticStatement ;
+    rdfs:range proeth:Action ;
+    rdfs:label "constrains"@en ;
+    iao:0000115 "Relates a deontic statement to actions it constrains."@en .
+
+proeth:appliesToRole a owl:ObjectProperty ;
+    rdfs:domain proeth:DeonticStatement ;
+    rdfs:range proeth:Role ;
+    rdfs:label "applies to role"@en ;
+    iao:0000115 "Relates a deontic statement to roles it applies to."@en .
+
+proeth:hasObligation a owl:ObjectProperty ;
+    rdfs:domain proeth:Role ;
+    rdfs:range proeth:Obligation ;
+    rdfs:label "has obligation"@en ;
+    iao:0000115 "Relates a role to its obligations."@en .
+
+proeth:hasCapability a owl:ObjectProperty ;
+    rdfs:domain proeth:Agent ;
+    rdfs:range proeth:Capability ;
+    rdfs:label "has capability"@en ;
+    iao:0000115 "Relates an agent to capabilities it possesses."@en .
+
+proeth:conditionallyAppliesWhen a owl:ObjectProperty ;
+    rdfs:subPropertyOf iao:0000136 ;  # is about
+    rdfs:domain proeth:ConditionalObligation ;
+    rdfs:range proeth:State ;
+    rdfs:label "conditionally applies when"@en ;
+    iao:0000115 "Relates a conditional obligation to states that trigger its application."@en .
+
+proeth:overrides a owl:ObjectProperty ;
+    rdfs:domain proeth:OverridingObligation ;
+    rdfs:range proeth:Obligation ;
+    rdfs:label "overrides"@en ;
+    iao:0000115 "Relates an overriding obligation to obligations it takes precedence over."@en .
+
+proeth:triggersObligation a owl:ObjectProperty ;
+    rdfs:subPropertyOf ro:0000012 ;  # causally upstream of
+    rdfs:domain proeth:TriggeringEvent ;
+    rdfs:range proeth:Obligation ;
+    rdfs:label "triggers obligation"@en ;
+    iao:0000115 "Relates a triggering event to obligations it activates."@en .
+
+###############################################################
+# Data Properties
+###############################################################
+
+proeth:hasScoreValue a owl:DatatypeProperty ;
+    rdfs:domain proeth:EthicalScore ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "has score value"@en ;
+    iao:0000115 "The numerical value of an ethical assessment score."@en .
+
+proeth:hasSeverityLevel a owl:DatatypeProperty ;
+    rdfs:domain proeth:ViolationEvent ;
+    rdfs:range xsd:string ;
+    rdfs:label "has severity level"@en ;
+    iao:0000115 "The severity classification of a violation (e.g., 'minor', 'major', 'critical')."@en .
+
+proeth:hasConfidenceScore a owl:DatatypeProperty ;
+    rdfs:domain proeth:EthicalAssessment ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "has confidence score"@en ;
+    iao:0000115 "The confidence level of an ethical assessment (0.0 to 1.0)."@en .
+
+###############################################################
+# SHACL Validation Constraints (Improvement Suggestion 4)
+###############################################################
+
+proeth:RoleObligationConstraint a sh:NodeShape ;
+    sh:targetClass proeth:Role ;
+    sh:property [
+        sh:path proeth:hasObligation ;
+        sh:minCount 1 ;
+        sh:message "Every professional role must have at least one obligation."@en ;
+    ] ;
+    sh:property [
+        sh:path proeth:hasCapability ;
+        sh:minCount 1 ;
+        sh:message "Every professional role must have at least one associated capability."@en ;
+    ] .
+
+proeth:ConditionalObligationConstraint a sh:NodeShape ;
+    sh:targetClass proeth:ConditionalObligation ;
+    sh:property [
+        sh:path proeth:conditionallyAppliesWhen ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class proeth:State ;
+        sh:message "Every conditional obligation must have exactly one triggering state."@en ;
+    ] .
+
+proeth:EthicalAssessmentConstraint a sh:NodeShape ;
+    sh:targetClass proeth:EthicalAssessment ;
+    sh:property [
+        sh:path proeth:assessesAction ;
+        sh:minCount 1 ;
+        sh:class proeth:Action ;
+        sh:message "Every ethical assessment must assess at least one action."@en ;
+    ] ;
+    sh:property [
+        sh:path proeth:hasConfidenceScore ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0.0 ;
+        sh:maxInclusive 1.0 ;
+        sh:message "Confidence score must be between 0.0 and 1.0."@en ;
+    ] .
+
+###############################################################
+# Disjointness Axioms (Enhanced)
+###############################################################
+
+# Core disjointness
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:MaterialResource proeth:InformationResource ) .
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:Obligation proeth:Permission proeth:Prohibition ) .
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:Code proeth:Regulation proeth:Guideline ) .
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:FundamentalPrinciple proeth:ProfessionalPrinciple ) .
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:EnvironmentalState proeth:OrganizationalState proeth:LegalState proeth:TechnicalState ) .
+
+# Enhanced disjointness for new classes
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:EthicallyRequiredAction proeth:EthicallyOptionalAction proeth:EthicallyProhibitedAction ) .
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:TechnicalCompetency proeth:EthicalCompetency proeth:LeadershipCompetency ) .
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:ConditionalObligation proeth:OverridingObligation proeth:PrimafacieObligation ) .
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:ExplicitPermission proeth:ImplicitPermission ) .
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:AbsoluteProhibition proeth:ConditionalProhibition ) .
+
+# Temporal framework disjointness
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:DecisionTimeframe proeth:ComplianceTimeframe proeth:PrecedentTimeframe ) .
+
+# Assessment framework disjointness  
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:EthicalAssessment proeth:EthicalOutcome proeth:AssessmentCriteria proeth:EthicalScore ) .
+
+# Agent type disjointness
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth:EthicsReviewer proeth:AIAdvisor proeth:Engineer ) .
+
+# BFO alignment preservation
+[] a owl:AllDisjointClasses ;
+   owl:members ( bfo:0000002 bfo:0000003 ) .  # continuant vs occurrent

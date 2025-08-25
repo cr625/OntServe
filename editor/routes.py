@@ -644,14 +644,75 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 }
                 nodes.append(node)
             
-            # Create simple hierarchical relationships for visualization
+            # Create hierarchical relationships based on parent_uri
+            edge_id = 0
+            external_parents = set()
+            
+            # Collect external parent URIs and add subClassOf edges
+            for entity in entities:
+                if entity.parent_uri:
+                    # Check if parent is external (BFO/IAO/RO)
+                    entity_uris = {e.uri for e in entities}
+                    if entity.parent_uri not in entity_uris:
+                        external_parents.add(entity.parent_uri)
+                    
+                    edge = {
+                        'group': 'edges',
+                        'data': {
+                            'id': f'subClassOf_{edge_id}',
+                            'source': entity.uri,
+                            'target': entity.parent_uri,
+                            'type': 'subClassOf',
+                            'is_inferred': False
+                        },
+                        'classes': 'explicit subClassOf-edge'
+                    }
+                    edges.append(edge)
+                    edge_id += 1
+            
+            # Add placeholder nodes for external parents (BFO/IAO/RO)
+            for parent_uri in external_parents:
+                # Create display name and styling for external parent
+                if 'BFO_' in parent_uri:
+                    display_name = f"BFO:{parent_uri.split('_')[-1]}"
+                    node_color = '#E3F2FD'  # Light blue
+                elif 'IAO_' in parent_uri:
+                    display_name = f"IAO:{parent_uri.split('_')[-1]}"
+                    node_color = '#E8F5E8'  # Light green
+                elif 'RO_' in parent_uri:
+                    display_name = f"RO:{parent_uri.split('_')[-1]}"
+                    node_color = '#FFF3E0'  # Light orange
+                else:
+                    display_name = parent_uri.split('#')[-1].split('/')[-1]
+                    node_color = '#F5F5F5'  # Light gray
+                
+                external_node = {
+                    'group': 'nodes',
+                    'data': {
+                        'id': parent_uri,
+                        'label': display_name,
+                        'name': display_name,
+                        'uri': parent_uri,
+                        'type': 'external_class',
+                        'entity_type': 'external_class',
+                        'description': f'External class from {display_name.split(":")[0]} ontology',
+                        'comment': f'External class from {display_name.split(":")[0]} ontology',
+                        'is_inferred': False,
+                        'is_external': True,
+                        'color': node_color,
+                        'restrictions': 0,
+                        'namespace': parent_uri.split('#')[0] if '#' in parent_uri else parent_uri.split('/')[:-1]
+                    },
+                    'classes': 'class-node external-class'
+                }
+                nodes.append(external_node)
+            
+            # Connect remaining properties to classes for visualization (if no hierarchical structure)
             class_nodes = [n for n in nodes if n['data']['type'] == 'class']
             property_nodes = [n for n in nodes if n['data']['type'] == 'property']
             
-            # Connect properties to classes for better visualization
-            edge_id = 0
             for i, prop in enumerate(property_nodes):
-                if i < len(class_nodes):  # Connect each property to a class
+                if i < len(class_nodes) and len(edges) < 20:  # Limit arbitrary connections
                     edge = {
                         'group': 'edges',
                         'data': {
@@ -1314,8 +1375,8 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                     'classes': f"entity-node {entity.entity_type}" + (' inferred' if node_data.get('is_inferred') else ' explicit')
                 })
                 
-                # Create edges for parent relationships - only if target exists in current ontology
-                if entity.parent_uri and entity.parent_uri in entity_uris:
+                # Create edges for parent relationships (including external ontology parents) 
+                if entity.parent_uri:
                     edge_id = f"{entity.uri}-subClassOf-{entity.parent_uri}"
                     edges.append({
                         'data': {
@@ -1376,6 +1437,26 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                         'line-color': '#7ED321',
                         'target-arrow-color': '#7ED321',
                         'line-style': 'dashed'
+                    }
+                },
+                {
+                    'selector': 'node.external',
+                    'style': {
+                        'border-color': '#666',
+                        'border-width': '1px',
+                        'font-style': 'italic',
+                        'font-size': '9px',
+                        'opacity': '0.8',
+                        'shape': 'round-rectangle'
+                    }
+                },
+                {
+                    'selector': 'edge.external',
+                    'style': {
+                        'line-color': '#666',
+                        'target-arrow-color': '#666',
+                        'line-style': 'dotted',
+                        'width': '1px'
                     }
                 }
             ]

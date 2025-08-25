@@ -471,14 +471,39 @@ class EnhancedOntologyProcessor:
                 raise ValueError(f"Failed to load ontology {ontology_id} from both file storage ({e}) and database ({db_error})")
     
     def _parse_with_rdflib(self, content: str, ontology_id: str) -> Graph:
-        """Parse ontology content with RDFLib."""
-        try:
-            graph = Graph()
-            graph.parse(data=content, format='turtle')
-            logger.debug(f"Parsed {len(graph)} triples for {ontology_id}")
-            return graph
-        except Exception as e:
-            raise ValueError(f"Failed to parse RDF content: {e}")
+        """Parse ontology content with RDFLib, auto-detecting format."""
+        graph = Graph()
+        
+        # Try different formats in order of likelihood
+        formats_to_try = []
+        
+        # Detect format based on content patterns
+        content_start = content[:500].strip()
+        if content_start.startswith('<?xml') or '<rdf:RDF' in content_start:
+            formats_to_try = ['xml', 'application/rdf+xml']
+        elif content_start.startswith('@prefix') or content_start.startswith('@base'):
+            formats_to_try = ['turtle', 'ttl']
+        elif content_start.startswith('PREFIX'):
+            formats_to_try = ['n3', 'turtle']
+        elif '{' in content_start and '"' in content_start:
+            formats_to_try = ['json-ld']
+        else:
+            # Try common formats in order
+            formats_to_try = ['turtle', 'xml', 'n3', 'json-ld']
+        
+        # Try each format
+        last_error = None
+        for fmt in formats_to_try:
+            try:
+                graph.parse(data=content, format=fmt)
+                logger.debug(f"Successfully parsed {len(graph)} triples for {ontology_id} using format: {fmt}")
+                return graph
+            except Exception as e:
+                last_error = e
+                continue
+        
+        # If all formats failed, raise the last error
+        raise ValueError(f"Failed to parse RDF content in any format. Last error: {last_error}")
     
     def _apply_reasoning(self, content: str, ontology_id: str, options: ProcessingOptions) -> Dict[str, Any]:
         """Apply enhanced reasoning using Owlready2 with aggressive inference."""
@@ -512,8 +537,9 @@ class EnhancedOntologyProcessor:
             self.owlready_importer.include_inferred = True
             
             # Apply reasoning with the enhanced importer
+            detected_format = self._detect_rdf_format(content)
             reasoning_result = self.owlready_importer._import_from_content(
-                content, f"temp://{ontology_id}", ontology_id, None, None, 'turtle'
+                content, f"temp://{ontology_id}", ontology_id, None, None, detected_format
             )
             
             # Restore original settings
@@ -540,12 +566,27 @@ class EnhancedOntologyProcessor:
             logger.error(f"Enhanced reasoning failed for {ontology_id}: {e}")
             return {'reasoning_applied': False, 'error': str(e)}
     
+    def _detect_rdf_format(self, content: str) -> str:
+        """Detect RDF format from content."""
+        content_start = content[:500].strip()
+        if content_start.startswith('<?xml') or '<rdf:RDF' in content_start:
+            return 'xml'
+        elif content_start.startswith('@prefix') or content_start.startswith('@base'):
+            return 'turtle'
+        elif content_start.startswith('PREFIX'):
+            return 'n3'
+        elif '{' in content_start and '"' in content_start:
+            return 'json-ld'
+        else:
+            return 'turtle'  # Default fallback
+    
     def _apply_additional_reasoning(self, content: str, ontology_id: str, options: ProcessingOptions) -> Dict[str, Any]:
         """Apply additional comprehensive reasoning passes."""
         try:
-            # Parse content with rdflib first to handle Turtle format
+            # Parse content with rdflib, auto-detecting format
             g = Graph()
-            g.parse(data=content, format='turtle')
+            detected_format = self._detect_rdf_format(content)
+            g.parse(data=content, format=detected_format)
             
             # Convert to RDF/XML for owlready2
             temp_file = os.path.join(self.temp_dir, f"{ontology_id}_reasoning.owl")
