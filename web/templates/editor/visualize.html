@@ -9,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Cytoscape core -->
     <script src="https://unpkg.com/cytoscape@3.21.0/dist/cytoscape.min.js"></script>
-    
+
     <!-- Only load dagre for hierarchical layout -->
     <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
     <script src="https://unpkg.com/cytoscape-dagre@2.4.0/cytoscape-dagre.js"></script>
@@ -185,6 +185,20 @@
             color: #6c757d;
         }
 
+        /* Fullscreen visualization styles */
+        .visualization-fullscreen .col-md-3 {
+            display: none !important;
+        }
+
+        .visualization-fullscreen .visualization-column {
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+        }
+
+        .visualization-fullscreen .visualization-container {
+            height: 80vh !important;
+        }
+
         /* Additional Cytoscape styling for highlighting */
         .tooltip {
             position: absolute;
@@ -267,7 +281,8 @@
                         {{ ontology.name }}
                         {% if ontology.current_version %}
                         <span class="badge bg-secondary ms-2">v{{ ontology.current_version.version_number }}</span>
-                        {% if ontology.current_version.version_tag and 'reasoned' in ontology.current_version.version_tag %}
+                        {% if ontology.current_version.version_tag and 'reasoned' in
+                        ontology.current_version.version_tag %}
                         <span class="badge bg-info ms-1">
                             <i class="fas fa-brain"></i> Inferred
                         </span>
@@ -290,8 +305,11 @@
                 </div>
                 <div class="col-md-4">
                     <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="toggleFullscreen()" id="fullscreenBtn">
+                            <i class="fas fa-expand-arrows-alt me-1"></i>Expand to Full Width
+                        </button>
                         <button class="btn btn-outline-primary btn-sm" onclick="fitToScreen()">
-                            <i class="fas fa-expand-arrows-alt me-1"></i>Fit Screen
+                            <i class="fas fa-compress-arrows-alt me-1"></i>Fit Screen
                         </button>
                         <button class="btn btn-outline-primary btn-sm" onclick="resetZoom()">
                             <i class="fas fa-search-minus me-1"></i>Reset Zoom
@@ -306,14 +324,17 @@
     </div>
 
     <!-- Version Info Banner for Inferred Versions -->
-    {% if ontology.current_version and ontology.current_version.meta_data and ontology.current_version.meta_data.reasoning %}
+    {% if ontology.current_version and ontology.current_version.meta_data and
+    ontology.current_version.meta_data.reasoning %}
     <div class="container-fluid">
         <div class="alert alert-info alert-dismissible fade show mb-2" role="alert" style="margin-top: 0.5rem;">
             <i class="fas fa-info-circle me-2"></i>
-            <strong>Viewing inferred version:</strong> 
-            This visualization includes {{ ontology.current_version.meta_data.reasoning.inferred_relationships|length if ontology.current_version.meta_data.reasoning.inferred_relationships else 0 }} additional relationships 
-            discovered by {{ ontology.current_version.meta_data.reasoning.reasoner_type }} reasoning 
-            on {{ ontology.current_version.created_at.strftime('%Y-%m-%d') if ontology.current_version.created_at else 'unknown date' }}.
+            <strong>Viewing inferred version:</strong>
+            This visualization includes {{ ontology.current_version.meta_data.reasoning.inferred_relationships|length if
+            ontology.current_version.meta_data.reasoning.inferred_relationships else 0 }} additional relationships
+            discovered by {{ ontology.current_version.meta_data.reasoning.reasoner_type }} reasoning
+            on {{ ontology.current_version.created_at.strftime('%Y-%m-%d') if ontology.current_version.created_at else
+            'unknown date' }}.
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     </div>
@@ -377,26 +398,28 @@
                     <button class="btn btn-outline-primary btn-sm w-100" onclick="applyFilters()">
                         <i class="fas fa-filter me-1"></i>Apply Filters
                     </button>
-                    
-                    <button class="btn btn-outline-success btn-sm w-100 mt-2" onclick="runInference()" id="inferenceBtn">
+
+                    <button class="btn btn-outline-success btn-sm w-100 mt-2" onclick="runInference()"
+                        id="inferenceBtn">
                         <i class="fas fa-brain me-1"></i><span id="inferenceButtonText">Run Inference</span>
                     </button>
-                    
+
                     <div class="form-check mt-2">
                         <input class="form-check-input" type="checkbox" id="saveReasoningAsVersion" checked>
                         <label class="form-check-label small" for="saveReasoningAsVersion">
                             Save inference results as new version
                         </label>
                     </div>
-                    
+
                     <div class="form-check mt-1">
                         <input class="form-check-input" type="checkbox" id="autoPromoteSignificant" checked>
                         <label class="form-check-label small" for="autoPromoteSignificant">
                             Auto-load significant inferences (≥1 new relationship)
                         </label>
                     </div>
-                    
-                    <button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="loadOntologyData()" id="refreshBtn">
+
+                    <button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="loadOntologyData()"
+                        id="refreshBtn">
                         <i class="fas fa-sync me-1"></i>Refresh View
                     </button>
                 </div>
@@ -442,7 +465,7 @@
             </div>
 
             <!-- Visualization Area -->
-            <div class="col-md-6">
+            <div class="col-md-6 visualization-column">
                 <div class="visualization-container" style="position: relative;">
                     <div id="loadingIndicator" class="d-flex justify-content-center align-items-center h-100">
                         <div class="text-center">
@@ -504,24 +527,14 @@
         let currentEntityData;
         let originalElements; // Store original elements for filtering
         const ontologyId = "{{ ontology_name }}";
-        
+
         // Use hierarchical layout by default for hierarchical ontologies
         const isHierarchicalOntology = ontologyId.includes('prov-o') || ontologyId.includes('bfo');
         let currentLayout = isHierarchicalOntology ? 'dagre' : 'cose';
-        
-        // Check if current version has reasoning and update button text
-        function updateInferenceButtonText() {
-            // This will be set by the template based on current version metadata
-            const hasInferenceData = {{ 'true' if ontology.current_version and ontology.current_version.meta_data and ontology.current_version.meta_data.reasoning else 'false' }};
-            const buttonText = document.getElementById('inferenceButtonText');
-            if (hasInferenceData && buttonText) {
-                buttonText.textContent = 'Re-run Inference';
-            }
-        }
-        
+
         // Initialize button text on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateInferenceButtonText();
+        document.addEventListener('DOMContentLoaded', function () {
+            // Simple initialization without template expressions
         });
 
         function runInference() {
@@ -529,11 +542,11 @@
             const originalText = button.innerHTML;
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Running Inference...';
-            
+
             // Check if we should save as version and auto-promote
             const saveAsVersion = document.getElementById('saveReasoningAsVersion').checked;
             const autoPromoteSignificant = document.getElementById('autoPromoteSignificant').checked;
-            
+
             // Use the simple reasoning endpoint
             fetch(`/editor/api/simple/reasoning/${ontologyId}`, {
                 method: 'POST',
@@ -548,67 +561,67 @@
                     auto_promote_significant: autoPromoteSignificant && saveAsVersion
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const results = data.results || {};
-                    const classesInferred = results.classes_inferred || 0;
-                    const propertiesInferred = results.properties_inferred || 0;
-                    const hierarchicalRels = results.hierarchical_relationships || 0;
-                    const newInferredRels = results.new_inferred_relationships || 0;
-                    const sampleHierarchy = results.sample_hierarchy || [];
-                    
-                    let message = `Inference completed successfully!\n\n`;
-                    message += `📊 Results:\n`;
-                    message += `• ${results.classes_before || 0} classes, ${results.properties_before || 0} properties loaded\n`;
-                    message += `• ${hierarchicalRels} hierarchical relationships discovered\n`;
-                    
-                    if (classesInferred > 0 || propertiesInferred > 0) {
-                        message += `• ${classesInferred} new classes, ${propertiesInferred} new properties inferred\n`;
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const results = data.results || {};
+                        const classesInferred = results.classes_inferred || 0;
+                        const propertiesInferred = results.properties_inferred || 0;
+                        const hierarchicalRels = results.hierarchical_relationships || 0;
+                        const newInferredRels = results.new_inferred_relationships || 0;
+                        const sampleHierarchy = results.sample_hierarchy || [];
+
+                        let message = `Inference completed successfully!\n\n`;
+                        message += `📊 Results:\n`;
+                        message += `• ${results.classes_before || 0} classes, ${results.properties_before || 0} properties loaded\n`;
+                        message += `• ${hierarchicalRels} hierarchical relationships discovered\n`;
+
+                        if (classesInferred > 0 || propertiesInferred > 0) {
+                            message += `• ${classesInferred} new classes, ${propertiesInferred} new properties inferred\n`;
+                        }
+
+                        if (newInferredRels > 0) {
+                            message += `• ${newInferredRels} new logical relationships inferred\n`;
+                        }
+
+                        if (sampleHierarchy.length > 0) {
+                            message += `\n🏗️ Sample Class Hierarchy:\n`;
+                            sampleHierarchy.slice(0, 5).forEach(item => {
+                                message += `• ${item.class} ← ${item.parents.join(', ')}\n`;
+                            });
+                        }
+
+                        // Add version creation info if present
+                        if (data.version && data.version.version_created) {
+                            message += `\n✅ Version Created:\n`;
+                            message += `• Version ${data.version.version_number} (${data.version.version_tag})\n`;
+                            message += `• Status: Draft - ready for review\n`;
+                            message += `• You can switch to this version in the Versions tab\n`;
+
+                            // Update button text after creating a new version
+                            setTimeout(() => {
+                                const buttonText = document.getElementById('inferenceButtonText');
+                                if (buttonText) {
+                                    buttonText.textContent = 'Re-run Inference';
+                                }
+                            }, 100);
+                        } else if (data.version && !data.version.version_created) {
+                            message += `\n⚠️ Version creation failed: ${data.version.error}\n`;
+                        }
+
+                        showInferenceResultsModal(data, message);
+                    } else {
+                        showInferenceErrorModal(data.error || 'Unknown error');
                     }
-                    
-                    if (newInferredRels > 0) {
-                        message += `• ${newInferredRels} new logical relationships inferred\n`;
-                    }
-                    
-                    if (sampleHierarchy.length > 0) {
-                        message += `\n🏗️ Sample Class Hierarchy:\n`;
-                        sampleHierarchy.slice(0, 5).forEach(item => {
-                            message += `• ${item.class} ← ${item.parents.join(', ')}\n`;
-                        });
-                    }
-                    
-                    // Add version creation info if present
-                    if (data.version && data.version.version_created) {
-                        message += `\n✅ Version Created:\n`;
-                        message += `• Version ${data.version.version_number} (${data.version.version_tag})\n`;
-                        message += `• Status: Draft - ready for review\n`;
-                        message += `• You can switch to this version in the Versions tab\n`;
-                        
-                        // Update button text after creating a new version
-                        setTimeout(() => {
-                            const buttonText = document.getElementById('inferenceButtonText');
-                            if (buttonText) {
-                                buttonText.textContent = 'Re-run Inference';
-                            }
-                        }, 100);
-                    } else if (data.version && !data.version.version_created) {
-                        message += `\n⚠️ Version creation failed: ${data.version.error}\n`;
-                    }
-                    
-                    showInferenceResultsModal(data, message);
-                } else {
-                    showInferenceErrorModal(data.error || 'Unknown error');
-                }
-            })
-            .catch(error => {
-                console.error('Inference error:', error);
-                alert('Inference failed. This may be due to the enhanced processor configuration. Check console for details.');
-            })
-            .finally(() => {
-                button.disabled = false;
-                button.innerHTML = originalText;
-            });
+                })
+                .catch(error => {
+                    console.error('Inference error:', error);
+                    alert('Inference failed. This may be due to the enhanced processor configuration. Check console for details.');
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                });
         }
 
         function showHierarchy() {
@@ -616,43 +629,43 @@
             const originalText = button.innerHTML;
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Loading Hierarchy...';
-            
+
             // Fetch hierarchical visualization data
             fetch(`/editor/api/hierarchy/visualization/${ontologyId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Replace current visualization with hierarchical view
-                    const elements = [...data.visualization.nodes, ...data.visualization.edges];
-                    originalElements = elements;
-                    
-                    loadDataIntoGraph(elements);
-                    updateStatistics(data.statistics);
-                    
-                    // Use hierarchical layout
-                    currentLayout = 'dagre';
-                    applyLayout();
-                    
-                    alert(`Hierarchical view loaded!\n\n📊 ${data.statistics.classes} classes with ${data.statistics.hierarchical_relationships} subClassOf relationships\n\n🏗️ This shows the true PROV-O class hierarchy.`);
-                } else {
-                    alert('Failed to load hierarchy: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Hierarchy loading error:', error);
-                alert('Failed to load hierarchy. Check console for details.');
-            })
-            .finally(() => {
-                button.disabled = false;
-                button.innerHTML = originalText;
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Replace current visualization with hierarchical view
+                        const elements = [...data.visualization.nodes, ...data.visualization.edges];
+                        originalElements = elements;
+
+                        loadDataIntoGraph(elements);
+                        updateStatistics(data.statistics);
+
+                        // Use hierarchical layout
+                        currentLayout = 'dagre';
+                        applyLayout();
+
+                        alert(`Hierarchical view loaded!\n\n📊 ${data.statistics.classes} classes with ${data.statistics.hierarchical_relationships} subClassOf relationships\n\n🏗️ This shows the true PROV-O class hierarchy.`);
+                    } else {
+                        alert('Failed to load hierarchy: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Hierarchy loading error:', error);
+                    alert('Failed to load hierarchy. Check console for details.');
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.innerHTML = originalText;
+                });
         }
 
         function triggerProcessing() {
             const button = event.target;
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            
+
             fetch(`/editor/api/enhanced/process/${ontologyId}`, {
                 method: 'POST',
                 headers: {
@@ -660,25 +673,25 @@
                 },
                 body: JSON.stringify({})
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Reload the visualization data
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-                } else {
-                    alert('Processing failed: ' + (data.error || 'Unknown error'));
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload the visualization data
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        alert('Processing failed: ' + (data.error || 'Unknown error'));
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-cogs"></i> Process Ontology';
+                    }
+                })
+                .catch(error => {
+                    console.error('Processing error:', error);
+                    alert('Processing failed. Please check the console for details.');
                     button.disabled = false;
                     button.innerHTML = '<i class="fas fa-cogs"></i> Process Ontology';
-                }
-            })
-            .catch(error => {
-                console.error('Processing error:', error);
-                alert('Processing failed. Please check the console for details.');
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-cogs"></i> Process Ontology';
-            });
+                });
         }
 
         // Initialize visualization on load
@@ -696,7 +709,7 @@
                 currentLayout = this.value;
                 applyLayout(); // Apply the layout immediately when changed
             });
-            
+
             // Set the dropdown to match the current default layout
             document.getElementById('layoutSelector').value = currentLayout;
 
@@ -859,10 +872,10 @@
         function loadOntologyData() {
             const entityType = document.getElementById('filterType').value;
             const includeReasoning = document.getElementById('showInferred')?.checked || false;
-            
+
             // Use hierarchical view by default for ontologies with hierarchical structure
             const useHierarchical = isHierarchicalOntology;
-            const url = useHierarchical 
+            const url = useHierarchical
                 ? `/editor/api/hierarchy/visualization/${ontologyId}`
                 : `/editor/api/enhanced/visualization/${ontologyId}?include_reasoning=${includeReasoning}&limit=1000`;
 
@@ -879,7 +892,7 @@
                         // Both endpoints provide cytoscape-ready format
                         const elements = [...data.visualization.nodes, ...data.visualization.edges];
                         originalElements = elements;
-                        
+
                         if (elements.length === 0) {
                             // No entities to visualize
                             document.getElementById('loadingIndicator').innerHTML = `
@@ -895,13 +908,13 @@
                         } else {
                             loadDataIntoGraph(elements);
                             updateStatistics(data.stats || data.statistics);
-                            
+
                             // Use hierarchical layout by default for hierarchical ontologies
                             if (useHierarchical) {
                                 currentLayout = 'dagre';
                                 applyLayout();
                             }
-                            
+
                             // Hide loading indicator and show graph
                             document.getElementById('loadingIndicator').style.display = 'none';
                             document.getElementById('cy').style.display = 'block';
@@ -1068,7 +1081,7 @@
                         spacingFactor: 1.2
                     };
                     break;
-                    
+
                 case 'concentric':
                     layoutConfig = {
                         ...layoutConfig,
@@ -1242,12 +1255,51 @@
         }
 
         function resetZoom() {
-            cy.zoom(1);
+            cy.fit();
             cy.center();
         }
 
         function centerGraph() {
             cy.center();
+        }
+
+        // Global fullscreen state
+        let isFullscreen = false;
+
+        function toggleFullscreen() {
+            const container = document.querySelector('.container-fluid');
+            const btn = document.getElementById('fullscreenBtn');
+            const btnIcon = btn.querySelector('i');
+
+            isFullscreen = !isFullscreen;
+
+            if (isFullscreen) {
+                // Enter fullscreen mode
+                container.classList.add('visualization-fullscreen');
+                btnIcon.className = 'fas fa-compress-arrows-alt me-1';
+                btn.innerHTML = '<i class="fas fa-compress-arrows-alt me-1"></i>Exit Full Width';
+
+                // Resize Cytoscape after DOM changes
+                setTimeout(() => {
+                    if (cy) {
+                        cy.resize();
+                        cy.fit();
+                    }
+                }, 100);
+            } else {
+                // Exit fullscreen mode
+                container.classList.remove('visualization-fullscreen');
+                btnIcon.className = 'fas fa-expand-arrows-alt me-1';
+                btn.innerHTML = '<i class="fas fa-expand-arrows-alt me-1"></i>Expand to Full Width';
+
+                // Resize Cytoscape after DOM changes
+                setTimeout(() => {
+                    if (cy) {
+                        cy.resize();
+                        cy.fit();
+                    }
+                }, 100);
+            }
         }
 
         function performSemanticSearch() {
@@ -1448,7 +1500,7 @@
             const modal = document.getElementById('inferenceResultsModal');
             const modalBody = document.getElementById('inferenceResultsContent');
             const loadVersionBtn = document.getElementById('loadVersionBtn');
-            
+
             // Format the results for better display
             const results = data.results || {};
             const classesInferred = results.classes_inferred || 0;
@@ -1456,7 +1508,7 @@
             const hierarchicalInferred = results.hierarchical_inferred || 0;
             const relationshipsInferred = results.relationships_inferred || 0;
             const totalInferred = results.total_inferred || (classesInferred + propertiesInferred + hierarchicalInferred + relationshipsInferred);
-            
+
             let htmlContent = `
                 <div class="row">
                     <div class="col-md-6">
@@ -1478,13 +1530,13 @@
                     </div>
                 </div>
             `;
-            
+
             // Add version information if created
             if (data.version && data.version.version_created) {
                 const isAutoPromoted = data.version.auto_promoted || data.version.is_current;
                 const statusText = isAutoPromoted ? 'Current Version (Auto-promoted)' : 'Draft - ready for review';
                 const statusClass = isAutoPromoted ? 'alert-info' : 'alert-success';
-                
+
                 htmlContent += `
                     <div class="alert ${statusClass} mt-3">
                         <h6><i class="fas fa-code-branch text-${isAutoPromoted ? 'info' : 'success'}"></i> New Version Created</h6>
@@ -1495,7 +1547,7 @@
                         </ul>
                     </div>
                 `;
-                
+
                 // Show different button behavior based on promotion status
                 if (isAutoPromoted) {
                     // Already current, just show reload button
@@ -1516,33 +1568,33 @@
             } else {
                 loadVersionBtn.style.display = 'none';
             }
-            
+
             modalBody.innerHTML = htmlContent;
-            
+
             // Show the modal
             const bootstrapModal = new bootstrap.Modal(modal);
             bootstrapModal.show();
         }
-        
+
         function showInferenceErrorModal(error) {
             const modal = document.getElementById('inferenceResultsModal');
             const modalBody = document.getElementById('inferenceResultsContent');
             const loadVersionBtn = document.getElementById('loadVersionBtn');
-            
+
             modalBody.innerHTML = `
                 <div class="alert alert-danger">
                     <h6><i class="fas fa-exclamation-triangle"></i> Inference Failed</h6>
                     <p class="mb-0">${error}</p>
                 </div>
             `;
-            
+
             loadVersionBtn.style.display = 'none';
-            
+
             // Show the modal
             const bootstrapModal = new bootstrap.Modal(modal);
             bootstrapModal.show();
         }
-        
+
         function loadNewVersion(versionId) {
             // First make the version current
             fetch(`/api/versions/${versionId}/make-current`, {
@@ -1551,46 +1603,47 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Close the modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('inferenceResultsModal'));
-                    modal.hide();
-                    
-                    // Show loading indicator
-                    const loadingIndicator = document.getElementById('loadingIndicator');
-                    loadingIndicator.innerHTML = `
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Close the modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('inferenceResultsModal'));
+                        modal.hide();
+
+                        // Show loading indicator
+                        const loadingIndicator = document.getElementById('loadingIndicator');
+                        loadingIndicator.innerHTML = `
                         <div class="d-flex align-items-center">
                             <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
                             Loading reasoned version...
                         </div>
                     `;
-                    loadingIndicator.style.display = 'block';
-                    
-                    // Reload the page to show the new current version with entities
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
-                } else {
-                    alert('Failed to load new version: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                console.error('Error loading new version:', error);
-                alert('Failed to load new version. Check console for details.');
-            });
+                        loadingIndicator.style.display = 'block';
+
+                        // Reload the page to show the new current version with entities
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        alert('Failed to load new version: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading new version:', error);
+                    alert('Failed to load new version. Check console for details.');
+                });
         }
 
         // Initialize visualization when page loads
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Load ontology data on page load
             loadOntologyData();
         });
     </script>
-    
+
     <!-- Inference Results Modal -->
-    <div class="modal fade" id="inferenceResultsModal" tabindex="-1" aria-labelledby="inferenceResultsModalLabel" aria-hidden="true">
+    <div class="modal fade" id="inferenceResultsModal" tabindex="-1" aria-labelledby="inferenceResultsModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
