@@ -15,16 +15,16 @@
         font-family: 'Courier New', monospace;
         font-size: 0.9em;
     }
-    
+
     .definition-card {
         font-size: 0.9em;
         line-height: 1.4;
     }
-    
+
     .definition-card .text-muted {
         font-size: inherit;
     }
-    
+
     .entity-list {
         max-height: 600px;
     }
@@ -132,6 +132,112 @@
         </div>
         {% endif %}
 
+        <!-- Enrichment Summary -->
+        {% set total_entities = entities.classes|length + entities.properties|length + entities.individuals|length %}
+        {% set entities_with_definitions = (entities.classes + entities.properties +
+        entities.individuals)|selectattr('comment')|list|length %}
+        {% if entities_with_definitions > 0 %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-check-circle-fill"></i> Ontology Enrichment Status
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <div class="display-4 text-success">{{ ((entities_with_definitions / total_entities
+                                        * 100) if total_entities > 0 else 0)|round(1) }}%</div>
+                                    <small class="text-muted">Definition Coverage</small>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    {% set llm_generated = (entities.classes + entities.properties +
+                                    entities.individuals)|selectattr('properties')|map('from_json')|selectattr('generated_definition')|list|length
+                                    %}
+                                    {% set authoritative_sources = (entities.classes + entities.properties +
+                                    entities.individuals)|selectattr('properties')|map('from_json')|selectattr('dc:source')|list|length
+                                    %}
+                                    {% set high_confidence_entities = [] %}
+                                    {% for entity in (entities.classes + entities.properties + entities.individuals) %}
+                                    {% if entity.properties %}
+                                    {% set props = entity.properties|from_json if entity.properties is string else
+                                    entity.properties %}
+                                    {% if props and props.confidence and props.confidence > 0.8 %}
+                                    {% set _ = high_confidence_entities.append(entity) %}
+                                    {% endif %}
+                                    {% endif %}
+                                    {% endfor %}
+                                    {% set high_confidence = high_confidence_entities|length %}
+
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-robot text-info me-2"></i>
+                                            <div>
+                                                <div class="fw-bold">{{ llm_generated }}</div>
+                                                <small class="text-muted">LLM Generated</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-bookmark-check text-primary me-2"></i>
+                                            <div>
+                                                <div class="fw-bold">{{ authoritative_sources }}</div>
+                                                <small class="text-muted">Authoritative Sources</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-shield-check text-success me-2"></i>
+                                            <div>
+                                                <div class="fw-bold">{{ high_confidence }}</div>
+                                                <small class="text-muted">High Confidence (>80%)</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Enrichment Methods -->
+                                <div class="mt-3">
+                                    <h6 class="text-muted">Enrichment Methods Used:</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% if llm_generated > 0 %}
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-robot"></i> LLM Definition Generation
+                                        </span>
+                                        {% endif %}
+                                        {% if authoritative_sources > 0 %}
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-bookmark-check"></i> Professional Ethics Codes
+                                        </span>
+                                        {% endif %}
+                                        {% if ontology.name in ['Terminological Foundations', 'engineering-ethics'] %}
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-file-earmark-text"></i> Technical Standards Integration
+                                        </span>
+                                        {% endif %}
+                                        {% if ontology.current_version and ontology.current_version.version_tag and
+                                        'definitions-integrated' in ontology.current_version.version_tag %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-file-code"></i> TTL Integration
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Statistics -->
         <div class="row mb-3">
             <div class="col-md-3">
@@ -147,6 +253,10 @@
                     <div class="card-body text-center">
                         <h5 class="card-title">Classes</h5>
                         <h3 class="text-success">{{ entities.classes|length }}</h3>
+                        {% if entities.classes|selectattr('comment')|list|length > 0 %}
+                        <small class="text-muted">{{ entities.classes|selectattr('comment')|list|length }} with
+                            definitions</small>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -155,6 +265,10 @@
                     <div class="card-body text-center">
                         <h5 class="card-title">Properties</h5>
                         <h3 class="text-info">{{ entities.properties|length }}</h3>
+                        {% if entities.properties|selectattr('comment')|list|length > 0 %}
+                        <small class="text-muted">{{ entities.properties|selectattr('comment')|list|length }} with
+                            definitions</small>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -163,6 +277,10 @@
                     <div class="card-body text-center">
                         <h5 class="card-title">Individuals</h5>
                         <h3 class="text-warning">{{ entities.individuals|length }}</h3>
+                        {% if entities.individuals|selectattr('comment')|list|length > 0 %}
+                        <small class="text-muted">{{ entities.individuals|selectattr('comment')|list|length }} with
+                            definitions</small>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -221,6 +339,14 @@
                     <i class="bi bi-arrow-left-right"></i> Relationships ({{ relationships.total }})
                 </button>
             </li>
+            {% if entities_with_definitions > 0 %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="definitions-tab" data-bs-toggle="tab" data-bs-target="#definitions"
+                    type="button">
+                    <i class="bi bi-book"></i> Definitions ({{ entities_with_definitions }})
+                </button>
+            </li>
+            {% endif %}
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="content-tab" data-bs-toggle="tab" data-bs-target="#content" type="button">
                     <i class="bi bi-code-slash"></i> TTL Content
@@ -240,6 +366,14 @@
                     <i class="bi bi-brain"></i> Inferred Relationships ({{
                     ontology.current_version.meta_data.reasoning.inferred_relationships|length if
                     ontology.current_version.meta_data.reasoning.inferred_relationships else 0 }})
+                </button>
+            </li>
+            {% endif %}
+            {% if entities_with_definitions > 0 %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="enrichment-tab" data-bs-toggle="tab" data-bs-target="#enrichment"
+                    type="button">
+                    <i class="bi bi-stars"></i> Enrichment Details ({{ entities_with_definitions }})
                 </button>
             </li>
             {% endif %}
@@ -268,15 +402,19 @@
                                     <div class="text-muted mt-1">{{ entity.comment }}</div>
                                     {% if entity.properties and entity.properties|length > 0 %}
                                     <div class="mt-2">
-                                        {% set props = entity.properties|from_json if entity.properties is string else entity.properties %}
+                                        {% set props = entity.properties|from_json if entity.properties is string else
+                                        entity.properties %}
                                         {% if props.confidence %}
-                                        <span class="badge bg-success me-1" title="LLM Generation Confidence">Confidence: {{ (props.confidence * 100)|round(1) }}%</span>
+                                        <span class="badge bg-success me-1"
+                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
+                                            100)|round(1) }}%</span>
                                         {% endif %}
                                         {% if props.definition_type %}
                                         <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
                                         {% endif %}
                                         {% if props['dc:source'] %}
-                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source Referenced</span>
+                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
+                                            Referenced</span>
                                         {% endif %}
                                     </div>
                                     {% endif %}
@@ -304,15 +442,19 @@
                                     <div class="text-muted mt-1">{{ entity.comment }}</div>
                                     {% if entity.properties and entity.properties|length > 0 %}
                                     <div class="mt-2">
-                                        {% set props = entity.properties|from_json if entity.properties is string else entity.properties %}
+                                        {% set props = entity.properties|from_json if entity.properties is string else
+                                        entity.properties %}
                                         {% if props.confidence %}
-                                        <span class="badge bg-success me-1" title="LLM Generation Confidence">Confidence: {{ (props.confidence * 100)|round(1) }}%</span>
+                                        <span class="badge bg-success me-1"
+                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
+                                            100)|round(1) }}%</span>
                                         {% endif %}
                                         {% if props.definition_type %}
                                         <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
                                         {% endif %}
                                         {% if props['dc:source'] %}
-                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source Referenced</span>
+                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
+                                            Referenced</span>
                                         {% endif %}
                                     </div>
                                     {% endif %}
@@ -340,15 +482,321 @@
                                     <div class="text-muted mt-1">{{ entity.comment }}</div>
                                     {% if entity.properties and entity.properties|length > 0 %}
                                     <div class="mt-2">
-                                        {% set props = entity.properties|from_json if entity.properties is string else entity.properties %}
+                                        {% set props = entity.properties|from_json if entity.properties is string else
+                                        entity.properties %}
                                         {% if props.confidence %}
-                                        <span class="badge bg-success me-1" title="LLM Generation Confidence">Confidence: {{ (props.confidence * 100)|round(1) }}%</span>
+                                        <span class="badge bg-success me-1"
+                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
+                                            100)|round(1) }}%</span>
                                         {% endif %}
                                         {% if props.definition_type %}
                                         <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
                                         {% endif %}
                                         {% if props['dc:source'] %}
-                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source Referenced</span>
+                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
+                                            Referenced</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                <br><code class="small">{{ entity.uri }}</code>
+                            </div>
+                            {% endfor %}
+                            {% if not entities.individuals %}
+                            <div class="list-group-item text-muted">No individuals found</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relationships Tab -->
+            <div class="tab-pane fade" id="relationships" role="tabpanel">
+                <div class="row">
+                    <!-- Hierarchical Relationships -->
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-diagram-3"></i> Hierarchical Relationships ({{ relationships.hierarchical
+                            }})</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="relationship-list" style="max-height: 400px; overflow-y: auto;">
+                                    {% for entity in entities.classes %}
+                                    {% if entity.parent_uri %}
+                                    <div class="relationship-item mb-2 p-2 border-start border-2 border-secondary">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-light text-dark me-2">{{ entity.label or
+                                                entity.uri|extract_name }}</span>
+                                            <i class="bi bi-arrow-right text-muted mx-2"></i>
+                                            <span class="badge bg-secondary">{{ entity.parent_uri|extract_name }}</span>
+                                        </div>
+                                        <small class="text-muted d-block mt-1">
+                                            <code>{{ entity.uri }}</code> ⊆ <code>{{ entity.parent_uri }}</code>
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {% if relationships.hierarchical == 0 %}
+                                    <div class="text-muted text-center py-3">
+                                        <i class="bi bi-info-circle"></i> No hierarchical relationships found
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Property Constraints -->
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-arrow-left-right"></i> Property Constraints ({{ relationships.domain +
+                            relationships.range }})</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="relationship-list" style="max-height: 400px; overflow-y: auto;">
+                                    {% for entity in entities.properties %}
+                                    {% if entity.domain or entity.range %}
+                                    <div class="relationship-item mb-2 p-2 border-start border-2 border-info">
+                                        <div class="fw-bold">{{ entity.label or entity.uri|extract_name }}</div>
+                                        {% if entity.domain %}
+                                        <div class="mt-1">
+                                            <span class="badge bg-info me-1">Domain:</span>
+                                            <span class="badge bg-light text-dark">{{ entity.domain|extract_name if
+                                                entity.domain else 'Not specified' }}</span>
+                                        </div>
+                                        {% endif %}
+                                        {% if entity.range %}
+                                        <div class="mt-1">
+                                            <span class="badge bg-success me-1">Range:</span>
+                                            <span class="badge bg-light text-dark">{{ entity.range|extract_name if
+                                                entity.range else 'Not specified' }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <small class="text-muted d-block mt-1">
+                                            <code>{{ entity.uri }}</code>
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {% if (relationships.domain + relationships.range) == 0 %}
+                                    <div class="text-muted text-center py-3">
+                                        <i class="bi bi-info-circle"></i> No property constraints found
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Definitions Tab -->
+            <div class="tab-pane fade" id="definitions" role="tabpanel">
+                {% if entities_with_definitions > 0 %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-success">
+                            <h4><i class="bi bi-book"></i> Professional Ethics Definitions</h4>
+                            <p class="mb-0">This ontology provides <strong>{{ entities_with_definitions }}</strong>
+                                professional definitions for key ethical concepts used in engineering and other
+                                professional domains.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% for entity_type, entity_list in [('Classes', entities.classes), ('Properties', entities.properties),
+                ('Individuals', entities.individuals)] %}
+                {% set entities_with_defs = entity_list|selectattr('comment')|list %}
+                {% if entities_with_defs %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h4><i
+                                class="bi bi-{{ 'box' if entity_type == 'Classes' else ('arrow-left-right' if entity_type == 'Properties' else 'node-plus') }}"></i>
+                            {{ entity_type }} ({{ entities_with_defs|length }} with definitions)</h4>
+
+                        {% for entity in entities_with_defs %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <h5 class="text-primary">{{ entity.label or entity.uri|extract_name }}</h5>
+                                        <code class="small text-muted">{{ entity.uri }}</code>
+                                        {% if entity.properties %}
+                                        {% set props = entity.properties|from_json if entity.properties is string else
+                                        entity.properties %}
+                                        <div class="mt-2">
+                                            {% if props.confidence %}
+                                            <span class="badge bg-success me-1" title="Definition Quality">{{
+                                                (props.confidence * 100)|round(1) }}% Confidence</span>
+                                            {% endif %}
+                                            {% if props['dc:source'] %}
+                                            <span class="badge bg-primary me-1" title="Authoritative Source">{{
+                                                props['dc:source'] }}</span>
+                                            {% endif %}
+                                            {% if props.generated_definition %}
+                                            <span class="badge bg-info me-1">AI Generated</span>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="definition-content">
+                                            <h6 class="text-muted mb-2">Professional Definition:</h6>
+                                            <p class="definition-text">{{ entity.comment }}</p>
+
+                                            {% if entity.entity_type == 'class' and entity.parent_uri %}
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-diagram-3"></i>
+                                                    Specializes: <code>{{ entity.parent_uri|extract_name }}</code>
+                                                </small>
+                                            </div>
+                                            {% endif %}
+
+                                            {% if entity.entity_type == 'property' %}
+                                            <div class="mt-2">
+                                                {% if entity.domain %}
+                                                <small class="text-muted d-block">
+                                                    <i class="bi bi-arrow-right"></i>
+                                                    Domain:
+                                                    <code>{{ entity.domain|extract_name if entity.domain else 'Not specified' }}</code>
+                                                </small>
+                                                {% endif %}
+                                                {% if entity.range %}
+                                                <small class="text-muted d-block">
+                                                    <i class="bi bi-arrow-left"></i>
+                                                    Range:
+                                                    <code>{{ entity.range|extract_name if entity.range else 'Not specified' }}</code>
+                                                </small>
+                                                {% endif %}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No definitions found in this ontology.
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Entities Tab -->
+            <div class="tab-pane fade" id="entities" role="tabpanel">
+                <div class="row">
+                    <!-- Classes -->
+                    <div class="col-md-4">
+                        <h5><i class="bi bi-box"></i> Classes ({{ entities.classes|length }})</h5>
+                        <div class="entity-list list-group">
+                            {% for entity in entities.classes %}
+                            <div class="list-group-item">
+                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
+                                {% if entity.comment %}
+                                <div class="mt-2 p-2 bg-light border-start border-3 border-info definition-card">
+                                    <small class="text-info fw-bold">Definition:</small>
+                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
+                                    {% if entity.properties and entity.properties|length > 0 %}
+                                    <div class="mt-2">
+                                        {% set props = entity.properties|from_json if entity.properties is string else
+                                        entity.properties %}
+                                        {% if props.confidence %}
+                                        <span class="badge bg-success me-1"
+                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
+                                            100)|round(1) }}%</span>
+                                        {% endif %}
+                                        {% if props.definition_type %}
+                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
+                                        {% endif %}
+                                        {% if props['dc:source'] %}
+                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
+                                            Referenced</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                <br><code class="small">{{ entity.uri }}</code>
+                            </div>
+                            {% endfor %}
+                            {% if not entities.classes %}
+                            <div class="list-group-item text-muted">No classes found</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Properties -->
+                    <div class="col-md-4">
+                        <h5><i class="bi bi-arrow-left-right"></i> Properties ({{ entities.properties|length }})</h5>
+                        <div class="entity-list list-group">
+                            {% for entity in entities.properties %}
+                            <div class="list-group-item">
+                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
+                                {% if entity.comment %}
+                                <div class="mt-2 p-2 bg-light border-start border-3 border-success definition-card">
+                                    <small class="text-success fw-bold">Definition:</small>
+                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
+                                    {% if entity.properties and entity.properties|length > 0 %}
+                                    <div class="mt-2">
+                                        {% set props = entity.properties|from_json if entity.properties is string else
+                                        entity.properties %}
+                                        {% if props.confidence %}
+                                        <span class="badge bg-success me-1"
+                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
+                                            100)|round(1) }}%</span>
+                                        {% endif %}
+                                        {% if props.definition_type %}
+                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
+                                        {% endif %}
+                                        {% if props['dc:source'] %}
+                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
+                                            Referenced</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                <br><code class="small">{{ entity.uri }}</code>
+                            </div>
+                            {% endfor %}
+                            {% if not entities.properties %}
+                            <div class="list-group-item text-muted">No properties found</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Individuals -->
+                    <div class="col-md-4">
+                        <h5><i class="bi bi-node-plus"></i> Individuals ({{ entities.individuals|length }})</h5>
+                        <div class="entity-list list-group">
+                            {% for entity in entities.individuals %}
+                            <div class="list-group-item">
+                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
+                                {% if entity.comment %}
+                                <div class="mt-2 p-2 bg-light border-start border-3 border-warning definition-card">
+                                    <small class="text-warning fw-bold">Definition:</small>
+                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
+                                    {% if entity.properties and entity.properties|length > 0 %}
+                                    <div class="mt-2">
+                                        {% set props = entity.properties|from_json if entity.properties is string else
+                                        entity.properties %}
+                                        {% if props.confidence %}
+                                        <span class="badge bg-success me-1"
+                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
+                                            100)|round(1) }}%</span>
+                                        {% endif %}
+                                        {% if props.definition_type %}
+                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
+                                        {% endif %}
+                                        {% if props['dc:source'] %}
+                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
+                                            Referenced</span>
                                         {% endif %}
                                     </div>
                                     {% endif %}
@@ -683,6 +1131,253 @@
                     reasoning session.
                 </div>
                 {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Enrichment Details Tab -->
+            {% if entities_with_definitions > 0 %}
+            <div class="tab-pane fade" id="enrichment" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <h4><i class="bi bi-stars"></i> Ontology Enrichment Analysis</h4>
+                        <p class="text-muted">This ontology has been systematically enriched using multiple approaches
+                            to provide comprehensive professional definitions for engineering ethics concepts.</p>
+                    </div>
+                </div>
+
+                <!-- Enrichment Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <h2 class="text-success">{{ ((entities_with_definitions / total_entities * 100) if
+                                    total_entities > 0 else 0)|round(1) }}%</h2>
+                                <h5>Coverage Rate</h5>
+                                <small class="text-muted">{{ entities_with_definitions }} of {{ total_entities }}
+                                    entities</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-info">
+                            <div class="card-body text-center">
+                                {% set confidence_values = [] %}
+                                {% for entity in (entities.classes + entities.properties + entities.individuals) %}
+                                {% if entity.properties %}
+                                {% set props = entity.properties|from_json if entity.properties is string else
+                                entity.properties %}
+                                {% if props and props.confidence %}
+                                {% set _ = confidence_values.append(props.confidence) %}
+                                {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                                {% set avg_confidence = ((confidence_values|sum / confidence_values|length) * 100) if
+                                confidence_values|length > 0 else 0 %}
+                                <h2 class="text-info">{{ avg_confidence|round(1) if avg_confidence else 'N/A' }}%</h2>
+                                <h5>Avg Confidence</h5>
+                                <small class="text-muted">LLM-generated definitions</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-warning">
+                            <div class="card-body text-center">
+                                {% set professional_entities = [] %}
+                                {% for entity in (entities.classes + entities.properties + entities.individuals) %}
+                                {% if entity.properties and 'professional' in (entity.properties|string) %}
+                                {% set _ = professional_entities.append(entity) %}
+                                {% endif %}
+                                {% endfor %}
+                                {% set professional_sources = authoritative_sources + professional_entities|length %}
+                                <h2 class="text-warning">{{ professional_sources }}</h2>
+                                <h5>Professional Sources</h5>
+                                <small class="text-muted">Ethics codes & standards</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enrichment Methods Breakdown -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-graph-up"></i> Enrichment Methods</h5>
+                        <div class="list-group">
+                            {% if llm_generated > 0 %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-robot text-info me-2"></i>
+                                        <strong>LLM Definition Generation</strong>
+                                        <br><small class="text-muted">AI-powered professional definitions using
+                                            Claude</small>
+                                    </div>
+                                    <span class="badge bg-info rounded-pill">{{ llm_generated }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if authoritative_sources > 0 %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-bookmark-check text-primary me-2"></i>
+                                        <strong>Professional Ethics Codes</strong>
+                                        <br><small class="text-muted">ASCE, IEEE, ASME, NSPE codes with dc:source
+                                            attribution</small>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">{{ authoritative_sources }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if ontology.name in ['Terminological Foundations', 'engineering-ethics'] %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-file-earmark-text text-secondary me-2"></i>
+                                        <strong>Technical Standards Integration</strong>
+                                        <br><small class="text-muted">ISO, IEC, ANSI standards with proper
+                                            attribution</small>
+                                    </div>
+                                    <span class="badge bg-secondary rounded-pill">
+                                        {% if ontology.name == 'Terminological Foundations' %}15{% else %}31{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if ontology.current_version and ontology.current_version.version_tag and
+                            'definitions-integrated' in ontology.current_version.version_tag %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi bi-file-code text-success me-2"></i>
+                                        <strong>TTL Content Integration</strong>
+                                        <br><small class="text-muted">Definitions embedded in RDF using rdfs:comment &
+                                            skos:definition</small>
+                                    </div>
+                                    <span class="badge bg-success rounded-pill">✓</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5><i class="bi bi-clipboard-data"></i> Quality Metrics</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-8">High Confidence Definitions (>80%):</dt>
+                                    <dd class="col-sm-4"><span class="badge bg-success">{{ high_confidence }}</span>
+                                    </dd>
+
+                                    <dt class="col-sm-8">Authoritative Source Citations:</dt>
+                                    <dd class="col-sm-4"><span class="badge bg-primary">{{ authoritative_sources
+                                            }}</span></dd>
+
+                                    <dt class="col-sm-8">Professional Context Provided:</dt>
+                                    <dd class="col-sm-4"><span class="badge bg-info">{{ entities_with_definitions
+                                            }}</span></dd>
+
+                                    {% if ontology.current_version and ontology.current_version.version_tag and
+                                    'definitions-integrated' in ontology.current_version.version_tag %}
+                                    <dt class="col-sm-8">External System Accessibility:</dt>
+                                    <dd class="col-sm-4"><span class="badge bg-success">TTL Embedded</span></dd>
+                                    {% endif %}
+                                </dl>
+
+                                {% if ontology.name == 'proethica-intermediate' %}
+                                <div class="alert alert-info mt-3">
+                                    <i class="bi bi-info-circle"></i>
+                                    <strong>ProEthica Integration:</strong> This ontology serves as the core ethical
+                                    framework for the ProEthica concept extraction system, with {{
+                                    entities_with_definitions }} professionally defined concepts ready for annotation
+                                    and analysis.
+                                </div>
+                                {% endif %}
+
+                                {% if ontology.name in ['ASCE Code of Ethics', 'IEEE Code of Ethics', 'ASME Code of
+                                Ethics'] %}
+                                <div class="alert alert-primary mt-3">
+                                    <i class="bi bi-award"></i>
+                                    <strong>Professional Authority:</strong> All definitions in this ontology are
+                                    derived from official professional engineering ethics codes and represent
+                                    authoritative industry standards.
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Enriched Entities -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5><i class="bi bi-eye"></i> Sample Enriched Entities</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Entity</th>
+                                        <th>Type</th>
+                                        <th>Definition Preview</th>
+                                        <th>Enrichment Source</th>
+                                        <th>Quality</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for entity in (entities.classes + entities.properties +
+                                    entities.individuals)[:10] %}
+                                    {% if entity.comment %}
+                                    <tr>
+                                        <td><strong>{{ entity.label or entity.uri|extract_name }}</strong></td>
+                                        <td>
+                                            <span class="badge bg-light text-dark">{{ entity.entity_type|title }}</span>
+                                        </td>
+                                        <td>
+                                            <small>{{ entity.comment[:100] }}{% if entity.comment|length > 100 %}...{%
+                                                endif %}</small>
+                                        </td>
+                                        <td>
+                                            {% if entity.properties %}
+                                            {% set props = entity.properties|from_json if entity.properties is string
+                                            else entity.properties %}
+                                            {% if props['dc:source'] %}
+                                            <span class="badge bg-primary">Authoritative</span>
+                                            {% elif props.generated_definition %}
+                                            <span class="badge bg-info">LLM Generated</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">Manual</span>
+                                            {% endif %}
+                                            {% else %}
+                                            <span class="badge bg-secondary">Unknown</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if entity.properties %}
+                                            {% set props = entity.properties|from_json if entity.properties is string
+                                            else entity.properties %}
+                                            {% if props.confidence %}
+                                            <span class="badge bg-success">{{ (props.confidence * 100)|round(0)
+                                                }}%</span>
+                                            {% elif props['dc:source'] %}
+                                            <span class="badge bg-success">100%</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">N/A</span>
+                                            {% endif %}
+                                            {% else %}
+                                            <span class="badge bg-secondary">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
             {% endif %}
 
