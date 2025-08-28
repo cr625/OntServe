@@ -1901,6 +1901,200 @@ def register_routes(app):
                 'error': str(e)
             }), 500
     
+    # URI Resolution endpoint - path-based for direct access
+    @app.route('/ontology/<path:ontology_path>/<entity_name>')
+    def resolve_uri_path(ontology_path, entity_name):
+        """
+        Direct path-based URI resolution.
+        
+        Examples:
+            /ontology/intermediate/Honesty
+            /ontology/core/Principle
+        """
+        # Construct the full URI
+        base_uri = f"http://proethica.org/ontology/{ontology_path}"
+        full_uri = f"{base_uri}#{entity_name}"
+        
+        # Find entity in database
+        entity = OntologyEntity.query.filter_by(uri=full_uri).first()
+        
+        if not entity:
+            return jsonify({
+                'error': 'Entity not found',
+                'uri': full_uri
+            }), 404
+        
+        # Get ontology for context
+        ontology = entity.ontology
+        
+        # Check Accept header for content negotiation
+        accept_header = request.headers.get('Accept', '')
+        
+        if 'application/json' in accept_header:
+            # Return JSON representation
+            return jsonify({
+                'uri': entity.uri,
+                'label': entity.label,
+                'type': entity.entity_type,
+                'definition': entity.comment,
+                'ontology': ontology.name,
+                'ontology_base_uri': ontology.base_uri,
+                'properties': entity.properties or {}
+            })
+        
+        # Default: Return TTL representation
+        ttl_content = generate_entity_ttl(entity, ontology)
+        
+        response = app.response_class(
+            response=ttl_content,
+            status=200,
+            mimetype='text/turtle'
+        )
+        
+        # Add CORS headers for cross-origin access
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Accept, Content-Type'
+        
+        return response
+    
+    # URI Resolution endpoint - query parameter based
+    @app.route('/resolve', methods=['GET', 'OPTIONS'])
+    def resolve_uri():
+        """
+        Resolve ontology entity URIs and return entity information.
+        
+        Handles URIs like:
+        - http://proethica.org/ontology/intermediate#Honesty
+        - http://proethica.org/ontology/core#Principle
+        
+        Usage:
+            /resolve?uri=http://proethica.org/ontology/intermediate#Honesty
+            
+        Returns:
+            TTL format by default, with content negotiation support
+        """
+        try:
+            # Handle OPTIONS request for CORS preflight
+            if request.method == 'OPTIONS':
+                response = app.response_class(status=200)
+                response.headers['Access-Control-Allow-Origin'] = '*'
+                response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+                response.headers['Access-Control-Allow-Headers'] = 'Accept, Content-Type'
+                return response
+            
+            # Get URI from query parameter
+            uri = request.args.get('uri')
+            if not uri:
+                return jsonify({
+                    'error': 'Missing required parameter: uri',
+                    'usage': '/resolve?uri=http://proethica.org/ontology/intermediate#Honesty'
+                }), 400
+            
+            app.logger.info(f"Resolving URI: {uri}")
+            
+            # Find entity in database
+            entity = OntologyEntity.query.filter_by(uri=uri).first()
+            
+            if not entity:
+                app.logger.warning(f"Entity not found for URI: {uri}")
+                return jsonify({
+                    'error': 'Entity not found',
+                    'uri': uri
+                }), 404
+            
+            # Get ontology for context
+            ontology = entity.ontology
+            
+            # Check Accept header for content negotiation
+            accept_header = request.headers.get('Accept', '')
+            
+            if 'application/json' in accept_header:
+                # Return JSON representation
+                return jsonify({
+                    'uri': entity.uri,
+                    'label': entity.label,
+                    'type': entity.entity_type,
+                    'definition': entity.comment,
+                    'ontology': ontology.name,
+                    'ontology_base_uri': ontology.base_uri,
+                    'properties': entity.properties or {}
+                })
+            
+            # Default: Return TTL representation
+            ttl_content = generate_entity_ttl(entity, ontology)
+            
+            response = app.response_class(
+                response=ttl_content,
+                status=200,
+                mimetype='text/turtle'
+            )
+            
+            # Add CORS headers for cross-origin access
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Accept, Content-Type'
+            
+            return response
+            
+        except Exception as e:
+            app.logger.error(f"Error resolving URI {uri}: {e}")
+            return jsonify({
+                'error': 'Internal server error',
+                'message': str(e)
+            }), 500
+    
+    def generate_entity_ttl(entity, ontology):
+        """Generate TTL representation for an entity."""
+        lines = []
+        
+        # Add prefixes
+        lines.append(f"@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .")
+        lines.append(f"@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .")
+        lines.append(f"@prefix owl: <http://www.w3.org/2002/07/owl#> .")
+        
+        # Add ontology prefix
+        if ontology.base_uri:
+            prefix_name = ontology.name.replace('-', '_')
+            lines.append(f"@prefix {prefix_name}: <{ontology.base_uri}> .")
+        
+        lines.append("")  # Empty line
+        
+        # Entity declaration
+        entity_type_mapping = {
+            'class': 'owl:Class',
+            'property': 'owl:ObjectProperty', 
+            'datatype_property': 'owl:DatatypeProperty',
+            'individual': 'owl:NamedIndividual'
+        }
+        
+        entity_rdf_type = entity_type_mapping.get(entity.entity_type, 'owl:Thing')
+        lines.append(f"<{entity.uri}> a {entity_rdf_type} ;")
+        
+        # Add label
+        if entity.label:
+            lines.append(f'    rdfs:label "{entity.label}" ;')
+        
+        # Add comment/definition
+        if entity.comment:
+            lines.append(f'    rdfs:comment "{entity.comment}" ;')
+        
+        # Add parent class if available
+        if entity.parent_uri:
+            lines.append(f'    rdfs:subClassOf <{entity.parent_uri}> ;')
+        
+        # Add domain and range for properties
+        if entity.domain:
+            lines.append(f'    rdfs:domain <{entity.domain}> ;')
+        if entity.range:
+            lines.append(f'    rdfs:range <{entity.range}> ;')
+        
+        # Remove trailing semicolon from last line and add period
+        if lines and lines[-1].endswith(' ;'):
+            lines[-1] = lines[-1][:-2] + ' .'
+        
+        return '\n'.join(lines)
+    
     @app.errorhandler(404)
     def not_found(error):
         """404 error handler."""
