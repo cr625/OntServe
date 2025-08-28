@@ -122,6 +122,18 @@ def create_app(config_name=None):
         else:
             return uri
     
+    @app.template_filter('from_json')
+    def from_json_filter(json_str):
+        """Parse JSON string into Python object, returning empty dict on error."""
+        if not json_str:
+            return {}
+        try:
+            if isinstance(json_str, str):
+                return json.loads(json_str)
+            return json_str
+        except (json.JSONDecodeError, TypeError):
+            return {}
+    
     # Initialize CLI commands
     from cli import init_cli
     init_cli(app)

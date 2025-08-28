@@ -15,6 +15,19 @@
         font-family: 'Courier New', monospace;
         font-size: 0.9em;
     }
+    
+    .definition-card {
+        font-size: 0.9em;
+        line-height: 1.4;
+    }
+    
+    .definition-card .text-muted {
+        font-size: inherit;
+    }
+    
+    .entity-list {
+        max-height: 600px;
+    }
 </style>
 {% endblock %}
 
@@ -250,7 +263,24 @@
                             <div class="list-group-item">
                                 <strong>{{ entity.label or entity.uri|extract_name }}</strong>
                                 {% if entity.comment %}
-                                <br><small class="text-muted">{{ entity.comment[:100] }}...</small>
+                                <div class="mt-2 p-2 bg-light border-start border-3 border-info definition-card">
+                                    <small class="text-info fw-bold">Definition:</small>
+                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
+                                    {% if entity.properties and entity.properties|length > 0 %}
+                                    <div class="mt-2">
+                                        {% set props = entity.properties|from_json if entity.properties is string else entity.properties %}
+                                        {% if props.confidence %}
+                                        <span class="badge bg-success me-1" title="LLM Generation Confidence">Confidence: {{ (props.confidence * 100)|round(1) }}%</span>
+                                        {% endif %}
+                                        {% if props.definition_type %}
+                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
+                                        {% endif %}
+                                        {% if props['dc:source'] %}
+                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source Referenced</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
                                 {% endif %}
                                 <br><code class="small">{{ entity.uri }}</code>
                             </div>
@@ -269,7 +299,24 @@
                             <div class="list-group-item">
                                 <strong>{{ entity.label or entity.uri|extract_name }}</strong>
                                 {% if entity.comment %}
-                                <br><small class="text-muted">{{ entity.comment[:100] }}...</small>
+                                <div class="mt-2 p-2 bg-light border-start border-3 border-success definition-card">
+                                    <small class="text-success fw-bold">Definition:</small>
+                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
+                                    {% if entity.properties and entity.properties|length > 0 %}
+                                    <div class="mt-2">
+                                        {% set props = entity.properties|from_json if entity.properties is string else entity.properties %}
+                                        {% if props.confidence %}
+                                        <span class="badge bg-success me-1" title="LLM Generation Confidence">Confidence: {{ (props.confidence * 100)|round(1) }}%</span>
+                                        {% endif %}
+                                        {% if props.definition_type %}
+                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
+                                        {% endif %}
+                                        {% if props['dc:source'] %}
+                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source Referenced</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
                                 {% endif %}
                                 <br><code class="small">{{ entity.uri }}</code>
                             </div>
@@ -288,7 +335,24 @@
                             <div class="list-group-item">
                                 <strong>{{ entity.label or entity.uri|extract_name }}</strong>
                                 {% if entity.comment %}
-                                <br><small class="text-muted">{{ entity.comment[:100] }}...</small>
+                                <div class="mt-2 p-2 bg-light border-start border-3 border-warning definition-card">
+                                    <small class="text-warning fw-bold">Definition:</small>
+                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
+                                    {% if entity.properties and entity.properties|length > 0 %}
+                                    <div class="mt-2">
+                                        {% set props = entity.properties|from_json if entity.properties is string else entity.properties %}
+                                        {% if props.confidence %}
+                                        <span class="badge bg-success me-1" title="LLM Generation Confidence">Confidence: {{ (props.confidence * 100)|round(1) }}%</span>
+                                        {% endif %}
+                                        {% if props.definition_type %}
+                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
+                                        {% endif %}
+                                        {% if props['dc:source'] %}
+                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source Referenced</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
                                 {% endif %}
                                 <br><code class="small">{{ entity.uri }}</code>
                             </div>
