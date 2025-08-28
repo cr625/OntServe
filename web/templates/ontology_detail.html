@@ -65,8 +65,14 @@
                 </p>
             </div>
             <div class="btn-group" role="group">
+                {% if current_user.is_authenticated and current_user.can_perform_action('edit') %}
+                <a href="{{ url_for('ontology_settings', ontology_name=ontology.name) }}"
+                    class="btn btn-outline-primary">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+                {% endif %}
                 <a href="{{ url_for('edit_ontology', ontology_name=ontology.name) }}" class="btn btn-primary">
-                    <i class="bi bi-pencil-square"></i> Edit
+                    <i class="bi bi-pencil-square"></i> Edit TTL
                 </a>
                 <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}"
                     class="btn btn-success">

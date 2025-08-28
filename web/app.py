@@ -1546,6 +1546,80 @@ def register_routes(app):
         
         return jsonify(data)
     
+    @app.route('/api/ontology/<ontology_name>/metadata', methods=['PUT'])
+    @login_required
+    def update_ontology_metadata(ontology_name):
+        """Update ontology metadata (name, description, etc.)."""
+        # Check permissions
+        if not current_user.can_perform_action('edit'):
+            return jsonify({'success': False, 'error': 'Permission denied'}), 403
+            
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        
+        try:
+            data = request.get_json()
+            old_name = ontology.name
+            
+            # Validate new name if changed
+            new_name = data.get('name', ontology.name)
+            if new_name != old_name:
+                # Check if new name already exists
+                existing = Ontology.query.filter_by(name=new_name).first()
+                if existing:
+                    return jsonify({
+                        'success': False,
+                        'error': f'An ontology with name "{new_name}" already exists'
+                    }), 409
+            
+            # Update ontology metadata
+            ontology.name = new_name
+            ontology.base_uri = data.get('base_uri', ontology.base_uri)
+            ontology.description = data.get('description', ontology.description)
+            ontology.ontology_type = data.get('ontology_type', ontology.ontology_type)
+            ontology.is_editable = data.get('is_editable', ontology.is_editable)
+            ontology.is_base = data.get('is_base', ontology.is_base)
+            ontology.updated_at = datetime.now(timezone.utc)
+            
+            # Update metadata
+            if not ontology.meta_data:
+                ontology.meta_data = {}
+            ontology.meta_data.update({
+                'last_metadata_update': datetime.now(timezone.utc).isoformat(),
+                'updated_by': current_user.username
+            })
+            
+            db.session.commit()
+            
+            app.logger.info(f"Updated ontology metadata for {old_name} -> {new_name} by {current_user.username}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'Ontology metadata updated successfully',
+                'name_changed': old_name != new_name,
+                'old_name': old_name,
+                'new_name': new_name
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error updating ontology metadata: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    @app.route('/ontology/<ontology_name>/settings')
+    @login_required
+    def ontology_settings(ontology_name):
+        """Ontology settings page."""
+        # Check permissions
+        if not current_user.can_perform_action('edit'):
+            flash('You do not have permission to edit ontology settings', 'error')
+            return redirect(url_for('ontology_detail_or_uri_resolution', ontology_name=ontology_name))
+            
+        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        return render_template('ontology_settings.html', ontology=ontology)
+    
     @app.route('/editor/api/ontologies/<ontology_name>/entities')
     def api_ontology_entities(ontology_name):
         """API endpoint for ProEthica integration - get entities for an ontology."""

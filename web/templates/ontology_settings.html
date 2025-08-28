@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - {{ ontology.name }} - OntServe{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a
+                        href="{{ url_for('ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}">{{
+                        ontology.name }}</a></li>
+                <li class="breadcrumb-item active">Settings</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-gear"></i> Ontology Settings</h1>
+            <a href="{{ url_for('ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}"
+                class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Ontology
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Basic Settings Form -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle"></i> Basic Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="ontologySettingsForm">
+                            <div class="mb-3">
+                                <label for="ontologyName" class="form-label">Name *</label>
+                                <input type="text" class="form-control" id="ontologyName" name="name"
+                                    value="{{ ontology.name }}" required>
+                                <div class="form-text">
+                                    URI-safe identifier for the ontology. Used in URLs and imports.
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="ontologyBaseUri" class="form-label">Base URI *</label>
+                                <input type="url" class="form-control" id="ontologyBaseUri" name="base_uri"
+                                    value="{{ ontology.base_uri }}" required>
+                                <div class="form-text">
+                                    The canonical URI namespace for this ontology.
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="ontologyDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="ontologyDescription" name="description"
+                                    rows="3">{{ ontology.description or '' }}</textarea>
+                                <div class="form-text">
+                                    Human-readable description of the ontology's purpose and scope.
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="ontologyType" class="form-label">Type</label>
+                                        <select class="form-select" id="ontologyType" name="ontology_type">
+                                            <option value="base" {{ 'selected' if ontology.ontology_type=='base' else ''
+                                                }}>Base</option>
+                                            <option value="core" {{ 'selected' if ontology.ontology_type=='core' else ''
+                                                }}>Core</option>
+                                            <option value="domain" {{ 'selected' if ontology.ontology_type=='domain'
+                                                else '' }}>Domain</option>
+                                            <option value="application" {{ 'selected' if
+                                                ontology.ontology_type=='application' else '' }}>Application</option>
+                                            <option value="derived" {{ 'selected' if ontology.ontology_type=='derived'
+                                                else '' }}>Derived</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="isEditable"
+                                                name="is_editable" {{ 'checked' if ontology.is_editable else '' }}>
+                                            <label class="form-check-label" for="isEditable">
+                                                Editable
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="isBase" name="is_base"
+                                                {{ 'checked' if ontology.is_base else '' }}>
+                                            <label class="form-check-label" for="isBase">
+                                                Base Ontology
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Save Changes
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                    <i class="bi bi-arrow-clockwise"></i> Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                {% if current_user.is_authenticated and current_user.can_perform_action('delete') %}
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5><i class="bi bi-exclamation-triangle"></i> Danger Zone</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Delete Ontology</h6>
+                        <p class="text-muted">
+                            Permanently delete this ontology and all its versions. This action cannot be undone.
+                        </p>
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                            data-bs-target="#deleteOntologyModal">
+                            <i class="bi bi-trash"></i> Delete Ontology
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-4">
+                <!-- Current Status -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-bar-chart"></i> Current Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-6">Classes:</dt>
+                            <dd class="col-6">{{ ontology.class_count or 0 }}</dd>
+
+                            <dt class="col-6">Properties:</dt>
+                            <dd class="col-6">{{ ontology.property_count or 0 }}</dd>
+
+                            <dt class="col-6">Triples:</dt>
+                            <dd class="col-6">{{ ontology.triple_count or 0 }}</dd>
+
+                            <dt class="col-6">Versions:</dt>
+                            <dd class="col-6">{{ ontology.version_count or 0 }}</dd>
+
+                            <dt class="col-6">Created:</dt>
+                            <dd class="col-6">{{ ontology.created_at.strftime('%Y-%m-%d') if ontology.created_at else
+                                '-' }}</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightning"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('edit_ontology', ontology_name=ontology.name) }}"
+                                class="btn btn-outline-primary">
+                                <i class="bi bi-pencil-square"></i> Edit TTL Content
+                            </a>
+                            <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}"
+                                class="btn btn-outline-success">
+                                <i class="bi bi-diagram-3"></i> Visualize
+                            </a>
+                            <a href="{{ url_for('ontology_content', ontology_name=ontology.name) }}"
+                                class="btn btn-outline-secondary" target="_blank">
+                                <i class="bi bi-file-code"></i> View Raw TTL
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+{% if current_user.is_authenticated and current_user.can_perform_action('delete') %}
+<div class="modal fade" id="deleteOntologyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Delete Ontology</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <strong>Warning:</strong> This will permanently delete the ontology and all its data.
+                </div>
+                <p>Type <strong>{{ ontology.name }}</strong> to confirm deletion:</p>
+                <input type="text" class="form-control" id="deleteConfirmInput" placeholder="Enter ontology name">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled onclick="confirmDelete()">
+                    Delete Permanently
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    function resetForm() {
+        document.getElementById('ontologySettingsForm').reset();
+    }
+
+    document.getElementById('ontologySettingsForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const data = {
+            name: formData.get('name'),
+            base_uri: formData.get('base_uri'),
+            description: formData.get('description'),
+            ontology_type: formData.get('ontology_type'),
+            is_editable: formData.has('is_editable'),
+            is_base: formData.has('is_base')
+        };
+
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+        submitBtn.disabled = true;
+
+        fetch('/api/ontology/{{ ontology.name }}/metadata', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+                    alertDiv.innerHTML = `
+                <i class="bi bi-check-circle"></i> Settings saved successfully!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+                    this.insertBefore(alertDiv, this.firstChild);
+
+                    // If name changed, redirect to new URL
+                    if (result.name_changed) {
+                        setTimeout(() => {
+                            window.location.href = `/ontology/${data.name}/settings`;
+                        }, 2000);
+                    }
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+            })
+            .catch(error => {
+                // Show error message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                alertDiv.innerHTML = `
+            <i class="bi bi-exclamation-circle"></i> Error: ${error.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+                this.insertBefore(alertDiv, this.firstChild);
+            })
+            .finally(() => {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+    });
+
+    // Delete confirmation
+    const deleteInput = document.getElementById('deleteConfirmInput');
+    const deleteBtn = document.getElementById('confirmDeleteBtn');
+
+    if (deleteInput && deleteBtn) {
+        deleteInput.addEventListener('input', function () {
+            deleteBtn.disabled = this.value !== '{{ ontology.name }}';
+        });
+    }
+
+    function confirmDelete() {
+        fetch('/ontology/{{ ontology.name }}', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    alert('Delete failed: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                alert('Delete failed: ' + error.message);
+            });
+    }
+</script>
+{% endblock %}
