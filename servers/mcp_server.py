@@ -123,6 +123,28 @@ class OntServeMCPServer:
             "domains_loaded": domain_count
         })
 
+    async def handle_get_guidelines_compat(self, request):
+        """ProEthica compatibility endpoint for guidelines."""
+        domain = request.match_info.get('domain', 'engineering-ethics')
+        
+        logger.info(f"ProEthica compatibility: guidelines request for domain '{domain}'")
+        
+        # Return a basic successful response for ProEthica compatibility
+        # This allows ProEthica to start without MCP connectivity errors
+        return web.json_response({
+            "status": "ok",
+            "domain": domain,
+            "message": "Guidelines endpoint available for ProEthica compatibility",
+            "note": "This is a compatibility endpoint - full guidelines functionality available via JSON-RPC",
+            "available_methods": [
+                "get_entities_by_category",
+                "submit_candidate_concept", 
+                "update_concept_status",
+                "get_candidate_concepts",
+                "sparql_query"
+            ]
+        })
+
     async def handle_jsonrpc(self, request):
         """Handle JSON-RPC requests."""
         try:
@@ -535,6 +557,9 @@ class OntServeMCPServer:
         self.app.router.add_post('/', self.handle_jsonrpc)  # Root for MCP
         self.app.router.add_post('/jsonrpc', self.handle_jsonrpc)  # Standard JSON-RPC
         self.app.router.add_get('/health', self.handle_health)  # Health check
+        
+        # ProEthica compatibility endpoints
+        self.app.router.add_get('/api/guidelines/{domain}', self.handle_get_guidelines_compat)
 
         # Start the server
         port = int(os.environ.get("ONTSERVE_MCP_PORT", 8082))
