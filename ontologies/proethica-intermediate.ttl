@@ -16,14 +16,15 @@
 <http://proethica.org/ontology/intermediate> a owl:Ontology ;
     rdfs:label "ProEthica Intermediate Ontology"@en ;
     dc:creator "ProEthica AI"@en ;
-    dc:date "2025-08-25"^^xsd:date ;
-    rdfs:comment "Enhanced BFO-aligned ontology for professional ethics with class-instance boundaries, temporal scope, evaluation criteria, and advanced constraints"@en ;
-    owl:versionInfo "8.0.0"^^xsd:string ;
+    dc:date "2025-08-30"^^xsd:date ;
+    rdfs:comment "Enhanced BFO-aligned ontology for professional ethics with corrected BFO alignments based on formal analysis"@en ;
+    owl:versionInfo "9.2.0"^^xsd:string ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
     owl:imports <http://www.w3.org/2006/time> ;
-    skos:note "This ontology defines abstract class hierarchies. Instances should be modeled in domain-specific extensions."@en .
+    skos:note "This ontology defines abstract class hierarchies. Instances should be modeled in domain-specific extensions."@en ;
+    dc:description "Version 9.2.0 implements comprehensive intermediate ontology enhancements: bridge classes (ProfessionalAgent, TechnicalObligation), standards-based domain classes (EngineeringRole, BiomedicalObligation), and extensive SHACL validation for professional standards compliance."@en .
 
 ###############################################################
 # Annotation Properties for Class-Instance Boundary Clarity
@@ -44,20 +45,39 @@ proeth:operationalizationNote a owl:AnnotationProperty ;
     rdfs:label "Operationalization Note"@en ;
     iao:0000115 "Guidance for operationalizing this concept in SHACL, SWRL, or other tools."@en .
 
+proeth:bfoAlignmentNote a owl:AnnotationProperty ;
+    rdfs:subPropertyOf skos:note ;
+    rdfs:label "BFO Alignment Note"@en ;
+    iao:0000115 "Documents the rationale for BFO parent class selection."@en .
+
+proeth:standardsAuthority a owl:AnnotationProperty ;
+    rdfs:subPropertyOf dc:source ;
+    rdfs:label "Standards Authority"@en ;
+    iao:0000115 "Identifies the authoritative standards, codes, or regulations that define or govern a professional concept."@en .
+
 ###############################################################
-# Core Parent Classes (Enhanced with Clear Instance Guidance)
+# Core Parent Classes (Enhanced with Corrected BFO Alignments)
 ###############################################################
 
-# Role - aligned with BFO:Role
+# Agent - aligned with BFO:Material Entity ✓ CORRECT
+proeth:Agent a owl:Class ;
+    rdfs:subClassOf bfo:0000040 ;  # BFO:material entity
+    rdfs:label "Agent"@en ;
+    iao:0000115 "A material entity capable of bearing roles and performing intentional actions."@en ;
+    proeth:classificationGuidance "Model as class for agent types. Create individuals for specific people, organizations, or AI systems."@en ;
+    proeth:bfoAlignmentNote "Aligned with BFO:MaterialEntity because agents are physical entities (people, organizations) that can bear roles and act."@en .
+
+# Role - aligned with BFO:Role ✓ CORRECT  
 proeth:Role a owl:Class ;
     rdfs:subClassOf bfo:0000023 ;  # BFO:role
     rdfs:label "Professional Role"@en ;
     iao:0000115 "A role that inheres in a material entity and can be realized by processes involving professional duties and ethical obligations."@en ;
     proeth:classificationGuidance "Model as class for role types (e.g., Engineer, Lawyer). Create individuals for specific role instances (e.g., senior_engineer_alice_123)."@en ;
     proeth:instanceExample "Individual: eng:alice_senior_engineer_role_2025 rdf:type proeth:ProfessionalEngineerRole"@en ;
-    proeth:operationalizationNote "Use SHACL to enforce that role instances must have exactly one bearer agent."@en .
+    proeth:operationalizationNote "Use SHACL to enforce that role instances must have exactly one bearer agent."@en ;
+    proeth:bfoAlignmentNote "Correctly aligned with BFO:Role as professional roles are realizable entities that inhere in agents."@en .
 
-# Principle - aligned with IAO:Information Content Entity
+# Principle - aligned with IAO:Information Content Entity ✓ CORRECT
 proeth:Principle a owl:Class ;
     rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
     rdfs:subClassOf [ a owl:Restriction ;
@@ -67,9 +87,10 @@ proeth:Principle a owl:Class ;
     iao:0000115 "An information content entity that represents fundamental ethical values and guidelines for conduct."@en ;
     proeth:classificationGuidance "Model as class for principle types (e.g., IntegrityPrinciple). Create individuals for specific principle statements (e.g., nspe_integrity_principle_1)."@en ;
     proeth:instanceExample "Individual: eng:nspe_public_safety_principle rdf:type proeth:PublicSafetyPrinciple"@en ;
-    proeth:operationalizationNote "Link principle individuals to specific text content and authoritative sources using IAO properties."@en .
+    proeth:operationalizationNote "Link principle individuals to specific text content and authoritative sources using IAO properties."@en ;
+    proeth:bfoAlignmentNote "Correctly aligned with IAO:InformationContentEntity as principles are abstract informational entities about ethics."@en .
 
-# DeonticStatement - parent for Obligation/Permission/Prohibition
+# DeonticStatement - parent for Obligation/Permission/Prohibition ✓ CORRECT
 proeth:DeonticStatement a owl:Class ;
     rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
     rdfs:subClassOf [ a owl:Restriction ;
@@ -79,9 +100,10 @@ proeth:DeonticStatement a owl:Class ;
     iao:0000115 "An information content entity that expresses permissions, obligations, or prohibitions with temporal validity."@en ;
     proeth:classificationGuidance "Model as class for deontic types. Create individuals for specific obligations/permissions/prohibitions (e.g., reporting_obligation_123)."@en ;
     proeth:instanceExample "Individual: eng:report_safety_hazard_obligation_1 rdf:type proeth:PublicSafetyObligation"@en ;
-    proeth:operationalizationNote "Use SHACL cardinality constraints to enforce obligation structure and temporal bounds."@en .
+    proeth:operationalizationNote "Use SHACL cardinality constraints to enforce obligation structure and temporal bounds."@en ;
+    proeth:bfoAlignmentNote "Correctly aligned with IAO:InformationContentEntity as obligations are normative rules/content, not realizable entities."@en .
 
-# Action - aligned with BFO:Process
+# Action - aligned with BFO:Process ✓ CORRECT
 proeth:Action a owl:Class ;
     rdfs:subClassOf bfo:0000015 ;  # BFO:process
     rdfs:subClassOf [ a owl:Restriction ;
@@ -93,9 +115,10 @@ proeth:Action a owl:Class ;
     rdfs:label "Intentional Action"@en ;
     iao:0000115 "A process that has an agent participant and is directed toward achieving specific goals within a temporal interval."@en ;
     proeth:classificationGuidance "Model as class for action types. Create individuals for specific action instances with temporal bounds."@en ;
-    proeth:instanceExample "Individual: eng:bridge_inspection_2025_03_15 rdf:type proeth:RiskAssessmentAction"@en .
+    proeth:instanceExample "Individual: eng:bridge_inspection_2025_03_15 rdf:type proeth:RiskAssessmentAction"@en ;
+    proeth:bfoAlignmentNote "Correctly aligned with BFO:Process as actions are temporal processes with participants."@en .
 
-# Event - aligned with BFO:Process
+# Event - aligned with BFO:Process ✓ CORRECT
 proeth:Event a owl:Class ;
     rdfs:subClassOf bfo:0000015 ;  # BFO:process
     rdfs:subClassOf [ a owl:Restriction ;
@@ -103,9 +126,10 @@ proeth:Event a owl:Class ;
                       owl:someValuesFrom time:Interval ] ;
     rdfs:label "Event"@en ;
     iao:0000115 "A process that occurs in ethical scenarios within a specific temporal interval, which may or may not involve intentional agency."@en ;
-    proeth:classificationGuidance "Model as class for event types. Create individuals for specific event instances with precise temporal intervals."@en .
+    proeth:classificationGuidance "Model as class for event types. Create individuals for specific event instances with precise temporal intervals."@en ;
+    proeth:bfoAlignmentNote "Correctly aligned with BFO:Process as events are temporal processes."@en .
 
-# State - aligned with BFO:Quality
+# State - aligned with BFO:Quality ✓ CORRECT
 proeth:State a owl:Class ;
     rdfs:subClassOf bfo:0000019 ;  # BFO:quality
     rdfs:subClassOf [ a owl:Restriction ;
@@ -113,29 +137,25 @@ proeth:State a owl:Class ;
                       owl:someValuesFrom time:Interval ] ;
     rdfs:label "State"@en ;
     iao:0000115 "A quality that represents conditions affecting ethical decisions, with temporal validity."@en ;
-    proeth:classificationGuidance "Model as class for state types. Create individuals for specific state instances with temporal bounds."@en .
+    proeth:classificationGuidance "Model as class for state types. Create individuals for specific state instances with temporal bounds."@en ;
+    proeth:bfoAlignmentNote "Correctly aligned with BFO:Quality as professional states (licensed, competent) are qualities of agents."@en .
 
-# Capability - aligned with BFO:Disposition
+# Capability - CORRECTED: aligned with BFO:Realizable Entity
 proeth:Capability a owl:Class ;
-    rdfs:subClassOf bfo:0000016 ;  # BFO:disposition
+    rdfs:subClassOf bfo:0000017 ;  # BFO:realizable entity (CORRECTED from disposition)
     rdfs:label "Professional Capability"@en ;
-    iao:0000115 "A disposition that inheres in an agent and can be realized by specific types of actions or processes."@en ;
+    iao:0000115 "A realizable entity that inheres in an agent and can be realized by specific types of actions or processes."@en ;
     proeth:classificationGuidance "Model as class for capability types. Create individuals for specific capability instances with training/competency links."@en ;
-    proeth:instanceExample "Individual: eng:alice_structural_analysis_capability rdf:type proeth:TechnicalCompetency"@en .
+    proeth:instanceExample "Individual: eng:alice_structural_analysis_capability rdf:type proeth:TechnicalCompetency"@en ;
+    proeth:bfoAlignmentNote "CORRECTED: Aligned with BFO:RealizableEntity (parent of both Role and Disposition) as capabilities can be realized through actions. More general than Disposition."@en .
 
-# Resource - aligned with BFO continuant
+# Resource - CORRECTED: aligned with BFO:Independent Continuant
 proeth:Resource a owl:Class ;
-    rdfs:subClassOf bfo:0000002 ;  # BFO:continuant
+    rdfs:subClassOf bfo:0000004 ;  # BFO:independent continuant (CORRECTED from generic continuant)
     rdfs:label "Resource"@en ;
-    iao:0000115 "A continuant entity that serves as input or reference for professional activities."@en ;
-    proeth:classificationGuidance "Model as class for resource types. Create individuals for specific resource instances."@en .
-
-# Agent - aligned with BFO:Material Entity
-proeth:Agent a owl:Class ;
-    rdfs:subClassOf bfo:0000040 ;  # BFO:material entity
-    rdfs:label "Agent"@en ;
-    iao:0000115 "A material entity capable of bearing roles and performing intentional actions."@en ;
-    proeth:classificationGuidance "Model as class for agent types. Create individuals for specific people, organizations, or AI systems."@en .
+    iao:0000115 "An independent continuant entity that serves as input or reference for professional activities."@en ;
+    proeth:classificationGuidance "Model as class for resource types. Create individuals for specific resource instances."@en ;
+    proeth:bfoAlignmentNote "CORRECTED: Aligned with BFO:IndependentContinuant (more specific than generic Continuant) as resources exist independently and can be referenced."@en .
 
 # EthicalConduct - for principle alignment
 proeth:EthicalConduct a owl:Class ;
@@ -206,7 +226,7 @@ proeth:EthicalScore a owl:Class ;
     iao:0000115 "A quantitative assessment score from ethical analysis systems."@en .
 
 ###############################################################
-# Enhanced Agent Framework - Improvement Suggestion 4
+# Enhanced Agent Framework
 ###############################################################
 
 proeth:EthicsReviewer a owl:Class ;
@@ -236,7 +256,7 @@ proeth:EthicalAnalysisCapability a owl:Class ;
     iao:0000115 "The capability to perform systematic ethical analysis and reasoning."@en .
 
 ###############################################################
-# Enhanced Action Framework - Improvement Suggestion 4
+# Enhanced Action Framework
 ###############################################################
 
 proeth:EthicallyRequiredAction a owl:Class ;
@@ -265,7 +285,7 @@ proeth:EthicallyProhibitedAction a owl:Class ;
     iao:0000115 "An action that violates ethical prohibitions and should not be performed."@en .
 
 ###############################################################
-# Enhanced Case Precedent Framework - Improvement Suggestion 4
+# Enhanced Case Precedent Framework
 ###############################################################
 
 proeth:CasePrecedent a owl:Class ;
@@ -290,7 +310,7 @@ proeth:Jurisdiction a owl:Class ;
     iao:0000115 "A spatial region with defined legal or professional authority boundaries."@en .
 
 ###############################################################
-# Enhanced Event Framework - Improvement Suggestion 4
+# Enhanced Event Framework
 ###############################################################
 
 proeth:ViolationEvent a owl:Class ;
@@ -310,7 +330,7 @@ proeth:SeverityLevel a owl:Class ;
     iao:0000115 "A classification of the seriousness or impact of a violation or risk."@en .
 
 ###############################################################
-# Enhanced Capability Framework - Improvement Suggestion 4
+# Enhanced Capability Framework - Using Corrected BFO Alignment
 ###############################################################
 
 proeth:TechnicalCompetency a owl:Class ;
@@ -336,7 +356,7 @@ proeth:LeadershipCompetency a owl:Class ;
     iao:0000115 "A professional capability related to leading teams and organizations ethically."@en .
 
 ###############################################################
-# Professional Standards Framework (Enhanced)
+# Professional Standards Framework
 ###############################################################
 
 proeth:ProfessionalStandard a owl:Class ;
@@ -518,21 +538,164 @@ proeth:ContinuingEducationEvent a owl:Class ;
     iao:0000115 "An event involving professional development or educational activities."@en .
 
 ###############################################################
-# Specific Professional Classes
+# Bridge Classes - Professional Domain Integration Layer  
 ###############################################################
 
+# Bridge Classes connecting Core to Domain-Specific Classes
 proeth:ProfessionalRole a owl:Class ;
     rdfs:subClassOf proeth:Role ;
     rdfs:subClassOf [ a owl:Restriction ;
                       owl:onProperty bfo:0000052 ;  # inheres in
                       owl:someValuesFrom bfo:0000040 ] ;  # material entity
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasObligation ;
+                      owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
     rdfs:label "Professional Role"@en ;
-    iao:0000115 "A professional role with formal obligations and accountability."@en .
+    iao:0000115 "A professional role with formal obligations, accountability, and standards-based competency requirements."@en ;
+    proeth:classificationGuidance "Bridge class between abstract Role and domain-specific roles like EngineeringRole, MedicalRole, LegalRole."@en .
+
+proeth:ProfessionalAgent a owl:Class ;
+    rdfs:subClassOf proeth:Agent ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasRole ;
+                      owl:someValuesFrom proeth:ProfessionalRole ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasCapability ;
+                      owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
+    rdfs:label "Professional Agent"@en ;
+    iao:0000115 "An agent who bears professional roles and is subject to professional standards and ethical obligations."@en ;
+    proeth:classificationGuidance "Bridge class for agents in professional contexts - engineers, doctors, lawyers, etc."@en .
+
+proeth:TechnicalObligation a owl:Class ;
+    rdfs:subClassOf proeth:Obligation ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:appliesToRole ;
+                      owl:someValuesFrom proeth:ProfessionalRole ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasAuthority ;
+                      owl:someValuesFrom proeth:ProfessionalStandard ] ;
+    rdfs:label "Technical Obligation"@en ;
+    iao:0000115 "A professional obligation derived from technical standards, codes of practice, or professional guidelines."@en ;
+    proeth:classificationGuidance "Bridge class for obligations grounded in technical standards (ISO, ASTM, NSPE, etc.)."@en .
+
+proeth:EthicalObligation a owl:Class ;
+    rdfs:subClassOf proeth:Obligation ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasAuthority ;
+                      owl:someValuesFrom proeth:Code ] ;
+    rdfs:label "Ethical Obligation"@en ;
+    iao:0000115 "A professional obligation derived from codes of ethics or professional conduct standards."@en ;
+    proeth:classificationGuidance "Bridge class for obligations grounded in ethical codes (NSPE Code, Medical Ethics, etc.)."@en .
+
+###############################################################
+# Standards-Based Domain-Specific Classes
+###############################################################
+
+# Engineering Domain Classes
+proeth:EngineeringAgent a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalAgent ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasRole ;
+                      owl:someValuesFrom proeth:EngineeringRole ] ;
+    rdfs:label "Engineering Agent"@en ;
+    iao:0000115 "A professional agent who practices engineering and is bound by engineering codes of ethics and technical standards."@en ;
+    proeth:standardsAuthority "NSPE Code of Ethics, IEEE Code of Ethics, ASCE Code of Ethics"@en .
+
+proeth:EngineeringRole a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalRole ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasObligation ;
+                      owl:someValuesFrom proeth:PublicSafetyObligation ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasCapability ;
+                      owl:someValuesFrom proeth:TechnicalCompetency ] ;
+    rdfs:label "Engineering Role"@en ;
+    iao:0000115 "A professional role in engineering practice, governed by NSPE Code of Ethics and technical standards."@en ;
+    proeth:standardsAuthority "NSPE Code of Ethics (2019), ISO 26000, IEEE Standards"@en ;
+    rdfs:comment "Defined by NSPE Code, ISO 26000, ASCE Code, and domain-specific technical standards."@en .
+
+proeth:StructuralEngineerRole a owl:Class ;
+    rdfs:subClassOf proeth:EngineeringRole ;
+    rdfs:label "Structural Engineer Role"@en ;
+    iao:0000115 "Engineering role specializing in structural design and analysis with specific safety obligations."@en ;
+    proeth:standardsAuthority "ASCE Code of Ethics, ACI Standards, AISC Specifications"@en .
+
+proeth:SoftwareEngineerRole a owl:Class ;
+    rdfs:subClassOf proeth:EngineeringRole ;
+    rdfs:label "Software Engineer Role"@en ;
+    iao:0000115 "Engineering role in software development with obligations for reliability, security, and user safety."@en ;
+    proeth:standardsAuthority "ACM Code of Ethics, IEEE Software Engineering Standards"@en .
+
+# Biomedical Domain Classes  
+proeth:BiomedicalAgent a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalAgent ;
+    rdfs:label "Biomedical Agent"@en ;
+    iao:0000115 "A professional agent in biomedical fields subject to medical ethics and regulatory standards."@en ;
+    proeth:standardsAuthority "Hippocratic Oath, AMA Code of Medical Ethics, FDA Regulations"@en .
+
+proeth:BiomedicalObligation a owl:Class ;
+    rdfs:subClassOf proeth:EthicalObligation ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasAuthority ;
+                      owl:allValuesFrom proeth:MedicalEthicsCode ] ;
+    rdfs:label "Biomedical Obligation"@en ;
+    iao:0000115 "Ethical obligation specific to biomedical practice, derived from medical ethics codes."@en ;
+    proeth:standardsAuthority "AMA Code of Medical Ethics, World Medical Association Declaration of Helsinki"@en .
+
+###############################################################
+# Standards-Based Authority Classes
+###############################################################
+
+proeth:MedicalEthicsCode a owl:Class ;
+    rdfs:subClassOf proeth:Code ;
+    rdfs:label "Medical Ethics Code"@en ;
+    iao:0000115 "A formal code of ethics governing medical and biomedical practice."@en .
+
+proeth:EngineeringEthicsCode a owl:Class ;
+    rdfs:subClassOf proeth:Code ;
+    rdfs:label "Engineering Ethics Code"@en ;
+    iao:0000115 "A formal code of ethics governing engineering practice."@en .
+
+proeth:TechnicalStandard a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalStandard ;
+    rdfs:label "Technical Standard"@en ;
+    iao:0000115 "A technical standard or specification governing professional practice."@en .
+
+###############################################################
+# Enhanced Object Properties for Standards Integration
+###############################################################
+
+proeth:hasAuthority a owl:ObjectProperty ;
+    rdfs:domain proeth:TechnicalObligation ;
+    rdfs:range proeth:ProfessionalStandard ;
+    rdfs:label "has authority"@en ;
+    iao:0000115 "Links an obligation to the authoritative standard or code from which it derives."@en .
+
+proeth:hasStandardFunction a owl:ObjectProperty ;
+    rdfs:domain proeth:ProfessionalRole ;
+    rdfs:range proeth:ProfessionalFunction ;
+    rdfs:label "has standard function"@en ;
+    iao:0000115 "Relates a professional role to its standards-defined functions."@en .
+
+proeth:governedByStandard a owl:ObjectProperty ;
+    rdfs:domain proeth:ProfessionalRole ;
+    rdfs:range proeth:ProfessionalStandard ;
+    rdfs:label "governed by standard"@en ;
+    iao:0000115 "Links a professional role to standards that govern its practice."@en .
+
+proeth:ProfessionalFunction a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # Information content entity
+    rdfs:label "Professional Function"@en ;
+    iao:0000115 "A standardized function or responsibility defined by professional codes or standards."@en .
+
+###############################################################  
+# Specific Professional Classes (Enhanced)
+###############################################################
 
 proeth:Engineer a owl:Class ;
-    rdfs:subClassOf proeth:Agent ;
+    rdfs:subClassOf proeth:EngineeringAgent ;
     rdfs:label "Engineer"@en ;
-    iao:0000115 "An agent who bears engineering-related professional roles."@en .
+    iao:0000115 "An engineering agent who bears engineering-related professional roles and is subject to engineering ethics codes."@en .
 
 proeth:EngineeringSystem a owl:Class ;
     rdfs:subClassOf bfo:0000040 ;  # BFO:material entity
@@ -550,7 +713,7 @@ proeth:PublicSafetyObligation a owl:Class ;
     iao:0000115 "An obligation to prioritize public safety in professional activities."@en .
 
 ###############################################################
-# Resource Framework
+# Resource Framework - Using Corrected BFO Alignment
 ###############################################################
 
 proeth:MaterialResource a owl:Class ;
@@ -735,7 +898,7 @@ proeth:hasConfidenceScore a owl:DatatypeProperty ;
     iao:0000115 "The confidence level of an ethical assessment (0.0 to 1.0)."@en .
 
 ###############################################################
-# SHACL Validation Constraints (Improvement Suggestion 4)
+# SHACL Validation Constraints
 ###############################################################
 
 proeth:RoleObligationConstraint a sh:NodeShape ;
@@ -778,8 +941,177 @@ proeth:EthicalAssessmentConstraint a sh:NodeShape ;
     ] .
 
 ###############################################################
-# Disjointness Axioms (Enhanced)
+# Enhanced SHACL Validation Constraints for Professional Standards Compliance
 ###############################################################
+
+# Core Professional Standards Validation
+proeth:ActionObligationConstraint a sh:NodeShape ;
+    sh:targetClass proeth:Action ;
+    sh:property [
+        sh:path proeth:fulfillsObligation ;
+        sh:class proeth:Obligation ;
+        sh:minCount 1 ;
+        sh:message "Every professional action must fulfill at least one obligation."@en ;
+    ] ;
+    sh:property [
+        sh:path [ sh:inversePath proeth:performsAction ] ;
+        sh:class proeth:Agent ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Every action must have exactly one performing agent."@en ;
+    ] .
+
+proeth:ProfessionalAgentConstraint a sh:NodeShape ;
+    sh:targetClass proeth:ProfessionalAgent ;
+    sh:property [
+        sh:path proeth:hasRole ;
+        sh:class proeth:ProfessionalRole ;
+        sh:minCount 1 ;
+        sh:message "Every professional agent must have at least one professional role."@en ;
+    ] ;
+    sh:property [
+        sh:path proeth:hasCapability ;
+        sh:class proeth:Capability ;
+        sh:minCount 1 ;
+        sh:message "Every professional agent must have at least one capability."@en ;
+    ] .
+
+proeth:TechnicalObligationConstraint a sh:NodeShape ;
+    sh:targetClass proeth:TechnicalObligation ;
+    sh:property [
+        sh:path proeth:hasAuthority ;
+        sh:class proeth:ProfessionalStandard ;
+        sh:minCount 1 ;
+        sh:message "Every technical obligation must derive from at least one professional standard."@en ;
+    ] ;
+    sh:property [
+        sh:path proeth:appliesToRole ;
+        sh:class proeth:ProfessionalRole ;
+        sh:minCount 1 ;
+        sh:message "Every technical obligation must apply to at least one professional role."@en ;
+    ] .
+
+proeth:EngineeringRoleConstraint a sh:NodeShape ;
+    sh:targetClass proeth:EngineeringRole ;
+    sh:property [
+        sh:path proeth:hasObligation ;
+        sh:class proeth:PublicSafetyObligation ;
+        sh:minCount 1 ;
+        sh:message "Every engineering role must have at least one public safety obligation."@en ;
+    ] ;
+    sh:property [
+        sh:path proeth:hasCapability ;
+        sh:class proeth:TechnicalCompetency ;
+        sh:minCount 1 ;
+        sh:message "Every engineering role must have at least one technical competency."@en ;
+    ] .
+
+proeth:EthicalObligationConstraint a sh:NodeShape ;
+    sh:targetClass proeth:EthicalObligation ;
+    sh:property [
+        sh:path proeth:hasAuthority ;
+        sh:class proeth:Code ;
+        sh:minCount 1 ;
+        sh:message "Every ethical obligation must derive from at least one code of ethics."@en ;
+    ] .
+
+# Standards Authority Validation
+proeth:StandardsBasedRoleConstraint a sh:NodeShape ;
+    sh:targetClass proeth:EngineeringRole ;
+    sh:property [
+        sh:path proeth:governedByStandard ;
+        sh:class proeth:EngineeringEthicsCode ;
+        sh:minCount 1 ;
+        sh:message "Every engineering role must be governed by at least one engineering ethics code."@en ;
+    ] .
+
+proeth:BiomedicalObligationConstraint a sh:NodeShape ;
+    sh:targetClass proeth:BiomedicalObligation ;
+    sh:property [
+        sh:path proeth:hasAuthority ;
+        sh:class proeth:MedicalEthicsCode ;
+        sh:minCount 1 ;
+        sh:message "Every biomedical obligation must derive from at least one medical ethics code."@en ;
+    ] .
+
+# Competency and Training Validation
+proeth:TechnicalCompetencyConstraint a sh:NodeShape ;
+    sh:targetClass proeth:TechnicalCompetency ;
+    sh:property [
+        sh:path proeth:requiresTrainingIn ;
+        sh:class proeth:ContinuingEducationEvent ;
+        sh:minCount 1 ;
+        sh:message "Every technical competency must require at least one type of training."@en ;
+    ] .
+
+# Professional Decision Validation
+proeth:ProfessionalDecisionConstraint a sh:NodeShape ;
+    sh:targetClass proeth:ProfessionalDecision ;
+    sh:property [
+        sh:path proeth:basedOnPrinciple ;
+        sh:class proeth:Principle ;
+        sh:minCount 1 ;
+        sh:message "Every professional decision must be based on at least one ethical principle."@en ;
+    ] ;
+    sh:property [
+        sh:path [ sh:inversePath proeth:linkedToProfessionalDecision ] ;
+        sh:class proeth:EthicalAssessment ;
+        sh:minCount 1 ;
+        sh:message "Every professional decision should have at least one linked ethical assessment."@en ;
+    ] .
+
+# Formal Specification Compliance (D=R,P,O,S,Rs,A,E,Ca,Cs)
+proeth:FormalSpecificationConstraint a sh:NodeShape ;
+    sh:targetClass proeth:ProfessionalAction ;
+    rdfs:comment "Ensures compliance with formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)"@en ;
+    sh:property [
+        sh:path [ sh:inversePath proeth:performsAction ] ;  # R - Role via Agent
+        sh:class proeth:Agent ;
+        sh:minCount 1 ;
+    ] ;
+    sh:property [
+        sh:path proeth:fulfillsObligation ;  # O - Obligation
+        sh:class proeth:Obligation ;
+        sh:minCount 1 ;
+    ] ;
+    sh:property [
+        sh:path proeth:hasState ;  # S - State
+        sh:class proeth:State ;
+        sh:minCount 0 ;  # Optional but recommended
+    ] ;
+    sh:property [
+        sh:path proeth:usesResource ;  # Rs - Resource
+        sh:class proeth:Resource ;
+        sh:minCount 0 ;  # Optional
+    ] ;
+    sh:property [
+        sh:path proeth:realizesCapability ;  # Ca - Capability
+        sh:class proeth:Capability ;
+        sh:minCount 1 ;
+    ] .
+
+###############################################################
+# Disjointness Axioms (Enhanced) - Critical BFO-Based Constraints Added
+###############################################################
+
+# CRITICAL BFO-Based Disjointness: Continuants vs Occurrents
+# Agent (material entity/continuant) is disjoint from processes (occurrents)
+proeth:Agent owl:disjointWith proeth:Action, proeth:Event .
+
+# Role vs Capability conceptual distinction  
+# Role = "what you are" vs Capability = "what you can do"
+proeth:Role owl:disjointWith proeth:Capability .
+
+# Information Content Entities are disjoint from physical entities
+proeth:Principle owl:disjointWith proeth:Agent, proeth:Resource .
+proeth:Obligation owl:disjointWith proeth:Agent, proeth:Resource .
+
+# Processes are disjoint from continuants
+proeth:Action owl:disjointWith proeth:Agent, proeth:Resource, proeth:Role, proeth:Capability .
+proeth:Event owl:disjointWith proeth:Agent, proeth:Resource, proeth:Role, proeth:Capability .
+
+# Qualities are disjoint from other continuant types
+proeth:State owl:disjointWith proeth:Agent, proeth:Resource, proeth:Role, proeth:Capability .
 
 # Core disjointness
 [] a owl:AllDisjointClasses ;

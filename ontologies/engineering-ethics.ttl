@@ -1,0 +1,328 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ns1: <http://proethica.org/ontology/intermediate#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix proethica: <http://proethica.org/ontology/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+proethica:engineering-ethics a owl:Ontology ;
+    proethica:extractedAt "2025-08-27T23:26:28.900647"^^xsd:dateTime ;
+    rdfs:comment "Extracted concepts from ProEthica guideline analysis" ;
+    owl:imports proethica:proeth-core ;
+    owl:versionInfo "1.0-draft" .
+
+proethica:engineering_standards a owl:Ontology ;
+    rdfs:label "Engineering Technical Standards Ontology" ;
+    dcterms:created "2025-08-28"^^xsd:date ;
+    dcterms:description "Comprehensive ontology of technical standards, codes, and regulations governing engineering practice across multiple domains" ;
+    dcterms:source <https://www.ansi.org>,
+        <https://www.iec.ch>,
+        <https://www.iso.org> ;
+    dcterms:title "Technical Standards for Engineering Practice" ;
+    owl:imports proethica:intermediate .
+
+<http://proethica.org/ontology/engineering_standards#ANSIB11> a ns1:Resource ;
+    rdfs:label "ANSI B11 Machine Safety" ;
+    ns1:applicableDomains "industrial_engineering",
+        "manufacturing_engineering",
+        "mechanical_engineering" ;
+    ns1:standardType "machine_safety" ;
+    dcterms:identifier "ANSI B11.0-2020" ;
+    rdfs:comment "Fundamental machinery safety standard for manufacturing and industrial applications" ;
+    skos:definition "American national standard providing safety requirements for machine tools and related machinery",
+        "Fundamental machinery safety standard for manufacturing and industrial applications" .
+
+<http://proethica.org/ontology/engineering_standards#ANSIZ359> a ns1:Resource ;
+    rdfs:label "ANSI Z359 Fall Protection" ;
+    ns1:applicableDomains "civil_engineering",
+        "construction_engineering",
+        "industrial_engineering" ;
+    ns1:standardType "fall_protection" ;
+    dcterms:identifier "ANSI/ASSE Z359.1-2007" ;
+    rdfs:comment "Critical safety standard for construction and industrial engineering" ;
+    skos:definition "American national standard establishing minimum requirements for personal fall arrest systems, positioning systems, and travel restraint systems",
+        "Critical safety standard for construction and industrial engineering" .
+
+<http://proethica.org/ontology/engineering_standards#CertificationRequired> a ns1:State ;
+    rdfs:label "Certification Required State" ;
+    ns1:appliesToDomain "regulated_engineering",
+        "safety_critical_engineering" ;
+    ns1:hasUrgency "before_deployment" ;
+    rdfs:comment "Checkpoint state requiring formal validation processes" ;
+    skos:definition "Checkpoint state requiring formal validation processes",
+        "Project state where formal certification or compliance verification is required before deployment" .
+
+<http://proethica.org/ontology/engineering_standards#ConductDesignReview> a ns1:Action ;
+    rdfs:label "Conduct Standards-Based Design Review" ;
+    ns1:appliesToDomain "all_engineering" ;
+    ns1:hasUrgency "design_phase" ;
+    ns1:supportsPrinciple ns1:ProfessionalCompetence ;
+    rdfs:comment "Quality assurance process to ensure standards compliance" ;
+    skos:definition "Quality assurance process to ensure standards compliance",
+        "The systematic review of engineering designs against applicable standards and regulations" .
+
+<http://proethica.org/ontology/engineering_standards#CybersecurityRequirements> a ns1:Constraint ;
+    rdfs:label "Cybersecurity Standards Compliance" ;
+    ns1:appliesToDomain "computer_engineering",
+        "software_engineering",
+        "systems_engineering" ;
+    ns1:hasType "technical_legal" ;
+    rdfs:comment "Mandatory security measures for connected and critical systems" ;
+    skos:definition "Mandatory security measures for connected and critical systems",
+        "Technical and legal requirements to implement appropriate cybersecurity controls and protections" .
+
+<http://proethica.org/ontology/engineering_standards#EnsureAccessibility> a ns1:Obligation ;
+    rdfs:label "Ensure Accessibility Compliance" ;
+    ns1:appliesToDomain "product_engineering",
+        "software_engineering",
+        "web_engineering" ;
+    ns1:derivedFromResource <http://proethica.org/ontology/engineering_standards#Section508>,
+        <http://proethica.org/ontology/engineering_standards#WCAG21> ;
+    ns1:hasUrgency "design_phase" ;
+    rdfs:comment "Legal and ethical obligation for inclusive design" ;
+    skos:definition "Engineers must design systems that meet applicable accessibility standards and provide equitable access",
+        "Legal and ethical obligation for inclusive design" .
+
+<http://proethica.org/ontology/engineering_standards#IEC60950> a ns1:Resource ;
+    rdfs:label "IEC 60950 IT Equipment Safety" ;
+    ns1:applicableDomains "computer_engineering",
+        "electrical_engineering",
+        "electronics_engineering" ;
+    ns1:standardType "electrical_safety" ;
+    dcterms:identifier "IEC 60950-1:2005+AMD1:2009+AMD2:2013" ;
+    rdfs:comment "Fundamental safety standard for IT and electronics equipment" ;
+    skos:definition "Fundamental safety standard for IT and electronics equipment",
+        "International standard for safety of information technology equipment including electrical business equipment and associated equipment" .
+
+<http://proethica.org/ontology/engineering_standards#IEC62304> a ns1:Resource ;
+    rdfs:label "IEC 62304 Medical Device Software" ;
+    ns1:applicableDomains "biomedical_engineering",
+        "software_engineering" ;
+    ns1:standardType "medical_software_safety" ;
+    dcterms:identifier "IEC 62304:2006+AMD1:2015" ;
+    rdfs:comment "Critical standard for medical device software safety and effectiveness" ;
+    skos:definition "Critical standard for medical device software safety and effectiveness",
+        "International standard defining life cycle requirements for medical device software, including risk-based approach to software development" .
+
+<http://proethica.org/ontology/engineering_standards#IEEESTD603> a ns1:Resource ;
+    rdfs:label "IEEE Std 603 Nuclear Safety Systems" ;
+    ns1:applicableDomains "electrical_engineering",
+        "nuclear_engineering" ;
+    ns1:standardType "nuclear_safety" ;
+    dcterms:identifier "IEEE Std 603-2018" ;
+    rdfs:comment "Fundamental safety standard for nuclear engineering applications" ;
+    skos:definition "Fundamental safety standard for nuclear engineering applications",
+        "IEEE standard providing criteria for safety systems in nuclear power generating stations" .
+
+<http://proethica.org/ontology/engineering_standards#ISO14001> a ns1:Resource ;
+    rdfs:label "ISO 14001 Environmental Management Systems" ;
+    ns1:applicableDomains "all_engineering" ;
+    ns1:standardType "environmental_management" ;
+    dcterms:identifier "ISO 14001:2015" ;
+    rdfs:comment "Environmental management standard with significant ethical implications for engineering projects" ;
+    skos:definition "Environmental management standard with significant ethical implications for engineering projects",
+        "International standard specifying requirements for environmental management systems that organizations can use to enhance their environmental performance" .
+
+<http://proethica.org/ontology/engineering_standards#ISO27001> a ns1:Resource ;
+    rdfs:label "ISO 27001 Information Security Management" ;
+    ns1:applicableDomains "computer_engineering",
+        "software_engineering",
+        "systems_engineering" ;
+    ns1:standardType "information_security" ;
+    dcterms:identifier "ISO/IEC 27001:2013" ;
+    rdfs:comment "Critical cybersecurity standard for protecting information assets in engineering systems" ;
+    skos:definition "Critical cybersecurity standard for protecting information assets in engineering systems",
+        "International standard specifying requirements for establishing, implementing, maintaining and continually improving information security management systems" .
+
+<http://proethica.org/ontology/engineering_standards#ImplementSecurityControls> a ns1:Action ;
+    rdfs:label "Implement Security Controls" ;
+    ns1:appliesToDomain "computer_engineering",
+        "software_engineering" ;
+    ns1:hasUrgency "implementation_phase" ;
+    ns1:supportsPrinciple ns1:PublicSafety ;
+    rdfs:comment "Required security implementation for connected systems" ;
+    skos:definition "Required security implementation for connected systems",
+        "The implementation of appropriate cybersecurity controls based on applicable standards and threat assessment" .
+
+<http://proethica.org/ontology/engineering_standards#NIST80053> a ns1:Resource ;
+    rdfs:label "NIST SP 800-53 Security Controls" ;
+    ns1:applicableDomains "computer_engineering",
+        "software_engineering",
+        "systems_engineering" ;
+    ns1:standardType "cybersecurity_controls" ;
+    dcterms:identifier "NIST Special Publication 800-53 Rev. 5" ;
+    rdfs:comment "Comprehensive cybersecurity framework for critical infrastructure" ;
+    skos:definition "Comprehensive cybersecurity framework for critical infrastructure",
+        "NIST publication providing catalog of security and privacy controls for federal information systems and organizations" .
+
+<http://proethica.org/ontology/engineering_standards#NonCompliantState> a ns1:State ;
+    rdfs:label "Non-Compliant State" ;
+    ns1:appliesToDomain "all_engineering" ;
+    ns1:hasUrgency "immediate_correction" ;
+    rdfs:comment "Problematic state requiring immediate corrective action" ;
+    skos:definition "Problematic state requiring immediate corrective action",
+        "System or process state where applicable technical standards are not being met" .
+
+<http://proethica.org/ontology/engineering_standards#PerformHazardAnalysis> a ns1:Action ;
+    rdfs:label "Perform Hazard Analysis" ;
+    ns1:appliesToDomain "all_engineering" ;
+    ns1:hasUrgency "design_phase" ;
+    ns1:supportsPrinciple ns1:PublicSafety ;
+    rdfs:comment "Required safety analysis process for risk identification" ;
+    skos:definition "Required safety analysis process for risk identification",
+        "The systematic identification and analysis of potential hazards according to applicable safety standards" .
+
+<http://proethica.org/ontology/engineering_standards#QualityEngineer> a ns1:Role ;
+    rdfs:label "Quality Engineer" ;
+    ns1:appliesToDomain "all_engineering" ;
+    ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#MaintainQualityDocumentation> ;
+    rdfs:comment "Role focused on quality assurance and continuous improvement" ;
+    skos:definition "Engineer responsible for implementing quality management systems and ensuring compliance with quality standards",
+        "Role focused on quality assurance and continuous improvement" .
+
+<http://proethica.org/ontology/engineering_standards#RegulatoryCompliance> a ns1:Constraint ;
+    rdfs:label "Regulatory Standards Compliance" ;
+    ns1:appliesToDomain "all_engineering" ;
+    ns1:hasType "legal" ;
+    rdfs:comment "Binding legal constraint with potential civil and criminal liability" ;
+    skos:definition "Binding legal constraint with potential civil and criminal liability",
+        "Legal requirement to comply with applicable technical standards as mandated by regulatory authorities" .
+
+<http://proethica.org/ontology/engineering_standards#SafetyEngineer> a ns1:Role ;
+    rdfs:label "Safety Engineer" ;
+    ns1:appliesToDomain "all_engineering" ;
+    ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#ComplyWithSafetyStandards>,
+        <http://proethica.org/ontology/engineering_standards#ConductRiskAssessment> ;
+    rdfs:comment "Critical role for safety-critical systems and applications" ;
+    skos:definition "Critical role for safety-critical systems and applications",
+        "Engineer specializing in system safety analysis and compliance with safety-critical standards" .
+
+<http://proethica.org/ontology/engineering_standards#SafetyIntegrityLevels> a ns1:Constraint ;
+    rdfs:label "Safety Integrity Level Requirements" ;
+    ns1:appliesToDomain "automotive_engineering",
+        "electrical_engineering",
+        "industrial_automation" ;
+    ns1:hasType "technical" ;
+    rdfs:comment "Quantitative safety requirements with verification obligations" ;
+    skos:definition "Quantitative safety requirements with verification obligations",
+        "Technical requirement to achieve specified Safety Integrity Levels (SIL/ASIL) based on risk assessment" .
+
+<http://proethica.org/ontology/engineering_standards#StandardsEngineer> a ns1:Role ;
+    rdfs:label "Standards Engineer" ;
+    ns1:appliesToDomain "all_engineering" ;
+    ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#ComplyWithSafetyStandards>,
+        <http://proethica.org/ontology/engineering_standards#MaintainQualityDocumentation> ;
+    rdfs:comment "Specialized role focusing on standards compliance and implementation" ;
+    skos:definition "Engineer responsible for ensuring compliance with applicable technical standards and regulations",
+        "Specialized role focusing on standards compliance and implementation" .
+
+<http://proethica.org/ontology/engineering_standards#StandardsUpdate> a ns1:Event ;
+    rdfs:label "Standards Update Event" ;
+    ns1:appliesToDomain "all_engineering" ;
+    ns1:hasUrgency "evaluation_required" ;
+    rdfs:comment "Trigger for reassessing compliance and updating practices" ;
+    skos:definition "Event when new versions of technical standards are published, requiring review and potential compliance updates",
+        "Trigger for reassessing compliance and updating practices" .
+
+<http://proethica.org/ontology/engineering_standards#ValidateAccessibility> a ns1:Action ;
+    rdfs:label "Validate Accessibility Compliance" ;
+    ns1:appliesToDomain "product_engineering",
+        "software_engineering" ;
+    ns1:hasUrgency "testing_phase" ;
+    ns1:supportsPrinciple ns1:SocialResponsibility ;
+    rdfs:comment "Required validation for inclusive design compliance" ;
+    skos:definition "Required validation for inclusive design compliance",
+        "The testing and validation of system accessibility against applicable accessibility standards" .
+
+<http://proethica.org/ontology/engineering_standards#ConductRiskAssessment> a ns1:Obligation ;
+    rdfs:label "Conduct Risk Assessment per Standards" ;
+    ns1:appliesToDomain "all_engineering" ;
+    ns1:derivedFromResource <http://proethica.org/ontology/engineering_standards#IEC61508>,
+        <http://proethica.org/ontology/engineering_standards#ISO26262> ;
+    ns1:hasUrgency "planning_phase" ;
+    rdfs:comment "Required risk analysis using established methodologies" ;
+    skos:definition "Engineers must perform systematic risk assessment following applicable standards and document safety considerations",
+        "Required risk analysis using established methodologies" .
+
+<http://proethica.org/ontology/engineering_standards#ISO26262> a ns1:Resource ;
+    rdfs:label "ISO 26262 Automotive Functional Safety" ;
+    ns1:applicableDomains "automotive_engineering",
+        "electrical_engineering",
+        "software_engineering" ;
+    ns1:standardType "automotive_safety" ;
+    dcterms:identifier "ISO 26262:2018" ;
+    rdfs:comment "Critical standard for automotive safety systems and autonomous vehicles" ;
+    skos:definition "Critical standard for automotive safety systems and autonomous vehicles",
+        "International standard defining functional safety for automotive electrical and electronic systems, establishing Automotive Safety Integrity Levels (ASIL)" .
+
+<http://proethica.org/ontology/engineering_standards#ISO45001> a ns1:Resource ;
+    rdfs:label "ISO 45001 Occupational Health and Safety" ;
+    ns1:applicableDomains "all_engineering" ;
+    ns1:standardType "safety_management" ;
+    dcterms:identifier "ISO 45001:2018" ;
+    rdfs:comment "Critical safety standard for protecting workers and the public" ;
+    skos:definition "Critical safety standard for protecting workers and the public",
+        "International standard specifying requirements for occupational health and safety management systems to provide safe and healthy workplaces" .
+
+<http://proethica.org/ontology/engineering_standards#ISO9001> a ns1:Resource ;
+    rdfs:label "ISO 9001 Quality Management Systems" ;
+    ns1:applicableDomains "all_engineering" ;
+    ns1:standardType "quality_management" ;
+    dcterms:identifier "ISO 9001:2015" ;
+    rdfs:comment "Fundamental quality management standard applicable to all engineering disciplines" ;
+    skos:definition "Fundamental quality management standard applicable to all engineering disciplines",
+        "International standard specifying requirements for quality management systems where organizations need to demonstrate their ability to consistently provide products and services that meet customer and applicable statutory and regulatory requirements" .
+
+<http://proethica.org/ontology/engineering_standards#Section508> a ns1:Resource ;
+    rdfs:label "Section 508 Accessibility Standards" ;
+    ns1:applicableDomains "computer_engineering",
+        "software_engineering",
+        "web_engineering" ;
+    ns1:standardType "accessibility" ;
+    dcterms:identifier "Section 508 (29 U.S.C. § 794d)" ;
+    rdfs:comment "Legal requirement ensuring equitable access to technology systems" ;
+    skos:definition "Legal requirement ensuring equitable access to technology systems",
+        "U.S. federal law requiring electronic and information technology to be accessible to people with disabilities" .
+
+<http://proethica.org/ontology/engineering_standards#WCAG21> a ns1:Resource ;
+    rdfs:label "WCAG 2.1 Web Content Accessibility" ;
+    ns1:applicableDomains "software_engineering",
+        "user_experience_engineering",
+        "web_engineering" ;
+    ns1:standardType "web_accessibility" ;
+    dcterms:identifier "WCAG 2.1 Level AA" ;
+    rdfs:comment "International standard for web accessibility and inclusive design" ;
+    skos:definition "International standard for web accessibility and inclusive design",
+        "Web Content Accessibility Guidelines providing recommendations for making web content more accessible to people with disabilities" .
+
+<http://proethica.org/ontology/engineering_standards#ComplyWithSafetyStandards> a ns1:Obligation ;
+    rdfs:label "Comply with Applicable Safety Standards" ;
+    ns1:appliesToDomain "all_engineering" ;
+    ns1:derivedFromResource <http://proethica.org/ontology/engineering_standards#IEC61508>,
+        <http://proethica.org/ontology/engineering_standards#ISO45001> ;
+    ns1:hasUrgency "immediate" ;
+    rdfs:comment "Fundamental obligation to follow established safety protocols" ;
+    skos:definition "Engineers must identify and comply with all applicable safety standards relevant to their work domain and geographic jurisdiction",
+        "Fundamental obligation to follow established safety protocols" .
+
+<http://proethica.org/ontology/engineering_standards#IEC61508> a ns1:Resource ;
+    rdfs:label "IEC 61508 Functional Safety" ;
+    ns1:applicableDomains "automation_engineering",
+        "electrical_engineering",
+        "electronics_engineering" ;
+    ns1:standardType "functional_safety" ;
+    dcterms:identifier "IEC 61508:2010" ;
+    rdfs:comment "Foundation standard for safety-critical electrical and electronic systems" ;
+    skos:definition "Foundation standard for safety-critical electrical and electronic systems",
+        "International standard for functional safety of electrical/electronic/programmable electronic safety-related systems, establishing Safety Integrity Levels (SIL)" .
+
+<http://proethica.org/ontology/engineering_standards#MaintainQualityDocumentation> a ns1:Obligation ;
+    rdfs:label "Maintain Quality Documentation" ;
+    ns1:appliesToDomain "all_engineering" ;
+    ns1:derivedFromResource <http://proethica.org/ontology/engineering_standards#ISO9001> ;
+    ns1:hasUrgency "ongoing" ;
+    rdfs:comment "Documentation requirements for traceability and accountability" ;
+    skos:definition "Documentation requirements for traceability and accountability",
+        "Engineers must create and maintain documentation that meets applicable quality management standards" .
+

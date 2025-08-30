@@ -1,0 +1,236 @@
+@prefix : <http://proethica.org/ontology/core#> .
+@prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix iao: <http://purl.obolibrary.org/obo/IAO_> .
+@prefix ro: <http://purl.obolibrary.org/obo/RO_> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# Ontology Declaration
+<http://proethica.org/ontology/core> a owl:Ontology ;
+    rdfs:label "ProEthica Core Ontology"@en ;
+    dc:creator "ProEthica AI"@en ;
+    dc:date "2025-08-30"^^xsd:date ;
+    rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with corrected BFO alignments for consistency with proethica-intermediate"@en ;
+    owl:versionInfo "2.1.0"^^xsd:string ;
+    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
+    owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
+    owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
+    dc:description "Version 2.1.0 adds enhanced disjointness axioms and domain/range constraints for robust ontology engineering: Agent⊥Action/Event, Role⊥Capability, complete property constraints for error detection."@en .
+
+###############################################################
+# Core Formal Specification Classes with Corrected BFO Alignments
+###############################################################
+
+# R - Role: Professional roles with BFO alignment
+proeth-core:Role a owl:Class ;
+    rdfs:subClassOf bfo:0000023 ;  # BFO:role
+    rdfs:label "Role"@en ;
+    rdfs:comment "A role that can be realized by processes involving professional duties and ethical obligations. This is the R component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "A role that can be realized by processes involving professional duties and ethical obligations. This is the R component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+
+# P - Principle: Ethical principles as information content entities  
+proeth-core:Principle a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Principle"@en ;
+    rdfs:comment "An information content entity representing ethical values and guidelines for conduct. This is the P component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "An information content entity representing ethical values and guidelines for conduct. This is the P component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+
+# O - Obligation: Professional obligations as information content entities
+proeth-core:Obligation a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Obligation"@en ;
+    rdfs:comment "An information content entity expressing required actions or behaviors in professional contexts. This is the O component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "An information content entity expressing required actions or behaviors in professional contexts. This is the O component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+
+# S - State: Professional states as qualities
+proeth-core:State a owl:Class ;
+    rdfs:subClassOf bfo:0000019 ;  # BFO:quality
+    rdfs:label "State"@en ;
+    rdfs:comment "A quality representing conditions that affect ethical decisions and professional conduct. This is the S component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "A quality representing conditions that affect ethical decisions and professional conduct. This is the S component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+
+# Rs - Resource: CORRECTED BFO alignment for consistency
+proeth-core:Resource a owl:Class ;
+    rdfs:subClassOf bfo:0000004 ;  # BFO:independent continuant (CORRECTED from generic continuant)
+    rdfs:label "Resource"@en ;
+    rdfs:comment "An independent continuant entity that serves as input or reference for professional activities. This is the Rs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "An independent continuant entity that serves as input or reference for professional activities. This is the Rs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:changeNote "CORRECTED v2.0.0: Changed from generic 'continuant' to 'independent continuant' for consistency with proethica-intermediate v9.0.0"@en .
+
+# A - Action: Professional actions as processes
+proeth-core:Action a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # BFO:process
+    rdfs:label "Action"@en ;
+    rdfs:comment "A process directed toward achieving specific goals in professional contexts. This is the A component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "A process directed toward achieving specific goals in professional contexts. This is the A component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+
+# E - Event: Professional events as processes  
+proeth-core:Event a owl:Class ;
+    rdfs:subClassOf bfo:0000015 ;  # BFO:process
+    rdfs:label "Event"@en ;
+    rdfs:comment "A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+
+# Ca - Capability: CORRECTED BFO alignment for consistency  
+proeth-core:Capability a owl:Class ;
+    rdfs:subClassOf bfo:0000017 ;  # BFO:realizable entity (CORRECTED from disposition)
+    rdfs:label "Capability"@en ;
+    rdfs:comment "A realizable entity that can be realized by specific types of actions or processes in professional contexts. This is the Ca component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "A realizable entity that can be realized by specific types of actions or processes in professional contexts. This is the Ca component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:changeNote "CORRECTED v2.0.0: Changed from 'disposition' to 'realizable entity' for consistency with proethica-intermediate v9.0.0 and more general BFO alignment"@en .
+
+# Cs - Constraint: Additional component for completeness
+proeth-core:Constraint a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Constraint"@en ;
+    rdfs:comment "An information content entity expressing limitations or restrictions on professional actions or decisions. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "An information content entity expressing limitations or restrictions on professional actions or decisions. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+
+# Agent: Supporting class for role bearers
+proeth-core:Agent a owl:Class ;
+    rdfs:subClassOf bfo:0000040 ;  # BFO:material entity
+    rdfs:label "Agent"@en ;
+    rdfs:comment "A material entity capable of bearing roles and performing intentional actions in professional contexts."@en ;
+    skos:definition "A material entity capable of bearing roles and performing intentional actions in professional contexts."@en .
+
+###############################################################
+# Core Object Properties 
+###############################################################
+
+proeth-core:hasRole a owl:ObjectProperty ;
+    rdfs:subPropertyOf ro:0000087 ;  # RO:has role
+    rdfs:domain proeth-core:Agent ;
+    rdfs:range proeth-core:Role ;
+    rdfs:label "has role"@en ;
+    rdfs:comment "Relates an agent to a role it bears."@en ;
+    skos:definition "Relates an agent to a role it bears."@en .
+
+proeth-core:hasObligation a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "has obligation"@en ;
+    rdfs:comment "Relates a role to its professional obligations."@en ;
+    skos:definition "Relates a role to its professional obligations."@en .
+
+proeth-core:adheresToPrinciple a owl:ObjectProperty ;
+    rdfs:subPropertyOf iao:0000136 ;  # IAO:is about
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Principle ;
+    rdfs:label "adheres to principle"@en ;
+    rdfs:comment "Relates a role to principles that guide its conduct."@en ;
+    skos:definition "Relates a role to principles that guide its conduct."@en .
+
+proeth-core:hasCapability a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Agent ;
+    rdfs:range proeth-core:Capability ;
+    rdfs:label "has capability"@en ;
+    rdfs:comment "Relates an agent to capabilities they possess."@en ;
+    skos:definition "Relates an agent to capabilities they possess."@en .
+
+proeth-core:performsAction a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Agent ;
+    rdfs:range proeth-core:Action ;
+    rdfs:label "performs action"@en ;
+    rdfs:comment "Relates an agent to actions they perform."@en ;
+    skos:definition "Relates an agent to actions they perform."@en .
+
+proeth-core:fulfillsObligation a owl:ObjectProperty ;
+    rdfs:subPropertyOf ro:0000057 ;  # RO:has participant
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "fulfills obligation"@en ;
+    rdfs:comment "Relates an action to obligations it fulfills."@en ;
+    skos:definition "Relates an action to obligations it fulfills."@en .
+
+proeth-core:realizesCapability a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Capability ;
+    rdfs:label "realizes capability"@en ;
+    rdfs:comment "Relates an action to capabilities it realizes."@en ;
+    skos:definition "Relates an action to capabilities it realizes."@en .
+
+proeth-core:hasState a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:State ;
+    rdfs:label "has state"@en ;
+    rdfs:comment "Relates an action to contextual states that affect its evaluation."@en ;
+    skos:definition "Relates an action to contextual states that affect its evaluation."@en .
+
+proeth-core:usesResource a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Resource ;
+    rdfs:label "uses resource"@en ;
+    rdfs:comment "Relates an action to resources it utilizes."@en ;
+    skos:definition "Relates an action to resources it utilizes."@en .
+
+proeth-core:triggersEvent a owl:ObjectProperty ;
+    rdfs:subPropertyOf ro:0000012 ;  # RO:causally upstream of
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Event ;
+    rdfs:label "triggers event"@en ;
+    rdfs:comment "Relates an action to events it causes or initiates."@en ;
+    skos:definition "Relates an action to events it causes or initiates."@en .
+
+proeth-core:constrainedBy a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Constraint ;
+    rdfs:label "constrained by"@en ;
+    rdfs:comment "Relates an action to constraints that limit or restrict it."@en ;
+    skos:definition "Relates an action to constraints that limit or restrict it."@en .
+
+###############################################################
+# Formal Specification Completeness Constraints
+###############################################################
+
+# Ensure every role has at least one obligation
+proeth-core:Role rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty proeth-core:hasObligation ;
+    owl:minCardinality "1"^^xsd:nonNegativeInteger
+] .
+
+# Ensure every action has an agent participant  
+proeth-core:Action rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty [ owl:inverseOf proeth-core:performsAction ] ;
+    owl:minCardinality "1"^^xsd:nonNegativeInteger
+] .
+
+###############################################################
+# Enhanced Disjointness Axioms for Ontology Engineering Quality
+###############################################################
+
+# CRITICAL BFO-Based Disjointness: Continuants vs Occurrents
+# Agent (material entity/continuant) is disjoint from processes (occurrents)
+proeth-core:Agent owl:disjointWith proeth-core:Action, proeth-core:Event .
+
+# Role vs Capability conceptual distinction
+# Role = "what you are" vs Capability = "what you can do"  
+proeth-core:Role owl:disjointWith proeth-core:Capability .
+
+# Information Content Entities are disjoint from physical entities
+proeth-core:Principle owl:disjointWith proeth-core:Agent, proeth-core:Resource .
+proeth-core:Obligation owl:disjointWith proeth-core:Agent, proeth-core:Resource .
+proeth-core:Constraint owl:disjointWith proeth-core:Agent, proeth-core:Resource .
+
+# Processes are disjoint from continuants
+proeth-core:Action owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .
+proeth-core:Event owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .
+
+# Qualities are disjoint from other continuant types
+proeth-core:State owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .
+
+# Core formal specification components remain disjoint
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth-core:Role proeth-core:Principle proeth-core:Obligation 
+                proeth-core:State proeth-core:Resource proeth-core:Action 
+                proeth-core:Event proeth-core:Capability proeth-core:Constraint ) .
+
+# BFO foundational disjointness preservation
+[] a owl:AllDisjointClasses ;
+   owl:members ( bfo:0000002 bfo:0000003 ) .  # continuant vs occurrent

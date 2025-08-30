@@ -1,0 +1,461 @@
+@prefix : <http://proethica.org/ontology/cases#> .
+@prefix proeth-cases: <http://proethica.org/ontology/cases#> .
+@prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix iao: <http://purl.obolibrary.org/obo/IAO_> .
+@prefix ro: <http://purl.obolibrary.org/obo/RO_> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+# Ontology Declaration
+<http://proethica.org/ontology/cases> a owl:Ontology ;
+    rdfs:label "ProEthica Cases Ontology"@en ;
+    dc:creator "ProEthica AI"@en ;
+    dc:date "2025-08-30"^^xsd:date ;
+    rdfs:comment "Case-based reasoning ontology for ethical scenario analysis and decision support. Enables structured representation of professional ethics dilemmas with evaluative dimensions."@en ;
+    owl:versionInfo "1.0.0"^^xsd:string ;
+    owl:imports <http://proethica.org/ontology/intermediate> ;
+    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
+    owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
+    owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
+    dc:description "Version 1.0.0 provides comprehensive case-based reasoning support for professional ethics scenarios with decision options, argumentation structures, and evaluative metrics for systematic ethical analysis."@en .
+
+###############################################################
+# Case Representation Classes
+###############################################################
+
+# Case: Core ethical scenario representation
+proeth-cases:Case a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Case"@en ;
+    rdfs:comment "An information content entity representing a professional ethics scenario requiring deliberation and decision-making."@en ;
+    skos:definition "A structured representation of a professional ethics dilemma or scenario that requires analysis, deliberation, and decision-making based on professional standards and ethical principles."@en .
+
+# Case Hierarchy: Different types of ethical cases
+proeth-cases:ConflictCase a owl:Class ;
+    rdfs:subClassOf proeth-cases:Case ;
+    rdfs:label "Conflict Case"@en ;
+    rdfs:comment "A case involving conflicts between competing obligations, principles, or stakeholder interests."@en ;
+    skos:definition "An ethical case characterized by tensions between competing obligations, principles, or stakeholder interests that require careful deliberation to resolve."@en .
+
+proeth-cases:ComplianceCase a owl:Class ;
+    rdfs:subClassOf proeth-cases:Case ;
+    rdfs:label "Compliance Case"@en ;
+    rdfs:comment "A case focused on adherence to professional standards, codes, or regulatory requirements."@en ;
+    skos:definition "An ethical case primarily concerned with ensuring compliance with professional standards, codes of ethics, or regulatory requirements."@en .
+
+proeth-cases:DilemmaCase a owl:Class ;
+    rdfs:subClassOf proeth-cases:Case ;
+    rdfs:label "Dilemma Case"@en ;
+    rdfs:comment "A case presenting difficult choices between equally valid but conflicting ethical options."@en ;
+    skos:definition "An ethical case presenting difficult choices where multiple options have valid ethical justifications but are mutually exclusive or in tension."@en .
+
+# Decision Options: Possible courses of action
+proeth-cases:DecisionOption a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Decision Option"@en ;
+    rdfs:comment "A possible course of action that could be taken in response to an ethical case."@en ;
+    skos:definition "A structured representation of a possible course of action, decision, or response that could be taken by a professional agent in an ethical case scenario."@en .
+
+# Decision Option Types
+proeth-cases:ActionOption a owl:Class ;
+    rdfs:subClassOf proeth-cases:DecisionOption ;
+    rdfs:label "Action Option"@en ;
+    rdfs:comment "A decision option that involves taking specific actions or implementing particular behaviors."@en ;
+    skos:definition "A decision option characterized by the implementation of specific actions, behaviors, or interventions to address the ethical case."@en .
+
+proeth-cases:RefrainOption a owl:Class ;
+    rdfs:subClassOf proeth-cases:DecisionOption ;
+    rdfs:label "Refrain Option"@en ;
+    rdfs:comment "A decision option that involves refraining from action or maintaining the status quo."@en ;
+    skos:definition "A decision option characterized by choosing not to take specific actions or maintaining the current situation without intervention."@en .
+
+proeth-cases:EscalationOption a owl:Class ;
+    rdfs:subClassOf proeth-cases:DecisionOption ;
+    rdfs:label "Escalation Option"@en ;
+    rdfs:comment "A decision option that involves referring the case to higher authority or additional expertise."@en ;
+    skos:definition "A decision option involving the referral of the case to higher authority, additional expertise, or formal review processes for resolution."@en .
+
+###############################################################
+# Argumentation Framework
+###############################################################
+
+# Argument Base Class
+proeth-cases:Argument a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Argument"@en ;
+    rdfs:comment "A structured reasoning element supporting or opposing a decision option in an ethical case."@en ;
+    skos:definition "An information content entity representing structured reasoning, evidence, or justification that supports or opposes a particular decision option in professional ethics deliberation."@en .
+
+# Pro Arguments: Support for decision options
+proeth-cases:ProArgument a owl:Class ;
+    rdfs:subClassOf proeth-cases:Argument ;
+    rdfs:label "Pro Argument"@en ;
+    rdfs:comment "An argument that supports or justifies a particular decision option."@en ;
+    skos:definition "An argument providing reasoning, evidence, or justification in favor of a particular decision option or course of action."@en .
+
+# Con Arguments: Opposition to decision options  
+proeth-cases:ConArgument a owl:Class ;
+    rdfs:subClassOf proeth-cases:Argument ;
+    rdfs:label "Con Argument"@en ;
+    rdfs:comment "An argument that opposes or raises concerns about a particular decision option."@en ;
+    skos:definition "An argument providing reasoning, evidence, or justification against a particular decision option or raising concerns about its implementation."@en .
+
+# Argument Types by Basis
+proeth-cases:PrincipleArgument a owl:Class ;
+    rdfs:subClassOf proeth-cases:Argument ;
+    rdfs:label "Principle Argument"@en ;
+    rdfs:comment "An argument based on fundamental ethical principles or values."@en ;
+    skos:definition "An argument grounded in fundamental ethical principles, professional values, or moral frameworks."@en .
+
+proeth-cases:ConsequenceArgument a owl:Class ;
+    rdfs:subClassOf proeth-cases:Argument ;
+    rdfs:label "Consequence Argument"@en ;
+    rdfs:comment "An argument based on predicted outcomes or consequences of a decision option."@en ;
+    skos:definition "An argument based on analysis of predicted outcomes, consequences, or results of implementing a particular decision option."@en .
+
+proeth-cases:StakeholderArgument a owl:Class ;
+    rdfs:subClassOf proeth-cases:Argument ;
+    rdfs:label "Stakeholder Argument"@en ;
+    rdfs:comment "An argument based on impacts to specific stakeholders or interest groups."@en ;
+    skos:definition "An argument focused on the interests, rights, or impacts affecting specific stakeholders or interest groups in the case scenario."@en .
+
+proeth-cases:LegalArgument a owl:Class ;
+    rdfs:subClassOf proeth-cases:Argument ;
+    rdfs:label "Legal Argument"@en ;
+    rdfs:comment "An argument based on legal requirements, regulations, or compliance considerations."@en ;
+    skos:definition "An argument grounded in legal requirements, regulatory compliance, statutory obligations, or jurisprudential precedents."@en .
+
+###############################################################
+# Case Context and Stakeholders
+###############################################################
+
+# Stakeholder: Entities affected by case decisions
+proeth-cases:Stakeholder a owl:Class ;
+    rdfs:subClassOf proeth-core:Agent ;
+    rdfs:label "Stakeholder"@en ;
+    rdfs:comment "An agent who has interests that may be affected by decisions in an ethical case."@en ;
+    skos:definition "An agent (individual, group, or organization) whose interests, rights, or welfare may be significantly affected by the decisions and outcomes of an ethical case."@en .
+
+# Case Context: Situational factors affecting the case
+proeth-cases:CaseContext a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity  
+    rdfs:label "Case Context"@en ;
+    rdfs:comment "Information content describing the situational context and relevant factors for an ethical case."@en ;
+    skos:definition "Structured information describing the professional, organizational, legal, and social context within which an ethical case occurs and decisions must be made."@en .
+
+###############################################################
+# Object Properties: Case Structure and Relationships  
+###############################################################
+
+# Core Case Relationships
+proeth-cases:hasDecisionOption a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:Case ;
+    rdfs:range proeth-cases:DecisionOption ;
+    rdfs:label "has decision option"@en ;
+    rdfs:comment "Relates a case to available decision options that could be pursued."@en ;
+    skos:definition "Relates an ethical case to a decision option that represents a possible course of action or response."@en .
+
+proeth-cases:hasArgument a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range proeth-cases:Argument ;
+    rdfs:label "has argument"@en ;
+    rdfs:comment "Relates a decision option to arguments supporting or opposing it."@en ;
+    skos:definition "Relates a decision option to an argument (pro or con) that provides reasoning about the option's merits or concerns."@en .
+
+proeth-cases:supportsOption a owl:ObjectProperty ;
+    rdfs:subPropertyOf proeth-cases:hasArgument ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range proeth-cases:ProArgument ;
+    rdfs:label "supports option"@en ;
+    rdfs:comment "Relates a decision option to pro arguments that support it."@en ;
+    skos:definition "Relates a decision option to a pro argument that provides reasoning or justification in favor of the option."@en .
+
+proeth-cases:opposesOption a owl:ObjectProperty ;
+    rdfs:subPropertyOf proeth-cases:hasArgument ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range proeth-cases:ConArgument ;
+    rdfs:label "opposes option"@en ;
+    rdfs:comment "Relates a decision option to con arguments that oppose it."@en ;
+    skos:definition "Relates a decision option to a con argument that raises concerns or provides reasoning against the option."@en .
+
+# Stakeholder Relationships
+proeth-cases:involvesStakeholder a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:Case ;
+    rdfs:range proeth-cases:Stakeholder ;
+    rdfs:label "involves stakeholder"@en ;
+    rdfs:comment "Relates a case to stakeholders who are affected by or have interests in the case."@en ;
+    skos:definition "Relates an ethical case to a stakeholder whose interests, rights, or welfare are significantly affected by the case and its potential resolutions."@en .
+
+proeth-cases:affectsStakeholder a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range proeth-cases:Stakeholder ;
+    rdfs:label "affects stakeholder"@en ;
+    rdfs:comment "Relates a decision option to stakeholders who would be impacted by its implementation."@en ;
+    skos:definition "Relates a decision option to a stakeholder who would be significantly impacted by the implementation of that option."@en .
+
+# Context Relationships
+proeth-cases:hasContext a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:Case ;
+    rdfs:range proeth-cases:CaseContext ;
+    rdfs:label "has context"@en ;
+    rdfs:comment "Relates a case to its relevant contextual information."@en ;
+    skos:definition "Relates an ethical case to contextual information that is relevant for understanding and analyzing the case scenario."@en .
+
+# Core Ontology Connections
+proeth-cases:involvesRole a owl:ObjectProperty ;
+    rdfs:subPropertyOf ro:0000057 ;  # RO:has participant
+    rdfs:domain proeth-cases:Case ;
+    rdfs:range proeth-core:Role ;
+    rdfs:label "involves role"@en ;
+    rdfs:comment "Relates a case to professional roles that are involved in the scenario."@en ;
+    skos:definition "Relates an ethical case to a professional role that is central to or involved in the case scenario."@en .
+
+proeth-cases:triggeredByEvent a owl:ObjectProperty ;
+    rdfs:subPropertyOf ro:0000013 ;  # RO:causally downstream of
+    rdfs:domain proeth-cases:Case ;
+    rdfs:range proeth-core:Event ;
+    rdfs:label "triggered by event"@en ;
+    rdfs:comment "Relates a case to events that initiated or precipitated the ethical scenario."@en ;
+    skos:definition "Relates an ethical case to an event that initiated, precipitated, or contributed to the development of the case scenario."@en .
+
+proeth-cases:requiresAction a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range proeth-core:Action ;
+    rdfs:label "requires action"@en ;
+    rdfs:comment "Relates a decision option to actions that would need to be performed if the option is chosen."@en ;
+    skos:definition "Relates a decision option to an action that would need to be performed, implemented, or taken if that option is selected."@en .
+
+###############################################################
+# Evaluative Data Properties
+###############################################################
+
+# Risk Assessment
+proeth-cases:riskLevel a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range xsd:string ;
+    rdfs:label "risk level"@en ;
+    rdfs:comment "Qualitative assessment of the risk level associated with a decision option."@en ;
+    skos:definition "A qualitative assessment (low/medium/high) of the overall risk level associated with implementing a particular decision option."@en .
+
+proeth-cases:riskScore a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "risk score"@en ;
+    rdfs:comment "Quantitative risk score for a decision option (scale 0-10, where 10 is highest risk)."@en ;
+    skos:definition "A quantitative assessment of risk on a scale from 0 (no risk) to 10 (maximum risk) for implementing a decision option."@en .
+
+# Stakeholder Impact Assessment  
+proeth-cases:stakeholderImpact a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range xsd:string ;
+    rdfs:label "stakeholder impact"@en ;
+    rdfs:comment "Qualitative assessment of overall impact on stakeholders."@en ;
+    skos:definition "A qualitative assessment (minimal/moderate/significant/major) of the overall impact on stakeholders affected by a decision option."@en .
+
+proeth-cases:benefitScore a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "benefit score"@en ;
+    rdfs:comment "Quantitative assessment of expected benefits (scale 0-10, where 10 is maximum benefit)."@en ;
+    skos:definition "A quantitative assessment of expected benefits on a scale from 0 (no benefit) to 10 (maximum benefit) for implementing a decision option."@en .
+
+proeth-cases:harmScore a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "harm score"@en ;
+    rdfs:comment "Quantitative assessment of potential harm (scale 0-10, where 10 is maximum harm)."@en ;
+    skos:definition "A quantitative assessment of potential harm on a scale from 0 (no harm) to 10 (maximum harm) for implementing a decision option."@en .
+
+# Ethical Alignment Assessment
+proeth-cases:ethicalAlignment a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range xsd:string ;
+    rdfs:label "ethical alignment"@en ;
+    rdfs:comment "Qualitative assessment of alignment with ethical principles and professional standards."@en ;
+    skos:definition "A qualitative assessment (poor/fair/good/excellent) of how well a decision option aligns with relevant ethical principles and professional standards."@en .
+
+proeth-cases:principleAlignment a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "principle alignment"@en ;
+    rdfs:comment "Quantitative assessment of alignment with core ethical principles (scale 0-10, where 10 is perfect alignment)."@en ;
+    skos:definition "A quantitative assessment of alignment with core ethical principles on a scale from 0 (no alignment) to 10 (perfect alignment)."@en .
+
+# Feasibility Assessment
+proeth-cases:feasibilityScore a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "feasibility score"@en ;
+    rdfs:comment "Quantitative assessment of implementation feasibility (scale 0-10, where 10 is most feasible)."@en ;
+    skos:definition "A quantitative assessment of how feasible it is to implement a decision option, on a scale from 0 (not feasible) to 10 (completely feasible)."@en .
+
+# Legal and Compliance Assessment
+proeth-cases:legalCompliance a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range xsd:string ;
+    rdfs:label "legal compliance"@en ;
+    rdfs:comment "Assessment of legal compliance status for the decision option."@en ;
+    skos:definition "An assessment (compliant/questionable/non-compliant) of whether a decision option meets relevant legal requirements and regulatory standards."@en .
+
+# Overall Evaluation
+proeth-cases:overallScore a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:DecisionOption ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "overall score"@en ;
+    rdfs:comment "Composite quantitative evaluation score (scale 0-10, where 10 is optimal choice)."@en ;
+    skos:definition "A composite quantitative evaluation combining multiple assessment dimensions on a scale from 0 (poor option) to 10 (optimal option)."@en .
+
+# Case Metadata
+proeth-cases:caseComplexity a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:Case ;
+    rdfs:range xsd:string ;
+    rdfs:label "case complexity"@en ;
+    rdfs:comment "Qualitative assessment of the case's complexity level."@en ;
+    skos:definition "A qualitative assessment (simple/moderate/complex/highly-complex) of the overall complexity of an ethical case scenario."@en .
+
+proeth-cases:resolutionUrgency a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:Case ;
+    rdfs:range xsd:string ;
+    rdfs:label "resolution urgency"@en ;
+    rdfs:comment "Assessment of how urgently the case requires resolution."@en ;
+    skos:definition "An assessment (low/moderate/high/critical) of how urgently an ethical case requires decision-making and resolution."@en .
+
+###############################################################
+# Ontological Constraints for Case-Based Reasoning
+###############################################################
+
+# Every case must have at least one decision option
+proeth-cases:Case rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty proeth-cases:hasDecisionOption ;
+    owl:minCardinality "1"^^xsd:nonNegativeInteger
+] .
+
+# Every decision option should have at least one supporting or opposing argument
+proeth-cases:DecisionOption rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty proeth-cases:hasArgument ;
+    owl:minCardinality "1"^^xsd:nonNegativeInteger
+] .
+
+# Cases should involve at least one stakeholder
+proeth-cases:Case rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty proeth-cases:involvesStakeholder ;
+    owl:minCardinality "1"^^xsd:nonNegativeInteger
+] .
+
+###############################################################
+# SHACL Validation for Case-Based Reasoning Quality
+###############################################################
+
+# Case Structure Validation
+proeth-cases:CaseStructureConstraint a sh:NodeShape ;
+    sh:targetClass proeth-cases:Case ;
+    sh:property [
+        sh:path proeth-cases:hasDecisionOption ;
+        sh:minCount 2 ;
+        sh:message "A case should have at least 2 decision options for meaningful analysis."
+    ] ;
+    sh:property [
+        sh:path proeth-cases:involvesStakeholder ;
+        sh:minCount 1 ;
+        sh:message "A case must involve at least one stakeholder."
+    ] ;
+    sh:property [
+        sh:path proeth-cases:hasContext ;
+        sh:maxCount 1 ;
+        sh:message "A case should have at most one primary context description."
+    ] .
+
+# Decision Option Evaluation Validation
+proeth-cases:DecisionOptionConstraint a sh:NodeShape ;
+    sh:targetClass proeth-cases:DecisionOption ;
+    sh:property [
+        sh:path proeth-cases:hasArgument ;
+        sh:minCount 1 ;
+        sh:message "Every decision option must have at least one supporting or opposing argument."
+    ] ;
+    sh:property [
+        sh:path proeth-cases:riskScore ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0.0 ;
+        sh:maxInclusive 10.0 ;
+        sh:message "Risk score must be between 0.0 and 10.0."
+    ] ;
+    sh:property [
+        sh:path proeth-cases:overallScore ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0.0 ;
+        sh:maxInclusive 10.0 ;
+        sh:message "Overall score must be between 0.0 and 10.0."
+    ] .
+
+# Argument Quality Validation
+proeth-cases:ArgumentConstraint a sh:NodeShape ;
+    sh:targetClass proeth-cases:Argument ;
+    sh:property [
+        sh:path rdfs:comment ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 10 ;
+        sh:message "Every argument must have a substantive comment with at least 10 characters."
+    ] .
+
+###############################################################
+# Domain-Specific Case Types for Professional Ethics
+###############################################################
+
+# Engineering Ethics Cases
+proeth-cases:EngineeringCase a owl:Class ;
+    rdfs:subClassOf proeth-cases:Case ;
+    rdfs:label "Engineering Case"@en ;
+    rdfs:comment "An ethical case specific to engineering practice and professional responsibilities."@en ;
+    skos:definition "An ethical case arising within engineering practice, involving professional responsibilities, public safety, and technical decision-making."@en .
+
+# Medical Ethics Cases
+proeth-cases:MedicalCase a owl:Class ;
+    rdfs:subClassOf proeth-cases:Case ;
+    rdfs:label "Medical Case"@en ;
+    rdfs:comment "An ethical case specific to medical practice and healthcare responsibilities."@en ;
+    skos:definition "An ethical case arising within medical practice, involving patient care, professional responsibilities, and healthcare decision-making."@en .
+
+# Business Ethics Cases
+proeth-cases:BusinessCase a owl:Class ;
+    rdfs:subClassOf proeth-cases:Case ;
+    rdfs:label "Business Case"@en ;
+    rdfs:comment "An ethical case specific to business practice and corporate responsibilities."@en ;
+    skos:definition "An ethical case arising within business practice, involving corporate responsibilities, stakeholder interests, and commercial decision-making."@en .
+
+# Research Ethics Cases
+proeth-cases:ResearchCase a owl:Class ;
+    rdfs:subClassOf proeth-cases:Case ;
+    rdfs:label "Research Case"@en ;
+    rdfs:comment "An ethical case specific to research practice and academic responsibilities."@en ;
+    skos:definition "An ethical case arising within research practice, involving academic responsibilities, research integrity, and scholarly decision-making."@en .
+
+###############################################################
+# Disjointness and Consistency Axioms
+###############################################################
+
+# Case types are disjoint
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth-cases:ConflictCase proeth-cases:ComplianceCase proeth-cases:DilemmaCase ) .
+
+# Decision option types are disjoint  
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth-cases:ActionOption proeth-cases:RefrainOption proeth-cases:EscalationOption ) .
+
+# Pro and con arguments are disjoint
+proeth-cases:ProArgument owl:disjointWith proeth-cases:ConArgument .
+
+# Domain-specific case types are disjoint
+[] a owl:AllDisjointClasses ;
+   owl:members ( proeth-cases:EngineeringCase proeth-cases:MedicalCase proeth-cases:BusinessCase proeth-cases:ResearchCase ) .

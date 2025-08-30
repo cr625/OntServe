@@ -29,7 +29,8 @@ sys.path.insert(0, str(project_root))
 
 # Import storage backend and concept manager
 from storage.postgresql_storage import PostgreSQLStorage, StorageError
-from storage.concept_manager import ConceptManager
+# Use enhanced concept manager that supports both ontology classes and instances
+from storage.concept_manager_enhanced import EnhancedConceptManager
 
 class OntServeMCPServer:
     """
@@ -89,7 +90,8 @@ class OntServeMCPServer:
             }
             
             self.storage = PostgreSQLStorage(storage_config)
-            self.concept_manager = ConceptManager(self.storage)
+            # Use enhanced concept manager that can return ontology classes
+            self.concept_manager = EnhancedConceptManager(self.storage)
             
             self.db_connected = True
             logger.info("Database connection initialized successfully")
