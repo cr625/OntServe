@@ -1,14 +1,22 @@
 #!/bin/bash
 
 # OntServe Database Restore Script
-# Restores from a timestamped backup file
+# Restores from a backup file using simple psql
 
-# Configuration
+# Configuration - Updated for server deployment
+if [ -d "/opt/ontserve" ]; then
+    # Server deployment path
+    BACKUP_DIR="/opt/ontserve/backups"
+else
+    # Development path
+    BACKUP_DIR="/home/chris/onto/OntServe/backups"
+fi
+
 DB_HOST="localhost"
 DB_PORT="5432"
 DB_NAME="ontserve"
 DB_USER="ontserve_user"
-BACKUP_DIR="/home/chris/onto/OntServe/backups"
+DB_PASSWORD="ontserve_development_password"
 
 # Check if backup file is provided
 if [ $# -eq 0 ]; then
@@ -55,25 +63,11 @@ if [ "$confirm" != "yes" ]; then
     exit 1
 fi
 
-# Set password environment variable
-export PGPASSWORD="ontserve_development_password"
-
 echo ""
-echo "🗑️  Dropping and recreating database..."
-# Drop database (disconnect all users first)
-psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d postgres -c "
-    SELECT pg_terminate_backend(pid) 
-    FROM pg_stat_activity 
-    WHERE datname = '$DB_NAME' AND pid <> pg_backend_pid();
-"
+echo "📥 Restoring database from backup using psql..."
 
-# Drop and recreate database
-dropdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$DB_NAME"
-createdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$DB_NAME"
-
-echo "📥 Restoring database from backup..."
-# Restore the backup
-psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" < "$BACKUP_FILE"
+# Use simple psql with password embedded in connection string
+PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" < "$BACKUP_FILE"
 
 # Check if restore was successful
 if [ $? -eq 0 ]; then
@@ -83,12 +77,7 @@ if [ $? -eq 0 ]; then
     # Get some basic stats
     echo ""
     echo "📊 Restored database statistics:"
-    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "
-        SELECT schemaname, tablename, n_tup_ins as rows 
-        FROM pg_stat_user_tables 
-        WHERE n_tup_ins > 0
-        ORDER BY n_tup_ins DESC;
-    "
+    PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "SELECT COUNT(*) as total_tables FROM information_schema.tables WHERE table_schema = 'public';"
 else
     echo "❌ Database restore failed!"
     exit 1

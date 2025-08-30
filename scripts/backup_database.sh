@@ -3,12 +3,19 @@
 # OntServe Database Backup Script
 # Creates a timestamped backup of the PostgreSQL database
 
-# Configuration
+# Configuration - Updated for server deployment
+if [ -d "/opt/ontserve" ]; then
+    # Server deployment path
+    BACKUP_DIR="/opt/ontserve/backups"
+else
+    # Development path
+    BACKUP_DIR="/home/chris/onto/OntServe/backups"
+fi
+
 DB_HOST="localhost"
 DB_PORT="5432"
 DB_NAME="ontserve"
 DB_USER="ontserve_user"
-BACKUP_DIR="/home/chris/onto/OntServe/backups"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_FILE="${BACKUP_DIR}/ontserve_backup_${TIMESTAMP}.sql"
 
