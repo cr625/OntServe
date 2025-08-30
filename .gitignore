@@ -27,10 +27,20 @@ env/
 .DS_Store
 Thumbs.db
 
-# Project-specific ignores
-docs/
+# Development documentation (not for public version control)
 CLAUDE.md
+
+# Documentation directories (development/internal only)
+docs/
+*/docs/
+
+# Scripts and development artifacts
+scripts/
+*/scripts/
 scratch/
+*/scratch/
+pending_delete/
+*/pending_delete/
 
 # Cache
 cache/
