@@ -1901,63 +1901,7 @@ def register_routes(app):
                 'error': str(e)
             }), 500
     
-    # URI Resolution endpoint - path-based for direct access
-    @app.route('/ontology/<path:ontology_path>/<entity_name>')
-    def resolve_uri_path(ontology_path, entity_name):
-        """
-        Direct path-based URI resolution.
-        
-        Examples:
-            /ontology/intermediate/Honesty
-            /ontology/core/Principle
-        """
-        # Construct the full URI
-        base_uri = f"http://proethica.org/ontology/{ontology_path}"
-        full_uri = f"{base_uri}#{entity_name}"
-        
-        # Find entity in database
-        entity = OntologyEntity.query.filter_by(uri=full_uri).first()
-        
-        if not entity:
-            return jsonify({
-                'error': 'Entity not found',
-                'uri': full_uri
-            }), 404
-        
-        # Get ontology for context
-        ontology = entity.ontology
-        
-        # Check Accept header for content negotiation
-        accept_header = request.headers.get('Accept', '')
-        
-        if 'application/json' in accept_header:
-            # Return JSON representation
-            return jsonify({
-                'uri': entity.uri,
-                'label': entity.label,
-                'type': entity.entity_type,
-                'definition': entity.comment,
-                'ontology': ontology.name,
-                'ontology_base_uri': ontology.base_uri,
-                'properties': entity.properties or {}
-            })
-        
-        # Default: Return TTL representation
-        ttl_content = generate_entity_ttl(entity, ontology)
-        
-        response = app.response_class(
-            response=ttl_content,
-            status=200,
-            mimetype='text/turtle'
-        )
-        
-        # Add CORS headers for cross-origin access
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Accept, Content-Type'
-        
-        return response
-    
+    # NOTE: Path-based URI resolution route moved to end of file to avoid conflicts
     # URI Resolution endpoint - query parameter based
     @app.route('/resolve', methods=['GET', 'OPTIONS'])
     def resolve_uri():
@@ -2094,6 +2038,81 @@ def register_routes(app):
             lines[-1] = lines[-1][:-2] + ' .'
         
         return '\n'.join(lines)
+    
+    # URI Resolution endpoint - path-based for direct access (placed last to avoid conflicts)
+    @app.route('/ontology/<path:ontology_path>/<entity_name>')
+    def resolve_uri_path(ontology_path, entity_name):
+        """
+        Direct path-based URI resolution.
+        
+        Examples:
+            /ontology/intermediate/Honesty
+            /ontology/core/Principle
+        """
+        # Exclude reserved route names that have specific handlers
+        reserved_names = {'content', 'edit', 'save', 'settings', 'version', 'draft'}
+        
+        # If entity_name is reserved, redirect to the correct specific handler
+        if entity_name in reserved_names:
+            from flask import redirect, url_for
+            
+            # For content requests, call the content handler directly
+            if entity_name == 'content':
+                # Extract just the ontology name from the path
+                ontology_name = ontology_path.split('/')[-1] if '/' in ontology_path else ontology_path
+                # Call the ontology_content function directly instead of redirecting
+                return ontology_content(ontology_name)
+            
+            # For other reserved names, return 404 as they should have their own handlers
+            from flask import abort
+            abort(404)
+        
+        # Construct the full URI
+        base_uri = f"http://proethica.org/ontology/{ontology_path}"
+        full_uri = f"{base_uri}#{entity_name}"
+        
+        # Find entity in database
+        entity = OntologyEntity.query.filter_by(uri=full_uri).first()
+        
+        if not entity:
+            return jsonify({
+                'error': 'Entity not found',
+                'uri': full_uri
+            }), 404
+        
+        # Get ontology for context
+        ontology = entity.ontology
+        
+        # Check Accept header for content negotiation
+        accept_header = request.headers.get('Accept', '')
+        
+        if 'application/json' in accept_header:
+            # Return JSON representation
+            return jsonify({
+                'uri': entity.uri,
+                'label': entity.label,
+                'type': entity.entity_type,
+                'definition': entity.comment,
+                'ontology': ontology.name,
+                'ontology_base_uri': ontology.base_uri,
+                'properties': entity.properties or {}
+            })
+        
+        # Default: Return TTL representation
+        ttl_content = generate_entity_ttl(entity, ontology)
+        
+        response = app.response_class(
+            response=ttl_content,
+            status=200,
+            mimetype='text/turtle'
+        )
+        
+        # Add CORS headers for cross-origin access
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Accept, Content-Type'
+        
+        return response
     
     @app.errorhandler(404)
     def not_found(error):
