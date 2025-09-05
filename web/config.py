@@ -4,8 +4,24 @@ Configuration for OntServe Web Application
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 basedir = Path(__file__).parent.absolute()
+
+# Load environment variables in priority order:
+# 1. shared/.env (shared across all applications)  
+# 2. OntServe/.env (app-specific configuration)
+workspace_root = basedir.parent.parent
+shared_env = workspace_root / "shared" / ".env"
+ontserve_env = workspace_root / "OntServe" / ".env"
+
+if shared_env.exists():
+    load_dotenv(shared_env, override=False)
+    print(f"✅ Loaded shared environment config: {shared_env}")
+
+if ontserve_env.exists():
+    load_dotenv(ontserve_env, override=True)  # App-specific overrides shared
+    print(f"✅ Loaded OntServe environment config: {ontserve_env}")
 
 
 class Config:
@@ -16,7 +32,7 @@ class Config:
     
     # Database settings - using local PostgreSQL on port 5432
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://ontserve_user:ontserve_development_password@localhost:5432/ontserve'
+        'postgresql://postgres:PASS@localhost:5432/ontserve'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Application settings

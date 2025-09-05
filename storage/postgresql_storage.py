@@ -49,7 +49,7 @@ class PostgreSQLStorage(StorageBackend):
         # Database configuration - set before calling super().__init__()
         self.db_url = self.config.get('db_url') or os.environ.get(
             'ONTSERVE_DB_URL',
-            'postgresql://ontserve_user:ontserve_development_password@localhost:5432/ontserve'
+            'postgresql://postgres:PASS@localhost:5432/ontserve'
         )
         
         self.pool_size = self.config.get('pool_size', 5)

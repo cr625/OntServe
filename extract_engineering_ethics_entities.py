@@ -13,7 +13,7 @@ from rdflib import RDF, RDFS, OWL
 sys.path.insert(0, '/home/chris/onto/OntServe/web')
 
 # Set up database connection
-os.environ['DATABASE_URL'] = 'postgresql://ontserve_user:ontserve_development_password@localhost:5432/ontserve'
+os.environ['DATABASE_URL'] = 'postgresql://postgres:PASS@localhost:5432/ontserve'
 
 def extract_entities():
     """Extract entities from engineering-ethics ontology and save to database."""

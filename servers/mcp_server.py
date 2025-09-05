@@ -15,6 +15,7 @@ from aiohttp import web
 from typing import Dict, List, Any, Optional, Union
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
 
 # Set up logging
 logging.basicConfig(
@@ -26,6 +27,21 @@ logger = logging.getLogger(__name__)
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+
+# Load environment variables in priority order:
+# 1. shared/.env (shared across all applications)
+# 2. OntServe/.env (app-specific configuration)
+workspace_root = project_root.parent
+shared_env = workspace_root / "shared" / ".env"
+ontserve_env = workspace_root / "OntServe" / ".env"
+
+if shared_env.exists():
+    load_dotenv(shared_env, override=False)
+    logger.info(f"✅ Loaded shared environment config: {shared_env}")
+
+if ontserve_env.exists():
+    load_dotenv(ontserve_env, override=True)  # App-specific overrides shared
+    logger.info(f"✅ Loaded OntServe environment config: {ontserve_env}")
 
 # Import storage backend and concept manager
 from storage.postgresql_storage import PostgreSQLStorage, StorageError
@@ -76,7 +92,7 @@ class OntServeMCPServer:
             # Database URL from environment
             self.db_url = os.environ.get(
                 'ONTSERVE_DB_URL', 
-                'postgresql://ontserve_user:ontserve_development_password@localhost:5432/ontserve'
+                'postgresql://postgres:PASS@localhost:5432/ontserve'
             )
             
             logger.info(f"Initializing PostgreSQL storage: {self.db_url}")
