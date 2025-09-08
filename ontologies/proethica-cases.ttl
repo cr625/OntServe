@@ -6,6 +6,7 @@
 @prefix iao: <http://purl.obolibrary.org/obo/IAO_> .
 @prefix ro: <http://purl.obolibrary.org/obo/RO_> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -17,14 +18,14 @@
 <http://proethica.org/ontology/cases> a owl:Ontology ;
     rdfs:label "ProEthica Cases Ontology"@en ;
     dc:creator "ProEthica AI"@en ;
-    dc:date "2025-08-30"^^xsd:date ;
-    rdfs:comment "Case-based reasoning ontology for ethical scenario analysis and decision support. Enables structured representation of professional ethics dilemmas with evaluative dimensions."@en ;
-    owl:versionInfo "1.0.0"^^xsd:string ;
+    dc:date "2025-09-08"^^xsd:date ;
+    rdfs:comment "Case-based reasoning ontology for ethical scenario analysis and decision support. Enables structured representation of professional ethics dilemmas with evaluative dimensions. Version 2.0.0 adds comprehensive case structure framework for LangExtract integration."@en ;
+    owl:versionInfo "2.0.0"^^xsd:string ;
     owl:imports <http://proethica.org/ontology/intermediate> ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
-    dc:description "Version 1.0.0 provides comprehensive case-based reasoning support for professional ethics scenarios with decision options, argumentation structures, and evaluative metrics for systematic ethical analysis."@en .
+    dc:description "Version 2.0.0 provides comprehensive case-based reasoning support for professional ethics scenarios with decision options, argumentation structures, and evaluative metrics. Adds case structure framework with templates, sections, and LangExtract integration properties for systematic content analysis and structured case processing."@en .
 
 ###############################################################
 # Case Representation Classes
@@ -407,6 +408,215 @@ proeth-cases:ArgumentConstraint a sh:NodeShape ;
         sh:datatype xsd:string ;
         sh:minLength 10 ;
         sh:message "Every argument must have a substantive comment with at least 10 characters."
+    ] .
+
+###############################################################
+# Case Structure Framework for LangExtract Integration  
+###############################################################
+
+# Case Structure Template: Defines the structural organization of ethics cases
+proeth-cases:CaseStructureTemplate a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Case Structure Template"@en ;
+    rdfs:comment "Defines the structural organization and sectional composition of professional ethics cases for systematic analysis."@en ;
+    skos:definition "An information content entity that specifies the structural template, sections, and organization pattern used for professional ethics case presentation and analysis."@en .
+
+# Case Section: Individual structural components within a case
+proeth-cases:CaseSection a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Case Section"@en ;
+    rdfs:comment "A structured section or component within a professional ethics case."@en ;
+    skos:definition "An information content entity representing a distinct structural section or component within a professional ethics case, such as facts, questions, or conclusions."@en .
+
+# Section Type: Classification of different section types
+proeth-cases:SectionType a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Section Type"@en ;
+    rdfs:comment "A classification or category for different types of case sections."@en ;
+    skos:definition "A classification scheme that categorizes the different types of sections found in professional ethics cases based on their content and analytical purpose."@en .
+
+# Generic Section Types for Cross-Domain Use
+proeth-cases:FactualSection a owl:Class ;
+    rdfs:subClassOf proeth-cases:SectionType ;
+    rdfs:label "Factual Section"@en ;
+    rdfs:comment "Section type for objective factual information and situational context that establishes the environmental states for ethical analysis."@en ;
+    skos:definition "Section presenting objective factual information, background context, and situational details that establish environmental states affecting ethical evaluation. Captures current conditions, historical information, and relevant contextual factors that determine which principles activate and how professional obligations apply in specific scenarios."@en ;
+    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705> ;
+    proeth-cases:hasExtractionTarget "factual_statements, environmental_conditions, contextual_factors, situational_details" ;
+    proeth-cases:analysisPriority 1 .
+
+proeth-cases:EthicalQuestionSection a owl:Class ;
+    rdfs:subClassOf proeth-cases:SectionType ;
+    rdfs:label "Ethical Question Section"@en ;
+    rdfs:comment "Section type for central ethical questions requiring professional judgment and decision-making within role-specific contexts."@en ;
+    skos:definition "Section presenting central ethical questions, dilemmas, or decision points requiring professional judgment. Frames ethical challenges within role-specific contexts where professional obligations may conflict and require systematic resolution through precedent-based reasoning."@en ;
+    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705>, <https://doi.org/10.1007/s10676-021-09592-x> ;
+    proeth-cases:hasExtractionTarget "ethical_questions, moral_dilemmas, decision_points, conflicting_obligations" ;
+    proeth-cases:analysisPriority 2 .
+
+proeth-cases:AnalysisSection a owl:Class ;
+    rdfs:subClassOf proeth-cases:SectionType ;
+    rdfs:label "Analysis Section"@en ;
+    rdfs:comment "Section type for structured ethical reasoning that transforms abstract principles into concrete professional obligations through precedent-based analysis."@en ;
+    skos:definition "Section providing structured ethical analysis, reasoning, and argumentation that bridges abstract principles to concrete obligations. Employs precedent-based reasoning, analogical comparison to paradigmatic cases, and systematic weighing of professional duties within domain-specific contexts."@en ;
+    dcterms:source <https://doi.org/10.1016/j.artint.2003.09.005>, <https://doi.org/10.1016/j.artint.2022.103705> ;
+    proeth-cases:hasExtractionTarget "reasoning_chains, precedent_references, principle_applications, duty_weightings" ;
+    proeth-cases:analysisPriority 3 .
+
+proeth-cases:ConclusionSection a owl:Class ;
+    rdfs:subClassOf proeth-cases:SectionType ;
+    rdfs:label "Conclusion Section"@en ;
+    rdfs:comment "Section type for final professional decisions that specify concrete actions and establish precedential value for future cases."@en ;
+    skos:definition "Section presenting final professional decisions, resolutions, and determinations that specify concrete actions while establishing precedential value for future analogical reasoning. Provides traceable connections from principles through analysis to specific professional obligations."@en ;
+    dcterms:source <https://doi.org/10.1016/j.artint.2003.09.005>, <https://doi.org/10.1016/j.artint.2022.103705> ;
+    proeth-cases:hasExtractionTarget "final_decisions, concrete_actions, precedential_determinations, obligation_specifications" ;
+    proeth-cases:analysisPriority 5 .
+
+# NOTE: Domain-specific section types (e.g., CodeReferenceSection, DissentingSection) 
+# should be defined in domain-specific ontologies (e.g., engineering-ethics.ttl)
+
+###############################################################
+# Case Structure Relationship Properties
+###############################################################
+
+# Structure Template Relationships
+proeth-cases:hasSection a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:CaseStructureTemplate ;
+    rdfs:range proeth-cases:CaseSection ;
+    rdfs:label "has section"@en ;
+    rdfs:comment "Relates a case structure template to its constituent sections."@en ;
+    skos:definition "Relates a case structure template to a case section that forms part of the template's organizational structure."@en .
+
+proeth-cases:hasSectionType a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:CaseSection ;
+    rdfs:range proeth-cases:SectionType ;
+    rdfs:label "has section type"@en ;
+    rdfs:comment "Relates a case section to its section type classification."@en ;
+    skos:definition "Relates a case section to a section type that classifies the section's content and analytical purpose."@en .
+
+proeth-cases:followsTemplate a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:Case ;
+    rdfs:range proeth-cases:CaseStructureTemplate ;
+    rdfs:label "follows template"@en ;
+    rdfs:comment "Relates a case to the structure template that it follows."@en ;
+    skos:definition "Relates a professional ethics case to the structure template that defines its organizational pattern and sectional composition."@en .
+
+# Section Ordering and Sequencing
+proeth-cases:sectionOrder a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:CaseSection ;
+    rdfs:range xsd:integer ;
+    rdfs:label "section order"@en ;
+    rdfs:comment "Specifies the sequential order position of a section within a case structure."@en ;
+    skos:definition "An integer value that specifies the position or sequence order of a case section within the overall case structure template."@en .
+
+proeth-cases:sectionLabel a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:CaseSection ;
+    rdfs:range xsd:string ;
+    rdfs:label "section label"@en ;
+    rdfs:comment "The display label or title for a case section."@en ;
+    skos:definition "A human-readable string that provides the display label or title for a case section as it appears in case presentations."@en .
+
+###############################################################
+# LangExtract Integration Properties
+###############################################################
+
+# LangExtract Prompt Template
+proeth-cases:hasLangExtractPrompt a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:SectionType ;
+    rdfs:range xsd:string ;
+    rdfs:label "has LangExtract prompt"@en ;
+    rdfs:comment "Specifies the LangExtract prompt template for analyzing this section type."@en ;
+    skos:definition "A string property that contains the LangExtract prompt template used for structured analysis of case sections of this type."@en .
+
+# Extraction Target Specification
+proeth-cases:hasExtractionTarget a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:SectionType ;
+    rdfs:range xsd:string ;
+    rdfs:label "has extraction target"@en ;
+    rdfs:comment "Specifies the types of content to be extracted from this section type."@en ;
+    skos:definition "A string property that specifies what types of content, concepts, or entities should be extracted from sections of this type during analysis."@en .
+
+# Analysis Priority
+proeth-cases:analysisPriority a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:SectionType ;
+    rdfs:range xsd:integer ;
+    rdfs:label "analysis priority"@en ;
+    rdfs:comment "Specifies the priority order for analyzing sections of this type."@en ;
+    skos:definition "An integer value that specifies the priority order for analyzing sections of this type, with lower numbers indicating higher priority."@en .
+
+# Domain Specificity
+proeth-cases:isDomainSpecific a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:CaseStructureTemplate ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "is domain specific"@en ;
+    rdfs:comment "Indicates whether this template is specific to a particular professional domain."@en ;
+    skos:definition "A boolean property indicating whether a case structure template is designed for a specific professional domain or is generic across domains."@en .
+
+proeth-cases:targetDomain a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:CaseStructureTemplate ;
+    rdfs:range xsd:string ;
+    rdfs:label "target domain"@en ;
+    rdfs:comment "Specifies the professional domain for which this template is designed."@en ;
+    skos:definition "A string property that specifies the professional domain (e.g., engineering, medical, business) for which this case structure template is designed."@en .
+
+###############################################################
+# Structural Validation Constraints
+###############################################################
+
+# Case Structure Template Validation
+proeth-cases:CaseStructureTemplateConstraint a sh:NodeShape ;
+    sh:targetClass proeth-cases:CaseStructureTemplate ;
+    sh:property [
+        sh:path proeth-cases:hasSection ;
+        sh:minCount 2 ;
+        sh:message "A case structure template must have at least 2 sections for meaningful organization."
+    ] ;
+    sh:property [
+        sh:path proeth-cases:targetDomain ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "A template should have at most one target domain specified."
+    ] .
+
+# Case Section Validation
+proeth-cases:CaseSectionConstraint a sh:NodeShape ;
+    sh:targetClass proeth-cases:CaseSection ;
+    sh:property [
+        sh:path proeth-cases:hasSectionType ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Every case section must have exactly one section type."
+    ] ;
+    sh:property [
+        sh:path proeth-cases:sectionOrder ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1 ;
+        sh:message "Section order must be a positive integer starting from 1."
+    ] ;
+    sh:property [
+        sh:path proeth-cases:sectionLabel ;
+        sh:minCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 2 ;
+        sh:message "Every case section must have a label with at least 2 characters."
+    ] .
+
+# Section Type Validation
+proeth-cases:SectionTypeConstraint a sh:NodeShape ;
+    sh:targetClass proeth-cases:SectionType ;
+    sh:property [
+        sh:path proeth-cases:hasLangExtractPrompt ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 20 ;
+        sh:message "LangExtract prompt should be a substantive string with at least 20 characters."
+    ] ;
+    sh:property [
+        sh:path proeth-cases:analysisPriority ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1 ;
+        sh:maxInclusive 10 ;
+        sh:message "Analysis priority must be between 1 (highest) and 10 (lowest)."
     ] .
 
 ###############################################################
