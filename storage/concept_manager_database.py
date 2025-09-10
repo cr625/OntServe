@@ -107,7 +107,7 @@ class DatabaseConceptManager:
                 entities.append(entity)
             
             # If we found the main category class, also get its subclasses
-            if entities and category in ['Role', 'Principle', 'Obligation']:
+            if entities and category in ['Role', 'Principle', 'Obligation', 'Resource']:
                 subclasses = self._get_subclasses_for_category(category, ontology_names)
                 entities.extend(subclasses)
             
@@ -213,12 +213,16 @@ class DatabaseConceptManager:
         
         # Define known subclasses for each category
         subclass_mappings = {
-            'Role': ['ProfessionalRole', 'ParticipantRole', 'EngineerRole', 'StakeholderRole',
-                    'ProfessionalEngineer', 'ClientRole', 'EmployerRole', 'PublicRole'],
+            'Role': ['ProfessionalRole', 'ParticipantRole', 'EngineeringRole', 'StakeholderRole',
+                    'ProfessionalEngineer', 'ClientRole', 'EmployerRole', 'PublicRole',
+                    'EthicsReviewerRole', 'StructuralEngineerRole', 'SoftwareEngineerRole',
+                    'ProviderClientRole', 'ProfessionalPeerRole', 'EmployerRelationshipRole', 'PublicResponsibilityRole'],
             'Principle': ['PublicSafety', 'Sustainability', 'Honesty', 'Integrity',
                          'PublicSafetyPrinciple', 'SustainabilityPrinciple'],
             'Obligation': ['ProfessionalObligation', 'ReportingObligation', 'CompetenceObligation',
-                          'TechnicalCompetenceObligation', 'ConflictOfInterestObligation']
+                          'TechnicalCompetenceObligation', 'ConflictOfInterestObligation'],
+            'Resource': ['Professional Code', 'Expert Interpretation', 'Case Precedent', 
+                        'Technical Standard']
         }
         
         if category not in subclass_mappings:

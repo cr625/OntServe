@@ -436,41 +436,41 @@ proeth-cases:SectionType a owl:Class ;
     skos:definition "A classification scheme that categorizes the different types of sections found in professional ethics cases based on their content and analytical purpose."@en .
 
 # Generic Section Types for Cross-Domain Use
+# FactualSection Class Definition
 proeth-cases:FactualSection a owl:Class ;
     rdfs:subClassOf proeth-cases:SectionType ;
     rdfs:label "Factual Section"@en ;
     rdfs:comment "Section type for objective factual information and situational context that establishes the environmental states for ethical analysis."@en ;
     skos:definition "Section presenting objective factual information, background context, and situational details that establish environmental states affecting ethical evaluation. Captures current conditions, historical information, and relevant contextual factors that determine which principles activate and how professional obligations apply in specific scenarios."@en ;
-    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705> ;
-    proeth-cases:hasExtractionTarget "factual_statements, environmental_conditions, contextual_factors, situational_details" ;
-    proeth-cases:analysisPriority 1 .
+    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705> .
 
+
+# EthicalQuestionSection Class Definition  
 proeth-cases:EthicalQuestionSection a owl:Class ;
     rdfs:subClassOf proeth-cases:SectionType ;
     rdfs:label "Ethical Question Section"@en ;
     rdfs:comment "Section type for central ethical questions requiring professional judgment and decision-making within role-specific contexts."@en ;
     skos:definition "Section presenting central ethical questions, dilemmas, or decision points requiring professional judgment. Frames ethical challenges within role-specific contexts where professional obligations may conflict and require systematic resolution through precedent-based reasoning."@en ;
-    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705>, <https://doi.org/10.1007/s10676-021-09592-x> ;
-    proeth-cases:hasExtractionTarget "ethical_questions, moral_dilemmas, decision_points, conflicting_obligations" ;
-    proeth-cases:analysisPriority 2 .
+    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705>, <https://doi.org/10.1007/s10676-021-09592-x> .
 
+
+# AnalysisSection Class Definition
 proeth-cases:AnalysisSection a owl:Class ;
     rdfs:subClassOf proeth-cases:SectionType ;
     rdfs:label "Analysis Section"@en ;
     rdfs:comment "Section type for structured ethical reasoning that transforms abstract principles into concrete professional obligations through precedent-based analysis."@en ;
     skos:definition "Section providing structured ethical analysis, reasoning, and argumentation that bridges abstract principles to concrete obligations. Employs precedent-based reasoning, analogical comparison to paradigmatic cases, and systematic weighing of professional duties within domain-specific contexts."@en ;
-    dcterms:source <https://doi.org/10.1016/j.artint.2003.09.005>, <https://doi.org/10.1016/j.artint.2022.103705> ;
-    proeth-cases:hasExtractionTarget "reasoning_chains, precedent_references, principle_applications, duty_weightings" ;
-    proeth-cases:analysisPriority 3 .
+    dcterms:source <https://doi.org/10.1016/j.artint.2003.09.005>, <https://doi.org/10.1016/j.artint.2022.103705> .
 
+
+# ConclusionSection Class Definition
 proeth-cases:ConclusionSection a owl:Class ;
     rdfs:subClassOf proeth-cases:SectionType ;
     rdfs:label "Conclusion Section"@en ;
     rdfs:comment "Section type for final professional decisions that specify concrete actions and establish precedential value for future cases."@en ;
     skos:definition "Section presenting final professional decisions, resolutions, and determinations that specify concrete actions while establishing precedential value for future analogical reasoning. Provides traceable connections from principles through analysis to specific professional obligations."@en ;
-    dcterms:source <https://doi.org/10.1016/j.artint.2003.09.005>, <https://doi.org/10.1016/j.artint.2022.103705> ;
-    proeth-cases:hasExtractionTarget "final_decisions, concrete_actions, precedential_determinations, obligation_specifications" ;
-    proeth-cases:analysisPriority 5 .
+    dcterms:source <https://doi.org/10.1016/j.artint.2003.09.005>, <https://doi.org/10.1016/j.artint.2022.103705> .
+
 
 # NOTE: Domain-specific section types (e.g., CodeReferenceSection, DissentingSection) 
 # should be defined in domain-specific ontologies (e.g., engineering-ethics.ttl)
@@ -516,33 +516,6 @@ proeth-cases:sectionLabel a owl:DatatypeProperty ;
     rdfs:comment "The display label or title for a case section."@en ;
     skos:definition "A human-readable string that provides the display label or title for a case section as it appears in case presentations."@en .
 
-###############################################################
-# LangExtract Integration Properties
-###############################################################
-
-# LangExtract Prompt Template
-proeth-cases:hasLangExtractPrompt a owl:DatatypeProperty ;
-    rdfs:domain proeth-cases:SectionType ;
-    rdfs:range xsd:string ;
-    rdfs:label "has LangExtract prompt"@en ;
-    rdfs:comment "Specifies the LangExtract prompt template for analyzing this section type."@en ;
-    skos:definition "A string property that contains the LangExtract prompt template used for structured analysis of case sections of this type."@en .
-
-# Extraction Target Specification
-proeth-cases:hasExtractionTarget a owl:DatatypeProperty ;
-    rdfs:domain proeth-cases:SectionType ;
-    rdfs:range xsd:string ;
-    rdfs:label "has extraction target"@en ;
-    rdfs:comment "Specifies the types of content to be extracted from this section type."@en ;
-    skos:definition "A string property that specifies what types of content, concepts, or entities should be extracted from sections of this type during analysis."@en .
-
-# Analysis Priority
-proeth-cases:analysisPriority a owl:DatatypeProperty ;
-    rdfs:domain proeth-cases:SectionType ;
-    rdfs:range xsd:integer ;
-    rdfs:label "analysis priority"@en ;
-    rdfs:comment "Specifies the priority order for analyzing sections of this type."@en ;
-    skos:definition "An integer value that specifies the priority order for analyzing sections of this type, with lower numbers indicating higher priority."@en .
 
 # Domain Specificity
 proeth-cases:isDomainSpecific a owl:DatatypeProperty ;
@@ -604,20 +577,7 @@ proeth-cases:CaseSectionConstraint a sh:NodeShape ;
 # Section Type Validation
 proeth-cases:SectionTypeConstraint a sh:NodeShape ;
     sh:targetClass proeth-cases:SectionType ;
-    sh:property [
-        sh:path proeth-cases:hasLangExtractPrompt ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:minLength 20 ;
-        sh:message "LangExtract prompt should be a substantive string with at least 20 characters."
-    ] ;
-    sh:property [
-        sh:path proeth-cases:analysisPriority ;
-        sh:datatype xsd:integer ;
-        sh:minInclusive 1 ;
-        sh:maxInclusive 10 ;
-        sh:message "Analysis priority must be between 1 (highest) and 10 (lowest)."
-    ] .
+    .
 
 ###############################################################
 # Domain-Specific Case Types for Professional Ethics

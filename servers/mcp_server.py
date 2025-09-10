@@ -47,6 +47,8 @@ if ontserve_env.exists():
 from storage.postgresql_storage import PostgreSQLStorage, StorageError
 # Use database concept manager that queries ontology_entities table
 from storage.concept_manager_database import DatabaseConceptManager
+# Import SPARQL service
+from services.sparql_service import SPARQLService
 
 class OntServeMCPServer:
     """
@@ -109,6 +111,14 @@ class OntServeMCPServer:
             # Use database concept manager that queries the populated ontology_entities table
             self.concept_manager = DatabaseConceptManager(self.storage)
             
+            # Initialize SPARQL service
+            try:
+                self.sparql_service = SPARQLService()
+                logger.info("SPARQL service initialized successfully")
+            except Exception as sparql_error:
+                logger.warning(f"SPARQL service initialization failed: {sparql_error}")
+                self.sparql_service = None
+            
             self.db_connected = True
             logger.info("Database connection initialized successfully")
             
@@ -116,6 +126,7 @@ class OntServeMCPServer:
             logger.error(f"Failed to initialize database: {e}")
             self.storage = None
             self.concept_manager = None
+            self.sparql_service = None
             self.db_connected = False
             
             # In case of database failure, we can still start but with limited functionality
@@ -138,8 +149,45 @@ class OntServeMCPServer:
             "message": "OntServe MCP server is running",
             "server_info": self.server_info,
             "database_connected": self.db_connected,
-            "domains_loaded": domain_count
+            "domains_loaded": domain_count,
+            "sparql_service": "available" if self.sparql_service else "unavailable"
         })
+
+    async def handle_sparql(self, request):
+        """SPARQL query endpoint."""
+        if not self.sparql_service:
+            return web.json_response({
+                "error": "SPARQL service not available"
+            }, status=503)
+        
+        try:
+            # Get query from request body
+            body = await request.json()
+            query = body.get('query')
+            
+            if not query:
+                return web.json_response({
+                    "error": "No SPARQL query provided"
+                }, status=400)
+            
+            # Execute query
+            results = self.sparql_service.execute_query(query)
+            
+            return web.json_response(results)
+            
+        except json.JSONDecodeError:
+            return web.json_response({
+                "error": "Invalid JSON in request body"
+            }, status=400)
+        except ValueError as ve:
+            return web.json_response({
+                "error": str(ve)
+            }, status=400)
+        except Exception as e:
+            logger.error(f"SPARQL endpoint error: {e}")
+            return web.json_response({
+                "error": "Internal server error"
+            }, status=500)
 
     async def handle_get_guidelines_compat(self, request):
         """ProEthica compatibility endpoint for guidelines."""
@@ -464,15 +512,38 @@ class OntServeMCPServer:
         
         logger.debug(f"Executing SPARQL query on domain {domain_id}: {query}")
         
-        # TODO: Replace with actual SPARQL execution
-        # For now, return mock result
-        return {
-            "bindings": [],
-            "query": query,
-            "domain_id": domain_id,
-            "execution_time_ms": 45,
-            "message": "SPARQL execution not implemented yet - returning mock data"
-        }
+        if not self.sparql_service:
+            return {
+                "error": "SPARQL service not available",
+                "query": query,
+                "domain_id": domain_id
+            }
+        
+        try:
+            import time
+            start_time = time.time()
+            
+            # Execute query using SPARQL service
+            results = self.sparql_service.execute_query(query)
+            
+            execution_time_ms = int((time.time() - start_time) * 1000)
+            
+            # Return results in MCP tool format
+            return {
+                "results": results.get("results", {}),
+                "query": query,
+                "domain_id": domain_id,
+                "execution_time_ms": execution_time_ms,
+                "message": "SPARQL query executed successfully"
+            }
+            
+        except Exception as e:
+            logger.error(f"SPARQL query execution failed: {e}")
+            return {
+                "error": str(e),
+                "query": query,
+                "domain_id": domain_id
+            }
 
     async def _handle_submit_candidate_concept(self, arguments):
         """Submit a candidate concept."""
@@ -575,6 +646,7 @@ class OntServeMCPServer:
         self.app.router.add_post('/', self.handle_jsonrpc)  # Root for MCP
         self.app.router.add_post('/jsonrpc', self.handle_jsonrpc)  # Standard JSON-RPC
         self.app.router.add_get('/health', self.handle_health)  # Health check
+        self.app.router.add_post('/sparql', self.handle_sparql)  # SPARQL query endpoint
         
         # ProEthica compatibility endpoints
         self.app.router.add_get('/api/guidelines/{domain}', self.handle_get_guidelines_compat)

@@ -11,6 +11,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 
 # Ontology Declaration
 <http://proethica.org/ontology/intermediate> a owl:Ontology ;
@@ -72,6 +73,8 @@ proeth:Role a owl:Class ;
     rdfs:subClassOf bfo:0000023 ;  # BFO:role
     rdfs:label "Professional Role"@en ;
     iao:0000115 "A role that inheres in a material entity and can be realized by processes involving professional duties and ethical obligations."@en ;
+    skos:definition "Professional roles that create distinctive ethical obligations tied to professional goals and practices. Professional roles generate peculiar moral demands and role-generated sensitivities that mark proper performance. They function as filters determining which obligations apply in specific contexts and enable navigation between personal moral standards and institutional obligations."@en ;
+    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3>, <https://doi.org/10.1007/s10676-015-9372-z> ;
     proeth:classificationGuidance "Model as class for role types (e.g., Engineer, Lawyer). Create individuals for specific role instances (e.g., senior_engineer_alice_123)."@en ;
     proeth:instanceExample "Individual: eng:alice_senior_engineer_role_2025 rdf:type proeth:ProfessionalEngineerRole"@en ;
     proeth:operationalizationNote "Use SHACL to enforce that role instances must have exactly one bearer agent."@en ;
@@ -248,7 +251,9 @@ proeth:AIAdvisor a owl:Class ;
 proeth:EthicsReviewerRole a owl:Class ;
     rdfs:subClassOf proeth:ProfessionalRole ;
     rdfs:label "Ethics Reviewer Role"@en ;
-    iao:0000115 "A professional role involving the review and evaluation of ethical decisions and conduct."@en .
+    iao:0000115 "A professional role involving the review and evaluation of ethical decisions and conduct."@en ;
+    skos:definition "Professional role responsible for systematic evaluation of ethical decisions and conduct within professional contexts. Functions as institutional filter for ethical compliance while maintaining independence from direct operational pressures. Creates obligations to apply consistent standards across cases while considering contextual factors."@en ;
+    dcterms:source <https://doi.org/10.1007/s10676-015-9372-z> .
 
 proeth:EthicalAnalysisCapability a owl:Class ;
     rdfs:subClassOf proeth:Capability ;
@@ -364,10 +369,7 @@ proeth:ProfessionalStandard a owl:Class ;
     rdfs:label "Professional Standard"@en ;
     iao:0000115 "An information content entity that specifies professional requirements, guidelines, or best practices for a domain."@en .
 
-proeth:Code a owl:Class ;
-    rdfs:subClassOf proeth:ProfessionalStandard ;
-    rdfs:label "Professional Code"@en ;
-    iao:0000115 "A formal code of ethics or conduct established by a professional organization."@en .
+# Consolidated into proeth:ProfessionalCode - this duplicate definition removed
 
 proeth:Regulation a owl:Class ;
     rdfs:subClassOf proeth:ProfessionalStandard ;
@@ -552,6 +554,8 @@ proeth:ProfessionalRole a owl:Class ;
                       owl:minCardinality "1"^^xsd:nonNegativeInteger ] ;
     rdfs:label "Professional Role"@en ;
     iao:0000115 "A professional role with formal obligations, accountability, and standards-based competency requirements."@en ;
+    skos:definition "Bridge class representing professional roles that encompass both identity roles (provider-client, professional peer, employer relationships) and identity virtues (integrity, responsibility, competence). Professional roles create context-specific filters that determine applicable obligations while maintaining accountability to both professional standards and broader moral values."@en ;
+    dcterms:source <https://doi.org/10.1093/acprof:oso/9780195146080.001.0001>, <https://doi.org/10.1007/s10676-021-09597-3> ;
     proeth:classificationGuidance "Bridge class between abstract Role and domain-specific roles like EngineeringRole, MedicalRole, LegalRole."@en .
 
 proeth:ProfessionalAgent a owl:Class ;
@@ -582,7 +586,7 @@ proeth:EthicalObligation a owl:Class ;
     rdfs:subClassOf proeth:Obligation ;
     rdfs:subClassOf [ a owl:Restriction ;
                       owl:onProperty proeth:hasAuthority ;
-                      owl:someValuesFrom proeth:Code ] ;
+                      owl:someValuesFrom proeth:ProfessionalCode ] ;
     rdfs:label "Ethical Obligation"@en ;
     iao:0000115 "A professional obligation derived from codes of ethics or professional conduct standards."@en ;
     proeth:classificationGuidance "Bridge class for obligations grounded in ethical codes (NSPE Code, Medical Ethics, etc.)."@en .
@@ -611,6 +615,8 @@ proeth:EngineeringRole a owl:Class ;
                       owl:someValuesFrom proeth:TechnicalCompetency ] ;
     rdfs:label "Engineering Role"@en ;
     iao:0000115 "A professional role in engineering practice, governed by NSPE Code of Ethics and technical standards."@en ;
+    skos:definition "Professional engineering role that creates distinctive obligations to hold paramount public safety, health, and welfare. Functions as ethical filter determining when safety obligations override client interests or employer directives. Encompasses provider-client relationships (engineer-client), professional peer relationships (engineer-engineer), employer relationships (engineer-employer), and public responsibility relationships (engineer-society)."@en ;
+    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3>, <https://doi.org/10.1093/acprof:oso/9780195146080.001.0001> ;
     proeth:standardsAuthority "NSPE Code of Ethics (2019), ISO 26000, IEEE Standards"@en ;
     rdfs:comment "Defined by NSPE Code, ISO 26000, ASCE Code, and domain-specific technical standards."@en .
 
@@ -618,6 +624,8 @@ proeth:StructuralEngineerRole a owl:Class ;
     rdfs:subClassOf proeth:EngineeringRole ;
     rdfs:label "Structural Engineer Role"@en ;
     iao:0000115 "Engineering role specializing in structural design and analysis with specific safety obligations."@en ;
+    skos:definition "Specialized engineering role with heightened public safety obligations due to direct impact on structural integrity affecting human life. Creates obligations for rigorous safety analysis, conservative design practices, and immediate reporting of safety risks. Functions as filter prioritizing structural safety over cost or schedule considerations."@en ;
+    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3> ;
     proeth:standardsAuthority "ASCE Code of Ethics, ACI Standards, AISC Specifications"@en .
 
 proeth:SoftwareEngineerRole a owl:Class ;
@@ -625,6 +633,35 @@ proeth:SoftwareEngineerRole a owl:Class ;
     rdfs:label "Software Engineer Role"@en ;
     iao:0000115 "Engineering role in software development with obligations for reliability, security, and user safety."@en ;
     proeth:standardsAuthority "ACM Code of Ethics, IEEE Software Engineering Standards"@en .
+
+# Professional Relationship Roles (from Chapter 2 - Kong et al. 2020)
+proeth:ProviderClientRole a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalRole ;
+    rdfs:label "Provider-Client Role"@en ;
+    iao:0000115 "A professional role defining the relationship between service providers and their clients."@en ;
+    skos:definition "Professional role that creates distinctive obligations in provider-client relationships. Establishes duties of competent service delivery, confidentiality, and client welfare while maintaining professional boundaries. Functions as ethical filter for managing conflicts between client desires and professional standards."@en ;
+    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3>, <https://doi.org/10.1093/acprof:oso/9780195146080.001.0001> .
+
+proeth:ProfessionalPeerRole a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalRole ;
+    rdfs:label "Professional Peer Role"@en ;
+    iao:0000115 "A professional role defining relationships between professional peers within the same field."@en ;
+    skos:definition "Professional role governing interactions between practitioners within the same professional domain. Creates obligations for peer review, professional development, knowledge sharing, and collective standard maintenance. Functions as filter for balancing individual professional interests with collective professional integrity."@en ;
+    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3> .
+
+proeth:EmployerRelationshipRole a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalRole ;
+    rdfs:label "Employer Relationship Role"@en ;
+    iao:0000115 "A professional role defining the relationship between professionals and their employing organizations."@en ;
+    skos:definition "Professional role that creates distinctive obligations in employer-employee relationships within professional contexts. Establishes duties of loyalty, competent performance, and honest reporting while maintaining professional independence when employer directives conflict with professional standards. Functions as ethical filter for managing institutional pressures against professional obligations."@en ;
+    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3>, <https://doi.org/10.1093/acprof:oso/9780195146080.001.0001> .
+
+proeth:PublicResponsibilityRole a owl:Class ;
+    rdfs:subClassOf proeth:ProfessionalRole ;
+    rdfs:label "Public Responsibility Role"@en ;
+    iao:0000115 "A professional role defining obligations to the broader public and society."@en ;
+    skos:definition "Professional role that creates distinctive obligations to protect and serve the public interest. Establishes duties that extend beyond immediate clients or employers to encompass societal welfare, environmental protection, and future generations. Functions as ethical filter that can override client or employer interests when public welfare is at stake."@en ;
+    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3> .
 
 # Biomedical Domain Classes  
 proeth:BiomedicalAgent a owl:Class ;
@@ -647,12 +684,12 @@ proeth:BiomedicalObligation a owl:Class ;
 ###############################################################
 
 proeth:MedicalEthicsCode a owl:Class ;
-    rdfs:subClassOf proeth:Code ;
+    rdfs:subClassOf proeth:ProfessionalCode ;
     rdfs:label "Medical Ethics Code"@en ;
     iao:0000115 "A formal code of ethics governing medical and biomedical practice."@en .
 
 proeth:EngineeringEthicsCode a owl:Class ;
-    rdfs:subClassOf proeth:Code ;
+    rdfs:subClassOf proeth:ProfessionalCode ;
     rdfs:label "Engineering Ethics Code"@en ;
     iao:0000115 "A formal code of ethics governing engineering practice."@en .
 
@@ -720,13 +757,46 @@ proeth:MaterialResource a owl:Class ;
     rdfs:subClassOf proeth:Resource ;
     rdfs:subClassOf bfo:0000040 ;  # BFO:material entity
     rdfs:label "Material Resource"@en ;
-    iao:0000115 "A physical resource used in professional activities."@en .
+    iao:0000115 "Physical assets, materials, equipment, or tangible resources that engineers must manage responsibly in professional practice."@en ;
+    skos:definition "Physical assets, materials, equipment, or tangible resources that engineers must manage responsibly in professional practice, including proper allocation, conservation, and stewardship. Material resources encompass both natural resources and manufactured goods under engineering control or influence."@en ;
+    dcterms:source <https://doi.org/10.1007/978-94-007-2150-9>, <https://doi.org/10.1007/s11948-015-9718-8> .
 
 proeth:InformationResource a owl:Class ;
     rdfs:subClassOf proeth:Resource ;
     rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
     rdfs:label "Information Resource"@en ;
-    iao:0000115 "An informational resource used in professional activities."@en .
+    iao:0000115 "Professional knowledge sources that provide precedential knowledge and expert interpretations for ethical decision-making."@en ;
+    skos:definition "Any source of data, knowledge, or expertise that engineers utilize to inform their professional decisions and practices, including technical literature, professional codes, case precedents, expert consultation, research findings, and documented experience. Information resources provide the precedential knowledge essential for extensional definition of ethical principles."@en ;
+    dcterms:source <https://doi.org/10.1016/j.artint.2003.06.003>, <https://doi.org/10.1007/s10676-021-09592-x> .
+
+# Specific Information Resource Types for Professional Knowledge Sources
+proeth:ProfessionalCode a owl:Class ;
+    rdfs:subClassOf proeth:InformationResource ;
+    rdfs:label "Professional Code"@en ;
+    iao:0000115 "Formal codified professional ethics standards that establish professional identity, create accountability mechanisms, and provide deliberation frameworks."@en ;
+    skos:definition "Formal codified professional ethics standards such as the NSPE Code of Ethics that serve multiple functions beyond rule specification: they establish professional identity, create accountability mechanisms, and provide deliberation frameworks. Professional codes function as distillations of collective experience and reflection that guide and justify professional actions."@en ;
+    dcterms:source <https://doi.org/10.1016/j.artint.2003.06.003>, <https://doi.org/10.1007/s10676-015-9372-z> .
+
+proeth:CasePrecedent a owl:Class ;
+    rdfs:subClassOf proeth:InformationResource ;
+    rdfs:label "Case Precedent"@en ;
+    iao:0000115 "Documented cases from professional ethics review boards or similar authorities that provide precedential knowledge for ethical decision-making."@en ;
+    skos:definition "Documented cases from professional ethics review boards such as the NSPE Board of Ethical Review that provide rich extensional representation through accumulated precedents. Case precedents demonstrate how abstract principles are interpreted in context of real case facts and provide analogical comparison for current ethical decisions."@en ;
+    dcterms:source <https://doi.org/10.1016/j.artint.2003.06.003>, <https://doi.org/10.1007/s10676-021-09592-x> .
+
+proeth:ExpertInterpretation a owl:Class ;
+    rdfs:subClassOf proeth:InformationResource ;
+    rdfs:label "Expert Interpretation"@en ;
+    iao:0000115 "Authoritative interpretations and guidance from professional experts, boards, or committees that provide context-specific ethical guidance."@en ;
+    skos:definition "Authoritative interpretations and guidance from professional experts, ethics committees, professional boards, or recognized authorities that provide context-specific ethical guidance. Expert interpretations bridge abstract principles to concrete application through systematic mediation of accumulated professional knowledge."@en ;
+    dcterms:source <https://doi.org/10.1016/j.artint.2003.06.003>, <https://doi.org/10.1007/s10676-021-09592-x> .
+
+proeth:TechnicalStandard a owl:Class ;
+    rdfs:subClassOf proeth:InformationResource ;
+    rdfs:label "Technical Standard"@en ;
+    iao:0000115 "Technical standards, specifications, and documented best practices that inform professional decision-making in domain-specific contexts."@en ;
+    skos:definition "Technical standards, specifications, and documented best practices such as IEEE standards, ASTM specifications, or ISO guidelines that inform professional decision-making. Technical standards provide domain-specific patterns extracted from professional practice and serve as authoritative sources for competent professional performance."@en ;
+    dcterms:source <https://doi.org/10.1007/s11948-015-9718-8>, <https://doi.org/10.1007/s10676-021-09592-x> .
 
 ###############################################################
 # Enhanced Object Properties
@@ -1010,7 +1080,7 @@ proeth:EthicalObligationConstraint a sh:NodeShape ;
     sh:targetClass proeth:EthicalObligation ;
     sh:property [
         sh:path proeth:hasAuthority ;
-        sh:class proeth:Code ;
+        sh:class proeth:ProfessionalCode ;
         sh:minCount 1 ;
         sh:message "Every ethical obligation must derive from at least one code of ethics."@en ;
     ] .
@@ -1121,7 +1191,7 @@ proeth:State owl:disjointWith proeth:Agent, proeth:Resource, proeth:Role, proeth
    owl:members ( proeth:Obligation proeth:Permission proeth:Prohibition ) .
 
 [] a owl:AllDisjointClasses ;
-   owl:members ( proeth:Code proeth:Regulation proeth:Guideline ) .
+   owl:members ( proeth:ProfessionalCode proeth:Regulation proeth:Guideline ) .
 
 [] a owl:AllDisjointClasses ;
    owl:members ( proeth:FundamentalPrinciple proeth:ProfessionalPrinciple ) .
