@@ -5,6 +5,7 @@
 @prefix ro: <http://purl.obolibrary.org/obo/RO_> .
 @prefix time: <http://www.w3.org/2006/time#> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -73,8 +74,12 @@ proeth:Role a owl:Class ;
     rdfs:subClassOf bfo:0000023 ;  # BFO:role
     rdfs:label "Professional Role"@en ;
     iao:0000115 "A role that inheres in a material entity and can be realized by processes involving professional duties and ethical obligations."@en ;
-    skos:definition "Professional roles that create distinctive ethical obligations tied to professional goals and practices. Professional roles generate peculiar moral demands and role-generated sensitivities that mark proper performance. They function as filters determining which obligations apply in specific contexts and enable navigation between personal moral standards and institutional obligations."@en ;
-    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3>, <https://doi.org/10.1007/s10676-015-9372-z> ;
+    skos:definition "Professional roles that create distinctive ethical obligations tied to professional goals and practices, generating peculiar moral demands and role-generated sensitivities that mark proper performance (Oakley & Cocking 2001). Roles function as filters determining which obligations apply in specific contexts (Dennis et al. 2016) and enable navigation between personal moral standards and institutional obligations through moral complexity (Wendel 2024)."@en ;
+    dcterms:source <https://doi.org/10.1093/acprof:oso/9780198686154.001.0001>, <https://doi.org/10.1007/s00146-015-0626-3>, <https://doi.org/10.1093/oso/9780197693544.001.0001>, <https://doi.org/10.1080/10508422.2020.1776635> ;
+    proeth:theoreticalGrounding "Role morality justifies behaviors within professional contexts that might be unacceptable in other settings, though roles must remain answerable to broader moral values (Oakley & Cocking 2001). The inescapable tension between ordinary human obligations and distinctive occupational duties creates moral complexity requiring continuous balancing (Wendel 2024)"@en ;
+    proeth:computationalApproach "Roles formalized as filters determining obligation applicability (Dennis et al. 2016), with both static elements (moral values, rules, principles) and dynamic elements (contextual behaviors, multi-agent interactions) required for computational representation (Cointe et al. 2016)"@en ;
+    proeth:normativeFunction "Roles are complex normative constructs shaping ethical obligations, not merely job descriptions. Identity virtues change in accordance with interactional roles, requiring representation of both structural aspects (client relationships) and normative content (integrity, responsibility) (Kong et al. 2020)"@en ;
+    proeth:spheresOfMorality "Distinct professional activities within single professions create different spheres of morality where moral obligations are specific to particular roles and ends of activities (Doernberg & Truog 2023)"@en ;
     proeth:classificationGuidance "Model as class for role types (e.g., Engineer, Lawyer). Create individuals for specific role instances (e.g., senior_engineer_alice_123)."@en ;
     proeth:instanceExample "Individual: eng:alice_senior_engineer_role_2025 rdf:type proeth:ProfessionalEngineerRole"@en ;
     proeth:operationalizationNote "Use SHACL to enforce that role instances must have exactly one bearer agent."@en ;
@@ -88,6 +93,11 @@ proeth:Principle a owl:Class ;
                       owl:someValuesFrom proeth:EthicalConduct ] ;
     rdfs:label "Ethical Principle"@en ;
     iao:0000115 "An information content entity that represents fundamental ethical values and guidelines for conduct."@en ;
+    skos:definition "Abstract ethical foundations that provide high-level guidance but require contextual interpretation and extensional definition through accumulated precedents to achieve concrete meaning. Principles function as mechanisms that mediate moral ideals into professional reality through context-sensitive application (Hallamaa & Kalliokoski 2022)."@en ;
+    dcterms:source <https://doi.org/10.1007/s00146-022-01454-7>, <https://doi.org/10.1080/08989621.2023.2271960>, <https://doi.org/10.1145/3236024.3236052> ;
+    proeth:theoreticalGrounding "Principles exhibit inherent vagueness requiring extensional definition (McLaren 2003), operate as constitutional-like foundations requiring interpretation (Taddeo et al. 2024), and can be learned from expert examples through inductive logic programming (Anderson & Anderson 2018)"@en ;
+    proeth:operationalizationApproach "Three-step operationalization: (1) identify abstraction levels for modeling, (2) interpret principles to extract specific requirements, (3) define criteria for context-specific balancing (Taddeo et al. 2024)"@en ;
+    proeth:extensionalGrounding "Principles achieve meaning through accumulated precedents rather than abstract theory, requiring case-based reasoning for concrete application (McLaren 2003, Prem 2023)"@en ;
     proeth:classificationGuidance "Model as class for principle types (e.g., IntegrityPrinciple). Create individuals for specific principle statements (e.g., nspe_integrity_principle_1)."@en ;
     proeth:instanceExample "Individual: eng:nspe_public_safety_principle rdf:type proeth:PublicSafetyPrinciple"@en ;
     proeth:operationalizationNote "Link principle individuals to specific text content and authoritative sources using IAO properties."@en ;
@@ -157,6 +167,12 @@ proeth:Resource a owl:Class ;
     rdfs:subClassOf bfo:0000004 ;  # BFO:independent continuant (CORRECTED from generic continuant)
     rdfs:label "Resource"@en ;
     iao:0000115 "An independent continuant entity that serves as input or reference for professional activities."@en ;
+    skos:definition "Professional knowledge sources that provide extensional grounding for abstract ethical principles through accumulated precedents, codes, and expert interpretations. Resources enable ethical expertise through similarity recognition between cases rather than universal rule application (Ashley & McLaren 1995), operating through both explicit codes and implicit patterns extracted from diverse case examples (Guarini 2006)."@en ;
+    dcterms:source <https://doi.org/10.1007/BF00709154>, <https://doi.org/10.1007/s11023-006-9032-4>, <https://doi.org/10.1145/581339.581366> ;
+    proeth:theoreticalGrounding "Professional ethical knowledge exists primarily in accumulated cases rather than explicit rules, requiring systems to learn from precedents and reason through analogical comparison (Ashley & McLaren 1995). Resources encompass both structured codes and emergent patterns from precedents (Guarini 2006)"@en ;
+    proeth:extensionalFunction "Resources provide concrete meaning to abstract principles through accumulated exemplars, enabling operationalization of professional ethical reasoning through precedent-based approaches rather than rule application"@en ;
+    proeth:knowledgeTypes "Hybrid representation encompassing explicit codes with hierarchical structure (Frankel 1989), implicit patterns from neural network classification (Guarini 2006), and complex normative constructs serving identity, accountability, and deliberation functions (Davis 1991)"@en ;
+    proeth:computationalRequirement "Systems must access and apply precedential knowledge through mechanisms for similarity recognition, pattern extraction, and structured code representation (Kong et al. 2020)"@en ;
     proeth:classificationGuidance "Model as class for resource types. Create individuals for specific resource instances."@en ;
     proeth:bfoAlignmentNote "CORRECTED: Aligned with BFO:IndependentContinuant (more specific than generic Continuant) as resources exist independently and can be referenced."@en .
 
@@ -293,16 +309,7 @@ proeth:EthicallyProhibitedAction a owl:Class ;
 # Enhanced Case Precedent Framework
 ###############################################################
 
-proeth:CasePrecedent a owl:Class ;
-    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
-    rdfs:subClassOf [ a owl:Restriction ;
-                      owl:onProperty proeth:hasLegalStanding ;
-                      owl:someValuesFrom proeth:LegalStanding ] ;
-    rdfs:subClassOf [ a owl:Restriction ;
-                      owl:onProperty proeth:applicableInJurisdiction ;
-                      owl:someValuesFrom proeth:Jurisdiction ] ;
-    rdfs:label "Case Precedent"@en ;
-    iao:0000115 "An information content entity documenting a previous professional decision with legal standing and jurisdictional scope."@en .
+# Note: CasePrecedent is defined under InformationResource section as a professional knowledge resource
 
 proeth:LegalStanding a owl:Class ;
     rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
@@ -388,17 +395,32 @@ proeth:Guideline a owl:Class ;
 proeth:FundamentalPrinciple a owl:Class ;
     rdfs:subClassOf proeth:Principle ;
     rdfs:label "Fundamental Principle"@en ;
-    iao:0000115 "A basic ethical principle that serves as a foundation for professional conduct across domains."@en .
+    iao:0000115 "A basic ethical principle that serves as a foundation for professional conduct across domains."@en ;
+    skos:definition "Core ethical values that possess constitutional-like character, requiring interpretation and balancing in specific contexts. These principles are foundational rather than offering detailed guidelines and must be operationalized through accumulated precedents (Taddeo et al. 2024)"@en ;
+    dcterms:source <https://doi.org/10.1080/08989621.2023.2271960> ;
+    proeth:extensionalNote "Cannot be understood through logical definition alone but requires examination of how they are applied across actual cases (McLaren 2003)"@en .
 
 proeth:ProfessionalPrinciple a owl:Class ;
     rdfs:subClassOf proeth:Principle ;
     rdfs:label "Professional Principle"@en ;
-    iao:0000115 "An ethical principle specific to professional practice and occupational roles."@en .
+    iao:0000115 "An ethical principle specific to professional practice and occupational roles."@en ;
+    skos:definition "Domain-specific ethical principles that emerge from professional practice and are validated through expert consensus. These principles require combination with domain-specific ethics as accepted by domain experts (Tolmeijer et al. 2021)"@en ;
+    dcterms:source <https://doi.org/10.1007/s11948-020-00182-9> ;
+    proeth:operationalizationNote "Professional principles are grounded in practical professional knowledge found in precedents and expert interpretations rather than abstract philosophical speculation"@en .
 
 proeth:AccountabilityPrinciple a owl:Class ;
     rdfs:subClassOf proeth:ProfessionalPrinciple ;
     rdfs:label "Accountability Principle"@en ;
     iao:0000115 "The principle that professionals must take responsibility for their decisions and actions."@en .
+
+proeth:PublicSafetyPrinciple a owl:Class ;
+    rdfs:subClassOf proeth:FundamentalPrinciple ;
+    rdfs:label "Public Safety Principle"@en ;
+    iao:0000115 "The principle that professionals must hold paramount the safety, health, and welfare of the public."@en ;
+    skos:definition "A paramount professional principle exemplifying the challenge of operationalizing abstract ethical guidance. The meaning of 'hold paramount' emerges only through examining application across hundreds of actual cases, as abstract specification proves insufficient (McLaren 2003, NSPE Code)"@en ;
+    dcterms:source <https://doi.org/10.1145/581339.581366> ;
+    proeth:extensionalDefinition "What it means to 'hold paramount' public welfare cannot be determined through intensional definition but requires examining how the NSPE Board applies this principle across actual engineering cases"@en ;
+    proeth:operationalizationChallenge "Demonstrates the methodological gap between abstract principles and concrete application, requiring nine operationalization techniques including principle instantiation and conflict resolution (McLaren 2003)"@en .
 
 proeth:TransparencyPrinciple a owl:Class ;
     rdfs:subClassOf proeth:ProfessionalPrinciple ;
@@ -456,8 +478,20 @@ proeth:Obligation a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ;
                       owl:onProperty proeth:appliesToRole ;
                       owl:someValuesFrom proeth:Role ] ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:derivedFromPrinciple ;
+                      owl:someValuesFrom proeth:Principle ] ;
     rdfs:label "Professional Obligation"@en ;
-    iao:0000115 "A deontic statement expressing required actions or behaviors."@en .
+    iao:0000115 "A deontic statement expressing required actions or behaviors derived from abstract principles."@en ;
+    skos:definition "Concrete professional requirements that emerge when abstract principles are applied to specific professional contexts. Obligations specify exact behavioral requirements including what should be done, when, by whom, and under what conditions (Dennis et al. 2016). They represent the transformation from abstract ethical guidance to enforceable requirements through extensional definition via precedents (McLaren 2003)."@en ;
+    dcterms:source <https://doi.org/10.1007/s00146-015-0626-3>, <https://doi.org/10.1145/581339.581366>, <https://doi.org/10.1145/3236024.3236052>, <https://doi.org/10.1007/s11036-020-01580-w> ;
+    proeth:transformationFromPrinciples "Principles like 'do no harm' require transformation into specific obligations such as 'obtain informed consent before medical procedures' to guide professional behavior (Benzmüller et al. 2020). This transformation requires extensional definitions that precedents provide"@en ;
+    proeth:temporalNature "Professional obligations often involve temporal sequences where earlier obligations create or modify later ones (Govindarajulu & Bringsjord 2017). Emergency conditions can temporarily suspend normal requirements, demonstrating contextual and temporal dependencies"@en ;
+    proeth:conflictResolution "Multiple obligations often conflict, requiring resolution beyond simple priority ordering (Scheutz & Malle 2014). MedEthEx represents obligations as tuples of integers (-2 to +2) indicating degrees of satisfaction/violation, enabling systematic comparison and resolution (Anderson et al. 2006)"@en ;
+    proeth:roleDependent "Obligations are filtered through professional roles, with the same action being obligatory in one role and forbidden in another (Doernberg & Truog 2023). Systems must track role-based obligation activation to prevent inappropriate requirement application"@en ;
+    proeth:defeasibleCharacteristics "Professional obligations exhibit defeasible characteristics with justified exceptions (Ganascia 2007, Dennis & del Olmo 2021). Rigid rule application can violate professional judgment, requiring distinction between strict and defeasible obligations"@en ;
+    proeth:complementsPrinciples "While principles provide abstract ethical guidance requiring extensional definition, obligations specify concrete requirements that professionals must satisfy in specific situations"@en ;
+    proeth:boundedByConstraints "Obligations operate within boundaries established by constraints, which set inviolable limits on acceptable professional actions"@en .
 
 proeth:ConditionalObligation a owl:Class ;
     rdfs:subClassOf proeth:Obligation ;
@@ -500,6 +534,22 @@ proeth:Prohibition a owl:Class ;
     rdfs:label "Prohibition"@en ;
     iao:0000115 "A deontic statement expressing forbidden actions or behaviors."@en .
 
+# Constraint - Professional Boundaries (NEW)
+proeth:Constraint a owl:Class ;
+    rdfs:subClassOf proeth:DeonticStatement ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty proeth:hasDefeasibilityCondition ;
+                      owl:someValuesFrom proeth:ExceptionCondition ] ;
+    rdfs:label "Professional Constraint"@en ;
+    iao:0000115 "A deontic statement establishing inviolable limits on acceptable professional actions, with potential for justified exceptions."@en ;
+    skos:definition "Professional boundaries that complement obligations by establishing broader limits on acceptable actions. Constraints are typically defeasible, tolerating justified exceptions where strict adherence would violate other duties (Ganascia 2007). They operate at a different level than obligations, establishing boundaries while obligations specify concrete requirements within those boundaries."@en ;
+    dcterms:source <https://doi.org/10.1007/978-3-540-75256-1_27>, <https://doi.org/10.1007/978-3-319-08108-3_4>, <https://doi.org/10.1007/s00146-015-0626-3> ;
+    proeth:theoreticalGrounding "Constraints establish broader boundaries while obligations specify concrete requirements. Most professional constraints are defeasible, requiring systems capable of handling exceptions while maintaining overall compliance (Ganascia 2007). Constraint conflicts are inherent features of professional ethics requiring systematic management rather than elimination (Dennis et al. 2016)"@en ;
+    proeth:formalRepresentation "Modal Argumentation Deontic Logic (MADL/SDL) captures normative structure of professional requirements (Furbach et al. 2014). Systems must handle dilemmas where all available actions violate some constraint, requiring selection of least unethical course (Dennis et al. 2016)"@en ;
+    proeth:enforcementMechanism "Ethical governor concept suppresses, restricts, or transforms unethical behavior to ensure actions fall within permissible boundaries (Arkin 2008). Requires both preventive and detective controls coupled with comprehensive explanation capabilities"@en ;
+    proeth:defeasibilityNature "Default rules with justified exceptions satisfy general rules prohibiting certain behaviors while recommending exceptions in particular situations where strict adherence would violate other duties (Ganascia 2007)"@en ;
+    proeth:complementsObligation "While obligations transform principles into concrete requirements, constraints establish the inviolable boundaries within which those obligations operate"@en .
+
 proeth:AbsoluteProhibition a owl:Class ;
     rdfs:subClassOf proeth:Prohibition ;
     rdfs:label "Absolute Prohibition"@en ;
@@ -528,6 +578,12 @@ proeth:ComplianceEvent a owl:Class ;
     rdfs:subClassOf proeth:Event ;
     rdfs:label "Compliance Event"@en ;
     iao:0000115 "An event demonstrating adherence to professional obligations or ethical standards."@en .
+
+proeth:ExceptionCondition a owl:Class ;
+    rdfs:subClassOf proeth:State ;
+    rdfs:label "Exception Condition"@en ;
+    iao:0000115 "A state that justifies exception to a constraint or obligation based on professional judgment."@en ;
+    skos:definition "Conditions under which strict adherence to a constraint would violate other professional duties, requiring justified exception based on professional judgment (Ganascia 2007)"@en .
 
 proeth:CompetencyAssessmentEvent a owl:Class ;
     rdfs:subClassOf proeth:Event ;
@@ -639,29 +695,37 @@ proeth:ProviderClientRole a owl:Class ;
     rdfs:subClassOf proeth:ProfessionalRole ;
     rdfs:label "Provider-Client Role"@en ;
     iao:0000115 "A professional role defining the relationship between service providers and their clients."@en ;
-    skos:definition "Professional role that creates distinctive obligations in provider-client relationships. Establishes duties of competent service delivery, confidentiality, and client welfare while maintaining professional boundaries. Functions as ethical filter for managing conflicts between client desires and professional standards."@en ;
-    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3>, <https://doi.org/10.1093/acprof:oso/9780195146080.001.0001> .
+    skos:definition "Professional role that creates distinctive obligations in provider-client relationships. Establishes duties of competent service delivery, confidentiality, and client welfare while maintaining professional boundaries (Kong et al. 2020). Exemplifies how role morality justifies behaviors like intimate questioning in counseling that would be unacceptable outside professional contexts (Oakley & Cocking 2001). Functions as ethical filter for managing conflicts between client desires and professional standards."@en ;
+    dcterms:source <https://doi.org/10.1080/10508422.2020.1776635>, <https://doi.org/10.1093/acprof:oso/9780198686154.001.0001> ;
+    proeth:obligationPattern "Duties of competence, confidentiality, and prioritizing client welfare within professional boundaries"@en ;
+    proeth:ethicalFilter "Mediates between client desires and professional standards, determining when client interests must yield to professional integrity or public safety"@en .
 
 proeth:ProfessionalPeerRole a owl:Class ;
     rdfs:subClassOf proeth:ProfessionalRole ;
     rdfs:label "Professional Peer Role"@en ;
     iao:0000115 "A professional role defining relationships between professional peers within the same field."@en ;
-    skos:definition "Professional role governing interactions between practitioners within the same professional domain. Creates obligations for peer review, professional development, knowledge sharing, and collective standard maintenance. Functions as filter for balancing individual professional interests with collective professional integrity."@en ;
-    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3> .
+    skos:definition "Professional role governing interactions between practitioners within the same professional domain. Creates obligations for peer review, professional development, knowledge sharing, and collective standard maintenance (Kong et al. 2020). Identity virtues change in accordance with these interactional roles, requiring both competence support and professional accountability (Cointe et al. 2016). Functions as filter for balancing individual professional interests with collective professional integrity."@en ;
+    dcterms:source <https://doi.org/10.1080/10508422.2020.1776635>, <https://doi.org/10.1007/s00146-015-0626-3> ;
+    proeth:obligationPattern "Mentoring duties, peer review responsibilities, knowledge sharing, maintaining professional standards collectively"@en ;
+    proeth:balancingFunction "Mediates between individual professional autonomy and collective professional integrity"@en .
 
 proeth:EmployerRelationshipRole a owl:Class ;
     rdfs:subClassOf proeth:ProfessionalRole ;
     rdfs:label "Employer Relationship Role"@en ;
     iao:0000115 "A professional role defining the relationship between professionals and their employing organizations."@en ;
-    skos:definition "Professional role that creates distinctive obligations in employer-employee relationships within professional contexts. Establishes duties of loyalty, competent performance, and honest reporting while maintaining professional independence when employer directives conflict with professional standards. Functions as ethical filter for managing institutional pressures against professional obligations."@en ;
-    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3>, <https://doi.org/10.1093/acprof:oso/9780195146080.001.0001> .
+    skos:definition "Professional role that creates distinctive obligations in employer-employee relationships within professional contexts. Establishes duties of loyalty, competent performance, and honest reporting while maintaining professional independence when employer directives conflict with professional standards (Kong et al. 2020). Functions as ethical filter for navigating the inescapable tension between institutional obligations and professional judgment (Wendel 2024)."@en ;
+    dcterms:source <https://doi.org/10.1080/10508422.2020.1776635>, <https://doi.org/10.1093/oso/9780197693544.001.0001> ;
+    proeth:tensionManagement "Navigates between organizational loyalty and professional independence when institutional pressures conflict with ethical standards"@en ;
+    proeth:obligationPattern "Loyalty to employer, performance of assigned duties, protection of proprietary information, while maintaining professional integrity"@en .
 
 proeth:PublicResponsibilityRole a owl:Class ;
     rdfs:subClassOf proeth:ProfessionalRole ;
     rdfs:label "Public Responsibility Role"@en ;
     iao:0000115 "A professional role defining obligations to the broader public and society."@en ;
-    skos:definition "Professional role that creates distinctive obligations to protect and serve the public interest. Establishes duties that extend beyond immediate clients or employers to encompass societal welfare, environmental protection, and future generations. Functions as ethical filter that can override client or employer interests when public welfare is at stake."@en ;
-    dcterms:source <https://doi.org/10.1007/s10676-021-09597-3> .
+    skos:definition "Professional role that creates distinctive obligations to protect and serve the public interest, exemplifying how roles must remain answerable to broader moral values (Oakley & Cocking 2001). Establishes duties extending beyond immediate clients or employers to encompass societal welfare, environmental protection, and future generations (Kong et al. 2020). Functions as ultimate ethical filter ensuring professional practice serves broader social good through spheres of morality specific to public responsibility (Doernberg & Truog 2023)."@en ;
+    dcterms:source <https://doi.org/10.1080/10508422.2020.1776635>, <https://doi.org/10.1093/acprof:oso/9780198686154.001.0001>, <https://doi.org/10.1001/ama.2023.25501> ;
+    proeth:overridingFunction "Supersedes client and employer interests when public safety, welfare, or environmental protection is at stake"@en ;
+    proeth:obligationPattern "Protection of public safety, environmental stewardship, consideration of future generations, whistleblowing when necessary"@en .
 
 # Biomedical Domain Classes  
 proeth:BiomedicalAgent a owl:Class ;
@@ -742,7 +806,10 @@ proeth:EngineeringSystem a owl:Class ;
 proeth:IntegrityPrinciple a owl:Class ;
     rdfs:subClassOf proeth:Principle ;
     rdfs:label "Integrity Principle"@en ;
-    iao:0000115 "A principle that guides honest and truthful professional conduct."@en .
+    iao:0000115 "A principle that guides honest and truthful professional conduct."@en ;
+    skos:definition "A fundamental professional value that requires contextual interpretation through case-based reasoning. Integrity manifests differently across professional contexts and must be understood through accumulated precedents demonstrating truthful and honest behavior (Kong et al. 2020)"@en ;
+    dcterms:source <https://doi.org/10.1080/10508422.2020.1776635> ;
+    proeth:contextSensitivity "The application of integrity varies by professional domain and situation, requiring extensional definition through paradigmatic cases"@en .
 
 proeth:PublicSafetyObligation a owl:Class ;
     rdfs:subClassOf proeth:Obligation ;
@@ -774,15 +841,20 @@ proeth:ProfessionalCode a owl:Class ;
     rdfs:subClassOf proeth:InformationResource ;
     rdfs:label "Professional Code"@en ;
     iao:0000115 "Formal codified professional ethics standards that establish professional identity, create accountability mechanisms, and provide deliberation frameworks."@en ;
-    skos:definition "Formal codified professional ethics standards such as the NSPE Code of Ethics that serve multiple functions beyond rule specification: they establish professional identity, create accountability mechanisms, and provide deliberation frameworks. Professional codes function as distillations of collective experience and reflection that guide and justify professional actions."@en ;
-    dcterms:source <https://doi.org/10.1016/j.artint.2003.06.003>, <https://doi.org/10.1007/s10676-015-9372-z> .
+    skos:definition "Complex knowledge resources serving multiple functions beyond rule specification: establishing professional identity, creating accountability mechanisms, and providing deliberation frameworks (Davis 1991). Professional codes exhibit hierarchical structure from aspirational principles to detailed regulatory procedures (Frankel 1989), with implicit patterns and dynamic relationships between identity roles and virtues revealed through computational analysis (Kong et al. 2020)."@en ;
+    dcterms:source <https://doi.org/10.1111/j.1468-0378.1991.tb00290.x>, <https://doi.org/10.1177/027046768900900109>, <https://doi.org/10.1080/10508422.2020.1776635> ;
+    proeth:multifacetedFunction "Codes structure choices and provide standards of professional conduct that shape the practice of professions, operating as comprehensive resources for professional reasoning rather than simple rule lists (Davis 1991)"@en ;
+    proeth:hierarchicalStructure "Ranges from aspirational principles to detailed regulatory procedures, reflecting different levels of ethical guidance from abstract ideals to concrete requirements (Frankel 1989)"@en .
 
 proeth:CasePrecedent a owl:Class ;
     rdfs:subClassOf proeth:InformationResource ;
     rdfs:label "Case Precedent"@en ;
     iao:0000115 "Documented cases from professional ethics review boards or similar authorities that provide precedential knowledge for ethical decision-making."@en ;
-    skos:definition "Documented cases from professional ethics review boards such as the NSPE Board of Ethical Review that provide rich extensional representation through accumulated precedents. Case precedents demonstrate how abstract principles are interpreted in context of real case facts and provide analogical comparison for current ethical decisions."@en ;
-    dcterms:source <https://doi.org/10.1016/j.artint.2003.06.003>, <https://doi.org/10.1007/s10676-021-09592-x> .
+    skos:definition "Documented cases demonstrating that ethical expertise depends on similarity recognition between cases rather than universal rule application (Ashley & McLaren 1995). Professional ethical knowledge exists primarily in accumulated cases, requiring systems to learn from precedents and reason through analogical comparison. Case precedents provide rich extensional representation showing how abstract principles are interpreted in context of real case facts."@en ;
+    dcterms:source <https://doi.org/10.1007/BF00709154>, <https://doi.org/10.1145/581339.581366> ;
+    proeth:epistemologicalRole "Establishes that professional ethical knowledge exists primarily in accumulated cases rather than explicit rules, firmly establishing case-based knowledge as essential for operationalizing professional ethical reasoning (Ashley & McLaren 1995)"@en ;
+    proeth:computationalMechanism "Requires mechanisms for similarity recognition and analogical comparison rather than rule application, enabling computational systems to access and apply precedential knowledge"@en ;
+    rdfs:comment "Case precedents may have legal standing and jurisdictional scope when derived from formal review boards, but also include informal precedents from professional practice"@en .
 
 proeth:ExpertInterpretation a owl:Class ;
     rdfs:subClassOf proeth:InformationResource ;
@@ -795,8 +867,10 @@ proeth:TechnicalStandard a owl:Class ;
     rdfs:subClassOf proeth:InformationResource ;
     rdfs:label "Technical Standard"@en ;
     iao:0000115 "Technical standards, specifications, and documented best practices that inform professional decision-making in domain-specific contexts."@en ;
-    skos:definition "Technical standards, specifications, and documented best practices such as IEEE standards, ASTM specifications, or ISO guidelines that inform professional decision-making. Technical standards provide domain-specific patterns extracted from professional practice and serve as authoritative sources for competent professional performance."@en ;
-    dcterms:source <https://doi.org/10.1007/s11948-015-9718-8>, <https://doi.org/10.1007/s10676-021-09592-x> .
+    skos:definition "Technical standards and specifications representing implicit ethical patterns extracted from professional practice. These resources demonstrate that professional ethics operates through pattern recognition in accumulated data (Guarini 2006), complementing explicit rule-based approaches. Technical standards serve as hybrid representations capturing both structured specifications and emergent patterns from professional practice."@en ;
+    dcterms:source <https://doi.org/10.1007/s11023-006-9032-4>, <https://doi.org/10.1080/10508422.2020.1776635> ;
+    proeth:patternBasedApproach "Professional ethics often operates through pattern recognition in accumulated technical practice, with standards encoding implicit ethical patterns that can be extracted through neural network classification without explicit rules (Guarini 2006)"@en ;
+    proeth:hybridRepresentation "Technical standards require representation methods capturing both structured codes and emergent patterns from precedents, supporting the view that resources must encompass explicit specifications and implicit patterns from diverse examples"@en .
 
 ###############################################################
 # Enhanced Object Properties
@@ -900,6 +974,32 @@ proeth:adheresToPrinciple a owl:ObjectProperty ;
     rdfs:range proeth:Principle ;
     rdfs:label "adheres to principle"@en ;
     iao:0000115 "Relates a role to ethical principles that normatively govern that role."@en .
+
+# New properties for P-O-Cs relationships
+proeth:derivedFromPrinciple a owl:ObjectProperty ;
+    rdfs:subPropertyOf prov:wasDerivedFrom ;
+    rdfs:domain proeth:Obligation ;
+    rdfs:range proeth:Principle ;
+    rdfs:label "derived from principle"@en ;
+    iao:0000115 "Relates an obligation to the abstract principle from which it was derived through extensional definition."@en .
+
+proeth:boundedByConstraint a owl:ObjectProperty ;
+    rdfs:domain proeth:Obligation ;
+    rdfs:range proeth:Constraint ;
+    rdfs:label "bounded by constraint"@en ;
+    iao:0000115 "Relates an obligation to constraints that establish its operational boundaries."@en .
+
+proeth:operationalizesPrinciple a owl:ObjectProperty ;
+    rdfs:domain proeth:Constraint ;
+    rdfs:range proeth:Principle ;
+    rdfs:label "operationalizes principle"@en ;
+    iao:0000115 "Relates a constraint to principles it helps operationalize by establishing boundaries."@en .
+
+proeth:hasDefeasibilityCondition a owl:ObjectProperty ;
+    rdfs:domain proeth:Constraint ;
+    rdfs:range proeth:ExceptionCondition ;
+    rdfs:label "has defeasibility condition"@en ;
+    iao:0000115 "Relates a constraint to conditions under which justified exceptions may apply."@en .
 
 proeth:constrains a owl:ObjectProperty ;
     rdfs:domain proeth:DeonticStatement ;
