@@ -56,8 +56,8 @@ class Config:
     EMBEDDING_DIMENSION = 384  # Using sentence-transformers/all-MiniLM-L6-v2
     
     # OntServe integration
-    ONTSERVE_STORAGE_DIR = str(basedir.parent / 'storage')
-    ONTSERVE_CACHE_DIR = str(basedir.parent / 'storage' / 'cache' / 'downloads')
+    ONTSERVE_STORAGE_DIR = os.environ.get('ONTSERVE_STORAGE_DIR') or str(basedir.parent / 'storage')
+    ONTSERVE_CACHE_DIR = os.environ.get('ONTSERVE_CACHE_DIR') or str(basedir.parent / 'storage' / 'cache' / 'downloads')
     
     # Ontology URI settings
     ONTOLOGY_BASE_URI = os.environ.get('ONTOLOGY_BASE_URI') or 'https://ontserve.ontorealm.net/'

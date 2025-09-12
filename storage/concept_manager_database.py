@@ -107,7 +107,7 @@ class DatabaseConceptManager:
                 entities.append(entity)
             
             # If we found the main category class, also get its subclasses
-            if entities and category in ['Role', 'Principle', 'Obligation', 'Resource']:
+            if entities and category in ['Role', 'Principle', 'Obligation', 'Resource', 'State']:
                 subclasses = self._get_subclasses_for_category(category, ontology_names)
                 entities.extend(subclasses)
             
@@ -216,13 +216,20 @@ class DatabaseConceptManager:
             'Role': ['ProfessionalRole', 'ParticipantRole', 'EngineeringRole', 'StakeholderRole',
                     'ProfessionalEngineer', 'ClientRole', 'EmployerRole', 'PublicRole',
                     'EthicsReviewerRole', 'StructuralEngineerRole', 'SoftwareEngineerRole',
-                    'ProviderClientRole', 'ProfessionalPeerRole', 'EmployerRelationshipRole', 'PublicResponsibilityRole'],
-            'Principle': ['PublicSafety', 'Sustainability', 'Honesty', 'Integrity',
-                         'PublicSafetyPrinciple', 'SustainabilityPrinciple'],
+                    'ProviderClientRole', 'ProfessionalPeerRole', 'EmployerRelationshipRole', 'PublicResponsibilityRole',
+                    'Provider-Client Role', 'Professional Peer Role', 'Employer Relationship Role', 'Public Responsibility Role'],
+            'Principle': ['FundamentalEthicalPrinciple', 'ProfessionalVirtuePrinciple', 'RelationalPrinciple', 'DomainSpecificPrinciple', 'PublicWelfarePrinciple', 'IntegrityPrinciple', 'CompetencePrinciple', 'ConfidentialityPrinciple', 'TransparencyPrinciple', 'EnvironmentalStewardshipPrinciple'],
             'Obligation': ['ProfessionalObligation', 'ReportingObligation', 'CompetenceObligation',
                           'TechnicalCompetenceObligation', 'ConflictOfInterestObligation'],
-            'Resource': ['Professional Code', 'Expert Interpretation', 'Case Precedent', 
-                        'Technical Standard']
+            'Resource': ['ProfessionalCode', 'Professional Code', 'CasePrecedent', 'Case Precedent',
+                        'ExpertInterpretation', 'Expert Interpretation', 'TechnicalStandard', 'Technical Standard',
+                        'LegalResource', 'Legal Resource', 'DecisionTool', 'Decision Tool', 
+                        'ReferenceMaterial', 'Reference Material', 'NSPECodeOfEthics', 'NSPE Code of Ethics',
+                        'Standard', 'Measurement', 'Justification'],
+            'State': ['ConflictOfInterest', 'CompetingDuties', 'PublicSafetyAtRisk', 'EnvironmentalHazard',
+                     'OutsideCompetence', 'QualifiedToPerform', 'ClientRelationship', 'EmploymentTerminated',
+                     'ConfidentialInformation', 'PublicInformation', 'EmergencySituation', 'CrisisConditions',
+                     'RegulatoryCompliance', 'NonCompliant', 'JudgmentOverruled', 'UnderReview', 'DecisionPending']
         }
         
         if category not in subclass_mappings:
