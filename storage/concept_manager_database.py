@@ -47,68 +47,154 @@ class DatabaseConceptManager:
                 logger.warning(f"No ontologies found for domain: {domain_id}")
                 return self._empty_response(category, domain_id, status)
             
-            # Query ontology_entities for classes matching the category
-            # The category matches the label (e.g., "Role", "Principle", etc.)
-            query = """
-                SELECT e.uri, e.label, e.comment, o.name as ontology_name,
-                    CASE 
-                        WHEN e.label = %s THEN 0  -- Exact match first
-                        WHEN e.label ILIKE %s THEN 1  -- Contains category
-                        ELSE 2
-                    END as sort_order
-                FROM ontology_entities e
-                JOIN ontologies o ON e.ontology_id = o.id
-                WHERE o.name = ANY(%s)
-                AND e.entity_type = 'class'
-                AND (
-                    e.label ILIKE %s
-                    OR e.uri ILIKE %s
-                    OR e.comment ILIKE %s
+            # Use proper ontological hierarchy via parent_uri relationships
+            # This is semantically correct and uses actual subClassOf relationships
+            if category in ['Principle', 'Role', 'State', 'Resource', 'Obligation', 
+                          'Action', 'Event', 'Capability', 'Constraint']:
+                
+                # First, find the base class URI for this category
+                base_uri_query = """
+                    SELECT DISTINCT uri 
+                    FROM ontology_entities 
+                    WHERE label = %s 
+                    AND entity_type = 'class'
+                    AND ontology_id IN (
+                        SELECT id FROM ontologies WHERE name = ANY(%s)
+                    )
+                    ORDER BY uri
+                    LIMIT 1
+                """
+                
+                base_uri_result = self.storage._execute_query(
+                    base_uri_query,
+                    (category, ontology_names),
+                    fetch_one=True
                 )
-                ORDER BY sort_order, e.label
-            """
-            
-            # Create search patterns
-            exact_category = category
-            category_pattern = f'%{category}%'
-            category_uri_pattern = f'%#{category}%'
-            
-            results = self.storage._execute_query(
-                query,
-                (exact_category, category_pattern, ontology_names, 
-                 exact_category, category_uri_pattern, category_pattern),
-                fetch_all=True
-            )
+                
+                if base_uri_result and base_uri_result['uri']:
+                    base_uri = base_uri_result['uri']
+                    
+                    # Use recursive CTE to get all subclasses via parent_uri
+                    query = """
+                        WITH RECURSIVE category_hierarchy AS (
+                            -- Base case: Get the category class itself
+                            SELECT e.uri, e.label, e.comment, e.parent_uri, 
+                                   o.name as ontology_name, o.id as ontology_id,
+                                   0 as hierarchy_level
+                            FROM ontology_entities e
+                            JOIN ontologies o ON e.ontology_id = o.id
+                            WHERE e.uri = %s
+                            AND e.entity_type = 'class'
+                            
+                            UNION
+                            
+                            -- Recursive case: Get all subclasses
+                            SELECT e.uri, e.label, e.comment, e.parent_uri,
+                                   o.name as ontology_name, o.id as ontology_id,
+                                   ch.hierarchy_level + 1
+                            FROM ontology_entities e
+                            JOIN ontologies o ON e.ontology_id = o.id
+                            INNER JOIN category_hierarchy ch ON e.parent_uri = ch.uri
+                            WHERE e.entity_type = 'class'
+                            AND o.name = ANY(%s)
+                        )
+                        SELECT DISTINCT uri, label, comment, ontology_name, 
+                               hierarchy_level as sort_order, ontology_id
+                        FROM category_hierarchy
+                        ORDER BY hierarchy_level, label
+                    """
+                    
+                    results = self.storage._execute_query(
+                        query,
+                        (base_uri, ontology_names),
+                        fetch_all=True
+                    )
+                else:
+                    # Fallback to label matching if no base URI found
+                    logger.warning(f"No base URI found for category {category}, using label matching")
+                    query = """
+                        SELECT DISTINCT e.uri, e.label, e.comment, o.name as ontology_name,
+                            0 as sort_order, o.id as ontology_id
+                        FROM ontology_entities e
+                        JOIN ontologies o ON e.ontology_id = o.id
+                        WHERE o.name = ANY(%s)
+                        AND e.entity_type = 'class'
+                        AND e.label = %s
+                        ORDER BY e.label
+                    """
+                    
+                    results = self.storage._execute_query(
+                        query,
+                        (ontology_names, category),
+                        fetch_all=True
+                    )
+            else:
+                # Broader matching for other categories
+                query = """
+                    SELECT e.uri, e.label, e.comment, o.name as ontology_name,
+                        CASE 
+                            WHEN e.label = %s THEN 0  -- Exact match first
+                            WHEN e.label ILIKE %s THEN 1  -- Contains category
+                            ELSE 2
+                        END as sort_order,
+                        o.id as ontology_id
+                    FROM ontology_entities e
+                    JOIN ontologies o ON e.ontology_id = o.id
+                    WHERE o.name = ANY(%s)
+                    AND e.entity_type = 'class'
+                    AND (
+                        e.label ILIKE %s
+                        OR e.uri ILIKE %s
+                    )
+                    ORDER BY sort_order, e.label
+                """
+                
+                # Create search patterns
+                exact_category = category
+                category_pattern = f'%{category}%'
+                category_uri_pattern = f'%#{category}%'
+                
+                results = self.storage._execute_query(
+                    query,
+                    (exact_category, category_pattern, ontology_names, 
+                     category_pattern, category_uri_pattern),
+                    fetch_all=True
+                )
             
             if not results:
                 # Try to get the core category definitions from proethica-core
                 logger.info(f"No specific {category} classes found, checking proethica-core")
                 results = self._get_core_category_class(category)
             
-            # Format results
+            # Format results and track URIs to avoid duplicates
             entities = []
+            seen_uris = set()
+            
             for row in results:
-                entity = {
-                    'id': row['uri'],
-                    'uri': row['uri'],
-                    'label': row['label'],
-                    'semantic_label': row['label'],
-                    'description': row['comment'] or f"A {category} in the {domain_id} domain",
-                    'category': category,
-                    'confidence_score': 1.0,  # Ontology classes have full confidence
-                    'entity_type': 'class',
-                    'source': row.get('ontology_name', 'proethica-core'),
-                    'metadata': {
-                        'source': 'ontology',
-                        'ontology': row.get('ontology_name', 'proethica-core'),
-                        'from_database': True
+                if row['uri'] not in seen_uris:
+                    seen_uris.add(row['uri'])
+                    entity = {
+                        'id': row['uri'],
+                        'uri': row['uri'],
+                        'label': row['label'],
+                        'semantic_label': row['label'],
+                        'description': row['comment'] or f"A {category} in the {domain_id} domain",
+                        'category': category,
+                        'confidence_score': 1.0,  # Ontology classes have full confidence
+                        'entity_type': 'class',
+                        'source': row.get('ontology_name', 'proethica-core'),
+                        'metadata': {
+                            'source': 'ontology',
+                            'ontology': row.get('ontology_name', 'proethica-core'),
+                            'from_database': True
+                        }
                     }
-                }
-                entities.append(entity)
+                    entities.append(entity)
             
             # If we found the main category class, also get its subclasses
+            # Pass seen_uris to avoid duplicates
             if entities and category in ['Role', 'Principle', 'Obligation', 'Resource', 'State']:
-                subclasses = self._get_subclasses_for_category(category, ontology_names)
+                subclasses = self._get_subclasses_for_category(category, ontology_names, seen_uris)
                 entities.extend(subclasses)
             
             return {
@@ -198,83 +284,74 @@ class DatabaseConceptManager:
             logger.error(f"Error getting core category class: {e}")
             return []
     
-    def _get_subclasses_for_category(self, category: str, ontology_names: List[str]) -> List[Dict[str, Any]]:
+    def _get_subclasses_for_category(self, category: str, ontology_names: List[str], seen_uris: set = None) -> List[Dict[str, Any]]:
         """
         Get subclasses of a category (e.g., ProfessionalRole as subclass of Role).
         
         Args:
             category: Category name
             ontology_names: List of ontology names to search
+            seen_uris: Set of URIs already seen (to avoid duplicates)
             
         Returns:
             List of subclass entities
         """
         subclasses = []
-        
-        # Define known subclasses for each category
-        subclass_mappings = {
-            'Role': ['ProfessionalRole', 'ParticipantRole', 'EngineeringRole', 'StakeholderRole',
-                    'ProfessionalEngineer', 'ClientRole', 'EmployerRole', 'PublicRole',
-                    'EthicsReviewerRole', 'StructuralEngineerRole', 'SoftwareEngineerRole',
-                    'ProviderClientRole', 'ProfessionalPeerRole', 'EmployerRelationshipRole', 'PublicResponsibilityRole',
-                    'Provider-Client Role', 'Professional Peer Role', 'Employer Relationship Role', 'Public Responsibility Role'],
-            'Principle': ['FundamentalEthicalPrinciple', 'ProfessionalVirtuePrinciple', 'RelationalPrinciple', 'DomainSpecificPrinciple', 'PublicWelfarePrinciple', 'IntegrityPrinciple', 'CompetencePrinciple', 'ConfidentialityPrinciple', 'TransparencyPrinciple', 'EnvironmentalStewardshipPrinciple'],
-            'Obligation': ['ProfessionalObligation', 'ReportingObligation', 'CompetenceObligation',
-                          'TechnicalCompetenceObligation', 'ConflictOfInterestObligation'],
-            'Resource': ['ProfessionalCode', 'Professional Code', 'CasePrecedent', 'Case Precedent',
-                        'ExpertInterpretation', 'Expert Interpretation', 'TechnicalStandard', 'Technical Standard',
-                        'LegalResource', 'Legal Resource', 'DecisionTool', 'Decision Tool', 
-                        'ReferenceMaterial', 'Reference Material', 'NSPECodeOfEthics', 'NSPE Code of Ethics',
-                        'Standard', 'Measurement', 'Justification'],
-            'State': ['ConflictOfInterest', 'CompetingDuties', 'PublicSafetyAtRisk', 'EnvironmentalHazard',
-                     'OutsideCompetence', 'QualifiedToPerform', 'ClientRelationship', 'EmploymentTerminated',
-                     'ConfidentialInformation', 'PublicInformation', 'EmergencySituation', 'CrisisConditions',
-                     'RegulatoryCompliance', 'NonCompliant', 'JudgmentOverruled', 'UnderReview', 'DecisionPending']
-        }
-        
-        if category not in subclass_mappings:
-            return subclasses
+        if seen_uris is None:
+            seen_uris = set()  # Track URIs to avoid duplicates
         
         try:
-            # Query for known subclasses
-            for subclass_name in subclass_mappings[category]:
-                query = """
-                    SELECT e.uri, e.label, e.comment, o.name as ontology_name
-                    FROM ontology_entities e
-                    JOIN ontologies o ON e.ontology_id = o.id
-                    WHERE o.name = ANY(%s)
-                    AND e.entity_type = 'class'
-                    AND (e.label ILIKE %s OR e.uri ILIKE %s)
-                    LIMIT 1
-                """
-                
-                result = self.storage._execute_query(
-                    query,
-                    (ontology_names, f'%{subclass_name}%', f'%{subclass_name}%'),
-                    fetch_one=True
+            # Query for all subclasses in one go to avoid duplicates
+            query = """
+                SELECT DISTINCT e.uri, e.label, e.comment, o.name as ontology_name
+                FROM ontology_entities e
+                JOIN ontologies o ON e.ontology_id = o.id
+                WHERE o.name = ANY(%s)
+                AND e.entity_type = 'class'
+                AND e.label != %s  -- Exclude the main category itself
+                AND (
+                    e.label ILIKE %s  -- Match Role in label
+                    OR e.uri ILIKE %s  -- Match Role in URI
                 )
+                ORDER BY e.label
+            """
+            
+            # Create search patterns for the category
+            category_pattern = f'%{category}%'
+            
+            results = self.storage._execute_query(
+                query,
+                (ontology_names, category, category_pattern, category_pattern),
+                fetch_all=True
+            )
+            
+            for result in results:
+                # Skip if we've already seen this URI
+                if result['uri'] in seen_uris:
+                    continue
+                    
+                seen_uris.add(result['uri'])
                 
-                if result:
-                    entity = {
-                        'id': result['uri'],
-                        'uri': result['uri'],
-                        'label': result['label'],
-                        'semantic_label': result['label'],
-                        'description': result['comment'] or f"A subclass of {category}",
-                        'category': category,
-                        'confidence_score': 1.0,
-                        'entity_type': 'class',
-                        'source': result['ontology_name'],
-                        'is_subclass': True,
-                        'parent_class': category,
-                        'metadata': {
-                            'source': 'ontology',
-                            'ontology': result['ontology_name'],
-                            'from_database': True,
-                            'is_subclass_of': category
-                        }
+                entity = {
+                    'id': result['uri'],
+                    'uri': result['uri'],
+                    'label': result['label'],
+                    'semantic_label': result['label'],
+                    'description': result['comment'] or f"A subclass of {category}",
+                    'category': category,
+                    'confidence_score': 1.0,
+                    'entity_type': 'class',
+                    'source': result['ontology_name'],
+                    'is_subclass': True,
+                    'parent_class': category,
+                    'metadata': {
+                        'source': 'ontology',
+                        'ontology': result['ontology_name'],
+                        'from_database': True,
+                        'is_subclass_of': category
                     }
-                    subclasses.append(entity)
+                }
+                subclasses.append(entity)
             
         except Exception as e:
             logger.error(f"Error getting subclasses: {e}")

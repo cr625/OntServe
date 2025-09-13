@@ -1,0 +1,111 @@
+# Constraint Subclasses to add to proethica-intermediate.ttl
+# Based on Chapter 2.2.9 Literature
+
+#################################################################
+# Constraint Categories from Chapter 2.2.9 Literature
+# Based on Ganascia (2007), Dennis et al. (2016), Taddeo et al. (2024)
+#################################################################
+
+# The base Constraint class is already in proethica-core.ttl
+# These subclasses should be added to proethica-intermediate.ttl
+
+# Boundary Type Constraints
+proeth:LegalConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Legal Constraint"@en ;
+    rdfs:comment "Constraints arising from legal requirements and statutes that establish inviolable boundaries (Kroll 2020, Stenseke 2024)"@en ;
+    dcterms:references <https://doi.org/10.1007/s00146-020-00965-5> . # Kroll 2020
+
+proeth:RegulatoryConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Regulatory Constraint"@en ;
+    rdfs:comment "Constraints from regulatory bodies and professional standards organizations (Taddeo et al. 2024)"@en ;
+    dcterms:references <https://doi.org/10.1007/s00146-024-01870-x> . # Taddeo et al. 2024
+
+proeth:ResourceConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Resource Constraint"@en ;
+    rdfs:comment "Limitations on available time, budget, materials, or human resources (Ganascia 2007)"@en ;
+    dcterms:references <https://doi.org/10.1007/s11023-007-9079-x> . # Ganascia 2007
+
+proeth:CompetenceConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Competence Constraint"@en ;
+    rdfs:comment "Boundaries defined by agent capabilities and technical limitations (Hallamaa & Kalliokoski 2022)"@en ;
+    dcterms:references <https://doi.org/10.1080/08989621.2022.2054267> . # Hallamaa & Kalliokoski 2022
+
+proeth:JurisdictionalConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Jurisdictional Constraint"@en ;
+    rdfs:comment "Boundaries of authority and geographical or organizational scope (Dennis et al. 2016)"@en ;
+    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+
+proeth:ProceduralConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Procedural Constraint"@en ;
+    rdfs:comment "Requirements for following specific processes or protocols (Furbach et al. 2014)"@en ;
+    dcterms:references <https://doi.org/10.1007/s13218-014-0309-0> . # Furbach et al. 2014
+
+# Defeasibility Type Constraints
+proeth:DefeasibleConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Defeasible Constraint"@en ;
+    rdfs:comment "Constraints that admit justified exceptions under specified conditions (Ganascia 2007)"@en ;
+    dcterms:references <https://doi.org/10.1007/s11023-007-9079-x> . # Ganascia 2007
+
+proeth:InviolableConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Inviolable Constraint"@en ;
+    rdfs:comment "Absolute constraints that cannot be overridden under any circumstances (Dennis et al. 2016)"@en ;
+    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+
+# Ethical Boundary Type Constraints
+proeth:EthicalConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Ethical Constraint"@en ;
+    rdfs:comment "Professional ethical boundaries beyond legal requirements (Benzmüller et al. 2020)"@en ;
+    dcterms:references <https://doi.org/10.1007/s10817-018-9507-z> . # Benzmüller et al. 2020
+
+proeth:SafetyConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Safety Constraint"@en ;
+    rdfs:comment "Constraints ensuring safety requirements are met (Arkin 2008)"@en ;
+    dcterms:references <https://doi.org/10.1109/MIS.2008.100> . # Arkin 2008
+
+proeth:ConfidentialityConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Confidentiality Constraint"@en ;
+    rdfs:comment "Boundaries on information disclosure and privacy (Dennis et al. 2016)"@en ;
+    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+
+# Temporal and Priority Type Constraints
+proeth:TemporalConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Temporal Constraint"@en ;
+    rdfs:comment "Time-based limitations and deadlines (Govindarajulu & Bringsjord 2017)"@en ;
+    dcterms:references <https://doi.org/10.1609/aimag.v38i2.2743> . # Govindarajulu & Bringsjord 2017
+
+proeth:PriorityConstraint a owl:Class ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:label "Priority Constraint"@en ;
+    rdfs:comment "Constraints establishing precedence when multiple requirements conflict (Scheutz & Malle 2014)"@en ;
+    dcterms:references <https://doi.org/10.1075/is.15.2.05sch> . # Scheutz & Malle 2014
+
+# Constraint properties for relationships
+proeth:hasConstraintType a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Constraint ;
+    rdfs:range xsd:string ;
+    rdfs:label "has constraint type"@en ;
+    rdfs:comment "Specifies the type of constraint (legal, regulatory, resource, etc.)"@en .
+
+proeth:constrainsAction a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Constraint ;
+    rdfs:range proeth-core:Action ;
+    rdfs:label "constrains action"@en ;
+    rdfs:comment "Links constraint to actions it limits or prohibits"@en .
+
+proeth:conflictsWithObligation a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Constraint ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "conflicts with obligation"@en ;
+    rdfs:comment "Indicates when a constraint creates tension with an obligation"@en .
