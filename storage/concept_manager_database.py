@@ -96,7 +96,6 @@ class DatabaseConceptManager:
                             JOIN ontologies o ON e.ontology_id = o.id
                             INNER JOIN category_hierarchy ch ON e.parent_uri = ch.uri
                             WHERE e.entity_type = 'class'
-                            AND o.name = ANY(%s)
                         )
                         SELECT DISTINCT uri, label, comment, ontology_name, 
                                hierarchy_level as sort_order, ontology_id
@@ -106,9 +105,10 @@ class DatabaseConceptManager:
                     
                     results = self.storage._execute_query(
                         query,
-                        (base_uri, ontology_names),
+                        (base_uri,),
                         fetch_all=True
                     )
+                    logger.info(f"Recursive CTE for {category} returned {len(results)} entities")
                 else:
                     # Fallback to label matching if no base URI found
                     logger.warning(f"No base URI found for category {category}, using label matching")
@@ -193,7 +193,8 @@ class DatabaseConceptManager:
             
             # If we found the main category class, also get its subclasses
             # Pass seen_uris to avoid duplicates
-            if entities and category in ['Role', 'Principle', 'Obligation', 'Resource', 'State']:
+            if entities and category in ['Role', 'Principle', 'Obligation', 'Resource', 'State',
+                                         'Action', 'Event', 'Capability', 'Constraint']:
                 subclasses = self._get_subclasses_for_category(category, ontology_names, seen_uris)
                 entities.extend(subclasses)
             

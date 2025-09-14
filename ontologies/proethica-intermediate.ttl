@@ -204,13 +204,203 @@
     rdfs:label "Capability Type"@en ;
     rdfs:comment "Meta-class for specific capability types recognized by the ProEthica system"@en .
 
-# Other important classes
+#################################################################
+# Action Categories from Chapter 2.2.6 Literature
+# Based on professional decisions and volitional interventions
+#################################################################
+
+# Communication Actions - Professional disclosure and information sharing
+proeth:CommunicationAction a owl:Class ;
+    rdfs:subClassOf proeth-core:Action ;
+    rdfs:label "Communication Action"@en ;
+    skos:definition "Professional actions involving disclosure, informing, notifying stakeholders, and communicating relevant information per Tolmeijer et al. (2021) explanation requirements and McLaren (2003) transparency obligations."@en ;
+    rdfs:comment "Actions involving disclosure, informing, and transparent communication"@en ;
+    dcterms:references <https://doi.org/10.1007/s11948-020-00230-4> , # Tolmeijer et al. 2021
+                      <https://doi.org/10.1023/A:1024195425598> . # McLaren 2003
+
+proeth:PreventionAction a owl:Class ;
+    rdfs:subClassOf proeth-core:Action ;
+    rdfs:label "Prevention Action"@en ;
+    skos:definition "Professional actions aimed at avoiding, preventing, minimizing, or eliminating risks and harms per Anderson & Anderson (2018) harm prevention principles and Arkin (2008) safety obligations."@en ;
+    rdfs:comment "Actions focused on avoiding and minimizing potential harms"@en ;
+    dcterms:references <https://doi.org/10.1007/s10676-017-9430-8> , # Anderson & Anderson 2018
+                      <https://doi.org/10.1109/MIS.2008.100> . # Arkin 2008
+
+proeth:MaintenanceAction a owl:Class ;
+    rdfs:subClassOf proeth-core:Action ;
+    rdfs:label "Maintenance Action"@en ;
+    skos:definition "Professional actions involving maintaining, upholding, preserving, and protecting professional standards and values per Oakley & Cocking (2001) role requirements and Kong et al. (2020) integrity principles."@en ;
+    rdfs:comment "Actions focused on maintaining standards and protecting values"@en ;
+    dcterms:references <https://doi.org/10.1017/CBO9780511489471> , # Oakley & Cocking 2001
+                      <https://doi.org/10.1007/s10676-020-09538-y> . # Kong et al. 2020
+
+proeth:PerformanceAction a owl:Class ;
+    rdfs:subClassOf proeth-core:Action ;
+    rdfs:label "Performance Action"@en ;
+    skos:definition "Professional actions involving performing, executing, conducting, and implementing professional services within areas of competence per professional obligation frameworks (NSPE II.2)."@en ;
+    rdfs:comment "Actions involving execution of professional services and duties"@en ;
+    dcterms:references "NSPE Code of Ethics II.2" .
+
+proeth:EvaluationAction a owl:Class ;
+    rdfs:subClassOf proeth-core:Action ;
+    rdfs:label "Evaluation Action"@en ;
+    skos:definition "Professional actions involving evaluating, assessing, analyzing, reviewing, and examining professional work, conditions, or decisions per Berreby et al. (2017) assessment processes and Tolmeijer et al. (2021) situational awareness."@en ;
+    rdfs:comment "Actions involving assessment and analysis of professional situations"@en ;
+    dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> , # Berreby et al. 2017
+                      <https://doi.org/10.1007/s11948-020-00230-4> . # Tolmeijer et al. 2021
+
+proeth:CollaborationAction a owl:Class ;
+    rdfs:subClassOf proeth-core:Action ;
+    rdfs:label "Collaboration Action"@en ;
+    skos:definition "Professional actions involving consulting, collaborating, coordinating, and cooperating with colleagues, clients, and stakeholders per Dennis et al. (2016) multi-agent frameworks and professional peer obligations."@en ;
+    rdfs:comment "Actions involving professional cooperation and coordination"@en ;
+    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+
+proeth:CreationAction a owl:Class ;
+    rdfs:subClassOf proeth-core:Action ;
+    rdfs:label "Creation Action"@en ;
+    skos:definition "Professional actions involving designing, developing, creating, building, and constructing professional solutions per technical competence requirements and innovation obligations."@en ;
+    rdfs:comment "Actions involving design and development of professional solutions"@en ;
+    dcterms:references "NSPE Code of Ethics Professional Obligations" .
+
+proeth:MonitoringAction a owl:Class ;
+    rdfs:subClassOf proeth-core:Action ;
+    rdfs:label "Monitoring Action"@en ;
+    skos:definition "Professional actions involving monitoring, supervising, overseeing, managing, and controlling professional processes per Arkin (2008) responsibility documentation and oversight requirements."@en ;
+    rdfs:comment "Actions involving supervision and oversight of professional processes"@en ;
+    dcterms:references <https://doi.org/10.1109/MIS.2008.100> . # Arkin 2008
+
+# Specific Action Types
 :Decision rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdf:type :ActionType ;
-    rdfs:subClassOf proeth-core:Action ;
+    rdfs:subClassOf proeth:EvaluationAction ;
     rdfs:label "Decision"@en ;
-    rdfs:comment "A choice made by an agent in response to an ethical situation"@en .
+    skos:definition "A volitional choice made by an agent in response to an ethical situation, requiring deliberation between alternatives per Hooker & Kim (2018) reasoning-based action theory."@en ;
+    rdfs:comment "Professional choice made after ethical deliberation between alternatives"@en ;
+    dcterms:references <https://doi.org/10.1007/s11948-018-0030-6> . # Hooker & Kim 2018
+
+proeth:DisclosureAction a owl:Class ;
+    rdfs:subClassOf proeth:CommunicationAction ;
+    rdfs:label "Disclosure Action"@en ;
+    skos:definition "Professional action of revealing conflicts, limitations, or risks to stakeholders per NSPE requirements and transparency principles."@en ;
+    rdfs:comment "Action of revealing relevant conflicts or limitations"@en ;
+    dcterms:references "NSPE Code of Ethics II.4" .
+
+proeth:CompetenceAction a owl:Class ;
+    rdfs:subClassOf proeth:PerformanceAction ;
+    rdfs:label "Competence Action"@en ;
+    skos:definition "Professional action performed within demonstrated areas of competence per NSPE competence requirements and professional boundaries."@en ;
+    rdfs:comment "Action performed within established professional competence"@en ;
+    dcterms:references "NSPE Code of Ethics II.2" .
+
+#################################################################
+# Event Categories from Chapter 2.2.7 Literature  
+# Based on temporal occurrences that trigger ethical consideration
+#################################################################
+
+# Crisis Events - Failures and emergency situations
+proeth:CrisisEvent a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Crisis Event"@en ;
+    skos:definition "Events involving failures, accidents, emergencies, crises, and disasters that require immediate professional response and may override normal procedures per Berreby et al. (2017) automatic event modeling."@en ;
+    rdfs:comment "Emergency situations requiring immediate professional response"@en ;
+    dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> . # Berreby et al. 2017
+
+proeth:ComplianceEvent a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Compliance Event"@en ;
+    skos:definition "Events involving violations, breaches, non-compliance, misconduct, or errors that trigger regulatory or professional review processes per Dennis et al. (2016) ethical policy frameworks."@en ;
+    rdfs:comment "Events involving breaches of professional or regulatory standards"@en ;
+    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+
+proeth:ConflictEvent a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Conflict Event"@en ;
+    skos:definition "Events involving conflicts, disputes, disagreements, controversies, or issues between stakeholders that require professional mediation or resolution per Rao et al. (2023) context-dependent moral evaluation."@en ;
+    rdfs:comment "Events involving stakeholder conflicts requiring resolution"@en ;
+    dcterms:references <https://doi.org/10.48550/arXiv.2302.00997> . # Rao et al. 2023
+
+proeth:ProjectEvent a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Project Event"@en ;
+    skos:definition "Events involving deadlines, milestones, completions, deliveries, and launches that affect project timelines and professional obligations per Sarmiento et al. (2023) temporal reasoning."@en ;
+    rdfs:comment "Time-based project events affecting professional obligations"@en ;
+    dcterms:references <https://doi.org/10.1007/s10458-023-09609-6> . # Sarmiento et al. 2023
+
+proeth:SafetyEvent a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Safety Event"@en ;
+    skos:definition "Events involving injuries, harm, damage, losses, threats, or risks that trigger safety obligations and public welfare protections per Anderson & Anderson (2018) harm-based ethical evaluation."@en ;
+    rdfs:comment "Events involving harm or risk requiring safety response"@en ;
+    dcterms:references <https://doi.org/10.1007/s10676-017-9430-8> . # Anderson & Anderson 2018
+
+proeth:EvaluationEvent a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Evaluation Event"@en ;
+    skos:definition "Events involving inspections, audits, reviews, assessments, and evaluations that trigger professional scrutiny and accountability requirements per Arkin (2008) responsibility documentation."@en ;
+    rdfs:comment "Formal review events triggering professional accountability"@en ;
+    dcterms:references <https://doi.org/10.1109/MIS.2008.100> . # Arkin 2008
+
+proeth:DiscoveryEvent a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Discovery Event"@en ;
+    skos:definition "Events involving discoveries, findings, identifications, detections, or reports of new information that may affect professional obligations per Zhang et al. (2023) moral event classification."@en ;
+    rdfs:comment "Events revealing new information affecting professional responsibilities"@en ;
+    dcterms:references <https://doi.org/10.18653/v1/2023.findings-emnlp.95> . # Zhang et al. 2023
+
+proeth:ChangeEvent a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Change Event"@en ;
+    skos:definition "Events involving changes, modifications, alterations, updates, or revisions to systems, procedures, or requirements that affect professional practice per Almpani et al. (2023) dynamic priority adjustment."@en ;
+    rdfs:comment "Events involving changes affecting professional practice requirements"@en ;
+    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
+
+# Specific Event Instances
+:Violation rdf:type owl:Class ;
+    rdf:type :EntityType ;
+    rdfs:subClassOf proeth:ComplianceEvent ;
+    rdfs:label "Violation"@en ;
+    skos:definition "An event indicating that an obligation, prohibition, or standard has been breached, requiring corrective action and potentially triggering disciplinary procedures."@en ;
+    rdfs:comment "Breach of professional standard requiring corrective response"@en .
+
+proeth:EmergencyEvent a owl:Class ;
+    rdfs:subClassOf proeth:CrisisEvent ;
+    rdfs:label "Emergency Event"@en ;
+    skos:definition "Critical event requiring immediate response that may override normal professional procedures and activate emergency protocols."@en ;
+    rdfs:comment "Critical event overriding normal professional procedures"@en .
+
+proeth:DeadlineEvent a owl:Class ;
+    rdfs:subClassOf proeth:ProjectEvent ;
+    rdfs:label "Deadline Event"@en ;
+    skos:definition "Temporal event marking project deadline or milestone that affects professional priorities and resource allocation decisions."@en ;
+    rdfs:comment "Time constraint event affecting professional priorities"@en .
+
+proeth:SafetyIncident a owl:Class ;
+    rdfs:subClassOf proeth:SafetyEvent ;
+    rdfs:label "Safety Incident"@en ;
+    skos:definition "Event involving actual or potential harm triggering safety reporting obligations and corrective measures per public welfare protection requirements."@en ;
+    rdfs:comment "Incident triggering safety obligations and reporting requirements"@en .
+
+# Event properties for temporal relationships
+proeth:triggersObligation a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Event ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "triggers obligation"@en ;
+    rdfs:comment "Relates an event to obligations it activates"@en .
+
+proeth:causedByAction a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Event ;
+    rdfs:range proeth-core:Action ;
+    rdfs:label "caused by action"@en ;
+    rdfs:comment "Links event to actions that caused it (Wright's NESS test)"@en ;
+    dcterms:references <https://doi.org/10.1007/s10458-023-09609-6> . # Sarmiento et al. 2023
+
+proeth:altersPriority a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Event ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "alters priority"@en ;
+    rdfs:comment "Indicates how events change obligation priorities"@en .
 
 # Common Ethical Concepts
 :EthicalDilemma rdf:type owl:Class ;
