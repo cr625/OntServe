@@ -1,0 +1,148 @@
+# Capability Subclasses for proethica-intermediate.ttl
+# Based on Chapter 2.2.8 Literature on Agent Competencies
+#################################################################
+# Capabilities (Ca) - Agent Competencies from Chapter 2.2.8 Literature
+# Based on Tolmeijer et al. (2021), Berreby et al. (2017), Anderson & Anderson (2018)
+#
+# The base Capability class should already be in proethica-core.ttl
+# These subclasses should be added to proethica-intermediate.ttl
+
+#################################################################
+# Norm Management Capabilities
+#################################################################
+
+proeth:NormCompetence a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Norm Competence"@en ;
+    rdfs:comment "Ability to store ethical rules, recognize when they apply, understand conflicts, and resolve contradictions (Tolmeijer et al. 2021)"@en ;
+    dcterms:references <https://doi.org/10.1007/s11948-020-00230-4> . # Tolmeijer et al. 2021
+
+proeth:ConflictResolution a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Conflict Resolution"@en ;
+    rdfs:comment "Capability to manage and resolve conflicts between diverse and potentially conflicting normative requirements (Dennis et al. 2016)"@en ;
+    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+
+#################################################################
+# Awareness and Perception Capabilities
+#################################################################
+
+proeth:SituationalAwareness a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Situational Awareness"@en ;
+    rdfs:comment "Ability to perceive and interpret environmental factors affecting ethical evaluation (Almpani et al. 2023, Tolmeijer et al. 2021)"@en ;
+    dcterms:references <https://doi.org/10.1007/s11948-020-00230-4> . # Tolmeijer et al. 2021
+
+proeth:EthicalPerception a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Ethical Perception"@en ;
+    rdfs:comment "Capability to recognize ethically salient features and dynamically assess environment (Anderson et al. 2006, Berreby et al. 2017)"@en ;
+    dcterms:references <https://doi.org/10.1109/MIS.2006.98> . # Anderson et al. 2006
+
+#################################################################
+# Learning and Adaptation Capabilities
+#################################################################
+
+proeth:EthicalLearning a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Ethical Learning"@en ;
+    rdfs:comment "Ability to adapt to new cases, changing standards, and novel situations while maintaining consistency (Anderson & Anderson 2018)"@en ;
+    dcterms:references <https://doi.org/10.1007/s10676-017-9430-8> . # Anderson & Anderson 2018
+
+proeth:PrincipleRefinement a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Principle Refinement"@en ;
+    rdfs:comment "Capability to evolve principles as inconsistencies are resolved and new cases are added (GenEth system, Anderson & Anderson 2018)"@en ;
+    dcterms:references <https://doi.org/10.1007/s10676-017-9430-8> . # Anderson & Anderson 2018
+
+#################################################################
+# Reasoning and Deliberation Capabilities
+#################################################################
+
+proeth:EthicalReasoning a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Ethical Reasoning"@en ;
+    rdfs:comment "Capability to process ethical information, deliberate on choices, and exercise moral judgment (Wallach & Allen 2009, Belle 2023)"@en ;
+    dcterms:references <https://doi.org/10.1093/acprof:oso/9780195374049.001.0001> . # Wallach & Allen 2009
+
+proeth:CausalReasoning a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Causal Reasoning"@en ;
+    rdfs:comment "Ability to trace complex causal chains and establish responsibility relationships (Sarmiento et al. 2023, Wright's NESS test)"@en ;
+    dcterms:references <https://doi.org/10.1007/s10458-023-09609-6> . # Sarmiento et al. 2023
+
+proeth:TemporalReasoning a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Temporal Reasoning"@en ;
+    rdfs:comment "Capability to reason about temporal dynamics and event sequences in ethical evaluation (Govindarajulu & Bringsjord 2017)"@en ;
+    dcterms:references <https://doi.org/10.1007/s11023-015-9367-9> . # Govindarajulu & Bringsjord 2017
+
+#################################################################
+# Communication and Explanation Capabilities
+#################################################################
+
+proeth:ExplanationGeneration a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Explanation Generation"@en ;
+    rdfs:comment "Ability to provide clear explanations and justifications for ethical decisions (Langley 2019, Tolmeijer et al. 2021)"@en ;
+    dcterms:references <https://doi.org/10.1007/s11948-020-00230-4> . # Tolmeijer et al. 2021
+
+proeth:JustificationCapability a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Justification Capability"@en ;
+    rdfs:comment "Capability to trace reasoning paths connecting decisions to authoritative sources (McLaren 2003, Anderson & Anderson 2018)"@en ;
+    dcterms:references <https://doi.org/10.1023/B:AIRE.0000009444.71972.2e> . # McLaren 2003
+
+proeth:ResponsibilityDocumentation a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Responsibility Documentation"@en ;
+    rdfs:comment "Capability to maintain detailed logs of actions and reasoning for accountability (Arkin 2008, Kroll 2020)"@en ;
+    dcterms:references <https://doi.org/10.1109/MIS.2008.100> . # Arkin 2008
+
+#################################################################
+# Domain-Specific Capabilities
+#################################################################
+
+proeth:DomainExpertise a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Domain Expertise"@en ;
+    rdfs:comment "Professional domain-specific knowledge and competencies (Hallamaa & Kalliokoski 2022, Doernberg & Truog 2023)"@en ;
+    dcterms:references <https://doi.org/10.1007/s00146-021-01230-z> . # Hallamaa & Kalliokoski 2022
+
+proeth:ProfessionalCompetence a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Professional Competence"@en ;
+    rdfs:comment "Technical competencies specific to professional roles and activities (Kong et al. 2020, Stenseke 2024)"@en ;
+    dcterms:references <https://doi.org/10.1007/s10676-024-09775-5> . # Stenseke 2024
+
+#################################################################
+# Retrieval and Application Capabilities
+#################################################################
+
+proeth:PrecedentRetrieval a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Precedent Retrieval"@en ;
+    rdfs:comment "Capability to identify relevant precedents and apply case-based reasoning (McLaren 2003, SIROCCO system)"@en ;
+    dcterms:references <https://doi.org/10.1023/B:AIRE.0000009444.71972.2e> . # McLaren 2003
+
+#################################################################
+# Capability properties for relationships
+#################################################################
+
+proeth:hasCapabilityLevel a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Capability ;
+    rdfs:range xsd:string ;
+    rdfs:label "has capability level"@en ;
+    rdfs:comment "Indicates the level or degree of a capability"@en .
+
+proeth:enablesAction a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Capability ;
+    rdfs:range proeth-core:Action ;
+    rdfs:label "enables action"@en ;
+    rdfs:comment "Relates a capability to the actions it enables"@en .
+
+proeth:requiresCapability a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Capability ;
+    rdfs:label "requires capability"@en ;
+    rdfs:comment "Specifies capabilities required for a professional role"@en .
