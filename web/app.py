@@ -134,6 +134,12 @@ def create_app(config_name=None):
         except (json.JSONDecodeError, TypeError):
             return {}
     
+    # Make config available in templates
+    @app.context_processor
+    def inject_config():
+        """Make app config available in templates."""
+        return {'config': app.config}
+    
     # Initialize CLI commands
     from cli import init_cli
     init_cli(app)
@@ -239,7 +245,7 @@ def register_auth_routes(app):
                 # Log successful login
                 app.logger.info(f"User {username} logged in successfully")
                 
-                next_page = request.args.get('next')
+                next_page = request.args.get('next') or request.form.get('next')
                 if next_page:
                     return redirect(next_page)
                 return redirect(url_for('index'))
