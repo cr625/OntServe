@@ -132,11 +132,80 @@
         </div>
         {% endif %}
 
-        <!-- Enrichment Summary -->
+        <!-- Calculate variables needed throughout the template -->
         {% set total_entities = entities.classes|length + entities.properties|length + entities.individuals|length %}
         {% set entities_with_definitions = (entities.classes + entities.properties +
         entities.individuals)|selectattr('comment')|list|length %}
-        {% if entities_with_definitions > 0 %}
+        {% set llm_generated = (entities.classes + entities.properties +
+        entities.individuals)|selectattr('properties')|map('from_json')|selectattr('generated_definition')|list|length
+        %}
+        {% set authoritative_sources = (entities.classes + entities.properties +
+        entities.individuals)|selectattr('properties')|map('from_json')|selectattr('dc:source')|list|length
+        %}
+        {% set high_confidence_entities = [] %}
+        {% for entity in (entities.classes + entities.properties + entities.individuals) %}
+        {% if entity.properties %}
+        {% set props = entity.properties|from_json if entity.properties is string else
+        entity.properties %}
+        {% if props and props.confidence and props.confidence > 0.8 %}
+        {% set _ = high_confidence_entities.append(entity) %}
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+        {% set high_confidence = high_confidence_entities|length %}
+
+        <!-- Ontology-specific Banner -->
+        {% if ontology.name == 'proethica-intermediate' %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-layers"></i> ProEthica Intermediate Layer
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="display-4 text-primary">94</div>
+                                    <small class="text-muted">NSPE Ethical Concepts</small>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h6 class="text-muted mb-3">9-Concept Formal Framework</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled mb-2">
+                                            <li><i class="bi bi-person-badge text-info"></i> <strong>Roles:</strong> 18 entities</li>
+                                            <li><i class="bi bi-compass text-success"></i> <strong>Principles:</strong> 13 entities</li>
+                                            <li><i class="bi bi-clipboard-check text-warning"></i> <strong>Obligations:</strong> 23 entities</li>
+                                            <li><i class="bi bi-flag text-danger"></i> <strong>States:</strong> 21 entities</li>
+                                            <li><i class="bi bi-book text-secondary"></i> <strong>Resources:</strong> 4 entities</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="list-unstyled mb-2">
+                                            <li><i class="bi bi-lightning text-primary"></i> <strong>Actions:</strong> 23 entities</li>
+                                            <li><i class="bi bi-calendar-event text-info"></i> <strong>Events:</strong> 8 entities</li>
+                                            <li><i class="bi bi-gear text-success"></i> <strong>Capabilities:</strong> 16 entities</li>
+                                            <li><i class="bi bi-exclamation-triangle text-warning"></i> <strong>Constraints:</strong> 3 entities</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        This intermediate ontology bridges the formal ProEthica core concepts with domain-specific ethical knowledge extracted from the NSPE Code of Ethics.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% elif entities_with_definitions > 0 %}
+        <!-- Original Enrichment Summary for other ontologies -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card border-success">
@@ -156,23 +225,6 @@
                             </div>
                             <div class="col-md-9">
                                 <div class="row">
-                                    {% set llm_generated = (entities.classes + entities.properties +
-                                    entities.individuals)|selectattr('properties')|map('from_json')|selectattr('generated_definition')|list|length
-                                    %}
-                                    {% set authoritative_sources = (entities.classes + entities.properties +
-                                    entities.individuals)|selectattr('properties')|map('from_json')|selectattr('dc:source')|list|length
-                                    %}
-                                    {% set high_confidence_entities = [] %}
-                                    {% for entity in (entities.classes + entities.properties + entities.individuals) %}
-                                    {% if entity.properties %}
-                                    {% set props = entity.properties|from_json if entity.properties is string else
-                                    entity.properties %}
-                                    {% if props and props.confidence and props.confidence > 0.8 %}
-                                    {% set _ = high_confidence_entities.append(entity) %}
-                                    {% endif %}
-                                    {% endif %}
-                                    {% endfor %}
-                                    {% set high_confidence = high_confidence_entities|length %}
 
                                     <div class="col-md-4">
                                         <div class="d-flex align-items-center mb-2">
