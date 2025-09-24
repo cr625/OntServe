@@ -361,16 +361,23 @@ class ConceptManager:
                     'approved_by': row['approved_by'],
                     'approved_at': row['approved_at'].isoformat() if row['approved_at'] else None,
                     'created_at': row['created_at'].isoformat() if row['created_at'] else None,
-                    'metadata': row['metadata'] or {}
+                    'metadata': row['metadata'] or {},
+                    'source': 'concepts'
                 }
                 entities.append(entity)
-            
+
+            # Also get ontology entities for this category
+            ontology_entities = self.get_ontology_entities_by_category(category)
+            entities.extend(ontology_entities)
+
             return {
                 'entities': entities,
                 'category': category,
                 'domain_id': domain_id,
                 'status': status,
-                'total_count': len(entities)
+                'total_count': len(entities),
+                'concept_count': len(results),
+                'ontology_count': len(ontology_entities)
             }
             
         except Exception as e:
@@ -581,3 +588,71 @@ class ConceptManager:
             
         except Exception as e:
             logger.warning(f"Failed to create concept version: {e}")
+
+    def get_ontology_entities_by_category(self, category: str) -> List[Dict[str, Any]]:
+        """
+        Get ontology class entities by category from the ontology_entities table.
+
+        Args:
+            category: Entity category (Role, Principle, etc.)
+
+        Returns:
+            List of ontology entities matching the category
+        """
+        try:
+            # Look for classes in the proethica intermediate ontology that match the category
+            query = """
+                SELECT
+                    id, uri, label, comment as description, entity_type,
+                    parent_uri, created_at
+                FROM ontology_entities
+                WHERE entity_type = 'class'
+                AND (
+                    uri LIKE %s
+                    OR label ILIKE %s
+                    OR uri LIKE %s
+                )
+                AND uri LIKE %s
+                ORDER BY label
+            """
+
+            # Search patterns for the category
+            category_pattern = f'%{category}%'
+            label_pattern = f'%{category}%'
+            uri_pattern = f'%{category}'
+            ontology_pattern = '%proethica.org/ontology%'
+
+            results = self.storage._execute_query(
+                query,
+                (category_pattern, label_pattern, uri_pattern, ontology_pattern),
+                fetch_all=True
+            )
+
+            entities = []
+            if results:
+                for row in results:
+                    try:
+                        entity = {
+                            'id': row['id'],
+                            'uri': row['uri'],
+                            'label': row['label'],
+                            'description': row['description'] or f'Ontology class for {category}',
+                            'category': category,
+                            'entity_type': row['entity_type'],
+                            'parent_uri': row['parent_uri'],
+                            'created_at': row['created_at'].isoformat() if row['created_at'] else None,
+                            'source': 'ontology'
+                        }
+                        entities.append(entity)
+                    except Exception as row_error:
+                        logger.error(f"Error processing row: {row_error}, row data: {row}")
+                        continue
+            else:
+                logger.warning(f"No results returned for category {category} query")
+
+            logger.info(f"Found {len(entities)} ontology entities for category {category}")
+            return entities
+
+        except Exception as e:
+            logger.error(f"Error getting ontology entities by category {category}: {e}")
+            return []

@@ -46,7 +46,7 @@ if ontserve_env.exists():
 # Import storage backend and concept manager
 from storage.postgresql_storage import PostgreSQLStorage, StorageError
 # Use database concept manager that queries ontology_entities table
-from storage.concept_manager_database import DatabaseConceptManager
+from storage.concept_manager import ConceptManager
 # Import SPARQL service
 from services.sparql_service import SPARQLService
 
@@ -108,8 +108,8 @@ class OntServeMCPServer:
             }
             
             self.storage = PostgreSQLStorage(storage_config)
-            # Use database concept manager that queries the populated ontology_entities table
-            self.concept_manager = DatabaseConceptManager(self.storage)
+            # Use concept manager that handles candidate concept submission
+            self.concept_manager = ConceptManager(self.storage)
             
             # Initialize SPARQL service
             try:
@@ -437,6 +437,65 @@ class OntServeMCPServer:
                     },
                     "required": ["domain_id"]
                 }
+            },
+            {
+                "name": "store_extracted_entities",
+                "description": "Store extracted entities from LLM in case-specific ontology",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "case_id": {
+                            "type": "string",
+                            "description": "Case identifier"
+                        },
+                        "section_type": {
+                            "type": "string",
+                            "description": "Section type (facts, analysis, questions, etc.)"
+                        },
+                        "entities": {
+                            "type": "array",
+                            "description": "Array of extracted entities",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "label": {"type": "string"},
+                                    "description": {"type": "string"},
+                                    "category": {"type": "string"},
+                                    "confidence": {"type": "number"},
+                                    "extraction_metadata": {"type": "object"}
+                                },
+                                "required": ["label", "category"]
+                            }
+                        },
+                        "extraction_session": {
+                            "type": "object",
+                            "description": "Extraction session metadata"
+                        }
+                    },
+                    "required": ["case_id", "section_type", "entities"]
+                }
+            },
+            {
+                "name": "get_case_entities",
+                "description": "Retrieve stored entities for a specific case",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "case_id": {
+                            "type": "string",
+                            "description": "Case identifier"
+                        },
+                        "section_type": {
+                            "type": "string",
+                            "description": "Optional section type filter"
+                        },
+                        "category": {
+                            "type": "string",
+                            "description": "Optional entity category filter"
+                        }
+                    },
+                    "required": ["case_id"]
+                }
             }
         ]
         
@@ -456,7 +515,9 @@ class OntServeMCPServer:
             "submit_candidate_concept": self._handle_submit_candidate_concept,
             "update_concept_status": self._handle_update_concept_status,
             "get_candidate_concepts": self._handle_get_candidate_concepts,
-            "get_domain_info": self._handle_get_domain_info
+            "get_domain_info": self._handle_get_domain_info,
+            "store_extracted_entities": self._handle_store_extracted_entities,
+            "get_case_entities": self._handle_get_case_entities
         }
         
         if name not in tool_handlers:
@@ -615,16 +676,133 @@ class OntServeMCPServer:
     async def _handle_get_domain_info(self, arguments):
         """Get domain information."""
         domain_id = arguments.get("domain_id", "engineering-ethics")
-        
+
         if not self.db_connected or not self.concept_manager:
             return {"error": "Database not connected"}
-        
+
         try:
             result = self.concept_manager.get_domain_info(domain_id)
             return result
         except StorageError as e:
             logger.error(f"Storage error getting domain info: {e}")
             return {"error": f"Failed to retrieve domain info: {str(e)}"}
+
+    async def _handle_store_extracted_entities(self, arguments):
+        """Store extracted entities as candidate concepts in OntServe."""
+        case_id = arguments.get("case_id")
+        section_type = arguments.get("section_type")
+        entities = arguments.get("entities", [])
+        extraction_session = arguments.get("extraction_session", {})
+
+        if not self.db_connected or not self.concept_manager:
+            return {"error": "Database not connected"}
+
+        try:
+            stored_entities = []
+            domain_id = "engineering-ethics"  # Default domain
+            submitted_by = f"proethica-case-{case_id}-{section_type}"
+
+            for entity in entities:
+                # Generate URI for the entity
+                label = entity.get('label', '')
+                safe_label = label.replace(' ', '_').replace('-', '_').replace('(', '').replace(')', '')
+                entity_uri = f"http://proethica.org/ontology/case/{case_id}#{section_type}_{safe_label}"
+
+                # Prepare candidate concept in the format expected by concept_manager
+                candidate_concept = {
+                    'label': entity.get('label', ''),
+                    'description': entity.get('description', ''),
+                    'category': entity.get('category', 'Entity'),
+                    'uri': entity_uri,
+                    'confidence_score': entity.get('confidence', 0.8),
+                    'source_text': entity.get('source_text', ''),
+                    'extraction_method': 'case_entity_extraction',
+                    'metadata': {
+                        'case_id': case_id,
+                        'section_type': section_type,
+                        'extraction_session': extraction_session,
+                        'extraction_metadata': entity.get('extraction_metadata', {}),
+                        'nspe_case_entity': True
+                    }
+                }
+
+                # Submit as candidate concept
+                result = self.concept_manager.submit_candidate_concept(
+                    candidate_concept, domain_id, submitted_by
+                )
+
+                if result.get('success'):
+                    stored_entities.append({
+                        'label': entity.get('label', ''),
+                        'category': entity.get('category', 'Entity'),
+                        'section_type': section_type,
+                        'concept_id': result.get('concept_id'),
+                        'status': 'candidate'
+                    })
+                else:
+                    logger.warning(f"Failed to store entity {entity.get('label', '')}: {result.get('error', 'Unknown error')}")
+
+            logger.info(f"Stored {len(stored_entities)} entities as candidates for case {case_id}, section {section_type}")
+
+            return {
+                "success": True,
+                "case_id": case_id,
+                "section_type": section_type,
+                "stored_count": len(stored_entities),
+                "entities": stored_entities,
+                "method": "candidate_concepts"
+            }
+
+        except Exception as e:
+            logger.error(f"Error storing extracted entities: {e}")
+            return {"error": f"Failed to store entities: {str(e)}"}
+
+    async def _handle_get_case_entities(self, arguments):
+        """Retrieve stored entities for a specific case."""
+        case_id = arguments.get("case_id")
+        section_type = arguments.get("section_type")
+        category = arguments.get("category")
+
+        if not self.db_connected or not self.concept_manager:
+            return {"error": "Database not connected"}
+
+        try:
+            # Use the candidate concepts system to retrieve case entities
+            # We'll search for concepts submitted by our case-specific submitter
+            submitted_by_pattern = f"proethica-case-{case_id}"
+            if section_type:
+                submitted_by_pattern += f"-{section_type}"
+
+            # Get candidate concepts that match our case
+            result = self.concept_manager.get_candidate_concepts(
+                domain_id="engineering-ethics",
+                status="candidate",
+                filters={'submitted_by_like': submitted_by_pattern}
+            )
+
+            entities = result.get('candidates', [])
+
+            # Apply additional filters if specified
+            if category:
+                entities = [e for e in entities if e.get('category', '') == category]
+
+            if section_type:
+                entities = [e for e in entities if e.get('metadata', {}).get('section_type') == section_type]
+
+            return {
+                "case_id": case_id,
+                "entities": entities,
+                "total_count": len(entities),
+                "filters": {
+                    'section_type': section_type,
+                    'category': category
+                },
+                "method": "candidate_concepts"
+            }
+
+        except Exception as e:
+            logger.error(f"Error retrieving case entities: {e}")
+            return {"error": f"Failed to retrieve entities: {str(e)}"}
 
     async def start(self):
         """Start the MCP server."""
