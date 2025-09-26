@@ -12,6 +12,18 @@
     owl:imports <http://proethica.org/ontology/cases>,
         <http://proethica.org/ontology/intermediate> .
 
+case18:DrinkingWater_LeadStandards a proeth:WaterQualityStandards,
+        owl:NamedIndividual ;
+    rdfs:label "DrinkingWater_LeadStandards" ;
+    proeth:confidencescore "0.85" ;
+    proeth:createdby "Federal/State Environmental Protection Authorities" ;
+    proeth:generatedattime "2025-09-26T01:02:44.192512" ;
+    proeth:hasdocumenttitle "Drinking Water Standards for Lead Content" ;
+    proeth:usedby "Engineer B" ;
+    proeth:usedincontext "Referenced to establish acceptable lead levels in drinking water" ;
+    prov:generatedAtTime "2025-09-26T06:08:13.105530"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 18 Extraction" .
+
 case18:EngineerB_PublicHealthRisk_Letter a proeth:TechnicalEvaluationReport,
         owl:NamedIndividual ;
     rdfs:label "EngineerB_PublicHealthRisk_Letter" ;
@@ -34,5 +46,29 @@ case18:EngineerB_WaterSource_EvaluationReport a proeth:TechnicalEvaluationReport
     proeth:usedby "Metropolitan Water Commission" ;
     proeth:usedincontext "Evaluated feasibility and risks of changing water source to reduce expenses" ;
     prov:generatedAtTime "2025-09-26T01:19:12.936637"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 18 Extraction" .
+
+case18:StateEnv_WaterSourceApproval a proeth:LegalResource,
+        owl:NamedIndividual ;
+    rdfs:label "StateEnv_WaterSourceApproval" ;
+    proeth:confidencescore "0.9" ;
+    proeth:createdby "State Department of the Environment, Water Supply Division" ;
+    proeth:generatedattime "2025-09-26T01:02:44.192512" ;
+    proeth:hasdocumenttitle "State Department of Environment Water Source Change Approval with Five-Year Implementation Plan" ;
+    proeth:usedby "Metropolitan Water Commission" ;
+    proeth:usedincontext "Official regulatory approval for water source change" ;
+    prov:generatedAtTime "2025-09-26T06:08:13.105670"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 18 Extraction" .
+
+case18:XYZ_InsufficientInformation_Report a proeth:TechnicalEvaluationReport,
+        owl:NamedIndividual ;
+    rdfs:label "XYZ_InsufficientInformation_Report" ;
+    proeth:confidencescore "0.95" ;
+    proeth:createdby "XYZ Consultants" ;
+    proeth:generatedattime "2025-09-26T01:02:44.192512" ;
+    proeth:hasdocumenttitle "Report on Public Health and Safety Risk Assessment" ;
+    proeth:usedby "Metropolitan Water Commission" ;
+    proeth:usedincontext "Provided alternative assessment after Engineer B's discharge" ;
+    prov:generatedAtTime "2025-09-26T06:08:13.105447"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 18 Extraction" .
 
