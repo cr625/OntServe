@@ -1,0 +1,24 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+proeth:TechnicalEvaluationReport a owl:Class ;
+    rdfs:label "Technical Evaluation Report" ;
+    rdfs:comment "A formal engineering assessment document that evaluates technical feasibility, risks, and recommendations for a proposed project or system change" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "A formal engineering assessment document that evaluates technical feasibility, risks, and recommendations for a proposed project or system change" ;
+    prov:generatedAtTime "2025-09-26T01:19:12.930366"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:WaterQualityStandards a owl:Class ;
+    rdfs:label "Water Quality Standards" ;
+    rdfs:comment "Regulatory standards specifying acceptable levels of contaminants and treatment requirements for public water systems" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Regulatory standards specifying acceptable levels of contaminants and treatment requirements for public water systems" ;
+    prov:generatedAtTime "2025-09-26T01:19:12.930426"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
