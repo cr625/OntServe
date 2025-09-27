@@ -69,3 +69,13 @@ web/venv/
 
 # Review directory for cleanup
 untracked_review/
+
+# Archive folder for old files
+archive/
+
+# Claude internal files
+.claude/
+
+# Temporary ontology extraction files
+proethica-intermediate-extracted.ttl
+proethica-case-*.ttl
