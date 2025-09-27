@@ -1,0 +1,95 @@
+@prefix case8: <http://proethica.org/ontology/case/8#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://proethica.org/ontology/case/8> a owl:Ontology ;
+    rdfs:label "ProEthica Case 8 Ontology" ;
+    dcterms:created "2025-09-27T00:33:35.250468"^^xsd:dateTime ;
+    owl:imports <http://proethica.org/ontology/cases>,
+        <http://proethica.org/ontology/intermediate> .
+
+case8:Client_X a proeth:StakeholderRole,
+        owl:NamedIndividual ;
+    rdfs:label "Client X" ;
+    proeth:caseinvolvement "Contracted Engineer L for stormwater system design, requested work suspension due to financial issues, hesitant to invest in additional protective measures despite risks" ;
+    proeth:generatedattime "2025-09-27T00:33:08.586787" ;
+    proeth:hasactiveobligation "Address public safety concerns",
+        "Comply with environmental standards",
+        "Fund development project" ;
+    proeth:hasentitytype "private development entity" ;
+    proeth:hasethicaltension " ",
+        "/",
+        ";",
+        "C",
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "i",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "y" ;
+    proeth:hasfinancialstatus "experiencing financial setbacks followed by improvement" ;
+    proeth:hastitle "Client" ;
+    proeth:wasattributedto "Case 8 Extraction" ;
+    prov:generatedAtTime "2025-09-27T00:33:35.251048"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:Engineer_L a proeth:StormwaterControlDesignSpecialist,
+        owl:NamedIndividual ;
+    rdfs:label "Engineer L" ;
+    proeth:caseinvolvement "Contracted to design stormwater management system for development, identified risks to community drinking water source, advised client on need for additional protective measures" ;
+    proeth:generatedattime "2025-09-27T00:33:08.586787" ;
+    proeth:hasactiveobligation "Advise client on protective measures",
+        "Design stormwater management system",
+        "Ensure stormwater will not impact drinking water source",
+        "Quantify increased risk to community water source" ;
+    proeth:hasethicaltension " ",
+        "'",
+        ";",
+        "C",
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "r",
+        "s",
+        "t",
+        "u",
+        "w",
+        "y" ;
+    proeth:hasexperience "many years of experience in stormwater control design" ;
+    proeth:haslicense "licensed professional engineer" ;
+    proeth:hasspecialization "stormwater control design" ;
+    proeth:hastitle "Engineer" ;
+    proeth:wasattributedto "Case 8 Extraction" ;
+    prov:generatedAtTime "2025-09-27T00:33:35.250846"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+

@@ -1,3 +1,4 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix proeth: <http://proethica.org/ontology/intermediate#> .
 @prefix proeth-core: <http://proethica.org/ontology/core#> .
@@ -6,35 +7,17 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-proeth:ConflictofInterestState a owl:Class ;
-    rdfs:label "Conflict of Interest State" ;
-    rdfs:comment "A professional state where personal or financial interests conflict with professional duties" ;
-    rdfs:subClassOf proeth-core:State ;
-    skos:definition "A professional state where personal or financial interests conflict with professional duties" ;
-    prov:generatedAtTime "2025-09-26T06:10:57.388061"^^xsd:dateTime ;
+proeth:StormwaterControlDesignSpecialist a owl:Class ;
+    rdfs:label "Stormwater Control Design Specialist" ;
+    rdfs:comment "A licensed professional engineer specializing in the design and management of stormwater control systems to prevent flooding and protect water resources" ;
+    rdfs:subClassOf proeth-core:Role ;
+    skos:definition "A licensed professional engineer specializing in the design and management of stormwater control systems to prevent flooding and protect water resources" ;
+    prov:generatedAtTime "2025-09-27T00:33:35.245993"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
-proeth:PublicSafetyRiskState a owl:Class ;
-    rdfs:label "Public Safety Risk State" ;
-    rdfs:comment "A situation where public health or safety is at risk due to professional decisions or actions" ;
-    rdfs:subClassOf proeth-core:State ;
-    skos:definition "A situation where public health or safety is at risk due to professional decisions or actions" ;
-    prov:generatedAtTime "2025-09-26T06:10:57.388115"^^xsd:dateTime ;
-    prov:wasGeneratedBy "ProEthica Extraction" .
-
-proeth:TechnicalEvaluationReport a owl:Class ;
-    rdfs:label "Technical Evaluation Report" ;
-    rdfs:comment "A formal engineering assessment document that evaluates technical feasibility, risks, and recommendations for a proposed project or system change" ;
-    rdfs:subClassOf proeth-core:Resource ;
-    skos:definition "A formal engineering assessment document that evaluates technical feasibility, risks, and recommendations for a proposed project or system change" ;
-    prov:generatedAtTime "2025-09-26T01:19:12.930366"^^xsd:dateTime ;
-    prov:wasGeneratedBy "ProEthica Extraction" .
-
-proeth:WaterQualityStandards a owl:Class ;
-    rdfs:label "Water Quality Standards" ;
-    rdfs:comment "Regulatory standards specifying acceptable levels of contaminants and treatment requirements for public water systems" ;
-    rdfs:subClassOf proeth-core:Resource ;
-    skos:definition "Regulatory standards specifying acceptable levels of contaminants and treatment requirements for public water systems" ;
-    prov:generatedAtTime "2025-09-26T01:19:12.930426"^^xsd:dateTime ;
-    prov:wasGeneratedBy "ProEthica Extraction" .
+<http://proethica.org/ontology/intermediate-extracted> a owl:Ontology ;
+    rdfs:label "ProEthica Intermediate Extracted Classes" ;
+    dcterms:created "2025-09-26"^^xsd:date ;
+    rdfs:comment "Container for dynamically extracted classes from ProEthica case analysis. This file is automatically managed by the ProEthica extraction system." ;
+    owl:imports proeth-core: .
 
