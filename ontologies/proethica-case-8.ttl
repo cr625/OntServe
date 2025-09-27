@@ -12,6 +12,25 @@
     owl:imports <http://proethica.org/ontology/cases>,
         <http://proethica.org/ontology/intermediate> .
 
+case8:ClientX_BudgetConstraint_ProtectiveMeasures a proeth:ClientBudgetConstraintState,
+        owl:NamedIndividual ;
+    rdfs:label "ClientX_BudgetConstraint_ProtectiveMeasures" ;
+    proeth:affectsobligation "Client's duty to comply with environmental standards",
+        "Obligation to protect public water sources" ;
+    proeth:caseinvolvement "Client insisted on proceeding without safeguards despite Engineer L's concerns" ;
+    proeth:confidencescore "0.9" ;
+    proeth:generatedattime "2025-09-27T20:56:08.049049" ;
+    proeth:hasrelatedparty "Community dependent on watershed",
+        "Engineer L" ;
+    proeth:hassubject "Client X" ;
+    proeth:hasurgencylevel "high" ;
+    proeth:initiatedat "When Engineer L recommended additional protective measures" ;
+    proeth:initiatedby "Continuing financial limitations despite improved situation" ;
+    proeth:terminatedat "Ongoing at case end" ;
+    proeth:terminatedby "Not terminated in case narrative" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.656895"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
 case8:Client_X a proeth:StakeholderRole,
         owl:NamedIndividual ;
     rdfs:label "Client X" ;
@@ -49,6 +68,65 @@ case8:Client_X a proeth:StakeholderRole,
     proeth:hastitle "Client" ;
     proeth:wasattributedto "Case 8 Extraction" ;
     prov:generatedAtTime "2025-09-27T00:33:35.251048"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:Community_PublicHealthRisk_Watershed a proeth:UnquantifiedRiskAwarenessState,
+        owl:NamedIndividual ;
+    rdfs:label "Community_PublicHealthRisk_Watershed" ;
+    proeth:affectsobligation "Community's right to safe drinking water",
+        "Environmental protection requirements" ;
+    proeth:caseinvolvement "Community faces potential drinking water contamination from stormwater runoff" ;
+    proeth:confidencescore "0.85" ;
+    proeth:generatedattime "2025-09-27T20:56:08.049049" ;
+    proeth:hasrelatedparty "Client X",
+        "Engineer L" ;
+    proeth:hassubject "Small community" ;
+    proeth:hasurgencylevel "high increasing to critical" ;
+    proeth:initiatedat "When development project began" ;
+    proeth:initiatedby "Development project near primary drinking water source" ;
+    proeth:terminatedat "Ongoing at case end" ;
+    proeth:terminatedby "Not terminated - risk persists" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.657264"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:EngineerL_UnquantifiedRisk_DrinkingWater a proeth:UnquantifiedRiskAwarenessState,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_UnquantifiedRisk_DrinkingWater" ;
+    proeth:affectsobligation "Duty to protect public health",
+        "Obligation to communicate risks",
+        "Professional judgment in design" ;
+    proeth:caseinvolvement "Led to delayed risk communication and subsequent quantification efforts" ;
+    proeth:confidencescore "0.87" ;
+    proeth:generatedattime "2025-09-27T20:56:08.049049" ;
+    proeth:hasrelatedparty "Client X",
+        "Community using watershed for drinking water" ;
+    proeth:hassubject "Engineer L" ;
+    proeth:hasurgencylevel "high" ;
+    proeth:initiatedat "During preliminary design phase" ;
+    proeth:initiatedby "Preliminary design analysis showing potential increased stormwater impact risk" ;
+    proeth:terminatedat "After work resumption and historic rainfall event" ;
+    proeth:terminatedby "Additional studies conducted after work resumed" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.656789"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:EngineerL_WorkSuspension_ClientX_Phase1 a proeth:WorkSuspensionState,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_WorkSuspension_ClientX_Phase1" ;
+    proeth:affectsobligation "Communicate risks to client",
+        "Complete stormwater design",
+        "Ensure drinking water protection" ;
+    proeth:caseinvolvement "Created gap in risk communication about drinking water impacts" ;
+    proeth:confidencescore "0.92" ;
+    proeth:generatedattime "2025-09-27T20:56:08.049049" ;
+    proeth:hasrelatedparty "Client X",
+        "Small community relying on watershed" ;
+    proeth:hassubject "Engineer L" ;
+    proeth:hasurgencylevel "medium" ;
+    proeth:initiatedat "During preliminary design phase after initial concerns identified" ;
+    proeth:initiatedby "Client X's request to suspend work due to unexpected financial setbacks" ;
+    proeth:terminatedat "Several months later when Client X's financial situation improved" ;
+    proeth:terminatedby "Client X's request to resume work" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.657113"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
 case8:Engineer_L a proeth:StormwaterControlDesignSpecialist,
@@ -91,5 +169,55 @@ case8:Engineer_L a proeth:StormwaterControlDesignSpecialist,
     proeth:hastitle "Engineer" ;
     proeth:wasattributedto "Case 8 Extraction" ;
     prov:generatedAtTime "2025-09-27T00:33:35.250846"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:Engineer_L_Risk_Assessment_Study a proeth:RiskAssessmentStudy,
+        owl:NamedIndividual ;
+    rdfs:label "Engineer_L_Risk_Assessment_Study" ;
+    proeth:confidencescore "0.85" ;
+    proeth:createdat "After work resumption following historic rainfall" ;
+    proeth:createdby "Engineer L" ;
+    proeth:generatedattime "2025-09-27T20:58:11.904030" ;
+    proeth:hasdocumenttitle "Stormwater runoff risk assessment for Client X development" ;
+    proeth:usedby "Engineer L" ;
+    proeth:usedincontext "Conducted to qualitatively estimate risk of stormwater reaching watershed" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.657396"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:Local_Environmental_Standards_Water_Protection a proeth:EnvironmentalProtectionStandards,
+        owl:NamedIndividual ;
+    rdfs:label "Local_Environmental_Standards_Water_Protection" ;
+    proeth:confidencescore "0.9" ;
+    proeth:createdby "Local environmental regulatory authority" ;
+    proeth:generatedattime "2025-09-27T20:58:11.904030" ;
+    proeth:hasdocumenttitle "Local environmental standards for public water source protection" ;
+    proeth:usedby "Engineer L" ;
+    proeth:usedincontext "Referenced when advising Client X about required protective measures" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.657330"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:Original_Contract_Scope a proeth:LegalResource,
+        owl:NamedIndividual ;
+    rdfs:label "Original_Contract_Scope" ;
+    proeth:confidencescore "0.95" ;
+    proeth:createdat "Beginning of project" ;
+    proeth:createdby "Engineer L and Client X" ;
+    proeth:generatedattime "2025-09-27T20:58:11.904030" ;
+    proeth:hasdocumenttitle "Original contract between Engineer L and Client X" ;
+    proeth:usedby "Engineer L and Client X" ;
+    proeth:usedincontext "Defined scope of work including ensuring no impact to drinking water source" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.657460"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:Stormwater_Design_Standards_Implicit a proeth:StormwaterManagementDesignStandards,
+        owl:NamedIndividual ;
+    rdfs:label "Stormwater_Design_Standards_Implicit" ;
+    proeth:confidencescore "0.7" ;
+    proeth:createdby "Engineering professional organizations" ;
+    proeth:generatedattime "2025-09-27T20:58:11.904030" ;
+    proeth:hasdocumenttitle "Professional stormwater control design standards" ;
+    proeth:usedby "Engineer L" ;
+    proeth:usedincontext "Applied through Engineer L's years of experience in stormwater control design" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.657007"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 

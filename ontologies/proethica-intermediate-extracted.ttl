@@ -1,4 +1,3 @@
-@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix proeth: <http://proethica.org/ontology/intermediate#> .
 @prefix proeth-core: <http://proethica.org/ontology/core#> .
@@ -7,17 +6,61 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
+proeth: rdfs:comment "Extracted classes cleared on 2025-09-27T16:33:53.508662. Backup saved as proethica-intermediate-extracted.ttl.bak" .
+
+proeth:ClientBudgetConstraintState a owl:Class ;
+    rdfs:label "Client Budget Constraint State" ;
+    rdfs:comment "A state where a client's financial limitations actively prevent implementation of professionally recommended safety or compliance measures" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a client's financial limitations actively prevent implementation of professionally recommended safety or compliance measures" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.649457"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:EnvironmentalProtectionStandards a owl:Class ;
+    rdfs:label "Environmental Protection Standards" ;
+    rdfs:comment "Regulatory standards and requirements specifically focused on protecting environmental resources including water sources, air quality, and ecosystems" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Regulatory standards and requirements specifically focused on protecting environmental resources including water sources, air quality, and ecosystems" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.649655"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:RiskAssessmentStudy a owl:Class ;
+    rdfs:label "Risk Assessment Study" ;
+    rdfs:comment "Technical analysis document that quantifies or qualifies risks associated with engineering projects and their potential impacts" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Technical analysis document that quantifies or qualifies risks associated with engineering projects and their potential impacts" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.649505"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
 proeth:StormwaterControlDesignSpecialist a owl:Class ;
     rdfs:label "Stormwater Control Design Specialist" ;
     rdfs:comment "A licensed professional engineer specializing in the design and management of stormwater control systems to prevent flooding and protect water resources" ;
     rdfs:subClassOf proeth-core:Role ;
     skos:definition "A licensed professional engineer specializing in the design and management of stormwater control systems to prevent flooding and protect water resources" ;
-    prov:generatedAtTime "2025-09-27T00:33:35.245993"^^xsd:dateTime ;
+    prov:generatedAtTime "2025-09-27T20:59:03.649392"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
-<http://proethica.org/ontology/intermediate-extracted> a owl:Ontology ;
-    rdfs:label "ProEthica Intermediate Extracted Classes" ;
-    dcterms:created "2025-09-26"^^xsd:date ;
-    rdfs:comment "Container for dynamically extracted classes from ProEthica case analysis. This file is automatically managed by the ProEthica extraction system." ;
-    owl:imports proeth-core: .
+proeth:StormwaterManagementDesignStandards a owl:Class ;
+    rdfs:label "Stormwater Management Design Standards" ;
+    rdfs:comment "Technical standards and guidelines specifically for designing stormwater control and management systems" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Technical standards and guidelines specifically for designing stormwater control and management systems" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.649580"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:UnquantifiedRiskAwarenessState a owl:Class ;
+    rdfs:label "Unquantified Risk Awareness State" ;
+    rdfs:comment "A state where a professional has identified potential risks but lacks sufficient data or analysis to quantify them precisely" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a professional has identified potential risks but lacks sufficient data or analysis to quantify them precisely" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.649618"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:WorkSuspensionState a owl:Class ;
+    rdfs:label "Work Suspension State" ;
+    rdfs:comment "A state where contracted professional work is temporarily halted due to client circumstances while unresolved technical concerns remain" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where contracted professional work is temporarily halted due to client circumstances while unresolved technical concerns remain" ;
+    prov:generatedAtTime "2025-09-27T20:59:03.649542"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
 
