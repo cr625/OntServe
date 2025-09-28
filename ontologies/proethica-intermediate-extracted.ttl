@@ -8,12 +8,36 @@
 
 proeth: rdfs:comment "Extracted classes cleared on 2025-09-28T12:20:21.257937. Backup saved as proethica-intermediate-extracted.ttl.bak" .
 
+proeth:AIOutputVerification a owl:Class ;
+    rdfs:label "AI Output Verification" ;
+    rdfs:comment "Professional action to validate AI-generated content through cross-checking and verification procedures" ;
+    rdfs:subClassOf proeth-core:Action ;
+    skos:definition "Professional action to validate AI-generated content through cross-checking and verification procedures" ;
+    prov:generatedAtTime "2025-09-28T17:05:15.049545"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
 proeth:AISoftwareTool a owl:Class ;
     rdfs:label "AI Software Tool" ;
     rdfs:comment "Artificial intelligence software applications used to assist in professional tasks such as drafting, analysis, or design generation" ;
     rdfs:subClassOf proeth-core:Resource ;
     skos:definition "Artificial intelligence software applications used to assist in professional tasks such as drafting, analysis, or design generation" ;
     prov:generatedAtTime "2025-09-28T16:40:51.895751"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:AIToolAdoption a owl:Class ;
+    rdfs:label "AI Tool Adoption" ;
+    rdfs:comment "Professional action to integrate artificial intelligence tools into engineering practice without prior experience or established protocols" ;
+    rdfs:subClassOf proeth-core:Action ;
+    skos:definition "Professional action to integrate artificial intelligence tools into engineering practice without prior experience or established protocols" ;
+    prov:generatedAtTime "2025-09-28T17:05:15.049433"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:AccurateRepresentationObligation a owl:Class ;
+    rdfs:label "Accurate Representation Obligation" ;
+    rdfs:comment "Duty to accurately and completely represent data, findings, and stakeholder input without omission or mischaracterization in professional reports" ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    skos:definition "Duty to accurately and completely represent data, findings, and stakeholder input without omission or mischaracterization in professional reports" ;
+    prov:generatedAtTime "2025-09-28T18:44:48.901338"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
 proeth:AttributionConstraint a owl:Class ;
@@ -32,6 +56,52 @@ proeth:AttributionObligation a owl:Class ;
     prov:generatedAtTime "2025-09-28T17:00:49.340502"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:ClientDirectiveConflictState a owl:Class ;
+    rdfs:label "Client Directive Conflict State" ;
+    rdfs:comment "A state where a client's explicit instructions conflict with professional obligations to serve public welfare or ensure fair processes" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a client's explicit instructions conflict with professional obligations to serve public welfare or ensure fair processes" ;
+    prov:generatedAtTime "2025-09-28T18:27:13.599249"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:CommunityEngagementCapability a owl:Class ;
+    rdfs:label "Community Engagement Capability" ;
+    rdfs:comment "The competency to effectively plan, conduct, and facilitate meaningful public participation processes that ensure equitable access and representation for all affected stakeholders" ;
+    skos:definition "The competency to effectively plan, conduct, and facilitate meaningful public participation processes that ensure equitable access and representation for all affected stakeholders" ;
+    prov:generatedAtTime "2025-09-28T19:10:43.255153"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:CommunityExclusionState a owl:Class ;
+    rdfs:label "Community Exclusion State" ;
+    rdfs:comment "A state where public engagement processes systematically exclude or limit participation from affected stakeholder communities through structural barriers" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where public engagement processes systematically exclude or limit participation from affected stakeholder communities through structural barriers" ;
+    prov:generatedAtTime "2025-09-28T18:27:13.599173"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:ContractualAuthorityConstraint a owl:Class ;
+    rdfs:label "Contractual Authority Constraint" ;
+    rdfs:comment "Limitations on an agent's ability to control or direct the actions of contracted third parties, particularly when those parties have separate contractual relationships with the client" ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    skos:definition "Limitations on an agent's ability to control or direct the actions of contracted third parties, particularly when those parties have separate contractual relationships with the client" ;
+    prov:generatedAtTime "2025-09-28T18:44:48.901221"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:EnvironmentalJustice a owl:Class ;
+    rdfs:label "Environmental Justice" ;
+    rdfs:comment "Principle that environmental benefits and burdens should be distributed equitably, with special attention to historically marginalized communities" ;
+    rdfs:subClassOf proeth-core:Principle ;
+    skos:definition "Principle that environmental benefits and burdens should be distributed equitably, with special attention to historically marginalized communities" ;
+    prov:generatedAtTime "2025-09-28T18:44:48.901179"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:EthicalOversightCapability a owl:Class ;
+    rdfs:label "Ethical Oversight Capability" ;
+    rdfs:comment "The competency to identify, challenge, and correct unethical practices within collaborative professional relationships and project teams" ;
+    skos:definition "The competency to identify, challenge, and correct unethical practices within collaborative professional relationships and project teams" ;
+    prov:generatedAtTime "2025-09-28T19:10:43.255212"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
 proeth:GroundwaterMonitoringData a owl:Class ;
     rdfs:label "Groundwater Monitoring Data" ;
     rdfs:comment "Environmental data collected from groundwater monitoring activities including measurements, observations, and analytical results" ;
@@ -46,6 +116,14 @@ proeth:LocalSafetyRegulations a owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     skos:definition "Municipality or locality-specific regulations governing safety features and requirements for engineering projects" ;
     prov:generatedAtTime "2025-09-28T16:40:51.895892"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:MentorRetirement a owl:Class ;
+    rdfs:label "Mentor Retirement" ;
+    rdfs:comment "Loss of professional mentorship and quality assurance support due to retirement" ;
+    rdfs:subClassOf proeth-core:Action ;
+    skos:definition "Loss of professional mentorship and quality assurance support due to retirement" ;
+    prov:generatedAtTime "2025-09-28T17:05:15.049348"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
 proeth:MentorshipDependencyState a owl:Class ;
@@ -64,12 +142,92 @@ proeth:MethodologicalTransparency a owl:Class ;
     prov:generatedAtTime "2025-09-28T17:00:49.340293"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:MisrepresentationofPublicSupportState a owl:Class ;
+    rdfs:label "Misrepresentation of Public Support State" ;
+    rdfs:comment "A state where reported stakeholder feedback does not accurately reflect actual community sentiment due to selective reporting or omission of critical context" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where reported stakeholder feedback does not accurately reflect actual community sentiment due to selective reporting or omission of critical context" ;
+    prov:generatedAtTime "2025-09-28T18:27:13.599212"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:ProceduralJustice a owl:Class ;
+    rdfs:label "Procedural Justice" ;
+    rdfs:comment "Principle that decision-making processes must be fair, inclusive, and provide meaningful opportunity for affected parties to participate" ;
+    rdfs:subClassOf proeth-core:Principle ;
+    skos:definition "Principle that decision-making processes must be fair, inclusive, and provide meaningful opportunity for affected parties to participate" ;
+    prov:generatedAtTime "2025-09-28T18:44:48.901133"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
 proeth:ProfessionalJournalArticle a owl:Class ;
     rdfs:label "Professional Journal Article" ;
     rdfs:comment "Peer-reviewed academic or professional publications containing technical information, research findings, or industry standards" ;
     rdfs:subClassOf proeth-core:Resource ;
     skos:definition "Peer-reviewed academic or professional publications containing technical information, research findings, or industry standards" ;
     prov:generatedAtTime "2025-09-28T16:40:51.895849"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:ProfessionalSealApplication a owl:Class ;
+    rdfs:label "Professional Seal Application" ;
+    rdfs:comment "Professional action to apply engineering seal to documents, certifying professional responsibility" ;
+    rdfs:subClassOf proeth-core:Action ;
+    skos:definition "Professional action to apply engineering seal to documents, certifying professional responsibility" ;
+    prov:generatedAtTime "2025-09-28T17:05:15.049393"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:PublicAccessibilityConstraint a owl:Class ;
+    rdfs:label "Public Accessibility Constraint" ;
+    rdfs:comment "Requirements and limitations regarding the physical, temporal, and technological accessibility of public engagement processes to ensure meaningful participation by affected communities" ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    skos:definition "Requirements and limitations regarding the physical, temporal, and technological accessibility of public engagement processes to ensure meaningful participation by affected communities" ;
+    prov:generatedAtTime "2025-09-28T18:44:48.901261"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:PublicEngagementCoordinator a owl:Class ;
+    rdfs:label "Public Engagement Coordinator" ;
+    rdfs:comment "Professional responsible for organizing and conducting public outreach sessions to gather community input on infrastructure projects" ;
+    rdfs:subClassOf proeth-core:Role ;
+    skos:definition "Professional responsible for organizing and conducting public outreach sessions to gather community input on infrastructure projects" ;
+    prov:generatedAtTime "2025-09-28T18:27:13.599036"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:PublicEngagementObligation a owl:Class ;
+    rdfs:label "Public Engagement Obligation" ;
+    rdfs:comment "Duty to ensure meaningful, accessible, and inclusive participation opportunities for all affected stakeholders, particularly historically underserved communities, in infrastructure projects" ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    skos:definition "Duty to ensure meaningful, accessible, and inclusive participation opportunities for all affected stakeholders, particularly historically underserved communities, in infrastructure projects" ;
+    prov:generatedAtTime "2025-09-28T18:44:48.901301"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:PublicEngagementProtocol a owl:Class ;
+    rdfs:label "Public Engagement Protocol" ;
+    rdfs:comment "Formal procedures and requirements for conducting public consultation and community engagement in infrastructure projects" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Formal procedures and requirements for conducting public consultation and community engagement in infrastructure projects" ;
+    prov:generatedAtTime "2025-09-28T18:27:13.599086"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:PublicEngagementReport a owl:Class ;
+    rdfs:label "Public Engagement Report" ;
+    rdfs:comment "Documentation summarizing community consultation activities, feedback received, and stakeholder positions on proposed projects" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Documentation summarizing community consultation activities, feedback received, and stakeholder positions on proposed projects" ;
+    prov:generatedAtTime "2025-09-28T18:27:13.599134"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:QualityDiscrepancyDetection a owl:Class ;
+    rdfs:label "Quality Discrepancy Detection" ;
+    rdfs:comment "Client identification of inconsistent quality or style in professional deliverables" ;
+    rdfs:subClassOf proeth-core:Action ;
+    skos:definition "Client identification of inconsistent quality or style in professional deliverables" ;
+    prov:generatedAtTime "2025-09-28T17:05:15.049505"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:RegulatoryComplianceFailure a owl:Class ;
+    rdfs:label "Regulatory Compliance Failure" ;
+    rdfs:comment "Discovery of missing safety features or non-compliance with regulations in deliverables" ;
+    rdfs:subClassOf proeth-core:Action ;
+    skos:definition "Discovery of missing safety features or non-compliance with regulations in deliverables" ;
+    prov:generatedAtTime "2025-09-28T17:05:15.049583"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
 proeth:TechnologicalCompetence a owl:Class ;
@@ -102,6 +260,13 @@ proeth:ToolFamiliarityConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     skos:definition "Limitations arising from lack of experience or understanding of specific tools, technologies, or software systems that restrict the ability to fully utilize or verify their outputs" ;
     prov:generatedAtTime "2025-09-28T17:00:49.340345"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:TransparentReportingCapability a owl:Class ;
+    rdfs:label "Transparent Reporting Capability" ;
+    rdfs:comment "The competency to prepare complete, accurate, and unbiased reports that fully disclose methodologies, limitations, and potential conflicts in professional work" ;
+    skos:definition "The competency to prepare complete, accurate, and unbiased reports that fully disclose methodologies, limitations, and potential conflicts in professional work" ;
+    prov:generatedAtTime "2025-09-28T19:10:43.255254"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
 proeth:UndisclosedToolUseState a owl:Class ;
