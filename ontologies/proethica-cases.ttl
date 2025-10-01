@@ -629,3 +629,147 @@ proeth-cases:ProArgument owl:disjointWith proeth-cases:ConArgument .
 # Domain-specific case types are disjoint
 [] a owl:AllDisjointClasses ;
    owl:members ( proeth-cases:EngineeringCase proeth-cases:MedicalCase proeth-cases:BusinessCase proeth-cases:ResearchCase ) .
+###############################################################
+# NSPE-Specific Section Types for Multi-Section Extraction
+###############################################################
+
+# NSPE case section types extend generic section framework
+proeth-cases:NSPEFactsSection a owl:Class ;
+    rdfs:subClassOf proeth-cases:FactualSection ;
+    rdfs:label "NSPE Facts Section"@en ;
+    rdfs:comment "Objective facts section in NSPE case structure, establishes contextual framework"@en ;
+    skos:definition "Section presenting objective factual information specific to NSPE engineering ethics cases, establishing the environmental states and professional context for ethical analysis"@en ;
+    dcterms:source <https://www.nspe.org/resources/ethics/code-ethics> ;
+    proeth-cases:sectionOrder 1 .
+
+proeth-cases:NSPEDiscussionSection a owl:Class ;
+    rdfs:subClassOf proeth-cases:AnalysisSection ;
+    rdfs:label "NSPE Discussion Section"@en ;
+    rdfs:comment "Analysis and ethical reasoning section in NSPE case structure"@en ;
+    skos:definition "Section providing structured ethical analysis and reasoning in NSPE cases, applying professional engineering principles to case facts"@en ;
+    dcterms:source <https://www.nspe.org/resources/ethics/code-ethics> ;
+    proeth-cases:sectionOrder 2 .
+
+proeth-cases:NSPEQuestionSection a owl:Class ;
+    rdfs:subClassOf proeth-cases:EthicalQuestionSection ;
+    rdfs:label "NSPE Question Section"@en ;
+    rdfs:comment "Formal ethical questions posed in NSPE case structure"@en ;
+    skos:definition "Section presenting specific ethical questions requiring professional judgment in NSPE engineering ethics cases"@en ;
+    dcterms:source <https://www.nspe.org/resources/ethics/code-ethics> ;
+    proeth-cases:sectionOrder 3 .
+
+proeth-cases:NSPEConclusionSection a owl:Class ;
+    rdfs:subClassOf proeth-cases:ConclusionSection ;
+    rdfs:label "NSPE Conclusion Section"@en ;
+    rdfs:comment "Resolution and answers to ethical questions in NSPE case structure"@en ;
+    skos:definition "Section presenting final professional decisions and resolutions that answer ethical questions in NSPE cases"@en ;
+    dcterms:source <https://www.nspe.org/resources/ethics/code-ethics> ;
+    proeth-cases:sectionOrder 4 .
+
+proeth-cases:NSPEDissentingOpinionSection a owl:Class ;
+    rdfs:subClassOf proeth-cases:CaseSection ;
+    rdfs:label "NSPE Dissenting Opinion Section"@en ;
+    rdfs:comment "Alternative interpretation disagreeing with majority conclusion in NSPE cases"@en ;
+    skos:definition "Section presenting alternative ethical interpretation or reasoning that disagrees with the majority conclusion, providing important precedential nuance in NSPE engineering ethics cases"@en ;
+    dcterms:source <https://www.nspe.org/resources/ethics/code-ethics> ;
+    proeth-cases:sectionOrder 5 .
+
+proeth-cases:NSPEReferencesSection a owl:Class ;
+    rdfs:subClassOf proeth-cases:CaseSection ;
+    rdfs:label "NSPE References Section"@en ;
+    rdfs:comment "Code provisions, case precedents, and supporting references in NSPE cases"@en ;
+    skos:definition "Section citing relevant NSPE Code of Ethics provisions, previous case precedents, and supporting materials that inform the ethical analysis"@en ;
+    dcterms:source <https://www.nspe.org/resources/ethics/code-ethics> ;
+    proeth-cases:sectionOrder 6 .
+
+###############################################################
+# Question-Conclusion Framework for Ethical Reasoning
+###############################################################
+
+# Ethical Question and Conclusion entities
+proeth-cases:EthicalQuestion a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Ethical Question"@en ;
+    rdfs:comment "Specific ethical question posed in a case requiring professional resolution"@en ;
+    skos:definition "An information content entity representing a specific ethical question, dilemma, or decision point posed in a professional ethics case that requires systematic analysis and resolution through professional judgment"@en ;
+    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705> .
+
+proeth-cases:EthicalConclusion a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Ethical Conclusion"@en ;
+    rdfs:comment "Resolution or answer to an ethical question in a case"@en ;
+    skos:definition "An information content entity representing the resolution, answer, or professional decision made in response to an ethical question, grounded in professional principles and precedential reasoning"@en ;
+    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705> .
+
+###############################################################
+# Properties for Question-Conclusion Linking
+###############################################################
+
+proeth-cases:answersQuestion a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:EthicalConclusion ;
+    rdfs:range proeth-cases:EthicalQuestion ;
+    rdfs:label "answers question"@en ;
+    rdfs:comment "Links an ethical conclusion to the question it addresses"@en ;
+    skos:definition "Relates an ethical conclusion to the specific ethical question it addresses or resolves, establishing the reasoning chain from question to resolution"@en .
+
+proeth-cases:hasConclusion a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:EthicalQuestion ;
+    rdfs:range proeth-cases:EthicalConclusion ;
+    owl:inverseOf proeth-cases:answersQuestion ;
+    rdfs:label "has conclusion"@en ;
+    rdfs:comment "Links an ethical question to its conclusion(s)"@en ;
+    skos:definition "Relates an ethical question to its conclusion(s), enabling navigation from question to resolution"@en .
+
+proeth-cases:questionText a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:EthicalQuestion ;
+    rdfs:range xsd:string ;
+    rdfs:label "question text"@en ;
+    rdfs:comment "The verbatim text of the ethical question"@en ;
+    skos:definition "The exact textual formulation of the ethical question as posed in the case"@en .
+
+proeth-cases:questionNumber a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:EthicalQuestion ;
+    rdfs:range xsd:integer ;
+    rdfs:label "question number"@en ;
+    rdfs:comment "Ordering number for questions in a case"@en ;
+    skos:definition "Integer value specifying the sequential position of a question within a case's question set"@en .
+
+proeth-cases:conclusionText a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:EthicalConclusion ;
+    rdfs:range xsd:string ;
+    rdfs:label "conclusion text"@en ;
+    rdfs:comment "The verbatim text of the ethical conclusion"@en ;
+    skos:definition "The exact textual formulation of the ethical conclusion or resolution"@en .
+
+###############################################################
+# Properties for Entity Tracking Across Sections
+###############################################################
+
+proeth-cases:extractedFromSection a owl:ObjectProperty ;
+    rdfs:domain owl:Thing ;
+    rdfs:range proeth-cases:CaseSection ;
+    rdfs:label "extracted from section"@en ;
+    rdfs:comment "Links an entity to the case section from which it was extracted"@en ;
+    skos:definition "Relates an extracted entity (role, principle, action, etc.) to the specific case section from which it was identified, enabling provenance tracking and cross-section analysis"@en .
+
+proeth-cases:fromDissentingOpinion a owl:DatatypeProperty ;
+    rdfs:domain owl:Thing ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "from dissenting opinion"@en ;
+    rdfs:comment "Marks entities extracted from dissenting opinion section"@en ;
+    skos:definition "Boolean property indicating whether an entity was extracted from a dissenting opinion section, signaling alternative interpretations that may contradict majority conclusions"@en .
+
+proeth-cases:referencesEntity a owl:ObjectProperty ;
+    rdfs:domain owl:Thing ;
+    rdfs:range owl:Thing ;
+    rdfs:label "references entity"@en ;
+    rdfs:comment "Indicates this entity references another entity from a different section"@en ;
+    skos:definition "Relates an entity to another entity it references or mentions, typically used when entities in later sections (Discussion, Conclusion) refer to entities from earlier sections (Facts)"@en .
+
+proeth-cases:sameEntityAs a owl:ObjectProperty, owl:SymmetricProperty ;
+    rdfs:domain owl:Thing ;
+    rdfs:range owl:Thing ;
+    rdfs:label "same entity as"@en ;
+    rdfs:comment "Indicates this entity is the same as an entity from another section"@en ;
+    skos:definition "Symmetric property indicating that two entity mentions across different sections refer to the same real-world entity (e.g., 'the engineer' in Discussion refers to 'John Smith' in Facts)"@en .
+
