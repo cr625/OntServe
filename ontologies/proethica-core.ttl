@@ -184,6 +184,49 @@ proeth-core:constrainedBy a owl:ObjectProperty ;
     skos:definition "Relates an action to constraints that limit or restrict it."@en .
 
 ###############################################################
+# IAO Document Integration for Resources
+# Added: 2025-10-07 - Support for linking Resources to IAO documents
+###############################################################
+
+# Link Resource to IAO document
+proeth-core:refersToDocument a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Resource ;
+    rdfs:range iao:0000300 ;  # IAO:document
+    rdfs:label "refers to document"@en ;
+    rdfs:comment "Links a resource to the IAO document it represents or references. Used to connect ethical resources (NSPE Code, case precedents) to their document representations."@en ;
+    skos:definition "Relates a Resource to an Information Artifact Ontology document that it represents."@en .
+
+# Indicate which agent has access to a resource (case context)
+proeth-core:availableTo a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Resource ;
+    rdfs:range proeth-core:Role ;  # agents in roles
+    rdfs:label "available to"@en ;
+    rdfs:comment "Indicates which agent(s) in the case scenario have access to this resource. Distinguishes resources available to case participants from those cited by analysts."@en ;
+    skos:definition "Relates a Resource to a Role indicating who can access or use it within the case scenario."@en .
+
+# Indicate which agent cited a resource (analytic authority)
+proeth-core:citedByAgent a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Resource ;
+    rdfs:range proeth-core:Role ;  # BER, etc.
+    rdfs:label "cited by agent"@en ;
+    rdfs:comment "Indicates which agent(s) cited this resource as an authoritative source in their ethical analysis. Distinguishes Citations (References section) from available resources."@en ;
+    skos:definition "Relates a Resource to a Role indicating who cited it as authority."@en .
+
+# Link normative concepts to cited authorities
+proeth-core:citesAuthority a owl:ObjectProperty ;
+    rdfs:domain [
+        a owl:Class ;
+        owl:unionOf (proeth-core:Principle proeth-core:Obligation proeth-core:Constraint)
+    ] ;
+    rdfs:range [
+        a owl:Class ;
+        owl:unionOf (iao:0000300 iao:0000310)  # document or document part
+    ] ;
+    rdfs:label "cites authority"@en ;
+    rdfs:comment "Links an ethical concept (Principle, Obligation, Constraint) to the authoritative document that establishes or supports it. Used for tracking Board of Ethical Review citations."@en ;
+    skos:definition "Relates a normative concept to the IAO document or document part that serves as its authoritative source."@en .
+
+###############################################################
 # Formal Specification Completeness Constraints
 ###############################################################
 
