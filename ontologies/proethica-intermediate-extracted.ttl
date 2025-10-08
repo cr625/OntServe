@@ -6,160 +6,261 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-proeth:ClientBudgetConstraintState a owl:Class ;
-    rdfs:label "Client Budget Constraint State" ;
-    rdfs:comment "A state where a client's financial limitations actively constrain implementation of recommended safety or compliance measures" ;
-    rdfs:subClassOf proeth-core:State ;
-    skos:definition "A state where a client's financial limitations actively constrain implementation of recommended safety or compliance measures" ;
-    prov:generatedAtTime "2025-09-29T00:54:42.424146"^^xsd:dateTime ;
+proeth:AlternativeSolutionDevelopmentCapability a owl:Class ;
+    rdfs:label "Alternative Solution Development Capability" ;
+    rdfs:comment "The competency to develop and present innovative alternatives that address client needs while incorporating broader ethical and sustainability considerations" ;
+    skos:definition "The competency to develop and present innovative alternatives that address client needs while incorporating broader ethical and sustainability considerations" ;
+    prov:generatedAtTime "2025-10-08T23:31:55.691831"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
-proeth:ClientCommunicationCapability a owl:Class ;
-    rdfs:label "Client Communication Capability" ;
-    rdfs:comment "The competency to effectively communicate technical concerns, risks, and recommendations to clients, including difficult or unwelcome information" ;
-    skos:definition "The competency to effectively communicate technical concerns, risks, and recommendations to clients, including difficult or unwelcome information" ;
-    prov:generatedAtTime "2025-09-29T00:54:42.424302"^^xsd:dateTime ;
+proeth:BoardEthicsOpinion a owl:Class ;
+    rdfs:label "Board Ethics Opinion" ;
+    rdfs:comment "Formal written opinions issued by professional ethics review boards on specific ethical cases that serve as precedents and guidance" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Formal written opinions issued by professional ethics review boards on specific ethical cases that serve as precedents and guidance" ;
+    prov:generatedAtTime "2025-10-08T23:17:12.354708"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
-proeth:ClientResistanceEvent a owl:Class ;
-    rdfs:label "Client Resistance Event" ;
-    rdfs:comment "Client's explicit rejection or hesitation to implement recommended safety measures" ;
-    rdfs:subClassOf proeth-core:Action ;
-    skos:definition "Client's explicit rejection or hesitation to implement recommended safety measures" ;
-    prov:generatedAtTime "2025-09-29T01:27:28.878569"^^xsd:dateTime ;
+proeth:ClientEducationObligation a owl:Class ;
+    rdfs:label "Client Education Obligation" ;
+    rdfs:comment "Requirement to inform and educate clients about available options, alternatives, and implications of engineering decisions, particularly regarding sustainability and best practices" ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    skos:definition "Requirement to inform and educate clients about available options, alternatives, and implications of engineering decisions, particularly regarding sustainability and best practices" ;
+    prov:generatedAtTime "2025-10-08T23:31:55.691994"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:ClientSpecificationConstraint a owl:Class ;
+    rdfs:label "Client Specification Constraint" ;
+    rdfs:comment "Limitations imposed by specific technical or design specifications that a client has explicitly requested and that form part of the accepted project scope" ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    skos:definition "Limitations imposed by specific technical or design specifications that a client has explicitly requested and that form part of the accepted project scope" ;
+    prov:generatedAtTime "2025-10-08T23:31:55.691705"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
 proeth:ContractualScopeConstraint a owl:Class ;
     rdfs:label "Contractual Scope Constraint" ;
-    rdfs:comment "Limitations on professional actions defined by the specific scope of work agreed upon in a contract, restricting what services can be performed and when" ;
+    rdfs:comment "Boundaries defined by the specific deliverables and specifications in a binding contract" ;
     rdfs:subClassOf proeth-core:Constraint ;
-    skos:definition "Limitations on professional actions defined by the specific scope of work agreed upon in a contract, restricting what services can be performed and when" ;
-    prov:generatedAtTime "2025-09-29T00:54:42.424493"^^xsd:dateTime ;
+    skos:definition "Boundaries defined by the specific deliverables and specifications in a binding contract" ;
+    prov:generatedAtTime "2025-10-08T23:29:25.694904"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
-proeth:EnvironmentalImpactCapability a owl:Class ;
-    rdfs:label "Environmental Impact Capability" ;
-    rdfs:comment "The competency to assess and mitigate environmental consequences of professional activities, particularly regarding public resources" ;
-    skos:definition "The competency to assess and mitigate environmental consequences of professional activities, particularly regarding public resources" ;
-    prov:generatedAtTime "2025-09-29T00:54:42.424379"^^xsd:dateTime ;
+proeth:EngineerInternRole a owl:Class ;
+    rdfs:label "Engineer Intern Role" ;
+    rdfs:comment "Entry-level engineering position for individuals pursuing professional licensure, working under supervision while gaining practical experience" ;
+    rdfs:subClassOf proeth-core:Role ;
+    skos:definition "Entry-level engineering position for individuals pursuing professional licensure, working under supervision while gaining practical experience" ;
+    prov:generatedAtTime "2025-10-08T20:15:54.318301"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
 proeth:EnvironmentalImpactConstraint a owl:Class ;
     rdfs:label "Environmental Impact Constraint" ;
-    rdfs:comment "Boundaries on activities that could affect environmental resources, particularly those critical to public health and safety" ;
+    rdfs:comment "Limitations on actions that would cause measurable degradation to natural resources or ecosystems" ;
     rdfs:subClassOf proeth-core:Constraint ;
-    skos:definition "Boundaries on activities that could affect environmental resources, particularly those critical to public health and safety" ;
-    prov:generatedAtTime "2025-09-29T00:54:42.424267"^^xsd:dateTime ;
+    skos:definition "Limitations on actions that would cause measurable degradation to natural resources or ecosystems" ;
+    prov:generatedAtTime "2025-10-08T23:29:25.694863"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
-proeth:EnvironmentalProtectionObligation a owl:Class ;
-    rdfs:label "Environmental Protection Obligation" ;
-    rdfs:comment "Requirement for professionals to protect environmental resources, particularly water sources, from contamination or degradation resulting from their professional work" ;
+proeth:EnvironmentalSustainabilityConcernState a owl:Class ;
+    rdfs:label "Environmental Sustainability Concern State" ;
+    rdfs:comment "A state where a professional identifies potential environmental harm from a proposed design or action that conflicts with sustainable development principles" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a professional identifies potential environmental harm from a proposed design or action that conflicts with sustainable development principles" ;
+    prov:generatedAtTime "2025-10-08T20:15:54.318382"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:EthicalObjectionCapability a owl:Class ;
+    rdfs:label "Ethical Objection Capability" ;
+    rdfs:comment "The competency to formally articulate and document ethical concerns about professional work assignments based on professional codes and principles" ;
+    skos:definition "The competency to formally articulate and document ethical concerns about professional work assignments based on professional codes and principles" ;
+    prov:generatedAtTime "2025-10-08T23:29:25.695021"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:EthicalTensionResolutionCapability a owl:Class ;
+    rdfs:label "Ethical Tension Resolution Capability" ;
+    rdfs:comment "The competency to identify, analyze, and harmonize competing ethical obligations through creative problem-solving and integrated solutions" ;
+    skos:definition "The competency to identify, analyze, and harmonize competing ethical obligations through creative problem-solving and integrated solutions" ;
+    prov:generatedAtTime "2025-10-08T23:31:55.691792"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:FaithfulAgencyObligation a owl:Class ;
+    rdfs:label "Faithful Agency Obligation" ;
+    rdfs:comment "Requirement for engineers to act as faithful agents or trustees for their employers or clients, fulfilling assigned tasks and contractual commitments while maintaining professional integrity" ;
     rdfs:subClassOf proeth-core:Obligation ;
-    skos:definition "Requirement for professionals to protect environmental resources, particularly water sources, from contamination or degradation resulting from their professional work" ;
-    prov:generatedAtTime "2025-09-29T00:54:42.424343"^^xsd:dateTime ;
+    skos:definition "Requirement for engineers to act as faithful agents or trustees for their employers or clients, fulfilling assigned tasks and contractual commitments while maintaining professional integrity" ;
+    prov:generatedAtTime "2025-10-08T23:31:55.691911"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
-proeth:EnvironmentalProtectionStandards a owl:Class ;
-    rdfs:label "Environmental Protection Standards" ;
-    rdfs:comment "Regulatory standards and requirements specifically focused on protecting environmental resources including water sources, air quality, and ecosystems" ;
-    rdfs:subClassOf proeth-core:Resource ;
-    skos:definition "Regulatory standards and requirements specifically focused on protecting environmental resources including water sources, air quality, and ecosystems" ;
-    prov:generatedAtTime "2025-09-29T00:42:43.151459"^^xsd:dateTime ;
-    prov:wasGeneratedBy "ProEthica Extraction" .
-
-proeth:FinancialRecoveryEvent a owl:Class ;
-    rdfs:label "Financial Recovery Event" ;
-    rdfs:comment "Improvement in client's financial situation enabling project resumption" ;
-    rdfs:subClassOf proeth-core:Action ;
-    skos:definition "Improvement in client's financial situation enabling project resumption" ;
-    prov:generatedAtTime "2025-09-29T01:27:28.878490"^^xsd:dateTime ;
-    prov:wasGeneratedBy "ProEthica Extraction" .
-
-proeth:HistoricWeatherEvent a owl:Class ;
-    rdfs:label "Historic Weather Event" ;
-    rdfs:comment "Extreme weather occurrence exceeding normal design parameters" ;
-    rdfs:subClassOf proeth-core:Action ;
-    skos:definition "Extreme weather occurrence exceeding normal design parameters" ;
-    prov:generatedAtTime "2025-09-29T01:27:28.878530"^^xsd:dateTime ;
-    prov:wasGeneratedBy "ProEthica Extraction" .
-
-proeth:RiskAdvisoryAction a owl:Class ;
-    rdfs:label "Risk Advisory Action" ;
-    rdfs:comment "Professional action to formally advise client of identified risks and recommend protective measures" ;
-    rdfs:subClassOf proeth-core:Action ;
-    skos:definition "Professional action to formally advise client of identified risks and recommend protective measures" ;
-    prov:generatedAtTime "2025-09-29T01:27:28.878412"^^xsd:dateTime ;
-    prov:wasGeneratedBy "ProEthica Extraction" .
-
-proeth:RiskAssessmentCapability a owl:Class ;
-    rdfs:label "Risk Assessment Capability" ;
-    rdfs:comment "The competency to identify, analyze, quantify and communicate potential risks and their impacts in professional contexts" ;
-    skos:definition "The competency to identify, analyze, quantify and communicate potential risks and their impacts in professional contexts" ;
-    prov:generatedAtTime "2025-09-29T00:54:42.424225"^^xsd:dateTime ;
-    prov:wasGeneratedBy "ProEthica Extraction" .
-
-proeth:RiskAssessmentObligation a owl:Class ;
-    rdfs:label "Risk Assessment Obligation" ;
-    rdfs:comment "Duty to properly identify, quantify, and communicate risks associated with professional work, including long-term and cumulative risks" ;
-    rdfs:subClassOf proeth-core:Obligation ;
-    skos:definition "Duty to properly identify, quantify, and communicate risks associated with professional work, including long-term and cumulative risks" ;
-    prov:generatedAtTime "2025-09-29T00:54:42.424449"^^xsd:dateTime ;
-    prov:wasGeneratedBy "ProEthica Extraction" .
-
-proeth:RiskAssessmentStudy a owl:Class ;
-    rdfs:label "Risk Assessment Study" ;
-    rdfs:comment "Technical analysis document that quantifies or qualitatively estimates risks associated with engineering projects" ;
-    rdfs:subClassOf proeth-core:Resource ;
-    skos:definition "Technical analysis document that quantifies or qualitatively estimates risks associated with engineering projects" ;
-    prov:generatedAtTime "2025-09-29T00:42:43.151416"^^xsd:dateTime ;
-    prov:wasGeneratedBy "ProEthica Extraction" .
-
-proeth:RiskQuantificationStudy a owl:Class ;
-    rdfs:label "Risk Quantification Study" ;
-    rdfs:comment "Professional action to conduct technical studies to measure and quantify identified risks" ;
-    rdfs:subClassOf proeth-core:Action ;
-    skos:definition "Professional action to conduct technical studies to measure and quantify identified risks" ;
-    prov:generatedAtTime "2025-09-29T01:27:28.878451"^^xsd:dateTime ;
-    prov:wasGeneratedBy "ProEthica Extraction" .
-
-proeth:StormwaterControlDesignSpecialist a owl:Class ;
-    rdfs:label "Stormwater Control Design Specialist" ;
-    rdfs:comment "A licensed professional engineer specializing in the design and management of stormwater control systems to prevent flooding and protect water resources" ;
+proeth:FirmPrincipalRole a owl:Class ;
+    rdfs:label "Firm Principal Role" ;
+    rdfs:comment "Senior leadership position in an engineering firm with authority over project contracts, resource allocation, and supervision of engineering staff" ;
     rdfs:subClassOf proeth-core:Role ;
-    skos:definition "A licensed professional engineer specializing in the design and management of stormwater control systems to prevent flooding and protect water resources" ;
-    prov:generatedAtTime "2025-09-29T00:42:43.151255"^^xsd:dateTime ;
+    skos:definition "Senior leadership position in an engineering firm with authority over project contracts, resource allocation, and supervision of engineering staff" ;
+    prov:generatedAtTime "2025-10-08T20:15:54.318261"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
-proeth:StormwaterManagementDesignGuidelines a owl:Class ;
-    rdfs:label "Stormwater Management Design Guidelines" ;
-    rdfs:comment "Technical guidelines and best practices for designing stormwater control and management systems" ;
+proeth:GreatestGoodPrinciple a owl:Class ;
+    rdfs:label "Greatest Good Principle" ;
+    rdfs:comment "Utilitarian principle that engineering decisions should maximize benefit for the greatest number of stakeholders" ;
+    rdfs:subClassOf proeth-core:Principle ;
+    skos:definition "Utilitarian principle that engineering decisions should maximize benefit for the greatest number of stakeholders" ;
+    prov:generatedAtTime "2025-10-08T23:31:55.692072"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:GreenBuildingCertificationStandard a owl:Class ;
+    rdfs:label "Green Building Certification Standard" ;
+    rdfs:comment "Standards and certification systems for environmentally sustainable building design and construction" ;
     rdfs:subClassOf proeth-core:Resource ;
-    skos:definition "Technical guidelines and best practices for designing stormwater control and management systems" ;
-    prov:generatedAtTime "2025-09-29T00:42:43.151309"^^xsd:dateTime ;
+    skos:definition "Standards and certification systems for environmentally sustainable building design and construction" ;
+    prov:generatedAtTime "2025-10-08T23:17:12.354793"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
-proeth:SuspendedWorkState a owl:Class ;
-    rdfs:label "Suspended Work State" ;
-    rdfs:comment "A professional state where contracted work is temporarily halted due to client circumstances, creating uncertainty about ongoing professional obligations" ;
+proeth:HierarchicalAuthorityConstraint a owl:Class ;
+    rdfs:label "Hierarchical Authority Constraint" ;
+    rdfs:comment "Limitations on subordinate employees' ability to refuse or modify assigned tasks based on organizational hierarchy" ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    skos:definition "Limitations on subordinate employees' ability to refuse or modify assigned tasks based on organizational hierarchy" ;
+    prov:generatedAtTime "2025-10-08T23:29:25.694946"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:HydrogeologicalStudy a owl:Class ;
+    rdfs:label "Hydrogeological Study" ;
+    rdfs:comment "Scientific assessment of groundwater resources, water table levels, and hydrological impacts of proposed developments" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Scientific assessment of groundwater resources, water table levels, and hydrological impacts of proposed developments" ;
+    prov:generatedAtTime "2025-10-08T20:15:54.318103"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:LandscapeArchitectRole a owl:Class ;
+    rdfs:label "Landscape Architect Role" ;
+    rdfs:comment "Design professional responsible for outdoor space planning, including environmental systems, aesthetics, and functional landscape elements" ;
+    rdfs:subClassOf proeth-core:Role ;
+    skos:definition "Design professional responsible for outdoor space planning, including environmental systems, aesthetics, and functional landscape elements" ;
+    prov:generatedAtTime "2025-10-08T20:15:54.318340"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:PersonalEthicalConvictionState a owl:Class ;
+    rdfs:label "Personal Ethical Conviction State" ;
+    rdfs:comment "A state where a professional's deeply held personal ethical beliefs conflict with assigned professional tasks that are legally and technically permissible" ;
     rdfs:subClassOf proeth-core:State ;
-    skos:definition "A professional state where contracted work is temporarily halted due to client circumstances, creating uncertainty about ongoing professional obligations" ;
-    prov:generatedAtTime "2025-09-29T00:54:42.424093"^^xsd:dateTime ;
+    skos:definition "A state where a professional's deeply held personal ethical beliefs conflict with assigned professional tasks that are legally and technically permissible" ;
+    prov:generatedAtTime "2025-10-08T23:17:12.354590"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
-proeth:UnquantifiedRiskAwarenessState a owl:Class ;
-    rdfs:label "Unquantified Risk Awareness State" ;
-    rdfs:comment "A professional state where an engineer is aware of potential risks but lacks sufficient data or analysis to quantify them precisely" ;
+proeth:ProfessionalDisagreementState a owl:Class ;
+    rdfs:label "Professional Disagreement State" ;
+    rdfs:comment "A state where subordinate and supervising engineers have conflicting professional judgments about technical or ethical aspects of a project" ;
     rdfs:subClassOf proeth-core:State ;
-    skos:definition "A professional state where an engineer is aware of potential risks but lacks sufficient data or analysis to quantify them precisely" ;
-    prov:generatedAtTime "2025-09-29T00:54:42.424188"^^xsd:dateTime ;
+    skos:definition "A state where subordinate and supervising engineers have conflicting professional judgments about technical or ethical aspects of a project" ;
+    prov:generatedAtTime "2025-10-08T20:15:54.318445"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
-proeth:WorkSuspensionCompliance a owl:Class ;
-    rdfs:label "Work Suspension Compliance" ;
-    rdfs:comment "Professional action to suspend ongoing work at client's request due to external circumstances" ;
-    rdfs:subClassOf proeth-core:Action ;
-    skos:definition "Professional action to suspend ongoing work at client's request due to external circumstances" ;
-    prov:generatedAtTime "2025-09-29T01:27:28.878364"^^xsd:dateTime ;
+proeth:ProfessionalEncouragementConstraint a owl:Class ;
+    rdfs:label "Professional Encouragement Constraint" ;
+    rdfs:comment "Soft boundaries created by professional codes that encourage but do not mandate certain behaviors, creating ethical tension without absolute prohibition" ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    skos:definition "Soft boundaries created by professional codes that encourage but do not mandate certain behaviors, creating ethical tension without absolute prohibition" ;
+    prov:generatedAtTime "2025-10-08T23:31:55.691755"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:ProfessionalEthicsCode a owl:Class ;
+    rdfs:label "Professional Ethics Code" ;
+    rdfs:comment "Formal code of ethical conduct established by professional engineering societies to guide professional practice" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Formal code of ethical conduct established by professional engineering societies to guide professional practice" ;
+    prov:generatedAtTime "2025-10-08T20:15:54.318219"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:ResourceManagementCapability a owl:Class ;
+    rdfs:label "Resource Management Capability" ;
+    rdfs:comment "The competency to assess and manage natural resource utilization in engineering projects, particularly water resources" ;
+    skos:definition "The competency to assess and manage natural resource utilization in engineering projects, particularly water resources" ;
+    prov:generatedAtTime "2025-10-08T23:29:25.695058"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:ResourceScarcityContextState a owl:Class ;
+    rdfs:label "Resource Scarcity Context State" ;
+    rdfs:comment "A state where a project is located in an area with documented resource limitations that affect design decisions" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a project is located in an area with documented resource limitations that affect design decisions" ;
+    prov:generatedAtTime "2025-10-08T20:15:54.318549"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:RighttoEthicalDissent a owl:Class ;
+    rdfs:label "Right to Ethical Dissent" ;
+    rdfs:comment "Principle that engineers have the right to refuse tasks they believe violate ethical principles, while balancing obligations to employers" ;
+    rdfs:subClassOf proeth-core:Principle ;
+    skos:definition "Principle that engineers have the right to refuse tasks they believe violate ethical principles, while balancing obligations to employers" ;
+    prov:generatedAtTime "2025-10-08T23:31:55.692033"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:SolutionIntegrationObligation a owl:Class ;
+    rdfs:label "Solution Integration Obligation" ;
+    rdfs:comment "Duty to endeavor to integrate and harmonize all applicable code provisions when developing engineering solutions, rather than treating obligations as mutually exclusive" ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    skos:definition "Duty to endeavor to integrate and harmonize all applicable code provisions when developing engineering solutions, rather than treating obligations as mutually exclusive" ;
+    prov:generatedAtTime "2025-10-08T23:31:55.691953"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:StakeholderInterestBalancingCapability a owl:Class ;
+    rdfs:label "Stakeholder Interest Balancing Capability" ;
+    rdfs:comment "The competency to identify, evaluate, and balance the legitimate interests of multiple stakeholders in engineering decisions" ;
+    skos:definition "The competency to identify, evaluate, and balance the legitimate interests of multiple stakeholders in engineering decisions" ;
+    prov:generatedAtTime "2025-10-08T23:31:55.691869"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:SupervisoryObligation a owl:Class ;
+    rdfs:label "Supervisory Obligation" ;
+    rdfs:comment "Duty of supervising engineers to properly direct, oversee, and respond to concerns raised by subordinate engineers and interns" ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    skos:definition "Duty of supervising engineers to properly direct, oversee, and respond to concerns raised by subordinate engineers and interns" ;
+    prov:generatedAtTime "2025-10-08T23:29:25.694822"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:SustainabilityAssessmentCapability a owl:Class ;
+    rdfs:label "Sustainability Assessment Capability" ;
+    rdfs:comment "The competency to evaluate projects, systems, and designs against sustainability principles and environmental impact criteria" ;
+    skos:definition "The competency to evaluate projects, systems, and designs against sustainability principles and environmental impact criteria" ;
+    prov:generatedAtTime "2025-10-08T23:29:25.694984"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:SustainabilityDesignChoiceState a owl:Class ;
+    rdfs:label "Sustainability Design Choice State" ;
+    rdfs:comment "A state where a project has multiple technically viable design options with significantly different environmental sustainability impacts" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a project has multiple technically viable design options with significantly different environmental sustainability impacts" ;
+    prov:generatedAtTime "2025-10-08T23:17:12.354643"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:SustainabilityObligation a owl:Class ;
+    rdfs:label "Sustainability Obligation" ;
+    rdfs:comment "Requirement for engineers to consider environmental sustainability and resource conservation in their designs and to adhere to principles of sustainable development" ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    skos:definition "Requirement for engineers to consider environmental sustainability and resource conservation in their designs and to adhere to principles of sustainable development" ;
+    prov:generatedAtTime "2025-10-08T23:29:25.694779"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:SustainableDevelopmentPrinciple a owl:Class ;
+    rdfs:label "Sustainable Development Principle" ;
+    rdfs:comment "Principle requiring engineering solutions to balance present needs with long-term environmental sustainability and resource conservation for future generations" ;
+    rdfs:subClassOf proeth-core:Principle ;
+    skos:definition "Principle requiring engineering solutions to balance present needs with long-term environmental sustainability and resource conservation for future generations" ;
+    prov:generatedAtTime "2025-10-08T23:29:25.694724"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:UNSustainabilityFramework a owl:Class ;
+    rdfs:label "UN Sustainability Framework" ;
+    rdfs:comment "International frameworks and blueprints established by the United Nations for sustainable development goals and principles" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "International frameworks and blueprints established by the United Nations for sustainable development goals and principles" ;
+    prov:generatedAtTime "2025-10-08T23:17:12.354753"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:UNSustainableDevelopmentGoals a owl:Class ;
+    rdfs:label "UN Sustainable Development Goals" ;
+    rdfs:comment "International framework of 17 global goals established by the United Nations for achieving sustainable development" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "International framework of 17 global goals established by the United Nations for achieving sustainable development" ;
+    prov:generatedAtTime "2025-10-08T20:15:54.318173"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
