@@ -12,6 +12,149 @@
     owl:imports <http://proethica.org/ontology/cases>,
         <http://proethica.org/ontology/intermediate> .
 
+case8:BER_Case_04-8 a proeth:BoardEthicsCasePrecedent,
+        owl:NamedIndividual ;
+    rdfs:label "BER_Case_04-8" ;
+    proeth:confidencescore "0.9" ;
+    proeth:createdat "2004" ;
+    proeth:createdby "Board of Ethical Review" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "BER Case 04-8" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Referenced for disclosure of violations of federal and state laws and regulations" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.567738"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:BER_Case_07-6 a proeth:BoardEthicsCasePrecedent,
+        owl:NamedIndividual ;
+    rdfs:label "BER_Case_07-6" ;
+    proeth:confidencescore "0.95" ;
+    proeth:createdat "2007" ;
+    proeth:createdby "Board of Ethical Review" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "BER Case 07-6" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Classic example of disclosure requirements for environmental threats" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564373"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:BER_Case_18-9 a proeth:BoardEthicsCasePrecedent,
+        owl:NamedIndividual ;
+    rdfs:label "BER_Case_18-9" ;
+    proeth:confidencescore "0.9" ;
+    proeth:createdat "2018" ;
+    proeth:createdby "Board of Ethical Review" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "BER Case 18-9" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Referenced for public safety risk of future surge level rise" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.567162"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:BER_Case_20-4 a proeth:BoardEthicsCasePrecedent,
+        owl:NamedIndividual ;
+    rdfs:label "BER_Case_20-4" ;
+    proeth:confidencescore "0.95" ;
+    proeth:createdat "2020" ;
+    proeth:createdby "Board of Ethical Review" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "BER Case 20-4" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Referenced for engineer's responsibility to public health, safety and welfare regarding safe drinking water" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.567360"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:BER_Case_21-2 a proeth:BoardEthicsCasePrecedent,
+        owl:NamedIndividual ;
+    rdfs:label "BER_Case_21-2" ;
+    proeth:confidencescore "0.9" ;
+    proeth:createdat "2021" ;
+    proeth:createdby "Board of Ethical Review" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "BER Case 21-2" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Referenced for effects of sea level rise and climate change impacts" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564438"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:BER_Case_22-5 a proeth:BoardEthicsCasePrecedent,
+        owl:NamedIndividual ;
+    rdfs:label "BER_Case_22-5" ;
+    proeth:confidencescore "0.95" ;
+    proeth:createdat "2022" ;
+    proeth:createdby "Board of Ethical Review" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "BER Case 22-5" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Referenced for engineer's responsibility to public health, safety and welfare regarding safe drinking water" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564307"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:BER_Case_67-10 a proeth:BoardEthicsCasePrecedent,
+        owl:NamedIndividual ;
+    rdfs:label "BER_Case_67-10" ;
+    proeth:confidencescore "0.9" ;
+    proeth:createdat "1967" ;
+    proeth:createdby "Board of Ethical Review" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "BER Case 67-10" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Quoted to establish that engineers must devote interests to public welfare" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.567672"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:BER_Case_76-4 a proeth:BoardEthicsCasePrecedent,
+        owl:NamedIndividual ;
+    rdfs:label "BER_Case_76-4" ;
+    proeth:confidencescore "0.95" ;
+    proeth:createdat "1976" ;
+    proeth:createdby "Board of Ethical Review" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "BER Case 76-4" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Foundation case for environmental discharge and reporting obligations" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.567095"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:BER_Case_84-5 a proeth:BoardEthicsCasePrecedent,
+        owl:NamedIndividual ;
+    rdfs:label "BER_Case_84-5" ;
+    proeth:confidencescore "0.95" ;
+    proeth:createdat "1984" ;
+    proeth:createdby "Board of Ethical Review" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "BER Case 84-5" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Direct parallel case about engineer's duty when client refuses safety measures" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.567594"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:BER_Case_89-7 a proeth:BoardEthicsCasePrecedent,
+        owl:NamedIndividual ;
+    rdfs:label "BER_Case_89-7" ;
+    proeth:confidencescore "0.9" ;
+    proeth:createdat "1989" ;
+    proeth:createdby "Board of Ethical Review" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "BER Case 89-7" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Referenced for disclosure of safety violations confided by client" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.567527"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:BER_Case_99-8 a proeth:BoardEthicsCasePrecedent,
+        owl:NamedIndividual ;
+    rdfs:label "BER_Case_99-8" ;
+    proeth:confidencescore "0.9" ;
+    proeth:createdat "1999" ;
+    proeth:createdby "Board of Ethical Review" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "BER Case 99-8" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Referenced for disclosure of incomplete drawings and specifications" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.567803"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
 case8:ClientX_BudgetConstraint_InitialSetback a proeth:ClientBudgetConstraintState,
         owl:NamedIndividual ;
     rdfs:label "ClientX_BudgetConstraint_InitialSetback" ;
@@ -48,6 +191,38 @@ case8:ClientX_BudgetConstraint_PostResumption a proeth:ClientBudgetConstraintSta
     proeth:terminatedat "Not applicable - ongoing at case end" ;
     proeth:terminatedby "Not terminated in case narrative" ;
     prov:generatedAtTime "2025-09-29T00:54:42.432545"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:ClientX_BudgetConstraint_ProtectiveMeasures a proeth:ClientBudgetConstraintState,
+        owl:NamedIndividual ;
+    rdfs:label "ClientX_BudgetConstraint_ProtectiveMeasures" ;
+    proeth:affectsobligation "Comply with environmental standards",
+        "Implement adequate protective measures",
+        "Safeguard public water sources" ;
+    proeth:caseinvolvement "Client X refused additional protective measures despite Engineer L's recommendations" ;
+    proeth:confidencescore "0.95" ;
+    proeth:generatedattime "2025-10-13T13:20:21.708919" ;
+    proeth:hasrelatedparty "Community dependent on watershed",
+        "Engineer L" ;
+    proeth:hassubject "Client X" ;
+    proeth:hasurgencylevel "high" ;
+    proeth:initiatedat "During preliminary design phase" ;
+    proeth:initiatedby "Unexpected financial setbacks affecting development project" ;
+    proeth:terminatedat "Ongoing at case end" ;
+    proeth:terminatedby "Not terminated in case narrative" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.563880"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:ClientX_EngineerL_Stormwater_Contract a proeth:StormwaterManagementDesignContract,
+        owl:NamedIndividual ;
+    rdfs:label "ClientX_EngineerL_Stormwater_Contract" ;
+    proeth:confidencescore "0.9" ;
+    proeth:createdby "Client X and Engineer L" ;
+    proeth:generatedattime "2025-10-13T13:20:05.721846" ;
+    proeth:hasdocumenttitle "Original contract for stormwater management system design" ;
+    proeth:usedby "Engineer L and Client X" ;
+    proeth:usedincontext "Defined Engineer L's scope of work including ensuring no impact to community drinking water" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.563946"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
 case8:ClientX_FinancialImprovement_Month5 a proeth:FinancialRecoveryEvent,
@@ -145,6 +320,27 @@ case8:ClientX_Resistance_Month5 a proeth:ClientResistanceEvent,
     prov:generatedAtTime "2025-09-29T01:27:28.893794"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
+case8:ClientX_SafetyRefusal_StormwaterProtection a proeth:ClientSafetyRefusalState,
+        owl:NamedIndividual ;
+    rdfs:label "ClientX_SafetyRefusal_StormwaterProtection" ;
+    proeth:affectsobligation "Engineer L's duty as faithful agent",
+        "Engineer L's duty to public safety",
+        "Engineer L's obligation to advise on project success" ;
+    proeth:caseinvolvement "Created ethical dilemma requiring Engineer L to refuse continuation of work" ;
+    proeth:confidencescore "0.95" ;
+    proeth:generatedattime "2025-10-13T13:23:04.373497" ;
+    proeth:hasrelatedparty "Engineer L",
+        "nearby watershed community",
+        "public" ;
+    proeth:hassubject "Client X" ;
+    proeth:hasurgencylevel "high" ;
+    proeth:initiatedat "After Engineer L identified and reported factual runoff risks" ;
+    proeth:initiatedby "Client X's insistence on moving forward without adequate safeguards after being informed of runoff risks" ;
+    proeth:terminatedat "Ongoing at case conclusion" ;
+    proeth:terminatedby "Not terminated in case narrative" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.567276"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
 case8:Client_Budget_Limitation a proeth:ResourceConstraint,
         owl:NamedIndividual ;
     rdfs:label "Client_Budget_Limitation" ;
@@ -216,6 +412,23 @@ case8:Community_PublicHealthRisk_Watershed a proeth:PublicHealthRiskState,
     prov:generatedAtTime "2025-09-29T00:54:42.432650"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
+case8:Competence_RiskAssessment_Case a proeth:CompetencePrinciple,
+        owl:NamedIndividual ;
+    rdfs:label "Competence_RiskAssessment_Case" ;
+    proeth:appliedto "Technical assessment of stormwater risks" ;
+    proeth:balancedwith "Budget restrictions",
+        "Data limitations",
+        "Time constraints" ;
+    proeth:generatedattime "2025-10-13T13:33:12.899899" ;
+    proeth:hascaserelevance "Shows engineer applying professional expertise to evaluate risks within constraints" ;
+    proeth:hasconcreteexpression "Engineer L conducts additional studies and qualitatively estimates the risk that heavy rainfall could lead to stormwater runoff" ;
+    proeth:hasinterpretation "Professional competence includes conducting appropriate studies even with qualitative methods when quantitative data unavailable" ;
+    proeth:hastensionresolution "Engineer uses available methods to assess risk despite limitations" ;
+    proeth:invokedby "Engineer L" ;
+    proeth:wasgeneratedby "ProEthica Dual Principles Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.565712"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
 case8:Competence_StormwaterCase_Facts a proeth:CompetencePrinciple,
         owl:NamedIndividual ;
     rdfs:label "Competence_StormwaterCase_Facts" ;
@@ -264,6 +477,48 @@ case8:Drinking_Water_Protection_Requirement a proeth:EnvironmentalImpactConstrai
     prov:generatedAtTime "2025-09-29T00:54:42.434402"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
+case8:EngineerA_ObjectiveTruthfulStatements_BirdSpecies a proeth:ObjectiveandTruthfulStatements,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerA_ObjectiveTruthfulStatements_BirdSpecies" ;
+    proeth:affectsobligation "Duty to include all relevant information in reports",
+        "Obligation to be objective and truthful",
+        "Public authority reporting requirements" ;
+    proeth:caseinvolvement "Referenced as precedent (BER 07-6) for requirement to include factual information in reports" ;
+    proeth:confidencescore "0.95" ;
+    proeth:generatedattime "2025-10-13T13:23:04.373497" ;
+    proeth:hasrelatedparty "Developer client",
+        "federal and state environmental regulators",
+        "public authority" ;
+    proeth:hassubject "Engineer A" ;
+    proeth:hasurgencylevel "high" ;
+    proeth:initiatedat "During property analysis for condominium development" ;
+    proeth:initiatedby "Biologist's report about threatened bird species" ;
+    proeth:terminatedat "Not applicable" ;
+    proeth:terminatedby "Not applicable - ongoing obligation" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564677"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:EngineerDoe_NonCompliance_PollutionReporting a proeth:Non-CompliantState,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerDoe_NonCompliance_PollutionReporting" ;
+    proeth:affectsobligation "Duty to report to authorities",
+        "Public welfare obligations",
+        "Truthful reporting requirements" ;
+    proeth:caseinvolvement "Referenced as precedent case (BER 76-4) establishing duty to report to authorities" ;
+    proeth:confidencescore "0.9" ;
+    proeth:generatedattime "2025-10-13T13:23:04.373497" ;
+    proeth:hasrelatedparty "Engineer Doe",
+        "State Pollution Control Authority",
+        "public" ;
+    proeth:hassubject "XYZ Corporation" ;
+    proeth:hasurgencylevel "high" ;
+    proeth:initiatedat "After Engineer Doe's verbal report about water quality standards" ;
+    proeth:initiatedby "XYZ Corporation's instruction to Engineer Doe not to complete written report on water quality" ;
+    proeth:terminatedat "Not specified" ;
+    proeth:terminatedby "Not specified in case" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.567019"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
 case8:EngineerL_ClientAdvisory a proeth:ClientCommunicationCapability,
         owl:NamedIndividual ;
     rdfs:label "EngineerL_ClientAdvisory" ;
@@ -277,6 +532,37 @@ case8:EngineerL_ClientAdvisory a proeth:ClientCommunicationCapability,
     proeth:proficiencylevel "intermediate" ;
     proeth:temporalaspect "After work resumption when risks were quantified" ;
     prov:generatedAtTime "2025-09-29T00:54:42.433336"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:EngineerL_ClientCommunication a proeth:ClientAdvisoryCapability,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_ClientCommunication" ;
+    proeth:capabilitystatement "Communicate technical risks and regulatory requirements to clients" ;
+    proeth:casecontext "Advising client despite budget resistance" ;
+    proeth:confidence "0.8" ;
+    proeth:demonstratedthrough "Notifying Client X of risks and advising on protective measures" ;
+    proeth:enablesobligations "Professional duty to inform clients of compliance requirements and safety concerns" ;
+    proeth:generatedattime "2025-10-13T13:32:59.830049" ;
+    proeth:possessedby "Engineer L" ;
+    proeth:proficiencylevel "intermediate" ;
+    proeth:temporalaspect "After work resumption and risk assessment" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.565045"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:EngineerL_CompetenceInStormwater a proeth:CompetenceObligation,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_CompetenceInStormwater" ;
+    proeth:casecontext "Engineer L has many years of experience in stormwater control design" ;
+    proeth:compliancestatus "met" ;
+    proeth:confidencescore "1.0" ;
+    proeth:derivedfrom "NSPE Code II.2 - Services in areas of competence" ;
+    proeth:enforcementcontext "Professional licensing and standards" ;
+    proeth:generatedattime "2025-10-13T13:33:11.633704" ;
+    proeth:obligatedparty "Engineer L" ;
+    proeth:obligationstatement "Perform stormwater control design only within area of competence" ;
+    proeth:temporalscope "Throughout engagement" ;
+    proeth:wasgeneratedby "ProEthica Dual Obligations Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.566419"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
 case8:EngineerL_ConductStudies_Month5 a proeth:RiskQuantificationStudy,
@@ -318,6 +604,26 @@ case8:EngineerL_EnvironmentalCompliance a proeth:EnvironmentalImpactCapability,
     prov:generatedAtTime "2025-09-29T00:54:42.433477"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
+case8:EngineerL_IncompleteRiskAssessment_InitialPhase a proeth:IncompleteRiskAssessmentState,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_IncompleteRiskAssessment_InitialPhase" ;
+    proeth:affectsobligation "Client advisory requirements",
+        "Duty to be objective and truthful",
+        "Obligation to base public statements on facts" ;
+    proeth:caseinvolvement "Prevented Engineer L from being required to report concerns as they were not yet facts" ;
+    proeth:confidencescore "0.9" ;
+    proeth:generatedattime "2025-10-13T13:23:04.373497" ;
+    proeth:hasrelatedparty "Client X",
+        "nearby watershed community" ;
+    proeth:hassubject "Engineer L" ;
+    proeth:hasurgencylevel "moderate" ;
+    proeth:initiatedat "During initial design phase" ;
+    proeth:initiatedby "Engineer L's initial concerns about increased risk over time from development" ;
+    proeth:terminatedat "During resumed design phase" ;
+    proeth:terminatedby "Additional studies identifying factual runoff risk" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.566883"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
 case8:EngineerL_InitialDesign_Month1 a proeth:CreationAction,
         owl:NamedIndividual ;
     rdfs:label "EngineerL_InitialDesign_Month1" ;
@@ -339,6 +645,22 @@ case8:EngineerL_InitialDesign_Month1 a proeth:CreationAction,
     proeth:sequenceorder "1" ;
     proeth:temporalinterval "Month 1 to Month 2" ;
     prov:generatedAtTime "2025-09-29T01:27:28.892183"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:EngineerL_InitialRiskDisclosure a proeth:DisclosureObligation,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_InitialRiskDisclosure" ;
+    proeth:casecontext "Engineer L did not mention potential increased risk when Client X requested work suspension" ;
+    proeth:compliancestatus "unmet" ;
+    proeth:confidencescore "0.95" ;
+    proeth:derivedfrom "NSPE Code II.3.a - Disclosure of circumstances that could influence judgment" ;
+    proeth:enforcementcontext "Professional standards enforcement through licensing board" ;
+    proeth:generatedattime "2025-10-13T13:33:11.633704" ;
+    proeth:obligatedparty "Engineer L" ;
+    proeth:obligationstatement "Disclose potential increased risk to community drinking water source during work suspension communications" ;
+    proeth:temporalscope "During preliminary design phase and suspension communications" ;
+    proeth:wasgeneratedby "ProEthica Dual Obligations Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.565132"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
 case8:EngineerL_NotifyClient_Month5 a proeth:RiskAdvisoryAction,
@@ -365,6 +687,56 @@ case8:EngineerL_NotifyClient_Month5 a proeth:RiskAdvisoryAction,
     prov:generatedAtTime "2025-09-29T01:27:28.892861"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
+case8:EngineerL_ProfessionalLicensure a proeth:TechnicalCapability,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_ProfessionalLicensure" ;
+    proeth:capabilitystatement "Maintain professional engineering licensure and associated competencies" ;
+    proeth:casecontext "Licensed PE contracted for specialized work" ;
+    proeth:confidence "1.0" ;
+    proeth:demonstratedthrough "Licensed professional engineer status" ;
+    proeth:enablesobligations "Legal authority to practice engineering and stamp designs" ;
+    proeth:generatedattime "2025-10-13T13:32:59.830049" ;
+    proeth:possessedby "Engineer L" ;
+    proeth:proficiencylevel "expert" ;
+    proeth:temporalaspect "Continuous throughout professional practice" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.565789"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:EngineerL_ProjectSuspension_ClientRequest a proeth:ProjectSuspensionState,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_ProjectSuspension_ClientRequest" ;
+    proeth:affectsobligation "Duty to act as faithful agent",
+        "Obligation to respect client's decisions",
+        "Professional documentation requirements" ;
+    proeth:caseinvolvement "Required Engineer L to pause work despite concerns, respecting client's authority" ;
+    proeth:confidencescore "0.85" ;
+    proeth:generatedattime "2025-10-13T13:23:04.373497" ;
+    proeth:hasrelatedparty "Client X" ;
+    proeth:hassubject "Engineer L" ;
+    proeth:hasurgencylevel "low" ;
+    proeth:initiatedat "After initial design phase" ;
+    proeth:initiatedby "Client X's request to stop design work" ;
+    proeth:terminatedat "When Client X asked Engineer L to resume work" ;
+    proeth:terminatedby "Client X's request to resume design" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.567459"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:EngineerL_PublicSafetyDuty a proeth:SafetyObligation,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_PublicSafetyDuty" ;
+    proeth:casecontext "Engineer L must ensure stormwater system does not contaminate community water supply" ;
+    proeth:compliancestatus "pending" ;
+    proeth:confidencescore "1.0" ;
+    proeth:derivedfrom "NSPE Code I.1 - Hold paramount public safety, health, and welfare" ;
+    proeth:enforcementcontext "Professional engineering standards and state licensing requirements" ;
+    proeth:generatedattime "2025-10-13T13:33:11.633704" ;
+    proeth:obligatedparty "Engineer L" ;
+    proeth:obligationstatement "Hold paramount the safety of the community's drinking water source" ;
+    proeth:temporalscope "Throughout entire project engagement" ;
+    proeth:wasgeneratedby "ProEthica Dual Obligations Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.565218"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
 case8:EngineerL_PublicWaterSafety_Obligation a proeth:SafetyObligation,
         owl:NamedIndividual ;
     rdfs:label "EngineerL_PublicWaterSafety_Obligation" ;
@@ -379,6 +751,22 @@ case8:EngineerL_PublicWaterSafety_Obligation a proeth:SafetyObligation,
     proeth:temporalscope "Throughout entire project duration" ;
     proeth:wasgeneratedby "ProEthica Dual Obligations Extraction" ;
     prov:generatedAtTime "2025-09-29T00:54:42.434155"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:EngineerL_ReportingNoncompliance a proeth:ReportingObligation,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_ReportingNoncompliance" ;
+    proeth:casecontext "Client X insists on proceeding without added safeguards, stating will address compliance later" ;
+    proeth:compliancestatus "pending" ;
+    proeth:confidencescore "0.75" ;
+    proeth:derivedfrom "Professional duty to protect public welfare" ;
+    proeth:enforcementcontext "Professional ethics and regulatory requirements" ;
+    proeth:generatedattime "2025-10-13T13:33:11.633704" ;
+    proeth:obligatedparty "Engineer L" ;
+    proeth:obligationstatement "Report to authorities if client proceeds without required environmental safeguards" ;
+    proeth:temporalscope "If client proceeds without safeguards" ;
+    proeth:wasgeneratedby "ProEthica Dual Obligations Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.565345"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
 case8:EngineerL_ReportingToAuthorities a proeth:ReportingObligation,
@@ -498,6 +886,19 @@ case8:EngineerL_StormwaterDesign a proeth:TechnicalCapability,
     prov:generatedAtTime "2025-09-29T00:54:42.433405"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
+case8:EngineerL_Stormwater_Risk_Study a proeth:StormwaterRiskAssessmentStudy,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_Stormwater_Risk_Study" ;
+    proeth:confidencescore "0.85" ;
+    proeth:createdat "After historic heavy rainfall event" ;
+    proeth:createdby "Engineer L" ;
+    proeth:generatedattime "2025-10-13T13:20:05.721846" ;
+    proeth:hasdocumenttitle "Additional studies on stormwater runoff risk to watershed" ;
+    proeth:usedby "Engineer L" ;
+    proeth:usedincontext "Qualitatively estimated risk of stormwater reaching community drinking water source" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.563297"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
 case8:EngineerL_SuspendWork_Month2 a proeth:WorkSuspensionCompliance,
         owl:NamedIndividual ;
     rdfs:label "EngineerL_SuspendWork_Month2" ;
@@ -540,6 +941,26 @@ case8:EngineerL_SuspendedWork_ClientX_Phase1 a proeth:SuspendedWorkState,
     prov:generatedAtTime "2025-09-29T00:54:42.430249"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
+case8:EngineerL_UnquantifiedRisk_DrinkingWaterImpact a proeth:UnquantifiedRiskAwarenessState,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_UnquantifiedRisk_DrinkingWaterImpact" ;
+    proeth:affectsobligation "Communicate risks to client",
+        "Ensure drinking water safety",
+        "Protect public welfare" ;
+    proeth:caseinvolvement "Engineer L did not mention potential risks during suspension communications" ;
+    proeth:confidencescore "0.9" ;
+    proeth:generatedattime "2025-10-13T13:20:21.708919" ;
+    proeth:hasrelatedparty "Client X",
+        "Community using watershed for drinking water" ;
+    proeth:hassubject "Engineer L" ;
+    proeth:hasurgencylevel "high" ;
+    proeth:initiatedat "During preliminary design phase" ;
+    proeth:initiatedby "Observation during preliminary design that stormwater flows would increase over time" ;
+    proeth:terminatedat "After work resumption and historic rainfall event" ;
+    proeth:terminatedby "Completion of additional studies providing qualitative risk estimates" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.563759"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
 case8:EngineerL_UnquantifiedRisk_WaterSource_Initial a proeth:UnquantifiedRiskAwarenessState,
         owl:NamedIndividual ;
     rdfs:label "EngineerL_UnquantifiedRisk_WaterSource_Initial" ;
@@ -579,6 +1000,55 @@ case8:EngineerL_WithholdRiskInfo_Month2 a proeth:CommunicationAction,
     proeth:sequenceorder "3" ;
     proeth:temporalinterval "Month 2, Week 3" ;
     prov:generatedAtTime "2025-09-29T01:27:28.892457"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:EngineerL_WorkSuspension_StormwaterProject a proeth:WorkSuspensionState,
+        owl:NamedIndividual ;
+    rdfs:label "EngineerL_WorkSuspension_StormwaterProject" ;
+    proeth:affectsobligation "Communicate identified risks to client",
+        "Complete risk assessment for drinking water source" ;
+    proeth:caseinvolvement "Created gap in risk assessment and delayed communication of water source concerns" ;
+    proeth:confidencescore "0.95" ;
+    proeth:generatedattime "2025-10-13T13:20:21.708919" ;
+    proeth:hasrelatedparty "Client X",
+        "Small community relying on watershed" ;
+    proeth:hassubject "Engineer L" ;
+    proeth:hasurgencylevel "medium" ;
+    proeth:initiatedat "During preliminary design phase after initial risk concerns arose" ;
+    proeth:initiatedby "Client X's request to suspend work due to unexpected financial setbacks" ;
+    proeth:terminatedat "Several months later" ;
+    proeth:terminatedby "Client X's request to resume work when financial situation improved" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564054"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:Engineer_A a proeth:EnvironmentalFirmPrincipal,
+        owl:NamedIndividual ;
+    rdfs:label "Engineer A" ;
+    proeth:caseinvolvement "Historical case example (BER Case 07-6) - prepared analysis for residential condominium development" ;
+    proeth:generatedattime "2025-10-13T13:22:47.070975" ;
+    proeth:hasactiveobligation "Include all relevant information in reports",
+        "Prepare property analysis",
+        "Submit reports to public authority" ;
+    proeth:hasethicaltension "Failed to include information about threat to bird species in written report" ;
+    proeth:hasspecialization "environmental engineering firm leadership" ;
+    proeth:hastitle "Principal" ;
+    proeth:wasattributedto "Case 8 Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564211"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:Engineer_Doe a proeth:EnvironmentalConsultingEngineer,
+        owl:NamedIndividual ;
+    rdfs:label "Engineer Doe" ;
+    proeth:caseinvolvement "Historical case example - hired to assess manufacturing waste discharge impacts" ;
+    proeth:generatedattime "2025-10-13T13:22:47.070975" ;
+    proeth:hasactiveobligation "Perform consulting engineering services",
+        "Report findings to Pollution Control Authority",
+        "Submit detailed report on discharge impacts" ;
+    proeth:hasethicaltension "Conflict between client's instruction not to complete written report and duty to public welfare" ;
+    proeth:hasspecialization "pollution control and water quality assessment" ;
+    proeth:hastitle "Engineer" ;
+    proeth:wasattributedto "Case 8 Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.566764"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
 case8:Engineer_L a proeth:StormwaterControlDesignSpecialist,
@@ -652,6 +1122,23 @@ case8:EnvironmentalStewardship_StormwaterCase_Facts a proeth:EnvironmentalStewar
         "Local environmental standards" ;
     proeth:wasgeneratedby "ProEthica Dual Principles Extraction" ;
     prov:generatedAtTime "2025-09-29T00:54:42.433004"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:EnvironmentalStewardship_Watershed_Case a proeth:EnvironmentalStewardshipPrinciple,
+        owl:NamedIndividual ;
+    rdfs:label "EnvironmentalStewardship_Watershed_Case" ;
+    proeth:appliedto "Protection of watershed and drinking water source" ;
+    proeth:balancedwith "Client budget limitations",
+        "Development timeline" ;
+    proeth:generatedattime "2025-10-13T13:33:12.899899" ;
+    proeth:hascaserelevance "Establishes regulatory baseline for environmental protection obligations" ;
+    proeth:hasconcreteexpression "local environmental standards require steps to safeguard public water sources" ;
+    proeth:hasinterpretation "Environmental protection standards establish minimum requirements for water source protection" ;
+    proeth:hastensionresolution "Client defers compliance, stating will address issues later if needed" ;
+    proeth:invokedby "Engineer L",
+        "Local environmental standards" ;
+    proeth:wasgeneratedby "ProEthica Dual Principles Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.566090"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
 case8:Environmental_Standards_Compliance a proeth:RegulatoryConstraint,
@@ -738,6 +1225,19 @@ case8:Local_Environmental_Standards_Water_Protection a proeth:EnvironmentalProte
     prov:generatedAtTime "2025-09-29T00:42:43.155474"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
+case8:NSPE_Code_of_Ethics_Current a proeth:LegalResource,
+        owl:NamedIndividual ;
+    rdfs:label "NSPE_Code_of_Ethics_Current" ;
+    proeth:confidencescore "0.95" ;
+    proeth:createdby "National Society of Professional Engineers" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "NSPE Code of Ethics" ;
+    proeth:hasversion "Current (with references to historical Section 2(a))" ;
+    proeth:usedby "Board of Ethical Review" ;
+    proeth:usedincontext "Referenced throughout for fundamental canons and specific sections" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564571"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
 case8:Original_Contract_Scope a proeth:LegalResource,
         owl:NamedIndividual ;
     rdfs:label "Original_Contract_Scope" ;
@@ -749,6 +1249,54 @@ case8:Original_Contract_Scope a proeth:LegalResource,
     proeth:usedby "Engineer L and Client X" ;
     proeth:usedincontext "Defined scope of work including ensuring stormwater won't impact drinking water source" ;
     prov:generatedAtTime "2025-09-29T00:42:43.155604"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:Precautionary_RiskIncrease_Case a proeth:PrecautionaryPrinciple,
+        owl:NamedIndividual ;
+    rdfs:label "Precautionary_RiskIncrease_Case" ;
+    proeth:appliedto "Long-term risk assessment of stormwater impact" ;
+    proeth:balancedwith "Client financial situation",
+        "Need for complete data" ;
+    proeth:generatedattime "2025-10-13T13:33:12.899899" ;
+    proeth:hascaserelevance "Demonstrates engineer's recognition of precautionary obligations despite incomplete analysis" ;
+    proeth:hasconcreteexpression "Engineer L becomes concerned that the risk of impact to the community drinking water source will potentially increase, as the likelihood of heavy stormwater flows will increase over time" ;
+    proeth:hasinterpretation "Future risk increases require present preventive action even before full quantification" ;
+    proeth:hastensionresolution "Initially deferred due to work suspension, later raised after resumption" ;
+    proeth:invokedby "Engineer L" ;
+    proeth:wasgeneratedby "ProEthica Dual Principles Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.565992"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:ProfessionalCommunication_Notification_Case a proeth:ProfessionalCommunicationPrinciple,
+        owl:NamedIndividual ;
+    rdfs:label "ProfessionalCommunication_Notification_Case" ;
+    proeth:appliedto "Risk communication after work resumption and additional studies" ;
+    proeth:balancedwith "Budget constraints",
+        "Client preferences" ;
+    proeth:generatedattime "2025-10-13T13:33:12.899899" ;
+    proeth:hascaserelevance "Demonstrates proper professional communication of risks and recommendations" ;
+    proeth:hasconcreteexpression "Engineer L notifies Client X of this risk, advising that additional protective measures should be considered" ;
+    proeth:hasinterpretation "Professional duty to communicate identified risks and recommend protective measures" ;
+    proeth:hastensionresolution "Engineer fulfills communication duty but client rejects recommendations" ;
+    proeth:invokedby "Engineer L" ;
+    proeth:wasgeneratedby "ProEthica Dual Principles Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.565608"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:ProfessionalCommunication_Suspension_Case a proeth:ProfessionalCommunicationPrinciple,
+        owl:NamedIndividual ;
+    rdfs:label "ProfessionalCommunication_Suspension_Case" ;
+    proeth:appliedto "Communication during work suspension" ;
+    proeth:balancedwith "Contractual suspension",
+        "Incomplete analysis" ;
+    proeth:generatedattime "2025-10-13T13:33:12.899899" ;
+    proeth:hascaserelevance "Raises question about timing obligations for risk disclosure" ;
+    proeth:hasconcreteexpression "In their communications about the suspension, Engineer L does not mention to Client X the potential increased risk of impact to the community drinking water source" ;
+    proeth:hasinterpretation "Failure to communicate known risks even during project suspension" ;
+    proeth:hastensionresolution "Engineer chose not to communicate concerns at this point" ;
+    proeth:invokedby "Case narrative (noting absence)" ;
+    proeth:wasgeneratedby "ProEthica Dual Principles Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.565522"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
 case8:ProfessionalIntegrity_StormwaterCase_Facts a proeth:IntegrityPrinciple,
@@ -766,6 +1314,22 @@ case8:ProfessionalIntegrity_StormwaterCase_Facts a proeth:IntegrityPrinciple,
     proeth:invokedby "Engineer L's professional concerns" ;
     proeth:wasgeneratedby "ProEthica Dual Principles Extraction" ;
     prov:generatedAtTime "2025-09-29T00:54:42.432737"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:PublicWelfare_DrinkingWater_Case a proeth:PublicWelfarePrinciple,
+        owl:NamedIndividual ;
+    rdfs:label "PublicWelfare_DrinkingWater_Case" ;
+    proeth:appliedto "stormwater management system design for development near community water source" ;
+    proeth:balancedwith "Client financial interests",
+        "Development objectives" ;
+    proeth:generatedattime "2025-10-13T13:33:12.899899" ;
+    proeth:hascaserelevance "Central ethical tension as public water safety conflicts with client budget limitations" ;
+    proeth:hasconcreteexpression "ensuring that stormwater from the new development will not impact this primary drinking water source for the community" ;
+    proeth:hasinterpretation "Protection of community drinking water source is paramount responsibility" ;
+    proeth:hastensionresolution "Unresolved - client insists on proceeding without added safeguards" ;
+    proeth:invokedby "Engineer L's scope of work" ;
+    proeth:wasgeneratedby "ProEthica Dual Principles Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.565433"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
 case8:PublicWelfare_StormwaterCase_Facts a proeth:PublicWelfarePrinciple,
@@ -807,6 +1371,19 @@ case8:RiskConcern_Identified_Month2 a proeth:DiscoveryEvent,
     proeth:triggersobligation "Disclosure Obligation",
         "Risk Quantification Obligation" ;
     prov:generatedAtTime "2025-09-29T01:27:28.893118"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:State_Pollution_Discharge_Permit_76-4 a proeth:EnvironmentalRegulatoryPermit,
+        owl:NamedIndividual ;
+    rdfs:label "State_Pollution_Discharge_Permit_76-4" ;
+    proeth:confidencescore "0.85" ;
+    proeth:createdat "1976 (referenced)" ;
+    proeth:createdby "State Pollution Control Authority" ;
+    proeth:generatedattime "2025-10-13T13:23:01.869722" ;
+    proeth:hasdocumenttitle "Permit to discharge manufacturing waste" ;
+    proeth:usedby "XYZ Corporation (in BER Case 76-4)" ;
+    proeth:usedincontext "Required authorization for manufacturing waste discharge into water body" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564505"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
 case8:Transparency_StormwaterCase_Facts a proeth:TransparencyPrinciple,
@@ -862,5 +1439,122 @@ case8:Work_Suspension_Limitation a proeth:TemporalConstraint,
     proeth:temporalscope "Several months during suspension" ;
     proeth:wasgeneratedby "ProEthica Dual Constraints Extraction" ;
     prov:generatedAtTime "2025-09-29T00:54:42.434319"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:XYZ_Corporation a proeth:StakeholderRole,
+        owl:NamedIndividual ;
+    rdfs:label "XYZ Corporation" ;
+    proeth:caseinvolvement "Historical case example - sought permit for waste discharge" ;
+    proeth:generatedattime "2025-10-13T13:22:47.070975" ;
+    proeth:hasethicaltension "Instructed Engineer Doe not to complete written report about water quality impacts" ;
+    proeth:hastitle "Manufacturing company" ;
+    proeth:wasattributedto "Case 8 Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564112"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:client_budget_limitation a proeth:ClientFinancialConstraint,
+        owl:NamedIndividual ;
+    rdfs:label "client_budget_limitation" ;
+    proeth:casecontext "Client X hesitant to invest in additional protective measures citing continuing budget limitations" ;
+    proeth:confidencescore "0.9" ;
+    proeth:constrainedentity "Project protective measures" ;
+    proeth:constraintsource "Client X budget" ;
+    proeth:constraintstatement "Additional protective measures limited by Client X's budget constraints" ;
+    proeth:enforcementmechanism "Client's financial control" ;
+    proeth:generatedattime "2025-10-13T13:32:58.351761" ;
+    proeth:severity "critical" ;
+    proeth:temporalscope "Ongoing through project" ;
+    proeth:wasgeneratedby "ProEthica Dual Constraints Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564760"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:developer_client a owl:NamedIndividual ;
+    rdfs:label "developer client" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564238"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+<http://proethica.org/ontology/case/8#engineering_firm's_biologists> a owl:NamedIndividual ;
+    rdfs:label "engineering firm's biologists" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.565861"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:environmental_safety_requirement a proeth:SafetyConstraint,
+        owl:NamedIndividual ;
+    rdfs:label "environmental_safety_requirement" ;
+    proeth:casecontext "System must protect community drinking water source from stormwater contamination" ;
+    proeth:confidencescore "0.95" ;
+    proeth:constrainedentity "Stormwater management system" ;
+    proeth:constraintsource "Public safety requirements" ;
+    proeth:constraintstatement "Must prevent stormwater runoff from reaching watershed and community drinking water" ;
+    proeth:enforcementmechanism "Environmental regulations and professional standards" ;
+    proeth:generatedattime "2025-10-13T13:32:58.351761" ;
+    proeth:severity "critical" ;
+    proeth:temporalscope "Permanent" ;
+    proeth:wasgeneratedby "ProEthica Dual Constraints Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.564881"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:original_contract_scope a proeth:ContractualScopeConstraint,
+        owl:NamedIndividual ;
+    rdfs:label "original_contract_scope" ;
+    proeth:casecontext "Engineer L contracted to design stormwater management system including ensuring no impact to drinking water" ;
+    proeth:confidencescore "0.9" ;
+    proeth:constrainedentity "Engineer L" ;
+    proeth:constraintsource "Original contract with Client X" ;
+    proeth:constraintstatement "Work limited to designing stormwater management system as defined in original contract" ;
+    proeth:enforcementmechanism "Contractual agreement" ;
+    proeth:generatedattime "2025-10-13T13:32:58.351761" ;
+    proeth:severity "major" ;
+    proeth:temporalscope "Duration of contract unless amended" ;
+    proeth:wasgeneratedby "ProEthica Dual Constraints Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.566174"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:professional_competence_boundary a proeth:CompetenceConstraint,
+        owl:NamedIndividual ;
+    rdfs:label "professional_competence_boundary" ;
+    proeth:casecontext "Engineer L conducts additional studies and qualitatively estimates the risk" ;
+    proeth:confidencescore "0.7" ;
+    proeth:constrainedentity "Engineer L" ;
+    proeth:constraintsource "Available data and analysis tools" ;
+    proeth:constraintstatement "Limited to qualitative risk estimates without additional studies" ;
+    proeth:enforcementmechanism "Professional standards of practice" ;
+    proeth:generatedattime "2025-10-13T13:32:58.351761" ;
+    proeth:severity "minor" ;
+    proeth:temporalscope "Until additional studies conducted" ;
+    proeth:wasgeneratedby "ProEthica Dual Constraints Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.566257"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:watershed_protection_requirement a proeth:RegulatoryConstraint,
+        owl:NamedIndividual ;
+    rdfs:label "watershed_protection_requirement" ;
+    proeth:casecontext "Local environmental standards require steps to safeguard public water sources" ;
+    proeth:confidencescore "0.95" ;
+    proeth:constrainedentity "Development project" ;
+    proeth:constraintsource "Local environmental standards" ;
+    proeth:constraintstatement "Must not impact community's primary drinking water source" ;
+    proeth:enforcementmechanism "Regulatory compliance requirements" ;
+    proeth:generatedattime "2025-10-13T13:32:58.351761" ;
+    proeth:severity "critical" ;
+    proeth:temporalscope "Throughout project lifecycle" ;
+    proeth:wasgeneratedby "ProEthica Dual Constraints Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.566609"^^xsd:dateTime ;
+    prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
+
+case8:work_suspension_directive a proeth:ContractualScopeConstraint,
+        owl:NamedIndividual ;
+    rdfs:label "work_suspension_directive" ;
+    proeth:casecontext "Client X requests Engineer L suspend work due to financial setbacks" ;
+    proeth:confidencescore "0.85" ;
+    proeth:constrainedentity "Engineer L" ;
+    proeth:constraintsource "Client X directive" ;
+    proeth:constraintstatement "Must suspend work identified in original contract upon client request" ;
+    proeth:enforcementmechanism "Client authority under contract" ;
+    proeth:generatedattime "2025-10-13T13:32:58.351761" ;
+    proeth:severity "major" ;
+    proeth:temporalscope "Several months during Client X's financial setbacks" ;
+    proeth:wasgeneratedby "ProEthica Dual Constraints Extraction" ;
+    prov:generatedAtTime "2025-10-31T21:23:51.566526"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Case 8 Extraction" .
 
