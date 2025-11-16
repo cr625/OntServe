@@ -28,20 +28,10 @@ logger = logging.getLogger(__name__)
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# Load environment variables in priority order:
-# 1. shared/.env (shared across all applications)
-# 2. OntServe/.env (app-specific configuration)
-workspace_root = project_root.parent
-shared_env = workspace_root / "shared" / ".env"
-ontserve_env = workspace_root / "OntServe" / ".env"
-
-if shared_env.exists():
-    load_dotenv(shared_env, override=False)
-    logger.info(f"✅ Loaded shared environment config: {shared_env}")
-
-if ontserve_env.exists():
-    load_dotenv(ontserve_env, override=True)  # App-specific overrides shared
-    logger.info(f"✅ Loaded OntServe environment config: {ontserve_env}")
+# Load environment configuration using new standalone config system
+from config.config_loader import load_ontserve_config
+config_summary = load_ontserve_config()
+logger.info(f"✅ Loaded configuration from: {', '.join(config_summary['loaded_files'])}")
 
 # Import storage backend and concept manager
 from storage.postgresql_storage import PostgreSQLStorage, StorageError

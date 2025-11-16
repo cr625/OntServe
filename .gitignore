@@ -20,6 +20,13 @@ venv/
 ENV/
 env/
 
+# Allow config templates but not actual .env files
+!config/*.env
+!config/*.env.template
+# But still ignore any actual .env in project root
+.env
+/.env
+
 # VS Code
 .vscode/
 
