@@ -27,11 +27,13 @@ def check_users():
             return
 
         print(f"\nFound {len(users)} user(s):\n")
-        print(f"{'ID':<5} {'Username':<20} {'Email':<30} {'Role':<10} {'Active':<10}")
+        print(f"{'ID':<5} {'Username':<20} {'Email':<30} {'Admin':<10} {'Active':<10}")
         print("=" * 80)
 
         for user in users:
-            print(f"{user.id:<5} {user.username:<20} {user.email:<30} {user.role:<10} {'Yes' if user.is_active else 'No':<10}")
+            admin_status = 'Yes' if user.is_admin else 'No'
+            active_status = 'Yes' if user.is_active else 'No'
+            print(f"{user.id:<5} {user.username:<20} {user.email:<30} {admin_status:<10} {active_status:<10}")
 
 if __name__ == "__main__":
     check_users()
