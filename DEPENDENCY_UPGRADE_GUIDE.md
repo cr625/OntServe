@@ -148,8 +148,8 @@ sudo apt-get install openjdk-11-jdk
 If issues arise, rollback to old dependencies:
 
 ```bash
-# Restore old dependencies
-pip install -r requirements-old-backup.txt
+# Restore old dependencies from snapshot
+pip install -r requirements-old-snapshot.txt
 
 # Or restore virtual environment
 rm -rf venv
