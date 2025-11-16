@@ -89,7 +89,9 @@ def db_session(database_engine):
     yield session
 
     # Rollback transaction (keeps test database clean)
-    transaction.rollback()
+    # Check if transaction is still active before rolling back
+    if transaction.is_active:
+        transaction.rollback()
     session.close()
 
 
@@ -170,6 +172,8 @@ async def mcp_client(mcp_server):
     app.router.add_post('/', mcp_server.handle_jsonrpc)
     app.router.add_post('/jsonrpc', mcp_server.handle_jsonrpc)
     app.router.add_get('/health', mcp_server.handle_health)
+    app.router.add_post('/sparql', mcp_server.handle_sparql)
+    app.router.add_get('/api/guidelines/{domain}', mcp_server.handle_get_guidelines_compat)
 
     # Create test client
     client = TestClient(TestServer(app))
