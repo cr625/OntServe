@@ -1464,7 +1464,7 @@ def register_routes(app):
     @app.route('/editor/ontology/<ontology_name>/version/<version_id>')
     def get_editor_version(ontology_name, version_id):
         """Get a specific version of an ontology for the editor."""
-        version = OntologyVersion.query.get_or_404(version_id)
+        version = db.get_or_404(OntologyVersion, version_id)
         
         return jsonify({
             'success': True,
@@ -1477,7 +1477,8 @@ def register_routes(app):
     @app.route('/editor/ontology/<ontology_name>/save', methods=['POST'])
     def save_ontology_editor(ontology_name):
         """Save a new version of an ontology from the editor."""
-        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        stmt = select(Ontology).where(Ontology.name == ontology_name)
+        ontology = db.one_or_404(stmt)
         
         data = request.get_json()
         content = data.get('content', '')
@@ -1556,7 +1557,8 @@ def register_routes(app):
     @app.route('/editor/api/extract-entities/<ontology_name>', methods=['POST'])
     def extract_entities_editor(ontology_name):
         """Extract entities from an ontology for the editor."""
-        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        stmt = select(Ontology).where(Ontology.name == ontology_name)
+        ontology = db.one_or_404(stmt)
         
         try:
             # Get ontology content (use current version content)
@@ -1596,7 +1598,7 @@ def register_routes(app):
     @app.route('/ontology/<ontology_name>/version/<version_id>')
     def get_ontology_version(ontology_name, version_id):
         """Get a specific version of an ontology."""
-        version = OntologyVersion.query.get_or_404(version_id)
+        version = db.get_or_404(OntologyVersion, version_id)
         
         return jsonify({
             'content': version.content,
@@ -1608,26 +1610,40 @@ def register_routes(app):
     @app.route('/api/ontologies')
     def api_ontologies():
         """API endpoint to list ontologies."""
-        ontologies = Ontology.query.all()
+        stmt = select(Ontology)
+        ontologies = db.session.execute(stmt).scalars().all()
         return jsonify([ont.to_dict() for ont in ontologies])
     
     @app.route('/api/ontology/<ontology_name>')
     def api_ontology_detail(ontology_name):
         """API endpoint for ontology details."""
-        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        stmt = select(Ontology).where(Ontology.name == ontology_name)
+        ontology = db.one_or_404(stmt)
         data = ontology.to_dict()
         
         # Add entity counts
+        stmt = select(func.count()).select_from(OntologyEntity).where(
+            OntologyEntity.ontology_id == ontology.id,
+            OntologyEntity.entity_type == 'class'
+        )
+        class_count = db.session.execute(stmt).scalar()
+
+        stmt = select(func.count()).select_from(OntologyEntity).where(
+            OntologyEntity.ontology_id == ontology.id,
+            OntologyEntity.entity_type == 'property'
+        )
+        property_count = db.session.execute(stmt).scalar()
+
+        stmt = select(func.count()).select_from(OntologyEntity).where(
+            OntologyEntity.ontology_id == ontology.id,
+            OntologyEntity.entity_type == 'individual'
+        )
+        individual_count = db.session.execute(stmt).scalar()
+
         data['entity_counts'] = {
-            'classes': OntologyEntity.query.filter_by(
-                ontology_id=ontology.id, entity_type='class'
-            ).count(),
-            'properties': OntologyEntity.query.filter_by(
-                ontology_id=ontology.id, entity_type='property'
-            ).count(),
-            'individuals': OntologyEntity.query.filter_by(
-                ontology_id=ontology.id, entity_type='individual'
-            ).count()
+            'classes': class_count,
+            'properties': property_count,
+            'individuals': individual_count
         }
         
         return jsonify(data)
@@ -1640,7 +1656,8 @@ def register_routes(app):
         if not current_user.can_perform_action('edit'):
             return jsonify({'success': False, 'error': 'Permission denied'}), 403
             
-        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        stmt = select(Ontology).where(Ontology.name == ontology_name)
+        ontology = db.one_or_404(stmt)
         
         try:
             data = request.get_json()
@@ -1650,7 +1667,8 @@ def register_routes(app):
             new_name = data.get('name', ontology.name)
             if new_name != old_name:
                 # Check if new name already exists
-                existing = Ontology.query.filter_by(name=new_name).first()
+                check_stmt = select(Ontology).where(Ontology.name == new_name)
+                existing = db.session.execute(check_stmt).scalar_one_or_none()
                 if existing:
                     return jsonify({
                         'success': False,
@@ -1703,16 +1721,19 @@ def register_routes(app):
             flash('You do not have permission to edit ontology settings', 'error')
             return redirect(url_for('ontology_detail_or_uri_resolution', ontology_name=ontology_name))
             
-        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        stmt = select(Ontology).where(Ontology.name == ontology_name)
+        ontology = db.one_or_404(stmt)
         return render_template('ontology_settings.html', ontology=ontology)
     
     @app.route('/editor/api/ontologies/<ontology_name>/entities')
     def api_ontology_entities(ontology_name):
         """API endpoint for ProEthica integration - get entities for an ontology."""
-        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
-        
+        stmt = select(Ontology).where(Ontology.name == ontology_name)
+        ontology = db.one_or_404(stmt)
+
         # Get all entities for this ontology
-        entities = OntologyEntity.query.filter_by(ontology_id=ontology.id).all()
+        stmt = select(OntologyEntity).where(OntologyEntity.ontology_id == ontology.id)
+        entities = db.session.execute(stmt).scalars().all()
         
         # Organize entities by category for ProEthica format
         entities_by_category = {}
@@ -1765,15 +1786,17 @@ def register_routes(app):
             parent_ontology_name = data.get('parent_ontology', None)  # New parameter for parent relationship
             
             # Check if ontology already exists
-            ontology = Ontology.query.filter_by(name=ontology_name).first()
-            
+            stmt = select(Ontology).where(Ontology.name == ontology_name)
+            ontology = db.session.execute(stmt).scalar_one_or_none()
+
             if ontology:
                 # Check if there's already a draft version
-                existing_draft = OntologyVersion.query.filter_by(
-                    ontology_id=ontology.id,
-                    is_draft=True
-                ).first()
-                
+                stmt = select(OntologyVersion).where(
+                    OntologyVersion.ontology_id == ontology.id,
+                    OntologyVersion.is_draft == True
+                )
+                existing_draft = db.session.execute(stmt).scalar_one_or_none()
+
                 if existing_draft:
                     return jsonify({
                         'success': False,
@@ -1783,7 +1806,8 @@ def register_routes(app):
                 # Resolve parent ontology if specified
                 parent_ontology_id = None
                 if parent_ontology_name:
-                    parent_ontology = Ontology.query.filter_by(name=parent_ontology_name).first()
+                    stmt = select(Ontology).where(Ontology.name == parent_ontology_name)
+                    parent_ontology = db.session.execute(stmt).scalar_one_or_none()
                     if parent_ontology:
                         parent_ontology_id = parent_ontology.id
                         app.logger.info(f"Creating derived ontology {ontology_name} with parent {parent_ontology_name}")
@@ -1831,7 +1855,10 @@ def register_routes(app):
                 from rdflib import RDF, RDFS, OWL
                 
                 # Clear existing entities for this ontology (in case of recreate)
-                OntologyEntity.query.filter_by(ontology_id=ontology.id).delete()
+                stmt = select(OntologyEntity).where(OntologyEntity.ontology_id == ontology.id)
+                entities_to_clear = db.session.execute(stmt).scalars().all()
+                for entity in entities_to_clear:
+                    db.session.delete(entity)
                 
                 entity_counts = {'class': 0, 'property': 0, 'individual': 0}
                 
@@ -1927,34 +1954,40 @@ def register_routes(app):
     def delete_draft_ontology(ontology_name):
         """Delete draft ontology (replaces Clear Pending functionality)."""
         try:
-            ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
-            
+            stmt = select(Ontology).where(Ontology.name == ontology_name)
+            ontology = db.one_or_404(stmt)
+
             # Find all draft versions
-            draft_versions = OntologyVersion.query.filter_by(
-                ontology_id=ontology.id,
-                is_draft=True
-            ).all()
-            
+            stmt = select(OntologyVersion).where(
+                OntologyVersion.ontology_id == ontology.id,
+                OntologyVersion.is_draft == True
+            )
+            draft_versions = db.session.execute(stmt).scalars().all()
+
             if not draft_versions:
                 return jsonify({
                     'success': False,
                     'error': f'No draft versions found for {ontology_name}'
                 }), 404
-            
+
             # Delete all draft versions
             for version in draft_versions:
                 db.session.delete(version)
-            
+
             # Check if this ontology has any published versions
-            published_versions = OntologyVersion.query.filter_by(
-                ontology_id=ontology.id,
-                is_draft=False
-            ).count()
+            stmt = select(func.count()).select_from(OntologyVersion).where(
+                OntologyVersion.ontology_id == ontology.id,
+                OntologyVersion.is_draft == False
+            )
+            published_versions = db.session.execute(stmt).scalar()
             
             # If no published versions, delete the entire ontology
             if published_versions == 0:
                 # Also delete any extracted entities
-                OntologyEntity.query.filter_by(ontology_id=ontology.id).delete()
+                stmt = select(OntologyEntity).where(OntologyEntity.ontology_id == ontology.id)
+                entities_to_delete = db.session.execute(stmt).scalars().all()
+                for entity in entities_to_delete:
+                    db.session.delete(entity)
                 db.session.delete(ontology)
             
             db.session.commit()
@@ -2010,9 +2043,10 @@ def register_routes(app):
                 }), 400
             
             app.logger.info(f"Resolving URI: {uri}")
-            
+
             # Find entity in database
-            entity = OntologyEntity.query.filter_by(uri=uri).first()
+            stmt = select(OntologyEntity).where(OntologyEntity.uri == uri)
+            entity = db.session.execute(stmt).scalar_one_or_none()
             
             if not entity:
                 app.logger.warning(f"Entity not found for URI: {uri}")
@@ -2144,9 +2178,10 @@ def register_routes(app):
         # Construct the full URI
         base_uri = f"http://proethica.org/ontology/{ontology_path}"
         full_uri = f"{base_uri}#{entity_name}"
-        
+
         # Find entity in database
-        entity = OntologyEntity.query.filter_by(uri=full_uri).first()
+        stmt = select(OntologyEntity).where(OntologyEntity.uri == full_uri)
+        entity = db.session.execute(stmt).scalar_one_or_none()
         
         if not entity:
             return jsonify({
