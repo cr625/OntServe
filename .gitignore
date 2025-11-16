@@ -86,3 +86,13 @@ archive/
 # Temporary ontology extraction files
 proethica-intermediate-extracted.ttl
 proethica-case-*.ttl
+
+# Test artifacts
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+tests/test_log.txt
+.tox/
