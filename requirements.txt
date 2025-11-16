@@ -10,7 +10,7 @@ owlready2>=0.46
 # Note: Java JDK 11+ required for Owlready2 reasoners (HermiT, Pellet)
 
 # ===== Web Framework =====
-Flask>=3.1.0
+Flask>=3.1.2
 Flask-SQLAlchemy>=3.1.1
 Flask-Migrate>=4.0.7
 Flask-Login>=0.6.3
