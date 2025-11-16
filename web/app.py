@@ -142,7 +142,7 @@ def create_app(config_name=None):
         return {'config': app.config}
     
     # Initialize CLI commands
-    from cli import init_cli
+    from web.cli import init_cli
     init_cli(app)
     
     return app
