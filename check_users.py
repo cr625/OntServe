@@ -27,13 +27,23 @@ def check_users():
             return
 
         print(f"\nFound {len(users)} user(s):\n")
-        print(f"{'ID':<5} {'Username':<20} {'Email':<30} {'Admin':<10} {'Active':<10}")
-        print("=" * 80)
 
         for user in users:
-            admin_status = 'Yes' if user.is_admin else 'No'
-            active_status = 'Yes' if user.is_active else 'No'
-            print(f"{user.id:<5} {user.username:<20} {user.email:<30} {admin_status:<10} {active_status:<10}")
+            print(f"\n{'='*80}")
+            print(f"User ID: {user.id}")
+            print(f"Username: {user.username}")
+            print(f"Email: {user.email}")
+            print(f"Admin: {'Yes' if user.is_admin else 'No'}")
+            print(f"Active: {'Yes' if user.is_active else 'No'}")
+            print(f"\nPermissions:")
+            print(f"  Can import ontologies: {'Yes' if user.can_import_ontologies else 'No'}")
+            print(f"  Can edit ontologies: {'Yes' if user.can_edit_ontologies else 'No'}")
+            print(f"  Can delete ontologies: {'Yes' if user.can_delete_ontologies else 'No'}")
+            print(f"  Can publish versions: {'Yes' if user.can_publish_versions else 'No'}")
+            print(f"  Can access API: {'Yes' if user.can_access_api else 'No'}")
+            print(f"\ncan_perform_action('edit'): {user.can_perform_action('edit')}")
+
+        print(f"\n{'='*80}")
 
 if __name__ == "__main__":
     check_users()
