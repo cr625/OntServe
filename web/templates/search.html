@@ -43,16 +43,16 @@
         <h3>Ontologies ({{ results.ontologies|length }})</h3>
         <div class="list-group mb-4">
             {% for ontology in results.ontologies %}
-            <a href="{{ url_for('ontology_detail', ontology_id=ontology.ontology_id) }}" 
+            <a href="{{ url_for('ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}"
                class="list-group-item list-group-item-action">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{{ ontology.name }}</h5>
-                    <small><code>{{ ontology.ontology_id }}</code></small>
+                    <small><code>{{ ontology.base_uri }}</code></small>
                 </div>
                 {% if ontology.description %}
                 <p class="mb-1">{{ ontology.description[:200] }}{% if ontology.description|length > 200 %}...{% endif %}</p>
                 {% endif %}
-                <small>{{ ontology.triple_count or 0 }} triples | {{ ontology.class_count or 0 }} classes | {{ ontology.property_count or 0 }} properties</small>
+                <small class="text-muted">Base URI: {{ ontology.base_uri }}</small>
             </a>
             {% endfor %}
         </div>
@@ -73,7 +73,7 @@
                 </thead>
                 <tbody>
                     {% for entity in results.entities %}
-                    <tr onclick="window.location='{{ url_for('ontology_detail', ontology_id=entity.ontology.ontology_id) }}'" style="cursor: pointer;">
+                    <tr onclick="window.location='{{ url_for('ontology_detail_or_uri_resolution', ontology_name=entity.ontology.name) }}'" style="cursor: pointer;">
                         <td>
                             <strong>{{ entity.label or entity.uri|extract_name }}</strong>
                             {% if entity.comment %}
