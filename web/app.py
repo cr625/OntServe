@@ -1171,10 +1171,8 @@ def register_routes(app):
         page = request.args.get('page', 1, type=int)
         per_page = 10
 
-        # Get draft ontologies with version info
-        stmt = select(Ontology, OntologyVersion).join(
-            OntologyVersion, Ontology.id == OntologyVersion.ontology_id
-        ).where(
+        # Get draft ontology versions (accessing ontology through relationship)
+        stmt = select(OntologyVersion).where(
             OntologyVersion.is_draft == True
         ).order_by(OntologyVersion.created_at.desc())
 
@@ -1187,11 +1185,9 @@ def register_routes(app):
 
         # Get entity counts for each draft
         draft_data = []
-        for row in pagination.items:
-            # In SQLAlchemy 2.0, pagination.items contains Row objects
-            # Access tuple elements by index or convert to tuple
-            ont = row[0]
-            version = row[1]
+        for version in pagination.items:
+            # Access the ontology through the relationship
+            ont = version.ontology
 
             count_stmt = select(func.count()).select_from(OntologyEntity).where(
                 OntologyEntity.ontology_id == ont.id
