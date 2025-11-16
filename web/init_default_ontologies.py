@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
 from flask import Flask
-from sqlalchemy import text
+from sqlalchemy import text, select
 import rdflib
 from rdflib import RDF, RDFS, OWL
 
@@ -66,7 +66,8 @@ def init_database_ontologies(app):
             ont_id = ont_info['ontology_id']
             
             # Check if already in database
-            existing = Ontology.query.filter_by(ontology_id=ont_id).first()
+            stmt = select(Ontology).where(Ontology.ontology_id == ont_id)
+            existing = db.session.execute(stmt).scalar_one_or_none()
             if existing:
                 logger.info(f"✓ {ont_id} already exists in database")
                 continue
@@ -169,7 +170,8 @@ def init_database_ontologies(app):
                 continue
         
         # List all ontologies in database
-        all_onts = Ontology.query.all()
+        stmt = select(Ontology)
+        all_onts = db.session.execute(stmt).scalars().all()
         logger.info(f"\n=== Total ontologies in database: {len(all_onts)} ===")
         for ont in all_onts:
             logger.info(f"  - {ont.ontology_id}: {ont.name}")

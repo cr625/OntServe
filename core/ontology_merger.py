@@ -13,8 +13,9 @@ from datetime import datetime
 import rdflib
 from rdflib import Graph, Namespace, URIRef, Literal, BNode
 from rdflib.namespace import RDF, RDFS, OWL, XSD, DCTERMS
+from sqlalchemy import select
 
-from web.models import Ontology, OntologyVersion
+from web.models import Ontology, OntologyVersion, db
 
 
 class OntologyMergerService:
@@ -149,17 +150,18 @@ class OntologyMergerService:
             # Filter to only include children with published versions
             mergeable_children = []
             for child in children:
-                published_version = OntologyVersion.query.filter_by(
-                    ontology_id=child.id,
-                    is_current=True,
-                    is_draft=False
-                ).first()
-                
+                stmt = select(OntologyVersion).where(
+                    OntologyVersion.ontology_id == child.id,
+                    OntologyVersion.is_current == True,
+                    OntologyVersion.is_draft == False
+                )
+                published_version = db.session.execute(stmt).scalar_one_or_none()
+
                 if published_version:
                     mergeable_children.append(child)
                 else:
                     self.logger.info(f"Skipping child {child.name}: no published version")
-            
+
             return mergeable_children
         
         return children
