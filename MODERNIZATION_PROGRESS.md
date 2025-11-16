@@ -294,8 +294,8 @@
 | Initial | 5f07c0b | 2025-11-16 | Before modernization start |
 | Phase 1.1 | 042275a | 2025-11-16 | After standalone config |
 | Phase 1.2 Docs | f88f9d2 | 2025-11-16 | After dependency documentation |
-| Phase 1.2 Code | TBD | - | After code migration (pending) |
-| Phase 1.3 | TBD | - | After testing setup |
+| Phase 1.3 | 4be38c2 | 2025-11-16 | After testing infrastructure |
+| Phase 1.2 Code | TBD | - | After SQLAlchemy migration (pending) |
 
 ---
 
