@@ -458,11 +458,8 @@ echo $ONTSERVE_DB_URL
 # Check Python path
 python -c "import sys; print(sys.path)"
 
-# Install requirements
+# Install all requirements (includes test dependencies)
 pip install -r requirements.txt
-
-# Install test requirements
-pip install -r requirements-2025.txt
 ```
 
 ## Writing New Tests

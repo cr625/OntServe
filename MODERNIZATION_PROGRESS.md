@@ -98,8 +98,8 @@
 - [ ] Update rdflib usage for 7.4.0
 - [ ] Test database operations
 - [ ] Test RDF/SPARQL functionality
-- [ ] Backup and rename old requirements.txt
-- [ ] Move requirements-2025.txt to requirements.txt
+- [x] Backup and rename old requirements.txt
+- [x] Consolidate requirements files (requirements.txt now contains 2025 versions)
 
 **Breaking Changes Documented**:
 - SQLAlchemy 2.0: `Model.query()` → `session.execute(select(Model))`
