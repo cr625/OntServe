@@ -61,7 +61,9 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
-    SQLALCHEMY_ECHO = True
+    # Set to True to see all SQL queries (very verbose)
+    # Set to 'debug' for just query strings
+    SQLALCHEMY_ECHO = False
 
 
 class ProductionConfig(Config):
