@@ -118,7 +118,7 @@ def app(test_config):
     """Create Flask app for testing."""
     from web.app import create_app
 
-    app = create_app(test_config)
+    app = create_app('testing')
     app.config.update(test_config)
 
     # Create application context
