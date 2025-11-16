@@ -19,6 +19,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, login_required, current_user
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
+from sqlalchemy import select, func, or_
 import rdflib
 
 from config import config
@@ -231,8 +232,9 @@ def register_auth_routes(app):
             if not username or not password:
                 flash('Please enter both username and password', 'error')
                 return render_template('auth/login.html')
-            
-            user = User.query.filter_by(username=username).first()
+
+            stmt = select(User).where(User.username == username)
+            user = db.session.execute(stmt).scalar_one_or_none()
             
             if user and user.check_password(password) and user.is_active:
                 from flask_login import login_user
@@ -286,7 +288,9 @@ def register_routes(app):
         per_page = app.config['ONTOLOGIES_PER_PAGE']
         
         # Get ontologies from database
-        pagination = Ontology.query.paginate(
+        stmt = select(Ontology)
+        pagination = db.paginate(
+            stmt,
             page=page,
             per_page=per_page,
             error_out=False
@@ -317,8 +321,9 @@ def register_routes(app):
         
         is_semantic_request = any(fmt in accept_header for fmt in semantic_formats)
         is_browser = 'Mozilla' in user_agent and 'text/html' in accept_header and not is_semantic_request
-        
-        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+
+        stmt = select(Ontology).where(Ontology.name == ontology_name)
+        ontology = db.one_or_404(stmt)
         
         # Handle semantic web client requests (content negotiation)
         if is_semantic_request or (not is_browser and not 'text/html' in accept_header):
@@ -440,42 +445,64 @@ def register_routes(app):
         app.logger.info(f"Browser request for {ontology_name}, showing detail page")
         
         # Get entities grouped by type
+        stmt = select(OntologyEntity).where(
+            OntologyEntity.ontology_id == ontology.id,
+            OntologyEntity.entity_type == 'class'
+        )
+        classes = db.session.execute(stmt).scalars().all()
+
+        stmt = select(OntologyEntity).where(
+            OntologyEntity.ontology_id == ontology.id,
+            OntologyEntity.entity_type == 'property'
+        )
+        properties = db.session.execute(stmt).scalars().all()
+
+        stmt = select(OntologyEntity).where(
+            OntologyEntity.ontology_id == ontology.id,
+            OntologyEntity.entity_type == 'individual'
+        )
+        individuals = db.session.execute(stmt).scalars().all()
+
         entities = {
-            'classes': OntologyEntity.query.filter_by(
-                ontology_id=ontology.id, 
-                entity_type='class'
-            ).all(),
-            'properties': OntologyEntity.query.filter_by(
-                ontology_id=ontology.id, 
-                entity_type='property'
-            ).all(),
-            'individuals': OntologyEntity.query.filter_by(
-                ontology_id=ontology.id, 
-                entity_type='individual'
-            ).all()
+            'classes': classes,
+            'properties': properties,
+            'individuals': individuals
         }
-        
+
         # Count relationship instances
+        stmt = select(func.count()).select_from(OntologyEntity).where(
+            OntologyEntity.ontology_id == ontology.id,
+            OntologyEntity.entity_type == 'class',
+            OntologyEntity.parent_uri.isnot(None)
+        )
+        hierarchical_count = db.session.execute(stmt).scalar()
+
+        stmt = select(func.count()).select_from(OntologyEntity).where(
+            OntologyEntity.ontology_id == ontology.id,
+            OntologyEntity.entity_type == 'property',
+            OntologyEntity.domain.isnot(None)
+        )
+        domain_count = db.session.execute(stmt).scalar()
+
+        stmt = select(func.count()).select_from(OntologyEntity).where(
+            OntologyEntity.ontology_id == ontology.id,
+            OntologyEntity.entity_type == 'property',
+            OntologyEntity.range.isnot(None)
+        )
+        range_count = db.session.execute(stmt).scalar()
+
         relationships = {
-            'hierarchical': OntologyEntity.query.filter_by(
-                ontology_id=ontology.id, 
-                entity_type='class'
-            ).filter(OntologyEntity.parent_uri.isnot(None)).count(),
-            'domain': OntologyEntity.query.filter_by(
-                ontology_id=ontology.id, 
-                entity_type='property'
-            ).filter(OntologyEntity.domain.isnot(None)).count(),
-            'range': OntologyEntity.query.filter_by(
-                ontology_id=ontology.id, 
-                entity_type='property'
-            ).filter(OntologyEntity.range.isnot(None)).count()
+            'hierarchical': hierarchical_count,
+            'domain': domain_count,
+            'range': range_count
         }
         relationships['total'] = relationships['hierarchical'] + relationships['domain'] + relationships['range']
-        
+
         # Get versions
-        versions = OntologyVersion.query.filter_by(
-            ontology_id=ontology.id
-        ).order_by(OntologyVersion.created_at.desc()).all()
+        stmt = select(OntologyVersion).where(
+            OntologyVersion.ontology_id == ontology.id
+        ).order_by(OntologyVersion.created_at.desc())
+        versions = db.session.execute(stmt).scalars().all()
         
         return render_template('ontology_detail.html',
                              ontology=ontology,
@@ -486,7 +513,8 @@ def register_routes(app):
     @app.route('/ontology/<ontology_name>/content')
     def ontology_content(ontology_name):
         """Return raw TTL content of an ontology."""
-        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        stmt = select(Ontology).where(Ontology.name == ontology_name)
+        ontology = db.one_or_404(stmt)
         content = ontology.current_content
         if content is None:
             return "No content available for this ontology", 404
@@ -503,7 +531,8 @@ def register_routes(app):
         - /ontology/w3c-prov-o.rdf -> RDF/XML
         - /ontology/w3c-prov-o.jsonld -> JSON-LD
         """
-        ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
+        stmt = select(Ontology).where(Ontology.name == ontology_name)
+        ontology = db.one_or_404(stmt)
         content = ontology.current_content
         
         if content is None:
@@ -571,21 +600,35 @@ def register_routes(app):
             }), 403
         
         try:
-            ontology = Ontology.query.filter_by(name=ontology_name).first_or_404()
-            
+            stmt = select(Ontology).where(Ontology.name == ontology_name)
+            ontology = db.one_or_404(stmt)
+
             app.logger.info(f"Admin {current_user.username} is deleting ontology: {ontology_name}")
-            
+
             # Count what we're deleting for logging
-            entity_count = OntologyEntity.query.filter_by(ontology_id=ontology.id).count()
-            version_count = OntologyVersion.query.filter_by(ontology_id=ontology.id).count()
-            
+            stmt = select(func.count()).select_from(OntologyEntity).where(
+                OntologyEntity.ontology_id == ontology.id
+            )
+            entity_count = db.session.execute(stmt).scalar()
+
+            stmt = select(func.count()).select_from(OntologyVersion).where(
+                OntologyVersion.ontology_id == ontology.id
+            )
+            version_count = db.session.execute(stmt).scalar()
+
             # Delete in proper order to avoid foreign key constraints
-            
+
             # 1. Delete all entities
-            OntologyEntity.query.filter_by(ontology_id=ontology.id).delete()
-            
+            stmt = select(OntologyEntity).where(OntologyEntity.ontology_id == ontology.id)
+            entities_to_delete = db.session.execute(stmt).scalars().all()
+            for entity in entities_to_delete:
+                db.session.delete(entity)
+
             # 2. Delete all versions
-            OntologyVersion.query.filter_by(ontology_id=ontology.id).delete()
+            stmt = select(OntologyVersion).where(OntologyVersion.ontology_id == ontology.id)
+            versions_to_delete = db.session.execute(stmt).scalars().all()
+            for version in versions_to_delete:
+                db.session.delete(version)
             
             # 3. Clean up file storage if using file backend
             try:
