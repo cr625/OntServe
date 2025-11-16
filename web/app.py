@@ -1170,7 +1170,7 @@ def register_routes(app):
         """View all draft ontologies."""
         page = request.args.get('page', 1, type=int)
         per_page = 10
-        
+
         # Get draft ontologies with version info
         stmt = select(Ontology, OntologyVersion).join(
             OntologyVersion, Ontology.id == OntologyVersion.ontology_id
@@ -1187,7 +1187,12 @@ def register_routes(app):
 
         # Get entity counts for each draft
         draft_data = []
-        for ont, version in pagination.items:
+        for row in pagination.items:
+            # In SQLAlchemy 2.0, pagination.items contains Row objects
+            # Access tuple elements by index or convert to tuple
+            ont = row[0]
+            version = row[1]
+
             count_stmt = select(func.count()).select_from(OntologyEntity).where(
                 OntologyEntity.ontology_id == ont.id
             )
@@ -1197,8 +1202,8 @@ def register_routes(app):
                 'version': version,
                 'entity_count': entity_count
             })
-        
-        return render_template('drafts.html', 
+
+        return render_template('drafts.html',
                              drafts=draft_data,
                              pagination=pagination)
     
