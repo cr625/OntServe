@@ -13,8 +13,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from flask import Flask
 from sqlalchemy import select
-from config import config
-from models import db, init_db, Ontology, OntologyEntity, OntologyVersion
+from web.config import config
+from web.models import db, init_db, Ontology, OntologyEntity, OntologyVersion
 from core.ontology_manager import OntologyManager
 import rdflib
 from rdflib import RDF, RDFS, OWL

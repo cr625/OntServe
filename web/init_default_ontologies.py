@@ -21,8 +21,8 @@ from sqlalchemy import text, select
 import rdflib
 from rdflib import RDF, RDFS, OWL
 
-from config import config
-from models import db, Ontology, OntologyVersion, OntologyEntity
+from web.config import config
+from web.models import db, Ontology, OntologyVersion, OntologyEntity
 from core.ontology_manager import OntologyManager
 
 # Configure logging

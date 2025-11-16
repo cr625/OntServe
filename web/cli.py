@@ -9,7 +9,7 @@ from flask.cli import with_appcontext
 from werkzeug.security import generate_password_hash
 from sqlalchemy import select
 
-from models import db, User
+from web.models import db, User
 
 
 @click.command()

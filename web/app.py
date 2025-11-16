@@ -22,7 +22,7 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from sqlalchemy import select, func, or_
 import rdflib
 
-from config import config
+from web.config import config
 from web.models import db, init_db, Ontology, OntologyEntity, OntologyVersion, User
 from core.ontology_manager import OntologyManager
 from core.ontology_merger import OntologyMergerService
