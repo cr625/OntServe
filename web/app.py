@@ -1225,7 +1225,7 @@ def register_routes(app):
                     or_(
                         Ontology.name.ilike(f'%{query}%'),
                         Ontology.description.ilike(f'%{query}%'),
-                        Ontology.ontology_id.ilike(f'%{query}%')
+                        Ontology.base_uri.ilike(f'%{query}%')
                     )
                 )
                 results['ontologies'] = db.session.execute(stmt).scalars().all()
