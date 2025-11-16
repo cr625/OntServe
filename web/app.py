@@ -202,10 +202,12 @@ def generate_rdf_from_concepts(ontology_name, concepts, base_imports):
     rdfs:label "{concept.get('label', '')}" """
         
         if concept.get('description'):
-            concept_triples += f';\n    rdfs:comment "{concept.get('description')}"'
-        
+            desc = concept.get('description')
+            concept_triples += f';\n    rdfs:comment "{desc}"'
+
         if concept.get('confidence'):
-            concept_triples += f';\n    proethica:extractionConfidence "{concept.get('confidence')}"^^xsd:float'
+            conf = concept.get('confidence')
+            concept_triples += f';\n    proethica:extractionConfidence "{conf}"^^xsd:float'
         
         concept_triples += " .\n\n"
     
