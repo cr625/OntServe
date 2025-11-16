@@ -68,24 +68,32 @@
 - All shared/.env references removed from codebase
 - Need to install dependencies before testing services
 
-### 1.2 Python & Core Dependencies Update ⚪ Not Started
+### 1.2 Python & Core Dependencies Update 🟡 Documentation Complete
 
 **Goal**: Upgrade to latest stable versions (2025)
+**Status**: Documentation complete, code migration pending user decision
 
 **Target Versions**:
-- Python 3.12
-- Flask 3.1.x
+- Python 3.11+ (3.12 recommended)
+- Flask 3.1.0
 - SQLAlchemy 2.0.44
-- Flask-SQLAlchemy 3.1.x
+- Flask-SQLAlchemy 3.1.1
 - rdflib 7.4.0
-- aiohttp 3.11+
-- asyncpg 0.30+
-- psycopg2-binary 2.9.10
+- aiohttp 3.13.2
+- asyncpg 0.30.0
+- psycopg2-binary 2.9.11
+- pgvector 0.3.6
+- owlready2 0.46
 
 **Tasks**:
-- [ ] Create `requirements-2025.txt` with updated versions
-- [ ] Review SQLAlchemy 2.0 migration guide
-- [ ] Update all SQLAlchemy queries (no more .query() method)
+- [x] Create `requirements-2025.txt` with updated versions
+- [x] Create SQLAlchemy 2.0 migration guide
+- [x] Analyze impact (109 query patterns in 9 files)
+- [x] Document breaking changes
+- [x] Create Phase 1.2 summary document
+- [ ] Decide on migration approach (Option A/B/C)
+- [ ] Install new dependencies in test environment
+- [ ] Update all SQLAlchemy queries (109 occurrences)
 - [ ] Update Flask deprecated patterns
 - [ ] Update rdflib usage for 7.4.0
 - [ ] Test database operations
@@ -93,13 +101,24 @@
 - [ ] Backup and rename old requirements.txt
 - [ ] Move requirements-2025.txt to requirements.txt
 
-**Breaking Changes to Address**:
-- SQLAlchemy 2.0: `session.query()` → `session.execute(select())`
-- Flask patterns: Review deprecation warnings
-- rdflib 7.x: Check API changes
+**Breaking Changes Documented**:
+- SQLAlchemy 2.0: `Model.query()` → `session.execute(select(Model))`
+- Flask 3.1: Minor updates, mostly backward compatible
+- rdflib 7.4: Minor API changes to verify
+- aiohttp 3.13: Updated from 3.8, check for breaking changes
 
-**Rollback Point**: Before updating requirements.txt
-**Test Strategy**: Run existing test suite, verify all endpoints
+**Impact Analysis**:
+- 109 query patterns found in 9 files
+- Most changes in: web/app.py (56), editor/routes.py (24), web/models.py (5)
+- All changes documented in SQLALCHEMY_2.0_MIGRATION.md
+
+**Rollback Point**: Commit before dependency installation
+**Test Strategy**: Incremental file updates with testing after each
+
+**Decision Required**:
+- Option A: Complete SQLAlchemy migration now (high effort, ~109 changes)
+- Option B: Set up testing infrastructure first (Phase 1.3), then migrate
+- Option C: Proceed to Phase 2 (MCP), handle dependencies when needed
 
 ### 1.3 Testing Infrastructure ⚪ Not Started
 
@@ -226,7 +245,7 @@
 | Phase | Commit Hash | Date | Description |
 |-------|-------------|------|-------------|
 | Initial | 5f07c0b | 2025-11-16 | Before modernization start |
-| Phase 1.1 | TBD | - | After standalone config |
+| Phase 1.1 | 042275a | 2025-11-16 | After standalone config |
 | Phase 1.2 | TBD | - | After dependency updates |
 | Phase 1.3 | TBD | - | After testing setup |
 
@@ -242,7 +261,14 @@
   - Created config_loader.py utility
   - Updated mcp_server.py and web/config.py to use new config
   - Updated .gitignore
-- Ready to start Phase 1.2: Dependency Updates
+  - Committed: 042275a
+- 🟡 Phase 1.2 Documentation Complete: Dependency Updates
+  - Created requirements-2025.txt with latest stable versions
+  - Created comprehensive SQLAlchemy 2.0 migration guide
+  - Analyzed impact: 109 query patterns in 9 files
+  - Created Phase 1.2 summary with recommendations
+  - **Decision needed**: Migration approach (A/B/C)
+- ⏸️ Awaiting user decision on Phase 1.2 completion approach
 
 ### Known Issues
 - None yet
@@ -266,7 +292,12 @@
 - `web/config.py` - Updated to use new config system
 - `.gitignore` - Updated to allow config templates
 
-**Phase 1.2**: Not started
+**Phase 1.2 (Documentation Complete)**:
+- `requirements-2025.txt` - Updated dependency versions
+- `SQLALCHEMY_2.0_MIGRATION.md` - Migration guide
+- `PHASE_1.2_SUMMARY.md` - Impact analysis and recommendations
+- `MODERNIZATION_PROGRESS.md` - Updated with Phase 1.2 progress
+
 **Phase 1.3**: Not started
 
 ### Phase 2 (Not Started)
