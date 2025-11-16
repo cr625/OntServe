@@ -522,7 +522,8 @@ class OntologyValidationService:
             logger.info("Successfully loaded foundation ontologies for validation")
             
         except Exception as e:
-            logger.error(f"Failed to load foundation ontologies: {e}")
+            logger.warning(f"Foundation ontologies not available for validation: {e}")
+            logger.info("Validation service will run without foundation ontology checks")
             self.bfo_graph = None
             self.prov_graph = None
             self.intermediate_graph = None
