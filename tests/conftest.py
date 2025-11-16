@@ -7,6 +7,7 @@ This module provides shared fixtures and configuration for all tests.
 import os
 import sys
 import pytest
+import pytest_asyncio
 import asyncio
 from pathlib import Path
 from typing import Generator
@@ -142,7 +143,7 @@ def runner(app):
 # MCP Server Fixtures
 # =============================================================================
 
-@pytest.fixture(scope='function')
+@pytest_asyncio.fixture(scope='function')
 async def mcp_server():
     """Create MCP server instance for testing."""
     from servers.mcp_server import OntServeMCPServer
@@ -158,7 +159,7 @@ async def mcp_server():
         pass
 
 
-@pytest.fixture(scope='function')
+@pytest_asyncio.fixture(scope='function')
 async def mcp_client(mcp_server):
     """Create MCP test client."""
     from aiohttp import web
@@ -346,8 +347,7 @@ class TestHelpers:
         ontology = Ontology(
             name=name,
             base_uri=f'http://test.org/{name}#',
-            description=f'Test ontology: {name}',
-            version='1.0.0'
+            description=f'Test ontology: {name}'
         )
 
         db_session.add(ontology)
