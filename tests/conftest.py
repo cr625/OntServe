@@ -76,23 +76,21 @@ def database_engine(test_config):
 
 
 @pytest.fixture(scope='function')
-def db_session(database_engine):
-    """Provide a database session with transaction rollback."""
-    from sqlalchemy.orm import sessionmaker
+def db_session(app):
+    """Provide Flask-SQLAlchemy db session that routes can see."""
+    from web.models import db
 
-    Session = sessionmaker(bind=database_engine)
-    session = Session()
+    with app.app_context():
+        # Drop and recreate for clean state
+        db.drop_all()
+        db.create_all()
 
-    # Start transaction
-    transaction = session.begin()
+        # Use Flask-SQLAlchemy's session (same one routes use!)
+        yield db.session
 
-    yield session
-
-    # Rollback transaction (keeps test database clean)
-    # Check if transaction is still active before rolling back
-    if transaction.is_active:
-        transaction.rollback()
-    session.close()
+        # Clean up
+        db.session.remove()
+        db.drop_all()
 
 
 @pytest.fixture(scope='function')
