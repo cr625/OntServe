@@ -17,6 +17,7 @@ build/
 *.env
 *.venv
 venv/
+venv-ontserve/
 ENV/
 env/
 
@@ -66,6 +67,11 @@ web/venv/
 # local backups
 *.local
 *.backup
+backups/
+
+# Coverage reports
+.coverage
+coverage.xml
 
 # Review directory for cleanup
 untracked_review/
