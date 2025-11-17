@@ -12,6 +12,7 @@ from typing import Dict, Any, Optional
 
 from flask import Blueprint, request, jsonify, render_template, current_app, flash
 from werkzeug.exceptions import BadRequest, NotFound
+from sqlalchemy import select
 
 from web.models import db, Ontology, OntologyEntity, OntologyVersion
 from storage.file_storage import FileStorage
@@ -55,7 +56,8 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         """Main editor interface."""
         try:
             # Get list of available ontologies
-            ontologies = db.session.query(Ontology).order_by(Ontology.name).all()
+            stmt = select(Ontology).order_by(Ontology.name)
+            ontologies = db.session.execute(stmt).scalars().all()
             ontology_list = [ont.to_dict() for ont in ontologies]
             
             return render_template('editor/main.html', 
@@ -72,21 +74,22 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         """Load ontology in the editor."""
         try:
             # Get ontology
-            ontology = db.session.query(Ontology).filter_by(ontology_id=ontology_id).first()
+            stmt = select(Ontology).where(Ontology.ontology_id == ontology_id)
+            ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 raise NotFound(f"Ontology {ontology_id} not found")
-            
+
             # Get latest version
-            latest_version = db.session.query(OntologyVersion)\
-                .filter_by(ontology_id=ontology.id)\
-                .order_by(OntologyVersion.created_at.desc())\
-                .first()
-            
+            stmt = select(OntologyVersion)\
+                .where(OntologyVersion.ontology_id == ontology.id)\
+                .order_by(OntologyVersion.created_at.desc())
+            latest_version = db.session.execute(stmt).scalars().first()
+
             # Get version history
-            versions = db.session.query(OntologyVersion)\
-                .filter_by(ontology_id=ontology.id)\
-                .order_by(OntologyVersion.created_at.desc())\
-                .all()
+            stmt = select(OntologyVersion)\
+                .where(OntologyVersion.ontology_id == ontology.id)\
+                .order_by(OntologyVersion.created_at.desc())
+            versions = db.session.execute(stmt).scalars().all()
             
             version_list = []
             for v in versions:
@@ -126,9 +129,10 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             
             if not content:
                 raise BadRequest("Content cannot be empty")
-            
+
             # Get ontology
-            ontology = db.session.query(Ontology).filter_by(ontology_id=ontology_id).first()
+            stmt = select(Ontology).where(Ontology.ontology_id == ontology_id)
+            ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 raise NotFound(f"Ontology {ontology_id} not found")
             
@@ -225,22 +229,24 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         """Get entities for an ontology with optional filtering and search."""
         try:
             # Get ontology
-            ontology = db.session.query(Ontology).filter_by(ontology_id=ontology_id).first()
+            stmt = select(Ontology).where(Ontology.ontology_id == ontology_id)
+            ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 raise NotFound(f"Ontology {ontology_id} not found")
-            
+
             # Get query parameters
             entity_type = request.args.get('type')
             search_term = request.args.get('search', '').strip()
             limit = int(request.args.get('limit', 100))
-            
+
             # Get entities from database
-            query = db.session.query(OntologyEntity).filter_by(ontology_id=ontology.id)
-            
+            stmt = select(OntologyEntity).where(OntologyEntity.ontology_id == ontology.id)
+
             if entity_type:
-                query = query.filter_by(entity_type=entity_type)
-            
-            entities = query.limit(limit).all()
+                stmt = stmt.where(OntologyEntity.entity_type == entity_type)
+
+            stmt = stmt.limit(limit)
+            entities = db.session.execute(stmt).scalars().all()
             
             # Convert to dictionaries
             entity_list = [entity.to_dict() for entity in entities]
@@ -306,9 +312,10 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         """Visualization interface for ontology."""
         try:
             logger.info(f"Loading visualization for ontology: {ontology_name}")
-            
+
             # Get ontology
-            ontology = db.session.query(Ontology).filter_by(name=ontology_name).first()
+            stmt = select(Ontology).where(Ontology.name == ontology_name)
+            ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 logger.warning(f"Ontology {ontology_name} not found in database")
                 return f"<h1>Ontology Not Found</h1><p>Ontology '{ontology_name}' was not found in the database.</p>", 404
@@ -329,15 +336,16 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         """Get version history for an ontology."""
         try:
             # Get ontology
-            ontology = db.session.query(Ontology).filter_by(ontology_id=ontology_id).first()
+            stmt = select(Ontology).where(Ontology.ontology_id == ontology_id)
+            ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 raise NotFound(f"Ontology {ontology_id} not found")
-            
+
             # Get versions
-            versions = db.session.query(OntologyVersion)\
-                .filter_by(ontology_id=ontology.id)\
-                .order_by(OntologyVersion.created_at.desc())\
-                .all()
+            stmt = select(OntologyVersion)\
+                .where(OntologyVersion.ontology_id == ontology.id)\
+                .order_by(OntologyVersion.created_at.desc())
+            versions = db.session.execute(stmt).scalars().all()
             
             version_list = []
             for v in versions:
@@ -407,12 +415,12 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         """Get detailed information about a specific entity."""
         try:
             # Get entity
-            entity = db.session.query(OntologyEntity).get(entity_id)
+            entity = db.session.get(OntologyEntity, entity_id)
             if not entity:
                 raise NotFound(f"Entity {entity_id} not found")
-            
+
             # Get ontology information
-            ontology = db.session.query(Ontology).get(entity.ontology_id)
+            ontology = db.session.get(Ontology, entity.ontology_id)
             
             # Build entity details
             entity_dict = entity.to_dict()
@@ -422,19 +430,23 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             entity_dict['color'] = EntityTypeMapper.get_entity_color(entity.entity_type, entity.uri)
             entity_dict['is_bfo_aligned'] = EntityTypeMapper.is_bfo_aligned(entity.uri)
             entity_dict['ontology'] = ontology.to_dict() if ontology else None
-            
+
             # Get related entities (children and parents)
-            children = db.session.query(OntologyEntity)\
-                .filter_by(ontology_id=entity.ontology_id, parent_uri=entity.uri)\
-                .all()
-            
+            stmt = select(OntologyEntity).where(
+                OntologyEntity.ontology_id == entity.ontology_id,
+                OntologyEntity.parent_uri == entity.uri
+            )
+            children = db.session.execute(stmt).scalars().all()
+
             entity_dict['children'] = [child.to_dict() for child in children]
-            
+
             # Get parent if exists
             if entity.parent_uri:
-                parent = db.session.query(OntologyEntity)\
-                    .filter_by(ontology_id=entity.ontology_id, uri=entity.parent_uri)\
-                    .first()
+                stmt = select(OntologyEntity).where(
+                    OntologyEntity.ontology_id == entity.ontology_id,
+                    OntologyEntity.uri == entity.parent_uri
+                )
+                parent = db.session.execute(stmt).scalar_one_or_none()
                 entity_dict['parent'] = parent.to_dict() if parent else None
             else:
                 entity_dict['parent'] = None
@@ -456,7 +468,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         """Get entities similar to a specific entity using semantic search."""
         try:
             # Get entity
-            entity = db.session.query(OntologyEntity).get(entity_id)
+            entity = db.session.get(OntologyEntity, entity_id)
             if not entity:
                 raise NotFound(f"Entity {entity_id} not found")
             
@@ -534,16 +546,18 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
     def enhanced_get_entities(ontology_name: str):
         """Get entities for visualization from existing database entities."""
         try:
-            # Find ontology by name 
-            ontology = Ontology.query.filter_by(name=ontology_name).first()
+            # Find ontology by name
+            stmt = select(Ontology).where(Ontology.name == ontology_name)
+            ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 return jsonify({
                     'success': False,
                     'error': f'Ontology {ontology_name} not found'
                 }), 404
-            
+
             # Get all entities for this ontology
-            entities = OntologyEntity.query.filter_by(ontology_id=ontology.id).all()
+            stmt = select(OntologyEntity).where(OntologyEntity.ontology_id == ontology.id)
+            entities = db.session.execute(stmt).scalars().all()
             
             # Transform entities to the format expected by the visualization
             nodes = []
@@ -609,16 +623,18 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
     def enhanced_get_visualization(ontology_name: str):
         """Get visualization data for ontology."""
         try:
-            # Find ontology by name 
-            ontology = Ontology.query.filter_by(name=ontology_name).first()
+            # Find ontology by name
+            stmt = select(Ontology).where(Ontology.name == ontology_name)
+            ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 return jsonify({
                     'success': False,
                     'error': f'Ontology {ontology_name} not found'
                 }), 404
-            
+
             # Get all entities for this ontology
-            entities = OntologyEntity.query.filter_by(ontology_id=ontology.id).all()
+            stmt = select(OntologyEntity).where(OntologyEntity.ontology_id == ontology.id)
+            entities = db.session.execute(stmt).scalars().all()
             
             # Transform entities to the format expected by the visualization
             nodes = []
@@ -800,9 +816,10 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             save_as_version = data.get('save_as_version', False)
             reasoner_type = data.get('reasoner_type', 'pellet')
             auto_promote_significant = data.get('auto_promote_significant', False)
-            
+
             # Get ontology from database
-            ontology = Ontology.query.filter_by(name=ontology_name).first()
+            stmt = select(Ontology).where(Ontology.name == ontology_name)
+            ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 return jsonify({
                     'success': False,
@@ -1009,9 +1026,12 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                         auto_promoted = False
                         if auto_promote_significant and len(inferred_relationships) > 0:
                             # Set all versions to not current
-                            OntologyVersion.query.filter_by(
-                                ontology_id=ontology.id
-                            ).update({'is_current': False})
+                            stmt = select(OntologyVersion).where(
+                                OntologyVersion.ontology_id == ontology.id
+                            )
+                            versions_to_update = db.session.execute(stmt).scalars().all()
+                            for v in versions_to_update:
+                                v.is_current = False
                             
                             # Make this version current
                             new_version.is_current = True
@@ -1111,7 +1131,8 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         """Get hierarchical visualization data extracted from ontology content."""
         try:
             # Get ontology from database
-            ontology = Ontology.query.filter_by(name=ontology_name).first()
+            stmt = select(Ontology).where(Ontology.name == ontology_name)
+            ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 return jsonify({
                     'success': False,
@@ -1366,13 +1387,16 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                     return jsonify({'error': 'ontology_name parameter is required'}), 400
             
             # Check if we have cached visualization data from enhanced processing
-            ontology = db.session.query(Ontology).filter_by(name=ontology_name).first()
+            stmt = select(Ontology).where(Ontology.name == ontology_name)
+            ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 raise NotFound(f"Ontology {ontology_name} not found")
-            
+
             # Get entities with enhanced metadata
-            entities_query = db.session.query(OntologyEntity).filter_by(ontology_id=ontology.id)
-            entities = entities_query.limit(entity_limit).all()
+            stmt = select(OntologyEntity).where(
+                OntologyEntity.ontology_id == ontology.id
+            ).limit(entity_limit)
+            entities = db.session.execute(stmt).scalars().all()
             
             # Build nodes for Cytoscape.js
             nodes = []

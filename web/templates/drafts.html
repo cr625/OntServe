@@ -73,10 +73,10 @@
                                 </div>
                                 <div class="card-footer bg-light">
                                     <div class="btn-group w-100" role="group">
-                                        <a href="{{ url_for('ontology_detail', ontology_name=draft.ontology.name) }}" class="btn btn-outline-primary btn-sm">
+                                        <a href="{{ url_for('ontology_detail_or_uri_resolution', ontology_name=draft.ontology.name) }}" class="btn btn-outline-primary btn-sm">
                                             <i class="bi bi-eye"></i> View
                                         </a>
-                                        <a href="{{ url_for('ontology_detail', ontology_name=draft.ontology.name) }}?tab=entities" class="btn btn-outline-info btn-sm">
+                                        <a href="{{ url_for('ontology_detail_or_uri_resolution', ontology_name=draft.ontology.name) }}?tab=entities" class="btn btn-outline-info btn-sm">
                                             <i class="bi bi-list-ul"></i> Entities
                                         </a>
                                         <button class="btn btn-outline-danger btn-sm" onclick="deleteDraft('{{ draft.ontology.name }}')">

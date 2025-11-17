@@ -3,25 +3,19 @@ Configuration for OntServe Web Application
 """
 
 import os
+import sys
 from pathlib import Path
-from dotenv import load_dotenv
 
 basedir = Path(__file__).parent.absolute()
+project_root = basedir.parent
 
-# Load environment variables in priority order:
-# 1. shared/.env (shared across all applications)  
-# 2. OntServe/.env (app-specific configuration)
-workspace_root = basedir.parent.parent
-shared_env = workspace_root / "shared" / ".env"
-ontserve_env = workspace_root / "OntServe" / ".env"
+# Add project root to path for config imports
+sys.path.insert(0, str(project_root))
 
-if shared_env.exists():
-    load_dotenv(shared_env, override=False)
-    print(f"✅ Loaded shared environment config: {shared_env}")
-
-if ontserve_env.exists():
-    load_dotenv(ontserve_env, override=True)  # App-specific overrides shared
-    print(f"✅ Loaded OntServe environment config: {ontserve_env}")
+# Load environment configuration using new standalone config system
+from config.config_loader import load_ontserve_config
+config_summary = load_ontserve_config()
+print(f"✅ Loaded configuration from: {', '.join(config_summary['loaded_files'])}")
 
 
 class Config:
@@ -67,7 +61,9 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration"""
     DEBUG = True
-    SQLALCHEMY_ECHO = True
+    # Set to True to see all SQL queries (very verbose)
+    # Set to 'debug' for just query strings
+    SQLALCHEMY_ECHO = False
 
 
 class ProductionConfig(Config):

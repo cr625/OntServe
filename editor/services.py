@@ -502,27 +502,63 @@ class OntologyValidationService:
         self._load_foundation_ontologies()
     
     def _load_foundation_ontologies(self):
-        """Load foundation ontologies for validation."""
+        """Load foundation ontologies for validation from database."""
         try:
-            # Load BFO
-            bfo_result = self.storage.retrieve('bfo')
-            self.bfo_graph = Graph()
-            self.bfo_graph.parse(data=bfo_result['content'], format='turtle')
-            
-            # Load PROV-O
-            prov_result = self.storage.retrieve('prov-o')
-            self.prov_graph = Graph()
-            self.prov_graph.parse(data=prov_result['content'], format='turtle')
-            
-            # Load proethica intermediate
-            intermediate_result = self.storage.retrieve('proethica-intermediate')
-            self.intermediate_graph = Graph()
-            self.intermediate_graph.parse(data=intermediate_result['content'], format='turtle')
-            
-            logger.info("Successfully loaded foundation ontologies for validation")
-            
+            from sqlalchemy import select
+
+            # Load BFO from database
+            bfo_ont = db.session.execute(
+                select(Ontology).where(Ontology.name == 'bfo')
+            ).scalar_one_or_none()
+
+            if bfo_ont and bfo_ont.current_content:
+                self.bfo_graph = Graph()
+                self.bfo_graph.parse(data=bfo_ont.current_content, format='turtle')
+                logger.info("Loaded BFO for validation")
+            else:
+                self.bfo_graph = None
+                logger.debug("BFO not found in database")
+
+            # Load PROV-O from database
+            prov_ont = db.session.execute(
+                select(Ontology).where(Ontology.name == 'prov-o')
+            ).scalar_one_or_none()
+
+            if prov_ont and prov_ont.current_content:
+                self.prov_graph = Graph()
+                self.prov_graph.parse(data=prov_ont.current_content, format='turtle')
+                logger.info("Loaded PROV-O for validation")
+            else:
+                self.prov_graph = None
+                logger.debug("PROV-O not found in database")
+
+            # Load proethica intermediate from database
+            intermediate_ont = db.session.execute(
+                select(Ontology).where(Ontology.name == 'proethica-intermediate')
+            ).scalar_one_or_none()
+
+            if intermediate_ont and intermediate_ont.current_content:
+                self.intermediate_graph = Graph()
+                self.intermediate_graph.parse(data=intermediate_ont.current_content, format='turtle')
+                logger.info("Loaded proethica-intermediate for validation")
+            else:
+                self.intermediate_graph = None
+                logger.debug("proethica-intermediate not found in database")
+
+            # Log summary
+            loaded = []
+            if self.bfo_graph: loaded.append('BFO')
+            if self.prov_graph: loaded.append('PROV-O')
+            if self.intermediate_graph: loaded.append('proethica-intermediate')
+
+            if loaded:
+                logger.info(f"Validation service initialized with: {', '.join(loaded)}")
+            else:
+                logger.info("Validation service running without foundation ontology checks")
+
         except Exception as e:
-            logger.error(f"Failed to load foundation ontologies: {e}")
+            logger.warning(f"Error loading foundation ontologies: {e}")
+            logger.info("Validation service will run without foundation ontology checks")
             self.bfo_graph = None
             self.prov_graph = None
             self.intermediate_graph = None

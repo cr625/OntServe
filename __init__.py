@@ -15,13 +15,15 @@ __version__ = "0.1.0"
 __author__ = "OntServe Team"
 
 # Public API exports
-from .core.ontology_manager import OntologyManager
-from .storage.base import StorageBackend
-from .importers.base import BaseImporter
+# Note: These imports are commented out to avoid conflicts when running locally.
+# Uncomment when installing OntServe as a package (pip install -e .)
+# from .core.ontology_manager import OntologyManager
+# from .storage.base import StorageBackend
+# from .importers.base import BaseImporter
 
 __all__ = [
-    'OntologyManager',
-    'StorageBackend', 
-    'BaseImporter',
+    # 'OntologyManager',
+    # 'StorageBackend',
+    # 'BaseImporter',
     '__version__'
 ]

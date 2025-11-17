@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Index, text
+from sqlalchemy import Index, text, select, func
 from sqlalchemy.dialects.postgresql import UUID
 from pgvector.sqlalchemy import Vector
 import uuid
@@ -76,40 +76,47 @@ class Ontology(db.Model):
     @property
     def current_content(self):
         """Get the content of the current version."""
-        current_version = OntologyVersion.query.filter_by(
-            ontology_id=self.id, 
-            is_current=True
-        ).first()
+        stmt = select(OntologyVersion).where(
+            OntologyVersion.ontology_id == self.id,
+            OntologyVersion.is_current == True
+        )
+        current_version = db.session.execute(stmt).scalar_one_or_none()
         return current_version.content if current_version else None
     
     @property
     def current_version(self):
         """Get the current version object."""
-        return OntologyVersion.query.filter_by(
-            ontology_id=self.id, 
-            is_current=True
-        ).first()
+        stmt = select(OntologyVersion).where(
+            OntologyVersion.ontology_id == self.id,
+            OntologyVersion.is_current == True
+        )
+        return db.session.execute(stmt).scalar_one_or_none()
     
     @property
     def triple_count(self):
         """Get count of total entities (approximation of triples)."""
-        return OntologyEntity.query.filter_by(ontology_id=self.id).count()
+        stmt = select(func.count()).select_from(OntologyEntity).where(
+            OntologyEntity.ontology_id == self.id
+        )
+        return db.session.execute(stmt).scalar() or 0
     
     @property
     def class_count(self):
         """Get count of class entities."""
-        return OntologyEntity.query.filter_by(
-            ontology_id=self.id, 
-            entity_type='class'
-        ).count()
+        stmt = select(func.count()).select_from(OntologyEntity).where(
+            OntologyEntity.ontology_id == self.id,
+            OntologyEntity.entity_type == 'class'
+        )
+        return db.session.execute(stmt).scalar() or 0
     
     @property
     def property_count(self):
         """Get count of property entities."""
-        return OntologyEntity.query.filter_by(
-            ontology_id=self.id, 
-            entity_type='property'
-        ).count()
+        stmt = select(func.count()).select_from(OntologyEntity).where(
+            OntologyEntity.ontology_id == self.id,
+            OntologyEntity.entity_type == 'property'
+        )
+        return db.session.execute(stmt).scalar() or 0
     
     @property
     def has_children(self):
