@@ -2151,32 +2151,41 @@ def register_routes(app):
         return '\n'.join(lines)
     
     # URI Resolution endpoint - path-based for direct access (placed last to avoid conflicts)
+    # This route should only match multi-segment paths like /ontology/core/ethics/Honesty
+    # Single-segment paths with reserved names (edit, save, etc.) should use dedicated routes
     @app.route('/ontology/<path:ontology_path>/<entity_name>')
     def resolve_uri_path(ontology_path, entity_name):
         """
         Direct path-based URI resolution.
-        
+
         Examples:
             /ontology/intermediate/Honesty
             /ontology/core/Principle
         """
         # Exclude reserved route names that have specific handlers
-        reserved_names = {'content', 'edit', 'save', 'settings', 'version', 'draft'}
-        
-        # If entity_name is reserved, redirect to the correct specific handler
-        if entity_name in reserved_names:
-            from flask import redirect, url_for
-            
-            # For content requests, call the content handler directly
+        # For simple paths (no slashes), delegate to the appropriate handler function directly
+        reserved_names = {'content', 'edit', 'save', 'settings', 'version', 'draft', 'save-draft'}
+
+        # If entity_name is a reserved name and this is a simple path (no slashes),
+        # extract the ontology name and delegate to the appropriate handler
+        if entity_name in reserved_names and '/' not in ontology_path:
+            ontology_name = ontology_path
+
+            # Delegate to specific handler functions
             if entity_name == 'content':
-                # Extract just the ontology name from the path
-                ontology_name = ontology_path.split('/')[-1] if '/' in ontology_path else ontology_path
-                # Call the ontology_content function directly instead of redirecting
                 return ontology_content(ontology_name)
-            
-            # For other reserved names, return 404 as they should have their own handlers
-            from flask import abort
-            abort(404)
+            elif entity_name == 'edit':
+                return edit_ontology(ontology_name)
+            elif entity_name == 'save':
+                # This is a POST endpoint, so this shouldn't happen via GET
+                from flask import abort
+                abort(405)  # Method Not Allowed
+            elif entity_name == 'settings':
+                return ontology_settings(ontology_name)
+            else:
+                # Other reserved names without handlers
+                from flask import abort
+                abort(404)
         
         # Construct the full URI
         base_uri = f"http://proethica.org/ontology/{ontology_path}"
