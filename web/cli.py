@@ -7,8 +7,9 @@ from datetime import datetime, timezone
 from flask import Flask
 from flask.cli import with_appcontext
 from werkzeug.security import generate_password_hash
+from sqlalchemy import select
 
-from models import db, User
+from web.models import db, User
 
 
 @click.command()
@@ -24,10 +25,11 @@ def create_admin(username, email, password, first_name, last_name, organization)
     """Create an admin user for OntServe."""
     
     # Check if user already exists
-    existing_user = User.query.filter(
+    stmt = select(User).where(
         (User.username == username) | (User.email == email)
-    ).first()
-    
+    )
+    existing_user = db.session.execute(stmt).scalar_one_or_none()
+
     if existing_user:
         if existing_user.username == username:
             click.echo(f"Error: Username '{username}' already exists")
@@ -81,10 +83,11 @@ def create_user(username, email, password, first_name, last_name, organization,
     """Create a regular user for OntServe."""
     
     # Check if user already exists
-    existing_user = User.query.filter(
+    stmt = select(User).where(
         (User.username == username) | (User.email == email)
-    ).first()
-    
+    )
+    existing_user = db.session.execute(stmt).scalar_one_or_none()
+
     if existing_user:
         if existing_user.username == username:
             click.echo(f"Error: Username '{username}' already exists")
@@ -129,8 +132,9 @@ def create_user(username, email, password, first_name, last_name, organization,
 @with_appcontext
 def list_users():
     """List all users in the system."""
-    users = User.query.order_by(User.username).all()
-    
+    stmt = select(User).order_by(User.username)
+    users = db.session.execute(stmt).scalars().all()
+
     if not users:
         click.echo("No users found.")
         return
@@ -178,8 +182,9 @@ def list_users():
 @with_appcontext
 def delete_user(username, confirm):
     """Delete a user from the system."""
-    user = User.query.filter_by(username=username).first()
-    
+    stmt = select(User).where(User.username == username)
+    user = db.session.execute(stmt).scalar_one_or_none()
+
     if not user:
         click.echo(f"Error: User '{username}' not found")
         return

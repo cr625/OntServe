@@ -17,8 +17,16 @@ build/
 *.env
 *.venv
 venv/
+venv-*/
 ENV/
 env/
+
+# Allow config templates but not actual .env files
+!config/*.env
+!config/*.env.template
+# But still ignore any actual .env in project root
+.env
+/.env
 
 # VS Code
 .vscode/
@@ -66,6 +74,7 @@ web/venv/
 # local backups
 *.local
 *.backup
+backups/
 
 # Review directory for cleanup
 untracked_review/
@@ -79,3 +88,13 @@ archive/
 # Temporary ontology extraction files
 proethica-intermediate-extracted.ttl
 proethica-case-*.ttl
+
+# Test artifacts
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+tests/test_log.txt
+.tox/

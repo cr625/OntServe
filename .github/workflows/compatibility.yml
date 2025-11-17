@@ -1,0 +1,66 @@
+name: API Compatibility
+
+# Run on pull requests to ensure no breaking changes
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  api-compatibility:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ontserve_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-asyncio aiohttp
+
+    - name: Run API compatibility tests only
+      env:
+        ONTSERVE_DB_URL: postgresql://postgres:postgres@localhost:5432/ontserve_test
+        ENVIRONMENT: test
+      run: |
+        pytest -v -m api tests/api/
+
+    - name: Run ProEthica integration tests
+      env:
+        ONTSERVE_DB_URL: postgresql://postgres:postgres@localhost:5432/ontserve_test
+        ENVIRONMENT: test
+      run: |
+        pytest -v -k "proethica" tests/
+
+    - name: Comment on PR if compatibility tests fail
+      if: failure()
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.name,
+            body: '⚠️ API compatibility tests failed! This PR may introduce breaking changes for ProEthica or other external integrations. Please review the test results carefully.'
+          })

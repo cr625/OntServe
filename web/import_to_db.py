@@ -12,8 +12,9 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from flask import Flask
-from config import config
-from models import db, init_db, Ontology, OntologyEntity, OntologyVersion
+from sqlalchemy import select
+from web.config import config
+from web.models import db, init_db, Ontology, OntologyEntity, OntologyVersion
 from core.ontology_manager import OntologyManager
 import rdflib
 from rdflib import RDF, RDFS, OWL
@@ -40,7 +41,8 @@ def main():
     
     with app.app_context():
         # Check if PROV-O already exists
-        existing = Ontology.query.filter_by(ontology_id='prov-o').first()
+        stmt = select(Ontology).where(Ontology.ontology_id == 'prov-o')
+        existing = db.session.execute(stmt).scalar_one_or_none()
         if existing:
             print("PROV-O already exists in database, skipping...")
             return
