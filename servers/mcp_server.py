@@ -37,8 +37,12 @@ logger.info(f"✅ Loaded configuration from: {', '.join(config_summary['loaded_f
 from storage.postgresql_storage import PostgreSQLStorage, StorageError
 # Use database concept manager that queries ontology_entities table
 from storage.concept_manager import ConceptManager
+# Import source text manager for provenance tracking
+from storage.source_text_manager import SourceTextManager
 # Import SPARQL service
 from services.sparql_service import SPARQLService
+# Import MCP integration helpers
+from servers.mcp_source_text_integration import enhance_entity_submission_with_source_text
 
 class OntServeMCPServer:
     """
@@ -100,7 +104,9 @@ class OntServeMCPServer:
             self.storage = PostgreSQLStorage(storage_config)
             # Use concept manager that handles candidate concept submission
             self.concept_manager = ConceptManager(self.storage)
-            
+            # Initialize source text manager for provenance tracking
+            self.source_text_manager = SourceTextManager(self.storage)
+
             # Initialize SPARQL service
             try:
                 self.sparql_service = SPARQLService()
@@ -116,9 +122,10 @@ class OntServeMCPServer:
             logger.error(f"Failed to initialize database: {e}")
             self.storage = None
             self.concept_manager = None
+            self.source_text_manager = None
             self.sparql_service = None
             self.db_connected = False
-            
+
             # In case of database failure, we can still start but with limited functionality
             logger.warning("Server will start with limited functionality (no database)")
     
@@ -678,7 +685,7 @@ class OntServeMCPServer:
             return {"error": f"Failed to retrieve domain info: {str(e)}"}
 
     async def _handle_store_extracted_entities(self, arguments):
-        """Store extracted entities as candidate concepts in OntServe."""
+        """Store extracted entities with source text provenance in OntServe."""
         case_id = arguments.get("case_id")
         section_type = arguments.get("section_type")
         entities = arguments.get("entities", [])
@@ -698,27 +705,34 @@ class OntServeMCPServer:
                 safe_label = label.replace(' ', '_').replace('-', '_').replace('(', '').replace(')', '')
                 entity_uri = f"http://proethica.org/ontology/case/{case_id}#{section_type}_{safe_label}"
 
-                # Prepare candidate concept in the format expected by concept_manager
-                candidate_concept = {
+                # Prepare entity data with provenance metadata
+                entity_data = {
                     'label': entity.get('label', ''),
                     'description': entity.get('description', ''),
                     'category': entity.get('category', 'Entity'),
                     'uri': entity_uri,
-                    'confidence_score': entity.get('confidence', 0.8),
+                    'confidence': entity.get('confidence', 0.8),
                     'source_text': entity.get('source_text', ''),
+                    'extracted_from_section': section_type,
+                    'extraction_timestamp': datetime.now(),
+                    'extractor_name': submitted_by,
                     'extraction_method': 'case_entity_extraction',
+                    'domain_id': domain_id,
+                    'submitted_by': submitted_by,
+                    'case_id': case_id,
                     'metadata': {
-                        'case_id': case_id,
-                        'section_type': section_type,
                         'extraction_session': extraction_session,
                         'extraction_metadata': entity.get('extraction_metadata', {}),
                         'nspe_case_entity': True
                     }
                 }
 
-                # Submit as candidate concept
-                result = self.concept_manager.submit_candidate_concept(
-                    candidate_concept, domain_id, submitted_by
+                # Submit with enhanced source text provenance (stores RDF triples)
+                result = enhance_entity_submission_with_source_text(
+                    self.concept_manager,
+                    self.source_text_manager,
+                    entity_data,
+                    case_id
                 )
 
                 if result.get('success'):
@@ -727,12 +741,17 @@ class OntServeMCPServer:
                         'category': entity.get('category', 'Entity'),
                         'section_type': section_type,
                         'concept_id': result.get('concept_id'),
-                        'status': 'candidate'
+                        'status': 'candidate',
+                        'source_text_stored': result.get('source_text_stored', False),
+                        'triples_count': result.get('triples_count', 0)
                     })
                 else:
                     logger.warning(f"Failed to store entity {entity.get('label', '')}: {result.get('error', 'Unknown error')}")
 
-            logger.info(f"Stored {len(stored_entities)} entities as candidates for case {case_id}, section {section_type}")
+            logger.info(
+                f"Stored {len(stored_entities)} entities with provenance for "
+                f"case {case_id}, section {section_type}"
+            )
 
             return {
                 "success": True,
@@ -740,7 +759,7 @@ class OntServeMCPServer:
                 "section_type": section_type,
                 "stored_count": len(stored_entities),
                 "entities": stored_entities,
-                "method": "candidate_concepts"
+                "method": "candidate_concepts_with_provenance"
             }
 
         except Exception as e:
