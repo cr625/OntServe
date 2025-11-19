@@ -85,9 +85,10 @@ archive/
 # Claude internal files
 .claude/
 
-# Temporary ontology extraction files
-proethica-intermediate-extracted.ttl
-proethica-case-*.ttl
+# Temporary ontology extraction files (runtime data, not schemas)
+ontologies/proethica-intermediate-extracted.ttl
+ontologies/proethica-case-*.ttl
+ontologies/*_subclasses_to_add.ttl
 
 # Test artifacts
 .pytest_cache/
