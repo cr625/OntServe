@@ -63,7 +63,8 @@ class SPARQLService:
         
         ontology_files = [
             "proethica-core.ttl",
-            "proethica-intermediate.ttl", 
+            "proethica-provenance.ttl",
+            "proethica-intermediate.ttl",
             "proethica-cases.ttl",
             "engineering-ethics.ttl"
         ]

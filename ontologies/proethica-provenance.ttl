@@ -1,0 +1,98 @@
+@prefix : <http://proethica.org/provenance#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix proeth-core: <http://proethica.org/ontology/core#> .
+@base <http://proethica.org/provenance#> .
+
+<http://proethica.org/provenance#> rdf:type owl:Ontology ;
+    rdfs:label "ProEthica Provenance Ontology" ;
+    rdfs:comment "Provenance tracking for entities extracted from NSPE Board of Ethical Review cases. Tracks discovery context including case ID, extraction pass, section type, and source text." ;
+    owl:versionInfo "1.0.0" ;
+    owl:imports <http://www.w3.org/ns/prov#> ;
+    owl:imports <http://proethica.org/ontology/core#> .
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://proethica.org/provenance#firstDiscoveredInCase
+:firstDiscoveredInCase rdf:type owl:DatatypeProperty ,
+                                 owl:FunctionalProperty ;
+                       rdfs:domain owl:Class ;
+                       rdfs:range xsd:integer ;
+                       rdfs:label "first discovered in case" ;
+                       rdfs:comment "The case ID where this entity was first discovered. This is the original case that introduced this concept into the ontology." ;
+                       rdfs:subPropertyOf prov:wasAttributedTo .
+
+###  http://proethica.org/provenance#firstDiscoveredAt
+:firstDiscoveredAt rdf:type owl:DatatypeProperty ,
+                            owl:FunctionalProperty ;
+                   rdfs:domain owl:Class ;
+                   rdfs:range xsd:dateTime ;
+                   rdfs:label "first discovered at" ;
+                   rdfs:comment "The timestamp when this entity was first extracted and committed to the ontology." ;
+                   rdfs:subPropertyOf prov:generatedAtTime .
+
+###  http://proethica.org/provenance#discoveredInCase
+:discoveredInCase rdf:type owl:DatatypeProperty ;
+                  rdfs:domain owl:Class ;
+                  rdfs:range xsd:integer ;
+                  rdfs:label "discovered in case" ;
+                  rdfs:comment "A case ID where this entity was discovered. An entity may be discovered in multiple cases, so this property can have multiple values. Use firstDiscoveredInCase to identify the original source." ;
+                  rdfs:subPropertyOf prov:wasAttributedTo .
+
+###  http://proethica.org/provenance#discoveredInSection
+:discoveredInSection rdf:type owl:DatatypeProperty ,
+                              owl:FunctionalProperty ;
+                     rdfs:domain owl:Class ;
+                     rdfs:range xsd:string ;
+                     rdfs:label "discovered in section" ;
+                     rdfs:comment "The section of the case document where this entity was first discovered. Valid values: 'facts', 'discussion', 'questions', 'conclusions'." ;
+                     rdfs:subPropertyOf prov:hadPrimarySource .
+
+###  http://proethica.org/provenance#discoveredInPass
+:discoveredInPass rdf:type owl:DatatypeProperty ,
+                           owl:FunctionalProperty ;
+                  rdfs:domain owl:Class ;
+                  rdfs:range xsd:integer ;
+                  rdfs:label "discovered in pass" ;
+                  rdfs:comment "The extraction pass number where this entity was first discovered. Valid values: 1 (Contextual Framework), 2 (Normative Requirements), 3 (Temporal Dynamics)." ;
+                  rdfs:subPropertyOf prov:hadPrimarySource .
+
+###  http://proethica.org/provenance#sourceText
+:sourceText rdf:type owl:DatatypeProperty ;
+            rdfs:domain owl:Thing ;
+            rdfs:range xsd:string ;
+            rdfs:label "source text" ;
+            rdfs:comment "The exact text snippet from the case document that led to the extraction of this entity. Maximum recommended length: 200 characters." ;
+            rdfs:subPropertyOf prov:hadPrimarySource .
+
+###  http://proethica.org/provenance#extractedBy
+:extractedBy rdf:type owl:DatatypeProperty ,
+                      owl:FunctionalProperty ;
+             rdfs:domain owl:Thing ;
+             rdfs:range xsd:string ;
+             rdfs:label "extracted by" ;
+             rdfs:comment "The name and version of the extraction service or model that created this entity. Example: 'claude-opus-4-1-20250805'." ;
+             rdfs:subPropertyOf prov:wasAttributedTo .
+
+###  http://proethica.org/provenance#extractionSessionId
+:extractionSessionId rdf:type owl:DatatypeProperty ,
+                              owl:FunctionalProperty ;
+                     rdfs:domain owl:Thing ;
+                     rdfs:range xsd:string ;
+                     rdfs:label "extraction session ID" ;
+                     rdfs:comment "A UUID identifying the specific extraction session that created this entity. Used for tracing and debugging." ;
+                     rdfs:subPropertyOf prov:wasGeneratedBy .
+
+#################################################################
+#    Annotations
+#################################################################
+
+<http://proethica.org/provenance#> rdfs:seeAlso <http://www.w3.org/ns/prov#> ;
+                                    rdfs:seeAlso <http://proethica.org/ontology/core#> ;
+                                    rdfs:isDefinedBy <http://proethica.org/provenance#> .

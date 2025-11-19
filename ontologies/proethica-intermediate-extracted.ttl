@@ -1,5 +1,151 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix proeth-prov: <http://proethica.org/provenance#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 proeth: rdfs:comment "Extracted classes cleared on 2025-11-17T13:10:43.611609. Backup saved as proethica-intermediate-extracted.ttl.bak" .
+
+proeth:AISoftwareTool a owl:Class ;
+    rdfs:label "AI Software Tool" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2025-11-19T16:24:44.204264"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer A opted to use open-sourced artificial intelligence (AI) software to create an initial draft of the necessary report and to use AI-assisted drafting tools to generate preliminary design documents" ;
+    rdfs:comment "Artificial intelligence software applications used to assist in professional tasks such as drafting, analysis, or design generation" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Artificial intelligence software applications used to assist in professional tasks such as drafting, analysis, or design generation" ;
+    prov:generatedAtTime "2025-11-19T16:24:44.204264"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
+proeth:AIToolInexperienceState a owl:Class ;
+    rdfs:label "AI Tool Inexperience State" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2025-11-19T16:24:59.067115"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "The AI drafting software was new to the market and Engineer A had no previous experience with the tool" ;
+    rdfs:comment "A state where a professional uses AI tools without prior experience or understanding of their capabilities, limitations, and potential risks" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a professional uses AI tools without prior experience or understanding of their capabilities, limitations, and potential risks" ;
+    prov:generatedAtTime "2025-11-19T16:24:59.067115"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
+proeth:DesignDeficiencyDiscoveryState a owl:Class ;
+    rdfs:label "Design Deficiency Discovery State" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2025-11-19T16:24:59.067115"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Client W noticed several issues with the AI-generated design documents, including misaligned dimensions and an omission of key safety features" ;
+    rdfs:comment "A state where significant technical deficiencies in professional work products have been identified by the client, requiring immediate corrective action" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where significant technical deficiencies in professional work products have been identified by the client, requiring immediate corrective action" ;
+    prov:generatedAtTime "2025-11-19T16:24:59.067115"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
+proeth:EngineeringMentorRole a owl:Class ;
+    rdfs:label "Engineering Mentor Role" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2025-11-19T16:24:27.319739"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Previously, Engineer A had relied on guidance and quality assurance reviews by their mentor and supervisor, Engineer B" ;
+    rdfs:comment "A senior engineering professional who provides guidance, quality assurance reviews, and technical writing support to less experienced engineers" ;
+    rdfs:subClassOf proeth-core:Role ;
+    skos:definition "A senior engineering professional who provides guidance, quality assurance reviews, and technical writing support to less experienced engineers" ;
+    prov:generatedAtTime "2025-11-19T16:24:27.319739"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
+proeth:EnvironmentalEngineerRole a owl:Class ;
+    rdfs:label "Environmental Engineer Role" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2025-11-19T16:24:27.319739"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer A, an environmental engineer with several years of experience and holding a professional engineering license" ;
+    rdfs:comment "A specialized engineering role focused on environmental assessment, contamination analysis, and groundwater infrastructure design" ;
+    rdfs:subClassOf proeth-core:Role ;
+    skos:definition "A specialized engineering role focused on environmental assessment, contamination analysis, and groundwater infrastructure design" ;
+    prov:generatedAtTime "2025-11-19T16:24:27.319739"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
+proeth:GroundwaterMonitoringData a owl:Class ;
+    rdfs:label "Groundwater Monitoring Data" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2025-11-19T16:24:44.204264"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "This work required Engineer A to perform an analysis of groundwater monitoring data from a site Engineer A had been observing for over a year" ;
+    rdfs:comment "Environmental data collected from systematic observation and measurement of groundwater conditions over time" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Environmental data collected from systematic observation and measurement of groundwater conditions over time" ;
+    prov:generatedAtTime "2025-11-19T16:24:44.204264"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
+proeth:LocalSafetyRegulations a owl:Class ;
+    rdfs:label "Local Safety Regulations" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2025-11-19T16:24:44.204264"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Client W noticed several issues with the AI-generated design documents, including misaligned dimensions and an omission of key safety features required by local regulations" ;
+    rdfs:comment "Municipality or locality-specific regulations governing safety features and requirements for engineering projects" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Municipality or locality-specific regulations governing safety features and requirements for engineering projects" ;
+    prov:generatedAtTime "2025-11-19T16:24:44.204264"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
+proeth:MentorAbsenceState a owl:Class ;
+    rdfs:label "Mentor Absence State" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2025-11-19T16:24:59.067115"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer B recently retired and was no longer available to Engineer A in a work capacity" ;
+    rdfs:comment "A state where a professional lacks access to their established mentor or supervisor for guidance and quality assurance, creating vulnerability in work product quality" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a professional lacks access to their established mentor or supervisor for guidance and quality assurance, creating vulnerability in work product quality" ;
+    prov:generatedAtTime "2025-11-19T16:24:59.067115"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
+proeth:ProfessionalJournalArticle a owl:Class ;
+    rdfs:label "Professional Journal Article" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2025-11-19T16:24:44.204264"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer A conducted a thorough review of the report, cross-checking key facts against professional journal articles" ;
+    rdfs:comment "Peer-reviewed academic or professional publications containing technical information, research findings, or industry standards" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Peer-reviewed academic or professional publications containing technical information, research findings, or industry standards" ;
+    prov:generatedAtTime "2025-11-19T16:24:44.204264"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
+proeth:TechnicalWritingInsecurityState a owl:Class ;
+    rdfs:label "Technical Writing Insecurity State" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2025-11-19T16:24:59.067115"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer A is known for their strong technical expertise but is, personally, less confident in their technical writing" ;
+    rdfs:comment "A state where a professional lacks confidence in a specific technical skill area despite having general professional competence" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a professional lacks confidence in a specific technical skill area despite having general professional competence" ;
+    prov:generatedAtTime "2025-11-19T16:24:59.067115"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
 
