@@ -17,20 +17,25 @@ import tempfile
 
 try:
     import owlready2
-    from owlready2 import get_ontology, sync_reasoner, Ontology, Thing, ObjectProperty, DataProperty
-    # HermiT and Pellet are not directly importable, they're used via sync_reasoner
+    from owlready2 import get_ontology, sync_reasoner_hermit, sync_reasoner_pellet, Ontology, Thing, ObjectProperty, DataProperty
+    # HermiT and Pellet reasoners are called via sync_reasoner_hermit() and sync_reasoner_pellet()
     try:
-        from owlready2.reasoning import InconsistentOntologyError
+        from owlready2 import OwlReadyInconsistentOntologyError
     except ImportError:
         # Fallback for different owlready2 versions
-        InconsistentOntologyError = Exception
+        try:
+            from owlready2.reasoning import InconsistentOntologyError as OwlReadyInconsistentOntologyError
+        except ImportError:
+            OwlReadyInconsistentOntologyError = Exception
+    # Alias for backward compatibility
+    InconsistentOntologyError = OwlReadyInconsistentOntologyError
     OWLREADY2_AVAILABLE = True
 except ImportError:
     OWLREADY2_AVAILABLE = False
     logging.warning("owlready2 not available. OwlreadyImporter will be disabled.")
     # Create stub classes for graceful degradation
-    get_ontology = sync_reasoner = Ontology = Thing = ObjectProperty = DataProperty = None
-    InconsistentOntologyError = None
+    get_ontology = sync_reasoner_hermit = sync_reasoner_pellet = Ontology = Thing = ObjectProperty = DataProperty = None
+    InconsistentOntologyError = OwlReadyInconsistentOntologyError = None
 
 try:
     import rdflib
@@ -298,30 +303,27 @@ class OwlreadyImporter(BaseImporter):
             # Apply reasoner with comprehensive inference options
             with onto:
                 if self.reasoner_type == 'hermit':
-                    sync_reasoner(
-                        reasoner=HermiT,
+                    sync_reasoner_hermit(
                         infer_property_values=True,
-                        infer_data_property_values=True,
-                        debug=False
+                        debug=0
                     )
                 else:
-                    sync_reasoner(
-                        reasoner=Pellet,
-                        infer_property_values=True, 
+                    sync_reasoner_pellet(
+                        infer_property_values=True,
                         infer_data_property_values=True,
-                        debug=False
+                        debug=0
                     )
-                
+
                 # Additional reasoning passes for complex inferences
                 self.logger.info(f"Running additional inference passes for {ontology_id}")
-                
+
                 # Run reasoner multiple times to catch complex inferences
                 for pass_num in range(2):
                     try:
                         if self.reasoner_type == 'hermit':
-                            sync_reasoner(reasoner=HermiT, infer_property_values=True)
+                            sync_reasoner_hermit(infer_property_values=True, debug=0)
                         else:
-                            sync_reasoner(reasoner=Pellet, infer_property_values=True)
+                            sync_reasoner_pellet(infer_property_values=True, debug=0)
                         self.logger.debug(f"Completed reasoning pass {pass_num + 1}")
                     except Exception as e:
                         self.logger.warning(f"Reasoning pass {pass_num + 1} failed: {e}")
@@ -397,9 +399,9 @@ class OwlreadyImporter(BaseImporter):
                 'domain': [str(d.iri) for d in prop.domain if hasattr(d, 'iri')],
                 'range': [str(r.iri) for r in prop.range if hasattr(r, 'iri')],
                 'inverse': str(prop.inverse_property.iri) if prop.inverse_property else None,
-                'functional': prop in onto.functional_properties(),
-                'transitive': prop in onto.transitive_properties(),
-                'symmetric': prop in onto.symmetric_properties()
+                'functional': prop in list(onto.functional_properties()) if callable(getattr(onto, 'functional_properties', None)) else False,
+                'transitive': prop in list(onto.transitive_properties()) if callable(getattr(onto, 'transitive_properties', None)) else False,
+                'symmetric': prop in list(onto.symmetric_properties()) if callable(getattr(onto, 'symmetric_properties', None)) else False
             }
             properties.append(prop_info)
         
@@ -597,7 +599,10 @@ class OwlreadyImporter(BaseImporter):
         try:
             # Try to run reasoner - if it succeeds, ontology is consistent
             with onto:
-                sync_reasoner(reasoner=HermiT)
+                if self.reasoner_type == 'hermit':
+                    sync_reasoner_hermit(debug=0)
+                else:
+                    sync_reasoner_pellet(debug=0)
             return True
         except InconsistentOntologyError:
             return False

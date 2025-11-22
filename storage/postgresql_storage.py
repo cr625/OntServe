@@ -535,13 +535,13 @@ class PostgreSQLStorage(StorageBackend):
         
         return result['id']
     
-    def _create_ontology_version(self, ontology_id: int, content: str, 
+    def _create_ontology_version(self, ontology_id: int, content: str,
                                 content_hash: str, metadata: Dict[str, Any]) -> int:
         """Create a new version of an ontology."""
         # Get next version number
-        query = "SELECT COALESCE(MAX(version_number), 0) + 1 FROM ontology_versions WHERE ontology_id = %s"
+        query = "SELECT COALESCE(MAX(version_number), 0) + 1 AS next_version FROM ontology_versions WHERE ontology_id = %s"
         result = self._execute_query(query, (ontology_id,), fetch_one=True)
-        version_number = result[0] if result else 1
+        version_number = result['next_version'] if result else 1
         
         # Mark all previous versions as non-current
         query = "UPDATE ontology_versions SET is_current = false WHERE ontology_id = %s"
