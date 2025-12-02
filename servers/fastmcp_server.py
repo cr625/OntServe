@@ -329,7 +329,7 @@ async def get_domain_info(
 async def store_extracted_entities(
     entities: List[Dict[str, Any]],
     case_id: str,
-    ontology_name: str = "proethica-intermediate-extracted",
+    ontology_name: str = "proethica-intermediate",
     extraction_metadata: Dict[str, Any] = None
 ) -> dict:
     """
