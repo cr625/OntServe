@@ -1164,7 +1164,100 @@ proeth:requiresCapability a owl:ObjectProperty ;
     rdfs:comment "Specifies capabilities required for a professional role"@en .
 
 #################################################################
-#    SPARQL Query Support                                        
+#    Case Analysis Entities (Step 4 Enhanced Analysis)
+#    For Questions, Conclusions, and Decision Points
+#################################################################
+
+# Ethical Question - Questions posed to the Board for ethical review
+:EthicalQuestion rdf:type owl:Class ;
+    rdf:type :EntityType ;
+    rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
+    rdfs:label "Ethical Question"@en ;
+    iao:0000115 "A question about ethical conduct posed for Board of Ethical Review consideration, representing a specific inquiry about professional ethics requiring formal determination."@en ;
+    skos:definition "Questions submitted to ethics review boards articulate specific ethical uncertainties requiring authoritative interpretation. Per McLaren (2003), these questions provide the extensional grounding for principle application, with each Board determination adding to the precedential knowledge base."@en ;
+    dcterms:source <https://doi.org/10.1023/A:1024195425598> ; # McLaren 2003
+    rdfs:comment "Extracted from case 'Questions' sections. Each question frames a specific ethical issue for Board determination."@en .
+
+# Board Conclusion - The Board's formal determination on an ethical question
+:BoardConclusion rdf:type owl:Class ;
+    rdf:type :EntityType ;
+    rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
+    rdfs:label "Board Conclusion"@en ;
+    iao:0000115 "The Board of Ethical Review's formal determination on an ethical question, representing authoritative professional judgment with precedential value."@en ;
+    skos:definition "Board conclusions represent the culmination of ethical deliberation, providing precedential guidance for future cases. Per McLaren (2003), these determinations give concrete meaning to abstract principles through their application to specific factual contexts."@en ;
+    dcterms:source <https://doi.org/10.1023/A:1024195425598> ; # McLaren 2003
+    rdfs:comment "Extracted from case 'Conclusions' sections. Each conclusion answers a specific ethical question and establishes precedent."@en .
+
+# Decision Point - A point in the case where an ethical choice must be made
+:DecisionPoint rdf:type owl:Class ;
+    rdf:type :EntityType ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Decision Point"@en ;
+    iao:0000115 "A point in an ethics case where a professional actor must make a choice between ethically significant alternatives, representing a critical juncture in the case narrative."@en ;
+    skos:definition "Decision points mark critical junctures in ethics cases where actors face choices between alternatives with ethical implications. Per Hobbs & Moore (2005) scenario-directed decision analysis, these points structure the ethical problem space and enable systematic analysis of options, constraints, and outcomes."@en ;
+    dcterms:source <https://doi.org/10.1111/j.1539-6924.2005.00634.x> ; # Hobbs & Moore 2005
+    rdfs:comment "Extracted during Step 4 analysis. Each decision point includes options, involved roles, applicable provisions, and the board's resolution."@en .
+
+# Decision Option - An alternative available at a decision point
+:DecisionOption rdf:type owl:Class ;
+    rdf:type :EntityType ;
+    rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
+    rdfs:label "Decision Option"@en ;
+    iao:0000115 "A possible course of action available at a decision point, representing one alternative the actor could choose."@en ;
+    skos:definition "Decision options represent the discrete alternatives available to actors at decision points. Per scenario-directed analysis frameworks, clearly articulating options enables structured evaluation of consequences and ethical implications for each path."@en ;
+    rdfs:comment "Each decision point has multiple options; one is typically marked as the board's chosen resolution."@en .
+
+# Properties for case analysis entities
+:hasQuestion rdf:type owl:ObjectProperty ;
+    rdfs:domain bfo:BFO_0000001 ; # entity (case)
+    rdfs:range :EthicalQuestion ;
+    rdfs:label "has question"@en ;
+    rdfs:comment "Relates a case to the ethical questions it poses for Board review"@en .
+
+:hasConclusion rdf:type owl:ObjectProperty ;
+    rdfs:domain bfo:BFO_0000001 ; # entity (case)
+    rdfs:range :BoardConclusion ;
+    rdfs:label "has conclusion"@en ;
+    rdfs:comment "Relates a case to the Board's conclusions"@en .
+
+:hasDecisionPoint rdf:type owl:ObjectProperty ;
+    rdfs:domain bfo:BFO_0000001 ; # entity (case)
+    rdfs:range :DecisionPoint ;
+    rdfs:label "has decision point"@en ;
+    rdfs:comment "Relates a case to a decision point identified within it"@en .
+
+:hasOption rdf:type owl:ObjectProperty ;
+    rdfs:domain :DecisionPoint ;
+    rdfs:range :DecisionOption ;
+    rdfs:label "has option"@en ;
+    rdfs:comment "Relates a decision point to its available options"@en .
+
+:answersQuestion rdf:type owl:ObjectProperty ;
+    rdfs:domain :BoardConclusion ;
+    rdfs:range :EthicalQuestion ;
+    rdfs:label "answers question"@en ;
+    rdfs:comment "Relates a Board conclusion to the question it answers"@en .
+
+:involvesRole rdf:type owl:ObjectProperty ;
+    rdfs:domain :DecisionPoint ;
+    rdfs:range proeth-core:Role ;
+    rdfs:label "involves role"@en ;
+    rdfs:comment "Relates a decision point to the professional roles involved in it"@en .
+
+:appliesProvision rdf:type owl:ObjectProperty ;
+    rdfs:domain :DecisionPoint ;
+    rdfs:range :EthicalCode ;
+    rdfs:label "applies provision"@en ;
+    rdfs:comment "Relates a decision point to the ethical code provisions applicable to it"@en .
+
+:isBoardChoice rdf:type owl:DatatypeProperty ;
+    rdfs:domain :DecisionOption ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "is board choice"@en ;
+    rdfs:comment "Indicates whether this option was the Board's chosen resolution"@en .
+
+#################################################################
+#    SPARQL Query Support
 #################################################################
 
 # This comment documents the SPARQL query to retrieve all GuidelineConceptTypes:
