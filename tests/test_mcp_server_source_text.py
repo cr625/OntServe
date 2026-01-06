@@ -5,6 +5,7 @@ Tests the MCP server's source text handling via the store_extracted_entities end
 Simulates what ProEthica would send when extracting entities with source text.
 
 Run with: python tests/test_mcp_server_source_text.py
+Or via pytest: pytest tests/test_mcp_server_source_text.py -v
 
 Author: OntServe Team
 Date: 2025-11-17
@@ -16,6 +17,8 @@ import json
 import asyncio
 import logging
 from pathlib import Path
+
+import pytest
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -32,6 +35,7 @@ logger = logging.getLogger(__name__)
 from servers.mcp_server import OntServeMCPServer
 
 
+@pytest.mark.asyncio
 async def test_mcp_store_entities_with_source_text():
     """Test MCP server's store_extracted_entities with source text."""
     print("\n" + "="*70)
@@ -165,6 +169,7 @@ async def test_mcp_store_entities_with_source_text():
         return False
 
 
+@pytest.mark.asyncio
 async def test_mcp_json_rpc_format():
     """Test full JSON-RPC formatted request (as Claude would send)."""
     print("\n" + "="*70)

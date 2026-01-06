@@ -1207,6 +1207,15 @@ proeth:requiresCapability a owl:ObjectProperty ;
     skos:definition "Decision options represent the discrete alternatives available to actors at decision points. Per scenario-directed analysis frameworks, clearly articulating options enables structured evaluation of consequences and ethical implications for each path."@en ;
     rdfs:comment "Each decision point has multiple options; one is typically marked as the board's chosen resolution."@en .
 
+# Ethical Argument - A pro or con argument for a decision option
+:EthicalArgument rdf:type owl:Class ;
+    rdf:type :EntityType ;
+    rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
+    rdfs:label "Ethical Argument"@en ;
+    iao:0000115 "An argument supporting or opposing a decision option, based on ethical principles, code provisions, and precedent cases."@en ;
+    skos:definition "Ethical arguments represent the pro/con reasoning for decision options. Per the IAAI 'Pros and Cons in Ethical Decisions' paper, evaluative AI presents balanced arguments citing code provisions and precedents so practitioners can make informed decisions."@en ;
+    rdfs:comment "Generated during Step 4 Part F. Each argument includes a claim, premises, provision citations, and strength assessment."@en .
+
 # Properties for case analysis entities
 :hasQuestion rdf:type owl:ObjectProperty ;
     rdfs:domain bfo:BFO_0000001 ; # entity (case)
@@ -1255,6 +1264,44 @@ proeth:requiresCapability a owl:ObjectProperty ;
     rdfs:range xsd:boolean ;
     rdfs:label "is board choice"@en ;
     rdfs:comment "Indicates whether this option was the Board's chosen resolution"@en .
+
+:hasArgument rdf:type owl:ObjectProperty ;
+    rdfs:domain :DecisionOption ;
+    rdfs:range :EthicalArgument ;
+    rdfs:label "has argument"@en ;
+    rdfs:comment "Relates a decision option to an argument for or against it"@en .
+
+:argumentFor rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf :hasArgument ;
+    rdfs:domain :EthicalArgument ;
+    rdfs:range :DecisionOption ;
+    rdfs:label "argument for"@en ;
+    rdfs:comment "Indicates this is a PRO argument supporting the decision option"@en .
+
+:argumentAgainst rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf :hasArgument ;
+    rdfs:domain :EthicalArgument ;
+    rdfs:range :DecisionOption ;
+    rdfs:label "argument against"@en ;
+    rdfs:comment "Indicates this is a CON argument opposing the decision option"@en .
+
+:citesProvision rdf:type owl:ObjectProperty ;
+    rdfs:domain :EthicalArgument ;
+    rdfs:range :EthicalCode ;
+    rdfs:label "cites provision"@en ;
+    rdfs:comment "Relates an argument to the code provision it cites as support"@en .
+
+:argumentType rdf:type owl:DatatypeProperty ;
+    rdfs:domain :EthicalArgument ;
+    rdfs:range xsd:string ;
+    rdfs:label "argument type"@en ;
+    rdfs:comment "The type of argument: 'pro' or 'con'"@en .
+
+:argumentStrength rdf:type owl:DatatypeProperty ;
+    rdfs:domain :EthicalArgument ;
+    rdfs:range xsd:string ;
+    rdfs:label "argument strength"@en ;
+    rdfs:comment "The assessed strength of the argument: 'weak', 'moderate', or 'strong'"@en .
 
 #################################################################
 #    SPARQL Query Support

@@ -358,13 +358,13 @@ class TestHelpers:
         return ontology
 
     @staticmethod
-    def create_test_entity(db_session, ontology, label='TestEntity'):
+    def create_test_entity(db_session, ontology, label='TestEntity', uri=None):
         """Create a test ontology entity."""
         from web.models import OntologyEntity
 
         entity = OntologyEntity(
             ontology_id=ontology.id,
-            uri=f'{ontology.base_uri}{label}',
+            uri=uri or f'{ontology.base_uri}{label}',
             label=label,
             entity_type='class',
             comment=f'Test entity: {label}'

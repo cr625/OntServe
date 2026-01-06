@@ -490,21 +490,39 @@ class OntologyValidationService:
     """
     Service for validating ontologies against BFO and other standards.
     """
-    
+
     def __init__(self, storage_backend: StorageBackend):
         """
         Initialize the validation service.
-        
+
         Args:
             storage_backend: Storage backend for accessing foundation ontologies
         """
         self.storage = storage_backend
-        self._load_foundation_ontologies()
-    
-    def _load_foundation_ontologies(self):
-        """Load foundation ontologies for validation from database."""
+        # Use lazy loading to avoid accessing db.session before app context is ready
+        self._foundation_loaded = False
+        self.bfo_graph = None
+        self.prov_graph = None
+        self.intermediate_graph = None
+
+    def _ensure_foundation_ontologies_loaded(self):
+        """Lazy load foundation ontologies for validation from database.
+
+        Called on first use to ensure Flask app context is available.
+        """
+        if self._foundation_loaded:
+            return
+
+        self._foundation_loaded = True
+
         try:
             from sqlalchemy import select
+            from flask import current_app
+
+            # Verify we have an app context
+            if not current_app:
+                logger.debug("No Flask app context available, skipping foundation ontology loading")
+                return
 
             # Load BFO from database
             bfo_ont = db.session.execute(
@@ -516,7 +534,6 @@ class OntologyValidationService:
                 self.bfo_graph.parse(data=bfo_ont.current_content, format='turtle')
                 logger.info("Loaded BFO for validation")
             else:
-                self.bfo_graph = None
                 logger.debug("BFO not found in database")
 
             # Load PROV-O from database
@@ -529,7 +546,6 @@ class OntologyValidationService:
                 self.prov_graph.parse(data=prov_ont.current_content, format='turtle')
                 logger.info("Loaded PROV-O for validation")
             else:
-                self.prov_graph = None
                 logger.debug("PROV-O not found in database")
 
             # Load proethica intermediate from database
@@ -542,7 +558,6 @@ class OntologyValidationService:
                 self.intermediate_graph.parse(data=intermediate_ont.current_content, format='turtle')
                 logger.info("Loaded proethica-intermediate for validation")
             else:
-                self.intermediate_graph = None
                 logger.debug("proethica-intermediate not found in database")
 
             # Log summary
@@ -556,33 +571,40 @@ class OntologyValidationService:
             else:
                 logger.info("Validation service running without foundation ontology checks")
 
+        except RuntimeError as e:
+            # RuntimeError is raised when accessing current_app outside app context
+            if "Working outside of application context" in str(e):
+                logger.debug("Foundation ontologies will be loaded on first validation request")
+            else:
+                logger.warning(f"Error loading foundation ontologies: {e}")
+                logger.info("Validation service will run without foundation ontology checks")
         except Exception as e:
             logger.warning(f"Error loading foundation ontologies: {e}")
             logger.info("Validation service will run without foundation ontology checks")
-            self.bfo_graph = None
-            self.prov_graph = None
-            self.intermediate_graph = None
     
     def validate_ontology(self, ttl_content: str) -> Dict[str, Any]:
         """
         Validate an ontology against BFO and other standards.
-        
+
         Args:
             ttl_content: The TTL content to validate
-            
+
         Returns:
             Validation result with errors and warnings
         """
+        # Ensure foundation ontologies are loaded (lazy loading)
+        self._ensure_foundation_ontologies_loaded()
+
         errors = []
         warnings = []
-        
+
         try:
             # Parse the ontology
             graph = Graph()
             graph.parse(data=ttl_content, format='turtle')
-            
+
             # Basic syntax validation (already done by parsing)
-            
+
             # BFO compliance checks
             if self.bfo_graph:
                 bfo_warnings = self._check_bfo_compliance(graph)
