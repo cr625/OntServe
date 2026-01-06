@@ -1,0 +1,110 @@
+{# Case Display Macros - Rendering for case ontology entities #}
+{% from "macros/entity_display.html" import render_entity_properties %}
+
+{# Render an individual entity card #}
+{% macro render_entity_card(entity) %}
+<div class="entity-card">
+    <div class="d-flex justify-content-between align-items-start">
+        <div class="entity-label">
+            {{ entity.label or entity.uri.split('#')[-1].split('/')[-1] }}
+        </div>
+        {% if entity.parent_uri %}
+        <span class="badge bg-info entity-type-badge">
+            {{ entity.parent_uri.split('#')[-1].split('/')[-1] }}
+        </span>
+        {% endif %}
+    </div>
+
+    {% if entity.comment %}
+    <p class="small text-muted mb-2">{{ entity.comment }}</p>
+    {% endif %}
+
+    {{ render_entity_properties(entity) }}
+
+    <div class="entity-uri mt-2">
+        <i class="bi bi-link-45deg"></i> {{ entity.uri }}
+    </div>
+</div>
+{% endmacro %}
+
+{# Render a section with entities #}
+{% macro render_section(section) %}
+{% set section_count = section.entities|length %}
+{% if section.subsections %}
+{% set section_count = 0 %}
+{% for sub in section.subsections %}
+{% set section_count = section_count + sub.entities|length %}
+{% endfor %}
+{% endif %}
+
+{% if section_count > 0 %}
+<div class="case-section" id="section-{{ section.id }}">
+    <div class="case-section-header" data-bs-toggle="collapse" data-bs-target="#content-{{ section.id }}">
+        <h4>
+            {% if section.icon %}<i class="{{ section.icon }} me-2"></i>{% endif %}
+            {{ section.title }}
+            <span class="badge bg-primary ms-2">{{ section_count }}</span>
+        </h4>
+        <i class="bi bi-chevron-down"></i>
+    </div>
+
+    {% if section.description %}
+    <p class="text-muted small mb-2">{{ section.description }}</p>
+    {% endif %}
+
+    <div class="collapse {% if not section.collapsed %}show{% endif %}" id="content-{{ section.id }}">
+        {% if section.subsections %}
+        <!-- Render subsections -->
+        {% for subsection in section.subsections %}
+        {% if subsection.entities|length > 0 %}
+        <div class="subsection">
+            <div class="subsection-header">
+                {% if subsection.icon %}<i class="{{ subsection.icon }} me-2"></i>{% endif %}
+                {{ subsection.title }}
+                <span class="badge bg-secondary">{{ subsection.entities|length }}</span>
+            </div>
+
+            <div class="entity-list" id="list-{{ section.id }}-{{ subsection.id }}">
+                {% for entity in subsection.entities[:section.max_preview|default(10)] %}
+                {{ render_entity_card(entity) }}
+                {% endfor %}
+            </div>
+
+            {% if subsection.entities|length > section.max_preview|default(10) %}
+            <div class="hidden-entities" id="hidden-{{ section.id }}-{{ subsection.id }}" style="display: none;">
+                {% for entity in subsection.entities[section.max_preview|default(10):] %}
+                {{ render_entity_card(entity) }}
+                {% endfor %}
+            </div>
+            <button class="btn btn-outline-secondary btn-sm show-more-btn"
+                    onclick="toggleMore('{{ section.id }}-{{ subsection.id }}', this)">
+                Show {{ subsection.entities|length - section.max_preview|default(10) }} more
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <!-- Render entities directly -->
+        <div class="entity-list" id="list-{{ section.id }}">
+            {% for entity in section.entities[:section.max_preview|default(10)] %}
+            {{ render_entity_card(entity) }}
+            {% endfor %}
+        </div>
+
+        {% if section.entities|length > section.max_preview|default(10) %}
+        <div class="hidden-entities" id="hidden-{{ section.id }}" style="display: none;">
+            {% for entity in section.entities[section.max_preview|default(10):] %}
+            {{ render_entity_card(entity) }}
+            {% endfor %}
+        </div>
+        <button class="btn btn-outline-secondary btn-sm show-more-btn"
+                onclick="toggleMore('{{ section.id }}', this)">
+            Show {{ section.entities|length - section.max_preview|default(10) }} more
+        </button>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endmacro %}

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/entity_display.html" import render_entity_properties, render_entity_properties_compact %}
 
 {% block title %}{{ ontology.name }} - OntServe{% endblock %}
 
@@ -147,7 +148,7 @@
         {% if entity.properties %}
         {% set props = entity.properties|from_json if entity.properties is string else
         entity.properties %}
-        {% if props and props.confidence and props.confidence > 0.8 %}
+        {% if props and props.confidence and props.confidence|float > 0.8 %}
         {% set _ = high_confidence_entities.append(entity) %}
         {% endif %}
         {% endif %}
@@ -535,26 +536,9 @@
                                 <div class="mt-2 p-2 bg-light border-start border-3 border-warning definition-card">
                                     <small class="text-warning fw-bold">Definition:</small>
                                     <div class="text-muted mt-1">{{ entity.comment }}</div>
-                                    {% if entity.properties and entity.properties|length > 0 %}
-                                    <div class="mt-2">
-                                        {% set props = entity.properties|from_json if entity.properties is string else
-                                        entity.properties %}
-                                        {% if props.confidence %}
-                                        <span class="badge bg-success me-1"
-                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
-                                            100)|round(1) }}%</span>
-                                        {% endif %}
-                                        {% if props.definition_type %}
-                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
-                                        {% endif %}
-                                        {% if props['dc:source'] %}
-                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
-                                            Referenced</span>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
                                 </div>
                                 {% endif %}
+                                {{ render_entity_properties(entity) }}
                                 <br><code class="small">{{ entity.uri }}</code>
                             </div>
                             {% endfor %}
@@ -837,26 +821,9 @@
                                 <div class="mt-2 p-2 bg-light border-start border-3 border-warning definition-card">
                                     <small class="text-warning fw-bold">Definition:</small>
                                     <div class="text-muted mt-1">{{ entity.comment }}</div>
-                                    {% if entity.properties and entity.properties|length > 0 %}
-                                    <div class="mt-2">
-                                        {% set props = entity.properties|from_json if entity.properties is string else
-                                        entity.properties %}
-                                        {% if props.confidence %}
-                                        <span class="badge bg-success me-1"
-                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
-                                            100)|round(1) }}%</span>
-                                        {% endif %}
-                                        {% if props.definition_type %}
-                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
-                                        {% endif %}
-                                        {% if props['dc:source'] %}
-                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
-                                            Referenced</span>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
                                 </div>
                                 {% endif %}
+                                {{ render_entity_properties(entity) }}
                                 <br><code class="small">{{ entity.uri }}</code>
                             </div>
                             {% endfor %}

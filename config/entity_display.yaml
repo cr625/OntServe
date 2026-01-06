@@ -1,0 +1,262 @@
+# Entity Display Configuration for OntServe
+# Defines how different entity types should be rendered in the web interface
+#
+# Structure:
+#   entity_types:
+#     TypeName:  # Matches parent_uri type or extracted from URI
+#       badges: list of badge definitions
+#       fields: list of field definitions
+#
+# Badge definition:
+#   - field: property name
+#     color: bootstrap color (primary, secondary, success, danger, warning, info)
+#     color_map: {value: color} for conditional coloring
+#     type: percentage|text (default: text)
+#     transform: uppercase|lowercase|capitalize (optional)
+#
+# Field definition:
+#   - field: property name
+#     label: display label
+#     style: code|muted|bold|italic (optional)
+#     badge_suffix: property name to show as badge after value
+#     pattern: glob pattern for matching multiple fields (e.g., "option*")
+
+entity_types:
+  # ProEthica Arguments (Toulmin structure)
+  Argument:
+    badges:
+      - field: argumentType
+        color_map:
+          pro: success
+          con: danger
+        transform: uppercase
+      - field: confidenceScore
+        type: percentage
+        color: secondary
+      - field: decisionPointId
+        color: primary
+    fields:
+      - field: claimText
+        label: Claim
+      - field: warrantEntity
+        label: Warrant
+        badge_suffix: warrantType
+      - field: backingProvision
+        label: Backing
+        style: code
+      - field: qualifierConstraint
+        label: Qualifier
+      - field: foundingGoodAnalysis
+        label: Analysis
+        style: muted
+
+  # Argument Validation Results
+  ArgumentValidation:
+    badges:
+      - field: isValid
+        color_map:
+          "True": success
+          "False": danger
+          true: success
+          false: danger
+      - field: validationScore
+        type: percentage
+        color: secondary
+      - field: argumentId
+        color: primary
+    fields:
+      - field: validatesArgument
+        label: Validates
+        style: code
+      - field: foundingGood
+        label: Founding Good
+      - field: foundingValueAnalysis
+        label: Analysis
+        style: muted
+      - pattern: "validationNote"
+        label: Validation Notes
+        style: list
+      - pattern: "missingEntity"
+        label: Missing Entities
+        style: list
+      - pattern: "missingVirtue"
+        label: Missing Virtues
+        style: list
+
+  # Decision Points
+  DecisionPoint:
+    badges:
+      - field: decisionPointId
+        color: primary
+      - field: roleLabel
+        color: secondary
+    fields:
+      - field: focus
+        label: Focus
+      - field: decisionQuestion
+        label: Question
+        style: italic
+      - field: context
+        label: Context
+        style: muted
+      - pattern: "option"
+        label: Options
+        style: list
+
+  # Ethical Questions
+  EthicalQuestion:
+    fields:
+      - field: questionText
+        label: Question
+        style: bold
+      - field: questionType
+        label: Type
+      - field: emergence
+        label: Emergence
+
+  # Ethical Conclusions
+  EthicalConclusion:
+    badges:
+      - field: conclusionType
+        color: info
+        transform: capitalize
+      - field: conclusionNumber
+        color: primary
+    fields:
+      - field: conclusionText
+        label: Conclusion
+      - field: extractionReasoning
+        label: Reasoning
+        style: muted
+      - pattern: "citedProvision"
+        label: Cited Provisions
+        style: list
+      - pattern: "answersQuestion"
+        label: Answers Questions
+        style: list
+
+  # Question Emergence
+  QuestionEmergence:
+    fields:
+      - field: questionText
+        label: Question
+      - field: triggerEvent
+        label: Trigger
+      - field: emergencePattern
+        label: Pattern
+
+  # Resolution Patterns
+  ResolutionPattern:
+    badges:
+      - field: patternType
+        color: info
+    fields:
+      - field: description
+        label: Description
+      - field: applicability
+        label: Applicability
+
+  # Causal Links
+  CausalNormativeLink:
+    badges:
+      - field: linkType
+        color: warning
+    fields:
+      - field: cause
+        label: Cause
+      - field: effect
+        label: Effect
+      - field: normativeImplication
+        label: Implication
+
+  # Code Provision References
+  CodeProvisionReference:
+    badges:
+      - field: provisionId
+        color: dark
+    fields:
+      - field: provisionText
+        label: Text
+      - field: relevance
+        label: Relevance
+
+  # Roles (9-concept)
+  Role:
+    fields:
+      - field: roleDescription
+        label: Description
+      - field: responsibilities
+        label: Responsibilities
+
+  # States (9-concept)
+  State:
+    fields:
+      - field: stateDescription
+        label: Description
+      - field: triggers
+        label: Triggers
+      - field: duration
+        label: Duration
+
+  # Resources (9-concept)
+  Resource:
+    fields:
+      - field: resourceType
+        label: Type
+      - field: description
+        label: Description
+
+  # Principles (9-concept)
+  Principle:
+    fields:
+      - field: principleStatement
+        label: Statement
+      - field: source
+        label: Source
+        style: code
+
+  # Obligations (9-concept)
+  Obligation:
+    fields:
+      - field: obligationStatement
+        label: Statement
+      - field: obligor
+        label: Obligor
+      - field: obligee
+        label: Obligee
+
+  # Constraints (9-concept)
+  Constraint:
+    fields:
+      - field: constraintDescription
+        label: Description
+      - field: scope
+        label: Scope
+
+  # Capabilities (9-concept)
+  Capability:
+    fields:
+      - field: capabilityDescription
+        label: Description
+      - field: agent
+        label: Agent
+
+  # Timeline Events
+  TimelineEvent:
+    badges:
+      - field: eventType
+        color: info
+    fields:
+      - field: description
+        label: Description
+      - field: timestamp
+        label: When
+      - field: participants
+        label: Participants
+
+  # Default fallback - show all properties
+  _default:
+    show_all: true
+    exclude_fields:
+      - generatedAtTime
+      - wasGeneratedBy

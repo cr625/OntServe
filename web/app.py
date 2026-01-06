@@ -134,13 +134,31 @@ def create_app(config_name=None):
             return json_str
         except (json.JSONDecodeError, TypeError):
             return {}
-    
+
+    @app.template_filter('render_entity_props')
+    def render_entity_props_filter(properties, parent_uri=None):
+        """Render entity properties using display configuration."""
+        from web.entity_display import render_entity_properties
+        if not properties:
+            return {'badges': [], 'fields': [], 'extra': []}
+        # Handle both dict and JSON string
+        if isinstance(properties, str):
+            try:
+                properties = json.loads(properties)
+            except (json.JSONDecodeError, TypeError):
+                return {'badges': [], 'fields': [], 'extra': []}
+        return render_entity_properties(properties, parent_uri)
+
     # Make config available in templates
     @app.context_processor
     def inject_config():
         """Make app config available in templates."""
         return {'config': app.config}
-    
+
+    # Add render_props as a Jinja global (available in macros too)
+    from web.entity_display import render_entity_properties
+    app.jinja_env.globals['render_props'] = render_entity_properties
+
     # Initialize CLI commands
     from web.cli import init_cli
     init_cli(app)
@@ -299,10 +317,19 @@ def register_routes(app):
         )
         ontologies = pagination.items
         
-        return render_template('index.html', 
+        return render_template('index.html',
                              ontologies=ontologies,
                              pagination=pagination)
-    
+
+    @app.route('/health')
+    def health():
+        """Health check endpoint for monitoring and testing."""
+        return jsonify({
+            'status': 'healthy',
+            'service': 'ontserve-web',
+            'database': 'connected' if db.engine else 'disconnected'
+        })
+
     @app.route('/ontology/<ontology_name>')
     def ontology_detail_or_uri_resolution(ontology_name):
         """
@@ -445,25 +472,34 @@ def register_routes(app):
         
         # Browser request - show detail page
         app.logger.info(f"Browser request for {ontology_name}, showing detail page")
-        
-        # Get entities grouped by type
-        stmt = select(OntologyEntity).where(
-            OntologyEntity.ontology_id == ontology.id,
-            OntologyEntity.entity_type == 'class'
-        )
-        classes = db.session.execute(stmt).scalars().all()
 
+        # Get all entities for this ontology
         stmt = select(OntologyEntity).where(
-            OntologyEntity.ontology_id == ontology.id,
-            OntologyEntity.entity_type == 'property'
+            OntologyEntity.ontology_id == ontology.id
         )
-        properties = db.session.execute(stmt).scalars().all()
+        all_entities = db.session.execute(stmt).scalars().all()
 
-        stmt = select(OntologyEntity).where(
-            OntologyEntity.ontology_id == ontology.id,
-            OntologyEntity.entity_type == 'individual'
-        )
-        individuals = db.session.execute(stmt).scalars().all()
+        # Check if user explicitly requested standard view
+        view_mode = request.args.get('view', 'auto')
+
+        # Check if this is a case ontology (use case view by default for cases)
+        from web.case_display import is_case_ontology, organize_entities_for_case, get_domain_from_ontology
+
+        if view_mode != 'standard' and is_case_ontology(ontology_name, all_entities):
+            # Use case view
+            app.logger.info(f"Using case view for {ontology_name}")
+            domain = get_domain_from_ontology(ontology_name)
+            case_data = organize_entities_for_case(all_entities, domain)
+
+            return render_template('ontology_case.html',
+                                 ontology=ontology,
+                                 case_sections=case_data['sections'],
+                                 stats=case_data['stats'])
+
+        # Standard ontology view - group entities by type
+        classes = [e for e in all_entities if e.entity_type == 'class']
+        properties = [e for e in all_entities if e.entity_type == 'property']
+        individuals = [e for e in all_entities if e.entity_type == 'individual']
 
         entities = {
             'classes': classes,
@@ -505,7 +541,7 @@ def register_routes(app):
             OntologyVersion.ontology_id == ontology.id
         ).order_by(OntologyVersion.created_at.desc())
         versions = db.session.execute(stmt).scalars().all()
-        
+
         return render_template('ontology_detail.html',
                              ontology=ontology,
                              entities=entities,

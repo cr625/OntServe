@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% from "macros/case_display.html" import render_entity_card, render_section %}
+
+{% block title %}{{ ontology.name }} - Case View - OntServe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .case-section {
+        margin-bottom: 2rem;
+    }
+
+    .case-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .case-section-header:hover {
+        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    }
+
+    .case-section-header h4 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .case-section-header .badge {
+        font-size: 0.8rem;
+    }
+
+    .entity-card {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        transition: box-shadow 0.2s;
+    }
+
+    .entity-card:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .entity-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .entity-uri {
+        font-family: monospace;
+        font-size: 0.8rem;
+        color: #6c757d;
+        word-break: break-all;
+    }
+
+    .section-nav {
+        position: sticky;
+        top: 1rem;
+    }
+
+    .section-nav .nav-link {
+        padding: 0.5rem 1rem;
+        color: #495057;
+        border-radius: 0.25rem;
+    }
+
+    .section-nav .nav-link:hover {
+        background: #f8f9fa;
+    }
+
+    .section-nav .nav-link.active {
+        background: #e7f1ff;
+        color: #0d6efd;
+    }
+
+    .subsection {
+        margin-left: 1rem;
+        padding-left: 1rem;
+        border-left: 2px solid #dee2e6;
+    }
+
+    .subsection-header {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .entity-type-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stats-card h2 {
+        font-size: 2.5rem;
+        margin: 0;
+    }
+
+    .show-more-btn {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar navigation -->
+    <div class="col-md-3">
+        <div class="section-nav">
+            <!-- Case info card -->
+            <div class="stats-card mb-3">
+                <h2>{{ stats.total }}</h2>
+                <div>Total Entities</div>
+                <small class="opacity-75">{{ stats.by_type|length }} types</small>
+            </div>
+
+            <!-- Quick nav -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-list"></i> Sections
+                </div>
+                <nav class="nav flex-column p-2">
+                    {% for section in case_sections %}
+                    {% set count = section.entities|length %}
+                    {% if section.subsections %}
+                    {% set count = 0 %}
+                    {% for sub in section.subsections %}
+                    {% set count = count + sub.entities|length %}
+                    {% endfor %}
+                    {% endif %}
+                    {% if count > 0 %}
+                    <a class="nav-link" href="#section-{{ section.id }}">
+                        {% if section.icon %}<i class="{{ section.icon }} me-2"></i>{% endif %}
+                        {{ section.title }}
+                        <span class="badge bg-secondary float-end">{{ count }}</span>
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+                </nav>
+            </div>
+
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-tools"></i> Actions
+                </div>
+                <div class="card-body p-2">
+                    <a href="{{ url_for('ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}?view=standard"
+                       class="btn btn-outline-secondary btn-sm w-100 mb-2">
+                        <i class="bi bi-grid"></i> Standard View
+                    </a>
+                    <a href="{{ url_for('ontology_content', ontology_name=ontology.name) }}"
+                       class="btn btn-outline-secondary btn-sm w-100 mb-2" target="_blank">
+                        <i class="bi bi-file-code"></i> View TTL
+                    </a>
+                    <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}"
+                       class="btn btn-outline-success btn-sm w-100">
+                        <i class="bi bi-diagram-3"></i> Visualize
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="col-md-9">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <h1>
+                    <i class="bi bi-briefcase me-2"></i>
+                    {{ ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else ontology.name }}
+                </h1>
+                <p class="text-muted mb-0">
+                    <code>{{ ontology.base_uri }}</code>
+                    {% if ontology.current_version %}
+                    <span class="badge bg-secondary ms-2">v{{ ontology.current_version.version_number }}</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Sections -->
+        {% for section in case_sections %}
+        {{ render_section(section) }}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toggle show more/less for entity lists
+function toggleMore(sectionId, btn) {
+    const hiddenEl = document.getElementById('hidden-' + sectionId);
+    if (hiddenEl.style.display === 'none') {
+        hiddenEl.style.display = 'block';
+        btn.textContent = 'Show less';
+    } else {
+        hiddenEl.style.display = 'none';
+        const count = hiddenEl.querySelectorAll('.entity-card').length;
+        btn.textContent = 'Show ' + count + ' more';
+    }
+}
+
+// Smooth scroll to section
+document.querySelectorAll('.section-nav .nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+</script>
+{% endblock %}

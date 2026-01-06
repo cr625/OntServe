@@ -1,0 +1,158 @@
+# Case Ontology Display Configuration
+# Defines how case ontologies are rendered in OntServe web interface
+#
+# Structure:
+#   domains:
+#     domain_name:
+#       sections: ordered list of sections to display
+#       section_configs: per-section display settings
+#
+# Section definition:
+#   - id: unique section identifier
+#     title: display title
+#     description: optional section description
+#     entity_types: list of parent_uri patterns to match
+#     icon: bootstrap icon class (optional)
+#     collapsed: start collapsed (default: false)
+#     max_preview: max items to show before "show more" (default: 10)
+
+# Default case display (used when domain not specified)
+default:
+  sections:
+    - id: decision_points
+      title: Decision Points
+      description: Key decision moments in the case
+      entity_types:
+        - DecisionPoint
+      icon: bi-signpost-split
+      collapsed: false
+      max_preview: 5
+
+    - id: arguments
+      title: Arguments
+      description: PRO and CON arguments for each decision point
+      entity_types:
+        - Argument
+      icon: bi-chat-quote
+      collapsed: false
+      max_preview: 20
+
+    - id: questions
+      title: Ethical Questions
+      description: Questions that emerge from the case analysis
+      entity_types:
+        - EthicalQuestion
+      icon: bi-question-circle
+      collapsed: false
+      max_preview: 15
+
+    - id: conclusions
+      title: Conclusions
+      description: Synthesized ethical conclusions
+      entity_types:
+        - EthicalConclusion
+      icon: bi-lightbulb
+      collapsed: false
+      max_preview: 10
+
+    - id: validation
+      title: Argument Validation
+      description: Validation results for arguments
+      entity_types:
+        - ArgumentValidation
+      icon: bi-check-circle
+      collapsed: true
+      max_preview: 20
+
+    - id: nine_concepts
+      title: 9-Concept Elements
+      description: Extracted roles, principles, obligations, and other concepts
+      subsections:
+        - id: roles
+          title: Roles
+          entity_types: [Role]
+          icon: bi-person-badge
+        - id: principles
+          title: Principles
+          entity_types: [Principle]
+          icon: bi-compass
+        - id: obligations
+          title: Obligations
+          entity_types: [Obligation]
+          icon: bi-file-text
+        - id: constraints
+          title: Constraints
+          entity_types: [Constraint]
+          icon: bi-lock
+        - id: capabilities
+          title: Capabilities
+          entity_types: [Capability]
+          icon: bi-gear
+        - id: states
+          title: States
+          entity_types: [State]
+          icon: bi-diagram-3
+        - id: resources
+          title: Resources
+          entity_types: [Resource]
+          icon: bi-box
+      icon: bi-grid-3x3
+      collapsed: true
+      max_preview: 30
+
+    - id: analysis
+      title: Analysis Elements
+      description: Causal links, resolution patterns, and other analysis
+      entity_types:
+        - CausalNormativeLink
+        - ResolutionPattern
+        - QuestionEmergence
+        - CodeProvisionReference
+      icon: bi-diagram-2
+      collapsed: true
+      max_preview: 20
+
+    - id: other
+      title: Other Entities
+      description: Entities not categorized above
+      entity_types: []  # Catch-all for unmatched entities
+      icon: bi-collection
+      collapsed: true
+      max_preview: 50
+
+# Domain-specific overrides
+domains:
+  # Engineering ethics (ProEthica default domain)
+  engineering:
+    inherit: default
+    # Can override sections or add domain-specific ones
+    section_overrides:
+      nine_concepts:
+        collapsed: false  # Show 9-concepts expanded for engineering
+
+  # Medical ethics (future domain)
+  medical:
+    inherit: default
+    section_overrides:
+      nine_concepts:
+        title: Clinical Elements
+        description: Patient roles, medical obligations, and clinical constraints
+
+  # Legal ethics (future domain)
+  legal:
+    inherit: default
+    section_overrides:
+      nine_concepts:
+        title: Legal Elements
+        description: Party roles, legal duties, and procedural constraints
+
+# Pattern for detecting case ontologies
+case_detection:
+  # Ontology name patterns that indicate a case ontology
+  name_patterns:
+    - "proethica-case-*"
+    - "*-case-*"
+  # Or check if ontology has specific entity types
+  required_entity_types:
+    - Argument
+    - DecisionPoint
