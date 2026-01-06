@@ -18,9 +18,10 @@ This agent handles:
 **SSH Access**: `ssh digitalocean` (alias) or `ssh chris@209.38.62.85`
 **App Location**: `/opt/ontserve`
 **Venv Location**: `/opt/ontserve/venv`
-**Database**: PostgreSQL (ontserve_db)
-**Services**:
-- OntServe runs via gunicorn (port 5003)
+**Database**: PostgreSQL (ontserve) - User: `ontserve_user`
+**Services** (systemd managed):
+- `ontserve-web.service` - gunicorn on port 5003
+- `ontserve-mcp.service` - MCP server on port 8082
 - nginx (reverse proxy on 80/443)
 
 ## Server Directory Structure
@@ -57,7 +58,8 @@ This agent handles:
 
 3. **Create Database Dump** (if deploying database)
    ```bash
-   PGPASSWORD=PASS pg_dump -h localhost -U postgres -d ontserve_db \
+   # Local database is 'ontserve' (not 'ontserve_db')
+   PGPASSWORD=PASS pg_dump -h localhost -U postgres -d ontserve \
      --clean --if-exists --no-owner --no-privileges \
      -f /tmp/ontserve_dev_backup.sql
    ```
@@ -101,19 +103,28 @@ This agent handles:
    rsync -avz /home/chris/onto/OntServe/config/*.yaml digitalocean:/opt/ontserve/config/
    ```
 
-5. **Restart Gunicorn**
+5. **Restart Services** (via systemd)
    ```bash
-   ssh digitalocean "pkill -f 'gunicorn.*ontserve' || true"
-   ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && nohup gunicorn -w 2 -b 127.0.0.1:5003 --timeout 120 --access-logfile - --error-logfile - 'web.app:create_app()' > /tmp/ontserve.log 2>&1 &"
+   # Requires sudo access - if not available, services will auto-restart on code changes
+   ssh digitalocean "sudo systemctl restart ontserve-web ontserve-mcp"
+
+   # Alternative if sudo not available (services managed by systemd will auto-recover):
+   # ssh digitalocean "pkill -f 'gunicorn.*ontserve' || true"
+   # ssh digitalocean "pkill -f 'python.*mcp_server' || true"
    ```
 
 ### Phase 4: Database Operations (if deploying database)
 
 **IMPORTANT**: Always create a production backup before restoring.
 
+**Production Database Credentials**:
+- Database: `ontserve`
+- User: `ontserve_user`
+- Password: `REDACTED_PRODUCTION_PASSWORD`
+
 1. **Create Production Backup First**
    ```bash
-   ssh digitalocean "PGPASSWORD=PASS pg_dump -h localhost -U postgres -d ontserve_db \
+   ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD pg_dump -h localhost -U ontserve_user -d ontserve \
      --clean --if-exists --no-owner --no-privileges \
      -f /tmp/ontserve_production_backup_\$(date +%Y%m%d_%H%M%S).sql"
    ```
@@ -123,12 +134,18 @@ This agent handles:
    scp /tmp/ontserve_dev_backup.sql digitalocean:/tmp/
    ```
 
-3. **Restore Database**
+3. **Restore Database** (requires postgres superuser)
    ```bash
-   ssh digitalocean "PGPASSWORD=PASS psql -h localhost -U postgres -c 'DROP DATABASE IF EXISTS ontserve_db;'"
-   ssh digitalocean "PGPASSWORD=PASS psql -h localhost -U postgres -c 'CREATE DATABASE ontserve_db;'"
-   ssh digitalocean "PGPASSWORD=PASS psql -h localhost -U postgres -d ontserve_db -f /tmp/ontserve_dev_backup.sql"
+   ssh digitalocean "sudo -u postgres psql -d ontserve -f /tmp/ontserve_dev_backup.sql"
    ```
+
+4. **Grant Permissions to Application User** (CRITICAL after restore)
+   ```bash
+   # The restore changes table ownership - must grant permissions back to ontserve_user
+   ssh digitalocean "sudo -u postgres psql -d ontserve -c 'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ontserve_user; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ontserve_user; GRANT USAGE ON SCHEMA public TO ontserve_user;'"
+   ```
+
+   **Note**: Without this step, the application will get "permission denied" errors.
 
 ### Phase 5: Ontology Refresh (after database restore)
 
@@ -161,8 +178,8 @@ ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts
 
 3. **Verify Database**
    ```bash
-   ssh digitalocean "PGPASSWORD=PASS psql -h localhost -U postgres -d ontserve_db -c 'SELECT COUNT(*) as ontologies FROM ontologies;'"
-   ssh digitalocean "PGPASSWORD=PASS psql -h localhost -U postgres -d ontserve_db -c 'SELECT COUNT(*) as entities FROM ontology_entities;'"
+   ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD psql -h localhost -U ontserve_user -d ontserve -c 'SELECT COUNT(*) as ontologies FROM ontologies;'"
+   ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD psql -h localhost -U ontserve_user -d ontserve -c 'SELECT COUNT(*) as entities FROM ontology_entities;'"
    ```
 
 4. **Check Error Logs**
@@ -175,7 +192,7 @@ ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts
 ### Development (WSL/Local)
 - **Location**: /home/chris/onto/OntServe
 - **Venv**: venv-ontserve
-- **Database**: ontserve_db (postgres/PASS)
+- **Database**: `ontserve` (postgres/PASS)
 - **Web Port**: 5003
 - **MCP Port**: 8082
 - **URL**: http://localhost:5003
@@ -184,10 +201,12 @@ ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts
 ### Production (DigitalOcean)
 - **Location**: /opt/ontserve
 - **Venv**: venv
-- **Database**: ontserve_db (postgres/PASS)
+- **Database**: `ontserve` (ontserve_user/REDACTED_PRODUCTION_PASSWORD)
 - **Port**: 5003 (gunicorn) -> nginx -> 80/443
+- **MCP Port**: 8082 (internal only)
 - **URL**: https://ontserve.ontorealm.net
 - **Branch**: main
+- **Services**: ontserve-web.service, ontserve-mcp.service (systemd)
 
 ## Quick Reference Commands
 
@@ -198,9 +217,12 @@ cd /home/chris/onto/OntServe
 git push origin development
 git checkout main && git merge development && git push origin main && git checkout development
 
-# Server
-ssh digitalocean "cd /opt/ontserve && git pull origin main && pkill -f 'gunicorn.*ontserve'"
-ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && nohup gunicorn -w 2 -b 127.0.0.1:5003 --timeout 120 'web.app:create_app()' > /tmp/ontserve.log 2>&1 &"
+# Server - pull and restart via systemd
+ssh digitalocean "cd /opt/ontserve && git pull origin main"
+ssh digitalocean "sudo systemctl restart ontserve-web ontserve-mcp"
+
+# Verify
+curl -s -o /dev/null -w '%{http_code}' https://ontserve.ontorealm.net/
 ```
 
 ### Code + Ontologies Deployment
@@ -212,9 +234,9 @@ git checkout main && git merge development && git push origin main && git checko
 # Sync ontologies
 rsync -avz --delete /home/chris/onto/OntServe/ontologies/ digitalocean:/opt/ontserve/ontologies/
 
-# Restart
-ssh digitalocean "cd /opt/ontserve && git pull origin main && pkill -f 'gunicorn.*ontserve'"
-ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && nohup gunicorn -w 2 -b 127.0.0.1:5003 --timeout 120 'web.app:create_app()' > /tmp/ontserve.log 2>&1 &"
+# Pull code and restart
+ssh digitalocean "cd /opt/ontserve && git pull origin main"
+ssh digitalocean "sudo systemctl restart ontserve-web ontserve-mcp"
 
 # Verify
 curl -s -o /dev/null -w '%{http_code}' https://ontserve.ontorealm.net/
@@ -222,8 +244,8 @@ curl -s -o /dev/null -w '%{http_code}' https://ontserve.ontorealm.net/
 
 ### Full Deployment (Code + Database + Ontologies)
 ```bash
-# 1. Create dumps locally
-PGPASSWORD=PASS pg_dump -h localhost -U postgres -d ontserve_db --clean --if-exists --no-owner -f /tmp/ontserve_dev_backup.sql
+# 1. Create dump locally (database is 'ontserve')
+PGPASSWORD=PASS pg_dump -h localhost -U postgres -d ontserve --clean --if-exists --no-owner --no-privileges -f /tmp/ontserve_dev_backup.sql
 
 # 2. Push code
 git push origin development
@@ -234,17 +256,21 @@ ssh digitalocean "cd /opt/ontserve && git pull origin main"
 scp /tmp/ontserve_dev_backup.sql digitalocean:/tmp/
 rsync -avz --delete /home/chris/onto/OntServe/ontologies/ digitalocean:/opt/ontserve/ontologies/
 
-# 4. Backup and restore database
-ssh digitalocean "PGPASSWORD=PASS pg_dump -h localhost -U postgres -d ontserve_db -f /tmp/ontserve_prod_backup_\$(date +%Y%m%d).sql"
-ssh digitalocean "PGPASSWORD=PASS psql -h localhost -U postgres -c 'DROP DATABASE IF EXISTS ontserve_db; CREATE DATABASE ontserve_db;'"
-ssh digitalocean "PGPASSWORD=PASS psql -h localhost -U postgres -d ontserve_db -f /tmp/ontserve_dev_backup.sql"
+# 4. Backup production database
+ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD pg_dump -h localhost -U ontserve_user -d ontserve --clean --if-exists --no-owner --no-privileges -f /tmp/ontserve_prod_backup_\$(date +%Y%m%d).sql"
 
-# 5. Restart service
-ssh digitalocean "pkill -f 'gunicorn.*ontserve' || true"
-ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && nohup gunicorn -w 2 -b 127.0.0.1:5003 --timeout 120 'web.app:create_app()' > /tmp/ontserve.log 2>&1 &"
+# 5. Restore database (requires postgres superuser)
+ssh digitalocean "sudo -u postgres psql -d ontserve -f /tmp/ontserve_dev_backup.sql"
 
-# 6. Verify
+# 6. CRITICAL: Grant permissions to application user
+ssh digitalocean "sudo -u postgres psql -d ontserve -c 'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ontserve_user; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ontserve_user;'"
+
+# 7. Restart services
+ssh digitalocean "sudo systemctl restart ontserve-web ontserve-mcp"
+
+# 8. Verify
 curl -s -o /dev/null -w '%{http_code}' https://ontserve.ontorealm.net/
+ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD psql -h localhost -U ontserve_user -d ontserve -c 'SELECT COUNT(*) FROM ontology_entities;'"
 ```
 
 ### Ontology Files Only
@@ -256,8 +282,7 @@ ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts
 ### Config Files Only
 ```bash
 rsync -avz /home/chris/onto/OntServe/config/*.yaml digitalocean:/opt/ontserve/config/
-ssh digitalocean "pkill -f 'gunicorn.*ontserve' || true"
-ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && nohup gunicorn -w 2 -b 127.0.0.1:5003 --timeout 120 'web.app:create_app()' > /tmp/ontserve.log 2>&1 &"
+ssh digitalocean "sudo systemctl restart ontserve-web ontserve-mcp"
 ```
 
 ## Pre-Deployment Checklist
@@ -269,24 +294,32 @@ ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && nohup gunicorn
 
 ## Post-Deployment Verification
 
-- [ ] Gunicorn running: `ps aux | grep gunicorn | grep ontserve`
+- [ ] Services running: `ssh digitalocean "systemctl status ontserve-web ontserve-mcp"`
 - [ ] Main site responds: https://ontserve.ontorealm.net/ (HTTP 200)
+- [ ] MCP health: `ssh digitalocean "curl -s http://localhost:8082/health"`
 - [ ] Ontology detail works: https://ontserve.ontorealm.net/ontology/proethica-intermediate
-- [ ] Error logs clean: `tail /tmp/ontserve.log`
+- [ ] Error logs clean: `ssh digitalocean "journalctl -u ontserve-web -n 20 --no-pager"`
 - [ ] Database counts match expected values
 
 ## Troubleshooting
 
 ### Gunicorn Won't Start
 ```bash
-ssh digitalocean "tail -50 /tmp/ontserve.log"
+ssh digitalocean "journalctl -u ontserve-web -n 50 --no-pager"
 # Check for Python import errors, missing dependencies
 ```
 
 ### Database Connection Errors
 ```bash
-ssh digitalocean "PGPASSWORD=PASS psql -h localhost -U postgres -d ontserve_db -c 'SELECT 1;'"
+ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD psql -h localhost -U ontserve_user -d ontserve -c 'SELECT 1;'"
 ```
+
+### Permission Denied Errors (after database restore)
+If you see "permission denied for table" errors after restoring from a local dump:
+```bash
+ssh digitalocean "sudo -u postgres psql -d ontserve -c 'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ontserve_user; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ontserve_user;'"
+```
+This happens because the local dump was created by postgres user, and restoring changes table ownership.
 
 ### Missing Ontologies
 ```bash
