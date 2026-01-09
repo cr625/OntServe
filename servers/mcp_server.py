@@ -493,9 +493,43 @@ class OntServeMCPServer:
                     },
                     "required": ["case_id"]
                 }
+            },
+            {
+                "name": "get_entity_by_uri",
+                "description": "Retrieve an entity's definition and metadata by its URI. Use this to resolve ProEthica entity IRIs during reasoning.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "uri": {
+                            "type": "string",
+                            "description": "The full entity URI (e.g., 'http://proethica.org/ontology/case/56#Engineer_A')"
+                        },
+                        "include_properties": {
+                            "type": "boolean",
+                            "description": "Whether to include all RDF properties in the response",
+                            "default": False
+                        }
+                    },
+                    "required": ["uri"]
+                }
+            },
+            {
+                "name": "get_entities_by_uris",
+                "description": "Retrieve definitions for multiple entities at once. More efficient than multiple single lookups.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "uris": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of entity URIs to resolve (max 20)"
+                        }
+                    },
+                    "required": ["uris"]
+                }
             }
         ]
-        
+
         return {"tools": tools}
 
     async def _handle_call_tool(self, params):
@@ -514,7 +548,9 @@ class OntServeMCPServer:
             "get_candidate_concepts": self._handle_get_candidate_concepts,
             "get_domain_info": self._handle_get_domain_info,
             "store_extracted_entities": self._handle_store_extracted_entities,
-            "get_case_entities": self._handle_get_case_entities
+            "get_case_entities": self._handle_get_case_entities,
+            "get_entity_by_uri": self._handle_get_entity_by_uri,
+            "get_entities_by_uris": self._handle_get_entities_by_uris
         }
         
         if name not in tool_handlers:
@@ -812,6 +848,209 @@ class OntServeMCPServer:
         except Exception as e:
             logger.error(f"Error retrieving case entities: {e}")
             return {"error": f"Failed to retrieve entities: {str(e)}"}
+
+    async def _handle_get_entity_by_uri(self, arguments):
+        """
+        Retrieve an entity's definition and metadata by its URI.
+
+        Searches across all ontologies to find the entity, extracts definition
+        from comment field or RDF properties, and returns structured response.
+        """
+        uri = arguments.get("uri")
+        include_properties = arguments.get("include_properties", False)
+
+        if not uri:
+            return {"error": "URI is required"}
+
+        if not self.db_connected or not self.storage:
+            return {"error": "Database not connected"}
+
+        logger.debug(f"Looking up entity by URI: {uri}")
+
+        try:
+            # Query ontology_entities table by exact URI match
+            query = """
+                SELECT
+                    e.uri,
+                    e.label,
+                    e.comment,
+                    e.entity_type,
+                    e.parent_uri,
+                    e.properties,
+                    o.name as source_ontology
+                FROM ontology_entities e
+                JOIN ontologies o ON e.ontology_id = o.id
+                WHERE e.uri = %s
+                LIMIT 1
+            """
+
+            result = self.storage._execute_query(query, (uri,), fetch_one=True)
+
+            if not result:
+                # Try fragment-based lookup (search by the part after #)
+                if '#' in uri:
+                    fragment = uri.split('#')[-1]
+                    query_fragment = """
+                        SELECT
+                            e.uri,
+                            e.label,
+                            e.comment,
+                            e.entity_type,
+                            e.parent_uri,
+                            e.properties,
+                            o.name as source_ontology
+                        FROM ontology_entities e
+                        JOIN ontologies o ON e.ontology_id = o.id
+                        WHERE e.uri LIKE %s
+                        ORDER BY o.name
+                        LIMIT 1
+                    """
+                    result = self.storage._execute_query(
+                        query_fragment,
+                        (f'%#{fragment}',),
+                        fetch_one=True
+                    )
+
+            if not result:
+                return {
+                    "error": "Entity not found",
+                    "uri": uri,
+                    "found": False
+                }
+
+            # Result is a dict from RealDictCursor
+            # Extract definition - prefer comment, fall back to properties
+            definition = result.get('comment') or ""
+            properties = result.get('properties') or {}
+
+            # If no definition in comment, try to extract from properties
+            if not definition and properties:
+                # Priority order for definition extraction (check both prefixed and unprefixed)
+                definition_keys = [
+                    'obligationstatement', 'proeth:obligationstatement',
+                    'sourcetext', 'proeth:sourcetext',
+                    'casecontext', 'proeth:casecontext',
+                    'ethicaltension', 'proeth:ethicaltension',
+                    'comment', 'rdfs:comment',
+                    'definition', 'skos:definition',
+                    'description'
+                ]
+                for key in definition_keys:
+                    if key in properties and properties[key]:
+                        val = properties[key]
+                        # Handle list values
+                        if isinstance(val, list):
+                            definition = val[0] if val else ""
+                        else:
+                            definition = str(val)
+                        break
+
+            # Determine entity category from entity_type or parent_uri
+            entity_type = result.get('entity_type') or "individual"
+            parent_uri = result.get('parent_uri') or ""
+
+            # Map to ProEthica categories
+            category = self._infer_category_from_type(entity_type, parent_uri, uri)
+
+            # Get label, fallback to URI fragment
+            label = result.get('label')
+            if not label:
+                label = uri.split('#')[-1] if '#' in uri else uri.split('/')[-1]
+
+            response = {
+                "uri": result.get('uri'),
+                "label": label,
+                "definition": definition,
+                "entity_type": category,
+                "parent_type": parent_uri,
+                "source_ontology": result.get('source_ontology'),
+                "found": True
+            }
+
+            if include_properties and properties:
+                response["properties"] = properties
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Error looking up entity by URI: {e}")
+            return {"error": f"Failed to retrieve entity: {str(e)}", "uri": uri}
+
+    async def _handle_get_entities_by_uris(self, arguments):
+        """
+        Retrieve definitions for multiple entities at once.
+
+        More efficient than multiple single lookups. Limited to 20 URIs.
+        """
+        uris = arguments.get("uris", [])
+
+        if not uris:
+            return {"error": "URIs list is required", "entities": [], "not_found": []}
+
+        # Limit to 20 URIs
+        if len(uris) > 20:
+            uris = uris[:20]
+            logger.warning(f"Truncated URIs list to 20 items")
+
+        if not self.db_connected or not self.storage:
+            return {"error": "Database not connected", "entities": [], "not_found": uris}
+
+        logger.debug(f"Looking up {len(uris)} entities by URI")
+
+        entities = []
+        not_found = []
+
+        for uri in uris:
+            result = await self._handle_get_entity_by_uri({"uri": uri})
+            if result.get("found"):
+                # Remove the 'found' key for cleaner output
+                result.pop("found", None)
+                entities.append(result)
+            else:
+                not_found.append(uri)
+
+        return {
+            "entities": entities,
+            "found_count": len(entities),
+            "not_found": not_found,
+            "not_found_count": len(not_found)
+        }
+
+    def _infer_category_from_type(self, entity_type: str, parent_uri: str, uri: str) -> str:
+        """Infer ProEthica category from entity type, parent URI, or URI pattern."""
+
+        # Check parent URI for category hints
+        parent_lower = parent_uri.lower() if parent_uri else ""
+        uri_lower = uri.lower()
+
+        category_patterns = {
+            'role': ['role', 'engineer', 'professional', 'actor'],
+            'principle': ['principle', 'virtue', 'value'],
+            'obligation': ['obligation', 'duty', 'requirement'],
+            'state': ['state', 'condition', 'situation'],
+            'resource': ['resource', 'document', 'asset'],
+            'action': ['action', 'act', 'behavior'],
+            'event': ['event', 'occurrence', 'happening'],
+            'capability': ['capability', 'ability', 'competence'],
+            'constraint': ['constraint', 'limitation', 'restriction'],
+            'question': ['question', 'ethicalquestion'],
+            'conclusion': ['conclusion', 'ethicalconclusion'],
+            'argument': ['argument', 'toulmin'],
+            'decision_point': ['decisionpoint', 'decision']
+        }
+
+        for category, patterns in category_patterns.items():
+            for pattern in patterns:
+                if pattern in parent_lower or pattern in uri_lower:
+                    return category.title()
+
+        # Default based on entity_type
+        if entity_type == 'class':
+            return 'Class'
+        elif entity_type == 'individual':
+            return 'Individual'
+
+        return entity_type or 'Unknown'
 
     async def start(self):
         """Start the MCP server."""
