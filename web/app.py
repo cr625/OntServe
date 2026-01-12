@@ -2083,37 +2083,56 @@ def register_routes(app):
             
             app.logger.info(f"Resolving URI: {uri}")
 
-            # Find entity in database
+            # Find entity in ontology_entities table first
             stmt = select(OntologyEntity).where(OntologyEntity.uri == uri)
             entity = db.session.execute(stmt).scalar_one_or_none()
-            
-            if not entity:
-                app.logger.warning(f"Entity not found for URI: {uri}")
-                return jsonify({
-                    'error': 'Entity not found',
-                    'uri': uri
-                }), 404
-            
-            # Get ontology for context
-            ontology = entity.ontology
-            
+
             # Check Accept header for content negotiation
             accept_header = request.headers.get('Accept', '')
-            
-            if 'application/json' in accept_header:
-                # Return JSON representation
-                return jsonify({
-                    'uri': entity.uri,
-                    'label': entity.label,
-                    'type': entity.entity_type,
-                    'definition': entity.comment,
-                    'ontology': ontology.name,
-                    'ontology_base_uri': ontology.base_uri,
-                    'properties': entity.properties or {}
-                })
-            
-            # Default: Return TTL representation
-            ttl_content = generate_entity_ttl(entity, ontology)
+
+            if entity:
+                # Found in ontology_entities - use existing logic
+                ontology = entity.ontology
+
+                if 'application/json' in accept_header:
+                    return jsonify({
+                        'uri': entity.uri,
+                        'label': entity.label,
+                        'type': entity.entity_type,
+                        'definition': entity.comment,
+                        'ontology': ontology.name,
+                        'ontology_base_uri': ontology.base_uri,
+                        'properties': entity.properties or {}
+                    })
+
+                ttl_content = generate_entity_ttl(entity, ontology)
+            else:
+                # Fallback: check concepts table (for provisions, principles, etc.)
+                concept = db.session.execute(
+                    db.text("SELECT uri, label, semantic_label, primary_type, description, metadata FROM concepts WHERE uri = :uri"),
+                    {'uri': uri}
+                ).mappings().first()
+
+                if not concept:
+                    app.logger.warning(f"Entity not found for URI: {uri}")
+                    return jsonify({
+                        'error': 'Entity not found',
+                        'uri': uri
+                    }), 404
+
+                app.logger.info(f"Found concept in concepts table: {concept['label']}")
+
+                if 'application/json' in accept_header:
+                    return jsonify({
+                        'uri': concept['uri'],
+                        'label': concept['semantic_label'] or concept['label'],
+                        'type': concept['primary_type'],
+                        'definition': concept['description'],
+                        'source': 'concepts',
+                        'metadata': concept['metadata'] or {}
+                    })
+
+                ttl_content = generate_concept_ttl(concept)
             
             response = app.response_class(
                 response=ttl_content,
@@ -2185,7 +2204,64 @@ def register_routes(app):
             lines[-1] = lines[-1][:-2] + ' .'
         
         return '\n'.join(lines)
-    
+
+    def generate_concept_ttl(concept):
+        """Generate TTL representation for a concept from the concepts table."""
+        lines = []
+
+        # Add prefixes
+        lines.append("@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .")
+        lines.append("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .")
+        lines.append("@prefix owl: <http://www.w3.org/2002/07/owl#> .")
+        lines.append("@prefix skos: <http://www.w3.org/2004/02/skos/core#> .")
+        lines.append("@prefix proeth-core: <http://proethica.org/ontology/core#> .")
+        lines.append("")
+
+        # Map primary_type to OWL class
+        type_mapping = {
+            'Provision': 'proeth-core:CodeProvision',
+            'Guideline': 'proeth-core:Guideline',
+            'Principle': 'proeth-core:Principle',
+            'Obligation': 'proeth-core:Obligation',
+            'Constraint': 'proeth-core:Constraint',
+            'Role': 'proeth-core:Role',
+            'State': 'proeth-core:State',
+            'Resource': 'proeth-core:Resource',
+            'Action': 'proeth-core:Action',
+            'Event': 'proeth-core:Event',
+            'Capability': 'proeth-core:Capability'
+        }
+
+        rdf_type = type_mapping.get(concept['primary_type'], 'owl:Thing')
+        lines.append(f"<{concept['uri']}> a {rdf_type} ;")
+
+        # Add label
+        label = concept.get('semantic_label') or concept.get('label') or ''
+        if label:
+            escaped_label = label.replace('"', '\\"').replace('\n', ' ')
+            lines.append(f'    rdfs:label "{escaped_label}"@en ;')
+
+        # Add description/definition
+        description = concept.get('description') or ''
+        if description:
+            # Truncate and escape
+            desc_truncated = description[:1000].replace('"', '\\"').replace('\n', ' ')
+            lines.append(f'    rdfs:comment "{desc_truncated}"@en ;')
+
+        # Add metadata-specific properties for provisions
+        metadata = concept.get('metadata') or {}
+        if concept['primary_type'] == 'Provision':
+            if metadata.get('provision_code'):
+                lines.append(f'    proeth-core:provisionCode "{metadata["provision_code"]}" ;')
+            if metadata.get('provision_category'):
+                lines.append(f'    proeth-core:provisionCategory "{metadata["provision_category"]}" ;')
+
+        # Remove trailing semicolon from last line and add period
+        if lines and lines[-1].endswith(' ;'):
+            lines[-1] = lines[-1][:-2] + ' .'
+
+        return '\n'.join(lines)
+
     # URI Resolution endpoint - path-based for direct access (placed last to avoid conflicts)
     # This route should only match multi-segment paths like /ontology/core/ethics/Honesty
     # Single-segment paths with reserved names (edit, save, etc.) should use dedicated routes
