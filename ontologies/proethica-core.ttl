@@ -14,13 +14,13 @@
 <http://proethica.org/ontology/core> a owl:Ontology ;
     rdfs:label "ProEthica Core Ontology"@en ;
     dc:creator "ProEthica AI"@en ;
-    dc:date "2025-08-30"^^xsd:date ;
-    rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with corrected BFO alignments for consistency with proethica-intermediate"@en ;
-    owl:versionInfo "2.1.0"^^xsd:string ;
+    dc:date "2026-01-12"^^xsd:date ;
+    rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
+    owl:versionInfo "2.2.0"^^xsd:string ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
-    dc:description "Version 2.1.0 adds enhanced disjointness axioms and domain/range constraints for robust ontology engineering: Agent⊥Action/Event, Role⊥Capability, complete property constraints for error detection."@en .
+    dc:description "Version 2.2.0 adds CodeProvision class for representing individual provisions from codes of ethics (NSPE, NEA, ACM, etc.) with establishes relationships linking provisions to the principles, obligations, and constraints they define."@en .
 
 ###############################################################
 # Core Formal Specification Classes with Corrected BFO Alignments
@@ -90,6 +90,27 @@ proeth-core:Constraint a owl:Class ;
     rdfs:label "Constraint"@en ;
     rdfs:comment "An information content entity expressing limitations or restrictions on professional actions or decisions. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "An information content entity expressing limitations or restrictions on professional actions or decisions. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+
+###############################################################
+# CodeProvision: Extension for Ethics Code Integration
+# Added: 2026-01-12 - Support for representing guideline provisions
+###############################################################
+
+# CodeProvision: Individual provisions from codes of ethics
+proeth-core:CodeProvision a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Code Provision"@en ;
+    rdfs:comment "An information content entity representing a single provision, section, or rule from a professional code of ethics (e.g., NSPE Code of Ethics, NEA Code of Ethics). Provisions establish the normative foundation from which Principles, Obligations, and Constraints are derived."@en ;
+    skos:definition "A discrete normative statement from a code of ethics that establishes ethical requirements for professional conduct."@en ;
+    skos:example "NSPE Code II.1.c: 'Engineers shall not reveal facts, data, or information without the prior consent of the client or employer except as authorized or required by law or this Code.'"@en ;
+    skos:scopeNote "CodeProvisions serve as the authoritative source for derived ethical concepts. When analyzing cases, provisions are cited to justify the application of principles and obligations."@en .
+
+# Guideline: Container for provisions (the full code document)
+proeth-core:Guideline a owl:Class ;
+    rdfs:subClassOf iao:0000310 ;  # IAO:document part (or could be iao:0000300 document)
+    rdfs:label "Guideline"@en ;
+    rdfs:comment "A professional code of ethics or guideline document containing multiple provisions. Examples include NSPE Code of Ethics, NEA Code of Ethics, ACM Code of Ethics."@en ;
+    skos:definition "A formal document establishing ethical standards for a profession, containing individual CodeProvisions."@en .
 
 # Agent: Supporting class for role bearers
 proeth-core:Agent a owl:Class ;
@@ -184,6 +205,85 @@ proeth-core:constrainedBy a owl:ObjectProperty ;
     skos:definition "Relates an action to constraints that limit or restrict it."@en .
 
 ###############################################################
+# CodeProvision Properties
+# Added: 2026-01-12 - Support for provision-concept linkage
+###############################################################
+
+# Relates a provision to the concepts it establishes
+proeth-core:establishes a owl:ObjectProperty ;
+    rdfs:domain proeth-core:CodeProvision ;
+    rdfs:range [
+        a owl:Class ;
+        owl:unionOf (proeth-core:Principle proeth-core:Obligation proeth-core:Constraint)
+    ] ;
+    rdfs:label "establishes"@en ;
+    rdfs:comment "Relates a code provision to the ethical concepts (principles, obligations, constraints) it establishes or defines."@en ;
+    skos:definition "Links a CodeProvision to the normative concepts it creates or reinforces."@en ;
+    skos:example "NSPE I.1 establishes PublicSafety (Principle), DutyOfCare (Obligation)"@en .
+
+# Inverse: track which provision establishes a concept
+proeth-core:establishedBy a owl:ObjectProperty ;
+    owl:inverseOf proeth-core:establishes ;
+    rdfs:domain [
+        a owl:Class ;
+        owl:unionOf (proeth-core:Principle proeth-core:Obligation proeth-core:Constraint)
+    ] ;
+    rdfs:range proeth-core:CodeProvision ;
+    rdfs:label "established by"@en ;
+    rdfs:comment "Indicates which code provision establishes this ethical concept."@en ;
+    skos:definition "Links a normative concept to the CodeProvision that defines it."@en .
+
+# Relates a provision to its parent guideline
+proeth-core:partOfGuideline a owl:ObjectProperty ;
+    rdfs:domain proeth-core:CodeProvision ;
+    rdfs:range proeth-core:Guideline ;
+    rdfs:label "part of guideline"@en ;
+    rdfs:comment "Relates a code provision to the guideline document it belongs to."@en ;
+    skos:definition "Links a CodeProvision to its containing Guideline document."@en .
+
+# Inverse: guideline contains provisions
+proeth-core:containsProvision a owl:ObjectProperty ;
+    owl:inverseOf proeth-core:partOfGuideline ;
+    rdfs:domain proeth-core:Guideline ;
+    rdfs:range proeth-core:CodeProvision ;
+    rdfs:label "contains provision"@en ;
+    rdfs:comment "Relates a guideline to the provisions it contains."@en ;
+    skos:definition "Links a Guideline to the CodeProvisions it contains."@en .
+
+# For case analysis to cite provisions
+proeth-core:citesProvision a owl:ObjectProperty ;
+    rdfs:range proeth-core:CodeProvision ;
+    rdfs:label "cites provision"@en ;
+    rdfs:comment "Relates an ethical analysis or decision to the code provisions it references."@en ;
+    skos:definition "Links an analysis element to the CodeProvision(s) that justify or support it."@en ;
+    skos:scopeNote "Used in case analysis to track which provisions are cited when applying ethical principles."@en .
+
+###############################################################
+# CodeProvision Datatype Properties
+###############################################################
+
+proeth-core:provisionCode a owl:DatatypeProperty ;
+    rdfs:domain proeth-core:CodeProvision ;
+    rdfs:range xsd:string ;
+    rdfs:label "provision code"@en ;
+    rdfs:comment "The alphanumeric code identifying this provision within its guideline (e.g., 'II.1.c', 'P1.3')."@en ;
+    skos:definition "The unique identifier code for a provision within its parent guideline."@en .
+
+proeth-core:provisionText a owl:DatatypeProperty ;
+    rdfs:domain proeth-core:CodeProvision ;
+    rdfs:range xsd:string ;
+    rdfs:label "provision text"@en ;
+    rdfs:comment "The full normative text of the provision."@en ;
+    skos:definition "The complete text content of the code provision."@en .
+
+proeth-core:provisionCategory a owl:DatatypeProperty ;
+    rdfs:domain proeth-core:CodeProvision ;
+    rdfs:range xsd:string ;
+    rdfs:label "provision category"@en ;
+    rdfs:comment "The category or section type within the guideline (e.g., 'fundamental_canons', 'rules_of_practice', 'professional_obligations')."@en ;
+    skos:definition "Classification of the provision within the guideline structure."@en .
+
+###############################################################
 # IAO Document Integration for Resources
 # Added: 2025-10-07 - Support for linking Resources to IAO documents
 ###############################################################
@@ -260,6 +360,8 @@ proeth-core:Role owl:disjointWith proeth-core:Capability .
 proeth-core:Principle owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 proeth-core:Obligation owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 proeth-core:Constraint owl:disjointWith proeth-core:Agent, proeth-core:Resource .
+proeth-core:CodeProvision owl:disjointWith proeth-core:Agent, proeth-core:Resource .
+proeth-core:Guideline owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 
 # Processes are disjoint from continuants
 proeth-core:Action owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .

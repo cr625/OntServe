@@ -299,7 +299,7 @@ class OntServeMCPServer:
                         "category": {
                             "type": "string",
                             "description": "Entity category (Role, Principle, Obligation, etc.)",
-                            "enum": ["Role", "Principle", "Obligation", "State", "Resource", "Action", "Event", "Capability", "Constraint"]
+                            "enum": ["Role", "Principle", "Obligation", "State", "Resource", "Action", "Event", "Capability", "Constraint", "Provision", "Guideline"]
                         },
                         "domain_id": {
                             "type": "string", 
