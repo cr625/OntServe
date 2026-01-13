@@ -374,7 +374,7 @@ def build_stats_context(ontology, entities: dict, relationships: dict) -> dict:
     Returns:
         Enhanced stats context dict
     """
-    display_config = get_display_config(ontology)
+    display_config = get_or_create_display_config(ontology)
 
     # Check if we have entity data
     has_entities = bool(entities.get('classes') or entities.get('properties') or entities.get('individuals'))
