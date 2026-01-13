@@ -179,8 +179,8 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="extractEntities()">
-                            <i class="fas fa-sync me-1"></i>Extract Entities
+                        <button class="btn btn-outline-secondary btn-sm w-100 mb-2" onclick="extractEntities()" title="Re-parse TTL and update entities (auto-synced on startup)">
+                            <i class="fas fa-sync me-1"></i>Force Re-sync
                         </button>
                         <button class="btn btn-outline-success btn-sm w-100 mb-2" onclick="formatTTL()">
                             <i class="fas fa-magic me-1"></i>Format TTL
@@ -252,7 +252,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="extractEntitiesCheck" checked>
                             <label class="form-check-label" for="extractEntitiesCheck">
-                                Extract entities after saving
+                                Re-sync entities after saving
                             </label>
                         </div>
                     </form>
@@ -551,12 +551,12 @@
         }
 
         function extractEntities() {
-            if (confirm('Extract entities from this ontology? This may take a moment.')) {
+            if (confirm('Force re-sync entities from TTL? (Entities auto-sync on startup)')) {
                 fetch(`/editor/api/extract-entities/${currentOntologyId}`, { method: 'POST' })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            showAlert('success', `Successfully extracted ${data.total_entities} entities`);
+                            showAlert('success', `Re-synced ${data.total_entities} entities`);
                             // Update statistics
                             updateStats(data.entity_counts);
                         } else {

@@ -715,6 +715,24 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:label "fulfills obligation"@en ;
     rdfs:comment "Relates an action to an obligation it fulfills"@en .
 
+:violatesObligation rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "violates obligation"@en ;
+    rdfs:comment "Relates an action to an obligation it violates"@en .
+
+:constrainedBy rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Constraint ;
+    rdfs:label "constrained by"@en ;
+    rdfs:comment "Relates an action to a constraint that limits or shapes it"@en .
+
+:hasAgentRole rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Role ;
+    rdfs:label "has agent role"@en ;
+    rdfs:comment "Relates an action to the role of the agent performing it"@en .
+
 # Properties connecting roles to obligations and principles
 :hasObligation rdf:type owl:ObjectProperty ;
     rdfs:domain proeth-core:Role ;
@@ -739,6 +757,111 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:range :EthicalCode ;
     rdfs:label "governed by code"@en ;
     rdfs:comment "Relates a professional role to an ethical code that formalizes its obligations and norms."@en .
+
+#################################################################
+#    Role-to-Role Instance Relations
+#################################################################
+
+# These properties model professional relationships between role instances
+# Used in case extraction to capture organizational and supervisory structures
+
+:retainedBy rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    rdfs:label "retained by"@en ;
+    rdfs:comment "Professional retained by client or organization"@en .
+
+:retains rdf:type owl:ObjectProperty ;
+    owl:inverseOf :retainedBy ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    rdfs:label "retains"@en ;
+    rdfs:comment "Client or organization that retains a professional"@en .
+
+:employedBy rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    rdfs:label "employed by"@en ;
+    rdfs:comment "Professional employed by organization"@en .
+
+:employs rdf:type owl:ObjectProperty ;
+    owl:inverseOf :employedBy ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    rdfs:label "employs"@en ;
+    rdfs:comment "Organization that employs a professional"@en .
+
+:supervises rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    owl:inverseOf :supervisedBy ;
+    rdfs:label "supervises"@en ;
+    rdfs:comment "Role supervises another role in organizational hierarchy"@en .
+
+:supervisedBy rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    owl:inverseOf :supervises ;
+    rdfs:label "supervised by"@en ;
+    rdfs:comment "Role is supervised by another role"@en .
+
+:mentors rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    owl:inverseOf :mentoredBy ;
+    rdfs:label "mentors"@en ;
+    rdfs:comment "Role mentors another role in professional development"@en .
+
+:mentoredBy rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    owl:inverseOf :mentors ;
+    rdfs:label "mentored by"@en ;
+    rdfs:comment "Role is mentored by another role"@en .
+
+:collaboratesWith rdf:type owl:ObjectProperty ;
+    rdf:type owl:SymmetricProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    rdfs:label "collaborates with"@en ;
+    rdfs:comment "Role collaborates with another role as peers"@en .
+
+:reportsTo rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    owl:inverseOf :receivesReportFrom ;
+    rdfs:label "reports to"@en ;
+    rdfs:comment "Role reports to another role in organizational structure"@en .
+
+:receivesReportFrom rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    owl:inverseOf :reportsTo ;
+    rdfs:label "receives report from"@en ;
+    rdfs:comment "Role receives reports from another role"@en .
+
+#################################################################
+#    Provision-Concept Relationships
+#################################################################
+
+# These properties link ethical code provisions to the concepts they establish
+# Used to trace how specific code sections ground principles, obligations, and constraints
+
+:establishes rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Resource ;
+    rdfs:range [ rdf:type owl:Class ;
+                 owl:unionOf ( proeth-core:Principle proeth-core:Obligation proeth-core:Constraint ) ] ;
+    rdfs:label "establishes"@en ;
+    rdfs:comment "Relates a code provision to the ethical concepts (Principles, Obligations, Constraints) it establishes or reinforces. For example, NSPE Canon I.1 establishes the Public Safety Principle."@en ;
+    dcterms:source <https://doi.org/10.1023/A:1024195425598> . # McLaren 2003 - extensional grounding
+
+:establishedBy rdf:type owl:ObjectProperty ;
+    owl:inverseOf :establishes ;
+    rdfs:domain [ rdf:type owl:Class ;
+                  owl:unionOf ( proeth-core:Principle proeth-core:Obligation proeth-core:Constraint ) ] ;
+    rdfs:range proeth-core:Resource ;
+    rdfs:label "established by"@en ;
+    rdfs:comment "Inverse of establishes. Relates an ethical concept to the code provision(s) that establish it. For example, Public Safety Principle is established by NSPE Canon I.1."@en .
 
 #################################################################
 #    State Classes - Based on Chapter 2.2.4 Literature Review

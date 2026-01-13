@@ -73,8 +73,8 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
     def edit_ontology(ontology_id: str):
         """Load ontology in the editor."""
         try:
-            # Get ontology
-            stmt = select(Ontology).where(Ontology.ontology_id == ontology_id)
+            # Get ontology by name (ontology_id param is the name string like 'proethica-intermediate')
+            stmt = select(Ontology).where(Ontology.name == ontology_id)
             ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 raise NotFound(f"Ontology {ontology_id} not found")
@@ -94,20 +94,23 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             version_list = []
             for v in versions:
                 version_list.append({
-                    'version': v.version,
+                    'version': v.version_number,
                     'created_at': v.created_at.isoformat(),
                     'created_by': v.created_by,
-                    'commit_message': v.commit_message,
-                    'triple_count': v.triple_count
+                    'commit_message': v.change_summary,
+                    'triple_count': getattr(v, 'triple_count', None)
                 })
-            
+
             ontology_data = ontology.to_dict()
             ontology_data['versions'] = version_list
-            ontology_data['latest_version'] = latest_version.version if latest_version else None
+            ontology_data['latest_version'] = latest_version.version_number if latest_version else None
             
+            # Get content from latest version
+            content = latest_version.content if latest_version else ''
+
             return render_template('editor/edit.html',
                                  ontology=ontology_data,
-                                 content=ontology.content,
+                                 content=content,
                                  page_title=f"Edit {ontology.name}")
                                  
         except Exception as e:
@@ -131,7 +134,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 raise BadRequest("Content cannot be empty")
 
             # Get ontology
-            stmt = select(Ontology).where(Ontology.ontology_id == ontology_id)
+            stmt = select(Ontology).where(Ontology.name == ontology_id)
             ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 raise NotFound(f"Ontology {ontology_id} not found")
@@ -229,7 +232,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         """Get entities for an ontology with optional filtering and search."""
         try:
             # Get ontology
-            stmt = select(Ontology).where(Ontology.ontology_id == ontology_id)
+            stmt = select(Ontology).where(Ontology.name == ontology_id)
             ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 raise NotFound(f"Ontology {ontology_id} not found")
@@ -336,7 +339,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         """Get version history for an ontology."""
         try:
             # Get ontology
-            stmt = select(Ontology).where(Ontology.ontology_id == ontology_id)
+            stmt = select(Ontology).where(Ontology.name == ontology_id)
             ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 raise NotFound(f"Ontology {ontology_id} not found")
@@ -350,12 +353,12 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             version_list = []
             for v in versions:
                 version_list.append({
-                    'version': v.version,
+                    'version': v.version_number,
                     'created_at': v.created_at.isoformat(),
                     'created_by': v.created_by,
-                    'commit_message': v.commit_message,
-                    'triple_count': v.triple_count,
-                    'changes_summary': v.changes_summary
+                    'commit_message': v.change_summary,
+                    'triple_count': getattr(v, 'triple_count', None),
+                    'changes_summary': v.change_summary
                 })
             
             return jsonify({

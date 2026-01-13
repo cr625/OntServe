@@ -139,8 +139,8 @@
                                         <hr class="dropdown-divider">
                                     </li>
                                     <li><a class="dropdown-item" href="#"
-                                            onclick="extractEntities('{{ ontology.ontology_id or ontology.id }}')">
-                                            <i class="bi bi-arrow-clockwise me-2"></i>Extract Entities
+                                            onclick="extractEntities('{{ ontology.ontology_id or ontology.id }}')" title="Re-parse TTL and update entities (auto-synced on startup)">
+                                            <i class="bi bi-arrow-clockwise me-2"></i>Force Re-sync
                                         </a></li>
                                     <li><a class="dropdown-item text-danger" href="#"
                                             onclick="deleteOntology('{{ ontology.ontology_id or ontology.id }}')">

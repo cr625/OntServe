@@ -49,7 +49,21 @@ def create_app(config_name=None):
     # Initialize database
     init_db(app)
     migrate = Migrate(app, db)
-    
+
+    # Auto-sync ontology entities from TTL files on startup
+    with app.app_context():
+        try:
+            from services.ontology_sync_service import sync_ontologies_on_startup
+            from pathlib import Path
+            ontologies_dir = Path(__file__).parent.parent / 'ontologies'
+            sync_result = sync_ontologies_on_startup(db.session, ontologies_dir)
+            if sync_result.get('updated', 0) > 0:
+                logging.info(f"Ontology sync: {sync_result['updated']} ontologies updated")
+            else:
+                logging.debug(f"Ontology sync: all ontologies up to date")
+        except Exception as e:
+            logging.warning(f"Ontology sync failed (non-fatal): {e}")
+
     # Initialize OntologyManager
     ontology_config = {
         'storage_type': 'file',

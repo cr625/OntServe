@@ -43,6 +43,8 @@ from storage.source_text_manager import SourceTextManager
 from services.sparql_service import SPARQLService
 # Import MCP integration helpers
 from servers.mcp_source_text_integration import enhance_entity_submission_with_source_text
+# Import ontology sync service
+from services.ontology_sync_service import sync_ontologies_on_startup
 
 class OntServeMCPServer:
     """
@@ -117,7 +119,24 @@ class OntServeMCPServer:
             
             self.db_connected = True
             logger.info("Database connection initialized successfully")
-            
+
+            # Auto-sync ontology entities from TTL files
+            try:
+                from sqlalchemy import create_engine
+                from sqlalchemy.orm import sessionmaker
+                engine = create_engine(self.db_url)
+                Session = sessionmaker(bind=engine)
+                session = Session()
+                ontologies_dir = project_root / 'ontologies'
+                sync_result = sync_ontologies_on_startup(session, ontologies_dir)
+                if sync_result.get('updated', 0) > 0:
+                    logger.info(f"Ontology sync: {sync_result['updated']} ontologies updated")
+                else:
+                    logger.debug("Ontology sync: all ontologies up to date")
+                session.close()
+            except Exception as sync_error:
+                logger.warning(f"Ontology sync failed (non-fatal): {sync_error}")
+
         except Exception as e:
             logger.error(f"Failed to initialize database: {e}")
             self.storage = None
