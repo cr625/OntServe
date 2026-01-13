@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 from flask_migrate import Migrate
 from flask_login import LoginManager, login_required, current_user
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 from sqlalchemy import select, func, or_
@@ -24,6 +25,7 @@ import rdflib
 
 from web.config import config
 from web.models import db, init_db, Ontology, OntologyEntity, OntologyVersion, User
+from web.ontology_stats import build_stats_context, get_or_create_display_config
 from core.ontology_manager import OntologyManager
 from core.ontology_merger import OntologyMergerService
 from editor.routes import create_editor_blueprint
@@ -41,7 +43,18 @@ def create_app(config_name=None):
         Flask application instance
     """
     app = Flask(__name__)
-    
+
+    # Configure CORS to allow requests from ProEthica
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": [
+                "https://proethica.org",
+                "http://localhost:5000",
+                "http://127.0.0.1:5000"
+            ]
+        }
+    })
+
     # Load configuration
     config_name = config_name or os.environ.get('FLASK_CONFIG', 'development')
     app.config.from_object(config[config_name])
@@ -556,11 +569,15 @@ def register_routes(app):
         ).order_by(OntologyVersion.created_at.desc())
         versions = db.session.execute(stmt).scalars().all()
 
+        # Build enhanced stats context with display_config support
+        stats = build_stats_context(ontology, entities, relationships)
+
         return render_template('ontology_detail.html',
                              ontology=ontology,
                              entities=entities,
                              relationships=relationships,
-                             versions=versions)
+                             versions=versions,
+                             stats=stats)
     
     @app.route('/ontology/<ontology_name>/content')
     def ontology_content(ontology_name):

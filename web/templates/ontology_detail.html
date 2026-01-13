@@ -155,52 +155,52 @@
         {% endfor %}
         {% set high_confidence = high_confidence_entities|length %}
 
-        <!-- Ontology-specific Banner -->
-        {% if ontology.name == 'proethica-intermediate' %}
+        <!-- Ontology-specific Banner (driven by display_config) -->
+        {% if stats.show_banner %}
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card border-primary">
-                    <div class="card-header bg-primary text-white">
+                <div class="card border-{{ stats.banner.color or 'primary' }}">
+                    <div class="card-header bg-{{ stats.banner.color or 'primary' }} text-white">
                         <h5 class="mb-0">
-                            <i class="bi bi-layers"></i> ProEthica Intermediate Layer
+                            <i class="bi {{ stats.banner.icon or 'bi-layers' }}"></i> {{ stats.banner.title }}
                         </h5>
                     </div>
                     <div class="card-body">
+                        {% if stats.category_counts %}
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="text-center">
-                                    <div class="display-4 text-primary">94</div>
-                                    <small class="text-muted">NSPE Ethical Concepts</small>
+                                    <div class="display-4 text-{{ stats.banner.color or 'primary' }}">{{ stats.class_count }}</div>
+                                    <small class="text-muted">{{ stats.banner.subtitle or 'Total Classes' }}</small>
                                 </div>
                             </div>
-                            <div class="col-md-8">
-                                <h6 class="text-muted mb-3">9-Concept Formal Framework</h6>
+                            <div class="col-md-9">
+                                {% if stats.display_config.featured_categories %}
+                                <h6 class="text-muted mb-3">Entity Categories</h6>
                                 <div class="row">
-                                    <div class="col-md-6">
-                                        <ul class="list-unstyled mb-2">
-                                            <li><i class="bi bi-person-badge text-info"></i> <strong>Roles:</strong> 18 entities</li>
-                                            <li><i class="bi bi-compass text-success"></i> <strong>Principles:</strong> 13 entities</li>
-                                            <li><i class="bi bi-clipboard-check text-warning"></i> <strong>Obligations:</strong> 23 entities</li>
-                                            <li><i class="bi bi-flag text-danger"></i> <strong>States:</strong> 21 entities</li>
-                                            <li><i class="bi bi-book text-secondary"></i> <strong>Resources:</strong> 4 entities</li>
-                                        </ul>
+                                    {% for cat in stats.display_config.featured_categories %}
+                                    <div class="col-md-4 mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi {{ cat.icon or 'bi-circle' }} me-2" style="color: {{ cat.color }};"></i>
+                                            <div>
+                                                <strong>{{ cat.label }}:</strong>
+                                                <span class="text-muted">{{ stats.category_counts.get(cat.label, 0) }}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <ul class="list-unstyled mb-2">
-                                            <li><i class="bi bi-lightning text-primary"></i> <strong>Actions:</strong> 23 entities</li>
-                                            <li><i class="bi bi-calendar-event text-info"></i> <strong>Events:</strong> 8 entities</li>
-                                            <li><i class="bi bi-gear text-success"></i> <strong>Capabilities:</strong> 16 entities</li>
-                                            <li><i class="bi bi-exclamation-triangle text-warning"></i> <strong>Constraints:</strong> 3 entities</li>
-                                        </ul>
-                                    </div>
+                                    {% endfor %}
                                 </div>
+                                {% endif %}
+                                {% if stats.display_config.description %}
                                 <div class="mt-2">
-                                    <small class="text-muted">
-                                        This intermediate ontology bridges the formal ProEthica core concepts with domain-specific ethical knowledge extracted from the NSPE Code of Ethics.
-                                    </small>
+                                    <small class="text-muted">{{ stats.display_config.description }}</small>
                                 </div>
+                                {% endif %}
                             </div>
                         </div>
+                        {% else %}
+                        <p class="mb-0">{{ stats.banner.subtitle or '' }}</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -294,145 +294,47 @@
         comment ends here #}
         {% endif %}
 
-        <!-- Statistics -->
-        <div class="row mb-3">
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Triples</h5>
-                        <h3 class="text-primary">{{ ontology.triple_count or 0 }}</h3>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Classes</h5>
-                        <h3 class="text-success">{{ entities.classes|length }}</h3>
-                        {% if entities.classes|selectattr('comment')|list|length > 0 %}
-                        <small class="text-muted">{{ entities.classes|selectattr('comment')|list|length }} with
-                            definitions</small>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Properties</h5>
-                        <h3 class="text-info">{{ entities.properties|length }}</h3>
-                        {% if entities.properties|selectattr('comment')|list|length > 0 %}
-                        <small class="text-muted">{{ entities.properties|selectattr('comment')|list|length }} with
-                            definitions</small>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Individuals</h5>
-                        <h3 class="text-warning">{{ entities.individuals|length }}</h3>
-                        {% if entities.individuals|selectattr('comment')|list|length > 0 %}
-                        <small class="text-muted">{{ entities.individuals|selectattr('comment')|list|length }} with
-                            definitions</small>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Relationship Statistics -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">
-                            <i class="bi bi-arrow-left-right"></i> Relationships
-                        </h5>
-                        <h3 class="text-danger">{{ relationships.total }}</h3>
-                        <small class="text-muted">
-                            {{ relationships.hierarchical }} hierarchical,
-                            {{ relationships.domain + relationships.range }} property constraints
-                        </small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-9">
-                <div class="card">
-                    <div class="card-body">
-                        <h6 class="card-title">Relationship Breakdown</h6>
-                        <div class="row text-center">
-                            <div class="col-md-4">
-                                <span class="badge bg-secondary me-1">{{ relationships.hierarchical }}</span>
-                                <small>Hierarchical (subClassOf)</small>
-                            </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-info me-1">{{ relationships.domain }}</span>
-                                <small>Domain constraints</small>
-                            </div>
-                            <div class="col-md-4">
-                                <span class="badge bg-success me-1">{{ relationships.range }}</span>
-                                <small>Range constraints</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% set axiom_count = stats.axioms.subclass|length + stats.axioms.property_constraints|length + stats.axioms.equivalent|length + stats.axioms.disjoint|length %}
 
         <!-- Tabs for different views -->
         <ul class="nav nav-tabs" id="ontologyTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="entities-tab" data-bs-toggle="tab" data-bs-target="#entities"
-                    type="button">
-                    <i class="bi bi-diagram-2"></i> Entities
+                <button class="nav-link active" id="schema-tab" data-bs-toggle="tab" data-bs-target="#schema"
+                    type="button" title="Class and property definitions (TBox in description logic)">
+                    <i class="bi bi-diagram-3"></i> Schema
+                    <span class="badge bg-secondary ms-1">{{ stats.class_count + stats.property_count }}</span>
                 </button>
             </li>
+            {% if stats.category_entities %}
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="relationships-tab" data-bs-toggle="tab" data-bs-target="#relationships"
-                    type="button">
-                    <i class="bi bi-arrow-left-right"></i> Relationships ({{ relationships.total }})
-                </button>
-            </li>
-            {% if entities_with_definitions > 0 %}
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="definitions-tab" data-bs-toggle="tab" data-bs-target="#definitions"
-                    type="button">
-                    <i class="bi bi-book"></i> Definitions ({{ entities_with_definitions }})
+                <button class="nav-link" id="concepts-tab" data-bs-toggle="tab" data-bs-target="#concepts"
+                    type="button" title="Domain concepts organized by the Nine-Component Framework categories">
+                    <i class="bi bi-grid-3x3-gap"></i> Concepts
+                    <span class="badge bg-primary ms-1">{{ stats.category_total }}</span>
                 </button>
             </li>
             {% endif %}
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="content-tab" data-bs-toggle="tab" data-bs-target="#content" type="button">
-                    <i class="bi bi-code-slash"></i> TTL Content
+                <button class="nav-link" id="individuals-tab" data-bs-toggle="tab" data-bs-target="#individuals"
+                    type="button" title="Named individuals/instances (ABox in description logic)">
+                    <i class="bi bi-collection"></i> Individuals
+                    <span class="badge bg-secondary ms-1">{{ stats.individual_count }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="axioms-tab" data-bs-toggle="tab" data-bs-target="#axioms"
+                    type="button" title="Logical axioms: subsumption hierarchy and property constraints">
+                    <i class="bi bi-arrow-left-right"></i> Axioms
+                    <span class="badge bg-secondary ms-1">{{ stats.axioms.subclass|length + stats.axioms.property_constraints|length }}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="versions-tab" data-bs-toggle="tab" data-bs-target="#versions"
                     type="button">
-                    <i class="bi bi-clock-history"></i> Versions ({{ versions|length }})
+                    <i class="bi bi-clock-history"></i> Versions
+                    <span class="badge bg-secondary ms-1">{{ versions|length }}</span>
                 </button>
             </li>
-            {% if ontology.current_version and ontology.current_version.meta_data and
-            ontology.current_version.meta_data.reasoning %}
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="reasoning-tab" data-bs-toggle="tab" data-bs-target="#reasoning"
-                    type="button">
-                    <i class="bi bi-brain"></i> Inferred Relationships ({{
-                    ontology.current_version.meta_data.reasoning.inferred_relationships|length if
-                    ontology.current_version.meta_data.reasoning.inferred_relationships else 0 }})
-                </button>
-            </li>
-            {% endif %}
-            {% if entities_with_definitions > 0 %}
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="enrichment-tab" data-bs-toggle="tab" data-bs-target="#enrichment"
-                    type="button">
-                    <i class="bi bi-stars"></i> Enrichment Details ({{ entities_with_definitions }})
-                </button>
-            </li>
-            {% endif %}
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata"
                     type="button">
@@ -442,427 +344,259 @@
         </ul>
 
         <div class="tab-content mt-3" id="ontologyTabContent">
-            <!-- Entities Tab -->
-            <div class="tab-pane fade show active" id="entities" role="tabpanel">
+            <!-- Schema Tab (Classes and Properties) -->
+            <div class="tab-pane fade show active" id="schema" role="tabpanel">
                 <div class="row">
-                    <!-- Classes -->
-                    <div class="col-md-4">
-                        <h5><i class="bi bi-box"></i> Classes ({{ entities.classes|length }})</h5>
-                        <div class="entity-list list-group">
-                            {% for entity in entities.classes %}
-                            <div class="list-group-item">
-                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
-                                {% if entity.comment %}
-                                <div class="mt-2 p-2 bg-light border-start border-3 border-info definition-card">
-                                    <small class="text-info fw-bold">Definition:</small>
-                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
-                                    {% if entity.properties and entity.properties|length > 0 %}
-                                    <div class="mt-2">
-                                        {% set props = entity.properties|from_json if entity.properties is string else
-                                        entity.properties %}
-                                        {% if props.confidence %}
-                                        <span class="badge bg-success me-1"
-                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
-                                            100)|round(1) }}%</span>
-                                        {% endif %}
-                                        {% if props.definition_type %}
-                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
-                                        {% endif %}
-                                        {% if props['dc:source'] %}
-                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
-                                            Referenced</span>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% endif %}
-                                <br><code class="small">{{ entity.uri }}</code>
-                            </div>
-                            {% endfor %}
-                            {% if not entities.classes %}
-                            <div class="list-group-item text-muted">No classes found</div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Properties -->
-                    <div class="col-md-4">
-                        <h5><i class="bi bi-arrow-left-right"></i> Properties ({{ entities.properties|length }})</h5>
-                        <div class="entity-list list-group">
-                            {% for entity in entities.properties %}
-                            <div class="list-group-item">
-                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
-                                {% if entity.comment %}
-                                <div class="mt-2 p-2 bg-light border-start border-3 border-success definition-card">
-                                    <small class="text-success fw-bold">Definition:</small>
-                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
-                                    {% if entity.properties and entity.properties|length > 0 %}
-                                    <div class="mt-2">
-                                        {% set props = entity.properties|from_json if entity.properties is string else
-                                        entity.properties %}
-                                        {% if props.confidence %}
-                                        <span class="badge bg-success me-1"
-                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
-                                            100)|round(1) }}%</span>
-                                        {% endif %}
-                                        {% if props.definition_type %}
-                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
-                                        {% endif %}
-                                        {% if props['dc:source'] %}
-                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
-                                            Referenced</span>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% endif %}
-                                <br><code class="small">{{ entity.uri }}</code>
-                            </div>
-                            {% endfor %}
-                            {% if not entities.properties %}
-                            <div class="list-group-item text-muted">No properties found</div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Individuals -->
-                    <div class="col-md-4">
-                        <h5><i class="bi bi-node-plus"></i> Individuals ({{ entities.individuals|length }})</h5>
-                        <div class="entity-list list-group">
-                            {% for entity in entities.individuals %}
-                            <div class="list-group-item">
-                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
-                                {% if entity.comment %}
-                                <div class="mt-2 p-2 bg-light border-start border-3 border-warning definition-card">
-                                    <small class="text-warning fw-bold">Definition:</small>
-                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
-                                </div>
-                                {% endif %}
-                                {{ render_entity_properties(entity) }}
-                                <br><code class="small">{{ entity.uri }}</code>
-                            </div>
-                            {% endfor %}
-                            {% if not entities.individuals %}
-                            <div class="list-group-item text-muted">No individuals found</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Relationships Tab -->
-            <div class="tab-pane fade" id="relationships" role="tabpanel">
-                <div class="row">
-                    <!-- Hierarchical Relationships -->
+                    <!-- Classes Section -->
                     <div class="col-md-6">
-                        <h5><i class="bi bi-diagram-3"></i> Hierarchical Relationships ({{ relationships.hierarchical
-                            }})</h5>
                         <div class="card">
-                            <div class="card-body">
-                                <div class="relationship-list" style="max-height: 400px; overflow-y: auto;">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="bi bi-box"></i> Classes</h5>
+                                <span class="badge bg-primary">{{ stats.class_count }}</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="entity-list" style="max-height: 500px; overflow-y: auto;">
+                                    {% if stats.from_ttl and stats.ttl_classes %}
+                                    {% for cls in stats.ttl_classes %}
+                                    <div class="list-group-item border-0 border-bottom">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>{{ cls.label }}</strong>
+                                                {% if cls.comment %}
+                                                <p class="text-muted small mb-1 mt-1">{{ cls.comment[:150] }}{% if cls.comment|length > 150 %}...{% endif %}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <code class="small text-muted">{{ cls.uri }}</code>
+                                    </div>
+                                    {% endfor %}
+                                    {% elif entities.classes %}
                                     {% for entity in entities.classes %}
-                                    {% if entity.parent_uri %}
-                                    <div class="relationship-item mb-2 p-2 border-start border-2 border-secondary">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-light text-dark me-2">{{ entity.label or
-                                                entity.uri|extract_name }}</span>
-                                            <i class="bi bi-arrow-right text-muted mx-2"></i>
-                                            <span class="badge bg-secondary">{{ entity.parent_uri|extract_name }}</span>
+                                    <div class="list-group-item border-0 border-bottom">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
+                                                {% if entity.comment %}
+                                                <p class="text-muted small mb-1 mt-1">{{ entity.comment[:150] }}{% if entity.comment|length > 150 %}...{% endif %}</p>
+                                                {% endif %}
+                                            </div>
                                         </div>
-                                        <small class="text-muted d-block mt-1">
-                                            <code>{{ entity.uri }}</code> ⊆ <code>{{ entity.parent_uri }}</code>
-                                        </small>
-                                    </div>
-                                    {% endif %}
-                                    {% endfor %}
-                                    {% if relationships.hierarchical == 0 %}
-                                    <div class="text-muted text-center py-3">
-                                        <i class="bi bi-info-circle"></i> No hierarchical relationships found
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Property Constraints -->
-                    <div class="col-md-6">
-                        <h5><i class="bi bi-arrow-left-right"></i> Property Constraints ({{ relationships.domain +
-                            relationships.range }})</h5>
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="relationship-list" style="max-height: 400px; overflow-y: auto;">
-                                    {% for entity in entities.properties %}
-                                    {% if entity.domain or entity.range %}
-                                    <div class="relationship-item mb-2 p-2 border-start border-2 border-info">
-                                        <div class="fw-bold">{{ entity.label or entity.uri|extract_name }}</div>
-                                        {% if entity.domain %}
-                                        <div class="mt-1">
-                                            <span class="badge bg-info me-1">Domain:</span>
-                                            <span class="badge bg-light text-dark">{{ entity.domain|extract_name if
-                                                entity.domain else 'Not specified' }}</span>
-                                        </div>
-                                        {% endif %}
-                                        {% if entity.range %}
-                                        <div class="mt-1">
-                                            <span class="badge bg-success me-1">Range:</span>
-                                            <span class="badge bg-light text-dark">{{ entity.range|extract_name if
-                                                entity.range else 'Not specified' }}</span>
-                                        </div>
-                                        {% endif %}
-                                        <small class="text-muted d-block mt-1">
-                                            <code>{{ entity.uri }}</code>
-                                        </small>
-                                    </div>
-                                    {% endif %}
-                                    {% endfor %}
-                                    {% if (relationships.domain + relationships.range) == 0 %}
-                                    <div class="text-muted text-center py-3">
-                                        <i class="bi bi-info-circle"></i> No property constraints found
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Definitions Tab -->
-            <div class="tab-pane fade" id="definitions" role="tabpanel">
-                {% if entities_with_definitions > 0 %}
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="alert alert-success">
-                            <h4><i class="bi bi-book"></i> Professional Ethics Definitions</h4>
-                            <p class="mb-0">This ontology provides <strong>{{ entities_with_definitions }}</strong>
-                                professional definitions for key ethical concepts used in engineering and other
-                                professional domains.</p>
-                        </div>
-                    </div>
-                </div>
-
-                {% for entity_type, entity_list in [('Classes', entities.classes), ('Properties', entities.properties),
-                ('Individuals', entities.individuals)] %}
-                {% set entities_with_defs = entity_list|selectattr('comment')|list %}
-                {% if entities_with_defs %}
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <h4><i
-                                class="bi bi-{{ 'box' if entity_type == 'Classes' else ('arrow-left-right' if entity_type == 'Properties' else 'node-plus') }}"></i>
-                            {{ entity_type }} ({{ entities_with_defs|length }} with definitions)</h4>
-
-                        {% for entity in entities_with_defs %}
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <h5 class="text-primary">{{ entity.label or entity.uri|extract_name }}</h5>
                                         <code class="small text-muted">{{ entity.uri }}</code>
-                                        {% if entity.properties %}
-                                        {% set props = entity.properties|from_json if entity.properties is string else
-                                        entity.properties %}
-                                        <div class="mt-2">
-                                            {% if props.confidence %}
-                                            <span class="badge bg-success me-1" title="Definition Quality">{{
-                                                (props.confidence * 100)|round(1) }}% Confidence</span>
-                                            {% endif %}
-                                            {% if props['dc:source'] %}
-                                            <span class="badge bg-primary me-1" title="Authoritative Source">{{
-                                                props['dc:source'] }}</span>
-                                            {% endif %}
-                                            {% if props.generated_definition %}
-                                            <span class="badge bg-info me-1">AI Generated</span>
-                                            {% endif %}
-                                        </div>
-                                        {% endif %}
                                     </div>
-                                    <div class="col-md-9">
-                                        <div class="definition-content">
-                                            <h6 class="text-muted mb-2">Professional Definition:</h6>
-                                            <p class="definition-text">{{ entity.comment }}</p>
-
-                                            {% if entity.entity_type == 'class' and entity.parent_uri %}
-                                            <div class="mt-2">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-diagram-3"></i>
-                                                    Specializes: <code>{{ entity.parent_uri|extract_name }}</code>
-                                                </small>
-                                            </div>
-                                            {% endif %}
-
-                                            {% if entity.entity_type == 'property' %}
-                                            <div class="mt-2">
-                                                {% if entity.domain %}
-                                                <small class="text-muted d-block">
-                                                    <i class="bi bi-arrow-right"></i>
-                                                    Domain:
-                                                    <code>{{ entity.domain|extract_name if entity.domain else 'Not specified' }}</code>
-                                                </small>
-                                                {% endif %}
-                                                {% if entity.range %}
-                                                <small class="text-muted d-block">
-                                                    <i class="bi bi-arrow-left"></i>
-                                                    Range:
-                                                    <code>{{ entity.range|extract_name if entity.range else 'Not specified' }}</code>
-                                                </small>
-                                                {% endif %}
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-                {% endfor %}
-
-                {% else %}
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> No definitions found in this ontology.
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Entities Tab -->
-            <div class="tab-pane fade" id="entities" role="tabpanel">
-                <div class="row">
-                    <!-- Classes -->
-                    <div class="col-md-4">
-                        <h5><i class="bi bi-box"></i> Classes ({{ entities.classes|length }})</h5>
-                        <div class="entity-list list-group">
-                            {% for entity in entities.classes %}
-                            <div class="list-group-item">
-                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
-                                {% if entity.comment %}
-                                <div class="mt-2 p-2 bg-light border-start border-3 border-info definition-card">
-                                    <small class="text-info fw-bold">Definition:</small>
-                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
-                                    {% if entity.properties and entity.properties|length > 0 %}
-                                    <div class="mt-2">
-                                        {% set props = entity.properties|from_json if entity.properties is string else
-                                        entity.properties %}
-                                        {% if props.confidence %}
-                                        <span class="badge bg-success me-1"
-                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
-                                            100)|round(1) }}%</span>
-                                        {% endif %}
-                                        {% if props.definition_type %}
-                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
-                                        {% endif %}
-                                        {% if props['dc:source'] %}
-                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
-                                            Referenced</span>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% endif %}
-                                <br><code class="small">{{ entity.uri }}</code>
-                            </div>
-                            {% endfor %}
-                            {% if not entities.classes %}
-                            <div class="list-group-item text-muted">No classes found</div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Properties -->
-                    <div class="col-md-4">
-                        <h5><i class="bi bi-arrow-left-right"></i> Properties ({{ entities.properties|length }})</h5>
-                        <div class="entity-list list-group">
-                            {% for entity in entities.properties %}
-                            <div class="list-group-item">
-                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
-                                {% if entity.comment %}
-                                <div class="mt-2 p-2 bg-light border-start border-3 border-success definition-card">
-                                    <small class="text-success fw-bold">Definition:</small>
-                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
-                                    {% if entity.properties and entity.properties|length > 0 %}
-                                    <div class="mt-2">
-                                        {% set props = entity.properties|from_json if entity.properties is string else
-                                        entity.properties %}
-                                        {% if props.confidence %}
-                                        <span class="badge bg-success me-1"
-                                            title="LLM Generation Confidence">Confidence: {{ (props.confidence *
-                                            100)|round(1) }}%</span>
-                                        {% endif %}
-                                        {% if props.definition_type %}
-                                        <span class="badge bg-info me-1">{{ props.definition_type|title }}</span>
-                                        {% endif %}
-                                        {% if props['dc:source'] %}
-                                        <span class="badge bg-primary me-1" title="{{ props['dc:source'] }}">Source
-                                            Referenced</span>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% endif %}
-                                <br><code class="small">{{ entity.uri }}</code>
-                            </div>
-                            {% endfor %}
-                            {% if not entities.properties %}
-                            <div class="list-group-item text-muted">No properties found</div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Individuals -->
-                    <div class="col-md-4">
-                        <h5><i class="bi bi-node-plus"></i> Individuals ({{ entities.individuals|length }})</h5>
-                        <div class="entity-list list-group">
-                            {% for entity in entities.individuals %}
-                            <div class="list-group-item">
-                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
-                                {% if entity.comment %}
-                                <div class="mt-2 p-2 bg-light border-start border-3 border-warning definition-card">
-                                    <small class="text-warning fw-bold">Definition:</small>
-                                    <div class="text-muted mt-1">{{ entity.comment }}</div>
-                                </div>
-                                {% endif %}
-                                {{ render_entity_properties(entity) }}
-                                <br><code class="small">{{ entity.uri }}</code>
-                            </div>
-                            {% endfor %}
-                            {% if not entities.individuals %}
-                            <div class="list-group-item text-muted">No individuals found</div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Relationships Tab -->
-            <div class="tab-pane fade" id="relationships" role="tabpanel">
-                <div class="row">
-                    <!-- Hierarchical Relationships -->
-                    <div class="col-md-6">
-                        <h5><i class="bi bi-diagram-3"></i> Hierarchical Relationships ({{ relationships.hierarchical
-                            }})</h5>
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="relationship-list" style="max-height: 400px; overflow-y: auto;">
-                                    {% for entity in entities.classes %}
-                                    {% if entity.parent_uri %}
-                                    <div class="relationship-item mb-2 p-2 border-start border-2 border-secondary">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-light text-dark me-2">{{ entity.label or
-                                                entity.uri|extract_name }}</span>
-                                            <i class="bi bi-arrow-right text-muted mx-2"></i>
-                                            <span class="badge bg-secondary">{{ entity.parent_uri|extract_name }}</span>
-                                        </div>
-                                        <small class="text-muted d-block mt-1">
-                                            <code>{{ entity.uri }}</code> ⊆ <code>{{ entity.parent_uri }}</code>
-                                        </small>
-                                    </div>
-                                    {% endif %}
                                     {% endfor %}
-                                    {% if relationships.hierarchical == 0 %}
-                                    <div class="text-muted text-center py-3">
-                                        <i class="bi bi-info-circle"></i> No hierarchical relationships found
+                                    {% else %}
+                                    <div class="text-muted text-center py-4">
+                                        <i class="bi bi-info-circle"></i> No classes found
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Properties Section -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="bi bi-arrow-left-right"></i> Properties</h5>
+                                <span class="badge bg-success">{{ stats.property_count }}</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="entity-list" style="max-height: 500px; overflow-y: auto;">
+                                    {% if stats.from_ttl %}
+                                    <!-- Object Properties -->
+                                    {% if stats.ttl_object_properties %}
+                                    <div class="list-group-item bg-light border-0">
+                                        <small class="text-muted fw-bold">Object Properties ({{ stats.ttl_object_properties|length }})</small>
+                                    </div>
+                                    {% for prop in stats.ttl_object_properties %}
+                                    <div class="list-group-item border-0 border-bottom">
+                                        <strong>{{ prop.label }}</strong>
+                                        {% if prop.domain or prop.range %}
+                                        <div class="mt-1">
+                                            {% if prop.domain %}
+                                            <span class="badge bg-info me-1">Domain: {{ prop.domain|extract_name }}</span>
+                                            {% endif %}
+                                            {% if prop.range %}
+                                            <span class="badge bg-success">Range: {{ prop.range|extract_name }}</span>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                        <br><code class="small text-muted">{{ prop.uri }}</code>
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                    <!-- Datatype Properties -->
+                                    {% if stats.ttl_datatype_properties %}
+                                    <div class="list-group-item bg-light border-0">
+                                        <small class="text-muted fw-bold">Datatype Properties ({{ stats.ttl_datatype_properties|length }})</small>
+                                    </div>
+                                    {% for prop in stats.ttl_datatype_properties %}
+                                    <div class="list-group-item border-0 border-bottom">
+                                        <strong>{{ prop.label }}</strong>
+                                        <br><code class="small text-muted">{{ prop.uri }}</code>
+                                    </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                    {% elif entities.properties %}
+                                    {% for entity in entities.properties %}
+                                    <div class="list-group-item border-0 border-bottom">
+                                        <strong>{{ entity.label or entity.uri|extract_name }}</strong>
+                                        {% if entity.domain or entity.range %}
+                                        <div class="mt-1">
+                                            {% if entity.domain %}
+                                            <span class="badge bg-info me-1">Domain: {{ entity.domain|extract_name }}</span>
+                                            {% endif %}
+                                            {% if entity.range %}
+                                            <span class="badge bg-success">Range: {{ entity.range|extract_name }}</span>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                        <br><code class="small text-muted">{{ entity.uri }}</code>
+                                    </div>
+                                    {% endfor %}
+                                    {% else %}
+                                    <div class="text-muted text-center py-4">
+                                        <i class="bi bi-info-circle"></i> No properties found
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Concepts Tab (Category-grouped entities for ProEthica) -->
+            {% if stats.category_entities %}
+            <div class="tab-pane fade" id="concepts" role="tabpanel">
+                <div class="row">
+                    {% for cat_label, cat_data in stats.category_entities.items() %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header" style="background-color: {{ cat_data.color }}20; border-left: 4px solid {{ cat_data.color }};">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">
+                                        <i class="bi {{ cat_data.icon }}" style="color: {{ cat_data.color }};"></i>
+                                        {{ cat_label }}
+                                    </h6>
+                                    <span class="badge" style="background-color: {{ cat_data.color }};">{{ cat_data.count }}</span>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
+                                    {% for entity in cat_data.entities %}
+                                    <div class="list-group-item py-2">
+                                        <strong class="small">{{ entity.label }}</strong>
+                                        {% if entity.comment %}
+                                        <p class="text-muted small mb-0 mt-1" style="font-size: 0.75rem;">{{ entity.comment[:80] }}{% if entity.comment|length > 80 %}...{% endif %}</p>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                    {% if not cat_data.entities %}
+                                    <div class="list-group-item text-muted small text-center py-3">
+                                        No {{ cat_label|lower }} found
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Individuals Tab (Named Instances) -->
+            <div class="tab-pane fade" id="individuals" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="bi bi-collection"></i> Named Individuals</h5>
+                                <span class="badge bg-warning">{{ stats.individual_count }}</span>
+                            </div>
+                            <div class="card-body">
+                                {% if stats.from_ttl and stats.ttl_individuals %}
+                                <div class="row">
+                                    {% for ind in stats.ttl_individuals %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6>{{ ind.label }}</h6>
+                                                {% if ind.comment %}
+                                                <p class="text-muted small">{{ ind.comment }}</p>
+                                                {% endif %}
+                                                <code class="small">{{ ind.uri }}</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% elif entities.individuals %}
+                                <div class="row">
+                                    {% for entity in entities.individuals %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6>{{ entity.label or entity.uri|extract_name }}</h6>
+                                                {% if entity.comment %}
+                                                <p class="text-muted small">{{ entity.comment }}</p>
+                                                {% endif %}
+                                                <code class="small">{{ entity.uri }}</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="alert alert-info mb-0">
+                                    <i class="bi bi-info-circle"></i> No named individuals (instances) found in this ontology.
+                                    <p class="mb-0 mt-2 small text-muted">
+                                        The ABox contains assertions about specific instances. This ontology primarily defines the TBox (classes and properties).
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Axioms Tab -->
+            <div class="tab-pane fade" id="axioms" role="tabpanel">
+                <div class="row">
+                    <!-- SubClassOf Axioms -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0"><i class="bi bi-diagram-3"></i> Subsumption Hierarchy</h6>
+                                <span class="badge bg-secondary">{{ stats.axioms.subclass|length }}</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div style="max-height: 350px; overflow-y: auto;">
+                                    {% if stats.axioms.subclass %}
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Subclass</th>
+                                                <th></th>
+                                                <th>Superclass</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for axiom in stats.axioms.subclass %}
+                                            <tr>
+                                                <td><code class="small">{{ axiom.subject }}</code></td>
+                                                <td class="text-center text-muted">rdfs:subClassOf</td>
+                                                <td><code class="small">{{ axiom.object }}</code></td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    {% else %}
+                                    <div class="text-muted text-center py-4">
+                                        <i class="bi bi-info-circle"></i> No subclass axioms found
                                     </div>
                                     {% endif %}
                                 </div>
@@ -871,38 +605,47 @@
                     </div>
 
                     <!-- Property Constraints -->
-                    <div class="col-md-6">
-                        <h5><i class="bi bi-arrow-left-right"></i> Property Constraints ({{ relationships.domain +
-                            relationships.range }})</h5>
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="relationship-list" style="max-height: 400px; overflow-y: auto;">
-                                    {% for entity in entities.properties %}
-                                    {% if entity.domain or entity.range %}
-                                    <div class="relationship-item mb-2 p-2 border-start border-2 border-info">
-                                        <div class="fw-bold">{{ entity.label or entity.uri|extract_name }}</div>
-                                        {% if entity.domain %}
-                                        <div class="mt-1">
-                                            <span class="badge bg-info me-1">Domain:</span>
-                                            <span class="badge bg-light text-dark">{{ entity.domain|extract_name if
-                                                entity.domain else 'Not specified' }}</span>
-                                        </div>
-                                        {% endif %}
-                                        {% if entity.range %}
-                                        <div class="mt-1">
-                                            <span class="badge bg-success me-1">Range:</span>
-                                            <span class="badge bg-light text-dark">{{ entity.range|extract_name if
-                                                entity.range else 'Not specified' }}</span>
-                                        </div>
-                                        {% endif %}
-                                        <small class="text-muted d-block mt-1">
-                                            <code>{{ entity.uri }}</code>
-                                        </small>
-                                    </div>
-                                    {% endif %}
-                                    {% endfor %}
-                                    {% if (relationships.domain + relationships.range) == 0 %}
-                                    <div class="text-muted text-center py-3">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0"><i class="bi bi-arrow-left-right"></i> Property Constraints</h6>
+                                <span class="badge bg-info">{{ stats.axioms.property_constraints|length }}</span>
+                            </div>
+                            <div class="card-body p-0">
+                                <div style="max-height: 350px; overflow-y: auto;">
+                                    {% if stats.axioms.property_constraints %}
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Property</th>
+                                                <th>Domain</th>
+                                                <th>Range</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for constraint in stats.axioms.property_constraints %}
+                                            <tr>
+                                                <td><code class="small">{{ constraint.property }}</code></td>
+                                                <td>
+                                                    {% if constraint.domain %}
+                                                    <span class="badge bg-info">{{ constraint.domain }}</span>
+                                                    {% else %}
+                                                    <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if constraint.range %}
+                                                    <span class="badge bg-success">{{ constraint.range }}</span>
+                                                    {% else %}
+                                                    <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    {% else %}
+                                    <div class="text-muted text-center py-4">
                                         <i class="bi bi-info-circle"></i> No property constraints found
                                     </div>
                                     {% endif %}
@@ -910,23 +653,43 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Content Tab -->
-            <div class="tab-pane fade" id="content" role="tabpanel">
-                <div class="card">
-                    <div class="card-body">
-                        {% if ontology.current_content %}
-                        <pre class="ttl-content bg-light p-3"><code>{{ ontology.current_content[:5000] }}{% if ontology.current_content|length > 5000 %}...
-
-[Content truncated. View full content using the "View Raw TTL" button above]{% endif %}</code></pre>
-                        {% else %}
-                        <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle"></i> No content available for this ontology.
+                    <!-- Equivalent and Disjoint Classes -->
+                    {% if stats.axioms.equivalent or stats.axioms.disjoint %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="bi bi-intersect"></i> Class Equivalence & Disjointness</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if stats.axioms.equivalent %}
+                                <h6 class="small text-muted">Equivalent Classes</h6>
+                                <ul class="list-unstyled">
+                                    {% for eq in stats.axioms.equivalent %}
+                                    <li class="mb-1">
+                                        <code class="small">{{ eq.class1 }}</code>
+                                        <span class="text-muted mx-1">owl:equivalentClass</span>
+                                        <code class="small">{{ eq.class2 }}</code>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                                {% if stats.axioms.disjoint %}
+                                <h6 class="small text-muted mt-3">Disjoint Classes</h6>
+                                <ul class="list-unstyled">
+                                    {% for dj in stats.axioms.disjoint %}
+                                    <li class="mb-1">
+                                        <code class="small">{{ dj.class1 }}</code>
+                                        <span class="text-muted mx-1">owl:disjointWith</span>
+                                        <code class="small">{{ dj.class2 }}</code>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </div>
                         </div>
-                        {% endif %}
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
