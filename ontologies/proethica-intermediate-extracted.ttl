@@ -1,6 +1,7 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix proeth: <http://proethica.org/ontology/intermediate#> .
 @prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix proeth-prov: <http://proethica.org/provenance#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -8,12 +9,35 @@
 
 proeth: rdfs:comment "Extracted classes cleared on 2025-10-12T21:50:50.884474. Backup saved as proethica-intermediate-extracted.ttl.bak" .
 
+proeth:AIDisclosureObligation a owl:Class ;
+    rdfs:label "AI Disclosure Obligation" ;
+    proeth-prov:sourceText "proactive disclosure could have prevented misunderstandings and strengthened trust" ;
+    rdfs:comment "Requirement to inform clients and stakeholders when AI substantially contributes to professional work products" ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    skos:definition "Requirement to inform clients and stakeholders when AI substantially contributes to professional work products" ;
+    prov:generatedAtTime "2026-01-05T18:54:38.842265"^^xsd:dateTime .
+
 proeth:AIOutputValidationCapability a owl:Class ;
     rdfs:label "AI Output Validation Capability" ;
     rdfs:comment "The competency to critically evaluate, verify, and validate AI-generated content for accuracy, originality, and compliance with professional standards" ;
     skos:definition "The competency to critically evaluate, verify, and validate AI-generated content for accuracy, originality, and compliance with professional standards" ;
     prov:generatedAtTime "2025-11-11T12:34:12.453271"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:AIOutputVerificationCapability a owl:Class ;
+    rdfs:label "AI Output Verification Capability" ;
+    proeth-prov:sourceText "Engineer A performed a thorough review, cross-checked key facts against professional sources, and made adjustments to the text" ;
+    rdfs:comment "The competency to comprehensively verify, validate, and correct AI-generated technical outputs through systematic review processes" ;
+    skos:definition "The competency to comprehensively verify, validate, and correct AI-generated technical outputs through systematic review processes" ;
+    prov:generatedAtTime "2026-01-05T18:56:04.765002"^^xsd:dateTime .
+
+proeth:AIOutputVerificationObligation a owl:Class ;
+    rdfs:label "AI Output Verification Obligation" ;
+    proeth-prov:sourceText "AI-generated technical work requires at least the same level of scrutiny as human-created work" ;
+    rdfs:comment "Duty to conduct comprehensive verification of AI-generated technical work at least to the same level as human-created work" ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    skos:definition "Duty to conduct comprehensive verification of AI-generated technical work at least to the same level as human-created work" ;
+    prov:generatedAtTime "2026-01-05T18:54:38.842265"^^xsd:dateTime .
 
 proeth:AISoftwareTool a owl:Class ;
     rdfs:label "AI Software Tool" ;
@@ -47,6 +71,18 @@ proeth:AIToolDisclosureObligation a owl:Class ;
     prov:generatedAtTime "2025-11-11T12:34:12.453346"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:AIToolFirst-UseState a owl:Class ;
+    rdfs:label "AI Tool First-Use State" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:firstDiscoveredAt "2026-01-05T18:47:55.015233"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "The AI drafting software was new to the market and Engineer A had no previous experience with the tool" ;
+    rdfs:comment "A state where a professional is using AI tools for the first time without prior experience, training, or understanding of the tool's capabilities and limitations" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a professional is using AI tools for the first time without prior experience, training, or understanding of the tool's capabilities and limitations" ;
+    prov:generatedAtTime "2026-01-05T18:47:55.015233"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
 proeth:AIToolRelianceState a owl:Class ;
     rdfs:label "AI Tool Reliance State" ;
     rdfs:comment "A state where a professional relies on artificial intelligence tools for generating technical work products without maintaining adequate oversight and verification processes" ;
@@ -69,6 +105,22 @@ proeth:AppearanceofImpropriety a owl:Class ;
     skos:definition "Principle that professionals must avoid not only actual conflicts of interest but also situations that could appear improper to reasonable observers" ;
     prov:generatedAtTime "2025-11-10T14:16:35.688974"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:AttributionTransparency a owl:Class ;
+    rdfs:label "Attribution Transparency" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer A did not cite their use of AI-software or its large language models" ;
+    rdfs:comment "Principle requiring disclosure of tools, methods, and sources used in professional work product creation" ;
+    rdfs:subClassOf proeth-core:Principle ;
+    skos:definition "Principle requiring disclosure of tools, methods, and sources used in professional work product creation" ;
+    prov:generatedAtTime "2026-01-05T18:51:06.631129"^^xsd:dateTime .
+
+proeth:AttributionandCitationCapability a owl:Class ;
+    rdfs:label "Attribution and Citation Capability" ;
+    proeth-prov:sourceText "the facts do not indicate the AI-generated report included citations of pertinent documents of technical authority" ;
+    rdfs:comment "The competency to properly attribute contributions and cite technical authorities in engineering work products" ;
+    skos:definition "The competency to properly attribute contributions and cite technical authorities in engineering work products" ;
+    prov:generatedAtTime "2026-01-05T18:56:04.765002"^^xsd:dateTime .
 
 proeth:AttributionandCreditManagementCapability a owl:Class ;
     rdfs:label "Attribution and Credit Management Capability" ;
@@ -140,6 +192,18 @@ proeth:ClientSafetyRefusalState a owl:Class ;
     prov:generatedAtTime "2025-10-31T21:23:51.541400"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:CompromisedOversightState a owl:Class ;
+    rdfs:label "Compromised Oversight State" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:firstDiscoveredAt "2026-01-05T18:49:50.748240"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer A appears to be operating in a compromised manner – namely, without the help of Engineer B" ;
+    rdfs:comment "A state where a professional is operating without their usual quality assurance mechanisms or supervisory support, leading to reduced verification processes" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a professional is operating without their usual quality assurance mechanisms or supervisory support, leading to reduced verification processes" ;
+    prov:generatedAtTime "2026-01-05T18:49:50.748240"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
 proeth:ConfidentialityBreachState a owl:Class ;
     rdfs:label "Confidentiality Breach State" ;
     rdfs:comment "A state where client confidential information has been exposed to unauthorized parties or systems without prior consent" ;
@@ -177,6 +241,13 @@ proeth:ConflictofInterestPreventionConstraint a owl:Class ;
     prov:generatedAtTime "2025-11-10T14:16:35.688566"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:ContaminantCharacterizationCapability a owl:Class ;
+    rdfs:label "Contaminant Characterization Capability" ;
+    proeth-prov:sourceText "prepare a comprehensive report addressing the manufacture, use, and characteristics of an organic compound identified as an emerging contaminant" ;
+    rdfs:comment "The competency to comprehensively analyze and document the manufacture, use, and characteristics of chemical compounds and emerging contaminants" ;
+    skos:definition "The competency to comprehensively analyze and document the manufacture, use, and characteristics of chemical compounds and emerging contaminants" ;
+    prov:generatedAtTime "2026-01-05T18:53:05.461186"^^xsd:dateTime .
+
 proeth:ContractNegotiationCapability a owl:Class ;
     rdfs:label "Contract Negotiation Capability" ;
     rdfs:comment "The competency to negotiate, structure, and manage professional service contracts between organizations while maintaining fairness and transparency" ;
@@ -199,6 +270,18 @@ proeth:Cooling-OffPeriodObligation a owl:Class ;
     skos:definition "Requirement or voluntary commitment to abstain from certain professional activities for a specified period after leaving a position to avoid conflicts of interest" ;
     prov:generatedAtTime "2025-11-10T14:16:35.689045"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:DraftSubmissionState a owl:Class ;
+    rdfs:label "Draft Submission State" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:firstDiscoveredAt "2026-01-05T18:47:55.015233"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "submitted the draft report to Client W for review, including language to clearly identify that the supplied report was a draft, but applied their seal consistent with state law" ;
+    rdfs:comment "A state where a professional has submitted draft documents with professional seal applied, creating ambiguity about the document's completeness and review status" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a professional has submitted draft documents with professional seal applied, creating ambiguity about the document's completeness and review status" ;
+    prov:generatedAtTime "2026-01-05T18:47:55.015233"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
 
 proeth:DualCapacityConstraint a owl:Class ;
     rdfs:label "Dual Capacity Constraint" ;
@@ -223,6 +306,27 @@ proeth:DualRoleManagementCapability a owl:Class ;
     prov:generatedAtTime "2025-11-10T14:16:35.689008"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:EngineeringJudgmentPreservationCapability a owl:Class ;
+    rdfs:label "Engineering Judgment Preservation Capability" ;
+    proeth-prov:sourceText "technology has an important place in the practice of engineering, but it must never be a replacement of a substitute for engineering judgment" ;
+    rdfs:comment "The competency to maintain independent engineering judgment when using automated tools and not substitute technology for professional decision-making" ;
+    skos:definition "The competency to maintain independent engineering judgment when using automated tools and not substitute technology for professional decision-making" ;
+    prov:generatedAtTime "2026-01-05T18:56:04.765002"^^xsd:dateTime .
+
+proeth:EngineeringMentorRole a owl:Class ;
+    rdfs:label "Engineering Mentor Role" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2026-01-05T18:46:59.158495"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "relied on guidance and quality assurance reviews by their mentor and supervisor, Engineer B, to refine report drafts" ;
+    rdfs:comment "A senior engineering professional who provides guidance, quality assurance reviews, and technical writing support to less experienced engineers" ;
+    rdfs:subClassOf proeth-core:Role ;
+    skos:definition "A senior engineering professional who provides guidance, quality assurance reviews, and technical writing support to less experienced engineers" ;
+    prov:generatedAtTime "2026-01-05T18:46:59.158495"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
 proeth:EnvironmentalConsultingEngineer a owl:Class ;
     rdfs:label "Environmental Consulting Engineer" ;
     rdfs:comment "Professional engineer specializing in environmental impact assessment, pollution control, and regulatory compliance for development projects" ;
@@ -230,6 +334,20 @@ proeth:EnvironmentalConsultingEngineer a owl:Class ;
     skos:definition "Professional engineer specializing in environmental impact assessment, pollution control, and regulatory compliance for development projects" ;
     prov:generatedAtTime "2025-10-31T21:23:51.541323"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:EnvironmentalEngineerRole a owl:Class ;
+    rdfs:label "Environmental Engineer Role" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:discoveredInPass 1 ;
+    proeth-prov:discoveredInSection "facts" ;
+    proeth-prov:firstDiscoveredAt "2026-01-05T18:46:59.158495"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer A, an environmental engineer with several years of experience and holding a professional engineering license" ;
+    rdfs:comment "A specialized engineering role focused on environmental assessment, contamination analysis, and groundwater infrastructure design" ;
+    rdfs:subClassOf proeth-core:Role ;
+    skos:definition "A specialized engineering role focused on environmental assessment, contamination analysis, and groundwater infrastructure design" ;
+    prov:generatedAtTime "2026-01-05T18:46:59.158495"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
 
 proeth:EnvironmentalFirmPrincipal a owl:Class ;
     rdfs:label "Environmental Firm Principal" ;
@@ -286,6 +404,37 @@ proeth:GovernmentAgencyEngineer a owl:Class ;
     prov:generatedAtTime "2025-11-10T14:13:11.359459"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:GroundwaterMonitoringAnalysisCapability a owl:Class ;
+    rdfs:label "Groundwater Monitoring Analysis Capability" ;
+    proeth-prov:sourceText "perform an analysis of groundwater monitoring data from a site Engineer A had been observing for over a year" ;
+    rdfs:comment "The competency to analyze, interpret, and synthesize groundwater monitoring data for environmental assessment and reporting" ;
+    skos:definition "The competency to analyze, interpret, and synthesize groundwater monitoring data for environmental assessment and reporting" ;
+    prov:generatedAtTime "2026-01-05T18:53:05.461186"^^xsd:dateTime .
+
+proeth:GroundwaterMonitoringData a owl:Class ;
+    rdfs:label "Groundwater Monitoring Data" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:firstDiscoveredAt "2026-01-05T18:48:36.176849"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "This work required Engineer A to perform an analysis of groundwater monitoring data from a site Engineer A had been observing for over a year" ;
+    rdfs:comment "Technical data collected from environmental monitoring systems tracking groundwater conditions, contamination levels, and related parameters" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Technical data collected from environmental monitoring systems tracking groundwater conditions, contamination levels, and related parameters" ;
+    prov:generatedAtTime "2026-01-05T18:48:36.176849"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
+proeth:InadequateReviewState a owl:Class ;
+    rdfs:label "Inadequate Review State" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:firstDiscoveredAt "2026-01-05T18:49:50.748240"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer A elected to only conduct a high-level review and adjusted certain elements to align with site-specific conditions" ;
+    rdfs:comment "A state where a professional has performed only high-level or cursory review of technical work product, failing to detect critical errors or omissions" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a professional has performed only high-level or cursory review of technical work product, failing to detect critical errors or omissions" ;
+    prov:generatedAtTime "2026-01-05T18:49:50.748240"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
 proeth:IncompleteRiskAssessmentState a owl:Class ;
     rdfs:label "Incomplete Risk Assessment State" ;
     rdfs:comment "A state where professional concerns exist but technical analysis has not yet produced factual findings sufficient for formal reporting" ;
@@ -332,6 +481,30 @@ proeth:LegalCircumventionAttemptState a owl:Class ;
     skos:definition "A state where a professional attempts to bypass legal or regulatory restrictions through technical workarounds while violating ethical principles" ;
     prov:generatedAtTime "2025-11-10T14:13:11.359497"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:LocalSafetyRegulations a owl:Class ;
+    rdfs:label "Local Safety Regulations" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:firstDiscoveredAt "2026-01-05T18:48:36.176849"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Client W noticed several issues with the AI-generated design documents, including misaligned dimensions and an omission of key safety features required by local regulations" ;
+    rdfs:comment "Municipality or locality-specific regulations governing safety requirements for engineering projects and infrastructure" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Municipality or locality-specific regulations governing safety requirements for engineering projects and infrastructure" ;
+    prov:generatedAtTime "2026-01-05T18:48:36.176849"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
+proeth:MentorLossState a owl:Class ;
+    rdfs:label "Mentor Loss State" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:firstDiscoveredAt "2026-01-05T18:47:55.015233"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer B recently retired and was no longer available to Engineer A in a work capacity" ;
+    rdfs:comment "A state where a professional has lost access to their established mentor or supervisor due to retirement, departure, or other circumstances, affecting their work processes and confidence" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where a professional has lost access to their established mentor or supervisor due to retirement, departure, or other circumstances, affecting their work processes and confidence" ;
+    prov:generatedAtTime "2026-01-05T18:47:55.015233"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
 
 proeth:MentorshipAvailabilityConstraint a owl:Class ;
     rdfs:label "Mentorship Availability Constraint" ;
@@ -429,6 +602,18 @@ proeth:ProfessionalEthicsCasePrecedent a owl:Class ;
     prov:generatedAtTime "2025-11-10T14:13:11.359340"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:ProfessionalJournalArticle a owl:Class ;
+    rdfs:label "Professional Journal Article" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:firstDiscoveredAt "2026-01-05T18:48:36.176849"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer A conducted a thorough review of the report, cross-checking key facts against professional journal articles" ;
+    rdfs:comment "Peer-reviewed academic or professional publications containing technical information, research findings, or industry standards" ;
+    rdfs:subClassOf proeth-core:Resource ;
+    skos:definition "Peer-reviewed academic or professional publications containing technical information, research findings, or industry standards" ;
+    prov:generatedAtTime "2026-01-05T18:48:36.176849"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
 proeth:ProfessionalPositionStatement a owl:Class ;
     rdfs:label "Professional Position Statement" ;
     rdfs:comment "Official position statements from professional organizations defining key concepts and standards" ;
@@ -453,6 +638,18 @@ proeth:PublicDomainDisclosureConstraint a owl:Class ;
     prov:generatedAtTime "2025-11-11T12:35:33.589985"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:PublicDomainExposureState a owl:Class ;
+    rdfs:label "Public Domain Exposure State" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:firstDiscoveredAt "2026-01-05T18:49:50.748240"^^xsd:dateTime ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "When Engineer A uploaded Client W's information into the AI open-source interface, this was tantamount to placing the Client's private information in the public domain" ;
+    rdfs:comment "A state where confidential client information has been uploaded to public or open-source platforms without prior consent" ;
+    rdfs:subClassOf proeth-core:State ;
+    skos:definition "A state where confidential client information has been uploaded to public or open-source platforms without prior consent" ;
+    prov:generatedAtTime "2026-01-05T18:49:50.748240"^^xsd:dateTime ;
+    prov:wasAttributedTo "Case 7 Extraction" .
+
 proeth:PublicTrustObligation a owl:Class ;
     rdfs:label "Public Trust Obligation" ;
     rdfs:comment "Duty of public sector professionals to maintain public confidence by avoiding actions that could appear to compromise the integrity of public office or create unfair competitive advantages" ;
@@ -469,6 +666,14 @@ proeth:RegulatoryComplianceDesignConstraint a owl:Class ;
     prov:generatedAtTime "2025-11-11T12:34:12.453447"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:RegulatoryComplianceVerificationObligation a owl:Class ;
+    rdfs:label "Regulatory Compliance Verification Obligation" ;
+    proeth-prov:sourceText "omission of key safety features required by local regulations" ;
+    rdfs:comment "Duty to verify that all design elements meet applicable regulatory standards before submission" ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    skos:definition "Duty to verify that all design elements meet applicable regulatory standards before submission" ;
+    prov:generatedAtTime "2026-01-05T18:51:46.401098"^^xsd:dateTime .
+
 proeth:RegulatoryGapState a owl:Class ;
     rdfs:label "Regulatory Gap State" ;
     rdfs:comment "A state where an organization lacks formal policies or regulations to address potential conflicts of interest or ethical concerns" ;
@@ -476,6 +681,15 @@ proeth:RegulatoryGapState a owl:Class ;
     skos:definition "A state where an organization lacks formal policies or regulations to address potential conflicts of interest or ethical concerns" ;
     prov:generatedAtTime "2025-11-10T14:07:35.546508"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:ResponsibleCharge a owl:Class ;
+    rdfs:label "Responsible Charge" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:sourceText "being actively engaged in the engineering process, from conception to completion. Engineering decisions must be personally made by the professional engineer" ;
+    rdfs:comment "Principle requiring active engagement and personal involvement in engineering decisions from conception to completion" ;
+    rdfs:subClassOf proeth-core:Principle ;
+    skos:definition "Principle requiring active engagement and personal involvement in engineering decisions from conception to completion" ;
+    prov:generatedAtTime "2026-01-05T18:53:53.108261"^^xsd:dateTime .
 
 proeth:ResponsibleChargeConstraint a owl:Class ;
     rdfs:label "Responsible Charge Constraint" ;
@@ -547,6 +761,13 @@ proeth:RiskAssessmentObligation a owl:Class ;
     prov:generatedAtTime "2025-10-31T21:23:51.541040"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:Self-AssessmentCapability a owl:Class ;
+    rdfs:label "Self-Assessment Capability" ;
+    proeth-prov:sourceText "Engineer A is known for their strong technical expertise but is, personally, less confident in their technical writing" ;
+    rdfs:comment "The competency to accurately recognize and acknowledge one's own professional strengths and limitations" ;
+    skos:definition "The competency to accurately recognize and acknowledge one's own professional strengths and limitations" ;
+    prov:generatedAtTime "2026-01-05T18:53:05.461186"^^xsd:dateTime .
+
 proeth:StateEmploymentLaw a owl:Class ;
     rdfs:label "State Employment Law" ;
     rdfs:comment "State-level legislation governing employment transitions and restrictions for public officials" ;
@@ -579,6 +800,14 @@ proeth:StormwaterRiskAssessmentStudy a owl:Class ;
     prov:generatedAtTime "2025-10-31T21:23:51.540514"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:SupervisionTransitionObligation a owl:Class ;
+    rdfs:label "Supervision Transition Obligation" ;
+    proeth-prov:sourceText "Previously, Engineer A had relied on guidance and quality assurance reviews by their mentor and supervisor, Engineer B" ;
+    rdfs:comment "Duty to ensure adequate alternative quality assurance and review mechanisms when losing supervisory support" ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    skos:definition "Duty to ensure adequate alternative quality assurance and review mechanisms when losing supervisory support" ;
+    prov:generatedAtTime "2026-01-05T18:51:46.401098"^^xsd:dateTime .
+
 proeth:TechnicalWritingSelf-SufficiencyCapability a owl:Class ;
     rdfs:label "Technical Writing Self-Sufficiency Capability" ;
     rdfs:comment "The competency to independently produce professional technical documentation without reliance on supervisory review or mentorship" ;
@@ -602,6 +831,15 @@ proeth:TechnologicalCompetence a owl:Class ;
     prov:generatedAtTime "2025-11-11T12:34:12.453156"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
 
+proeth:TechnologicalPrudence a owl:Class ;
+    rdfs:label "Technological Prudence" ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:sourceText "technology has an important place in the practice of engineering, but it must never be a replacement of a substitute for engineering judgment" ;
+    rdfs:comment "Principle that new technologies must be adopted with careful consideration of their limitations and appropriate professional oversight" ;
+    rdfs:subClassOf proeth-core:Principle ;
+    skos:definition "Principle that new technologies must be adopted with careful consideration of their limitations and appropriate professional oversight" ;
+    prov:generatedAtTime "2026-01-05T18:53:53.108261"^^xsd:dateTime .
+
 proeth:TechnologyJudgmentIntegrationCapability a owl:Class ;
     rdfs:label "Technology Judgment Integration Capability" ;
     rdfs:comment "The competency to maintain professional engineering judgment while integrating technological tools, ensuring technology enhances rather than replaces critical thinking and decision-making" ;
@@ -624,6 +862,22 @@ proeth:TechnologyVerificationObligation a owl:Class ;
     skos:definition "Requirement for professionals to thoroughly verify and validate outputs from technological tools, ensuring they meet professional standards before acceptance, with verification rigor matching or exceeding that applied to human-generated work" ;
     prov:generatedAtTime "2025-11-11T12:35:33.590028"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
+
+proeth:ToolFamiliarityConstraint a owl:Class ;
+    rdfs:label "Tool Familiarity Constraint" ;
+    proeth-prov:sourceText "The AI drafting software was new to the market and Engineer A had no previous experience with the tool" ;
+    rdfs:comment "Limitations arising from lack of experience or understanding of tools, software, or technologies used in professional work" ;
+    rdfs:subClassOf proeth-core:Constraint ;
+    skos:definition "Limitations arising from lack of experience or understanding of tools, software, or technologies used in professional work" ;
+    prov:generatedAtTime "2026-01-05T18:52:22.276856"^^xsd:dateTime .
+
+proeth:ToolFamiliarityObligation a owl:Class ;
+    rdfs:label "Tool Familiarity Obligation" ;
+    proeth-prov:sourceText "Not being familiar with the full functionality of the AI software, including the accuracy and originality of AI-generated text" ;
+    rdfs:comment "Requirement to gain adequate familiarity with new technological tools before using them for professional deliverables" ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    skos:definition "Requirement to gain adequate familiarity with new technological tools before using them for professional deliverables" ;
+    prov:generatedAtTime "2026-01-05T18:51:46.401098"^^xsd:dateTime .
 
 proeth:ToolTransparencyDisclosureCapability a owl:Class ;
     rdfs:label "Tool Transparency Disclosure Capability" ;
