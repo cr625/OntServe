@@ -149,6 +149,34 @@ def get_entity_type_name(entity) -> Optional[str]:
     return uri
 
 
+def match_entity_to_concept_type(entity_type: str, concept_types: List[str]) -> Optional[str]:
+    """
+    Match an entity type name to one of the 9-concept types.
+
+    Handles both exact matches and suffix matches (e.g., 'EnvironmentalEngineerRole' -> 'Role').
+
+    Args:
+        entity_type: The entity type name from parent_uri (e.g., 'EnvironmentalEngineerRole')
+        concept_types: List of expected concept type names (e.g., ['Role', 'Action', 'State'])
+
+    Returns:
+        The matching concept type, or None if no match
+    """
+    if not entity_type:
+        return None
+
+    # First try exact match
+    if entity_type in concept_types:
+        return entity_type
+
+    # Then try suffix match (e.g., 'EnvironmentalEngineerRole' ends with 'Role')
+    for concept_type in concept_types:
+        if entity_type.endswith(concept_type):
+            return concept_type
+
+    return None
+
+
 def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[str, Any]:
     """
     Organize entities into sections based on case display configuration.
@@ -219,6 +247,9 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
         'by_section': {}
     }
 
+    # Build list of all known concept types for flexible matching
+    all_concept_types = list(type_to_section.keys())
+
     for entity in entities:
         entity_type = get_entity_type_name(entity)
 
@@ -226,10 +257,20 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
         if entity_type:
             stats['by_type'][entity_type] = stats['by_type'].get(entity_type, 0) + 1
 
-        # Find matching section
+        # Find matching section - try exact match first, then suffix match
         matched = False
-        if entity_type and entity_type in type_to_section:
-            section_id, subsection_id = type_to_section[entity_type]
+        matched_type = None
+
+        if entity_type:
+            # First try exact match
+            if entity_type in type_to_section:
+                matched_type = entity_type
+            else:
+                # Try suffix match (e.g., 'EnvironmentalEngineerRole' -> 'Role')
+                matched_type = match_entity_to_concept_type(entity_type, all_concept_types)
+
+        if matched_type and matched_type in type_to_section:
+            section_id, subsection_id = type_to_section[matched_type]
             section = section_entities.get(section_id)
 
             if section:
