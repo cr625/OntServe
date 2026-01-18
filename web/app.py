@@ -186,6 +186,19 @@ def create_app(config_name=None):
     from web.entity_display import render_entity_properties
     app.jinja_env.globals['render_props'] = render_entity_properties
 
+    # Add custom filter to format camelCase/snake_case to Title Case
+    import re
+    def format_property_key(key):
+        """Convert camelCase or snake_case to Title Case with spaces."""
+        # Replace underscores with spaces
+        result = key.replace('_', ' ')
+        # Insert space before uppercase letters (camelCase)
+        result = re.sub(r'([a-z])([A-Z])', r'\1 \2', result)
+        # Title case and clean up
+        return ' '.join(word.capitalize() for word in result.split())
+
+    app.jinja_env.filters['format_key'] = format_property_key
+
     # Initialize CLI commands
     from web.cli import init_cli
     init_cli(app)
@@ -330,12 +343,25 @@ def register_routes(app):
     
     @app.route('/')
     def index():
-        """Home page showing list of ontologies."""
+        """Home page showing list of ontologies with filtering."""
         page = request.args.get('page', 1, type=int)
         per_page = app.config['ONTOLOGIES_PER_PAGE']
-        
-        # Get ontologies from database
+
+        # Filter parameters
+        source_system = request.args.get('source', None)
+        ontology_type = request.args.get('type', None)
+
+        # Build query with filters
         stmt = select(Ontology)
+
+        if source_system:
+            stmt = stmt.where(Ontology.source_system == source_system)
+        if ontology_type:
+            stmt = stmt.where(Ontology.ontology_type == ontology_type)
+
+        # Order by name
+        stmt = stmt.order_by(Ontology.name)
+
         pagination = db.paginate(
             stmt,
             page=page,
@@ -343,10 +369,24 @@ def register_routes(app):
             error_out=False
         )
         ontologies = pagination.items
-        
+
+        # Get counts for filter badges
+        source_counts = db.session.execute(
+            select(Ontology.source_system, func.count(Ontology.id))
+            .group_by(Ontology.source_system)
+        ).all()
+        type_counts = db.session.execute(
+            select(Ontology.ontology_type, func.count(Ontology.id))
+            .group_by(Ontology.ontology_type)
+        ).all()
+
         return render_template('index.html',
                              ontologies=ontologies,
-                             pagination=pagination)
+                             pagination=pagination,
+                             current_source=source_system,
+                             current_type=ontology_type,
+                             source_counts=dict(source_counts),
+                             type_counts=dict(type_counts))
 
     @app.route('/health')
     def health():

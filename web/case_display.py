@@ -203,6 +203,8 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
                     'id': subsection.get('id'),
                     'title': subsection.get('title', subsection.get('id')),
                     'icon': subsection.get('icon'),
+                    'color': subsection.get('color'),
+                    'abbrev': subsection.get('abbrev'),
                     'entities': []
                 })
 

@@ -9,39 +9,98 @@
             <i class="bi bi-diagram-3"></i> Ontology Repository
         </h1>
 
+        <!-- Filter buttons -->
+        <div class="mb-4">
+            <div class="btn-group me-3" role="group" aria-label="Source filter">
+                <span class="text-muted me-2 align-self-center">Source:</span>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm {% if not current_source %}active{% endif %}">
+                    All
+                </a>
+                <a href="{{ url_for('index', source='proethica') }}" class="btn btn-outline-primary btn-sm {% if current_source == 'proethica' %}active{% endif %}">
+                    <i class="bi bi-cpu"></i> ProEthica
+                    {% if source_counts and source_counts.get('proethica') %}
+                    <span class="badge bg-primary">{{ source_counts.get('proethica', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('index', source='external') }}" class="btn btn-outline-info btn-sm {% if current_source == 'external' %}active{% endif %}">
+                    <i class="bi bi-cloud-download"></i> External
+                    {% if source_counts and source_counts.get('external') %}
+                    <span class="badge bg-info">{{ source_counts.get('external', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('index', source='manual') }}" class="btn btn-outline-secondary btn-sm {% if current_source == 'manual' %}active{% endif %}">
+                    <i class="bi bi-pencil"></i> Manual
+                    {% if source_counts and source_counts.get('manual') %}
+                    <span class="badge bg-secondary">{{ source_counts.get('manual', 0) }}</span>
+                    {% endif %}
+                </a>
+            </div>
+
+            <div class="btn-group" role="group" aria-label="Type filter">
+                <span class="text-muted me-2 align-self-center">Type:</span>
+                <a href="{{ url_for('index', source=current_source) if current_source else url_for('index') }}" class="btn btn-outline-secondary btn-sm {% if not current_type %}active{% endif %}">
+                    All
+                </a>
+                <a href="{{ url_for('index', source=current_source, type='upper') if current_source else url_for('index', type='upper') }}" class="btn btn-outline-danger btn-sm {% if current_type == 'upper' %}active{% endif %}">
+                    <i class="bi bi-diagram-3"></i> Upper
+                    {% if type_counts and type_counts.get('upper') %}
+                    <span class="badge bg-danger">{{ type_counts.get('upper', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('index', source=current_source, type='case') if current_source else url_for('index', type='case') }}" class="btn btn-outline-success btn-sm {% if current_type == 'case' %}active{% endif %}">
+                    <i class="bi bi-folder"></i> Cases
+                    {% if type_counts and type_counts.get('case') %}
+                    <span class="badge bg-success">{{ type_counts.get('case', 0) }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('index', source=current_source, type='core') if current_source else url_for('index', type='core') }}" class="btn btn-outline-warning btn-sm {% if current_type == 'core' %}active{% endif %}">
+                    <i class="bi bi-star"></i> Core
+                </a>
+                <a href="{{ url_for('index', source=current_source, type='base') if current_source else url_for('index', type='base') }}" class="btn btn-outline-dark btn-sm {% if current_type == 'base' %}active{% endif %}">
+                    <i class="bi bi-box"></i> Base
+                </a>
+            </div>
+        </div>
+
         <!-- Statistics cards -->
         <div class="row mb-4">
             <div class="col-md-3">
                 <div class="card text-white bg-primary">
                     <div class="card-body">
-                        <h5 class="card-title">Total Ontologies</h5>
+                        <h5 class="card-title">{% if current_source or current_type %}Filtered{% else %}Total{% endif %} Ontologies</h5>
                         <h2 class="card-text">{{ pagination.total if pagination else 0 }}</h2>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card text-white bg-success">
-                    <div class="card-body">
-                        <h5 class="card-title">PROV-O</h5>
-                        <p class="card-text">Provenance Tracking</p>
+                <a href="{{ url_for('index', source='proethica') }}" class="text-decoration-none">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <h5 class="card-title">ProEthica</h5>
+                            <p class="card-text">{{ source_counts.get('proethica', 0) if source_counts else 0 }} ontologies</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-3">
-                <div class="card text-white bg-info">
-                    <div class="card-body">
-                        <h5 class="card-title">BFO</h5>
-                        <p class="card-text">Basic Formal Ontology</p>
+                <a href="{{ url_for('index', source='external') }}" class="text-decoration-none">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <h5 class="card-title">External</h5>
+                            <p class="card-text">{{ source_counts.get('external', 0) if source_counts else 0 }} ontologies</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-3">
-                <div class="card text-white bg-warning">
-                    <div class="card-body">
-                        <h5 class="card-title">Custom</h5>
-                        <p class="card-text">Domain-Specific</p>
+                <a href="{{ url_for('index', type='case') }}" class="text-decoration-none">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <h5 class="card-title">Case Ontologies</h5>
+                            <p class="card-text">{{ type_counts.get('case', 0) if type_counts else 0 }} cases</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -59,13 +118,11 @@
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>ID</th>
+                        <th>Source</th>
+                        <th>Type</th>
                         <th>Description</th>
-                        <th>Triples</th>
                         <th>Classes</th>
-                        <th>Properties</th>
-                        <th>Created</th>
-                        <th>Actions</th>
+                        <th>Statements</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -88,34 +145,35 @@
                             </small>
                             {% endif %}
                         </td>
-                        <td><code>{{ ontology.base_uri }}</code></td>
-                        <td>{{ ontology.description[:100] if ontology.description else '-' }}
-                            {% if ontology.description and ontology.description|length > 100 %}...{% endif %}
-                        </td>
-                        <td>{{ ontology.triple_count or '-' }}</td>
-                        <td>{{ ontology.class_count or '-' }}</td>
-                        <td>{{ ontology.property_count or '-' }}</td>
-                        <td>{{ ontology.created_at.strftime('%Y-%m-%d') if ontology.created_at else '-' }}</td>
                         <td>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <a href="{{ url_for('ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}"
-                                    class="btn btn-outline-primary" title="View Details">
-                                    <i class="bi bi-info-circle"></i>
-                                </a>
-                                <a href="{{ url_for('edit_ontology', ontology_name=ontology.name) }}"
-                                    class="btn btn-outline-warning" title="Edit">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}"
-                                    class="btn btn-outline-success" title="Visualize">
-                                    <i class="bi bi-eye-fill"></i>
-                                </a>
-                                <a href="{{ url_for('ontology_content', ontology_name=ontology.name) }}"
-                                    class="btn btn-outline-secondary" title="Raw TTL" target="_blank">
-                                    <i class="bi bi-file-code"></i>
-                                </a>
-                            </div>
+                            {% if ontology.source_system == 'proethica' %}
+                            <span class="badge bg-success">ProEthica</span>
+                            {% elif ontology.source_system == 'external' %}
+                            <span class="badge bg-info">External</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Manual</span>
+                            {% endif %}
                         </td>
+                        <td>
+                            {% if ontology.ontology_type == 'upper' %}
+                            <span class="badge bg-danger"><i class="bi bi-diagram-3"></i> Upper</span>
+                            {% elif ontology.ontology_type == 'case' %}
+                            <span class="badge bg-warning text-dark">Case</span>
+                            {% elif ontology.ontology_type == 'core' %}
+                            <span class="badge bg-primary">Core</span>
+                            {% elif ontology.ontology_type == 'extracted' %}
+                            <span class="badge bg-secondary">Extracted</span>
+                            {% elif ontology.ontology_type == 'domain' %}
+                            <span class="badge bg-dark">Domain</span>
+                            {% else %}
+                            <span class="badge bg-light text-dark">Base</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ ontology.description[:80] if ontology.description else '-' }}
+                            {% if ontology.description and ontology.description|length > 80 %}...{% endif %}
+                        </td>
+                        <td>{{ ontology.class_count or '-' }}</td>
+                        <td>{{ ontology.triple_count or '-' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

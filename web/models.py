@@ -55,7 +55,8 @@ class Ontology(db.Model):
     
     # Parent-child relationship for derived ontologies
     parent_ontology_id = db.Column(db.Integer, db.ForeignKey('ontologies.id'), nullable=True)
-    ontology_type = db.Column(db.String(20), default='base')  # 'base', 'derived', 'composite'
+    ontology_type = db.Column(db.String(20), default='base')  # 'base', 'case', 'core', 'domain', 'extracted'
+    source_system = db.Column(db.String(50), default='manual')  # 'proethica', 'external', 'manual'
     
     # JSON metadata field for flexible storage
     meta_data = db.Column('metadata', db.JSON, default={})  # Map to 'metadata' column in DB
@@ -117,7 +118,16 @@ class Ontology(db.Model):
             OntologyEntity.entity_type == 'property'
         )
         return db.session.execute(stmt).scalar() or 0
-    
+
+    @property
+    def individual_count(self):
+        """Get count of individual entities."""
+        stmt = select(func.count()).select_from(OntologyEntity).where(
+            OntologyEntity.ontology_id == self.id,
+            OntologyEntity.entity_type == 'individual'
+        )
+        return db.session.execute(stmt).scalar() or 0
+
     @property
     def has_children(self):
         """Check if this ontology has any derived children."""
@@ -166,6 +176,7 @@ class Ontology(db.Model):
             'is_editable': self.is_editable,
             'parent_ontology_id': self.parent_ontology_id,
             'ontology_type': self.ontology_type,
+            'source_system': self.source_system,
             'is_derived': self.is_derived,
             'has_children': self.has_children,
             'metadata': self.meta_data if self.meta_data else {},
@@ -175,6 +186,7 @@ class Ontology(db.Model):
             # Include computed properties for template display
             'class_count': self.class_count,
             'property_count': self.property_count,
+            'individual_count': self.individual_count,
             'triple_count': self.triple_count
         }
 

@@ -1,22 +1,22 @@
 {# Case Display Macros - Rendering for case ontology entities #}
 {% from "macros/entity_display.html" import render_entity_properties %}
 
-{# Render an individual entity card #}
-{% macro render_entity_card(entity) %}
-<div class="entity-card">
+{# Render an individual entity card with optional color #}
+{% macro render_entity_card(entity, color=none) %}
+<div class="entity-card" style="{% if color %}--entity-color: {{ color }};{% endif %}">
     <div class="d-flex justify-content-between align-items-start">
         <div class="entity-label">
             {{ entity.label or entity.uri.split('#')[-1].split('/')[-1] }}
         </div>
         {% if entity.parent_uri %}
-        <span class="badge bg-info entity-type-badge">
+        <span class="badge entity-type-badge" style="{% if color %}background: {{ color }};{% else %}background: #6c757d;{% endif %}">
             {{ entity.parent_uri.split('#')[-1].split('/')[-1] }}
         </span>
         {% endif %}
     </div>
 
     {% if entity.comment %}
-    <p class="small text-muted mb-2">{{ entity.comment }}</p>
+    <p class="entity-comment">{{ entity.comment }}</p>
     {% endif %}
 
     {{ render_entity_properties(entity) }}
@@ -29,13 +29,14 @@
 
 {# Render a section with entities #}
 {% macro render_section(section) %}
-{% set section_count = section.entities|length %}
+{% set ns = namespace(count=section.entities|length) %}
 {% if section.subsections %}
-{% set section_count = 0 %}
+{% set ns.count = 0 %}
 {% for sub in section.subsections %}
-{% set section_count = section_count + sub.entities|length %}
+{% set ns.count = ns.count + sub.entities|length %}
 {% endfor %}
 {% endif %}
+{% set section_count = ns.count %}
 
 {% if section_count > 0 %}
 <div class="case-section" id="section-{{ section.id }}">
@@ -49,7 +50,7 @@
     </div>
 
     {% if section.description %}
-    <p class="text-muted small mb-2">{{ section.description }}</p>
+    <p class="text-muted small mb-2 ms-1">{{ section.description }}</p>
     {% endif %}
 
     <div class="collapse {% if not section.collapsed %}show{% endif %}" id="content-{{ section.id }}">
@@ -57,27 +58,29 @@
         <!-- Render subsections -->
         {% for subsection in section.subsections %}
         {% if subsection.entities|length > 0 %}
-        <div class="subsection">
+        <div class="subsection" id="subsection-{{ subsection.id }}" style="{% if subsection.color %}--subsection-color: {{ subsection.color }}; border-left-color: {{ subsection.color }};{% endif %}">
             <div class="subsection-header">
-                {% if subsection.icon %}<i class="{{ subsection.icon }} me-2"></i>{% endif %}
-                {{ subsection.title }}
-                <span class="badge bg-secondary">{{ subsection.entities|length }}</span>
+                <span class="subsection-abbrev" style="{% if subsection.color %}background: {{ subsection.color }};{% endif %}">{{ subsection.abbrev or subsection.id[:2]|upper }}</span>
+                <span class="subsection-title">{{ subsection.title }}</span>
+                <span class="badge" style="{% if subsection.color %}background: {{ subsection.color }};{% else %}background: #6c757d;{% endif %}">{{ subsection.entities|length }}</span>
+                <span class="individual-type-note ms-2">Named Individuals</span>
             </div>
 
             <div class="entity-list" id="list-{{ section.id }}-{{ subsection.id }}">
                 {% for entity in subsection.entities[:section.max_preview|default(10)] %}
-                {{ render_entity_card(entity) }}
+                {{ render_entity_card(entity, subsection.color) }}
                 {% endfor %}
             </div>
 
             {% if subsection.entities|length > section.max_preview|default(10) %}
             <div class="hidden-entities" id="hidden-{{ section.id }}-{{ subsection.id }}" style="display: none;">
                 {% for entity in subsection.entities[section.max_preview|default(10):] %}
-                {{ render_entity_card(entity) }}
+                {{ render_entity_card(entity, subsection.color) }}
                 {% endfor %}
             </div>
             <button class="btn btn-outline-secondary btn-sm show-more-btn"
-                    onclick="toggleMore('{{ section.id }}-{{ subsection.id }}', this)">
+                    onclick="toggleMore('{{ section.id }}-{{ subsection.id }}', this)"
+                    style="{% if subsection.color %}border-color: {{ subsection.color }}; color: {{ subsection.color }};{% endif %}">
                 Show {{ subsection.entities|length - section.max_preview|default(10) }} more
             </button>
             {% endif %}

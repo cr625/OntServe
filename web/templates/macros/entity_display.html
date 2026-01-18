@@ -1,101 +1,55 @@
-{# Entity Display Macros - Configurable entity property rendering #}
+{# Entity Display Macros - Simple property rendering for all RDF data #}
+{# Uses format_key filter from app.py for camelCase to Title Case #}
 
-{# Render a single badge #}
-{% macro render_badge(badge) %}
-{% if badge %}
-<span class="badge bg-{{ badge.color }} me-1">{{ badge.value }}</span>
-{% endif %}
+{# Format a value for display - handles URIs, lists, etc #}
+{% macro format_value(value) %}
+{%- if value is string -%}
+    {%- if value.startswith('http://') or value.startswith('https://') -%}
+        {%- set short = value.split('#')[-1].split('/')[-1] -%}
+        <code class="text-primary" title="{{ value }}">{{ short }}</code>
+    {%- else -%}
+        {{ value }}
+    {%- endif -%}
+{%- elif value is iterable and value is not string -%}
+    {%- for v in value -%}
+        {{ format_value(v) }}{% if not loop.last %}, {% endif %}
+    {%- endfor -%}
+{%- else -%}
+    {{ value }}
+{%- endif -%}
 {% endmacro %}
 
-{# Render a single field #}
-{% macro render_field(field) %}
-{% if field %}
-<div class="mt-1">
-    <strong>{{ field.label }}:</strong>
-    {% if field.style == 'code' %}
-    <code>{{ field.value }}</code>
-    {% elif field.style == 'muted' %}
-    <span class="text-muted small"><em>{{ field.value }}</em></span>
-    {% elif field.style == 'bold' %}
-    <strong>{{ field.value }}</strong>
-    {% elif field.style == 'italic' %}
-    <em>{{ field.value }}</em>
-    {% elif field.style == 'list' and field.list_items %}
-    <ul class="mb-0 ps-3">
-        {% for val in field.list_items %}
-        <li class="small">{{ val }}</li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    {{ field.value }}
-    {% endif %}
-    {% if field.badge %}
-    <span class="badge bg-{{ field.badge.color }} text-dark ms-1">{{ field.badge.value }}</span>
-    {% endif %}
-</div>
-{% endif %}
-{% endmacro %}
-
-{# Render extra/fallback fields #}
-{% macro render_extra_field(field) %}
-{% if field %}
-<div class="mt-1 small">
-    <span class="text-muted">{{ field.label }}:</span>
-    <span>{{ field.value }}</span>
-</div>
-{% endif %}
-{% endmacro %}
-
-{# Main macro to render entity properties #}
+{# Main macro to render all entity properties #}
 {% macro render_entity_properties(entity) %}
 {% if entity.properties %}
 {% set props = entity.properties if entity.properties is mapping else {} %}
-{% set rendered = render_props(props, entity.parent_uri) %}
-<div class="mt-2 p-2 bg-light border-start border-3 border-info">
-    <small class="text-info fw-bold">Properties:</small>
-
-    {# Badges row #}
-    {% if rendered.badges %}
-    <div class="mt-1">
-        {% for badge in rendered.badges %}
-        {{ render_badge(badge) }}
-        {% endfor %}
+{% if props|length > 0 %}
+<div class="entity-properties mt-2">
+    {% for key, value in props.items() %}
+    {% if value is not none and value != '' %}
+    <div class="property-row">
+        <span class="property-key">{{ key|format_key }}:</span>
+        <span class="property-value">{{ format_value(value) }}</span>
     </div>
     {% endif %}
-
-    {# Fields #}
-    {% for field in rendered.fields %}
-    {{ render_field(field) }}
     {% endfor %}
-
-    {# Extra fields (from show_all fallback) #}
-    {% if rendered.extra %}
-    <div class="mt-2 pt-2 border-top">
-        <small class="text-muted">Additional properties:</small>
-        {% for field in rendered.extra %}
-        {{ render_extra_field(field) }}
-        {% endfor %}
-    </div>
-    {% endif %}
 </div>
+{% endif %}
 {% endif %}
 {% endmacro %}
 
-{# Compact version for list views #}
+{# Compact version for list views - just first property #}
 {% macro render_entity_properties_compact(entity) %}
 {% if entity.properties %}
 {% set props = entity.properties if entity.properties is mapping else {} %}
-{% set rendered = render_props(props, entity.parent_uri) %}
-<div class="mt-1">
-    {# Just badges for compact view #}
-    {% for badge in rendered.badges %}
-    {{ render_badge(badge) }}
-    {% endfor %}
-    {# First field only #}
-    {% if rendered.fields and rendered.fields|length > 0 %}
-    {% set first_field = rendered.fields[0] %}
-    <div class="small text-muted mt-1">{{ first_field.value[:100] }}{% if first_field.value|length > 100 %}...{% endif %}</div>
+{% if props|length > 0 %}
+<div class="mt-1 small text-muted">
+    {% for key, value in props.items() %}
+    {% if loop.first and value is not none %}
+    {{ format_value(value)|truncate(100) }}
     {% endif %}
+    {% endfor %}
 </div>
+{% endif %}
 {% endif %}
 {% endmacro %}

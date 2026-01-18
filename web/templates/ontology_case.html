@@ -5,8 +5,131 @@
 
 {% block extra_css %}
 <style>
+    /* Page header */
+    .case-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .case-header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .case-header .case-uri {
+        font-family: monospace;
+        font-size: 0.8rem;
+        opacity: 0.85;
+        margin-top: 0.5rem;
+    }
+
+    .breadcrumb-nav {
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb-nav a {
+        color: #6c757d;
+        text-decoration: none;
+    }
+
+    .breadcrumb-nav a:hover {
+        color: #495057;
+    }
+
+    /* 9-Concept Formalism Panel - Full width above content */
+    .formalism-panel {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 0.75rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .formalism-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .formalism-panel-header h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .formalism-panel-header .stats-summary {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    /* Horizontal concept filter row */
+    .concept-filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .concept-filter-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.75rem;
+        border-radius: 2rem;
+        text-decoration: none;
+        color: inherit;
+        border: 1px solid #dee2e6;
+        transition: all 0.15s;
+        background: white;
+        font-size: 0.85rem;
+    }
+
+    .concept-filter-item:hover {
+        border-color: var(--concept-color);
+        background: #fafafa;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .concept-filter-item.disabled {
+        opacity: 0.35;
+        pointer-events: none;
+        border-style: dashed;
+    }
+
+    .concept-filter-abbrev {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        background: var(--concept-color);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: bold;
+    }
+
+    .concept-filter-name {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .concept-filter-count {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+
+    /* Section styles */
     .case-section {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .case-section-header {
@@ -14,60 +137,114 @@
         justify-content: space-between;
         align-items: center;
         cursor: pointer;
-        padding: 0.75rem 1rem;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 0.6rem 1rem;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
         border-radius: 0.5rem;
         margin-bottom: 0.5rem;
+        transition: background 0.15s;
     }
 
     .case-section-header:hover {
-        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        background: #e9ecef;
     }
 
     .case-section-header h4 {
         margin: 0;
-        font-size: 1.1rem;
+        font-size: 1rem;
+        font-weight: 600;
     }
 
     .case-section-header .badge {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 
+    /* Individual cards - more compact */
     .entity-card {
         background: #fff;
-        border: 1px solid #dee2e6;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-        transition: box-shadow 0.2s;
+        border: 1px solid #e9ecef;
+        border-left: 3px solid var(--entity-color, #6c757d);
+        border-radius: 0 0.375rem 0.375rem 0;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        transition: box-shadow 0.15s, transform 0.15s;
     }
 
     .entity-card:hover {
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transform: translateX(2px);
     }
 
     .entity-label {
         font-weight: 600;
-        color: #495057;
-        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        color: #212529;
+        margin-bottom: 0.25rem;
     }
 
     .entity-uri {
         font-family: monospace;
-        font-size: 0.8rem;
-        color: #6c757d;
+        font-size: 0.7rem;
+        color: #adb5bd;
         word-break: break-all;
     }
 
+    .entity-comment {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin: 0.25rem 0;
+        line-height: 1.4;
+    }
+
+    /* Entity properties display */
+    .entity-properties {
+        background: #f8f9fa;
+        border-radius: 0.25rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .property-row {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.2rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .property-row:last-child {
+        border-bottom: none;
+    }
+
+    .property-key {
+        color: #6c757d;
+        font-weight: 500;
+        min-width: 100px;
+        flex-shrink: 0;
+    }
+
+    .property-value {
+        color: #212529;
+        word-break: break-word;
+    }
+
+    .property-value code {
+        font-size: 0.75rem;
+        padding: 0.1rem 0.3rem;
+        background: #e9ecef;
+        border-radius: 0.2rem;
+    }
+
+    /* Sidebar */
     .section-nav {
         position: sticky;
         top: 1rem;
     }
 
     .section-nav .nav-link {
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 0.75rem;
         color: #495057;
         border-radius: 0.25rem;
+        font-size: 0.875rem;
     }
 
     .section-nav .nav-link:hover {
@@ -79,76 +256,203 @@
         color: #0d6efd;
     }
 
+    /* Subsections */
     .subsection {
-        margin-left: 1rem;
-        padding-left: 1rem;
-        border-left: 2px solid #dee2e6;
+        margin-left: 0.5rem;
+        padding-left: 0.75rem;
+        border-left: 2px solid var(--subsection-color, #dee2e6);
+        margin-bottom: 1rem;
     }
 
     .subsection-header {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         font-weight: 600;
-        color: #6c757d;
+        color: #495057;
         margin-bottom: 0.5rem;
-        margin-top: 1rem;
+        margin-top: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0;
+    }
+
+    .subsection-abbrev {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 0.25rem;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: bold;
+        background: #6c757d;
     }
 
     .entity-type-badge {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.5rem;
+        font-size: 0.65rem;
+        padding: 0.15rem 0.4rem;
     }
 
+    /* Stats card in sidebar */
     .stats-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border-radius: 0.5rem;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        text-align: center;
     }
 
     .stats-card h2 {
-        font-size: 2.5rem;
+        font-size: 2rem;
         margin: 0;
+        font-weight: 700;
+    }
+
+    .stats-card .stats-label {
+        font-size: 0.8rem;
+        opacity: 0.9;
     }
 
     .show-more-btn {
         width: 100%;
         margin-top: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    /* Quick nav card */
+    .quick-nav-card {
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .quick-nav-card .card-header {
+        background: #f8f9fa;
+        border-bottom: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.5rem 0.75rem;
+    }
+
+    /* Actions card */
+    .actions-card {
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .actions-card .card-header {
+        background: #f8f9fa;
+        border-bottom: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .actions-card .btn {
+        font-size: 0.8rem;
+    }
+
+    /* Individual type indicator */
+    .individual-type-note {
+        font-size: 0.75rem;
+        color: #6c757d;
+        font-style: italic;
+        margin-bottom: 0.5rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Breadcrumb -->
+<nav class="breadcrumb-nav" aria-label="breadcrumb">
+    <ol class="breadcrumb mb-2">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}"><i class="bi bi-house"></i> Ontologies</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('index', type='case') }}">Cases</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ ontology.name }}</li>
+    </ol>
+</nav>
+
+<!-- Case Header -->
+<div class="case-header">
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h1>
+                <i class="bi bi-briefcase me-2"></i>
+                {{ ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else ontology.name }}
+            </h1>
+            {% if ontology.description %}
+            <p class="mb-0 mt-2 opacity-90" style="font-size: 0.9rem;">{{ ontology.description }}</p>
+            {% endif %}
+            <div class="case-uri mt-2">
+                <i class="bi bi-link-45deg"></i> {{ ontology.base_uri }}
+                {% if ontology.current_version %}
+                <span class="badge bg-light text-dark ms-2">v{{ ontology.current_version.version_number }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="text-end">
+            <div style="font-size: 2rem; font-weight: 700;">{{ stats.total }}</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">Named Individuals</div>
+        </div>
+    </div>
+</div>
+
+<!-- 9-Concept Formalism Panel - Full width above content -->
+{% for section in case_sections %}
+{% if section.id == 'nine_concepts' and section.subsections %}
+<div class="formalism-panel">
+    <div class="formalism-panel-header">
+        <h5><i class="bi bi-grid-3x3 me-2"></i>9-Concept Formalism</h5>
+        <span class="stats-summary">
+            {% set ns = namespace(total=0) %}
+            {% for sub in section.subsections %}
+            {% set ns.total = ns.total + sub.entities|length %}
+            {% endfor %}
+            {{ ns.total }} individuals across 9 concepts
+        </span>
+    </div>
+
+    <div class="concept-filter-row">
+        {% for sub in section.subsections %}
+        <a href="#subsection-{{ sub.id }}" class="concept-filter-item {% if sub.entities|length == 0 %}disabled{% endif %}"
+           style="--concept-color: {{ sub.color or '#6c757d' }};">
+            <span class="concept-filter-abbrev">{{ sub.abbrev or sub.id[:2]|upper }}</span>
+            <span class="concept-filter-name">{{ sub.title }}</span>
+            <span class="concept-filter-count">{{ sub.entities|length }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
 <div class="row">
     <!-- Sidebar navigation -->
-    <div class="col-md-3">
+    <div class="col-lg-3 col-md-4 order-md-2">
         <div class="section-nav">
-            <!-- Case info card -->
-            <div class="stats-card mb-3">
-                <h2>{{ stats.total }}</h2>
-                <div>Total Entities</div>
-                <small class="opacity-75">{{ stats.by_type|length }} types</small>
-            </div>
-
             <!-- Quick nav -->
-            <div class="card mb-3">
+            <div class="card quick-nav-card mb-3">
                 <div class="card-header">
-                    <i class="bi bi-list"></i> Sections
+                    <i class="bi bi-list me-1"></i> Sections
                 </div>
                 <nav class="nav flex-column p-2">
                     {% for section in case_sections %}
-                    {% set count = section.entities|length %}
+                    {% set ns = namespace(count=section.entities|length) %}
                     {% if section.subsections %}
-                    {% set count = 0 %}
+                    {% set ns.count = 0 %}
                     {% for sub in section.subsections %}
-                    {% set count = count + sub.entities|length %}
+                    {% set ns.count = ns.count + sub.entities|length %}
                     {% endfor %}
                     {% endif %}
+                    {% set count = ns.count %}
                     {% if count > 0 %}
-                    <a class="nav-link" href="#section-{{ section.id }}">
-                        {% if section.icon %}<i class="{{ section.icon }} me-2"></i>{% endif %}
-                        {{ section.title }}
-                        <span class="badge bg-secondary float-end">{{ count }}</span>
+                    <a class="nav-link d-flex justify-content-between align-items-center" href="#section-{{ section.id }}">
+                        <span>
+                            {% if section.icon %}<i class="{{ section.icon }} me-1"></i>{% endif %}
+                            {{ section.title }}
+                        </span>
+                        <span class="badge bg-secondary">{{ count }}</span>
                     </a>
                     {% endif %}
                     {% endfor %}
@@ -156,22 +460,22 @@
             </div>
 
             <!-- Actions -->
-            <div class="card">
+            <div class="card actions-card">
                 <div class="card-header">
-                    <i class="bi bi-tools"></i> Actions
+                    <i class="bi bi-tools me-1"></i> Actions
                 </div>
                 <div class="card-body p-2">
                     <a href="{{ url_for('ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}?view=standard"
                        class="btn btn-outline-secondary btn-sm w-100 mb-2">
-                        <i class="bi bi-grid"></i> Standard View
+                        <i class="bi bi-grid me-1"></i> Standard View
                     </a>
                     <a href="{{ url_for('ontology_content', ontology_name=ontology.name) }}"
                        class="btn btn-outline-secondary btn-sm w-100 mb-2" target="_blank">
-                        <i class="bi bi-file-code"></i> View TTL
+                        <i class="bi bi-file-code me-1"></i> View TTL
                     </a>
                     <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}"
                        class="btn btn-outline-success btn-sm w-100">
-                        <i class="bi bi-diagram-3"></i> Visualize
+                        <i class="bi bi-diagram-3 me-1"></i> Visualize
                     </a>
                 </div>
             </div>
@@ -179,23 +483,7 @@
     </div>
 
     <!-- Main content -->
-    <div class="col-md-9">
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-start mb-4">
-            <div>
-                <h1>
-                    <i class="bi bi-briefcase me-2"></i>
-                    {{ ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else ontology.name }}
-                </h1>
-                <p class="text-muted mb-0">
-                    <code>{{ ontology.base_uri }}</code>
-                    {% if ontology.current_version %}
-                    <span class="badge bg-secondary ms-2">v{{ ontology.current_version.version_number }}</span>
-                    {% endif %}
-                </p>
-            </div>
-        </div>
-
+    <div class="col-lg-9 col-md-8 order-md-1">
         <!-- Sections -->
         {% for section in case_sections %}
         {{ render_section(section) }}
@@ -206,7 +494,7 @@
 
 {% block extra_js %}
 <script>
-// Toggle show more/less for entity lists
+// Toggle show more/less for individual lists
 function toggleMore(sectionId, btn) {
     const hiddenEl = document.getElementById('hidden-' + sectionId);
     if (hiddenEl.style.display === 'none') {
@@ -219,16 +507,37 @@ function toggleMore(sectionId, btn) {
     }
 }
 
-// Smooth scroll to section
-document.querySelectorAll('.section-nav .nav-link').forEach(link => {
+// Smooth scroll to section with offset for sticky nav
+document.querySelectorAll('a[href^="#"]').forEach(link => {
     link.addEventListener('click', function(e) {
-        e.preventDefault();
         const targetId = this.getAttribute('href').substring(1);
         const targetEl = document.getElementById(targetId);
         if (targetEl) {
-            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            e.preventDefault();
+            const offset = 20;
+            const targetPosition = targetEl.getBoundingClientRect().top + window.pageYOffset - offset;
+            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
         }
     });
+});
+
+// Highlight active section in nav on scroll
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const id = entry.target.id;
+            document.querySelectorAll('.section-nav .nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + id) {
+                    link.classList.add('active');
+                }
+            });
+        }
+    });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+document.querySelectorAll('.case-section').forEach(section => {
+    observer.observe(section);
 });
 </script>
 {% endblock %}
