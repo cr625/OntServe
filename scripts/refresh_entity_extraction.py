@@ -86,7 +86,10 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
         g = rdflib.Graph()
         try:
             # First try parsing from original file if it exists
-            ontology_file = f"/home/chris/onto/OntServe/ontologies/{ontology_name}.ttl"
+            # Use script directory to find ontologies folder (works on both dev and production)
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            ontologies_dir = os.path.join(os.path.dirname(script_dir), 'ontologies')
+            ontology_file = os.path.join(ontologies_dir, f"{ontology_name}.ttl")
             if os.path.exists(ontology_file):
                 logger.info(f"Parsing from TTL file: {ontology_file}")
                 g.parse(ontology_file, format='turtle')
