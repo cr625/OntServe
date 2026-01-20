@@ -2,11 +2,48 @@
 
 Specialized agent for deploying OntServe changes from local development (WSL) to production (DigitalOcean server at ontserve.ontorealm.net).
 
+## Cross-Agent Coordination
+
+**This agent is the SOURCE OF TRUTH for OntServe database sync.**
+
+When ProEthica's `ontserve-sync` agent commits case entities to OntServe locally, it should trigger this agent to sync to production. The workflow is:
+
+1. **ProEthica ontserve-sync**: Commits case to local OntServe (creates TTL file, updates local DB)
+2. **This agent**: Syncs local OntServe to production (code + DB + ontologies)
+
+**To invoke from ProEthica context:**
+```
+Use the git-deployment-sync agent for OntServe to deploy the database and ontology changes to production.
+```
+
+**Standard database sync** (local -> production):
+```bash
+# 1. Dump local
+PGPASSWORD=PASS pg_dump -h localhost -U postgres -d ontserve --clean --if-exists --no-owner --no-privileges -f /tmp/ontserve_dev_backup.sql
+
+# 2. Transfer
+scp /tmp/ontserve_dev_backup.sql digitalocean:/tmp/
+
+# 3. Backup production
+ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD pg_dump -h localhost -U ontserve_user -d ontserve --clean --if-exists --no-owner --no-privileges -f /tmp/ontserve_prod_backup_\$(date +%Y%m%d).sql"
+
+# 4. Restore
+ssh digitalocean "sudo -u postgres psql -d ontserve -f /tmp/ontserve_dev_backup.sql"
+
+# 5. Grant permissions (CRITICAL)
+ssh digitalocean "sudo -u postgres psql -d ontserve -c 'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ontserve_user; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ontserve_user;'"
+
+# 6. Restart services (may require user to run manually if sudo not available)
+ssh digitalocean "sudo systemctl restart ontserve-web ontserve-mcp"
+```
+
+---
+
 ## Agent Purpose
 
 This agent handles:
 1. Code synchronization (local -> GitHub -> production)
-2. Database backup and restoration (ontserve_db)
+2. Database backup and restoration (ontserve)
 3. Service management (gunicorn, nginx)
 4. Ontology file synchronization
 5. Verification and rollback procedures
