@@ -14,16 +14,16 @@
 <http://proethica.org/ontology/core> a owl:Ontology ;
     rdfs:label "ProEthica Core Ontology"@en ;
     dc:creator "ProEthica AI"@en ;
-    dc:date "2026-01-12"^^xsd:date ;
+    dc:date "2026-02-08"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.2.0"^^xsd:string ;
+    owl:versionInfo "2.3.0"^^xsd:string ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
-    dc:description "Version 2.2.0 adds CodeProvision class for representing individual provisions from codes of ethics (NSPE, NEA, ACM, etc.) with establishes relationships linking provisions to the principles, obligations, and constraints they define."@en .
+    dc:description "Version 2.3.0 corrects BFO/IAO superclass alignments following formal audit against BFO 2020 (ISO/IEC 21838-2) and IAO definitions. Changes: Resource from independent continuant to information content entity; State from quality to specifically dependent continuant; Obligation refined to directive information entity (Donohue 2017); Principle and Constraint refined to directive information entity based on their prescriptive character (Frankel 1989, Ganascia 2007, Dennis et al. 2016); Capability from realizable entity to disposition."@en .
 
 ###############################################################
-# Core Formal Specification Classes with Corrected BFO Alignments
+# Core Formal Specification Classes -- BFO 2020 / IAO Aligned (v2.3.0)
 ###############################################################
 
 # R - Role: Professional roles with BFO alignment
@@ -33,34 +33,37 @@ proeth-core:Role a owl:Class ;
     rdfs:comment "A role that can be realized by processes involving professional duties and ethical obligations. This is the R component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A role that can be realized by processes involving professional duties and ethical obligations. This is the R component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
 
-# P - Principle: Ethical principles as information content entities  
+# P - Principle: Ethical principles as directive information entities
 proeth-core:Principle a owl:Class ;
-    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:subClassOf iao:0000033 ;  # IAO:directive information entity
     rdfs:label "Principle"@en ;
-    rdfs:comment "An information content entity representing ethical values and guidelines for conduct. This is the P component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:definition "An information content entity representing ethical values and guidelines for conduct. This is the P component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+    rdfs:comment "A directive information entity representing ethical values and guidelines for conduct. Principles prescribe professional behavior and gain operational meaning through accumulated case precedents (McLaren 2003). This is the P component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "A directive information entity representing ethical values and guidelines for conduct. This is the P component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:changeNote "v2.3.0: Refined from IAO:information content entity to IAO:directive information entity. Professional principles occupy the aspirational level of code hierarchies (Frankel 1989) and function analogously to constitutional provisions requiring interpretation in context (Taddeo et al. 2024). Their prescriptive character (world-to-word fit) distinguishes them from descriptive information content."@en .
 
-# O - Obligation: Professional obligations as information content entities
+# O - Obligation: Professional obligations as directive information entities (Donohue 2017)
 proeth-core:Obligation a owl:Class ;
-    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:subClassOf iao:0000033 ;  # IAO:directive information entity
     rdfs:label "Obligation"@en ;
-    rdfs:comment "An information content entity expressing required actions or behaviors in professional contexts. This is the O component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:definition "An information content entity expressing required actions or behaviors in professional contexts. This is the O component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+    rdfs:comment "A directive information entity expressing required actions or behaviors in professional contexts. Obligations prescribe conduct and, when concretized by an agent, guide compliant behavior. This is the O component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "A directive information entity expressing required actions or behaviors in professional contexts. This is the O component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:changeNote "v2.3.0: Refined from IAO:information content entity to IAO:directive information entity per Donohue (ICBO 2017) analysis of deontic entities in BFO-aligned ontologies."@en .
 
-# S - State: Professional states as qualities
+# S - State: Professional states as specifically dependent continuants
 proeth-core:State a owl:Class ;
-    rdfs:subClassOf bfo:0000019 ;  # BFO:quality
+    rdfs:subClassOf bfo:0000020 ;  # BFO:specifically dependent continuant
     rdfs:label "State"@en ;
-    rdfs:comment "A quality representing conditions that affect ethical decisions and professional conduct. This is the S component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:definition "A quality representing conditions that affect ethical decisions and professional conduct. This is the S component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+    rdfs:comment "A specifically dependent continuant representing conditions that affect ethical decisions and professional conduct. States span the quality-disposition boundary: some are monadic qualities of individual bearers (competence gaps, financial pressures) while others are relational or situational conditions (conflicts of interest, stakeholder divisions). This is the S component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "A specifically dependent continuant representing conditions that affect ethical decisions and professional conduct. This is the S component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:changeNote "v2.3.0: Changed from BFO:quality to BFO:specifically dependent continuant. ProEthica States include relational and situational conditions that do not fit the strict BFO definition of quality (which requires inherence in a single bearer). SDC is the common parent of quality and realizable entity."@en .
 
-# Rs - Resource: CORRECTED BFO alignment for consistency
+# Rs - Resource: Professional knowledge sources as information content entities
 proeth-core:Resource a owl:Class ;
-    rdfs:subClassOf bfo:0000004 ;  # BFO:independent continuant (CORRECTED from generic continuant)
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
     rdfs:label "Resource"@en ;
-    rdfs:comment "An independent continuant entity that serves as input or reference for professional activities. This is the Rs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:definition "An independent continuant entity that serves as input or reference for professional activities. This is the Rs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:changeNote "CORRECTED v2.0.0: Changed from generic 'continuant' to 'independent continuant' for consistency with proethica-intermediate v9.0.0"@en .
+    rdfs:comment "An information content entity that serves as a professional knowledge source for ethical decision-making. Resources include codes of ethics, case precedents, technical standards, and expert interpretations -- all generically dependent continuants with descriptive content about professional practice. This is the Rs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "An information content entity that serves as a professional knowledge source for ethical decision-making. This is the Rs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:changeNote "v2.3.0: Changed from BFO:independent continuant to IAO:information content entity. All extracted resources (codes, precedents, standards, interpretations) are generically dependent continuants, not independent continuants. Resources are descriptive ICEs (they describe existing professional knowledge) as distinct from the prescriptive ICEs (P, O, Cs) that direct conduct."@en .
 
 # A - Action: Professional actions as processes
 proeth-core:Action a owl:Class ;
@@ -76,20 +79,21 @@ proeth-core:Event a owl:Class ;
     rdfs:comment "A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
 
-# Ca - Capability: CORRECTED BFO alignment for consistency  
+# Ca - Capability: Professional capabilities as dispositions
 proeth-core:Capability a owl:Class ;
-    rdfs:subClassOf bfo:0000017 ;  # BFO:realizable entity (CORRECTED from disposition)
+    rdfs:subClassOf bfo:0000016 ;  # BFO:disposition
     rdfs:label "Capability"@en ;
-    rdfs:comment "A realizable entity that can be realized by specific types of actions or processes in professional contexts. This is the Ca component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:definition "A realizable entity that can be realized by specific types of actions or processes in professional contexts. This is the Ca component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:changeNote "CORRECTED v2.0.0: Changed from 'disposition' to 'realizable entity' for consistency with proethica-intermediate v9.0.0 and more general BFO alignment"@en .
+    rdfs:comment "A disposition that inheres in a professional agent and is realized through professional activities. Capabilities represent skills, competencies, and abilities that exist as potentials and are realized when the agent performs corresponding actions. This is the Ca component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "A disposition that inheres in a professional agent and is realized through professional activities. This is the Ca component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:changeNote "v2.3.0: Reverted from BFO:realizable entity to BFO:disposition. Extracted capabilities (technical skills, ethical reasoning abilities, communication competencies) are dispositions -- they inhere in individual bearers and are realized through professional processes. Disposition is the more precise subclass of realizable entity."@en .
 
-# Cs - Constraint: Additional component for completeness
+# Cs - Constraint: Professional constraints as directive information entities
 proeth-core:Constraint a owl:Class ;
-    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    rdfs:subClassOf iao:0000033 ;  # IAO:directive information entity
     rdfs:label "Constraint"@en ;
-    rdfs:comment "An information content entity expressing limitations or restrictions on professional actions or decisions. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:definition "An information content entity expressing limitations or restrictions on professional actions or decisions. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+    rdfs:comment "A directive information entity expressing limitations or restrictions on professional actions or decisions. Constraints prescribe boundaries on permissible conduct. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:definition "A directive information entity expressing limitations or restrictions on professional actions or decisions. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:changeNote "v2.3.0: Refined from IAO:information content entity to IAO:directive information entity. Constraints define the permissible space of action through negative behavioral limits (Arkin 2008) and prohibitions specifying what must not be done (Ganascia 2007). Their specification of prohibited actions under temporal and contextual conditions (Dennis et al. 2016) constitutes directive content."@en .
 
 ###############################################################
 # CodeProvision: Extension for Ethics Code Integration
@@ -139,12 +143,12 @@ proeth-core:hasObligation a owl:ObjectProperty ;
     skos:definition "Relates a role to its professional obligations."@en .
 
 proeth-core:adheresToPrinciple a owl:ObjectProperty ;
-    rdfs:subPropertyOf iao:0000136 ;  # IAO:is about
     rdfs:domain proeth-core:Role ;
     rdfs:range proeth-core:Principle ;
     rdfs:label "adheres to principle"@en ;
     rdfs:comment "Relates a role to principles that guide its conduct."@en ;
-    skos:definition "Relates a role to principles that guide its conduct."@en .
+    skos:definition "Relates a role to principles that guide its conduct."@en ;
+    skos:changeNote "v2.3.0: Removed subPropertyOf iao:0000136 (is about). The is_about relation links information content to what it represents; adheresToPrinciple links a role to the directive content that governs it, which is a different semantic relation."@en .
 
 proeth-core:hasCapability a owl:ObjectProperty ;
     rdfs:domain proeth-core:Agent ;
@@ -161,12 +165,12 @@ proeth-core:performsAction a owl:ObjectProperty ;
     skos:definition "Relates an agent to actions they perform."@en .
 
 proeth-core:fulfillsObligation a owl:ObjectProperty ;
-    rdfs:subPropertyOf ro:0000057 ;  # RO:has participant
     rdfs:domain proeth-core:Action ;
     rdfs:range proeth-core:Obligation ;
     rdfs:label "fulfills obligation"@en ;
-    rdfs:comment "Relates an action to obligations it fulfills."@en ;
-    skos:definition "Relates an action to obligations it fulfills."@en .
+    rdfs:comment "Relates an action to obligations it fulfills. The action realizes the directive content of the obligation."@en ;
+    skos:definition "Relates an action to obligations it fulfills."@en ;
+    skos:changeNote "v2.3.0: Removed subPropertyOf ro:0000057 (has participant). RO:has_participant relates a process to an independent continuant that participates in it. Obligations are directive information entities (generically dependent continuants), not process participants in the BFO sense."@en .
 
 proeth-core:realizesCapability a owl:ObjectProperty ;
     rdfs:domain proeth-core:Action ;
@@ -352,22 +356,22 @@ proeth-core:Action rdfs:subClassOf [
 # Agent (material entity/continuant) is disjoint from processes (occurrents)
 proeth-core:Agent owl:disjointWith proeth-core:Action, proeth-core:Event .
 
-# Role vs Capability conceptual distinction
-# Role = "what you are" vs Capability = "what you can do"  
+# Role vs Capability conceptual distinction (both realizable entities)
+# Role = social/institutional position vs Capability = skill/competence disposition
 proeth-core:Role owl:disjointWith proeth-core:Capability .
 
-# Information Content Entities are disjoint from physical entities
+# Directive ICEs (P, O, Cs) are disjoint from material entities and descriptive ICEs (Rs)
 proeth-core:Principle owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 proeth-core:Obligation owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 proeth-core:Constraint owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 proeth-core:CodeProvision owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 proeth-core:Guideline owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 
-# Processes are disjoint from continuants
+# Processes (occurrents) are disjoint from continuants
 proeth-core:Action owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .
 proeth-core:Event owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .
 
-# Qualities are disjoint from other continuant types
+# SDC (State) is disjoint from material entities, ICEs, and other SDC subtypes
 proeth-core:State owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .
 
 # Core formal specification components remain disjoint
