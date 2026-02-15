@@ -129,13 +129,16 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
             label = next(g.objects(class_uri, RDFS.label), None)
             comment = next(g.objects(class_uri, RDFS.comment), None)
             definition = next(g.objects(class_uri, SKOS.definition), None)
-            
+            # Get rdfs:subClassOf for hierarchy traversal (CTE queries)
+            parent = next(g.objects(class_uri, RDFS.subClassOf), None)
+
             entity = OntologyEntity(
                 ontology_id=ontology.id,
                 entity_type='class',
                 uri=str(class_uri),
                 label=str(label) if label else None,
-                comment=str(comment) if comment else str(definition) if definition else None
+                comment=str(comment) if comment else str(definition) if definition else None,
+                parent_uri=str(parent) if parent else None
             )
             db.session.add(entity)
             entities_added += 1

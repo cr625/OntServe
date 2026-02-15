@@ -593,6 +593,10 @@ class ConceptManager:
         """
         Get ontology class entities by category from the ontology_entities table.
 
+        Uses parent_uri hierarchy to classify entities by their ontological
+        lineage (rdfs:subClassOf chain) rather than label text matching.
+        Falls back to URI suffix matching for entities without parent_uri.
+
         Args:
             category: Entity category (Role, Principle, etc.)
 
@@ -600,31 +604,45 @@ class ConceptManager:
             List of ontology entities matching the category
         """
         try:
-            # Look for classes in the proethica intermediate ontology that match the category
+            # Use recursive CTE to walk the subClassOf hierarchy from the
+            # core concept class downward.  An entity belongs to a category
+            # if its parent_uri chain reaches a URI ending in the category
+            # name (e.g. core#Role, intermediate#Role).
             query = """
-                SELECT
-                    id, uri, label, comment as description, entity_type,
-                    parent_uri, created_at
-                FROM ontology_entities
-                WHERE entity_type = 'class'
-                AND (
-                    uri LIKE %s
-                    OR label ILIKE %s
-                    OR uri LIKE %s
+                WITH RECURSIVE hierarchy AS (
+                    -- Seed: the core/intermediate concept class itself
+                    SELECT id, uri, label, comment as description,
+                           entity_type, parent_uri, created_at
+                    FROM ontology_entities
+                    WHERE LOWER(entity_type) = 'class'
+                      AND uri LIKE %s
+                      AND uri LIKE %s
+
+                    UNION
+
+                    -- Recurse: children whose parent_uri matches a URI
+                    -- already in the hierarchy
+                    SELECT child.id, child.uri, child.label,
+                           child.comment as description, child.entity_type,
+                           child.parent_uri, child.created_at
+                    FROM ontology_entities child
+                    JOIN hierarchy parent ON child.parent_uri = parent.uri
+                    WHERE LOWER(child.entity_type) = 'class'
+                      AND child.uri LIKE %s
                 )
-                AND uri LIKE %s
+                SELECT DISTINCT id, uri, label, description,
+                       entity_type, parent_uri, created_at
+                FROM hierarchy
                 ORDER BY label
             """
 
-            # Search patterns for the category
-            category_pattern = f'%{category}%'
-            label_pattern = f'%{category}%'
-            uri_pattern = f'%{category}'
+            # URI ending in the category name (e.g. '#Role', '#Principle')
+            uri_suffix_pattern = f'%#{category}'
             ontology_pattern = '%proethica.org/ontology%'
 
             results = self.storage._execute_query(
                 query,
-                (category_pattern, label_pattern, uri_pattern, ontology_pattern),
+                (uri_suffix_pattern, ontology_pattern, ontology_pattern),
                 fetch_all=True
             )
 

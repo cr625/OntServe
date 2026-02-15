@@ -57,7 +57,7 @@ class DatabaseConceptManager:
                     SELECT DISTINCT uri 
                     FROM ontology_entities 
                     WHERE label = %s 
-                    AND entity_type = 'class'
+                    AND LOWER(entity_type) = 'class'
                     AND ontology_id IN (
                         SELECT id FROM ontologies WHERE name = ANY(%s)
                     )
@@ -84,7 +84,7 @@ class DatabaseConceptManager:
                             FROM ontology_entities e
                             JOIN ontologies o ON e.ontology_id = o.id
                             WHERE e.uri = %s
-                            AND e.entity_type = 'class'
+                            AND LOWER(e.entity_type) = 'class'
                             
                             UNION
                             
@@ -95,7 +95,7 @@ class DatabaseConceptManager:
                             FROM ontology_entities e
                             JOIN ontologies o ON e.ontology_id = o.id
                             INNER JOIN category_hierarchy ch ON e.parent_uri = ch.uri
-                            WHERE e.entity_type = 'class'
+                            WHERE e.LOWER(entity_type) = 'class'
                         )
                         SELECT DISTINCT uri, label, comment, ontology_name, 
                                hierarchy_level as sort_order, ontology_id
@@ -118,7 +118,7 @@ class DatabaseConceptManager:
                         FROM ontology_entities e
                         JOIN ontologies o ON e.ontology_id = o.id
                         WHERE o.name = ANY(%s)
-                        AND e.entity_type = 'class'
+                        AND LOWER(e.entity_type) = 'class'
                         AND e.label = %s
                         ORDER BY e.label
                     """
@@ -141,7 +141,7 @@ class DatabaseConceptManager:
                     FROM ontology_entities e
                     JOIN ontologies o ON e.ontology_id = o.id
                     WHERE o.name = ANY(%s)
-                    AND e.entity_type = 'class'
+                    AND LOWER(e.entity_type) = 'class'
                     AND (
                         e.label ILIKE %s
                         OR e.uri ILIKE %s
@@ -224,7 +224,7 @@ class DatabaseConceptManager:
         # For engineering-ethics, use these core ontologies
         # New classes discovered during extraction are added to proethica-intermediate (versioned)
         if domain_id == "engineering-ethics":
-            return ['proethica-core', 'proethica-intermediate', 'engineering-ethics']
+            return ['proethica-core', 'proethica-intermediate', 'proethica-engineering-extracted', 'engineering-ethics']
         
         # For other domains, try to find matching ontologies
         try:
@@ -267,7 +267,7 @@ class DatabaseConceptManager:
                 FROM ontology_entities e
                 JOIN ontologies o ON e.ontology_id = o.id
                 WHERE o.name = 'proethica-core'
-                AND e.entity_type = 'class'
+                AND LOWER(e.entity_type) = 'class'
                 AND e.label = %s
             """
             
@@ -309,7 +309,7 @@ class DatabaseConceptManager:
                 FROM ontology_entities e
                 JOIN ontologies o ON e.ontology_id = o.id
                 WHERE o.name = ANY(%s)
-                AND e.entity_type = 'class'
+                AND LOWER(e.entity_type) = 'class'
                 AND e.label != %s  -- Exclude the main category itself
                 AND (
                     e.label ILIKE %s  -- Match Role in label

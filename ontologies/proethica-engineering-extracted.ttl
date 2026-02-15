@@ -20,6 +20,7 @@ proeth:AIDisclosureObligation a owl:Class ;
 proeth:AIOutputValidationCapability a owl:Class ;
     rdfs:label "AI Output Validation Capability" ;
     rdfs:comment "The competency to critically evaluate, verify, and validate AI-generated content for accuracy, originality, and compliance with professional standards" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to critically evaluate, verify, and validate AI-generated content for accuracy, originality, and compliance with professional standards" ;
     prov:generatedAtTime "2025-11-11T12:34:12.453271"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -28,6 +29,7 @@ proeth:AIOutputVerificationCapability a owl:Class ;
     rdfs:label "AI Output Verification Capability" ;
     proeth-prov:sourceText "Engineer A performed a thorough review, cross-checked key facts against professional sources, and made adjustments to the text" ;
     rdfs:comment "The competency to comprehensively verify, validate, and correct AI-generated technical outputs through systematic review processes" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to comprehensively verify, validate, and correct AI-generated technical outputs through systematic review processes" ;
     prov:generatedAtTime "2026-01-05T18:56:04.765002"^^xsd:dateTime .
 
@@ -94,6 +96,7 @@ proeth:AIToolRelianceState a owl:Class ;
 proeth:AIToolUtilizationCapability a owl:Class ;
     rdfs:label "AI Tool Utilization Capability" ;
     rdfs:comment "The competency to appropriately select, implement, and oversee artificial intelligence tools in professional practice while maintaining accountability and quality standards" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to appropriately select, implement, and oversee artificial intelligence tools in professional practice while maintaining accountability and quality standards" ;
     prov:generatedAtTime "2025-11-11T12:34:12.453483"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -119,12 +122,14 @@ proeth:AttributionandCitationCapability a owl:Class ;
     rdfs:label "Attribution and Citation Capability" ;
     proeth-prov:sourceText "the facts do not indicate the AI-generated report included citations of pertinent documents of technical authority" ;
     rdfs:comment "The competency to properly attribute contributions and cite technical authorities in engineering work products" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to properly attribute contributions and cite technical authorities in engineering work products" ;
     prov:generatedAtTime "2026-01-05T18:56:04.765002"^^xsd:dateTime .
 
 proeth:AttributionandCreditManagementCapability a owl:Class ;
     rdfs:label "Attribution and Credit Management Capability" ;
     rdfs:comment "The competency to properly acknowledge and cite all sources of engineering work, including non-human contributors like AI systems, while recognizing proprietary interests" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to properly acknowledge and cite all sources of engineering work, including non-human contributors like AI systems, while recognizing proprietary interests" ;
     prov:generatedAtTime "2025-11-11T12:35:33.589874"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -156,6 +161,7 @@ proeth:CityEngineerRole a owl:Class ;
 proeth:ClientAdvisoryCapability a owl:Class ;
     rdfs:label "Client Advisory Capability" ;
     rdfs:comment "The competency to provide professional guidance and recommendations to clients regarding technical, regulatory, and ethical considerations" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to provide professional guidance and recommendations to clients regarding technical, regulatory, and ethical considerations" ;
     prov:generatedAtTime "2025-10-31T21:23:51.541287"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -215,6 +221,7 @@ proeth:ConfidentialityBreachState a owl:Class ;
 proeth:ConfidentialityPreservationCapability a owl:Class ;
     rdfs:label "Confidentiality Preservation Capability" ;
     rdfs:comment "The competency to protect and appropriately handle confidential information acquired during previous employment or professional engagements" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to protect and appropriately handle confidential information acquired during previous employment or professional engagements" ;
     prov:generatedAtTime "2025-11-10T14:16:35.689088"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -222,6 +229,7 @@ proeth:ConfidentialityPreservationCapability a owl:Class ;
 proeth:ConflictRecognitionandDisclosureCapability a owl:Class ;
     rdfs:label "Conflict Recognition and Disclosure Capability" ;
     rdfs:comment "The competency to identify potential or actual conflicts of interest and properly disclose them to relevant parties for informed consent" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to identify potential or actual conflicts of interest and properly disclose them to relevant parties for informed consent" ;
     prov:generatedAtTime "2025-11-10T14:16:35.688411"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -229,6 +237,7 @@ proeth:ConflictRecognitionandDisclosureCapability a owl:Class ;
 proeth:ConflictofInterestManagementCapability a owl:Class ;
     rdfs:label "Conflict of Interest Management Capability" ;
     rdfs:comment "The competency to identify, disclose, and manage potential conflicts of interest in professional transitions and ongoing relationships" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to identify, disclose, and manage potential conflicts of interest in professional transitions and ongoing relationships" ;
     prov:generatedAtTime "2025-11-10T14:16:35.688785"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -245,12 +254,14 @@ proeth:ContaminantCharacterizationCapability a owl:Class ;
     rdfs:label "Contaminant Characterization Capability" ;
     proeth-prov:sourceText "prepare a comprehensive report addressing the manufacture, use, and characteristics of an organic compound identified as an emerging contaminant" ;
     rdfs:comment "The competency to comprehensively analyze and document the manufacture, use, and characteristics of chemical compounds and emerging contaminants" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to comprehensively analyze and document the manufacture, use, and characteristics of chemical compounds and emerging contaminants" ;
     prov:generatedAtTime "2026-01-05T18:53:05.461186"^^xsd:dateTime .
 
 proeth:ContractNegotiationCapability a owl:Class ;
     rdfs:label "Contract Negotiation Capability" ;
     rdfs:comment "The competency to negotiate, structure, and manage professional service contracts between organizations while maintaining fairness and transparency" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to negotiate, structure, and manage professional service contracts between organizations while maintaining fairness and transparency" ;
     prov:generatedAtTime "2025-11-10T14:16:35.688604"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -302,6 +313,7 @@ proeth:DualCapacityEmploymentState a owl:Class ;
 proeth:DualRoleManagementCapability a owl:Class ;
     rdfs:label "Dual Role Management Capability" ;
     rdfs:comment "The competency to ethically manage simultaneous or sequential professional roles without dividing loyalties or compromising professional judgment" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to ethically manage simultaneous or sequential professional roles without dividing loyalties or compromising professional judgment" ;
     prov:generatedAtTime "2025-11-10T14:16:35.689008"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -310,6 +322,7 @@ proeth:EngineeringJudgmentPreservationCapability a owl:Class ;
     rdfs:label "Engineering Judgment Preservation Capability" ;
     proeth-prov:sourceText "technology has an important place in the practice of engineering, but it must never be a replacement of a substitute for engineering judgment" ;
     rdfs:comment "The competency to maintain independent engineering judgment when using automated tools and not substitute technology for professional decision-making" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to maintain independent engineering judgment when using automated tools and not substitute technology for professional decision-making" ;
     prov:generatedAtTime "2026-01-05T18:56:04.765002"^^xsd:dateTime .
 
@@ -360,6 +373,7 @@ proeth:EnvironmentalFirmPrincipal a owl:Class ;
 proeth:EnvironmentalImpactAssessmentCapability a owl:Class ;
     rdfs:label "Environmental Impact Assessment Capability" ;
     rdfs:comment "The competency to evaluate and predict environmental consequences of engineering projects on natural resources and public health" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to evaluate and predict environmental consequences of engineering projects on natural resources and public health" ;
     prov:generatedAtTime "2025-10-31T21:23:51.541253"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -408,6 +422,7 @@ proeth:GroundwaterMonitoringAnalysisCapability a owl:Class ;
     rdfs:label "Groundwater Monitoring Analysis Capability" ;
     proeth-prov:sourceText "perform an analysis of groundwater monitoring data from a site Engineer A had been observing for over a year" ;
     rdfs:comment "The competency to analyze, interpret, and synthesize groundwater monitoring data for environmental assessment and reporting" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to analyze, interpret, and synthesize groundwater monitoring data for environmental assessment and reporting" ;
     prov:generatedAtTime "2026-01-05T18:53:05.461186"^^xsd:dateTime .
 
@@ -446,6 +461,7 @@ proeth:IncompleteRiskAssessmentState a owl:Class ;
 proeth:InfrastructureProjectOversightCapability a owl:Class ;
     rdfs:label "Infrastructure Project Oversight Capability" ;
     rdfs:comment "The competency to provide senior-level review and oversight of major infrastructure projects including technical, administrative, and stakeholder management aspects" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to provide senior-level review and oversight of major infrastructure projects including technical, administrative, and stakeholder management aspects" ;
     prov:generatedAtTime "2025-11-10T14:16:35.688526"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -702,6 +718,7 @@ proeth:ResponsibleChargeConstraint a owl:Class ;
 proeth:ResponsibleChargeMaintenanceCapability a owl:Class ;
     rdfs:label "Responsible Charge Maintenance Capability" ;
     rdfs:comment "The competency to maintain active engagement and supervisory control throughout the engineering process from conception to completion, ensuring personal involvement in all engineering decisions" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to maintain active engagement and supervisory control throughout the engineering process from conception to completion, ensuring personal involvement in all engineering decisions" ;
     prov:generatedAtTime "2025-11-11T12:35:33.589928"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -749,6 +766,7 @@ proeth:RevolvingDoorTransitionState a owl:Class ;
 proeth:RiskAssessmentCapability a owl:Class ;
     rdfs:label "Risk Assessment Capability" ;
     rdfs:comment "The competency to identify, analyze, quantify and communicate potential risks and their impacts in professional contexts" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to identify, analyze, quantify and communicate potential risks and their impacts in professional contexts" ;
     prov:generatedAtTime "2025-10-31T21:23:51.541218"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -765,6 +783,7 @@ proeth:Self-AssessmentCapability a owl:Class ;
     rdfs:label "Self-Assessment Capability" ;
     proeth-prov:sourceText "Engineer A is known for their strong technical expertise but is, personally, less confident in their technical writing" ;
     rdfs:comment "The competency to accurately recognize and acknowledge one's own professional strengths and limitations" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to accurately recognize and acknowledge one's own professional strengths and limitations" ;
     prov:generatedAtTime "2026-01-05T18:53:05.461186"^^xsd:dateTime .
 
@@ -811,6 +830,7 @@ proeth:SupervisionTransitionObligation a owl:Class ;
 proeth:TechnicalWritingSelf-SufficiencyCapability a owl:Class ;
     rdfs:label "Technical Writing Self-Sufficiency Capability" ;
     rdfs:comment "The competency to independently produce professional technical documentation without reliance on supervisory review or mentorship" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to independently produce professional technical documentation without reliance on supervisory review or mentorship" ;
     prov:generatedAtTime "2025-11-11T12:34:12.453405"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -843,6 +863,7 @@ proeth:TechnologicalPrudence a owl:Class ;
 proeth:TechnologyJudgmentIntegrationCapability a owl:Class ;
     rdfs:label "Technology Judgment Integration Capability" ;
     rdfs:comment "The competency to maintain professional engineering judgment while integrating technological tools, ensuring technology enhances rather than replaces critical thinking and decision-making" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to maintain professional engineering judgment while integrating technological tools, ensuring technology enhances rather than replaces critical thinking and decision-making" ;
     prov:generatedAtTime "2025-11-11T12:35:33.589835"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -882,6 +903,7 @@ proeth:ToolFamiliarityObligation a owl:Class ;
 proeth:ToolTransparencyDisclosureCapability a owl:Class ;
     rdfs:label "Tool Transparency Disclosure Capability" ;
     rdfs:comment "The competency to appropriately disclose the use of tools, methods, and assistance utilized in professional work product creation" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to appropriately disclose the use of tools, methods, and assistance utilized in professional work product creation" ;
     prov:generatedAtTime "2025-11-11T12:34:12.453306"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
@@ -889,6 +911,7 @@ proeth:ToolTransparencyDisclosureCapability a owl:Class ;
 proeth:TransitionalEmploymentNavigationCapability a owl:Class ;
     rdfs:label "Transitional Employment Navigation Capability" ;
     rdfs:comment "The competency to ethically manage career transitions between public and private sector roles while maintaining professional integrity and avoiding conflicts of interest" ;
+    rdfs:subClassOf proeth-core:Capability ;
     skos:definition "The competency to ethically manage career transitions between public and private sector roles while maintaining professional integrity and avoiding conflicts of interest" ;
     prov:generatedAtTime "2025-11-10T14:16:35.688448"^^xsd:dateTime ;
     prov:wasGeneratedBy "ProEthica Extraction" .
