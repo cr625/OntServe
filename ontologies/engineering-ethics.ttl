@@ -25,6 +25,11 @@ proethica:engineering_standards a owl:Ontology ;
     dcterms:title "Technical Standards for Engineering Practice" ;
     owl:imports proethica:intermediate .
 
+<http://proethica.org/ontology/engineering_standards#NSPECodeOfEthics> a owl:Class ;
+    rdfs:subClassOf ns1:ProfessionalCode ;
+    rdfs:label "NSPE Code of Ethics" ;
+    rdfs:comment "The NSPE Code of Ethics for Engineers, comprising Fundamental Canons, Rules of Practice, and Professional Obligations. Primary normative resource for all BER case analysis." .
+
 <http://proethica.org/ontology/engineering_standards#ANSIB11> a owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     rdfs:label "ANSI B11 Machine Safety" ;

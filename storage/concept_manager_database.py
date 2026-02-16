@@ -95,7 +95,7 @@ class DatabaseConceptManager:
                             FROM ontology_entities e
                             JOIN ontologies o ON e.ontology_id = o.id
                             INNER JOIN category_hierarchy ch ON e.parent_uri = ch.uri
-                            WHERE e.LOWER(entity_type) = 'class'
+                            WHERE LOWER(e.entity_type) = 'class'
                         )
                         SELECT DISTINCT uri, label, comment, ontology_name, 
                                hierarchy_level as sort_order, ontology_id
