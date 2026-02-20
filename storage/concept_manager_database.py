@@ -224,7 +224,7 @@ class DatabaseConceptManager:
         # For engineering-ethics, use these core ontologies
         # New classes discovered during extraction are added to proethica-intermediate (versioned)
         if domain_id == "engineering-ethics":
-            return ['proethica-core', 'proethica-intermediate', 'proethica-engineering-extracted', 'engineering-ethics']
+            return ['proethica-core', 'proethica-intermediate', 'proethica-intermediate-extended', 'engineering-ethics']
         
         # For other domains, try to find matching ontologies
         try:

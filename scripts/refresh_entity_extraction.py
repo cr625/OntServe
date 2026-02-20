@@ -34,6 +34,37 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+PROETHICA_NS = 'http://proethica.org/ontology/'
+PROETHICA_INTERMEDIATE_NS = 'http://proethica.org/ontology/intermediate#'
+PROETHICA_CORE_NS = 'http://proethica.org/ontology/core#'
+
+
+def _pick_best_parent(g, class_uri):
+    """Select the best rdfs:subClassOf parent for CTE hierarchy walks.
+
+    Priority: proethica intermediate > proethica core > any other proethica URI.
+    BFO / OBO parents are ignored (outside the proethica namespace, break CTE).
+    Returns a URI string or None.
+    """
+    all_parents = [str(p) for p in g.objects(class_uri, RDFS.subClassOf)]
+    if not all_parents:
+        return None
+
+    intermediate = [p for p in all_parents if p.startswith(PROETHICA_INTERMEDIATE_NS)]
+    core = [p for p in all_parents if p.startswith(PROETHICA_CORE_NS)]
+    other_proethica = [p for p in all_parents if p.startswith(PROETHICA_NS)
+                       and p not in intermediate and p not in core]
+
+    if intermediate:
+        return intermediate[0]
+    if core:
+        return core[0]
+    if other_proethica:
+        return other_proethica[0]
+    # All parents are outside proethica namespace (BFO, etc.) -- skip
+    return None
+
+
 def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
     """Refresh entity extraction for specified ontology."""
 
@@ -126,19 +157,27 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
         
         # Extract classes
         for class_uri in g.subjects(RDF.type, OWL.Class):
+            # Skip blank nodes (rdflib artefacts without proper URIs)
+            uri_str = str(class_uri)
+            if not uri_str.startswith('http'):
+                continue
+
             label = next(g.objects(class_uri, RDFS.label), None)
             comment = next(g.objects(class_uri, RDFS.comment), None)
             definition = next(g.objects(class_uri, SKOS.definition), None)
-            # Get rdfs:subClassOf for hierarchy traversal (CTE queries)
-            parent = next(g.objects(class_uri, RDFS.subClassOf), None)
+            # Get rdfs:subClassOf for hierarchy traversal (CTE queries).
+            # Pick the best parent: prefer proethica intermediate > core > other.
+            # BFO parents (purl.obolibrary.org) are skipped since they're
+            # outside the proethica namespace and break CTE category walks.
+            parent_uri = _pick_best_parent(g, class_uri)
 
             entity = OntologyEntity(
                 ontology_id=ontology.id,
                 entity_type='class',
-                uri=str(class_uri),
+                uri=uri_str,
                 label=str(label) if label else None,
                 comment=str(comment) if comment else str(definition) if definition else None,
-                parent_uri=str(parent) if parent else None
+                parent_uri=parent_uri
             )
             db.session.add(entity)
             entities_added += 1
