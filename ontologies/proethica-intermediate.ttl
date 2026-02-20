@@ -11,6 +11,7 @@
 @prefix proeth: <http://proethica.org/ontology/intermediate#> .
 @prefix proeth-core: <http://proethica.org/ontology/core#> .
 @prefix bfo: <http://purl.obolibrary.org/obo/> .
+@prefix time: <http://www.w3.org/2006/time#> .
 @base <http://proethica.org/ontology/intermediate> .
 
 <http://proethica.org/ontology/intermediate> rdf:type owl:Ontology ;
@@ -401,6 +402,51 @@ proeth:altersPriority a owl:ObjectProperty ;
     rdfs:range proeth-core:Obligation ;
     rdfs:label "alters priority"@en ;
     rdfs:comment "Indicates how events change obligation priorities"@en .
+
+###############################################################
+# OWL-Time Temporal Properties (Allen Interval Algebra)
+# Maps to http://www.w3.org/2006/time# vocabulary
+###############################################################
+
+proeth:temporalMarker a owl:DatatypeProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf (proeth-core:Action proeth-core:Event) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "temporal marker"@en ;
+    rdfs:comment "Narrative temporal marker indicating when an action or event occurred in case time (e.g. 'During preliminary design phase', 'Several months later'). Cases use narrative rather than calendar time."@en .
+
+proeth:TemporalRelation a owl:Class ;
+    rdfs:label "Temporal Relation"@en ;
+    rdfs:comment "A reified Allen interval algebra relation between two temporal entities (actions or events). Stores both the ProEthica relation name and the corresponding OWL-Time property URI."@en .
+
+proeth:hasTemporalRelation a owl:ObjectProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf (proeth-core:Action proeth-core:Event) ] ;
+    rdfs:range proeth:TemporalRelation ;
+    rdfs:label "has temporal relation"@en ;
+    rdfs:comment "Links an action or event to a reified Allen interval relation instance."@en .
+
+proeth:fromEntity a owl:ObjectProperty ;
+    rdfs:domain proeth:TemporalRelation ;
+    rdfs:range [ a owl:Class ; owl:unionOf (proeth-core:Action proeth-core:Event) ] ;
+    rdfs:label "from entity"@en ;
+    rdfs:comment "The source entity in a temporal relation (Entity1 [relation] Entity2)."@en .
+
+proeth:toEntity a owl:ObjectProperty ;
+    rdfs:domain proeth:TemporalRelation ;
+    rdfs:range [ a owl:Class ; owl:unionOf (proeth-core:Action proeth-core:Event) ] ;
+    rdfs:label "to entity"@en ;
+    rdfs:comment "The target entity in a temporal relation (Entity1 [relation] Entity2)."@en .
+
+proeth:allenRelation a owl:DatatypeProperty ;
+    rdfs:domain proeth:TemporalRelation ;
+    rdfs:range xsd:string ;
+    rdfs:label "Allen relation"@en ;
+    rdfs:comment "The Allen interval algebra relation name (before, after, meets, overlaps, during, starts, finishes, equals, and their inverses). Maps to OWL-Time properties via allen_owl_time_mapper.py."@en .
+
+proeth:owlTimeProperty a owl:DatatypeProperty ;
+    rdfs:domain proeth:TemporalRelation ;
+    rdfs:range xsd:string ;
+    rdfs:label "OWL-Time property"@en ;
+    rdfs:comment "The corresponding OWL-Time property name (e.g. time:before, time:intervalMeets). See W3C OWL-Time ontology."@en .
 
 # Common Ethical Concepts
 :EthicalDilemma rdf:type owl:Class ;
