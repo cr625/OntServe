@@ -149,14 +149,126 @@ def get_entity_type_name(entity) -> Optional[str]:
     return uri
 
 
+# Cache for ontology hierarchy mapping (type_name -> root concept)
+_hierarchy_cache = None
+
+
+def _build_hierarchy_map() -> Dict[str, str]:
+    """Build a mapping from any proethica class name to its root concept (Role, Principle, etc.).
+
+    Walks the parent_uri chain in proethica-intermediate and proethica-core to resolve
+    each class to one of the 9 base concepts.
+    """
+    global _hierarchy_cache
+    if _hierarchy_cache is not None:
+        return _hierarchy_cache
+
+    root_concepts = {'Role', 'Principle', 'Obligation', 'State', 'Resource',
+                     'Action', 'Event', 'Capability', 'Constraint'}
+
+    try:
+        from web.models import OntologyEntity, Ontology, db
+        from sqlalchemy import select
+
+        # Load all classes from intermediate + extended + core ontologies
+        ontology_names = ['proethica-intermediate', 'proethica-intermediate-extended',
+                          'proethica-core', 'engineering-ethics']
+        ont_ids = []
+        for name in ontology_names:
+            ont = db.session.execute(select(Ontology).where(Ontology.name == name)).scalar()
+            if ont:
+                ont_ids.append(ont.id)
+
+        if not ont_ids:
+            _hierarchy_cache = {}
+            return _hierarchy_cache
+
+        entities = db.session.execute(
+            select(OntologyEntity).where(
+                OntologyEntity.ontology_id.in_(ont_ids),
+                OntologyEntity.entity_type.in_(['class', 'Class']),
+            )
+        ).scalars().all()
+
+        # Build URI -> (label, parent_uri) index.
+        # When duplicate URIs exist across ontologies, prefer the entry
+        # with a non-self-referencing parent_uri (avoids broken chains
+        # from re-imported classes in extended ontologies).
+        uri_to_info = {}
+        for e in entities:
+            label = e.label or e.uri.split('#')[-1].split('/')[-1]
+            existing = uri_to_info.get(e.uri)
+            if existing:
+                # Skip if new entry's parent_uri is self-referencing
+                if e.parent_uri == e.uri:
+                    continue
+                # Overwrite only if existing has no parent or is self-referencing
+                if not existing[1] or existing[1] == e.uri:
+                    uri_to_info[e.uri] = (label, e.parent_uri)
+            else:
+                uri_to_info[e.uri] = (label, e.parent_uri)
+
+        # For each class, walk up the parent chain to find a root concept.
+        # Index by BOTH the human label ("Case Precedent") and the URI
+        # fragment ("CasePrecedent"), since callers may use either form.
+        result = {}
+        for uri, (label, parent_uri) in uri_to_info.items():
+            # Extract CamelCase fragment from URI for alternate key
+            uri_frag = uri.split('#')[-1].split('/')[-1]
+
+            if label in root_concepts:
+                result[label] = label
+                result[uri_frag] = label
+                continue
+
+            # Walk up parent chain (max 10 levels)
+            visited = set()
+            current_uri = parent_uri
+            found_root = None
+            for _ in range(10):
+                if not current_uri or current_uri in visited:
+                    break
+                visited.add(current_uri)
+                info = uri_to_info.get(current_uri)
+                if info:
+                    parent_label, grandparent_uri = info
+                    if parent_label in root_concepts:
+                        found_root = parent_label
+                        break
+                    current_uri = grandparent_uri
+                else:
+                    # Try extracting label from URI directly
+                    frag = current_uri.split('#')[-1].split('/')[-1]
+                    if frag in root_concepts:
+                        found_root = frag
+                    break
+
+            if found_root:
+                result[label] = found_root
+                result[uri_frag] = found_root
+
+        _hierarchy_cache = result
+    except Exception:
+        _hierarchy_cache = {}
+
+    return _hierarchy_cache
+
+
 def match_entity_to_concept_type(entity_type: str, concept_types: List[str]) -> Optional[str]:
     """
     Match an entity type name to one of the 9-concept types.
 
-    Handles both exact matches and suffix matches (e.g., 'EnvironmentalEngineerRole' -> 'Role').
+    Matching order:
+      1. Exact match against concept_types
+      2. Suffix match (e.g., 'CompetenceConstraint' ends with 'Constraint')
+      3. Ontology hierarchy walk (resolves 'MilitaryOfficial' -> 'Role')
+      4. Prefix match: a known hierarchy key is a prefix of entity_type
+         (handles variant URIs like 'ClientRelationshipEstablished' when
+         'ClientRelationship' -> State exists in the hierarchy)
+      5. Case-insensitive lookup on the hierarchy map
 
     Args:
-        entity_type: The entity type name from parent_uri (e.g., 'EnvironmentalEngineerRole')
+        entity_type: The entity type name from parent_uri (e.g., 'ExpertInterpretation')
         concept_types: List of expected concept type names (e.g., ['Role', 'Action', 'State'])
 
     Returns:
@@ -165,14 +277,40 @@ def match_entity_to_concept_type(entity_type: str, concept_types: List[str]) -> 
     if not entity_type:
         return None
 
-    # First try exact match
+    # 1. Exact match
     if entity_type in concept_types:
         return entity_type
 
-    # Then try suffix match (e.g., 'EnvironmentalEngineerRole' ends with 'Role')
+    # 2. Suffix match (e.g., 'EnvironmentalEngineerRole' ends with 'Role')
     for concept_type in concept_types:
         if entity_type.endswith(concept_type):
             return concept_type
+
+    # 3. Ontology hierarchy walk
+    hierarchy = _build_hierarchy_map()
+    root = hierarchy.get(entity_type)
+    if root and root in concept_types:
+        return root
+
+    # 4. Prefix match: find the longest hierarchy key that is a prefix
+    #    of entity_type (e.g., 'ClientRelationship' matches
+    #    'ClientRelationshipEstablished')
+    best_prefix = ''
+    best_root = None
+    for key, key_root in hierarchy.items():
+        if (entity_type.startswith(key)
+                and len(key) > len(best_prefix)
+                and key_root in concept_types):
+            best_prefix = key
+            best_root = key_root
+    if best_root:
+        return best_root
+
+    # 5. Case-insensitive lookup
+    entity_lower = entity_type.lower()
+    for key, key_root in hierarchy.items():
+        if key.lower() == entity_lower and key_root in concept_types:
+            return key_root
 
     return None
 
@@ -257,16 +395,21 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
         if entity_type:
             stats['by_type'][entity_type] = stats['by_type'].get(entity_type, 0) + 1
 
-        # Find matching section - try exact match first, then suffix match
+        # Find matching section.
+        # Priority: conceptCategory property (set at commit time) > exact type match > hierarchy walk
         matched = False
         matched_type = None
 
-        if entity_type:
-            # First try exact match
+        # Check conceptCategory property first (reliable, set by ProEthica at commit)
+        props = getattr(entity, 'properties', None) or {}
+        concept_cat = props.get('conceptCategory')
+        if concept_cat and concept_cat in type_to_section:
+            matched_type = concept_cat
+        elif entity_type:
+            # Fall back to type-name matching for legacy data
             if entity_type in type_to_section:
                 matched_type = entity_type
             else:
-                # Try suffix match (e.g., 'EnvironmentalEngineerRole' -> 'Role')
                 matched_type = match_entity_to_concept_type(entity_type, all_concept_types)
 
         if matched_type and matched_type in type_to_section:

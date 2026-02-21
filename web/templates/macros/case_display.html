@@ -6,11 +6,12 @@
 <div class="entity-card" style="{% if color %}--entity-color: {{ color }};{% endif %}">
     <div class="d-flex justify-content-between align-items-start">
         <div class="entity-label">
-            {{ entity.label or entity.uri.split('#')[-1].split('/')[-1] }}
+            {{ entity.label or entity.uri.split('#')[-1].split('/')[-1] | split_pascal }}
         </div>
         {% if entity.parent_uri %}
-        <span class="badge entity-type-badge" style="{% if color %}background: {{ color }};{% else %}background: #6c757d;{% endif %}">
-            {{ entity.parent_uri.split('#')[-1].split('/')[-1] }}
+        {% set raw_type = entity.parent_uri.split('#')[-1].split('/')[-1] %}
+        <span class="badge entity-type-badge" style="{% if color %}background: {{ color }};{% else %}background: #6c757d;{% endif %}" title="{{ raw_type }}">
+            {{ raw_type | split_pascal }}
         </span>
         {% endif %}
     </div>

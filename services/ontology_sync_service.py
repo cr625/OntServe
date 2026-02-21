@@ -129,7 +129,7 @@ class OntologySyncService:
         # Get latest version to check hash
         stmt = select(OntologyVersion).where(
             OntologyVersion.ontology_id == ontology.id
-        ).order_by(OntologyVersion.created_at.desc())
+        ).order_by(OntologyVersion.version_number.desc())
         latest_version = self.db_session.execute(stmt).scalars().first()
 
         # Check if we need to update
@@ -212,25 +212,25 @@ class OntologySyncService:
 
         # Extract classes
         for s in graph.subjects(RDF.type, OWL.Class):
-            entity = self._create_entity_from_subject(graph, s, 'Class', ontology.id)
+            entity = self._create_entity_from_subject(graph, s, 'class', ontology.id)
             if entity:
                 entities.append(entity)
 
         # Extract object properties
         for s in graph.subjects(RDF.type, OWL.ObjectProperty):
-            entity = self._create_entity_from_subject(graph, s, 'ObjectProperty', ontology.id)
+            entity = self._create_entity_from_subject(graph, s, 'property', ontology.id)
             if entity:
                 entities.append(entity)
 
         # Extract datatype properties
         for s in graph.subjects(RDF.type, OWL.DatatypeProperty):
-            entity = self._create_entity_from_subject(graph, s, 'DatatypeProperty', ontology.id)
+            entity = self._create_entity_from_subject(graph, s, 'property', ontology.id)
             if entity:
                 entities.append(entity)
 
         # Extract named individuals
         for s in graph.subjects(RDF.type, OWL.NamedIndividual):
-            entity = self._create_entity_from_subject(graph, s, 'Individual', ontology.id)
+            entity = self._create_entity_from_subject(graph, s, 'individual', ontology.id)
             if entity:
                 entities.append(entity)
 
@@ -274,7 +274,7 @@ class OntologySyncService:
         # Get domain and range for properties
         domain = None
         range_ = None
-        if entity_type in ('ObjectProperty', 'DatatypeProperty'):
+        if entity_type == 'property':
             for obj in graph.objects(subject, RDFS.domain):
                 domain = str(obj)
                 break
@@ -282,14 +282,57 @@ class OntologySyncService:
                 range_ = str(obj)
                 break
 
+        # Determine parent_uri:
+        #   Classes: rdfs:subClassOf target
+        #   Individuals: rdf:type that isn't owl:NamedIndividual or owl:Class
+        parent_uri = None
+        if entity_type == 'class':
+            for obj in graph.objects(subject, RDFS.subClassOf):
+                obj_str = str(obj)
+                if not obj_str.startswith('_:'):
+                    parent_uri = obj_str
+                    break
+        elif entity_type == 'individual':
+            skip_types = {str(OWL.NamedIndividual), str(OWL.Class), str(OWL.Thing)}
+            for obj in graph.objects(subject, RDF.type):
+                obj_str = str(obj)
+                if obj_str not in skip_types and not obj_str.startswith('_:'):
+                    parent_uri = obj_str
+                    break
+
+        # Collect all properties for individuals
+        properties = None
+        if entity_type == 'individual':
+            props = {}
+            for p, o in graph.predicate_objects(subject):
+                p_str = str(p)
+                # Skip standard RDF/OWL predicates already handled above
+                if p_str in (str(RDF.type), str(RDFS.label), str(RDFS.comment),
+                             str(SKOS.definition)):
+                    continue
+                key = p_str.split('#')[-1].split('/')[-1]
+                val = str(o)
+                if key in props:
+                    existing = props[key]
+                    if isinstance(existing, list):
+                        existing.append(val)
+                    else:
+                        props[key] = [existing, val]
+                else:
+                    props[key] = val
+            if props:
+                properties = props
+
         return OntologyEntity(
             ontology_id=ontology_id,
             uri=uri,
             label=label,
             entity_type=entity_type,
             comment=description,
+            parent_uri=parent_uri,
             domain=[domain] if domain else None,
-            range=[range_] if range_ else None
+            range=[range_] if range_ else None,
+            properties=properties,
         )
 
 

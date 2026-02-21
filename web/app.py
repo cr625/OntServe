@@ -199,6 +199,41 @@ def create_app(config_name=None):
 
     app.jinja_env.filters['format_key'] = format_property_key
 
+    def split_pascal_case(text):
+        """Split PascalCase/camelCase into readable words.
+
+        'CompetenceBoundaryComplianceObligation' -> 'Competence Boundary Compliance Obligation'
+        'Post-FailureInvestigationState' -> 'Post-Failure Investigation State'
+        'PublicSafetyatRisk' -> 'Public Safety at Risk'
+        """
+        if not text:
+            return text
+        # Insert space before uppercase letters preceded by lowercase
+        result = re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
+        # Insert space between consecutive uppercase + lowercase (e.g., 'HTMLParser' -> 'HTML Parser')
+        result = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1 \2', result)
+        # After PascalCase splitting, some words end with lowercase joiners
+        # glued to the next word, e.g., 'Safetyat Risk' or 'Standardsvs Emerging'.
+        # Split these: look for a known joiner suffix on a word.
+        # Sorted longest-first to avoid 'or' matching before 'for'
+        _JOINERS = ['for', 'the', 'and', 'at', 'vs', 'of', 'to', 'in', 'or', 'by']
+        words = result.split()
+        fixed = []
+        for w in words:
+            split_found = False
+            for j in _JOINERS:
+                if len(w) > len(j) + 1 and w.endswith(j) and w[0].isupper():
+                    # e.g., 'Safetyat' -> 'Safety' + 'at'
+                    fixed.append(w[:-len(j)])
+                    fixed.append(j)
+                    split_found = True
+                    break
+            if not split_found:
+                fixed.append(w)
+        return ' '.join(fixed)
+
+    app.jinja_env.filters['split_pascal'] = split_pascal_case
+
     # Initialize CLI commands
     from web.cli import init_cli
     init_cli(app)

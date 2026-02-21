@@ -6,7 +6,7 @@
 {%- if value is string -%}
     {%- if value.startswith('http://') or value.startswith('https://') -%}
         {%- set short = value.split('#')[-1].split('/')[-1] -%}
-        <code class="text-primary" title="{{ value }}">{{ short }}</code>
+        <code class="text-primary" title="{{ value }}">{{ short | split_pascal }}</code>
     {%- else -%}
         {{ value }}
     {%- endif -%}
