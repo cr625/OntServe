@@ -546,6 +546,20 @@ class OntServeMCPServer:
                     },
                     "required": ["uris"]
                 }
+            },
+            {
+                "name": "get_entity_by_label",
+                "description": "Retrieve an entity's definition, URI, and metadata by its label. Use for disambiguation when matching extracted concepts against existing ontology classes.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "label": {
+                            "type": "string",
+                            "description": "The entity label to look up (exact match, case-insensitive)"
+                        }
+                    },
+                    "required": ["label"]
+                }
             }
         ]
 
@@ -569,7 +583,8 @@ class OntServeMCPServer:
             "store_extracted_entities": self._handle_store_extracted_entities,
             "get_case_entities": self._handle_get_case_entities,
             "get_entity_by_uri": self._handle_get_entity_by_uri,
-            "get_entities_by_uris": self._handle_get_entities_by_uris
+            "get_entities_by_uris": self._handle_get_entities_by_uris,
+            "get_entity_by_label": self._handle_get_entity_by_label
         }
         
         if name not in tool_handlers:
@@ -1034,6 +1049,105 @@ class OntServeMCPServer:
             "not_found": not_found,
             "not_found_count": len(not_found)
         }
+
+    async def _handle_get_entity_by_label(self, arguments):
+        """
+        Retrieve an entity's definition and metadata by its label.
+
+        Performs case-insensitive exact match against ontology_entities.
+        Used by ProEthica Phase 2 extraction for on-demand class definition
+        retrieval during label-only injection.
+        """
+        label = arguments.get("label")
+
+        if not label:
+            return {"error": "Label is required"}
+
+        if not self.db_connected or not self.storage:
+            return {"error": "Database not connected"}
+
+        logger.debug(f"Looking up entity by label: {label}")
+
+        try:
+            query = """
+                SELECT
+                    e.uri,
+                    e.label,
+                    e.comment,
+                    e.entity_type,
+                    e.parent_uri,
+                    e.properties,
+                    o.name as source_ontology
+                FROM ontology_entities e
+                JOIN ontologies o ON e.ontology_id = o.id
+                WHERE LOWER(e.label) = LOWER(%s)
+                ORDER BY
+                    CASE o.name
+                        WHEN 'proethica-core' THEN 1
+                        WHEN 'proethica-intermediate' THEN 2
+                        WHEN 'proethica-intermediate-extended' THEN 3
+                        WHEN 'engineering-ethics' THEN 4
+                        ELSE 5
+                    END
+                LIMIT 1
+            """
+
+            result = self.storage._execute_query(query, (label,), fetch_one=True)
+
+            if not result:
+                return {
+                    "error": "Entity not found",
+                    "label": label,
+                    "found": False
+                }
+
+            # Extract definition using same logic as get_entity_by_uri
+            definition = result.get('comment') or ""
+            properties = result.get('properties') or {}
+
+            if not definition and properties:
+                definition_keys = [
+                    'obligationstatement', 'proeth:obligationstatement',
+                    'sourcetext', 'proeth:sourcetext',
+                    'casecontext', 'proeth:casecontext',
+                    'ethicaltension', 'proeth:ethicaltension',
+                    'comment', 'rdfs:comment',
+                    'definition', 'skos:definition',
+                    'description'
+                ]
+                for key in definition_keys:
+                    if key in properties and properties[key]:
+                        val = properties[key]
+                        if isinstance(val, list):
+                            definition = val[0] if val else ""
+                        else:
+                            definition = str(val)
+                        break
+
+            entity_type = result.get('entity_type') or "individual"
+            parent_uri = result.get('parent_uri') or ""
+            category = self._infer_category_from_type(
+                entity_type, parent_uri, result.get('uri', '')
+            )
+
+            response_label = result.get('label')
+            if not response_label:
+                uri = result.get('uri', '')
+                response_label = uri.split('#')[-1] if '#' in uri else uri.split('/')[-1]
+
+            return {
+                "uri": result.get('uri'),
+                "label": response_label,
+                "definition": definition,
+                "entity_type": category,
+                "parent_type": parent_uri,
+                "source_ontology": result.get('source_ontology'),
+                "found": True
+            }
+
+        except Exception as e:
+            logger.error(f"Error looking up entity by label: {e}")
+            return {"error": f"Failed to retrieve entity: {str(e)}", "label": label}
 
     def _infer_category_from_type(self, entity_type: str, parent_uri: str, uri: str) -> str:
         """Infer ProEthica category from entity type, parent URI, or URI pattern."""
