@@ -56,6 +56,32 @@ def event_loop():
 
 
 # =============================================================================
+# Shared Storage Fixtures (session-scoped for reuse across tests)
+# =============================================================================
+
+@pytest.fixture(scope='session')
+def pg_storage():
+    """Session-scoped PostgreSQLStorage connected to the test database."""
+    from storage.postgresql_storage import PostgreSQLStorage
+
+    config = {
+        'db_url': os.environ.get(
+            'ONTSERVE_DB_URL',
+            'postgresql://postgres:PASS@localhost:5432/ontserve_test'
+        ),
+    }
+    storage = PostgreSQLStorage(config)
+    yield storage
+
+
+@pytest.fixture(scope='session')
+def concept_manager(pg_storage):
+    """Session-scoped ConceptManager backed by pg_storage."""
+    from storage.concept_manager import ConceptManager
+    return ConceptManager(pg_storage)
+
+
+# =============================================================================
 # Database Fixtures
 # =============================================================================
 

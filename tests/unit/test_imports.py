@@ -21,6 +21,17 @@ class TestCoreImports:
         from servers.mcp_server import OntServeMCPServer
         assert OntServeMCPServer is not None
 
+    def test_import_mcp_tool_handlers(self):
+        """Test MCP tool handlers import."""
+        from servers.mcp_tool_handlers import MCPToolHandlers
+        assert MCPToolHandlers is not None
+
+    def test_import_mcp_tool_schemas(self):
+        """Test MCP tool schemas import."""
+        from servers.mcp_tool_schemas import TOOL_DEFINITIONS
+        assert isinstance(TOOL_DEFINITIONS, list)
+        assert len(TOOL_DEFINITIONS) > 0
+
     def test_import_sparql_service(self):
         """Test SPARQL service import."""
         from services.sparql_service import SPARQLService
@@ -35,6 +46,19 @@ class TestCoreImports:
         """Test concept manager import."""
         from storage.concept_manager import ConceptManager
         assert ConceptManager is not None
+
+    def test_no_dead_concept_managers(self):
+        """Verify dead concept manager modules were removed."""
+        import importlib
+        for module_name in [
+            'storage.concept_manager_database',
+            'storage.concept_manager_enhanced',
+        ]:
+            try:
+                importlib.import_module(module_name)
+                assert False, f"{module_name} should have been removed"
+            except ModuleNotFoundError:
+                pass  # Expected
 
 
 @pytest.mark.unit

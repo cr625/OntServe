@@ -189,12 +189,12 @@ This agent handles:
 After restoring the database or syncing ontology files, refresh the entity extraction:
 
 ```bash
-ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts/refresh_entity_extraction.py proethica-intermediate"
+ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts/active/refresh_entity_extraction.py proethica-intermediate"
 ```
 
 For case ontologies:
 ```bash
-ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts/refresh_entity_extraction.py proethica-case-4"
+ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts/active/refresh_entity_extraction.py proethica-case-4"
 ```
 
 ### Phase 6: Verification
@@ -313,7 +313,7 @@ ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD psql -h localhost -U o
 ### Ontology Files Only
 ```bash
 rsync -avz --delete /home/chris/onto/OntServe/ontologies/ digitalocean:/opt/ontserve/ontologies/
-ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts/refresh_entity_extraction.py proethica-intermediate"
+ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts/active/refresh_entity_extraction.py proethica-intermediate"
 ```
 
 ### Config Files Only
@@ -366,7 +366,7 @@ ssh digitalocean "ls -la /opt/ontserve/ontologies/"
 
 ### Entity Extraction Issues
 ```bash
-ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts/refresh_entity_extraction.py proethica-intermediate"
+ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts/active/refresh_entity_extraction.py proethica-intermediate"
 ```
 
 ### Nginx Issues
