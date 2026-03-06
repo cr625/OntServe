@@ -70,6 +70,5 @@ pyshacl>=0.29.0
 # ===== Type Checking =====
 typing-extensions>=4.12.2
 
-# ===== Future Phases (Commented Out) =====
-# fastmcp>=2.0.0  # Phase 2: MCP modernization
-# rdflib-endpoint>=0.5.3  # Phase 3: SPARQL infrastructure upgrade
+# ===== MCP Server =====
+fastmcp>=3.0.0

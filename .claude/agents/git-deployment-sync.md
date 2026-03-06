@@ -25,7 +25,7 @@ PGPASSWORD=PASS pg_dump -h localhost -U postgres -d ontserve --clean --if-exists
 scp /tmp/ontserve_dev_backup.sql digitalocean:/tmp/
 
 # 3. Backup production
-ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD pg_dump -h localhost -U ontserve_user -d ontserve --clean --if-exists --no-owner --no-privileges -f /tmp/ontserve_prod_backup_\$(date +%Y%m%d).sql"
+ssh digitalocean "PGPASSWORD=$ONTSERVE_PROD_DB_PASS pg_dump -h localhost -U ontserve_user -d ontserve --clean --if-exists --no-owner --no-privileges -f /tmp/ontserve_prod_backup_\$(date +%Y%m%d).sql"
 
 # 4. Restore
 ssh digitalocean "sudo -u postgres psql -d ontserve -f /tmp/ontserve_dev_backup.sql"
@@ -157,11 +157,11 @@ This agent handles:
 **Production Database Credentials**:
 - Database: `ontserve`
 - User: `ontserve_user`
-- Password: `REDACTED_PRODUCTION_PASSWORD`
+- Password: `$ONTSERVE_PROD_DB_PASS`
 
 1. **Create Production Backup First**
    ```bash
-   ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD pg_dump -h localhost -U ontserve_user -d ontserve \
+   ssh digitalocean "PGPASSWORD=$ONTSERVE_PROD_DB_PASS pg_dump -h localhost -U ontserve_user -d ontserve \
      --clean --if-exists --no-owner --no-privileges \
      -f /tmp/ontserve_production_backup_\$(date +%Y%m%d_%H%M%S).sql"
    ```
@@ -215,8 +215,8 @@ ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts
 
 3. **Verify Database**
    ```bash
-   ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD psql -h localhost -U ontserve_user -d ontserve -c 'SELECT COUNT(*) as ontologies FROM ontologies;'"
-   ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD psql -h localhost -U ontserve_user -d ontserve -c 'SELECT COUNT(*) as entities FROM ontology_entities;'"
+   ssh digitalocean "PGPASSWORD=$ONTSERVE_PROD_DB_PASS psql -h localhost -U ontserve_user -d ontserve -c 'SELECT COUNT(*) as ontologies FROM ontologies;'"
+   ssh digitalocean "PGPASSWORD=$ONTSERVE_PROD_DB_PASS psql -h localhost -U ontserve_user -d ontserve -c 'SELECT COUNT(*) as entities FROM ontology_entities;'"
    ```
 
 4. **Check Error Logs**
@@ -238,7 +238,7 @@ ssh digitalocean "cd /opt/ontserve && source venv/bin/activate && python scripts
 ### Production (DigitalOcean)
 - **Location**: /opt/ontserve
 - **Venv**: venv
-- **Database**: `ontserve` (ontserve_user/REDACTED_PRODUCTION_PASSWORD)
+- **Database**: `ontserve` (ontserve_user/$ONTSERVE_PROD_DB_PASS)
 - **Port**: 5003 (gunicorn) -> nginx -> 80/443
 - **MCP Port**: 8082 (internal only)
 - **URL**: https://ontserve.ontorealm.net
@@ -294,7 +294,7 @@ scp /tmp/ontserve_dev_backup.sql digitalocean:/tmp/
 rsync -avz --delete /home/chris/onto/OntServe/ontologies/ digitalocean:/opt/ontserve/ontologies/
 
 # 4. Backup production database
-ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD pg_dump -h localhost -U ontserve_user -d ontserve --clean --if-exists --no-owner --no-privileges -f /tmp/ontserve_prod_backup_\$(date +%Y%m%d).sql"
+ssh digitalocean "PGPASSWORD=$ONTSERVE_PROD_DB_PASS pg_dump -h localhost -U ontserve_user -d ontserve --clean --if-exists --no-owner --no-privileges -f /tmp/ontserve_prod_backup_\$(date +%Y%m%d).sql"
 
 # 5. Restore database (requires postgres superuser)
 ssh digitalocean "sudo -u postgres psql -d ontserve -f /tmp/ontserve_dev_backup.sql"
@@ -307,7 +307,7 @@ ssh digitalocean "sudo systemctl restart ontserve-web ontserve-mcp"
 
 # 8. Verify
 curl -s -o /dev/null -w '%{http_code}' https://ontserve.ontorealm.net/
-ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD psql -h localhost -U ontserve_user -d ontserve -c 'SELECT COUNT(*) FROM ontology_entities;'"
+ssh digitalocean "PGPASSWORD=$ONTSERVE_PROD_DB_PASS psql -h localhost -U ontserve_user -d ontserve -c 'SELECT COUNT(*) FROM ontology_entities;'"
 ```
 
 ### Ontology Files Only
@@ -348,7 +348,7 @@ ssh digitalocean "journalctl -u ontserve-web -n 50 --no-pager"
 
 ### Database Connection Errors
 ```bash
-ssh digitalocean "PGPASSWORD=REDACTED_PRODUCTION_PASSWORD psql -h localhost -U ontserve_user -d ontserve -c 'SELECT 1;'"
+ssh digitalocean "PGPASSWORD=$ONTSERVE_PROD_DB_PASS psql -h localhost -U ontserve_user -d ontserve -c 'SELECT 1;'"
 ```
 
 ### Permission Denied Errors (after database restore)

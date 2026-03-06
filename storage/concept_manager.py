@@ -226,8 +226,8 @@ class ConceptManager:
                     c.uuid, c.label, c.semantic_label, c.primary_type, c.description,
                     c.uri, c.confidence_score, c.source_document, c.created_by,
                     c.created_at, c.needs_review, c.review_notes, c.metadata,
-                    cm.source_text, cm.llm_confidence, cm.extraction_method,
-                    cm.llm_reasoning, cm.source_document_title,
+                    cm.source_text, cm.llm_confidence, c.extraction_method,
+                    c.llm_reasoning, cm.source_document_title,
                     aw.current_state as workflow_state, aw.assigned_to, aw.priority
                 FROM concepts c
                 JOIN domains d ON c.domain_id = d.id
@@ -241,33 +241,16 @@ class ConceptManager:
             params.extend([limit, offset])
             results = self.storage._execute_query(query, tuple(params), fetch_all=True)
             
-            # Get total count
+            # Get total count (same WHERE clause, no LIMIT/OFFSET)
             count_query = f"""
                 SELECT COUNT(*)
                 FROM concepts c
                 JOIN domains d ON c.domain_id = d.id
-                WHERE {' AND '.join(where_clauses[:-2])}
+                WHERE {' AND '.join(where_clauses)}
             """
-            
             count_params = params[:-2]  # Remove limit and offset
-            if category:
-                count_params = params[:-3]  # Remove category, limit, offset
-                count_query = f"""
-                    SELECT COUNT(*)
-                    FROM concepts c
-                    JOIN domains d ON c.domain_id = d.id
-                    WHERE {' AND '.join(where_clauses[:-2])}
-                """
-            else:
-                count_query = f"""
-                    SELECT COUNT(*)
-                    FROM concepts c
-                    JOIN domains d ON c.domain_id = d.id
-                    WHERE {' AND '.join(where_clauses)}
-                """
-                count_params = params[:-2]
-            
-            total_count = self.storage._execute_query(count_query, tuple(count_params), fetch_one=True)[0]
+
+            total_count = self.storage._execute_query(count_query, tuple(count_params), fetch_one=True)['count']
             
             # Format results
             candidates = []

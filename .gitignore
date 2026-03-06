@@ -98,5 +98,5 @@ coverage.xml
 .hypothesis/
 tests/test_log.txt
 .tox/
-*.pids
+.pids/
 docs-internal/
