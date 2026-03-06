@@ -17,20 +17,14 @@ class TestCoreImports:
         assert ConfigLoader is not None
 
     def test_import_mcp_server(self):
-        """Test MCP server import."""
-        from servers.mcp_server import OntServeMCPServer
-        assert OntServeMCPServer is not None
+        """Test MCP server import (FastMCP 3.x)."""
+        from servers.mcp_server import mcp
+        assert mcp is not None
 
     def test_import_mcp_tool_handlers(self):
         """Test MCP tool handlers import."""
         from servers.mcp_tool_handlers import MCPToolHandlers
         assert MCPToolHandlers is not None
-
-    def test_import_mcp_tool_schemas(self):
-        """Test MCP tool schemas import."""
-        from servers.mcp_tool_schemas import TOOL_DEFINITIONS
-        assert isinstance(TOOL_DEFINITIONS, list)
-        assert len(TOOL_DEFINITIONS) > 0
 
     def test_import_sparql_service(self):
         """Test SPARQL service import."""
@@ -101,10 +95,10 @@ class TestDependencyVersions:
         import rdflib
         assert rdflib is not None
 
-    def test_aiohttp_installed(self):
-        """Test aiohttp is installed."""
-        import aiohttp
-        assert aiohttp is not None
+    def test_fastmcp_installed(self):
+        """Test FastMCP is installed."""
+        import fastmcp
+        assert fastmcp is not None
 
     def test_pytest_installed(self):
         """Test pytest is installed."""
