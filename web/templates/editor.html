@@ -48,9 +48,9 @@
     <div class="col-12">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
                 <li class="breadcrumb-item"><a
-                        href="{{ url_for('ontology_detail', ontology_id=ontology.ontology_id) }}">{{ ontology.name
+                        href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}">{{ ontology.name
                         }}</a></li>
                 <li class="breadcrumb-item active">Edit</li>
             </ol>

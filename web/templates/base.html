@@ -24,7 +24,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
                 <i class="bi bi-diagram-3"></i> OntServe
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -33,12 +33,12 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">
+                        <a class="nav-link" href="{{ url_for('main.index') }}">
                             <i class="bi bi-house"></i> Home
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('import_ontology') }}">
+                        <a class="nav-link" href="{{ url_for('ontology.import_ontology') }}">
                             <i class="bi bi-cloud-upload"></i> Import
                         </a>
                     </li>
@@ -48,12 +48,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('drafts') }}">
+                        <a class="nav-link" href="{{ url_for('draft.drafts') }}">
                             <i class="bi bi-file-earmark-text"></i> Drafts
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('search') }}">
+                        <a class="nav-link" href="{{ url_for('main.search') }}">
                             <i class="bi bi-search"></i> Search
                         </a>
                     </li>
@@ -105,7 +105,7 @@
                 </ul>
 
                 <!-- Search bar -->
-                <form class="d-flex" action="{{ url_for('search') }}" method="get">
+                <form class="d-flex" action="{{ url_for('main.search') }}" method="get">
                     <input class="form-control me-2" type="search" name="q" placeholder="Search ontologies..."
                         value="{{ request.args.get('q', '') }}">
                     <button class="btn btn-outline-light" type="submit">Search</button>

@@ -11,7 +11,7 @@
 
         <div class="card">
             <div class="card-body">
-                <form method="POST" action="{{ url_for('import_ontology') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ url_for('ontology.import_ontology') }}" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="source_type" class="form-label">Source Type</label>
                         <select class="form-select" id="source_type" name="source_type" onchange="toggleSourceInput()">
@@ -95,7 +95,7 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-cloud-upload"></i> Import Ontology
                         </button>
-                        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+                        <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>

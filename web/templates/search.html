@@ -10,7 +10,7 @@
         </h1>
         
         <!-- Search form -->
-        <form method="get" action="{{ url_for('search') }}" class="mb-4">
+        <form method="get" action="{{ url_for('main.search') }}" class="mb-4">
             <div class="row">
                 <div class="col-md-8">
                     <input type="text" class="form-control" name="q" 
@@ -43,7 +43,7 @@
         <h3>Ontologies ({{ results.ontologies|length }})</h3>
         <div class="list-group mb-4">
             {% for ontology in results.ontologies %}
-            <a href="{{ url_for('ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}"
+            <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}"
                class="list-group-item list-group-item-action">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{{ ontology.name }}</h5>
@@ -73,7 +73,7 @@
                 </thead>
                 <tbody>
                     {% for entity in results.entities %}
-                    <tr onclick="window.location='{{ url_for('ontology_detail_or_uri_resolution', ontology_name=entity.ontology.name) }}'" style="cursor: pointer;">
+                    <tr onclick="window.location='{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=entity.ontology.name) }}'" style="cursor: pointer;">
                         <td>
                             <strong>{{ entity.label or entity.uri|extract_name }}</strong>
                             {% if entity.comment %}
