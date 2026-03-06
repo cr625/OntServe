@@ -25,7 +25,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
     # Database settings - using local PostgreSQL on port 5432
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+    SQLALCHEMY_DATABASE_URI = os.environ.get('ONTSERVE_DB_URL') or \
         'postgresql://postgres:PASS@localhost:5432/ontserve'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
