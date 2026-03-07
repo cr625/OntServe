@@ -1,4 +1,4 @@
-# OntServe Requirements - Updated November 2025
+# OntServe Requirements - Updated 2026-03-07
 # Modernized dependencies with latest stable versions
 
 # ===== Python Version =====
@@ -18,9 +18,6 @@ Flask-CORS>=5.0.0
 bootstrap-flask>=2.4.1
 WTForms>=3.2.1
 
-# ===== Async Web Server (for MCP) =====
-aiohttp>=3.13.2
-aiofiles>=24.1.0
 
 # ===== Database =====
 # SQLAlchemy 2.0 - Major version upgrade (code already migrated)
@@ -72,3 +69,4 @@ typing-extensions>=4.12.2
 
 # ===== MCP Server =====
 fastmcp>=3.0.0
+pydantic>=2.0.0
