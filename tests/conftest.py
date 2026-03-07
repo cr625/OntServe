@@ -166,46 +166,23 @@ def runner(app):
 
 
 # =============================================================================
-# MCP Server Fixtures
+# MCP Server Fixtures (FastMCP in-process client)
 # =============================================================================
 
-@pytest_asyncio.fixture(scope='function')
-async def mcp_server():
-    """Create MCP server instance for testing."""
-    from servers.mcp_server import OntServeMCPServer
-
-    server = OntServeMCPServer()
-
-    # Don't actually start the web server
-    yield server
-
-    # Cleanup
-    if hasattr(server, 'storage') and server.storage:
-        # Close database connections
-        pass
+@pytest.fixture(scope='session')
+def mcp_server():
+    """Import the FastMCP server instance (runs lifespan on first Client use)."""
+    from servers.mcp_server import mcp
+    return mcp
 
 
 @pytest_asyncio.fixture(scope='function')
 async def mcp_client(mcp_server):
-    """Create MCP test client."""
-    from aiohttp import web
-    from aiohttp.test_utils import TestClient, TestServer
+    """In-process FastMCP Client -- no HTTP server needed."""
+    from fastmcp import Client
 
-    # Create test app
-    app = web.Application()
-    app.router.add_post('/', mcp_server.handle_jsonrpc)
-    app.router.add_post('/jsonrpc', mcp_server.handle_jsonrpc)
-    app.router.add_get('/health', mcp_server.handle_health)
-    app.router.add_post('/sparql', mcp_server.handle_sparql)
-    app.router.add_get('/api/guidelines/{domain}', mcp_server.handle_get_guidelines_compat)
-
-    # Create test client
-    client = TestClient(TestServer(app))
-    await client.start_server()
-
-    yield client
-
-    await client.close()
+    async with Client(mcp_server) as client:
+        yield client
 
 
 # =============================================================================
