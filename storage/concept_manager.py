@@ -195,9 +195,10 @@ class ConceptManager:
             logger.error(f"Failed to update concept status: {e}")
             raise StorageError(f"Status update failed: {str(e)}")
     
-    def get_candidate_concepts(self, domain_id: str = "engineering-ethics", 
+    def get_candidate_concepts(self, domain_id: str = "engineering-ethics",
                               category: Optional[str] = None,
                               status: str = "candidate",
+                              submitted_by_like: Optional[str] = None,
                               limit: int = 100, offset: int = 0) -> Dict[str, Any]:
         """
         Retrieve candidate concepts for review.
@@ -220,7 +221,11 @@ class ConceptManager:
             if category:
                 where_clauses.append("c.primary_type = %s")
                 params.append(category)
-            
+
+            if submitted_by_like:
+                where_clauses.append("c.created_by LIKE %s")
+                params.append(f"%{submitted_by_like}%")
+
             query = f"""
                 SELECT 
                     c.uuid, c.label, c.semantic_label, c.primary_type, c.description,

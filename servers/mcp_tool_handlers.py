@@ -329,7 +329,7 @@ class MCPToolHandlers:
             result = self.concept_manager.get_candidate_concepts(
                 domain_id="engineering-ethics",
                 status="candidate",
-                filters={"submitted_by_like": submitted_by_pattern},
+                submitted_by_like=submitted_by_pattern,
             )
 
             entities = result.get("candidates", [])
