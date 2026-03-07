@@ -14,29 +14,31 @@ build/
 *.pyd
 *.sqlite3
 *.db
-*.env
-*.venv
+
+# Virtual Environment
 venv/
 venv-*/
+.venv/
 ENV/
 env/
 
-# Allow config templates but not actual .env files
+# Environment variables
+*.env
 !config/*.env
 !config/*.env.template
-# But still ignore any actual .env in project root
-.env
-/.env
 
-# VS Code
+# IDE
 .vscode/
+*.swp
 
 # OS files
 .DS_Store
 Thumbs.db
 
-# Development documentation (not for public version control)
+# Claude internal files
+.claude/
 CLAUDE.md
+docs-internal/
 
 # Documentation directories (development/internal only)
 */docs/
@@ -53,36 +55,23 @@ pending_delete/
 cache/
 storage/cache/
 
-# Other
-*.bak
-*.swp
-*.tmp
-
-# Ignore storage metadata and versions
+# Storage runtime data
 storage/metadata/
 storage/versions/
-# Web-specific virtual environment
-web/venv/
+/storage/ontologies/
 
 # Production server local config
 /web/config.py
 
-# Ignore ontologies and large data stored on production (managed outside git)
-/storage/ontologies/
-
-# local backups
+# Backups
+*.bak
+*.tmp
 *.local
 *.backup
 backups/
 
-# Review directory for cleanup
-untracked_review/
-
-# Archive folder for old files
+# Archive
 archive/
-
-# Claude internal files
-.claude/
 
 # Temporary ontology extraction files (runtime data, not schemas)
 ontologies/proethica-intermediate-extended.ttl
@@ -99,4 +88,6 @@ coverage.xml
 tests/test_log.txt
 .tox/
 .pids/
-docs-internal/
+
+# Local tool configuration
+pytest.ini
