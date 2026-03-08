@@ -15,7 +15,8 @@ sys.path.insert(0, str(project_root))
 # Load environment configuration using new standalone config system
 from config.config_loader import load_ontserve_config
 config_summary = load_ontserve_config()
-print(f"✅ Loaded configuration from: {', '.join(config_summary['loaded_files'])}")
+import logging
+logging.getLogger(__name__).info(f"Loaded configuration from: {', '.join(config_summary['loaded_files'])}")
 
 
 class Config:
@@ -71,7 +72,9 @@ class ProductionConfig(Config):
     DEBUG = False
     
     # Use environment variables in production
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'prod-secret-key-must-be-set'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable must be set in production")
 
 
 class TestingConfig(Config):

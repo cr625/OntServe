@@ -4,7 +4,7 @@ URI resolution routes for OntServe web application.
 Handles resolving ontology entity URIs via query parameter and path-based access.
 """
 
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, redirect, url_for
 from sqlalchemy import select
 
 from web.models import db, OntologyEntity
@@ -133,19 +133,16 @@ def resolve_uri_path(ontology_path, entity_name):
     if entity_name in reserved_names and '/' not in ontology_path:
         ontology_name = ontology_path
 
-        # Delegate to specific handler functions via url_for redirect
+        # Redirect to proper routes (preserves auth decorators)
         if entity_name == 'content':
-            from web.ontology_routes import ontology_content
-            return ontology_content(ontology_name)
+            return redirect(url_for('ontology.ontology_content', ontology_name=ontology_name))
         elif entity_name == 'edit':
-            from web.ontology_routes import edit_ontology
-            return edit_ontology(ontology_name)
+            return redirect(url_for('ontology.edit_ontology', ontology_name=ontology_name))
         elif entity_name == 'save':
             from flask import abort
             abort(405)
         elif entity_name == 'settings':
-            from web.ontology_routes import ontology_settings
-            return ontology_settings(ontology_name)
+            return redirect(url_for('ontology.ontology_settings', ontology_name=ontology_name))
         else:
             from flask import abort
             abort(404)

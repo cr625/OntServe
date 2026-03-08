@@ -721,7 +721,8 @@ def edit_ontology(ontology_name):
     try:
         ont_data = current_app.ontology_manager.get_ontology(ontology_name)
         content = ont_data.get('content', '')
-    except:
+    except Exception as e:
+        current_app.logger.warning(f"Failed to load from file storage, using DB content: {e}")
         content = ontology.current_content or ''
 
     # Get versions with proper formatting
@@ -766,27 +767,16 @@ def save_ontology(ontology_name):
     try:
         # Save to file storage
         result = current_app.ontology_manager.store_ontology(
-            ontology_id,
+            ontology_name,
             content,
             metadata={'commit_message': commit_message}
         )
 
-        # Update database
-        ontology.content = content
-        ontology.updated_at = datetime.now()
-
-        # Parse to get stats
+        # Validate TTL parses correctly
         g = rdflib.Graph()
         g.parse(data=content, format='turtle')
-        ontology.triple_count = len(g)
 
-        # Count classes and properties
-        from rdflib import RDF, RDFS, OWL
-        ontology.class_count = len(list(g.subjects(RDF.type, OWL.Class)))
-        ontology.property_count = (
-            len(list(g.subjects(RDF.type, OWL.ObjectProperty))) +
-            len(list(g.subjects(RDF.type, OWL.DatatypeProperty)))
-        )
+        ontology.updated_at = datetime.now(timezone.utc)
 
         # Create version record
         count_stmt = select(func.count()).select_from(OntologyVersion).where(
@@ -798,7 +788,7 @@ def save_ontology(ontology_name):
             version_number=version_count + 1,
             content=content,
             change_summary=commit_message,
-            created_at=datetime.now()
+            created_at=datetime.now(timezone.utc)
         )
         db.session.add(version)
         db.session.commit()
@@ -811,18 +801,10 @@ def save_ontology(ontology_name):
 
 
 @ontology_bp.route('/ontology/<ontology_name>/save-draft', methods=['POST'])
+@login_required
 def save_draft(ontology_name):
     """Save a draft of an ontology (no version created)."""
-    stmt = select(Ontology).where(Ontology.name == ontology_name)
-    ontology = db.one_or_404(stmt)
-
-    data = request.get_json()
-    content = data.get('content', '')
-
-    try:
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+    return jsonify({'success': False, 'message': 'Draft saving not yet implemented'}), 501
 
 
 @ontology_bp.route('/validate', methods=['POST'])
@@ -935,6 +917,7 @@ def get_editor_version(ontology_name, version_id):
 
 
 @ontology_bp.route('/editor/ontology/<ontology_name>/save', methods=['POST'])
+@login_required
 def save_ontology_editor(ontology_name):
     """Save a new version of an ontology from the editor."""
     stmt = select(Ontology).where(Ontology.name == ontology_name)
@@ -950,21 +933,12 @@ def save_ontology_editor(ontology_name):
         g.parse(data=content, format='turtle')
 
         result = current_app.ontology_manager.store_ontology(
-            ontology_id,
+            ontology_name,
             content,
             metadata={'commit_message': commit_message}
         )
 
-        ontology.content = content
-        ontology.updated_at = datetime.now()
-
-        from rdflib import RDF, RDFS, OWL
-        ontology.triple_count = len(g)
-        ontology.class_count = len(list(g.subjects(RDF.type, OWL.Class)))
-        ontology.property_count = (
-            len(list(g.subjects(RDF.type, OWL.ObjectProperty))) +
-            len(list(g.subjects(RDF.type, OWL.DatatypeProperty)))
-        )
+        ontology.updated_at = datetime.now(timezone.utc)
 
         count_stmt = select(func.count()).select_from(OntologyVersion).where(
             OntologyVersion.ontology_id == ontology.id
@@ -975,7 +949,7 @@ def save_ontology_editor(ontology_name):
             version_number=version_count + 1,
             content=content,
             change_summary=commit_message,
-            created_at=datetime.now()
+            created_at=datetime.now(timezone.utc)
         )
         db.session.add(version)
         db.session.commit()

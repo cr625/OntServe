@@ -184,7 +184,7 @@ class BaseImporter(ABC):
                 import json
                 json.loads(content)
                 return True
-            except:
+            except (json.JSONDecodeError, ValueError):
                 return False
         return True
     

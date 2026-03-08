@@ -45,13 +45,13 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             try:
                 g.parse(data=content, format='xml')
                 format_hint = 'xml'
-            except:
+            except Exception:
                 raise parse_error
         elif format_hint == 'xml':
             try:
                 g.parse(data=content, format='turtle')
                 format_hint = 'turtle'
-            except:
+            except Exception:
                 raise parse_error
         else:
             raise parse_error

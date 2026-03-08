@@ -606,7 +606,7 @@ class OwlreadyImporter(BaseImporter):
             return True
         except InconsistentOntologyError:
             return False
-        except:
+        except Exception:
             return None  # Unknown consistency state
     
     def _get_node_classes(self, cls: Dict) -> str:
@@ -702,5 +702,5 @@ class OwlreadyImporter(BaseImporter):
             import shutil
             if hasattr(self, 'temp_dir') and os.path.exists(self.temp_dir):
                 shutil.rmtree(self.temp_dir)
-        except:
+        except Exception:
             pass

@@ -38,6 +38,7 @@ def get_version_api(version_id):
 
 
 @api_bp.route('/api/versions/<int:version_id>/make-current', methods=['POST'])
+@login_required
 def make_version_current(version_id):
     """Make a version the current version."""
     try:

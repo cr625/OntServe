@@ -5,6 +5,7 @@ Handles login, logout, and user profile pages.
 """
 
 from datetime import datetime, timezone
+from urllib.parse import urlparse
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
 from flask_login import login_required, current_user, login_user, logout_user
@@ -44,7 +45,9 @@ def login():
 
             next_page = request.args.get('next') or request.form.get('next')
             if next_page:
-                return redirect(next_page)
+                parsed = urlparse(next_page)
+                if not parsed.netloc and not parsed.scheme:
+                    return redirect(next_page)
             return redirect(url_for('main.index'))
         else:
             current_app.logger.warning(f"Failed login attempt for username: {username}")

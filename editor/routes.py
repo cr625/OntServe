@@ -7,12 +7,12 @@ Provides API endpoints that replace Neo4j queries with pgvector semantic search.
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
 from flask import Blueprint, request, jsonify, render_template, current_app, flash
 from werkzeug.exceptions import BadRequest, NotFound
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from web.models import db, Ontology, OntologyEntity, OntologyVersion
 from storage.file_storage import FileStorage
@@ -149,28 +149,29 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
                 }), 400
             
             # Create new version
-            version_num = datetime.now().strftime('%Y%m%d_%H%M%S')
+            count_stmt = select(func.count()).select_from(OntologyVersion).where(
+                OntologyVersion.ontology_id == ontology.id
+            )
+            version_count = db.session.execute(count_stmt).scalar()
             new_version = OntologyVersion(
                 ontology_id=ontology.id,
-                version=version_num,
+                version_number=version_count + 1,
                 content=content,
-                commit_message=commit_message,
-                created_at=datetime.utcnow(),
-                created_by=data.get('user', 'system')  # TODO: Get from auth
+                change_summary=commit_message,
+                created_at=datetime.now(timezone.utc),
+                created_by=data.get('user', 'system')
             )
-            
-            # Update ontology content
-            ontology.content = content
-            ontology.updated_at = datetime.utcnow()
+
+            ontology.updated_at = datetime.now(timezone.utc)
             
             # Store in file system
             storage_result = storage_backend.store(
-                ontology_id, 
+                ontology_id,
                 content,
                 metadata={
-                    'version': version_num,
+                    'version': new_version.version_number,
                     'commit_message': commit_message,
-                    'updated_at': datetime.utcnow().isoformat()
+                    'updated_at': datetime.now(timezone.utc).isoformat()
                 }
             )
             

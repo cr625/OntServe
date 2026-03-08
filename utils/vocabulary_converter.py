@@ -72,7 +72,7 @@ class VocabularyConverter:
                 try:
                     matches = len(list(graph.triples(pattern)))
                     score += matches
-                except:
+                except Exception:
                     continue
             scores[vocab_type] = score
         
