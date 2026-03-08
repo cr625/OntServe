@@ -95,43 +95,26 @@ class TestRESTAPIIntegration:
 @pytest.mark.mcp
 @pytest.mark.asyncio
 class TestMCPIntegration:
-    """Test MCP JSON-RPC integration (Port 8082) - SECONDARY METHOD."""
+    """Test MCP integration via FastMCP in-process Client."""
 
-    async def test_list_tools_endpoint(self, mcp_client):
-        """Test list_tools method returns available tools.
+    async def test_list_tools(self, mcp_client):
+        """Test list_tools returns available tools.
 
         Used by: ProEthica to discover available MCP tools
         """
-        request = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "list_tools",
-            "params": {}
-        }
+        tools = await mcp_client.list_tools()
+        tool_names = [t.name for t in tools]
 
-        response = await mcp_client.post('/', json=request)
-        assert response.status == 200, "list_tools must return 200"
-
-        data = await response.json()
-        assert 'result' in data, "Response must have 'result' key"
-        assert 'tools' in data['result'], "Result must have 'tools' key"
+        assert len(tool_names) > 0, "MCP server must expose at least one tool"
 
     async def test_get_entities_by_category_tool_exists(self, mcp_client):
         """Test get_entities_by_category tool is available.
 
         This is the PRIMARY tool used by ProEthica for concept extraction.
         """
-        request = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "list_tools",
-            "params": {}
-        }
+        tools = await mcp_client.list_tools()
+        tool_names = [t.name for t in tools]
 
-        response = await mcp_client.post('/', json=request)
-        data = await response.json()
-
-        tool_names = [tool['name'] for tool in data['result']['tools']]
         assert 'get_entities_by_category' in tool_names, \
             "Critical tool 'get_entities_by_category' must exist"
 
@@ -140,41 +123,26 @@ class TestMCPIntegration:
 
         ProEthica parses: result.content[0].text (JSON string)
         """
-        request = {
-            "jsonrpc": "2.0",
-            "id": 2,
-            "method": "call_tool",
-            "params": {
-                "name": "get_entities_by_category",
-                "arguments": {
-                    "category": "Role",
-                    "domain_id": "engineering-ethics",
-                    "status": "approved"
-                }
-            }
-        }
+        result = await mcp_client.call_tool(
+            'get_entities_by_category',
+            {
+                'category': 'Role',
+                'domain_id': 'engineering-ethics',
+                'status': 'approved',
+            },
+        )
 
-        response = await mcp_client.post('/', json=request)
+        # FastMCP call_tool returns a CallToolResult with .content list
+        assert result.content is not None, "Result must have content"
+        assert len(result.content) > 0, "Result must have at least one content block"
 
-        if response.status == 200:
-            data = await response.json()
+        first_content = result.content[0]
+        assert hasattr(first_content, 'text'), \
+            "Content must have 'text' attribute for ProEthica parsing"
 
-            # Check JSON-RPC response structure
-            assert 'result' in data or 'error' in data, \
-                "Must have 'result' or 'error' key"
-
-            if 'result' in data:
-                result = data['result']
-                # ProEthica expects: result.content[0].text
-                assert 'content' in result, \
-                    "Result must have 'content' key for ProEthica compatibility"
-
-                if result['content']:
-                    first_content = result['content'][0]
-                    assert 'type' in first_content, \
-                        "Content must have 'type' key"
-                    assert 'text' in first_content, \
-                        "Content must have 'text' key for ProEthica parsing"
+        # Text should be valid JSON
+        payload = json.loads(first_content.text)
+        assert isinstance(payload, dict), "Tool response must be a JSON object"
 
 
 @pytest.mark.integration
@@ -189,40 +157,26 @@ class TestCriticalMCPTools:
         Arguments: category, domain_id, status
         BREAKING CHANGE RISK: These argument names are hardcoded in ProEthica
         """
-        request = {
-            "jsonrpc": "2.0",
-            "id": 3,
-            "method": "call_tool",
-            "params": {
-                "name": "get_entities_by_category",
-                "arguments": {
-                    "category": "Role",
-                    "domain_id": "test",
-                    "status": "approved"
-                }
-            }
-        }
+        result = await mcp_client.call_tool(
+            'get_entities_by_category',
+            {
+                'category': 'Role',
+                'domain_id': 'test',
+                'status': 'approved',
+            },
+        )
 
-        response = await mcp_client.post('/', json=request)
-
-        # Should not fail due to missing/wrong arguments
-        assert response.status in [200, 400, 404], \
+        # Should return a valid result (possibly empty), not raise an error
+        assert result.content is not None
+        payload = json.loads(result.content[0].text)
+        assert 'entities' in payload or 'error' not in payload, \
             "Tool call should handle arguments gracefully"
 
     @pytest.mark.asyncio
     async def test_search_entities_tool(self, mcp_client):
         """Test search_entities tool is available."""
-        request = {
-            "jsonrpc": "2.0",
-            "id": 4,
-            "method": "list_tools",
-            "params": {}
-        }
-
-        response = await mcp_client.post('/', json=request)
-        data = await response.json()
-
-        tool_names = [tool['name'] for tool in data['result']['tools']]
+        tools = await mcp_client.list_tools()
+        tool_names = [t.name for t in tools]
 
         # This tool might not be implemented yet, but should be
         has_search = any('search' in name.lower() for name in tool_names)
@@ -268,25 +222,19 @@ class TestDataFlowPatterns:
         2. Get entities by category via MCP
         3. Provide to LLM as context
         """
-        # Step 2: Get entities by category
-        request = {
-            "jsonrpc": "2.0",
-            "id": 5,
-            "method": "call_tool",
-            "params": {
-                "name": "get_entities_by_category",
-                "arguments": {
-                    "category": "Role",
-                    "domain_id": "engineering-ethics",
-                    "status": "approved"
-                }
-            }
-        }
-
-        response = await mcp_client.post('/', json=request)
+        result = await mcp_client.call_tool(
+            'get_entities_by_category',
+            {
+                'category': 'Role',
+                'domain_id': 'engineering-ethics',
+                'status': 'approved',
+            },
+        )
 
         # Should return entities or empty result, not error
-        assert response.status in [200, 404]
+        assert result.content is not None
+        payload = json.loads(result.content[0].text)
+        assert 'entities' in payload
 
 
 @pytest.mark.integration
@@ -305,14 +253,13 @@ class TestBreakingChangeProtection:
             "Web server must be accessible (default port 5003)"
 
     @pytest.mark.asyncio
-    async def test_mcp_port_8082_accessible(self, mcp_client):
-        """Test that MCP server is on expected port 8082.
+    async def test_mcp_server_accessible(self, mcp_client):
+        """Test that MCP server is functional via in-process client.
 
         BREAKING CHANGE: Do not change port without updating all clients
         """
-        response = await mcp_client.get('/health')
-        assert response.status in [200, 404], \
-            "MCP server must be accessible (default port 8082)"
+        tools = await mcp_client.list_tools()
+        assert len(tools) > 0, "MCP server must be accessible and have tools"
 
     def test_http_status_codes(self, client, helpers, db_session):
         """Test HTTP status codes match ProEthica expectations.
@@ -366,7 +313,7 @@ class TestWorldOntologyMapping:
     def test_ontology_priority_system(self, client, helpers, db_session):
         """Test that ontologies can be queried in priority order.
 
-        ProEthica uses: core (1) → intermediate (2) → domain (3)
+        ProEthica uses: core (1) -> intermediate (2) -> domain (3)
         """
         # Create ontologies with different priorities
         core = helpers.create_test_ontology(db_session, name='proethica-core')
