@@ -41,6 +41,28 @@ def index():
     )
     ontologies = pagination.items
 
+    # Preload entity counts in a single query to avoid N+1 (2 COUNT queries per ontology)
+    if ontologies:
+        ont_ids = [o.id for o in ontologies]
+        count_rows = db.session.execute(
+            select(
+                OntologyEntity.ontology_id,
+                OntologyEntity.entity_type,
+                func.count(OntologyEntity.id)
+            )
+            .where(OntologyEntity.ontology_id.in_(ont_ids))
+            .group_by(OntologyEntity.ontology_id, OntologyEntity.entity_type)
+        ).all()
+        counts_by_ont = {}
+        for ont_id, etype, cnt in count_rows:
+            if ont_id not in counts_by_ont:
+                counts_by_ont[ont_id] = {'class': 0, 'property': 0, 'individual': 0}
+            counts_by_ont[ont_id][etype] = cnt
+        for ont in ontologies:
+            c = counts_by_ont.get(ont.id, {})
+            ont._prefetched_class_count = c.get('class', 0)
+            ont._prefetched_triple_count = c.get('class', 0) + c.get('property', 0) + c.get('individual', 0)
+
     # Get counts for filter badges
     source_counts = db.session.execute(
         select(Ontology.source_system, func.count(Ontology.id))

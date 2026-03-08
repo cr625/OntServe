@@ -243,9 +243,11 @@ class ConceptManager:
                 LIMIT %s OFFSET %s
             """
             
+            # Save filter params before adding pagination
+            count_params = list(params)
             params.extend([limit, offset])
             results = self.storage._execute_query(query, tuple(params), fetch_all=True)
-            
+
             # Get total count (same WHERE clause, no LIMIT/OFFSET)
             count_query = f"""
                 SELECT COUNT(*)
@@ -253,7 +255,6 @@ class ConceptManager:
                 JOIN domains d ON c.domain_id = d.id
                 WHERE {' AND '.join(where_clauses)}
             """
-            count_params = params[:-2]  # Remove limit and offset
 
             total_count = self.storage._execute_query(count_query, tuple(count_params), fetch_one=True)['count']
             

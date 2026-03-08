@@ -574,7 +574,14 @@ class PostgreSQLStorage(StorageBackend):
             self._sync_pool = None
         
         if self._async_pool:
-            asyncio.create_task(self._async_pool.close())
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    loop.create_task(self._async_pool.close())
+                else:
+                    loop.run_until_complete(self._async_pool.close())
+            except RuntimeError:
+                pass  # No event loop available during teardown
             self._async_pool = None
         
         logger.info("PostgreSQL storage backend closed")

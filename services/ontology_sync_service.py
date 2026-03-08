@@ -330,8 +330,8 @@ class OntologySyncService:
             entity_type=entity_type,
             comment=description,
             parent_uri=parent_uri,
-            domain=[domain] if domain else None,
-            range=[range_] if range_ else None,
+            domain=domain if domain else None,
+            range=range_ if range_ else None,
             properties=properties,
         )
 

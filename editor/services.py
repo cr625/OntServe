@@ -8,7 +8,7 @@ Adapted from proethica's Neo4j-based approach to use OntServe's pgvector semanti
 import json
 import logging
 from typing import List, Dict, Any, Optional, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 
 import rdflib
 from rdflib import Graph, Namespace, URIRef, Literal
@@ -276,13 +276,13 @@ class OntologyEntityService:
             domain = None
             range_val = None
             if entity_type == 'property':
-                domain_objs = list(graph.objects(uri, RDFS.domain))
-                if domain_objs:
-                    domain = [str(obj) for obj in domain_objs if isinstance(obj, URIRef)]
-                
-                range_objs = list(graph.objects(uri, RDFS.range))
-                if range_objs:
-                    range_val = [str(obj) for obj in range_objs if isinstance(obj, URIRef)]
+                domain_obj = next((obj for obj in graph.objects(uri, RDFS.domain) if isinstance(obj, URIRef)), None)
+                if domain_obj:
+                    domain = str(domain_obj)
+
+                range_obj = next((obj for obj in graph.objects(uri, RDFS.range) if isinstance(obj, URIRef)), None)
+                if range_obj:
+                    range_val = str(range_obj)
             
             # Get additional properties for individuals
             properties = None
@@ -312,7 +312,7 @@ class OntologyEntityService:
                 domain=domain,
                 range=range_val,
                 properties=properties,
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             )
             
             return entity

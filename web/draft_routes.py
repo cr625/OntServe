@@ -33,18 +33,32 @@ def drafts():
         error_out=False
     )
 
-    draft_data = []
-    for version in pagination.items:
-        ont = version.ontology
+    # Eagerly load ontologies and entity counts to avoid N+1
+    versions = pagination.items
+    if versions:
+        ont_ids = list({v.ontology_id for v in versions})
+        # Batch load ontologies
+        ont_map = {o.id: o for o in db.session.execute(
+            select(Ontology).where(Ontology.id.in_(ont_ids))
+        ).scalars().all()}
+        # Batch load entity counts
+        count_rows = db.session.execute(
+            select(OntologyEntity.ontology_id, func.count(OntologyEntity.id))
+            .where(OntologyEntity.ontology_id.in_(ont_ids))
+            .group_by(OntologyEntity.ontology_id)
+        ).all()
+        count_map = dict(count_rows)
+    else:
+        ont_map = {}
+        count_map = {}
 
-        count_stmt = select(func.count()).select_from(OntologyEntity).where(
-            OntologyEntity.ontology_id == ont.id
-        )
-        entity_count = db.session.execute(count_stmt).scalar()
+    draft_data = []
+    for version in versions:
+        ont = ont_map.get(version.ontology_id)
         draft_data.append({
             'ontology': ont,
             'version': version,
-            'entity_count': entity_count
+            'entity_count': count_map.get(version.ontology_id, 0)
         })
 
     return render_template('drafts.html',
@@ -168,8 +182,8 @@ def create_draft_ontology(ontology_name):
                     uri=str(prop),
                     label=str(label) if label else None,
                     comment=str(comment) if comment else None,
-                    domain={'uri': str(domain)} if domain else None,
-                    range={'uri': str(range_val)} if range_val else None
+                    domain=str(domain) if domain else None,
+                    range=str(range_val) if range_val else None
                 )
                 db.session.add(entity)
                 entity_counts['property'] += 1
@@ -187,8 +201,8 @@ def create_draft_ontology(ontology_name):
                     uri=str(prop),
                     label=str(label) if label else None,
                     comment=str(comment) if comment else None,
-                    domain={'uri': str(domain)} if domain else None,
-                    range={'uri': str(range_val)} if range_val else None
+                    domain=str(domain) if domain else None,
+                    range=str(range_val) if range_val else None
                 )
                 db.session.add(entity)
                 entity_counts['property'] += 1

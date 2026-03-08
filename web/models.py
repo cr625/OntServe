@@ -96,14 +96,18 @@ class Ontology(db.Model):
     @property
     def triple_count(self):
         """Get count of total entities (approximation of triples)."""
+        if hasattr(self, '_prefetched_triple_count'):
+            return self._prefetched_triple_count
         stmt = select(func.count()).select_from(OntologyEntity).where(
             OntologyEntity.ontology_id == self.id
         )
         return db.session.execute(stmt).scalar() or 0
-    
+
     @property
     def class_count(self):
         """Get count of class entities."""
+        if hasattr(self, '_prefetched_class_count'):
+            return self._prefetched_class_count
         stmt = select(func.count()).select_from(OntologyEntity).where(
             OntologyEntity.ontology_id == self.id,
             OntologyEntity.entity_type == 'class'
@@ -113,6 +117,8 @@ class Ontology(db.Model):
     @property
     def property_count(self):
         """Get count of property entities."""
+        if hasattr(self, '_prefetched_property_count'):
+            return self._prefetched_property_count
         stmt = select(func.count()).select_from(OntologyEntity).where(
             OntologyEntity.ontology_id == self.id,
             OntologyEntity.entity_type == 'property'
@@ -122,6 +128,8 @@ class Ontology(db.Model):
     @property
     def individual_count(self):
         """Get count of individual entities."""
+        if hasattr(self, '_prefetched_individual_count'):
+            return self._prefetched_individual_count
         stmt = select(func.count()).select_from(OntologyEntity).where(
             OntologyEntity.ontology_id == self.id,
             OntologyEntity.entity_type == 'individual'
