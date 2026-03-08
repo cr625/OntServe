@@ -254,12 +254,22 @@ def ontology_content(ontology_name):
 def entity_detail(ontology_name, fragment):
     """Entity detail page showing current state of an entity."""
     stmt = select(Ontology).where(Ontology.name == ontology_name)
-    ontology = db.one_or_404(stmt)
+    ontology = db.session.execute(stmt).scalar_one_or_none()
 
-    entity = _find_entity_by_fragment(ontology, fragment)
+    entity = _find_entity_by_fragment(ontology, fragment) if ontology else None
+
+    # Cross-ontology fallback: entity may be in a related ontology
+    # (e.g., classes targeted to proethica-intermediate live in proethica-intermediate-extended)
     if not entity:
-        from flask import abort
-        abort(404)
+        cross_stmt = select(OntologyEntity).where(
+            OntologyEntity.uri.like(f'%#{fragment}')
+        ).limit(1)
+        entity = db.session.execute(cross_stmt).scalar_one_or_none()
+        if entity:
+            ontology = entity.ontology
+        else:
+            from flask import abort
+            abort(404)
 
     children = _get_entity_children(ontology, entity)
     ttl_content = _generate_entity_ttl_display(entity, ontology)
