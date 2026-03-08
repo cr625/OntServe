@@ -5,6 +5,8 @@ Parses RDF content and extracts OWL classes, properties, and individuals
 into OntologyEntity records.
 """
 
+from datetime import datetime, timezone
+
 import rdflib
 from rdflib import RDF, RDFS, OWL
 from sqlalchemy import select
@@ -64,19 +66,25 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
 
     entity_counts = {'class': 0, 'property': 0, 'individual': 0}
 
+    now = datetime.now(timezone.utc)
+
     # Extract classes
     for cls in g.subjects(RDF.type, OWL.Class):
         label = next(g.objects(cls, RDFS.label), None)
         comment = next(g.objects(cls, RDFS.comment), None)
         subclass_of = list(g.objects(cls, RDFS.subClassOf))
+        label_str = str(label) if label else None
+        comment_str = str(comment) if comment else None
 
         entity = OntologyEntity(
             ontology_id=ontology.id,
             entity_type='class',
             uri=str(cls),
-            label=str(label) if label else None,
-            comment=str(comment) if comment else None,
-            parent_uri=str(subclass_of[0]) if subclass_of else None
+            label=label_str,
+            comment=comment_str,
+            parent_uri=str(subclass_of[0]) if subclass_of else None,
+            content_hash=OntologyEntity.compute_content_hash(str(cls), label_str, comment_str),
+            updated_at=now
         )
         db.session.add(entity)
         entity_counts['class'] += 1
@@ -87,15 +95,19 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         comment = next(g.objects(prop, RDFS.comment), None)
         domain = next(g.objects(prop, RDFS.domain), None)
         range_val = next(g.objects(prop, RDFS.range), None)
+        label_str = str(label) if label else None
+        comment_str = str(comment) if comment else None
 
         entity = OntologyEntity(
             ontology_id=ontology.id,
             entity_type='property',
             uri=str(prop),
-            label=str(label) if label else None,
-            comment=str(comment) if comment else None,
+            label=label_str,
+            comment=comment_str,
             domain=str(domain) if domain else None,
-            range=str(range_val) if range_val else None
+            range=str(range_val) if range_val else None,
+            content_hash=OntologyEntity.compute_content_hash(str(prop), label_str, comment_str),
+            updated_at=now
         )
         db.session.add(entity)
         entity_counts['property'] += 1
@@ -106,15 +118,19 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         comment = next(g.objects(prop, RDFS.comment), None)
         domain = next(g.objects(prop, RDFS.domain), None)
         range_val = next(g.objects(prop, RDFS.range), None)
+        label_str = str(label) if label else None
+        comment_str = str(comment) if comment else None
 
         entity = OntologyEntity(
             ontology_id=ontology.id,
             entity_type='property',
             uri=str(prop),
-            label=str(label) if label else None,
-            comment=str(comment) if comment else None,
+            label=label_str,
+            comment=comment_str,
             domain=str(domain) if domain else None,
-            range=str(range_val) if range_val else None
+            range=str(range_val) if range_val else None,
+            content_hash=OntologyEntity.compute_content_hash(str(prop), label_str, comment_str),
+            updated_at=now
         )
         db.session.add(entity)
         entity_counts['property'] += 1

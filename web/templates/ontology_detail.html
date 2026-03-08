@@ -84,6 +84,10 @@
                     class="btn btn-outline-primary">
                     <i class="bi bi-gear"></i> Settings
                 </a>
+                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal"
+                    data-bs-target="#tagVersionModal">
+                    <i class="bi bi-tag"></i> Tag Version
+                </button>
                 {% endif %}
                 <a href="{{ url_for('ontology.edit_ontology', ontology_name=ontology.name) }}" class="btn btn-primary">
                     <i class="bi bi-pencil-square"></i> Edit TTL
@@ -695,9 +699,26 @@
 
             <!-- Versions Tab -->
             <div class="tab-pane fade" id="versions" role="tabpanel">
+                <!-- Tagged Releases Section -->
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0"><i class="bi bi-tags"></i> Tagged Releases</h6>
+                        <div id="currentDivergence"></div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="taggedReleasesTable">
+                            <div class="text-center text-muted py-3">
+                                <small>Loading tagged releases...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Full Version History -->
+                <h6 class="text-muted mt-4 mb-2"><i class="bi bi-clock-history"></i> Full Version History</h6>
                 {% if versions %}
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover table-sm">
                         <thead>
                             <tr>
                                 <th>Version</th>
@@ -706,7 +727,6 @@
                                 <th>Created</th>
                                 <th>Created By</th>
                                 <th>Summary</th>
-                                <th>Reasoning</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -718,6 +738,9 @@
                                     <strong>v{{ version.version_number }}</strong>
                                     {% if version.is_current %}
                                     <span class="badge bg-success ms-1">Current</span>
+                                    {% endif %}
+                                    {% if version.is_tagged_release %}
+                                    <span class="badge bg-warning ms-1"><i class="bi bi-tag-fill"></i></span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -733,9 +756,6 @@
                                     {% else %}
                                     <span class="badge bg-primary">Published</span>
                                     {% endif %}
-                                    {% if version.workflow_status %}
-                                    <br><small>{{ version.workflow_status }}</small>
-                                    {% endif %}
                                 </td>
                                 <td>{{ version.created_at.strftime('%Y-%m-%d %H:%M') if version.created_at else '-' }}
                                 </td>
@@ -744,23 +764,6 @@
                                     {% if version.change_summary %}
                                     <small>{{ version.change_summary[:100] }}{% if version.change_summary|length > 100
                                         %}...{% endif %}</small>
-                                    {% else %}
-                                    -
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if version.meta_data and version.meta_data.reasoning %}
-                                    <span class="badge bg-info">
-                                        <i class="bi bi-brain"></i>
-                                        {{ version.meta_data.reasoning.reasoner_type }}
-                                    </span>
-                                    <br>
-                                    <small>
-                                        +{{ version.meta_data.reasoning.classes_after -
-                                        version.meta_data.reasoning.classes_before }} classes<br>
-                                        +{{ version.meta_data.reasoning.properties_after -
-                                        version.meta_data.reasoning.properties_before }} props
-                                    </small>
                                     {% else %}
                                     -
                                     {% endif %}
@@ -775,12 +778,6 @@
                                         <button class="btn btn-outline-success"
                                             onclick="makeVersionCurrent({{ version.id }})" title="Make Current">
                                             <i class="bi bi-check-circle"></i>
-                                        </button>
-                                        {% endif %}
-                                        {% if version.meta_data and version.meta_data.reasoning %}
-                                        <button class="btn btn-outline-info"
-                                            onclick="showReasoningDetails({{ version.id }})" title="Reasoning Details">
-                                            <i class="bi bi-info-circle"></i>
                                         </button>
                                         {% endif %}
                                     </div>
@@ -1275,6 +1272,44 @@
 </div>
 {% endif %}
 
+<!-- Tag Version Modal -->
+{% if current_user.is_authenticated and current_user.can_perform_action('edit') %}
+<div class="modal fade" id="tagVersionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-tag"></i> Tag Version Release</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">
+                    Create a named snapshot of the current ontology state. This tags the current
+                    version content as a release point for version tracking.
+                </p>
+                <div class="mb-3">
+                    <label for="versionTagInput" class="form-label">Version Tag</label>
+                    <input type="text" class="form-control" id="versionTagInput"
+                        placeholder="e.g. v1.0.0, 2026-03-release">
+                    <div class="form-text">A short identifier for this release.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="changeSummaryInput" class="form-label">Change Summary</label>
+                    <textarea class="form-control" id="changeSummaryInput" rows="3"
+                        placeholder="Describe what changed since the last tagged release..."></textarea>
+                </div>
+                <div id="tagVersionError" class="alert alert-danger d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="confirmTagBtn" onclick="tagVersion()">
+                    <i class="bi bi-tag"></i> Create Tag
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <script>
     function viewVersion(versionId) {
         // For now, show an alert with version info
@@ -1464,9 +1499,113 @@
         return meta ? meta.getAttribute('content') : '';
     }
 
+    // ===== Version Tagging =====
+
+    function tagVersion() {
+        const tag = document.getElementById('versionTagInput').value.trim();
+        const summary = document.getElementById('changeSummaryInput').value.trim();
+        const errorEl = document.getElementById('tagVersionError');
+        const btn = document.getElementById('confirmTagBtn');
+
+        errorEl.classList.add('d-none');
+
+        if (!tag) {
+            errorEl.textContent = 'Version tag is required.';
+            errorEl.classList.remove('d-none');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Tagging...';
+
+        fetch('/api/ontology/{{ ontology.name }}/tag-version', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({version_tag: tag, change_summary: summary})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('tagVersionModal'));
+                modal.hide();
+                loadTaggedReleases();
+                location.reload();
+            } else {
+                errorEl.textContent = data.error || 'Failed to tag version.';
+                errorEl.classList.remove('d-none');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-tag"></i> Create Tag';
+            }
+        })
+        .catch(err => {
+            errorEl.textContent = 'Network error: ' + err.message;
+            errorEl.classList.remove('d-none');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-tag"></i> Create Tag';
+        });
+    }
+
+    function loadTaggedReleases() {
+        const container = document.getElementById('taggedReleasesTable');
+        const divergenceEl = document.getElementById('currentDivergence');
+
+        fetch('/api/ontology/{{ ontology.name }}/version-history?tagged_only=true')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                container.innerHTML = '<div class="text-center text-muted py-3"><small>Failed to load tagged releases.</small></div>';
+                return;
+            }
+
+            // Show current divergence from latest tag
+            if (data.current_divergence_pct !== null && data.current_divergence_pct !== undefined) {
+                const pct = data.current_divergence_pct;
+                const color = pct === 0 ? 'success' : pct < 10 ? 'info' : pct < 30 ? 'warning' : 'danger';
+                divergenceEl.innerHTML = `<span class="badge bg-${color}">Divergence since last tag: ${pct}%</span>`;
+            } else {
+                divergenceEl.innerHTML = '';
+            }
+
+            if (!data.versions || data.versions.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-3"><small>No tagged releases yet. Use "Tag Version" to create one.</small></div>';
+                return;
+            }
+
+            let html = '<table class="table table-sm mb-0"><thead><tr>';
+            html += '<th>Tag</th><th>Version</th><th>Divergence</th><th>Created</th><th>By</th><th>Summary</th>';
+            html += '</tr></thead><tbody>';
+
+            data.versions.forEach(v => {
+                const divBadge = v.divergence_pct !== null && v.divergence_pct !== undefined
+                    ? `<span class="badge bg-${v.divergence_pct === 0 ? 'success' : v.divergence_pct < 10 ? 'info' : v.divergence_pct < 30 ? 'warning' : 'danger'}">${v.divergence_pct}%</span>`
+                    : '<span class="text-muted">--</span>';
+
+                const currentBadge = v.is_current ? ' <span class="badge bg-success">Current</span>' : '';
+                const date = v.created_at ? new Date(v.created_at).toLocaleDateString() : '-';
+                const summary = v.change_summary ? (v.change_summary.length > 80 ? v.change_summary.substring(0, 80) + '...' : v.change_summary) : '-';
+
+                html += `<tr>`;
+                html += `<td><code>${v.version_tag}</code>${currentBadge}</td>`;
+                html += `<td>v${v.version_number}</td>`;
+                html += `<td>${divBadge}</td>`;
+                html += `<td><small>${date}</small></td>`;
+                html += `<td><small>${v.created_by || '-'}</small></td>`;
+                html += `<td><small>${summary}</small></td>`;
+                html += `</tr>`;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        })
+        .catch(err => {
+            container.innerHTML = '<div class="text-center text-muted py-3"><small>Error loading tagged releases.</small></div>';
+        });
+    }
+
     // Run URI cleanup when the page loads
     document.addEventListener('DOMContentLoaded', function () {
         updateURIDisplays();
+        loadTaggedReleases();
 
         // Enable delete confirmation based on input
         const deleteInput = document.getElementById('deleteConfirmInput');

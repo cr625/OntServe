@@ -4,6 +4,7 @@ Database models for OntServe Web Application
 Uses SQLAlchemy with pgvector extension for semantic search.
 """
 
+import hashlib
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 
@@ -201,31 +202,38 @@ class Ontology(db.Model):
 
 class OntologyVersion(db.Model):
     """Version tracking for ontologies."""
-    
+
     __tablename__ = 'ontology_versions'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     ontology_id = db.Column(db.Integer, db.ForeignKey('ontologies.id'), nullable=False)
     version_number = db.Column(db.Integer, nullable=False)
     version_tag = db.Column(db.String(50))
     content = db.Column(db.Text, nullable=False)
-    content_hash = db.Column(db.String(64))  # SHA-256 hash
+    content_hash = db.Column(db.String(64))  # SHA-256 hash of full TTL content
     change_summary = db.Column(db.Text)
     created_by = db.Column(db.String(255))
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     is_current = db.Column(db.Boolean, default=False)
-    is_draft = db.Column(db.Boolean, default=True)  # True for draft versions, False for published
+    is_draft = db.Column(db.Boolean, default=True)
     workflow_status = db.Column(db.String(20), default='draft')  # draft, review, published
     meta_data = db.Column('metadata', db.JSON, default={})
-    
+
+    # Version tagging for manual releases
+    is_tagged_release = db.Column(db.Boolean, default=False)
+    divergence_pct = db.Column(db.Float, nullable=True)  # % entities changed since this tag
+    previous_tagged_version_id = db.Column(db.Integer, db.ForeignKey('ontology_versions.id'), nullable=True)
+
     # Relationships
     ontology = db.relationship('Ontology', back_populates='versions')
-    
+    previous_tagged_version = db.relationship('OntologyVersion', remote_side='OntologyVersion.id',
+                                              foreign_keys=[previous_tagged_version_id])
+
     # Unique constraint on ontology_id + version_number
     __table_args__ = (
         db.UniqueConstraint('ontology_id', 'version_number', name='uq_ontology_version'),
     )
-    
+
     def __repr__(self):
         return f'<OntologyVersion {self.version_number} for Ontology {self.ontology_id}>'
 
@@ -258,9 +266,13 @@ class OntologyEntity(db.Model):
     
     # Vector embedding for semantic search (384 dimensions for all-MiniLM-L6-v2)
     embedding = db.Column(Vector(384))
-    
+
+    # Content hash for version tracking (SHA-256 of uri|label|comment)
+    content_hash = db.Column(db.String(64))
+
     # Timestamps
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     
     # Relationships
     ontology = db.relationship('Ontology', back_populates='entities')
@@ -285,11 +297,22 @@ class OntologyEntity(db.Model):
             'uri': self.uri,
             'label': self.label,
             'comment': self.comment,
+            'content_hash': self.content_hash,
             'parent_uri': self.parent_uri,
             'domain': self.domain,
             'range': self.range,
             'properties': self.properties
         }
+
+    @staticmethod
+    def compute_content_hash(uri: str, label: str = None, comment: str = None) -> str:
+        """Compute SHA-256 content hash for version comparison.
+
+        This hash must be computed identically in both OntServe and ProEthica
+        to enable Shepard's signal comparison.
+        """
+        raw = f"{uri}|{label or ''}|{comment or ''}"
+        return hashlib.sha256(raw.encode('utf-8')).hexdigest()
     
     @classmethod
     def search_similar(cls, query_embedding: List[float], 

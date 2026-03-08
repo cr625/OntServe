@@ -333,6 +333,8 @@ class OntologySyncService:
             domain=domain if domain else None,
             range=range_ if range_ else None,
             properties=properties,
+            content_hash=OntologyEntity.compute_content_hash(uri, label, description),
+            updated_at=datetime.now(timezone.utc),
         )
 
 

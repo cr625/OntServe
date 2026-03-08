@@ -24,17 +24,28 @@ if str(ontserve_root) not in sys.path:
 if str(web_dir) not in sys.path:
     sys.path.insert(0, str(web_dir))
 
+import hashlib
 import logging
 import rdflib
 from rdflib import RDF, RDFS, OWL
 from rdflib.namespace import SKOS, DCTERMS
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 PROETHICA_NS = 'http://proethica.org/ontology/'
+
+
+def _compute_content_hash(uri: str, label: str = None, comment: str = None) -> str:
+    """Compute SHA-256 content hash for entity version tracking.
+
+    Must match OntologyEntity.compute_content_hash in web/models.py
+    and the equivalent function in ProEthica's TemporaryRDFStorage.
+    """
+    raw = f"{uri}|{label or ''}|{comment or ''}"
+    return hashlib.sha256(raw.encode('utf-8')).hexdigest()
 PROETHICA_INTERMEDIATE_NS = 'http://proethica.org/ontology/intermediate#'
 PROETHICA_CORE_NS = 'http://proethica.org/ontology/core#'
 
@@ -171,13 +182,17 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
             # outside the proethica namespace and break CTE category walks.
             parent_uri = _pick_best_parent(g, class_uri)
 
+            label_str = str(label) if label else None
+            comment_str = str(comment) if comment else str(definition) if definition else None
             entity = OntologyEntity(
                 ontology_id=ontology.id,
                 entity_type='class',
                 uri=uri_str,
-                label=str(label) if label else None,
-                comment=str(comment) if comment else str(definition) if definition else None,
-                parent_uri=parent_uri
+                label=label_str,
+                comment=comment_str,
+                parent_uri=parent_uri,
+                content_hash=_compute_content_hash(uri_str, label_str, comment_str),
+                updated_at=datetime.now(timezone.utc)
             )
             db.session.add(entity)
             entities_added += 1
@@ -191,38 +206,48 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
             comment = next(g.objects(prop_uri, RDFS.comment), None)
             domain = next(g.objects(prop_uri, RDFS.domain), None)
             range_ = next(g.objects(prop_uri, RDFS.range), None)
-            
+            uri_str = str(prop_uri)
+            label_str = str(label) if label else None
+            comment_str = str(comment) if comment else None
+
             entity = OntologyEntity(
                 ontology_id=ontology.id,
                 entity_type='property',
-                uri=str(prop_uri),
-                label=str(label) if label else None,
-                comment=str(comment) if comment else None,
+                uri=uri_str,
+                label=label_str,
+                comment=comment_str,
                 domain=str(domain) if domain else None,
-                range=str(range_) if range_ else None
+                range=str(range_) if range_ else None,
+                content_hash=_compute_content_hash(uri_str, label_str, comment_str),
+                updated_at=datetime.now(timezone.utc)
             )
             db.session.add(entity)
             prop_count += 1
-        
+
         # Extract datatype properties
         for prop_uri in g.subjects(RDF.type, OWL.DatatypeProperty):
             label = next(g.objects(prop_uri, RDFS.label), None)
             comment = next(g.objects(prop_uri, RDFS.comment), None)
             domain = next(g.objects(prop_uri, RDFS.domain), None)
             range_ = next(g.objects(prop_uri, RDFS.range), None)
-            
+            uri_str = str(prop_uri)
+            label_str = str(label) if label else None
+            comment_str = str(comment) if comment else None
+
             entity = OntologyEntity(
                 ontology_id=ontology.id,
                 entity_type='property',
-                uri=str(prop_uri),
-                label=str(label) if label else None,
-                comment=str(comment) if comment else None,
+                uri=uri_str,
+                label=label_str,
+                comment=comment_str,
                 domain=str(domain) if domain else None,
-                range=str(range_) if range_ else None
+                range=str(range_) if range_ else None,
+                content_hash=_compute_content_hash(uri_str, label_str, comment_str),
+                updated_at=datetime.now(timezone.utc)
             )
             db.session.add(entity)
             prop_count += 1
-        
+
         logger.info(f"Extracted {prop_count} properties")
         entities_added += prop_count
 
@@ -260,14 +285,19 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
                     else:
                         properties[pred_name] = obj_value
 
+            uri_str = str(individual_uri)
+            label_str = str(label) if label else None
+            comment_str = str(comment) if comment else None
             entity = OntologyEntity(
                 ontology_id=ontology.id,
                 entity_type='individual',
-                uri=str(individual_uri),
-                label=str(label) if label else None,
-                comment=str(comment) if comment else None,
-                parent_uri=types[0] if types else None,  # Use first type as parent
-                properties=properties if properties else None
+                uri=uri_str,
+                label=label_str,
+                comment=comment_str,
+                parent_uri=types[0] if types else None,
+                properties=properties if properties else None,
+                content_hash=_compute_content_hash(uri_str, label_str, comment_str),
+                updated_at=datetime.now(timezone.utc)
             )
             db.session.add(entity)
             individual_count += 1
