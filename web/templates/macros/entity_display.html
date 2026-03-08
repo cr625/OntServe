@@ -1,6 +1,19 @@
 {# Entity Display Macros - Simple property rendering for all RDF data #}
 {# Uses format_key filter from app.py for camelCase to Title Case #}
 
+{# Metadata property keys to hide from card display (case-insensitive match).
+   These are extraction provenance / internal tracking, not semantic content.
+   Full details remain available on the entity detail page. #}
+{% set HIDDEN_PROPERTY_KEYS = [
+    'generatedattime', 'wasgeneratedby', 'wasattributedto',
+    'conceptcategory', 'content_hash',
+    'discoveredincase', 'discoveredinpass', 'discoveredinsection',
+    'firstdiscoveredat', 'firstdiscoveredincase',
+    'textreferences', 'sourcetext',
+    'importance', 'confidence',
+    'attributes', 'relationships'
+] %}
+
 {# Format a value for display - handles URIs, lists, etc #}
 {% macro format_value(value) %}
 {%- if value is string -%}
@@ -19,8 +32,27 @@
 {%- endif -%}
 {% endmacro %}
 
-{# Main macro to render all entity properties #}
+{# Main macro to render entity properties (filtered) #}
 {% macro render_entity_properties(entity) %}
+{% if entity.properties %}
+{% set props = entity.properties if entity.properties is mapping else {} %}
+{% if props|length > 0 %}
+<div class="entity-properties mt-2">
+    {% for key, value in props.items() %}
+    {% if value is not none and value != '' and key|lower not in HIDDEN_PROPERTY_KEYS %}
+    <div class="property-row">
+        <span class="property-key">{{ key|format_key }}:</span>
+        <span class="property-value">{{ format_value(value) }}</span>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+{% endif %}
+{% endmacro %}
+
+{# Full properties (no filtering) for entity detail page #}
+{% macro render_entity_properties_full(entity) %}
 {% if entity.properties %}
 {% set props = entity.properties if entity.properties is mapping else {} %}
 {% if props|length > 0 %}

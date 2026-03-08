@@ -2,11 +2,18 @@
 {% from "macros/entity_display.html" import render_entity_properties %}
 
 {# Render an individual entity card with optional color #}
-{% macro render_entity_card(entity, color=none) %}
+{% macro render_entity_card(entity, color=none, ontology_name=none) %}
 <div class="entity-card" style="{% if color %}--entity-color: {{ color }};{% endif %}">
     <div class="d-flex justify-content-between align-items-start">
         <div class="entity-label">
+            {% if ontology_name %}
+            <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=entity.uri|extract_name) }}"
+               class="entity-link">
+                {{ entity.label or entity.uri.split('#')[-1].split('/')[-1] | split_pascal }}
+            </a>
+            {% else %}
             {{ entity.label or entity.uri.split('#')[-1].split('/')[-1] | split_pascal }}
+            {% endif %}
         </div>
         {% if entity.parent_uri %}
         {% set raw_type = entity.parent_uri.split('#')[-1].split('/')[-1] %}
@@ -21,15 +28,11 @@
     {% endif %}
 
     {{ render_entity_properties(entity) }}
-
-    <div class="entity-uri mt-2">
-        <i class="bi bi-link-45deg"></i> {{ entity.uri }}
-    </div>
 </div>
 {% endmacro %}
 
 {# Render a section with entities #}
-{% macro render_section(section) %}
+{% macro render_section(section, ontology_name=none) %}
 {% set ns = namespace(count=section.entities|length) %}
 {% if section.subsections %}
 {% set ns.count = 0 %}
@@ -64,19 +67,18 @@
                 <span class="subsection-abbrev" style="{% if subsection.color %}background: {{ subsection.color }};{% endif %}">{{ subsection.abbrev or subsection.id[:2]|upper }}</span>
                 <span class="subsection-title">{{ subsection.title }}</span>
                 <span class="badge" style="{% if subsection.color %}background: {{ subsection.color }};{% else %}background: #6c757d;{% endif %}">{{ subsection.entities|length }}</span>
-                <span class="individual-type-note ms-2">Named Individuals</span>
             </div>
 
             <div class="entity-list" id="list-{{ section.id }}-{{ subsection.id }}">
                 {% for entity in subsection.entities[:section.max_preview|default(10)] %}
-                {{ render_entity_card(entity, subsection.color) }}
+                {{ render_entity_card(entity, subsection.color, ontology_name) }}
                 {% endfor %}
             </div>
 
             {% if subsection.entities|length > section.max_preview|default(10) %}
             <div class="hidden-entities" id="hidden-{{ section.id }}-{{ subsection.id }}" style="display: none;">
                 {% for entity in subsection.entities[section.max_preview|default(10):] %}
-                {{ render_entity_card(entity, subsection.color) }}
+                {{ render_entity_card(entity, subsection.color, ontology_name) }}
                 {% endfor %}
             </div>
             <button class="btn btn-outline-secondary btn-sm show-more-btn"
@@ -92,14 +94,14 @@
         <!-- Render entities directly -->
         <div class="entity-list" id="list-{{ section.id }}">
             {% for entity in section.entities[:section.max_preview|default(10)] %}
-            {{ render_entity_card(entity) }}
+            {{ render_entity_card(entity, ontology_name=ontology_name) }}
             {% endfor %}
         </div>
 
         {% if section.entities|length > section.max_preview|default(10) %}
         <div class="hidden-entities" id="hidden-{{ section.id }}" style="display: none;">
             {% for entity in section.entities[section.max_preview|default(10):] %}
-            {{ render_entity_card(entity) }}
+            {{ render_entity_card(entity, ontology_name=ontology_name) }}
             {% endfor %}
         </div>
         <button class="btn btn-outline-secondary btn-sm show-more-btn"

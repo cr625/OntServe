@@ -19,51 +19,6 @@
 # Default case display (used when domain not specified)
 default:
   sections:
-    - id: decision_points
-      title: Decision Points
-      description: Key decision moments in the case
-      entity_types:
-        - DecisionPoint
-      icon: bi-signpost-split
-      collapsed: false
-      max_preview: 5
-
-    - id: arguments
-      title: Arguments
-      description: PRO and CON arguments for each decision point
-      entity_types:
-        - Argument
-      icon: bi-chat-quote
-      collapsed: false
-      max_preview: 20
-
-    - id: questions
-      title: Ethical Questions
-      description: Questions that emerge from the case analysis
-      entity_types:
-        - EthicalQuestion
-      icon: bi-question-circle
-      collapsed: false
-      max_preview: 15
-
-    - id: conclusions
-      title: Conclusions
-      description: Synthesized ethical conclusions
-      entity_types:
-        - EthicalConclusion
-      icon: bi-lightbulb
-      collapsed: false
-      max_preview: 10
-
-    - id: validation
-      title: Argument Validation
-      description: Validation results for arguments
-      entity_types:
-        - ArgumentValidation
-      icon: bi-check-circle
-      collapsed: true
-      max_preview: 20
-
     - id: nine_concepts
       title: 9-Concept Formalism
       description: Named individuals organized by the 9 core concepts
@@ -125,6 +80,51 @@ default:
       icon: bi-grid-3x3
       collapsed: false
       max_preview: 30
+
+    - id: decision_points
+      title: Decision Points
+      description: Key decision moments in the case
+      entity_types:
+        - DecisionPoint
+      icon: bi-signpost-split
+      collapsed: false
+      max_preview: 5
+
+    - id: arguments
+      title: Arguments
+      description: PRO and CON arguments for each decision point
+      entity_types:
+        - Argument
+      icon: bi-chat-quote
+      collapsed: false
+      max_preview: 20
+
+    - id: questions
+      title: Ethical Questions
+      description: Questions that emerge from the case analysis
+      entity_types:
+        - EthicalQuestion
+      icon: bi-question-circle
+      collapsed: false
+      max_preview: 15
+
+    - id: conclusions
+      title: Conclusions
+      description: Synthesized ethical conclusions
+      entity_types:
+        - EthicalConclusion
+      icon: bi-lightbulb
+      collapsed: false
+      max_preview: 10
+
+    - id: validation
+      title: Argument Validation
+      description: Validation results for arguments
+      entity_types:
+        - ArgumentValidation
+      icon: bi-check-circle
+      collapsed: true
+      max_preview: 20
 
     - id: analysis
       title: Analysis Elements

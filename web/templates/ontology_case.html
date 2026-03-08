@@ -182,11 +182,15 @@
         margin-bottom: 0.25rem;
     }
 
-    .entity-uri {
-        font-family: monospace;
-        font-size: 0.7rem;
-        color: #adb5bd;
-        word-break: break-all;
+    .entity-link {
+        color: #212529;
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+
+    .entity-link:hover {
+        color: #0d6efd;
+        text-decoration: underline;
     }
 
     .entity-comment {
@@ -354,12 +358,7 @@
     }
 
     /* Individual type indicator */
-    .individual-type-note {
-        font-size: 0.75rem;
-        color: #6c757d;
-        font-style: italic;
-        margin-bottom: 0.5rem;
-    }
+    /* Removed: .individual-type-note was cluttering subsection headers */
 </style>
 {% endblock %}
 
@@ -486,7 +485,7 @@
     <div class="col-lg-9 col-md-8 order-md-1">
         <!-- Sections -->
         {% for section in case_sections %}
-        {{ render_section(section) }}
+        {{ render_section(section, ontology_name=ontology.name) }}
         {% endfor %}
     </div>
 </div>
