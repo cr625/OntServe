@@ -250,6 +250,167 @@ def ontology_content(ontology_name):
     return content, 200, {'Content-Type': 'text/plain; charset=utf-8'}
 
 
+@ontology_bp.route('/entity/<ontology_name>/<fragment>')
+def entity_detail(ontology_name, fragment):
+    """Entity detail page showing current state of an entity."""
+    stmt = select(Ontology).where(Ontology.name == ontology_name)
+    ontology = db.one_or_404(stmt)
+
+    entity = _find_entity_by_fragment(ontology, fragment)
+    if not entity:
+        from flask import abort
+        abort(404)
+
+    children = _get_entity_children(ontology, entity)
+    ttl_content = _generate_entity_ttl_display(entity, ontology)
+
+    return render_template('entity_detail.html',
+                         ontology=ontology,
+                         entity=entity,
+                         fragment=fragment,
+                         children=children,
+                         ttl_content=ttl_content,
+                         version_tag=None,
+                         version_date=None)
+
+
+@ontology_bp.route('/entity/<ontology_name>/version/<version_tag>/<fragment>')
+def entity_detail_versioned(ontology_name, version_tag, fragment):
+    """Entity detail page showing entity at a specific tagged version."""
+    stmt = select(Ontology).where(Ontology.name == ontology_name)
+    ontology = db.one_or_404(stmt)
+
+    # Find the tagged version
+    version_stmt = select(OntologyVersion).where(
+        OntologyVersion.ontology_id == ontology.id,
+        OntologyVersion.version_tag == version_tag
+    )
+    version = db.session.execute(version_stmt).scalar_one_or_none()
+    if not version:
+        from flask import abort
+        abort(404)
+
+    # Parse entity from the version's TTL content
+    entity_data = _extract_entity_from_ttl(version.content, ontology, fragment)
+    if not entity_data:
+        from flask import abort
+        abort(404)
+
+    version_date = version.created_at.strftime('%Y-%m-%d') if version.created_at else None
+
+    return render_template('entity_detail.html',
+                         ontology=ontology,
+                         entity=entity_data,
+                         fragment=fragment,
+                         children=[],
+                         ttl_content=entity_data.get('_ttl', ''),
+                         version_tag=version_tag,
+                         version_date=version_date)
+
+
+def _find_entity_by_fragment(ontology, fragment):
+    """Find entity by URI fragment (the part after #)."""
+    # Try exact fragment match against known base URIs
+    if ontology.base_uri:
+        full_uri = f"{ontology.base_uri.rstrip('/#')}#{fragment}"
+        stmt = select(OntologyEntity).where(
+            OntologyEntity.ontology_id == ontology.id,
+            OntologyEntity.uri == full_uri
+        )
+        entity = db.session.execute(stmt).scalar_one_or_none()
+        if entity:
+            return entity
+
+    # Fallback: search by URI ending with #fragment
+    stmt = select(OntologyEntity).where(
+        OntologyEntity.ontology_id == ontology.id,
+        OntologyEntity.uri.like(f'%#{fragment}')
+    )
+    return db.session.execute(stmt).scalar_one_or_none()
+
+
+def _get_entity_children(ontology, entity):
+    """Get entities that have this entity as parent_uri."""
+    stmt = select(OntologyEntity).where(
+        OntologyEntity.ontology_id == ontology.id,
+        OntologyEntity.parent_uri == entity.uri
+    ).order_by(OntologyEntity.label)
+    return db.session.execute(stmt).scalars().all()
+
+
+def _generate_entity_ttl_display(entity, ontology):
+    """Generate TTL representation for display."""
+    from web.rdf_helpers import generate_entity_ttl
+    return generate_entity_ttl(entity, ontology)
+
+
+def _extract_entity_from_ttl(ttl_content, ontology, fragment):
+    """Extract a single entity's data from TTL content for versioned display.
+
+    Returns a dict-like object with entity attributes, or None if not found.
+    """
+    g = rdflib.Graph()
+    try:
+        g.parse(data=ttl_content, format='turtle')
+    except Exception:
+        return None
+
+    # Find the entity URI by fragment
+    target_uri = None
+    for s in g.subjects():
+        s_str = str(s)
+        if s_str.endswith(f'#{fragment}'):
+            target_uri = s
+            break
+
+    if not target_uri:
+        return None
+
+    from rdflib import RDF, RDFS, OWL
+
+    # Determine type
+    entity_type = 'class'
+    for type_uri in g.objects(target_uri, RDF.type):
+        if type_uri == OWL.ObjectProperty or type_uri == OWL.DatatypeProperty:
+            entity_type = 'property'
+        elif type_uri == OWL.NamedIndividual:
+            entity_type = 'individual'
+
+    label = next(g.objects(target_uri, RDFS.label), None)
+    comment = next(g.objects(target_uri, RDFS.comment), None)
+    parent = next(g.objects(target_uri, RDFS.subClassOf), None)
+    domain = next(g.objects(target_uri, RDFS.domain), None)
+    range_val = next(g.objects(target_uri, RDFS.range), None)
+
+    uri_str = str(target_uri)
+    label_str = str(label) if label else None
+    comment_str = str(comment) if comment else None
+    content_hash = OntologyEntity.compute_content_hash(uri_str, label_str, comment_str)
+
+    # Build TTL snippet for display
+    from web.rdf_helpers import generate_entity_ttl
+
+    class _EntityProxy:
+        """Lightweight proxy mimicking OntologyEntity for TTL generation."""
+        pass
+
+    proxy = _EntityProxy()
+    proxy.uri = uri_str
+    proxy.label = label_str
+    proxy.comment = comment_str
+    proxy.entity_type = entity_type
+    proxy.parent_uri = str(parent) if parent else None
+    proxy.domain = str(domain) if domain else None
+    proxy.range = str(range_val) if range_val else None
+    proxy.properties = None
+    proxy.content_hash = content_hash
+    proxy.updated_at = None
+    proxy.id = None
+    proxy._ttl = generate_entity_ttl(proxy, ontology)
+
+    return proxy
+
+
 @ontology_bp.route('/ontology/<ontology_name>.<format_ext>')
 def ontology_format_specific(ontology_name, format_ext):
     """

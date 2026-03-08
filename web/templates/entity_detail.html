@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block title %}{{ entity.label or fragment }} - {{ ontology.name }} - OntServe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .entity-header {
+        border-left: 4px solid;
+        padding-left: 1rem;
+    }
+    .entity-header.type-class { border-color: #0d6efd; }
+    .entity-header.type-property { border-color: #198754; }
+    .entity-header.type-individual { border-color: #6f42c1; }
+
+    .property-row {
+        display: flex;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .property-row:last-child { border-bottom: none; }
+    .property-key {
+        min-width: 140px;
+        font-weight: 600;
+        color: #6c757d;
+    }
+    .property-value {
+        flex: 1;
+        word-break: break-word;
+    }
+
+    .version-banner {
+        border-left: 4px solid #ffc107;
+    }
+
+    .edit-form .form-control:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+    }
+
+    .ttl-block {
+        font-family: 'Courier New', monospace;
+        font-size: 0.85em;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        white-space: pre-wrap;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}">
+                    {{ ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else ontology.name }}
+                </a>
+            </li>
+            <li class="breadcrumb-item active">{{ entity.label or fragment }}</li>
+        </ol>
+    </nav>
+
+    {% if version_tag %}
+    <!-- Versioned view banner -->
+    <div class="alert alert-warning version-banner mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <i class="bi bi-clock-history"></i>
+                <strong>Historical version</strong> -- viewing this entity as of tag <code>{{ version_tag }}</code>
+                {% if version_date %}
+                <small class="text-muted">({{ version_date }})</small>
+                {% endif %}
+            </div>
+            <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=fragment) }}"
+               class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-arrow-right"></i> View current version
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Entity Header -->
+    <div class="entity-header type-{{ entity.entity_type }} mb-4">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1 class="mb-1">{{ entity.label or fragment }}</h1>
+                <div class="mb-2">
+                    <span class="badge bg-{{ 'primary' if entity.entity_type == 'class' else 'success' if entity.entity_type == 'property' else 'secondary' }}">
+                        {{ entity.entity_type|capitalize }}
+                    </span>
+                    {% if entity.content_hash %}
+                    <span class="badge bg-light text-muted" title="Content hash: {{ entity.content_hash }}">
+                        <i class="bi bi-hash"></i> {{ entity.content_hash[:8] }}
+                    </span>
+                    {% endif %}
+                </div>
+                <code class="text-muted small">{{ entity.uri }}</code>
+            </div>
+            {% if not version_tag and current_user.is_authenticated and current_user.can_perform_action('edit') %}
+            <button class="btn btn-outline-warning btn-sm" id="editToggleBtn" onclick="toggleEditMode()">
+                <i class="bi bi-pencil"></i> Edit
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main content -->
+        <div class="col-md-8">
+            <!-- Display mode -->
+            <div id="displayMode">
+                <!-- Definition/Comment -->
+                {% if entity.comment %}
+                <div class="card mb-3">
+                    <div class="card-header"><h6 class="mb-0">Definition</h6></div>
+                    <div class="card-body">
+                        <p class="mb-0">{{ entity.comment }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Properties -->
+                <div class="card mb-3">
+                    <div class="card-header"><h6 class="mb-0">Properties</h6></div>
+                    <div class="card-body">
+                        {% if entity.parent_uri %}
+                        <div class="property-row">
+                            <div class="property-key">
+                                {% if entity.entity_type == 'class' %}Subclass of{% else %}Parent{% endif %}
+                            </div>
+                            <div class="property-value">
+                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.parent_uri.split('#')[-1] if '#' in entity.parent_uri else entity.parent_uri.split('/')[-1]) }}">
+                                    {{ entity.parent_uri.split('#')[-1] if '#' in entity.parent_uri else entity.parent_uri.split('/')[-1] }}
+                                </a>
+                                <br><code class="small text-muted">{{ entity.parent_uri }}</code>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if entity.domain %}
+                        <div class="property-row">
+                            <div class="property-key">Domain</div>
+                            <div class="property-value">
+                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.domain.split('#')[-1] if '#' in entity.domain else entity.domain.split('/')[-1]) }}">
+                                    {{ entity.domain.split('#')[-1] if '#' in entity.domain else entity.domain.split('/')[-1] }}
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if entity.range %}
+                        <div class="property-row">
+                            <div class="property-key">Range</div>
+                            <div class="property-value">
+                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.range.split('#')[-1] if '#' in entity.range else entity.range.split('/')[-1]) }}">
+                                    {{ entity.range.split('#')[-1] if '#' in entity.range else entity.range.split('/')[-1] }}
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if entity.properties %}
+                        {% for key, value in entity.properties.items() if key not in ('type', 'NamedIndividual') %}
+                        <div class="property-row">
+                            <div class="property-key">{{ key }}</div>
+                            <div class="property-value">
+                                {% if value is iterable and value is not string %}
+                                    {% for v in value %}
+                                    <div>{{ v }}</div>
+                                    {% endfor %}
+                                {% else %}
+                                    {{ value }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if not entity.parent_uri and not entity.domain and not entity.range and not entity.properties %}
+                        <p class="text-muted mb-0">No additional properties.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Children (subclasses / subproperties) -->
+                {% if children %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            {% if entity.entity_type == 'class' %}Subclasses{% else %}Related{% endif %}
+                            <span class="badge bg-secondary ms-1">{{ children|length }}</span>
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for child in children %}
+                            <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=child.uri.split('#')[-1] if '#' in child.uri else child.uri.split('/')[-1]) }}"
+                               class="list-group-item list-group-item-action">
+                                <strong>{{ child.label or child.uri.split('#')[-1] }}</strong>
+                                {% if child.comment %}
+                                <br><small class="text-muted">{{ child.comment[:120] }}{% if child.comment|length > 120 %}...{% endif %}</small>
+                                {% endif %}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- TTL representation -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-file-code"></i> TTL</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="ttl-block">{{ ttl_content }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit mode (hidden by default) -->
+            {% if not version_tag and current_user.is_authenticated and current_user.can_perform_action('edit') %}
+            <div id="editMode" class="d-none">
+                <div class="card mb-3">
+                    <div class="card-header bg-warning bg-opacity-10">
+                        <h6 class="mb-0"><i class="bi bi-pencil"></i> Edit Entity</h6>
+                    </div>
+                    <div class="card-body edit-form">
+                        <div class="mb-3">
+                            <label for="editLabel" class="form-label">Label</label>
+                            <input type="text" class="form-control" id="editLabel"
+                                   value="{{ entity.label or '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editComment" class="form-label">Definition / Comment</label>
+                            <textarea class="form-control" id="editComment" rows="4">{{ entity.comment or '' }}</textarea>
+                        </div>
+                        <div id="editError" class="alert alert-danger d-none"></div>
+                        <div id="editSuccess" class="alert alert-success d-none"></div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-warning" onclick="saveEntity()">
+                                <i class="bi bi-check-lg"></i> Save
+                            </button>
+                            <button class="btn btn-secondary" onclick="toggleEditMode()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Metadata card -->
+            <div class="card mb-3">
+                <div class="card-header"><h6 class="mb-0">Metadata</h6></div>
+                <div class="card-body">
+                    <div class="property-row">
+                        <div class="property-key">Ontology</div>
+                        <div class="property-value">
+                            <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}">
+                                {{ ontology.name }}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="property-row">
+                        <div class="property-key">Type</div>
+                        <div class="property-value">{{ entity.entity_type|capitalize }}</div>
+                    </div>
+                    {% if entity.content_hash %}
+                    <div class="property-row">
+                        <div class="property-key">Content Hash</div>
+                        <div class="property-value"><code class="small">{{ entity.content_hash[:16] }}...</code></div>
+                    </div>
+                    {% endif %}
+                    {% if entity.updated_at %}
+                    <div class="property-row">
+                        <div class="property-key">Last Updated</div>
+                        <div class="property-value">{{ entity.updated_at.strftime('%Y-%m-%d %H:%M') if entity.updated_at else '-' }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Content negotiation links -->
+            <div class="card mb-3">
+                <div class="card-header"><h6 class="mb-0">Formats</h6></div>
+                <div class="card-body">
+                    <a href="/resolve?uri={{ entity.uri }}" class="btn btn-sm btn-outline-secondary me-1 mb-1">
+                        <i class="bi bi-file-code"></i> TTL
+                    </a>
+                    <a href="/resolve?uri={{ entity.uri }}" class="btn btn-sm btn-outline-secondary me-1 mb-1"
+                       onclick="event.preventDefault(); fetch(this.href, {headers:{'Accept':'application/json'}}).then(r=>r.json()).then(d=>{const w=window.open('','_blank');w.document.write('<pre>'+JSON.stringify(d,null,2)+'</pre>')})">
+                        <i class="bi bi-braces"></i> JSON
+                    </a>
+                </div>
+            </div>
+
+            {% if version_tag %}
+            <!-- Version info for historical views -->
+            <div class="card mb-3 border-warning">
+                <div class="card-header bg-warning bg-opacity-10"><h6 class="mb-0">Version Info</h6></div>
+                <div class="card-body">
+                    <div class="property-row">
+                        <div class="property-key">Tag</div>
+                        <div class="property-value"><code>{{ version_tag }}</code></div>
+                    </div>
+                    {% if version_date %}
+                    <div class="property-row">
+                        <div class="property-key">Tagged</div>
+                        <div class="property-value">{{ version_date }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleEditMode() {
+        const display = document.getElementById('displayMode');
+        const edit = document.getElementById('editMode');
+        const btn = document.getElementById('editToggleBtn');
+        if (!edit) return;
+
+        const isEditing = !edit.classList.contains('d-none');
+        if (isEditing) {
+            edit.classList.add('d-none');
+            display.classList.remove('d-none');
+            btn.innerHTML = '<i class="bi bi-pencil"></i> Edit';
+            btn.classList.remove('btn-secondary');
+            btn.classList.add('btn-outline-warning');
+        } else {
+            edit.classList.remove('d-none');
+            display.classList.add('d-none');
+            btn.innerHTML = '<i class="bi bi-x-lg"></i> Cancel';
+            btn.classList.remove('btn-outline-warning');
+            btn.classList.add('btn-secondary');
+        }
+    }
+
+    function saveEntity() {
+        const label = document.getElementById('editLabel').value.trim();
+        const comment = document.getElementById('editComment').value.trim();
+        const errorEl = document.getElementById('editError');
+        const successEl = document.getElementById('editSuccess');
+
+        errorEl.classList.add('d-none');
+        successEl.classList.add('d-none');
+
+        fetch('/api/entity/{{ entity.id }}', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({label: label, comment: comment})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                successEl.textContent = 'Entity updated. Content hash: ' + data.content_hash.substring(0, 12) + '...';
+                successEl.classList.remove('d-none');
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                errorEl.textContent = data.error || 'Update failed.';
+                errorEl.classList.remove('d-none');
+            }
+        })
+        .catch(err => {
+            errorEl.textContent = 'Network error: ' + err.message;
+            errorEl.classList.remove('d-none');
+        });
+    }
+</script>
+{% endblock %}

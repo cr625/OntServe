@@ -362,31 +362,25 @@
                                 <div class="entity-list" style="max-height: 500px; overflow-y: auto;">
                                     {% if stats.from_ttl and stats.ttl_classes %}
                                     {% for cls in stats.ttl_classes %}
-                                    <div class="list-group-item border-0 border-bottom">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <strong>{{ cls.label }}</strong>
-                                                {% if cls.comment %}
-                                                <p class="text-muted small mb-1 mt-1">{{ cls.comment[:150] }}{% if cls.comment|length > 150 %}...{% endif %}</p>
-                                                {% endif %}
-                                            </div>
-                                        </div>
+                                    <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=cls.uri|extract_name) }}"
+                                       class="list-group-item list-group-item-action border-0 border-bottom">
+                                        <strong>{{ cls.label }}</strong>
+                                        {% if cls.comment %}
+                                        <p class="text-muted small mb-1 mt-1">{{ cls.comment[:150] }}{% if cls.comment|length > 150 %}...{% endif %}</p>
+                                        {% endif %}
                                         <code class="small text-muted">{{ cls.uri }}</code>
-                                    </div>
+                                    </a>
                                     {% endfor %}
                                     {% elif entities.classes %}
                                     {% for entity in entities.classes %}
-                                    <div class="list-group-item border-0 border-bottom">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <strong>{{ entity.label or entity.uri|extract_name }}</strong>
-                                                {% if entity.comment %}
-                                                <p class="text-muted small mb-1 mt-1">{{ entity.comment[:150] }}{% if entity.comment|length > 150 %}...{% endif %}</p>
-                                                {% endif %}
-                                            </div>
-                                        </div>
+                                    <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.uri|extract_name) }}"
+                                       class="list-group-item list-group-item-action border-0 border-bottom">
+                                        <strong>{{ entity.label or entity.uri|extract_name }}</strong>
+                                        {% if entity.comment %}
+                                        <p class="text-muted small mb-1 mt-1">{{ entity.comment[:150] }}{% if entity.comment|length > 150 %}...{% endif %}</p>
+                                        {% endif %}
                                         <code class="small text-muted">{{ entity.uri }}</code>
-                                    </div>
+                                    </a>
                                     {% endfor %}
                                     {% else %}
                                     <div class="text-muted text-center py-4">
@@ -414,7 +408,8 @@
                                         <small class="text-muted fw-bold">Object Properties ({{ stats.ttl_object_properties|length }})</small>
                                     </div>
                                     {% for prop in stats.ttl_object_properties %}
-                                    <div class="list-group-item border-0 border-bottom">
+                                    <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=prop.uri|extract_name) }}"
+                                       class="list-group-item list-group-item-action border-0 border-bottom">
                                         <strong>{{ prop.label }}</strong>
                                         {% if prop.domain or prop.range %}
                                         <div class="mt-1">
@@ -426,8 +421,8 @@
                                             {% endif %}
                                         </div>
                                         {% endif %}
-                                        <br><code class="small text-muted">{{ prop.uri }}</code>
-                                    </div>
+                                        <code class="small text-muted">{{ prop.uri }}</code>
+                                    </a>
                                     {% endfor %}
                                     {% endif %}
                                     <!-- Datatype Properties -->
@@ -436,15 +431,17 @@
                                         <small class="text-muted fw-bold">Datatype Properties ({{ stats.ttl_datatype_properties|length }})</small>
                                     </div>
                                     {% for prop in stats.ttl_datatype_properties %}
-                                    <div class="list-group-item border-0 border-bottom">
+                                    <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=prop.uri|extract_name) }}"
+                                       class="list-group-item list-group-item-action border-0 border-bottom">
                                         <strong>{{ prop.label }}</strong>
-                                        <br><code class="small text-muted">{{ prop.uri }}</code>
-                                    </div>
+                                        <code class="small text-muted">{{ prop.uri }}</code>
+                                    </a>
                                     {% endfor %}
                                     {% endif %}
                                     {% elif entities.properties %}
                                     {% for entity in entities.properties %}
-                                    <div class="list-group-item border-0 border-bottom">
+                                    <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.uri|extract_name) }}"
+                                       class="list-group-item list-group-item-action border-0 border-bottom">
                                         <strong>{{ entity.label or entity.uri|extract_name }}</strong>
                                         {% if entity.domain or entity.range %}
                                         <div class="mt-1">
@@ -456,8 +453,8 @@
                                             {% endif %}
                                         </div>
                                         {% endif %}
-                                        <br><code class="small text-muted">{{ entity.uri }}</code>
-                                    </div>
+                                        <code class="small text-muted">{{ entity.uri }}</code>
+                                    </a>
                                     {% endfor %}
                                     {% else %}
                                     <div class="text-muted text-center py-4">
@@ -490,12 +487,13 @@
                             <div class="card-body p-0">
                                 <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
                                     {% for entity in cat_data.entities %}
-                                    <div class="list-group-item py-2">
+                                    <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.uri|extract_name) }}"
+                                       class="list-group-item list-group-item-action py-2">
                                         <strong class="small">{{ entity.label }}</strong>
                                         {% if entity.comment %}
                                         <p class="text-muted small mb-0 mt-1" style="font-size: 0.75rem;">{{ entity.comment[:80] }}{% if entity.comment|length > 80 %}...{% endif %}</p>
                                         {% endif %}
-                                    </div>
+                                    </a>
                                     {% endfor %}
                                     {% if not cat_data.entities %}
                                     <div class="list-group-item text-muted small text-center py-3">
@@ -525,7 +523,8 @@
                                 <div class="row">
                                     {% for ind in stats.ttl_individuals %}
                                     <div class="col-md-4 mb-3">
-                                        <div class="card h-100">
+                                        <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=ind.uri|extract_name) }}"
+                                           class="card h-100 text-decoration-none">
                                             <div class="card-body">
                                                 <h6>{{ ind.label }}</h6>
                                                 {% if ind.comment %}
@@ -533,7 +532,7 @@
                                                 {% endif %}
                                                 <code class="small">{{ ind.uri }}</code>
                                             </div>
-                                        </div>
+                                        </a>
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -541,7 +540,8 @@
                                 <div class="row">
                                     {% for entity in entities.individuals %}
                                     <div class="col-md-4 mb-3">
-                                        <div class="card h-100">
+                                        <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.uri|extract_name) }}"
+                                           class="card h-100 text-decoration-none">
                                             <div class="card-body">
                                                 <h6>{{ entity.label or entity.uri|extract_name }}</h6>
                                                 {% if entity.comment %}
@@ -549,7 +549,7 @@
                                                 {% endif %}
                                                 <code class="small">{{ entity.uri }}</code>
                                             </div>
-                                        </div>
+                                        </a>
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -1282,6 +1282,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <div id="tagDivergenceWarning" class="d-none"></div>
                 <p class="text-muted">
                     Create a named snapshot of the current ontology state. This tags the current
                     version content as a release point for version tracking.
@@ -1500,6 +1501,36 @@
     }
 
     // ===== Version Tagging =====
+
+    // Check divergence when the tag modal opens
+    const tagModal = document.getElementById('tagVersionModal');
+    if (tagModal) {
+        tagModal.addEventListener('show.bs.modal', function () {
+            const warningEl = document.getElementById('tagDivergenceWarning');
+            warningEl.className = 'd-none';
+            warningEl.innerHTML = '';
+
+            fetch('/api/ontology/{{ ontology.name }}/version-history?tagged_only=true')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) return;
+                // No previous tags -- first tag, no warning needed
+                if (!data.versions || data.versions.length === 0) return;
+
+                const pct = data.current_divergence_pct;
+                if (pct === null || pct === undefined) return;
+
+                if (pct === 0) {
+                    warningEl.className = 'alert alert-warning mb-3';
+                    warningEl.innerHTML = '<i class="bi bi-exclamation-triangle"></i> <strong>No changes detected</strong> since the last tagged release. The ontology content is identical. Are you sure you want to create a new tag?';
+                } else if (pct < 5) {
+                    warningEl.className = 'alert alert-info mb-3';
+                    warningEl.innerHTML = '<i class="bi bi-info-circle"></i> Only <strong>' + pct + '%</strong> of entities have changed since the last tag. Consider waiting for more changes before tagging.';
+                }
+            })
+            .catch(() => {});  // Silently fail -- non-blocking check
+        });
+    }
 
     function tagVersion() {
         const tag = document.getElementById('versionTagInput').value.trim();

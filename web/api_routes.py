@@ -415,6 +415,45 @@ def entity_hash_check():
     })
 
 
+@api_bp.route('/api/entity/<int:entity_id>', methods=['PUT'])
+@login_required
+def update_entity(entity_id):
+    """Update entity label and/or comment. Recomputes content hash."""
+    entity = db.get_or_404(OntologyEntity, entity_id)
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'No data provided'}), 400
+
+    old_hash = entity.content_hash
+
+    if 'label' in data:
+        entity.label = data['label'] or None
+    if 'comment' in data:
+        entity.comment = data['comment'] or None
+
+    entity.content_hash = OntologyEntity.compute_content_hash(
+        entity.uri, entity.label, entity.comment
+    )
+    entity.updated_at = datetime.now(timezone.utc)
+
+    try:
+        db.session.commit()
+        current_app.logger.info(
+            f"Entity {entity.uri} updated by {current_user.username}: "
+            f"hash {old_hash[:8] if old_hash else 'none'}... -> {entity.content_hash[:8]}..."
+        )
+        return jsonify({
+            'success': True,
+            'content_hash': entity.content_hash,
+            'old_hash': old_hash,
+            'hash_changed': old_hash != entity.content_hash
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 def _compute_divergence(old_ttl_content: str, new_ttl_content: str) -> float:
     """Compute entity-level divergence between two TTL content strings.
 
