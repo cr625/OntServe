@@ -16,7 +16,6 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_cors import CORS
 
-from web.config import config
 from web.models import db, init_db, User
 from core.ontology_manager import OntologyManager
 from core.ontology_merger import OntologyMergerService
@@ -54,7 +53,8 @@ def create_app(config_name=None):
         }
     })
 
-    # Load configuration
+    # Load configuration — import deferred so .env is loaded before Config class body runs
+    from web.config import config
     config_name = config_name or os.environ.get('FLASK_CONFIG', 'development')
     config_class = config[config_name]
     app.config.from_object(config_class)

@@ -98,38 +98,41 @@ class PostgreSQLStorage(StorageBackend):
     
     def _verify_schema(self):
         """Verify that the required database schema exists."""
-        with self._get_connection() as conn:
+        conn = self._get_connection()
+        try:
             cursor = conn.cursor()
-            
+
             # Check for required tables
             required_tables = [
-                'domains', 'ontologies', 'ontology_versions', 
+                'domains', 'ontologies', 'ontology_versions',
                 'concepts', 'concept_versions', 'concept_triples',
                 'candidate_metadata', 'approval_workflows'
             ]
-            
+
             cursor.execute("""
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_name = ANY(%s)
             """, (required_tables,))
-            
+
             existing_tables = {row[0] for row in cursor.fetchall()}
             missing_tables = set(required_tables) - existing_tables
-            
+
             if missing_tables:
                 raise StorageError(
                     f"Missing required tables: {', '.join(missing_tables)}. "
                     "Please run the schema.sql file to initialize the database."
                 )
-            
+
             # Check for pgvector extension if vector search is enabled
             if self.enable_vector_search:
                 cursor.execute("SELECT EXISTS(SELECT 1 FROM pg_extension WHERE extname = 'vector')")
                 if not cursor.fetchone()[0]:
                     logger.warning("pgvector extension not found. Vector search will be disabled.")
                     self.enable_vector_search = False
+        finally:
+            self._return_connection(conn)
     
     def _get_connection(self):
         """Get a connection from the pool."""

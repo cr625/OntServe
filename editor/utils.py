@@ -8,14 +8,7 @@ import logging
 from typing import List, Dict, Any, Optional, Set
 from collections import defaultdict
 
-# Handle imports based on context
-try:
-    from web.models import OntologyEntity, Ontology
-except ImportError:
-    try:
-        from ..web.models import OntologyEntity, Ontology
-    except ImportError:
-        from models import OntologyEntity, Ontology
+from web.models import OntologyEntity, Ontology
 
 logger = logging.getLogger(__name__)
 
