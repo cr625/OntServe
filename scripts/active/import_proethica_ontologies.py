@@ -18,13 +18,8 @@ from datetime import datetime
 
 # Set up database connection
 def get_db_connection():
-    return psycopg2.connect(
-        host='localhost',
-        port=5432,
-        database='ontserve',
-        user='ontserve_user',
-        password='ontserve_development_password'
-    )
+    from config.config_loader import get_database_url
+    return psycopg2.connect(get_database_url())
 
 def ensure_domain_exists(conn, domain_name, display_name, namespace_uri, description):
     """Ensure the domain exists and return its ID."""

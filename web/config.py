@@ -3,27 +3,24 @@ Configuration for OntServe Web Application
 """
 
 import os
-import sys
 from pathlib import Path
+
+from config.config_loader import get_database_url
 
 basedir = Path(__file__).parent.absolute()
 project_root = basedir.parent
-
-# Add project root to path for config imports
-sys.path.insert(0, str(project_root))
 
 # Config loading deferred to create_app() — see web/app.py
 
 
 class Config:
     """Base configuration"""
-    
+
     # Flask settings
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-    
-    # Database settings - using local PostgreSQL on port 5432
-    SQLALCHEMY_DATABASE_URI = os.environ.get('ONTSERVE_DB_URL') or \
-        'postgresql://postgres:PASS@localhost:5432/ontserve'
+
+    # Database settings
+    SQLALCHEMY_DATABASE_URI = get_database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Application settings
@@ -66,11 +63,13 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    
-    # Use environment variables in production
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    if not SECRET_KEY:
-        raise ValueError("SECRET_KEY environment variable must be set in production")
+
+    @classmethod
+    def init_app(cls, app):
+        """Validate production-required settings after app creation."""
+        if not app.config.get('SECRET_KEY') or \
+                app.config['SECRET_KEY'] == 'dev-secret-key-change-in-production':
+            raise ValueError("SECRET_KEY environment variable must be set in production")
 
 
 class TestingConfig(Config):

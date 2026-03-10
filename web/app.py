@@ -5,15 +5,11 @@ Flask application for managing and serving ontologies with semantic search capab
 """
 
 import os
-import sys
 import json
 import logging
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-
-# Add parent directory to path to import OntServe modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from flask import Flask
 from flask_migrate import Migrate
@@ -60,7 +56,10 @@ def create_app(config_name=None):
 
     # Load configuration
     config_name = config_name or os.environ.get('FLASK_CONFIG', 'development')
-    app.config.from_object(config[config_name])
+    config_class = config[config_name]
+    app.config.from_object(config_class)
+    if hasattr(config_class, 'init_app'):
+        config_class.init_app(app)
 
     # Initialize database
     init_db(app)

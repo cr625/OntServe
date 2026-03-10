@@ -7,7 +7,6 @@ Tools are auto-registered with schemas generated from type hints.
 """
 
 import os
-import sys
 import json
 import logging
 from pathlib import Path
@@ -26,7 +25,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
 
 
 # ---------------------------------------------------------------------------
@@ -74,10 +72,8 @@ async def app_lifespan(server):
     from services.ontology_sync_service import sync_ontologies_on_startup
     from servers.mcp_tool_handlers import MCPToolHandlers
 
-    db_url = os.environ.get(
-        'ONTSERVE_DB_URL',
-        'postgresql://postgres:PASS@localhost:5432/ontserve'
-    )
+    from config.config_loader import get_database_url
+    db_url = get_database_url()
 
     try:
         storage = PostgreSQLStorage({

@@ -5,7 +5,6 @@ This module provides shared fixtures and configuration for all tests.
 """
 
 import os
-import sys
 import pytest
 import pytest_asyncio
 import asyncio
@@ -13,9 +12,7 @@ from pathlib import Path
 from typing import Generator
 from datetime import datetime
 
-# Add project root to path
 project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
 
 # Set test environment before importing app
 os.environ['ENVIRONMENT'] = 'test'

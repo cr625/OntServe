@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ontserve"
+version = "1.0.0"
+requires-python = ">=3.12"
+description = "Central ontology management and serving for the ProEthica ecosystem"
+
+[tool.setuptools.packages.find]
+include = [
+    "config*",
+    "core*",
+    "editor*",
+    "importers*",
+    "servers*",
+    "services*",
+    "storage*",
+    "utils*",
+    "web*",
+]
+exclude = [
+    "tests*",
+    "scripts*",
+    "venv*",
+]

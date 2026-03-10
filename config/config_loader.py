@@ -226,6 +226,11 @@ def load_ontserve_config(environment: Optional[str] = None) -> dict:
     return loader.load_config(environment)
 
 
+def get_database_url() -> str:
+    """Get database URL with fallback default. Single source of truth."""
+    return get_config_loader().get_database_url()
+
+
 # Example usage
 if __name__ == "__main__":
     # Configure logging for testing
