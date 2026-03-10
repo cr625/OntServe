@@ -38,6 +38,13 @@ def create_app(config_name=None):
     Returns:
         Flask application instance
     """
+    # Load environment variables from .env files before reading Config class
+    from config.config_loader import load_ontserve_config
+    config_summary = load_ontserve_config()
+    logging.getLogger(__name__).info(
+        "Loaded configuration from: %s", ", ".join(config_summary["loaded_files"]),
+    )
+
     app = Flask(__name__)
 
     # Configure CORS to allow requests from ProEthica

@@ -16,7 +16,7 @@ import asyncio
 import asyncpg
 import psycopg2
 from psycopg2.extras import RealDictCursor, Json
-from psycopg2.pool import SimpleConnectionPool
+from psycopg2.pool import ThreadedConnectionPool
 
 from .base import StorageBackend, StorageError
 
@@ -81,8 +81,8 @@ class PostgreSQLStorage(StorageBackend):
                 'password': parsed.password
             }
             
-            # Create synchronous connection pool
-            self._sync_pool = SimpleConnectionPool(
+            # Create thread-safe synchronous connection pool
+            self._sync_pool = ThreadedConnectionPool(
                 minconn=1,
                 maxconn=self.pool_size,
                 connect_timeout=10,
@@ -188,6 +188,20 @@ class PostgreSQLStorage(StorageBackend):
             if conn:
                 self._return_connection(conn)
     
+    async def _execute_query_async(self, query: str, params: Tuple = (),
+                                    fetch_one: bool = False,
+                                    fetch_all: bool = False) -> Any:
+        """Execute a query without blocking the event loop.
+
+        Delegates to the synchronous _execute_query via asyncio.to_thread,
+        which runs it in the default thread-pool executor. Requires
+        ThreadedConnectionPool for safe concurrent access.
+        """
+        return await asyncio.to_thread(
+            self._execute_query, query, params,
+            fetch_one=fetch_one, fetch_all=fetch_all,
+        )
+
     def _generate_content_hash(self, content: str) -> str:
         """Generate SHA-256 hash of content."""
         return hashlib.sha256(content.encode('utf-8')).hexdigest()

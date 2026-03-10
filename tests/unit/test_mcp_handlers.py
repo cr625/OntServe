@@ -8,7 +8,8 @@ without requiring a database connection or running MCP server.
 import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 
-from servers.mcp_tool_handlers import MCPToolHandlers, _infer_category_from_type
+from servers.mcp_tool_handlers import MCPToolHandlers
+from core.entity_patterns import infer_category_from_type
 
 
 @pytest.fixture
@@ -153,28 +154,28 @@ class TestInferCategoryFromType:
     """Test the module-level category inference function."""
 
     def test_role_from_parent_uri(self):
-        assert _infer_category_from_type("individual", "http://x#Role", "http://x#Y") == "Role"
+        assert infer_category_from_type("individual", "http://x#Role", "http://x#Y") == "Role"
 
     def test_principle_from_uri(self):
-        assert _infer_category_from_type("individual", "", "http://x#HonestyPrinciple") == "Principle"
+        assert infer_category_from_type("individual", "", "http://x#HonestyPrinciple") == "Principle"
 
     def test_obligation_from_parent(self):
-        assert _infer_category_from_type("individual", "http://x#Obligation", "http://x#Y") == "Obligation"
+        assert infer_category_from_type("individual", "http://x#Obligation", "http://x#Y") == "Obligation"
 
     def test_constraint_from_uri(self):
-        assert _infer_category_from_type("individual", "", "http://x#BudgetConstraint") == "Constraint"
+        assert infer_category_from_type("individual", "", "http://x#BudgetConstraint") == "Constraint"
 
     def test_decision_point_from_uri(self):
-        assert _infer_category_from_type("individual", "", "http://x#DecisionPoint1") == "Decision_Point"
+        assert infer_category_from_type("individual", "", "http://x#DecisionPoint1") == "Decision_Point"
 
     def test_class_fallback(self):
-        assert _infer_category_from_type("class", "", "http://x#SomeRandomThing") == "Class"
+        assert infer_category_from_type("class", "", "http://x#SomeRandomThing") == "Class"
 
     def test_individual_fallback(self):
-        assert _infer_category_from_type("individual", "", "http://x#SomeRandomThing") == "Individual"
+        assert infer_category_from_type("individual", "", "http://x#SomeRandomThing") == "Individual"
 
     def test_unknown_fallback(self):
-        assert _infer_category_from_type("", "", "http://x#SomeRandomThing") == "Unknown"
+        assert infer_category_from_type("", "", "http://x#SomeRandomThing") == "Unknown"
 
 
 # ------------------------------------------------------------------

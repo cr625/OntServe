@@ -5,6 +5,7 @@ Contains the business logic for each MCP tool. The OntServeMCPServer
 delegates call_tool requests to this class.
 """
 
+import asyncio
 import json
 import logging
 import time
@@ -13,6 +14,7 @@ from typing import Dict, Any, Optional
 
 from storage.postgresql_storage import StorageError
 from servers.mcp_source_text_integration import enhance_entity_submission_with_source_text
+from core.entity_patterns import infer_category_from_type, build_ontology_priority_sql
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +60,8 @@ class MCPToolHandlers:
             }
 
         try:
-            return self.concept_manager.get_entities_by_category(
+            return await asyncio.to_thread(
+                self.concept_manager.get_entities_by_category,
                 category, domain_id, status,
             )
         except StorageError as e:
@@ -92,7 +95,7 @@ class MCPToolHandlers:
 
         try:
             start_time = time.time()
-            results = self.sparql_service.execute_query(query)
+            results = await asyncio.to_thread(self.sparql_service.execute_query, query)
             execution_time_ms = int((time.time() - start_time) * 1000)
 
             return {
@@ -125,7 +128,8 @@ class MCPToolHandlers:
             return {"error": "Database not connected"}
 
         try:
-            return self.concept_manager.submit_candidate_concept(
+            return await asyncio.to_thread(
+                self.concept_manager.submit_candidate_concept,
                 concept, domain_id, submitted_by,
             )
         except StorageError as e:
@@ -151,7 +155,8 @@ class MCPToolHandlers:
             return {"error": "Database not connected"}
 
         try:
-            return self.concept_manager.update_concept_status(
+            return await asyncio.to_thread(
+                self.concept_manager.update_concept_status,
                 concept_id, status, user, reason,
             )
         except StorageError as e:
@@ -183,7 +188,8 @@ class MCPToolHandlers:
             }
 
         try:
-            return self.concept_manager.get_candidate_concepts(
+            return await asyncio.to_thread(
+                self.concept_manager.get_candidate_concepts,
                 domain_id, category, status,
             )
         except StorageError as e:
@@ -208,7 +214,9 @@ class MCPToolHandlers:
             return {"error": "Database not connected"}
 
         try:
-            return self.concept_manager.get_domain_info(domain_id)
+            return await asyncio.to_thread(
+                self.concept_manager.get_domain_info, domain_id,
+            )
         except StorageError as e:
             logger.error("Storage error getting domain info: %s", e)
             return {"error": f"Failed to retrieve domain info: {e}"}
@@ -266,7 +274,8 @@ class MCPToolHandlers:
                     },
                 }
 
-                result = enhance_entity_submission_with_source_text(
+                result = await asyncio.to_thread(
+                    enhance_entity_submission_with_source_text,
                     self.concept_manager,
                     self.source_text_manager,
                     entity_data,
@@ -326,7 +335,8 @@ class MCPToolHandlers:
             if section_type:
                 submitted_by_pattern += f"-{section_type}"
 
-            result = self.concept_manager.get_candidate_concepts(
+            result = await asyncio.to_thread(
+                self.concept_manager.get_candidate_concepts,
                 domain_id="engineering-ethics",
                 status="candidate",
                 submitted_by_like=submitted_by_pattern,
@@ -388,7 +398,9 @@ class MCPToolHandlers:
                 WHERE e.uri = %s
                 LIMIT 1
             """
-            result = self.storage._execute_query(query, (uri,), fetch_one=True)
+            result = await asyncio.to_thread(
+                self.storage._execute_query, query, (uri,), fetch_one=True,
+            )
 
             if not result and "#" in uri:
                 fragment = uri.split("#")[-1]
@@ -407,7 +419,8 @@ class MCPToolHandlers:
                     ORDER BY o.name
                     LIMIT 1
                 """
-                result = self.storage._execute_query(
+                result = await asyncio.to_thread(
+                    self.storage._execute_query,
                     query_fragment, (f"%#{fragment}",), fetch_one=True,
                 )
 
@@ -458,7 +471,9 @@ class MCPToolHandlers:
             JOIN ontologies o ON e.ontology_id = o.id
             WHERE e.uri = ANY(%s)
         """
-        rows = self.storage._execute_query(query, (uris,), fetch_all=True) or []
+        rows = await asyncio.to_thread(
+            self.storage._execute_query, query, (uris,), fetch_all=True,
+        ) or []
         found_by_uri = {row["uri"]: row for row in rows}
 
         entities = []
@@ -504,7 +519,8 @@ class MCPToolHandlers:
         logger.debug("Looking up entity by label: %s", label)
 
         try:
-            query = """
+            priority_sql = build_ontology_priority_sql()
+            query = f"""
                 SELECT
                     e.uri,
                     e.label,
@@ -516,17 +532,12 @@ class MCPToolHandlers:
                 FROM ontology_entities e
                 JOIN ontologies o ON e.ontology_id = o.id
                 WHERE LOWER(e.label) = LOWER(%s)
-                ORDER BY
-                    CASE o.name
-                        WHEN 'proethica-core' THEN 1
-                        WHEN 'proethica-intermediate' THEN 2
-                        WHEN 'proethica-intermediate-extended' THEN 3
-                        WHEN 'engineering-ethics' THEN 4
-                        ELSE 5
-                    END
+                ORDER BY {priority_sql}
                 LIMIT 1
             """
-            result = self.storage._execute_query(query, (label,), fetch_one=True)
+            result = await asyncio.to_thread(
+                self.storage._execute_query, query, (label,), fetch_one=True,
+            )
 
             if not result:
                 return {"error": "Entity not found", "label": label, "found": False}
@@ -553,7 +564,7 @@ class MCPToolHandlers:
 
         entity_type = result.get("entity_type") or "individual"
         parent_uri = result.get("parent_uri") or ""
-        category = _infer_category_from_type(entity_type, parent_uri, uri)
+        category = infer_category_from_type(entity_type, parent_uri, uri)
 
         label = result.get("label")
         if not label:
@@ -594,40 +605,3 @@ class MCPToolHandlers:
                 return str(val)
         return ""
 
-
-# ------------------------------------------------------------------
-# Module-level helpers
-# ------------------------------------------------------------------
-
-def _infer_category_from_type(entity_type: str, parent_uri: str, uri: str) -> str:
-    """Infer ProEthica category from entity type, parent URI, or URI pattern."""
-    parent_lower = parent_uri.lower() if parent_uri else ""
-    uri_lower = uri.lower()
-
-    category_patterns = {
-        "role": ["role", "engineer", "professional", "actor"],
-        "principle": ["principle", "virtue", "value"],
-        "obligation": ["obligation", "duty", "requirement"],
-        "state": ["state", "condition", "situation"],
-        "resource": ["resource", "document", "asset"],
-        "action": ["action", "act", "behavior"],
-        "event": ["event", "occurrence", "happening"],
-        "capability": ["capability", "ability", "competence"],
-        "constraint": ["constraint", "limitation", "restriction"],
-        "question": ["question", "ethicalquestion"],
-        "conclusion": ["conclusion", "ethicalconclusion"],
-        "argument": ["argument", "toulmin"],
-        "decision_point": ["decisionpoint", "decision"],
-    }
-
-    for category, patterns in category_patterns.items():
-        for pattern in patterns:
-            if pattern in parent_lower or pattern in uri_lower:
-                return category.title()
-
-    if entity_type == "class":
-        return "Class"
-    elif entity_type == "individual":
-        return "Individual"
-
-    return entity_type or "Unknown"

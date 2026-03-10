@@ -12,11 +12,7 @@ project_root = basedir.parent
 # Add project root to path for config imports
 sys.path.insert(0, str(project_root))
 
-# Load environment configuration using new standalone config system
-from config.config_loader import load_ontserve_config
-config_summary = load_ontserve_config()
-import logging
-logging.getLogger(__name__).info(f"Loaded configuration from: {', '.join(config_summary['loaded_files'])}")
+# Config loading deferred to create_app() — see web/app.py
 
 
 class Config:
