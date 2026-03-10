@@ -47,10 +47,12 @@ class OntologyEntityService:
         self.db_session = db_session or db.session
         
         # Initialize sentence transformer for embeddings
+        self.embedding_available = False
         try:
             self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+            self.embedding_available = True
         except Exception as e:
-            logger.warning(f"Failed to load embedding model: {e}")
+            logger.warning("Embedding model unavailable: %s. Semantic search disabled.", e)
             self.embedding_model = None
     
     def extract_and_store_entities(self, ontology_id: str, force_refresh: bool = False) -> List[OntologyEntity]:
@@ -402,6 +404,7 @@ class OntologyEntityService:
             List of entity dictionaries with similarity scores
         """
         if not self.embedding_model:
+            logger.debug("Semantic search unavailable (embedding model not loaded)")
             return []
         
         try:

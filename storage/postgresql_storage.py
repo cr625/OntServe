@@ -597,7 +597,7 @@ class PostgreSQLStorage(StorageBackend):
                 else:
                     loop.run_until_complete(self._async_pool.close())
             except RuntimeError:
-                pass  # No event loop available during teardown
+                logger.debug("Async pool cleanup skipped (no event loop at teardown)")
             self._async_pool = None
         
         logger.info("PostgreSQL storage backend closed")
