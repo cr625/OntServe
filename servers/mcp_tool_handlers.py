@@ -414,34 +414,7 @@ class MCPToolHandlers:
             if not result:
                 return {"error": "Entity not found", "uri": uri, "found": False}
 
-            definition = result.get("comment") or ""
-            properties = result.get("properties") or {}
-
-            if not definition and properties:
-                definition = self._extract_definition_from_properties(properties)
-
-            entity_type = result.get("entity_type") or "individual"
-            parent_uri = result.get("parent_uri") or ""
-            category = _infer_category_from_type(entity_type, parent_uri, uri)
-
-            label = result.get("label")
-            if not label:
-                label = uri.split("#")[-1] if "#" in uri else uri.split("/")[-1]
-
-            response = {
-                "uri": result.get("uri"),
-                "label": label,
-                "definition": definition,
-                "entity_type": category,
-                "parent_type": parent_uri,
-                "source_ontology": result.get("source_ontology"),
-                "found": True,
-            }
-
-            if include_properties and properties:
-                response["properties"] = properties
-
-            return response
+            return self._format_entity_result(result, include_properties)
 
         except Exception as e:
             logger.error("Error looking up entity by URI: %s", e)
@@ -471,14 +444,39 @@ class MCPToolHandlers:
 
         logger.debug("Looking up %d entities by URI", len(uris))
 
+        # Batch query: single round-trip for all URIs
+        query = """
+            SELECT
+                e.uri,
+                e.label,
+                e.comment,
+                e.entity_type,
+                e.parent_uri,
+                e.properties,
+                o.name as source_ontology
+            FROM ontology_entities e
+            JOIN ontologies o ON e.ontology_id = o.id
+            WHERE e.uri = ANY(%s)
+        """
+        rows = self.storage._execute_query(query, (uris,), fetch_all=True) or []
+        found_by_uri = {row["uri"]: row for row in rows}
+
         entities = []
         not_found = []
 
         for uri in uris:
-            result = await self.handle_get_entity_by_uri({"uri": uri})
-            if result.get("found"):
-                result.pop("found", None)
-                entities.append(result)
+            if uri in found_by_uri:
+                formatted = self._format_entity_result(found_by_uri[uri])
+                formatted.pop("found", None)
+                entities.append(formatted)
+            elif "#" in uri:
+                # Fragment fallback for URIs with different base but same fragment
+                result = await self.handle_get_entity_by_uri({"uri": uri})
+                if result.get("found"):
+                    result.pop("found", None)
+                    entities.append(result)
+                else:
+                    not_found.append(uri)
             else:
                 not_found.append(uri)
 
@@ -533,34 +531,7 @@ class MCPToolHandlers:
             if not result:
                 return {"error": "Entity not found", "label": label, "found": False}
 
-            definition = result.get("comment") or ""
-            properties = result.get("properties") or {}
-
-            if not definition and properties:
-                definition = self._extract_definition_from_properties(properties)
-
-            entity_type = result.get("entity_type") or "individual"
-            parent_uri = result.get("parent_uri") or ""
-            category = _infer_category_from_type(
-                entity_type, parent_uri, result.get("uri", ""),
-            )
-
-            response_label = result.get("label")
-            if not response_label:
-                uri = result.get("uri", "")
-                response_label = (
-                    uri.split("#")[-1] if "#" in uri else uri.split("/")[-1]
-                )
-
-            return {
-                "uri": result.get("uri"),
-                "label": response_label,
-                "definition": definition,
-                "entity_type": category,
-                "parent_type": parent_uri,
-                "source_ontology": result.get("source_ontology"),
-                "found": True,
-            }
+            return self._format_entity_result(result)
 
         except Exception as e:
             logger.error("Error looking up entity by label: %s", e)
@@ -569,6 +540,39 @@ class MCPToolHandlers:
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
+
+    def _format_entity_result(self, result: dict,
+                              include_properties: bool = False) -> dict:
+        """Format a raw DB entity row into the standard MCP response dict."""
+        uri = result.get("uri", "")
+        definition = result.get("comment") or ""
+        properties = result.get("properties") or {}
+
+        if not definition and properties:
+            definition = self._extract_definition_from_properties(properties)
+
+        entity_type = result.get("entity_type") or "individual"
+        parent_uri = result.get("parent_uri") or ""
+        category = _infer_category_from_type(entity_type, parent_uri, uri)
+
+        label = result.get("label")
+        if not label:
+            label = uri.split("#")[-1] if "#" in uri else uri.split("/")[-1]
+
+        response = {
+            "uri": uri,
+            "label": label,
+            "definition": definition,
+            "entity_type": category,
+            "parent_type": parent_uri,
+            "source_ontology": result.get("source_ontology"),
+            "found": True,
+        }
+
+        if include_properties and properties:
+            response["properties"] = properties
+
+        return response
 
     @staticmethod
     def _extract_definition_from_properties(properties: dict) -> str:

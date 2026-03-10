@@ -602,7 +602,7 @@ class ConceptManager:
                     -- Seed: the core/intermediate concept class itself
                     SELECT e.id, e.uri, e.label, e.comment as description,
                            e.entity_type, e.parent_uri, e.created_at,
-                           o.name as ontology_name
+                           o.name as ontology_name, 1 as depth
                     FROM ontology_entities e
                     JOIN ontologies o ON e.ontology_id = o.id
                     WHERE LOWER(e.entity_type) = 'class'
@@ -612,16 +612,17 @@ class ConceptManager:
                     UNION
 
                     -- Recurse: children whose parent_uri matches a URI
-                    -- already in the hierarchy
+                    -- already in the hierarchy (max 10 levels deep)
                     SELECT child.id, child.uri, child.label,
                            child.comment as description, child.entity_type,
                            child.parent_uri, child.created_at,
-                           o.name as ontology_name
+                           o.name as ontology_name, parent.depth + 1
                     FROM ontology_entities child
                     JOIN ontologies o ON child.ontology_id = o.id
                     JOIN hierarchy parent ON child.parent_uri = parent.uri
                     WHERE LOWER(child.entity_type) = 'class'
                       AND child.uri LIKE %s
+                      AND parent.depth < 10
                 )
                 SELECT DISTINCT id, uri, label, description,
                        entity_type, parent_uri, created_at, ontology_name

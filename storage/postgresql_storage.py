@@ -85,6 +85,7 @@ class PostgreSQLStorage(StorageBackend):
             self._sync_pool = SimpleConnectionPool(
                 minconn=1,
                 maxconn=self.pool_size,
+                connect_timeout=10,
                 **self._db_params
             )
             
