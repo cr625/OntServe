@@ -299,11 +299,13 @@
         {% endif %}
 
         {% set axiom_count = stats.axioms.subclass|length + stats.axioms.property_constraints|length + stats.axioms.equivalent|length + stats.axioms.disjoint|length %}
+        {% set has_schema = (stats.class_count + stats.property_count) > 0 %}
+        {% set default_tab = 'schema' if has_schema else ('individuals' if stats.individual_count > 0 else 'schema') %}
 
         <!-- Tabs for different views -->
         <ul class="nav nav-tabs" id="ontologyTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="schema-tab" data-bs-toggle="tab" data-bs-target="#schema"
+                <button class="nav-link {{ 'active' if default_tab == 'schema' }}" id="schema-tab" data-bs-toggle="tab" data-bs-target="#schema"
                     type="button" title="Class and property definitions (TBox in description logic)">
                     <i class="bi bi-diagram-3"></i> Schema
                     <span class="badge bg-secondary ms-1">{{ stats.class_count + stats.property_count }}</span>
@@ -319,7 +321,7 @@
             </li>
             {% endif %}
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="individuals-tab" data-bs-toggle="tab" data-bs-target="#individuals"
+                <button class="nav-link {{ 'active' if default_tab == 'individuals' }}" id="individuals-tab" data-bs-toggle="tab" data-bs-target="#individuals"
                     type="button" title="Named individuals/instances (ABox in description logic)">
                     <i class="bi bi-collection"></i> Individuals
                     <span class="badge bg-secondary ms-1">{{ stats.individual_count }}</span>
@@ -349,7 +351,7 @@
 
         <div class="tab-content mt-3" id="ontologyTabContent">
             <!-- Schema Tab (Classes and Properties) -->
-            <div class="tab-pane fade show active" id="schema" role="tabpanel">
+            <div class="tab-pane fade {{ 'show active' if default_tab == 'schema' }}" id="schema" role="tabpanel">
                 <div class="row">
                     <!-- Classes Section -->
                     <div class="col-md-6">
@@ -510,7 +512,7 @@
             {% endif %}
 
             <!-- Individuals Tab (Named Instances) -->
-            <div class="tab-pane fade" id="individuals" role="tabpanel">
+            <div class="tab-pane fade {{ 'show active' if default_tab == 'individuals' }}" id="individuals" role="tabpanel">
                 <div class="row">
                     <div class="col-12">
                         <div class="card">

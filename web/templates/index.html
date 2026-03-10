@@ -121,8 +121,7 @@
                         <th>Source</th>
                         <th>Type</th>
                         <th>Description</th>
-                        <th>Classes</th>
-                        <th>Statements</th>
+                        <th>Entities</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -172,7 +171,6 @@
                         <td>{{ ontology.description[:80] if ontology.description else '-' }}
                             {% if ontology.description and ontology.description|length > 80 %}...{% endif %}
                         </td>
-                        <td>{{ ontology.class_count or '-' }}</td>
                         <td>{{ ontology.triple_count or '-' }}</td>
                     </tr>
                     {% endfor %}
