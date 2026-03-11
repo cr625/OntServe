@@ -98,22 +98,35 @@ def database_engine(test_config):
     engine.dispose()
 
 
-@pytest.fixture(scope='function')
-def db_session(app):
-    """Provide Flask-SQLAlchemy db session that routes can see."""
+@pytest.fixture(scope='session')
+def _db_tables(app):
+    """Create all tables once for the test session (DDL is expensive)."""
     from web.models import db
 
     with app.app_context():
-        # Drop and recreate for clean state
-        db.drop_all()
         db.create_all()
+        yield
+        db.drop_all()
 
-        # Use Flask-SQLAlchemy's session (same one routes use!)
+
+@pytest.fixture(scope='function')
+def db_session(app, _db_tables):
+    """Provide a clean Flask-SQLAlchemy session for each test.
+
+    Uses DELETE (DML) instead of DROP/CREATE (DDL) for per-test isolation.
+    This avoids the ~17s overhead of full schema recreation per test.
+    """
+    from web.models import db
+
+    with app.app_context():
+        # Clean data from previous test (respects FK ordering)
+        for table in reversed(db.metadata.sorted_tables):
+            db.session.execute(table.delete())
+        db.session.commit()
+
         yield db.session
 
-        # Clean up
         db.session.remove()
-        db.drop_all()
 
 
 @pytest.fixture(scope='function')
@@ -137,17 +150,14 @@ def clean_database(database_engine):
 # Flask App Fixtures
 # =============================================================================
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='session')
 def app(test_config):
-    """Create Flask app for testing."""
+    """Create Flask app once for the test session."""
     from web.app import create_app
 
     app = create_app('testing')
     app.config.update(test_config)
-
-    # Create application context
-    with app.app_context():
-        yield app
+    return app
 
 
 @pytest.fixture(scope='function')
