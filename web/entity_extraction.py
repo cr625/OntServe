@@ -84,6 +84,9 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
 
     now = datetime.now(timezone.utc)
 
+    # Predicates to skip when collecting class properties
+    class_skip_predicates = {RDF.type, RDFS.label, RDFS.comment, RDFS.subClassOf}
+
     # --- Pass 1: Standard OWL classes ---
     for cls in g.subjects(RDF.type, OWL.Class):
         label = next(g.objects(cls, RDFS.label), None)
@@ -92,6 +95,9 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         label_str = str(label) if label else None
         comment_str = str(comment) if comment else None
 
+        # Collect additional properties (e.g., discoveredInCase, importance)
+        properties = _collect_properties(g, cls, class_skip_predicates)
+
         entity = OntologyEntity(
             ontology_id=ontology.id,
             entity_type='class',
@@ -99,6 +105,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             label=label_str,
             comment=comment_str,
             parent_uri=str(subclass_of[0]) if subclass_of else None,
+            properties=properties if properties else None,
             content_hash=OntologyEntity.compute_content_hash(str(cls), label_str, comment_str),
             updated_at=now
         )

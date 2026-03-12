@@ -28,6 +28,26 @@
         word-break: break-word;
     }
 
+    .evidence-quote {
+        border-left: 3px solid #dee2e6;
+        padding-left: 0.75rem;
+        margin-bottom: 0.5rem;
+        color: #495057;
+        font-size: 0.9em;
+    }
+    .evidence-quote:last-child { margin-bottom: 0; }
+
+    .dict-table {
+        font-size: 0.85em;
+        margin-bottom: 0;
+    }
+    .dict-table td { padding: 0.25rem 0.5rem; }
+    .dict-table td:first-child {
+        font-weight: 600;
+        color: #6c757d;
+        white-space: nowrap;
+    }
+
     .version-banner {
         border-left: 4px solid #ffc107;
     }
@@ -115,17 +135,42 @@
         <div class="col-md-8">
             <!-- Display mode -->
             <div id="displayMode">
+                {# Macro: render a single property value (handles dicts, lists, strings) #}
+                {% macro render_value(val) %}
+                    {% if val is mapping %}
+                    <table class="dict-table">
+                        {% for dk, dv in val.items() %}
+                        <tr><td>{{ dk }}</td><td>{{ dv }}</td></tr>
+                        {% endfor %}
+                    </table>
+                    {% elif val is iterable and val is not string %}
+                        {% for v in val %}
+                        <div>{{ render_value(v) }}</div>
+                        {% endfor %}
+                    {% else %}
+                        {{ val }}
+                    {% endif %}
+                {% endmacro %}
+
                 <!-- Definition/Comment -->
-                {% if entity.comment %}
+                {% if entity.comment or prop_groups.description %}
                 <div class="card mb-3">
                     <div class="card-header"><h6 class="mb-0">Definition</h6></div>
                     <div class="card-body">
+                        {% if entity.comment %}
                         <p class="mb-0">{{ entity.comment }}</p>
+                        {% endif %}
+                        {% for label, val in prop_groups.description %}
+                        {% if entity.comment %}<hr class="my-2">{% endif %}
+                        <p class="mb-0">{{ val }}</p>
+                        {% endfor %}
                     </div>
                 </div>
                 {% endif %}
 
                 <!-- Properties -->
+                {% set has_structural = entity.parent_uri or entity.domain or entity.range or prop_groups.core %}
+                {% if has_structural %}
                 <div class="card mb-3">
                     <div class="card-header"><h6 class="mb-0">Properties</h6></div>
                     <div class="card-body">
@@ -165,28 +210,35 @@
                         </div>
                         {% endif %}
 
-                        {% if entity.properties %}
-                        {% for key, value in entity.properties.items() if key not in ('type', 'NamedIndividual') %}
+                        {% for label, val in prop_groups.core %}
                         <div class="property-row">
-                            <div class="property-key">{{ key }}</div>
-                            <div class="property-value">
-                                {% if value is iterable and value is not string %}
-                                    {% for v in value %}
-                                    <div>{{ v }}</div>
-                                    {% endfor %}
-                                {% else %}
-                                    {{ value }}
-                                {% endif %}
-                            </div>
+                            <div class="property-key">{{ label }}</div>
+                            <div class="property-value">{{ render_value(val) }}</div>
                         </div>
                         {% endfor %}
-                        {% endif %}
-
-                        {% if not entity.parent_uri and not entity.domain and not entity.range and not entity.properties %}
-                        <p class="text-muted mb-0">No additional properties.</p>
-                        {% endif %}
                     </div>
                 </div>
+                {% endif %}
+
+                <!-- Source Evidence -->
+                {% if prop_groups.evidence %}
+                <div class="card mb-3">
+                    <div class="card-header"><h6 class="mb-0"><i class="bi bi-quote"></i> Source Evidence</h6></div>
+                    <div class="card-body">
+                        {% for label, val in prop_groups.evidence %}
+                        {% if not loop.first %}<hr class="my-2">{% endif %}
+                        <div class="small text-muted mb-1">{{ label }}</div>
+                        {% if val is iterable and val is not string %}
+                            {% for v in val %}
+                            <div class="evidence-quote">{{ v }}</div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="evidence-quote">{{ val }}</div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
 
                 <!-- Children (subclasses / subproperties) -->
                 {% if children %}
@@ -287,6 +339,21 @@
                     {% endif %}
                 </div>
             </div>
+
+            <!-- Extraction provenance (for case entities) -->
+            {% if prop_groups.extraction_meta %}
+            <div class="card mb-3">
+                <div class="card-header"><h6 class="mb-0">Extraction Provenance</h6></div>
+                <div class="card-body">
+                    {% for label, val in prop_groups.extraction_meta %}
+                    <div class="property-row">
+                        <div class="property-key">{{ label }}</div>
+                        <div class="property-value">{{ val }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Content negotiation links -->
             <div class="card mb-3">

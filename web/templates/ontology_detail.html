@@ -349,6 +349,13 @@
             </li>
         </ul>
 
+        {% if case_filter %}
+        <div class="alert alert-info d-flex align-items-center justify-content-between py-2 mb-3">
+            <span><i class="bi bi-funnel-fill me-1"></i> Filtered to entities discovered in <strong>Case {{ case_filter }}</strong> ({{ entities.classes|length }} classes, {{ entities.individuals|length }} individuals)</span>
+            <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-info">Clear filter</a>
+        </div>
+        {% endif %}
+
         <div class="tab-content mt-3" id="ontologyTabContent">
             <!-- Schema Tab (Classes and Properties) -->
             <div class="tab-pane fade {{ 'show active' if default_tab == 'schema' }}" id="schema" role="tabpanel">
