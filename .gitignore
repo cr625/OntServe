@@ -26,6 +26,8 @@ env/
 *.env
 !config/*.env
 !config/*.env.template
+# API keys file contains secrets -- never track
+config/api_keys.env
 
 # IDE
 .vscode/

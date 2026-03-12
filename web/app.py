@@ -21,6 +21,7 @@ from core.ontology_manager import OntologyManager
 from core.ontology_merger import OntologyMergerService
 from editor.routes import create_editor_blueprint
 from storage.file_storage import FileStorage
+from services.wolfram_service import WolframService
 
 
 def create_app(config_name=None):
@@ -93,6 +94,12 @@ def create_app(config_name=None):
     # Initialize OntologyMergerService
     app.ontology_merger = OntologyMergerService(logger=logging.getLogger('ontology_merger'))
 
+    # Initialize Wolfram AgentOne service
+    app.wolfram_service = WolframService(
+        api_key=os.environ.get("WOLFRAM_API_KEY"),
+        timeout=int(os.environ.get("WOLFRAM_TIMEOUT", "120")),
+    )
+
     # Setup logging
     if not app.debug:
         logging.basicConfig(
@@ -119,6 +126,7 @@ def create_app(config_name=None):
     from web.api_routes import api_bp
     from web.draft_routes import draft_bp
     from web.uri_resolution import uri_bp
+    from web.wolfram_routes import wolfram_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)
@@ -126,6 +134,7 @@ def create_app(config_name=None):
     app.register_blueprint(api_bp)
     app.register_blueprint(draft_bp)
     app.register_blueprint(uri_bp)
+    app.register_blueprint(wolfram_bp)
 
     # Register enhanced editor blueprint
     storage_backend = FileStorage({'storage_dir': app.config['ONTSERVE_STORAGE_DIR']})

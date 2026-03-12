@@ -22,8 +22,9 @@ class ConfigLoader:
     Priority order (highest to lowest):
     1. Environment variables (already set)
     2. .env file in project root
-    3. config/{environment}.env file
-    4. Default values
+    3. config/api_keys.env (external service credentials)
+    4. config/{environment}.env file
+    5. Default values
     """
 
     def __init__(self, project_root: Optional[Path] = None):
@@ -88,18 +89,25 @@ class ConfigLoader:
         if env_file.exists():
             load_dotenv(env_file, override=False)
             self.loaded_files.append(str(env_file))
-            logger.info(f"✅ Loaded config file: {env_file}")
+            logger.info(f"Loaded config file: {env_file}")
         else:
-            logger.warning(f"⚠️  Config file not found: {env_file}")
+            logger.warning(f"Config file not found: {env_file}")
 
-        # 2. Load .env from project root (if exists)
+        # 2. Load API keys (external service credentials)
+        api_keys_file = self.config_dir / "api_keys.env"
+        if api_keys_file.exists():
+            load_dotenv(api_keys_file, override=False)
+            self.loaded_files.append(str(api_keys_file))
+            logger.info(f"Loaded API keys from: {api_keys_file}")
+
+        # 3. Load .env from project root (if exists)
         root_env = self.project_root / ".env"
         if root_env.exists():
             load_dotenv(root_env, override=True)  # Override with project-specific settings
             self.loaded_files.append(str(root_env))
-            logger.info(f"✅ Loaded root .env file: {root_env}")
+            logger.info(f"Loaded root .env file: {root_env}")
 
-        # 3. Environment variables are already loaded (highest priority)
+        # 4. Environment variables are already loaded (highest priority)
 
         # Build config summary
         config_summary = {
@@ -113,7 +121,12 @@ class ConfigLoader:
                 'ONTSERVE_DB_URL': self._mask_password(os.environ.get('ONTSERVE_DB_URL', '')),
                 'ONTSERVE_MCP_PORT': os.environ.get('ONTSERVE_MCP_PORT'),
                 'ONTSERVE_WEB_PORT': os.environ.get('ONTSERVE_WEB_PORT'),
-            }
+            },
+            'api_keys': {
+                'WOLFRAM_API_KEY': self._mask_key(os.environ.get('WOLFRAM_API_KEY', '')),
+                'ZOTERO_API_KEY': self._mask_key(os.environ.get('ZOTERO_API_KEY', '')),
+                'ZOTERO_USER_ID': os.environ.get('ZOTERO_USER_ID', ''),
+            },
         }
 
         logger.info("Configuration loaded successfully")
@@ -135,6 +148,14 @@ class ConfigLoader:
             pass
 
         return db_url
+
+    def _mask_key(self, key: str) -> str:
+        """Mask an API key for logging, showing only the last 4 characters."""
+        if not key:
+            return "(not set)"
+        if len(key) <= 8:
+            return "****"
+        return "****" + key[-4:]
 
     def verify_required_settings(self, required: list = None) -> bool:
         """
@@ -188,6 +209,24 @@ class ConfigLoader:
         """Check if running in production environment."""
         env = os.environ.get('ENVIRONMENT', os.environ.get('FLASK_ENV', 'development'))
         return env == 'production'
+
+    # -- API key accessors ---------------------------------------------------
+
+    def get_wolfram_api_key(self) -> str:
+        """Get Wolfram AgentOne API key."""
+        return os.environ.get("WOLFRAM_API_KEY", "")
+
+    def get_zotero_api_key(self) -> str:
+        """Get Zotero API key."""
+        return os.environ.get("ZOTERO_API_KEY", "")
+
+    def get_zotero_user_id(self) -> str:
+        """Get Zotero user/group ID."""
+        return os.environ.get("ZOTERO_USER_ID", "")
+
+    def get_zotero_library_type(self) -> str:
+        """Get Zotero library type ('user' or 'group')."""
+        return os.environ.get("ZOTERO_LIBRARY_TYPE", "user")
 
 
 # Global configuration loader instance
@@ -253,5 +292,8 @@ if __name__ == "__main__":
         print(f"  - {file}")
     print(f"\nKey Settings:")
     for key, value in config['key_settings'].items():
+        print(f"  {key}: {value}")
+    print(f"\nAPI Keys:")
+    for key, value in config.get('api_keys', {}).items():
         print(f"  {key}: {value}")
     print("="*60)
