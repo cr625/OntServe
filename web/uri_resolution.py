@@ -127,15 +127,17 @@ def resolve_uri_path(ontology_path, entity_name):
         /ontology/intermediate/Honesty
         /ontology/core/Principle
     """
-    # Exclude reserved route names that have specific handlers
+    # Exclude reserved route names that have specific handlers.
+    # Call the handler directly instead of redirecting to avoid redirect
+    # loops (this catch-all route matches the same URL the redirect targets).
     reserved_names = {'content', 'edit', 'save', 'settings', 'version', 'draft', 'save-draft'}
 
     if entity_name in reserved_names and '/' not in ontology_path:
         ontology_name = ontology_path
 
-        # Redirect to proper routes (preserves auth decorators)
+        from web.ontology_routes import ontology_content
         if entity_name == 'content':
-            return redirect(url_for('ontology.ontology_content', ontology_name=ontology_name))
+            return ontology_content(ontology_name)
         elif entity_name == 'edit':
             return redirect(url_for('ontology.edit_ontology', ontology_name=ontology_name))
         elif entity_name == 'save':
