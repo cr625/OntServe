@@ -55,7 +55,7 @@ def create_app(config_name=None):
     })
 
     # Load configuration — import deferred so .env is loaded before Config class body runs
-    from web.config import config
+    from web.app_config import config
     config_name = config_name or os.environ.get('FLASK_CONFIG', 'development')
     config_class = config[config_name]
     app.config.from_object(config_class)

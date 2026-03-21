@@ -61,7 +61,7 @@ class TestWebImports:
 
     def test_import_web_config(self):
         """Test web config import."""
-        from web.config import Config
+        from web.app_config import Config
         assert Config is not None
 
     @pytest.mark.skip(reason="Requires database connection")
