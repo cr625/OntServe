@@ -31,14 +31,11 @@ load_ontserve_config('test')
 # =============================================================================
 
 @pytest.fixture(scope='session')
-def test_config():
+def test_config(test_db_url):
     """Provide test configuration."""
     return {
         'TESTING': True,
-        'SQLALCHEMY_DATABASE_URI': os.environ.get(
-            'ONTSERVE_DB_URL',
-            'postgresql://postgres:PASS@localhost:5432/ontserve_test'
-        ),
+        'SQLALCHEMY_DATABASE_URI': test_db_url,
         'SECRET_KEY': 'test-secret-key',
         'WTF_CSRF_ENABLED': False,
     }
@@ -57,17 +54,32 @@ def event_loop():
 # =============================================================================
 
 @pytest.fixture(scope='session')
-def pg_storage():
+def test_db_url():
+    """Resolve the test database URL from environment and validate connectivity.
+
+    Skips the test if ONTSERVE_DB_URL is not set or the database is not reachable.
+    """
+    url = os.environ.get('ONTSERVE_DB_URL')
+    if not url:
+        pytest.skip('ONTSERVE_DB_URL not set')
+
+    # Validate the connection is actually usable
+    from storage.postgresql_storage import PostgreSQLStorage, StorageError
+    try:
+        storage = PostgreSQLStorage({'db_url': url})
+        del storage
+    except StorageError:
+        pytest.skip(f'Test database not reachable at configured URL')
+
+    return url
+
+
+@pytest.fixture(scope='session')
+def pg_storage(test_db_url):
     """Session-scoped PostgreSQLStorage connected to the test database."""
     from storage.postgresql_storage import PostgreSQLStorage
 
-    config = {
-        'db_url': os.environ.get(
-            'ONTSERVE_DB_URL',
-            'postgresql://postgres:PASS@localhost:5432/ontserve_test'
-        ),
-    }
-    storage = PostgreSQLStorage(config)
+    storage = PostgreSQLStorage({'db_url': test_db_url})
     yield storage
 
 
