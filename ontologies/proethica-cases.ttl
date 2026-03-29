@@ -219,12 +219,17 @@ proeth-cases:involvesRole a owl:ObjectProperty ;
     skos:definition "Relates an ethical case to a professional role that is central to or involved in the case scenario."@en .
 
 proeth-cases:triggeredByEvent a owl:ObjectProperty ;
-    rdfs:subPropertyOf ro:0000013 ;  # RO:causally downstream of
+    # RO_0000013 does not exist. 'causally downstream of' is not a standard RO IRI.
+    # A Case (information content entity) cannot participate in causal relations per BFO.
+    # The inverse of causally-upstream-of is RO_0002427 (causally downstream of or within).
+    # However, Cases are not processes/occurrents so RO causal relations do not directly apply.
+    # We therefore leave this without an RO subPropertyOf and model it as a domain-specific link.
     rdfs:domain proeth-cases:Case ;
     rdfs:range proeth-core:Event ;
     rdfs:label "triggered by event"@en ;
-    rdfs:comment "Relates a case to events that initiated or precipitated the ethical scenario."@en ;
-    skos:definition "Relates an ethical case to an event that initiated, precipitated, or contributed to the development of the case scenario."@en .
+    rdfs:comment "Relates a case (as an information content entity representing the scenario) to events that initiated or precipitated the ethical situation."@en ;
+    skos:definition "Relates an ethical case to an event that initiated, precipitated, or contributed to the development of the case scenario."@en ;
+    skos:changeNote "v2.0.1: Removed rdfs:subPropertyOf ro:0000013 — RO_0000013 does not exist in the OBO Relations Ontology. Cases are ICEs (GDC) not processes, so RO causal relations do not apply directly."@en .
 
 proeth-cases:requiresAction a owl:ObjectProperty ;
     rdfs:domain proeth-cases:DecisionOption ;
@@ -333,24 +338,25 @@ proeth-cases:resolutionUrgency a owl:DatatypeProperty ;
 ###############################################################
 
 # Every case must have at least one decision option
+# Using owl:someValuesFrom (OBO/BFO standard pattern) rather than owl:minCardinality.
 proeth-cases:Case rdfs:subClassOf [
     a owl:Restriction ;
     owl:onProperty proeth-cases:hasDecisionOption ;
-    owl:minCardinality "1"^^xsd:nonNegativeInteger
+    owl:someValuesFrom proeth-cases:DecisionOption
 ] .
 
 # Every decision option should have at least one supporting or opposing argument
 proeth-cases:DecisionOption rdfs:subClassOf [
     a owl:Restriction ;
     owl:onProperty proeth-cases:hasArgument ;
-    owl:minCardinality "1"^^xsd:nonNegativeInteger
+    owl:someValuesFrom proeth-cases:Argument
 ] .
 
 # Cases should involve at least one stakeholder
 proeth-cases:Case rdfs:subClassOf [
     a owl:Restriction ;
     owl:onProperty proeth-cases:involvesStakeholder ;
-    owl:minCardinality "1"^^xsd:nonNegativeInteger
+    owl:someValuesFrom proeth-cases:Stakeholder
 ] .
 
 ###############################################################

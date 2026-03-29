@@ -463,10 +463,13 @@ proeth:owlTimeProperty a owl:DatatypeProperty ;
     rdfs:seeAlso :Principle .
 
 :ProfessionalObligation rdf:type owl:Class ;
-    rdfs:subClassOf bfo:BFO_0000017 ; # realizable entity
+    # NOTE: bfo:BFO_0000017 (realizable entity / SDC) removed — it conflicts with proeth-core:Obligation
+    # which is IAO:directive information entity (GDC). BFO GDC and SDC are mutually exclusive,
+    # so having both superclasses would make this class unsatisfiable in a reasoning context.
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Professional Obligation"@en ;
-    rdfs:comment "A duty or responsibility arising from professional role or standards"@en .
+    rdfs:comment "A duty or responsibility arising from professional role or standards. As a directive information entity (IAO:0000033 via proeth-core:Obligation), it is a generically dependent continuant — not a realizable entity."@en ;
+    skos:changeNote "v2.x: Removed rdfs:subClassOf bfo:BFO_0000017 (realizable entity/SDC). Obligations are directive information entities (GDC), and SDC+GDC dual-inheritance is inconsistent in BFO."@en .
 
 # Obligation Categories from Chapter 2 Literature
 # Based on Dennis et al. (2016), Anderson & Anderson, NSPE Code
@@ -532,11 +535,12 @@ proeth:CollegialObligation a owl:Class ;
     rdfs:comment "Duties toward professional peers including respect, fairness, and credit for work"@en .
 
 # Obligation properties for temporal and contextual aspects
-proeth:hasEnforcementLevel a owl:ObjectProperty ;
+proeth:hasEnforcementLevel a owl:DatatypeProperty ;  # was owl:ObjectProperty — corrected: range is xsd:string
     rdfs:domain proeth-core:Obligation ;
     rdfs:range xsd:string ;
     rdfs:label "has enforcement level"@en ;
-    rdfs:comment "Specifies whether obligation is mandatory, strongly recommended, or recommended"@en .
+    rdfs:comment "Specifies whether obligation is mandatory, strongly recommended, or recommended"@en ;
+    skos:changeNote "v2.x: Changed from owl:ObjectProperty to owl:DatatypeProperty. Properties with rdfs:range xsd:string must be DatatypeProperties."@en .
 
 proeth:derivedFromPrinciple a owl:ObjectProperty ;
     rdfs:domain proeth-core:Obligation ;
@@ -1193,11 +1197,12 @@ proeth:PriorityConstraint a owl:Class ;
     dcterms:references <https://doi.org/10.1075/is.15.2.05sch> . # Scheutz & Malle 2014
 
 # Constraint properties for relationships
-proeth:hasConstraintType a owl:ObjectProperty ;
+proeth:hasConstraintType a owl:DatatypeProperty ;  # was owl:ObjectProperty — corrected: range is xsd:string
     rdfs:domain proeth-core:Constraint ;
     rdfs:range xsd:string ;
     rdfs:label "has constraint type"@en ;
-    rdfs:comment "Specifies the type of constraint (legal, regulatory, resource, etc.)"@en .
+    rdfs:comment "Specifies the type of constraint (legal, regulatory, resource, etc.)"@en ;
+    skos:changeNote "v2.x: Changed from owl:ObjectProperty to owl:DatatypeProperty. A property relating to a string literal must be a DatatypeProperty."@en .
 
 proeth:constrainsAction a owl:ObjectProperty ;
     rdfs:domain proeth-core:Constraint ;
@@ -1314,11 +1319,12 @@ proeth:PrecedentRetrieval a owl:Class ;
     dcterms:references <https://doi.org/10.1023/B:AIRE.0000009444.71972.2e> . # McLaren 2003
 
 # Capability properties for relationships
-proeth:hasCapabilityLevel a owl:ObjectProperty ;
+proeth:hasCapabilityLevel a owl:DatatypeProperty ;  # was owl:ObjectProperty — corrected: range is xsd:string
     rdfs:domain proeth-core:Capability ;
     rdfs:range xsd:string ;
     rdfs:label "has capability level"@en ;
-    rdfs:comment "Indicates the level or degree of a capability"@en .
+    rdfs:comment "Indicates the level or degree of a capability"@en ;
+    skos:changeNote "v2.x: Changed from owl:ObjectProperty to owl:DatatypeProperty. A property relating to a string literal must be a DatatypeProperty."@en .
 
 proeth:enablesAction a owl:ObjectProperty ;
     rdfs:domain proeth-core:Capability ;

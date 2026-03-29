@@ -17,7 +17,7 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.4.0"^^xsd:string ;
+    owl:versionInfo "2.4.1"^^xsd:string ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
@@ -113,7 +113,7 @@ proeth-core:CodeProvision a owl:Class ;
 
 # Guideline: Container for provisions (the full code document)
 proeth-core:Guideline a owl:Class ;
-    rdfs:subClassOf iao:0000310 ;  # IAO:document part (or could be iao:0000300 document)
+    rdfs:subClassOf iao:0000310 ;  # IAO:document (IAO_0000310 = "document" — codes of ethics are documents)
     rdfs:label "Guideline"@en ;
     rdfs:comment "A professional code of ethics or guideline document containing multiple provisions. Examples include NSPE Code of Ethics, NEA Code of Ethics, ACM Code of Ethics."@en ;
     skos:definition "A formal document establishing ethical standards for a profession, containing individual CodeProvisions."@en .
@@ -166,6 +166,15 @@ proeth-core:performsAction a owl:ObjectProperty ;
     rdfs:comment "Relates an agent to actions they perform."@en ;
     skos:definition "Relates an agent to actions they perform."@en .
 
+proeth-core:isPerformedBy a owl:ObjectProperty ;
+    owl:inverseOf proeth-core:performsAction ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Agent ;
+    rdfs:label "is performed by"@en ;
+    rdfs:comment "Relates an action to the agent that performs it. Inverse of performsAction."@en ;
+    skos:definition "Relates an action to the agent responsible for performing it."@en ;
+    skos:changeNote "v2.4.1: Added as named inverse of performsAction to support OWL DL-compliant cardinality restriction on Action."@en .
+
 proeth-core:fulfillsObligation a owl:ObjectProperty ;
     rdfs:domain proeth-core:Action ;
     rdfs:range proeth-core:Obligation ;
@@ -196,12 +205,13 @@ proeth-core:usesResource a owl:ObjectProperty ;
     skos:definition "Relates an action to resources it utilizes."@en .
 
 proeth-core:triggersEvent a owl:ObjectProperty ;
-    rdfs:subPropertyOf ro:0000012 ;  # RO:causally upstream of
+    rdfs:subPropertyOf ro:0002411 ;  # RO:causally upstream of (RO_0002411)
     rdfs:domain proeth-core:Action ;
     rdfs:range proeth-core:Event ;
     rdfs:label "triggers event"@en ;
     rdfs:comment "Relates an action to events it causes or initiates."@en ;
-    skos:definition "Relates an action to events it causes or initiates."@en .
+    skos:definition "Relates an action to events it causes or initiates."@en ;
+    skos:changeNote "v2.4.1: Corrected RO IRI from non-existent ro:0000012 to ro:0002411 (causally upstream of). RO_0002411 is the correct IRI for 'causally upstream of' in the OBO Relations Ontology."@en .
 
 proeth-core:constrainedBy a owl:ObjectProperty ;
     rdfs:domain proeth-core:Action ;
@@ -337,17 +347,20 @@ proeth-core:citesAuthority a owl:ObjectProperty ;
 ###############################################################
 
 # Ensure every role has at least one obligation
+# Using owl:someValuesFrom (OBO/BFO standard existential pattern) rather than
+# owl:minCardinality which is unqualified and does not specify the filler type.
 proeth-core:Role rdfs:subClassOf [
     a owl:Restriction ;
     owl:onProperty proeth-core:hasObligation ;
-    owl:minCardinality "1"^^xsd:nonNegativeInteger
+    owl:someValuesFrom proeth-core:Obligation
 ] .
 
-# Ensure every action has an agent participant  
+# Ensure every action is performed by at least one agent
+# Uses named inverse property isPerformedBy (OWL DL compliant — no anonymous inverseOf in restriction).
 proeth-core:Action rdfs:subClassOf [
     a owl:Restriction ;
-    owl:onProperty [ owl:inverseOf proeth-core:performsAction ] ;
-    owl:minCardinality "1"^^xsd:nonNegativeInteger
+    owl:onProperty proeth-core:isPerformedBy ;
+    owl:someValuesFrom proeth-core:Agent
 ] .
 
 ###############################################################
