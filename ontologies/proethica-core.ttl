@@ -17,7 +17,7 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.4.1"^^xsd:string ;
+    owl:versionInfo "2.4.2"^^xsd:string ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
@@ -194,8 +194,9 @@ proeth-core:hasState a owl:ObjectProperty ;
     rdfs:domain proeth-core:Action ;
     rdfs:range proeth-core:State ;
     rdfs:label "has state"@en ;
-    rdfs:comment "Relates an action to contextual states that affect its evaluation."@en ;
-    skos:definition "Relates an action to contextual states that affect its evaluation."@en .
+    rdfs:comment "Relates an action to contextual states that affect its evaluation. NOTE: BFO strict interpretation requires SDCs to inhere in independent continuants, not processes. This property is an intentional pragmatic deviation -- it links a process to contextual SDCs (e.g., emergency conditions, competence states) that affect its ethical evaluation, without reifying the SDC-bearer-process chain."@en ;
+    skos:definition "Relates an action to contextual states that affect its evaluation."@en ;
+    skos:changeNote "v2.4.2: Documented as intentional pragmatic deviation from strict BFO. The domain (Action/process) to range (State/SDC) link is retained because the alternative (reifying the independent continuant bearer for each state) would add modeling complexity disproportionate to the extraction use case."@en .
 
 proeth-core:usesResource a owl:ObjectProperty ;
     rdfs:domain proeth-core:Action ;

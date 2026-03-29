@@ -10,6 +10,7 @@
 @prefix iao: <http://purl.obolibrary.org/obo/IAO_> .
 @prefix proeth: <http://proethica.org/ontology/intermediate#> .
 @prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix proeth-cases: <http://proethica.org/ontology/cases#> .
 @prefix bfo: <http://purl.obolibrary.org/obo/> .
 @prefix time: <http://www.w3.org/2006/time#> .
 @base <http://proethica.org/ontology/intermediate> .
@@ -571,9 +572,11 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:label "Professional Role"@en ;
         rdfs:comment "A role within a profession that entails recognized ends/goals of practice (e.g., safeguarding public safety, delivering competent technical solutions) and a coherent set of obligations codified in standards and codes (e.g., NSPE). Often associated with licensure or formal accountability. Examples: Professional Engineer, Project Manager, Public Official."@en ;
         # Professional roles characteristically bear obligations and are governed by codes
+        # v2.4.2: Fixed namespace references -- :Obligation and :hasObligation resolved to
+        # intermediate namespace where they were never defined. Corrected to proeth-core:.
         rdfs:subClassOf [ a owl:Restriction ;
-                                         owl:onProperty :hasObligation ;
-                                         owl:someValuesFrom :Obligation
+                                         owl:onProperty proeth-core:hasObligation ;
+                                         owl:someValuesFrom proeth-core:Obligation
                                      ] ;
         rdfs:subClassOf [ a owl:Restriction ;
                                          owl:onProperty :governedByCode ;
@@ -646,9 +649,10 @@ proeth:conflictsWith a owl:ObjectProperty ;
 
 :EthicalCode rdf:type owl:Class ;
     rdf:type :EntityType ;
-    rdfs:subClassOf proeth-core:Principle ;
+    rdfs:subClassOf proeth-core:Guideline ;
     rdfs:label "Ethical Code"@en ;
-    rdfs:comment "A standard that establishes ethical principles and professional conduct requirements"@en .
+    rdfs:comment "A formal document that codifies ethical principles and professional conduct requirements for a profession. As a document (IAO:0000310 via Guideline), it contains principles, obligations, and constraints -- it is not itself a principle."@en ;
+    skos:changeNote "v2.4.2: Changed rdfs:subClassOf from proeth-core:Principle to proeth-core:Guideline. An ethical code is a document that contains principles, obligations, and constraints. Classifying it as a Principle conflated the container with its contents."@en .
 
 # Specialized capability types
 :TechnicalCapability rdf:type owl:Class ;
@@ -717,10 +721,13 @@ proeth:conflictsWith a owl:ObjectProperty ;
 #################################################################
 
 :hasRole rdf:type owl:ObjectProperty ;
+    owl:equivalentProperty proeth-core:hasRole ;
+    owl:deprecated true ;
     rdfs:domain bfo:BFO_0000004 ; # independent continuant
     rdfs:range proeth-core:Role ;
     rdfs:label "has role"@en ;
-    rdfs:comment "Relates an entity to a role it bears"@en .
+    rdfs:comment "Relates an entity to a role it bears. DEPRECATED: use proeth-core:hasRole."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:hasRole. Added owl:equivalentProperty to bridge existing references."@en .
 
 :hasCondition rdf:type owl:ObjectProperty ;
     rdfs:domain bfo:BFO_0000015 ; # process
@@ -730,28 +737,38 @@ proeth:conflictsWith a owl:ObjectProperty ;
     owl:deprecated true .
 
 :hasState rdf:type owl:ObjectProperty ;
+    owl:equivalentProperty proeth-core:hasState ;
+    owl:deprecated true ;
     rdfs:domain bfo:BFO_0000015 ; # process
     rdfs:range proeth-core:State ;
     rdfs:label "has state"@en ;
-    rdfs:comment "Relates a process to a state that affects it"@en .
+    rdfs:comment "Relates a process to a state that affects it. DEPRECATED: use proeth-core:hasState."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:hasState. Added owl:equivalentProperty to bridge existing references."@en .
 
 :hasResource rdf:type owl:ObjectProperty ;
     rdfs:domain bfo:BFO_0000015 ; # process
-    rdfs:range :Resource ;
+    rdfs:range proeth-core:Resource ;
     rdfs:label "has resource"@en ;
-    rdfs:comment "Relates a process to a resource it uses"@en .
+    rdfs:comment "Relates a process to a resource it uses"@en ;
+    skos:changeNote "v2.4.2: Fixed range from :Resource (undefined in intermediate namespace) to proeth-core:Resource."@en .
 
 :performsAction rdf:type owl:ObjectProperty ;
+    owl:equivalentProperty proeth-core:performsAction ;
+    owl:deprecated true ;
     rdfs:domain bfo:BFO_0000040 ; # material entity
     rdfs:range proeth-core:Action ;
     rdfs:label "performs action"@en ;
-    rdfs:comment "Relates an agent to an action they perform"@en .
+    rdfs:comment "Relates an agent to an action they perform. DEPRECATED: use proeth-core:performsAction."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:performsAction. Added owl:equivalentProperty to bridge existing references."@en .
 
 :hasCapability rdf:type owl:ObjectProperty ;
+    owl:equivalentProperty proeth-core:hasCapability ;
+    owl:deprecated true ;
     rdfs:domain bfo:BFO_0000040 ; # material entity
     rdfs:range proeth-core:Capability ;
     rdfs:label "has capability"@en ;
-    rdfs:comment "Relates an entity to a capability it possesses"@en .
+    rdfs:comment "Relates an entity to a capability it possesses. DEPRECATED: use proeth-core:hasCapability."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:hasCapability. Added owl:equivalentProperty to bridge existing references."@en .
 
 :guidedByPrinciple rdf:type owl:ObjectProperty ;
     rdfs:domain proeth-core:Action ;
@@ -760,10 +777,13 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:comment "Relates an action to a principle that guides it"@en .
 
 :fulfillsObligation rdf:type owl:ObjectProperty ;
+    owl:equivalentProperty proeth-core:fulfillsObligation ;
+    owl:deprecated true ;
     rdfs:domain proeth-core:Action ;
     rdfs:range proeth-core:Obligation ;
     rdfs:label "fulfills obligation"@en ;
-    rdfs:comment "Relates an action to an obligation it fulfills"@en .
+    rdfs:comment "Relates an action to an obligation it fulfills. DEPRECATED: use proeth-core:fulfillsObligation."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:fulfillsObligation. Added owl:equivalentProperty to bridge existing references."@en .
 
 :violatesObligation rdf:type owl:ObjectProperty ;
     rdfs:domain proeth-core:Action ;
@@ -772,10 +792,13 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:comment "Relates an action to an obligation it violates"@en .
 
 :constrainedBy rdf:type owl:ObjectProperty ;
+    owl:equivalentProperty proeth-core:constrainedBy ;
+    owl:deprecated true ;
     rdfs:domain proeth-core:Action ;
     rdfs:range proeth-core:Constraint ;
     rdfs:label "constrained by"@en ;
-    rdfs:comment "Relates an action to a constraint that limits or shapes it"@en .
+    rdfs:comment "Relates an action to a constraint that limits or shapes it. DEPRECATED: use proeth-core:constrainedBy."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:constrainedBy. Added owl:equivalentProperty to bridge existing references."@en .
 
 :hasAgentRole rdf:type owl:ObjectProperty ;
     rdfs:domain proeth-core:Action ;
@@ -785,16 +808,22 @@ proeth:conflictsWith a owl:ObjectProperty ;
 
 # Properties connecting roles to obligations and principles
 :hasObligation rdf:type owl:ObjectProperty ;
+    owl:equivalentProperty proeth-core:hasObligation ;
+    owl:deprecated true ;
     rdfs:domain proeth-core:Role ;
     rdfs:range proeth-core:Obligation ;
     rdfs:label "has obligation"@en ;
-    rdfs:comment "Relates a role to the professional obligations borne by entities bearing that role"@en .
+    rdfs:comment "Relates a role to the professional obligations borne by entities bearing that role. DEPRECATED: use proeth-core:hasObligation."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:hasObligation. Added owl:equivalentProperty to bridge existing references."@en .
 
 :adheresToPrinciple rdf:type owl:ObjectProperty ;
+    owl:equivalentProperty proeth-core:adheresToPrinciple ;
+    owl:deprecated true ;
     rdfs:domain proeth-core:Role ;
     rdfs:range proeth-core:Principle ;
     rdfs:label "adheres to principle"@en ;
-    rdfs:comment "Relates a role to ethical principles that normatively govern that role"@en .
+    rdfs:comment "Relates a role to ethical principles that normatively govern that role. DEPRECATED: use proeth-core:adheresToPrinciple."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:adheresToPrinciple. Added owl:equivalentProperty to bridge existing references."@en .
 
 :pursuesEnd rdf:type owl:ObjectProperty ;
     rdfs:domain proeth-core:Role ;
@@ -1346,50 +1375,65 @@ proeth:requiresCapability a owl:ObjectProperty ;
 # Ethical Question - Questions posed to the Board for ethical review
 :EthicalQuestion rdf:type owl:Class ;
     rdf:type :EntityType ;
+    owl:equivalentClass proeth-cases:EthicalQuestion ;
+    owl:deprecated true ;
     rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
     rdfs:label "Ethical Question"@en ;
     iao:0000115 "A question about ethical conduct posed for Board of Ethical Review consideration, representing a specific inquiry about professional ethics requiring formal determination."@en ;
     skos:definition "Questions submitted to ethics review boards articulate specific ethical uncertainties requiring authoritative interpretation. Per McLaren (2003), these questions provide the extensional grounding for principle application, with each Board determination adding to the precedential knowledge base."@en ;
     dcterms:source <https://doi.org/10.1023/A:1024195425598> ; # McLaren 2003
-    rdfs:comment "Extracted from case 'Questions' sections. Each question frames a specific ethical issue for Board determination."@en .
+    rdfs:comment "Extracted from case 'Questions' sections. Each question frames a specific ethical issue for Board determination. DEPRECATED: use proeth-cases:EthicalQuestion."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:EthicalQuestion. Added owl:equivalentClass to bridge existing references. Case data uses the proeth-cases: version."@en .
 
 # Board Conclusion - The Board's formal determination on an ethical question
 :BoardConclusion rdf:type owl:Class ;
     rdf:type :EntityType ;
+    owl:equivalentClass proeth-cases:EthicalConclusion ;
+    owl:deprecated true ;
     rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
     rdfs:label "Board Conclusion"@en ;
     iao:0000115 "The Board of Ethical Review's formal determination on an ethical question, representing authoritative professional judgment with precedential value."@en ;
     skos:definition "Board conclusions represent the culmination of ethical deliberation, providing precedential guidance for future cases. Per McLaren (2003), these determinations give concrete meaning to abstract principles through their application to specific factual contexts."@en ;
     dcterms:source <https://doi.org/10.1023/A:1024195425598> ; # McLaren 2003
-    rdfs:comment "Extracted from case 'Conclusions' sections. Each conclusion answers a specific ethical question and establishes precedent."@en .
+    rdfs:comment "Extracted from case 'Conclusions' sections. Each conclusion answers a specific ethical question and establishes precedent. DEPRECATED: use proeth-cases:EthicalConclusion."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:EthicalConclusion. Added owl:equivalentClass to bridge existing references."@en .
 
 # Decision Point - A point in the case where an ethical choice must be made
 :DecisionPoint rdf:type owl:Class ;
     rdf:type :EntityType ;
+    owl:equivalentClass proeth-cases:DecisionPoint ;
+    owl:deprecated true ;
     rdfs:subClassOf proeth-core:Event ;
     rdfs:label "Decision Point"@en ;
     iao:0000115 "A point in an ethics case where a professional actor must make a choice between ethically significant alternatives, representing a critical juncture in the case narrative."@en ;
     skos:definition "Decision points mark critical junctures in ethics cases where actors face choices between alternatives with ethical implications. Per Hobbs & Moore (2005) scenario-directed decision analysis, these points structure the ethical problem space and enable systematic analysis of options, constraints, and outcomes."@en ;
     dcterms:source <https://doi.org/10.1111/j.1539-6924.2005.00634.x> ; # Hobbs & Moore 2005
-    rdfs:comment "Extracted during Step 4 analysis. Each decision point includes options, involved roles, applicable provisions, and the board's resolution."@en .
+    rdfs:comment "Extracted during Step 4 analysis. Each decision point includes options, involved roles, applicable provisions, and the board's resolution. DEPRECATED: use proeth-cases:DecisionPoint."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:DecisionPoint. Added owl:equivalentClass to bridge existing references. 845 case instances reference proeth-cases:DecisionPoint."@en .
 
 # Decision Option - An alternative available at a decision point
 :DecisionOption rdf:type owl:Class ;
     rdf:type :EntityType ;
+    owl:equivalentClass proeth-cases:DecisionOption ;
+    owl:deprecated true ;
     rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
     rdfs:label "Decision Option"@en ;
     iao:0000115 "A possible course of action available at a decision point, representing one alternative the actor could choose."@en ;
     skos:definition "Decision options represent the discrete alternatives available to actors at decision points. Per scenario-directed analysis frameworks, clearly articulating options enables structured evaluation of consequences and ethical implications for each path."@en ;
-    rdfs:comment "Each decision point has multiple options; one is typically marked as the board's chosen resolution."@en .
+    rdfs:comment "Each decision point has multiple options; one is typically marked as the board's chosen resolution. DEPRECATED: use proeth-cases:DecisionOption."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:DecisionOption. Added owl:equivalentClass to bridge existing references."@en .
 
 # Ethical Argument - A pro or con argument for a decision option
 :EthicalArgument rdf:type owl:Class ;
     rdf:type :EntityType ;
+    owl:equivalentClass proeth-cases:Argument ;
+    owl:deprecated true ;
     rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
     rdfs:label "Ethical Argument"@en ;
     iao:0000115 "An argument supporting or opposing a decision option, based on ethical principles, code provisions, and precedent cases."@en ;
     skos:definition "Ethical arguments represent the pro/con reasoning for decision options. Per the IAAI 'Pros and Cons in Ethical Decisions' paper, evaluative AI presents balanced arguments citing code provisions and precedents so practitioners can make informed decisions."@en ;
-    rdfs:comment "Generated during Step 4 Part F. Each argument includes a claim, premises, provision citations, and strength assessment."@en .
+    rdfs:comment "Generated during Step 4 Part F. Each argument includes a claim, premises, provision citations, and strength assessment. DEPRECATED: use proeth-cases:Argument."@en ;
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:Argument. Added owl:equivalentClass to bridge existing references."@en .
 
 # Properties for case analysis entities
 :hasQuestion rdf:type owl:ObjectProperty ;
@@ -1447,18 +1491,18 @@ proeth:requiresCapability a owl:ObjectProperty ;
     rdfs:comment "Relates a decision option to an argument for or against it"@en .
 
 :argumentFor rdf:type owl:ObjectProperty ;
-    rdfs:subPropertyOf :hasArgument ;
     rdfs:domain :EthicalArgument ;
     rdfs:range :DecisionOption ;
     rdfs:label "argument for"@en ;
-    rdfs:comment "Indicates this is a PRO argument supporting the decision option"@en .
+    rdfs:comment "Indicates this is a PRO argument supporting the decision option"@en ;
+    skos:changeNote "v2.4.2: Removed rdfs:subPropertyOf :hasArgument. The parent property has domain DecisionOption and range EthicalArgument, but argumentFor has the inverse direction (EthicalArgument to DecisionOption). A subproperty cannot invert its parent's domain/range."@en .
 
 :argumentAgainst rdf:type owl:ObjectProperty ;
-    rdfs:subPropertyOf :hasArgument ;
     rdfs:domain :EthicalArgument ;
     rdfs:range :DecisionOption ;
     rdfs:label "argument against"@en ;
-    rdfs:comment "Indicates this is a CON argument opposing the decision option"@en .
+    rdfs:comment "Indicates this is a CON argument opposing the decision option"@en ;
+    skos:changeNote "v2.4.2: Removed rdfs:subPropertyOf :hasArgument. Same domain/range inversion issue as argumentFor."@en .
 
 :citesProvision rdf:type owl:ObjectProperty ;
     rdfs:domain :EthicalArgument ;

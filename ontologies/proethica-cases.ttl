@@ -211,12 +211,12 @@ proeth-cases:hasContext a owl:ObjectProperty ;
 
 # Core Ontology Connections
 proeth-cases:involvesRole a owl:ObjectProperty ;
-    rdfs:subPropertyOf ro:0000057 ;  # RO:has participant
     rdfs:domain proeth-cases:Case ;
     rdfs:range proeth-core:Role ;
     rdfs:label "involves role"@en ;
     rdfs:comment "Relates a case to professional roles that are involved in the scenario."@en ;
-    skos:definition "Relates an ethical case to a professional role that is central to or involved in the case scenario."@en .
+    skos:definition "Relates an ethical case to a professional role that is central to or involved in the case scenario."@en ;
+    skos:changeNote "v2.4.2: Removed rdfs:subPropertyOf ro:0000057 (has_participant). RO:has_participant has domain process (BFO:0000015), but Case is an information content entity (GDC), not a process. A Case describes role involvement; it does not have participants in the BFO sense."@en .
 
 proeth-cases:triggeredByEvent a owl:ObjectProperty ;
     # RO_0000013 does not exist. 'causally downstream of' is not a standard RO IRI.
@@ -673,7 +673,7 @@ proeth-cases:NSPEConclusionSection a owl:Class ;
     proeth-cases:sectionOrder 4 .
 
 proeth-cases:NSPEDissentingOpinionSection a owl:Class ;
-    rdfs:subClassOf proeth-cases:CaseSection ;
+    rdfs:subClassOf proeth-cases:SectionType ;
     rdfs:label "NSPE Dissenting Opinion Section"@en ;
     rdfs:comment "Alternative interpretation disagreeing with majority conclusion in NSPE cases"@en ;
     skos:definition "Section presenting alternative ethical interpretation or reasoning that disagrees with the majority conclusion, providing important precedential nuance in NSPE engineering ethics cases"@en ;
@@ -681,7 +681,7 @@ proeth-cases:NSPEDissentingOpinionSection a owl:Class ;
     proeth-cases:sectionOrder 5 .
 
 proeth-cases:NSPEReferencesSection a owl:Class ;
-    rdfs:subClassOf proeth-cases:CaseSection ;
+    rdfs:subClassOf proeth-cases:SectionType ;
     rdfs:label "NSPE References Section"@en ;
     rdfs:comment "Code provisions, case precedents, and supporting references in NSPE cases"@en ;
     skos:definition "Section citing relevant NSPE Code of Ethics provisions, previous case precedents, and supporting materials that inform the ethical analysis"@en ;
@@ -706,6 +706,15 @@ proeth-cases:EthicalConclusion a owl:Class ;
     rdfs:comment "Resolution or answer to an ethical question in a case"@en ;
     skos:definition "An information content entity representing the resolution, answer, or professional decision made in response to an ethical question, grounded in professional principles and precedential reasoning"@en ;
     dcterms:source <https://doi.org/10.1016/j.artint.2022.103705> .
+
+# Decision Point: Critical juncture requiring ethical choice
+proeth-cases:DecisionPoint a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Decision Point"@en ;
+    rdfs:comment "A point in an ethics case where a professional actor must make a choice between ethically significant alternatives."@en ;
+    skos:definition "Decision points mark critical junctures in ethics cases where actors face choices between alternatives with ethical implications. Per Hobbs and Moore (2005) scenario-directed decision analysis, these points structure the ethical problem space and enable systematic analysis of options, constraints, and outcomes."@en ;
+    dcterms:source <https://doi.org/10.1111/j.1539-6924.2005.00634.x> ;
+    skos:changeNote "v2.4.2: Added to cases namespace. 845 case instances reference proeth-cases:DecisionPoint but the class was previously only defined in intermediate namespace (intermediate#DecisionPoint)."@en .
 
 ###############################################################
 # Properties for Question-Conclusion Linking
