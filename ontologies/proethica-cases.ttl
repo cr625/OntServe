@@ -356,7 +356,7 @@ proeth-cases:DecisionOption rdfs:subClassOf [
 proeth-cases:Case rdfs:subClassOf [
     a owl:Restriction ;
     owl:onProperty proeth-cases:involvesStakeholder ;
-    owl:someValuesFrom proeth-core:Role
+    owl:someValuesFrom proeth-cases:Stakeholder
 ] .
 
 ###############################################################
