@@ -68,6 +68,16 @@
         max-height: 300px;
         overflow-y: auto;
     }
+
+    #wolframResponse {
+        font-size: 0.85em;
+        max-height: 300px;
+        overflow-y: auto;
+        line-height: 1.5;
+    }
+    #wolframResponse p { margin-bottom: 0.4rem; }
+    #wolframResponse ul, #wolframResponse ol { padding-left: 1.2rem; }
+    #wolframResponse code { font-size: 0.9em; }
 </style>
 {% endblock %}
 
@@ -369,6 +379,35 @@
                 </div>
             </div>
 
+            <!-- Wolfram Lookup -->
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center"
+                     role="button" data-bs-toggle="collapse" data-bs-target="#wolframPanel"
+                     aria-expanded="false" aria-controls="wolframPanel">
+                    <h6 class="mb-0"><i class="bi bi-calculator"></i> Wolfram Lookup</h6>
+                    <i class="bi bi-chevron-down small text-muted"></i>
+                </div>
+                <div id="wolframPanel" class="collapse">
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <input type="text" class="form-control form-control-sm" id="wolframQuery"
+                                   value="{{ entity.label or fragment }}"
+                                   placeholder="Query...">
+                        </div>
+                        <div class="mb-2">
+                            <input type="text" class="form-control form-control-sm" id="wolframContext"
+                                   value="professional ethics ontology"
+                                   placeholder="Context (optional)">
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary w-100" id="wolframBtn" onclick="wolframLookup()">
+                            Look up
+                        </button>
+                        <div id="wolframResponse" class="mt-2 d-none border-top pt-2"></div>
+                        <div id="wolframError" class="mt-2 d-none text-danger small"></div>
+                    </div>
+                </div>
+            </div>
+
             {% if version_tag %}
             <!-- Version info for historical views -->
             <div class="card mb-3 border-warning">
@@ -391,7 +430,51 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
+    function wolframLookup() {
+        const query = document.getElementById('wolframQuery').value.trim();
+        const context = document.getElementById('wolframContext').value.trim();
+        const btn = document.getElementById('wolframBtn');
+        const responseEl = document.getElementById('wolframResponse');
+        const errorEl = document.getElementById('wolframError');
+
+        if (!query) return;
+
+        const message = context ? 'In the context of ' + context + ': ' + query : query;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Looking up...';
+        responseEl.classList.add('d-none');
+        errorEl.classList.add('d-none');
+
+        fetch('{{ url_for("wolfram.query") }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: message})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                responseEl.innerHTML = (typeof marked !== 'undefined' && marked.parse)
+                    ? marked.parse(data.content)
+                    : data.content;
+                responseEl.classList.remove('d-none');
+            } else {
+                errorEl.textContent = data.error || 'Lookup failed.';
+                errorEl.classList.remove('d-none');
+            }
+        })
+        .catch(err => {
+            errorEl.textContent = 'Network error: ' + err.message;
+            errorEl.classList.remove('d-none');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = 'Look up';
+        });
+    }
+
     function toggleEditMode() {
         const display = document.getElementById('displayMode');
         const edit = document.getElementById('editMode');

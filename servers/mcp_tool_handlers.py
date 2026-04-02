@@ -27,10 +27,11 @@ class MCPToolHandlers:
     """
 
     def __init__(self, concept_manager, storage, sparql_service,
-                 source_text_manager, db_connected: bool):
+                 wolfram_service, source_text_manager, db_connected: bool):
         self.concept_manager = concept_manager
         self.storage = storage
         self.sparql_service = sparql_service
+        self.wolfram_service = wolfram_service
         self.source_text_manager = source_text_manager
         self.db_connected = db_connected
 
@@ -108,6 +109,63 @@ class MCPToolHandlers:
         except Exception as e:
             logger.error("SPARQL query execution failed: %s", e)
             return {"error": str(e), "query": query, "domain_id": domain_id}
+
+    # ------------------------------------------------------------------
+    # wolfram_lookup
+    # ------------------------------------------------------------------
+
+    async def handle_wolfram_lookup(self, arguments: dict) -> dict:
+        """Look up a concept or term via Wolfram AgentOne."""
+        query = arguments.get("query", "")
+        context = arguments.get("context", "")
+
+        if not query:
+            return {"error": "Query is required", "query": query}
+
+        if not self.wolfram_service:
+            return {
+                "error": "Wolfram service not available",
+                "query": query,
+            }
+
+        if not self.wolfram_service.is_configured:
+            return {
+                "error": "Wolfram API key not configured",
+                "query": query,
+            }
+
+        if context:
+            formatted_query = f"In the context of {context}: {query}"
+        else:
+            formatted_query = query
+
+        logger.debug("Wolfram lookup: %s", formatted_query)
+
+        try:
+            start_time = time.time()
+            result = await asyncio.to_thread(
+                self.wolfram_service.query, formatted_query
+            )
+            execution_time_ms = int((time.time() - start_time) * 1000)
+
+            if not result.get("success"):
+                return {
+                    "error": result.get("error", "Wolfram query failed"),
+                    "query": query,
+                    "execution_time_ms": execution_time_ms,
+                }
+
+            return {
+                "content": result.get("content", ""),
+                "query": query,
+                "context": context,
+                "model": result.get("model", "AgentOne"),
+                "execution_time_ms": execution_time_ms,
+                "message": "Wolfram lookup completed successfully",
+            }
+        except Exception as e:
+            logger.error("Wolfram lookup failed: %s", e)
+            return {"error": str(e), "query": query}
 
     # ------------------------------------------------------------------
     # submit_candidate_concept

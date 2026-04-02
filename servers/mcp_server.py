@@ -69,6 +69,7 @@ async def app_lifespan(server):
     from storage.concept_manager import ConceptManager
     from storage.source_text_manager import SourceTextManager
     from services.sparql_service import SPARQLService
+    from services.wolfram_service import WolframService
     from services.ontology_sync_service import sync_ontologies_on_startup
     from servers.mcp_tool_handlers import MCPToolHandlers
 
@@ -93,6 +94,16 @@ async def app_lifespan(server):
             logger.warning(f"SPARQL service init failed: {e}")
             sparql_service = None
 
+        try:
+            wolfram_service = WolframService()
+            if wolfram_service.is_configured:
+                logger.info("Wolfram AgentOne service initialized")
+            else:
+                logger.warning("Wolfram service created but API key not configured")
+        except Exception as e:
+            logger.warning(f"Wolfram service init failed: {e}")
+            wolfram_service = None
+
         # Auto-sync ontology entities from TTL files
         try:
             from sqlalchemy import create_engine
@@ -115,6 +126,7 @@ async def app_lifespan(server):
             concept_manager=concept_manager,
             storage=storage,
             sparql_service=sparql_service,
+            wolfram_service=wolfram_service,
             source_text_manager=source_text_manager,
             db_connected=True,
         )
@@ -126,15 +138,18 @@ async def app_lifespan(server):
             concept_manager=None,
             storage=None,
             sparql_service=None,
+            wolfram_service=None,
             source_text_manager=None,
             db_connected=False,
         )
         sparql_service = None
+        wolfram_service = None
         logger.warning("Server starting with limited functionality (no database)")
 
     yield {
         "handlers": handlers,
         "sparql_service": sparql_service,
+        "wolfram_service": wolfram_service,
     }
 
 
@@ -196,14 +211,14 @@ async def guidelines_compat(request: Request) -> JSONResponse:
         "available_tools": [
             "get_entities_by_category", "submit_candidate_concept",
             "update_concept_status", "get_candidate_concepts", "sparql_query",
-            "store_extracted_entities", "get_case_entities",
+            "wolfram_lookup", "store_extracted_entities", "get_case_entities",
             "get_entity_by_uri", "get_entities_by_uris", "get_entity_by_label",
         ]
     })
 
 
 # ---------------------------------------------------------------------------
-# MCP Tools (11 tools, schemas auto-generated from type hints)
+# MCP Tools (12 tools, schemas auto-generated from type hints)
 # ---------------------------------------------------------------------------
 
 def _get_handlers(ctx: Context):
@@ -234,6 +249,21 @@ async def sparql_query(
     """Execute SPARQL query on professional domain ontology."""
     result = await _get_handlers(ctx).handle_sparql_query({
         "query": query, "domain_id": domain_id,
+    })
+    return json.dumps(result)
+
+
+@mcp.tool
+async def wolfram_lookup(
+    query: str,
+    ctx: Context,
+    context: str = "",
+) -> str:
+    """Look up a concept, definition, or factual information via Wolfram AgentOne.
+    Useful for verifying definitions, finding related concepts, and grounding
+    ontology terms in authoritative knowledge during ontology construction."""
+    result = await _get_handlers(ctx).handle_wolfram_lookup({
+        "query": query, "context": context,
     })
     return json.dumps(result)
 

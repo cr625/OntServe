@@ -19,6 +19,7 @@ def handlers():
         concept_manager=None,
         storage=None,
         sparql_service=None,
+        wolfram_service=None,
         source_text_manager=None,
         db_connected=False,
     )
@@ -226,6 +227,7 @@ class TestBatchEntityLookup:
             concept_manager=None,
             storage=storage,
             sparql_service=None,
+            wolfram_service=None,
             source_text_manager=None,
             db_connected=True,
         )
@@ -285,9 +287,72 @@ class TestBatchEntityLookup:
         assert len(call_args[0][1][0]) == 20
 
     async def test_db_not_connected(self):
-        h = MCPToolHandlers(None, None, None, None, db_connected=False)
+        h = MCPToolHandlers(None, None, None, None, None, db_connected=False)
         result = await h.handle_get_entities_by_uris({
             "uris": ["http://x#A"],
         })
         assert "error" in result
         assert result["not_found"] == ["http://x#A"]
+
+
+# ------------------------------------------------------------------
+# handle_wolfram_lookup
+# ------------------------------------------------------------------
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+class TestWolframLookup:
+    """Test the Wolfram lookup handler."""
+
+    async def test_no_service_returns_error(self):
+        h = MCPToolHandlers(None, None, None, None, None, db_connected=False)
+        result = await h.handle_wolfram_lookup({"query": "test"})
+        assert "error" in result
+        assert "not available" in result["error"]
+
+    async def test_empty_query_returns_error(self):
+        h = MCPToolHandlers(None, None, None, None, None, db_connected=False)
+        result = await h.handle_wolfram_lookup({"query": ""})
+        assert "error" in result
+        assert "required" in result["error"].lower()
+
+    async def test_unconfigured_key_returns_error(self):
+        mock_wolfram = MagicMock()
+        mock_wolfram.is_configured = False
+        h = MCPToolHandlers(None, None, None, mock_wolfram, None, db_connected=False)
+        result = await h.handle_wolfram_lookup({"query": "test"})
+        assert "error" in result
+        assert "not configured" in result["error"].lower()
+
+    async def test_successful_lookup(self):
+        mock_wolfram = MagicMock()
+        mock_wolfram.is_configured = True
+        mock_wolfram.query.return_value = {
+            "success": True,
+            "content": "Professional negligence is...",
+            "model": "AgentOne",
+            "uuid": "abc123",
+        }
+        h = MCPToolHandlers(None, None, None, mock_wolfram, None, db_connected=False)
+        result = await h.handle_wolfram_lookup({
+            "query": "professional negligence",
+            "context": "engineering ethics",
+        })
+        assert "content" in result
+        assert result["message"] == "Wolfram lookup completed successfully"
+        assert result["execution_time_ms"] >= 0
+        # Context should be prepended in the call to wolfram
+        call_args = mock_wolfram.query.call_args[0][0]
+        assert "engineering ethics" in call_args
+
+    async def test_wolfram_api_failure(self):
+        mock_wolfram = MagicMock()
+        mock_wolfram.is_configured = True
+        mock_wolfram.query.return_value = {
+            "success": False,
+            "error": "Request timed out after 120s.",
+        }
+        h = MCPToolHandlers(None, None, None, mock_wolfram, None, db_connected=False)
+        result = await h.handle_wolfram_lookup({"query": "test"})
+        assert "error" in result
+        assert "timed out" in result["error"]
