@@ -15,6 +15,7 @@ Central ontology management and serving system. Provides ontology storage, entit
 python -m venv venv-ontserve
 source venv-ontserve/bin/activate
 pip install -r requirements.txt
+pip install -e .
 
 # Set up the database
 createdb ontserve
