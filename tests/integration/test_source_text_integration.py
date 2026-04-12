@@ -19,6 +19,15 @@ import logging
 from pathlib import Path
 from datetime import datetime
 
+import pytest
+
+
+def _require_test_db_url() -> str:
+    url = os.environ.get('ONTSERVE_TEST_DB_URL')
+    if not url:
+        pytest.skip('ONTSERVE_TEST_DB_URL not set')
+    return url
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
@@ -45,10 +54,7 @@ def test_basic_source_text_storage():
 
     try:
         # Initialize storage
-        db_url = os.environ.get(
-            'ONTSERVE_DB_URL',
-            'postgresql://postgres:PASS@localhost:5432/ontserve'
-        )
+        db_url = _require_test_db_url()
 
         storage_config = {'db_url': db_url}
         storage = PostgreSQLStorage(storage_config)
@@ -122,10 +128,7 @@ def test_class_source_reference():
 
     try:
         # Initialize storage
-        db_url = os.environ.get(
-            'ONTSERVE_DB_URL',
-            'postgresql://postgres:PASS@localhost:5432/ontserve'
-        )
+        db_url = _require_test_db_url()
 
         storage_config = {'db_url': db_url}
         storage = PostgreSQLStorage(storage_config)
@@ -208,10 +211,7 @@ def test_batch_entity_storage():
 
     try:
         # Initialize storage
-        db_url = os.environ.get(
-            'ONTSERVE_DB_URL',
-            'postgresql://postgres:PASS@localhost:5432/ontserve'
-        )
+        db_url = _require_test_db_url()
 
         storage_config = {'db_url': db_url}
         storage = PostgreSQLStorage(storage_config)
@@ -289,10 +289,7 @@ def test_query_rdf_triples():
 
     try:
         # Initialize storage
-        db_url = os.environ.get(
-            'ONTSERVE_DB_URL',
-            'postgresql://postgres:PASS@localhost:5432/ontserve'
-        )
+        db_url = _require_test_db_url()
 
         storage_config = {'db_url': db_url}
         storage = PostgreSQLStorage(storage_config)

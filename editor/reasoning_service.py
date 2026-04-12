@@ -4,6 +4,12 @@ OWL reasoning service for the ontology editor.
 Handles owlready2-based reasoning: content parsing, import stripping,
 format conversion, reasoner execution, hierarchy diffing, and version creation.
 Extracted from editor/routes.py simple_reasoning().
+
+Note: This reasoner powers the editor's "reason" button for in-UI preview.
+It operates on a single ontology's current_content and does NOT merge
+core+intermediate or preserve external owl:imports. For paper-grade
+validation (merged graphs, corpus runs, mutation tests) see
+validation/pellet_validate.py.
 """
 
 import hashlib

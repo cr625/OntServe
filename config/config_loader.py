@@ -184,11 +184,14 @@ class ConfigLoader:
         return True
 
     def get_database_url(self) -> str:
-        """Get database URL with fallback to default."""
-        return os.environ.get(
-            'ONTSERVE_DB_URL',
-            'postgresql://postgres:PASS@localhost:5432/ontserve'
-        )
+        """Get database URL from ONTSERVE_DB_URL environment variable."""
+        url = os.environ.get('ONTSERVE_DB_URL')
+        if not url:
+            raise RuntimeError(
+                "ONTSERVE_DB_URL environment variable must be set. "
+                "For local dev, see config/ontserve.env.template"
+            )
+        return url
 
     def get_mcp_port(self) -> int:
         """Get MCP server port."""
