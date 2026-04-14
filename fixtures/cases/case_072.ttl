@@ -1,0 +1,80 @@
+@prefix case72: <http://proethica.org/ontology/case/72#> .
+@prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ---------------------------------------------------------------------------
+# NSPE BER Case 72 -- Figure 1 fixture
+#
+# This file is the minimal OWL rendering of Figure 1 from:
+#
+#   Rauch, C. B. An Ontology-Grounded Representation for Defeasible
+#   Professional Ethics Analysis. Submitted to KI2026.
+#
+# The paper's figure caption says "Local names abbreviated. Provenance
+# triples omitted." This fixture uses the same abbreviated local names
+# that appear in the figure, so that a reviewer can load it into a
+# SPARQL engine or a Pellet reasoner and see exactly the pattern the
+# paper draws.
+#
+# The live Case 72 ontology on https://ontserve.ontorealm.net uses
+# longer, more descriptive local names produced by the LLM extraction
+# client (e.g. Doe_Faithful_Agent_Obligation_Fulfilled_XYZ_Corporation
+# rather than Obl_FaithfulAgent). See fixtures/cases/README.md for
+# details on how to retrieve the full case ontology from the live site.
+# ---------------------------------------------------------------------------
+
+<http://proethica.org/ontology/case/72> a owl:Ontology ;
+    rdfs:label "NSPE BER Case 72 -- Figure 1 fixture"@en ;
+    dcterms:source "NSPE Board of Ethical Review, Case No. 76-4 (Public Welfare, Knowledge of Information Damaging to Client's Interest)" ;
+    rdfs:comment "Abbreviated fixture for KI2026 Figure 1. Reviewers should see three typed individuals and three defeasibility edges."@en ;
+    owl:imports <http://proethica.org/ontology/intermediate> ,
+                <http://proethica.org/ontology/core> .
+
+# ---------------------------------------------------------------------------
+# State that activates the competition (from case 72 facts)
+# ---------------------------------------------------------------------------
+
+case72:State_ConfirmedDischargeRisk a proeth:ConfirmedRiskWithoutAdequateSafeguardsState ,
+        owl:NamedIndividual ;
+    rdfs:label "Discharge below environmental standards (confirmed)" ;
+    proeth:sourcetext "Doe concludes that the discharge from the plant will lower the quality of the receiving body of water below established standards" .
+
+# ---------------------------------------------------------------------------
+# Obligation A: derived from NSPE Sec. 1 (faithful-agent principle)
+# ---------------------------------------------------------------------------
+
+case72:Obl_FaithfulAgent a proeth:FaithfulAgentObligation ,
+        owl:NamedIndividual ;
+    rdfs:label "Faithful-agent obligation to XYZ" ;
+    proeth:obligatedparty "Engineer Doe" ;
+    proeth:sourcetext "will act ... as a faithful agent or trustee (NSPE Sec. 1)" .
+
+# ---------------------------------------------------------------------------
+# Obligation B: derived from NSPE Sec. 2(a) (paramount public duty)
+# ---------------------------------------------------------------------------
+
+case72:Obl_PublicSafetyReport a proeth:PostTermEnvRiskReportingObligation ,
+        owl:NamedIndividual ;
+    rdfs:label "Post-termination public-safety reporting" ;
+    proeth:obligatedparty "Engineer Doe" ;
+    proeth:sourcetext "duty to the public be paramount (NSPE Sec. 2a)" .
+
+# ---------------------------------------------------------------------------
+# Defeasibility edges (core ontology)
+#
+# Read: the faithful-agent obligation competes with the public-safety
+# reporting obligation; under the confirmed-discharge-risk state, the
+# faithful-agent obligation is defeasible, and the public-safety
+# reporting obligation prevails.
+# ---------------------------------------------------------------------------
+
+case72:Obl_FaithfulAgent
+    proeth-core:competesWith case72:Obl_PublicSafetyReport ;
+    proeth-core:defeasibleUnder case72:State_ConfirmedDischargeRisk .
+
+case72:Obl_PublicSafetyReport
+    proeth-core:prevailsOver case72:Obl_FaithfulAgent .
