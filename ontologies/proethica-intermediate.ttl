@@ -441,7 +441,7 @@ proeth:allenRelation a owl:DatatypeProperty ;
     rdfs:domain proeth:TemporalRelation ;
     rdfs:range xsd:string ;
     rdfs:label "Allen relation"@en ;
-    rdfs:comment "The Allen interval algebra relation name (before, after, meets, overlaps, during, starts, finishes, equals, and their inverses). Maps to OWL-Time properties via allen_owl_time_mapper.py."@en .
+    rdfs:comment "The Allen interval algebra relation name (before, after, meets, overlaps, during, starts, finishes, equals, and their inverses). Maps to OWL-Time properties via services/allen_owl_time_mapper.py."@en .
 
 proeth:owlTimeProperty a owl:DatatypeProperty ;
     rdfs:domain proeth:TemporalRelation ;
