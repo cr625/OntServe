@@ -395,6 +395,17 @@
                         </label>
                     </div>
 
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="hideUnconnected">
+                        <label class="form-check-label" for="hideUnconnected">
+                            Hide unconnected nodes
+                        </label>
+                    </div>
+
+                    <button class="btn btn-outline-secondary btn-sm w-100 mb-2" id="classesOnlyBtn" onclick="toggleClassesOnly()">
+                        Classes Only (hide Properties)
+                    </button>
+
                     <button class="btn btn-outline-primary btn-sm w-100" onclick="applyFilters()">
                         <i class="fas fa-filter me-1"></i>Apply Filters
                     </button>
@@ -526,6 +537,7 @@
         let ontologyData;
         let currentEntityData;
         let originalElements; // Store original elements for filtering
+        let hidePropertyNodes = false; // Classes Only quick filter state
         const ontologyId = "{{ ontology_name }}";
 
         // Use hierarchical layout by default for hierarchical ontologies
@@ -705,6 +717,7 @@
             document.getElementById('filterType').addEventListener('change', applyFilters);
             document.getElementById('showInferred').addEventListener('change', applyFilters);
             document.getElementById('showRestrictions').addEventListener('change', applyFilters);
+            document.getElementById('hideUnconnected').addEventListener('change', applyFilters);
             document.getElementById('layoutSelector').addEventListener('change', function () {
                 currentLayout = this.value;
                 applyLayout(); // Apply the layout immediately when changed
@@ -1405,6 +1418,21 @@
             performSemanticSearch();
         }
 
+        function toggleClassesOnly() {
+            hidePropertyNodes = !hidePropertyNodes;
+            const btn = document.getElementById('classesOnlyBtn');
+            if (hidePropertyNodes) {
+                // Set dropdown to "All Types" so the quick filter has something to act on
+                document.getElementById('filterType').value = 'all';
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-secondary', 'text-white');
+            } else {
+                btn.classList.remove('btn-secondary', 'text-white');
+                btn.classList.add('btn-outline-secondary');
+            }
+            applyFilters();
+        }
+
         function applyFilters() {
             const filterType = document.getElementById('filterType').value;
             const showInferred = document.getElementById('showInferred').checked;
@@ -1438,6 +1466,35 @@
             if (!showInferred) {
                 filteredElements = filteredElements.filter(element => {
                     return !element.data.is_inferred;
+                });
+            }
+
+            // Classes Only quick filter: remove property-type nodes and any edges touching them
+            if (hidePropertyNodes) {
+                filteredElements = filteredElements.filter(element => {
+                    if (element.group === 'edges') return true;
+                    return element.data.type !== 'property';
+                });
+                const keepIds = new Set(filteredElements.filter(e => e.group === 'nodes').map(e => e.data.id));
+                filteredElements = filteredElements.filter(element => {
+                    if (element.group === 'nodes') return true;
+                    return keepIds.has(element.data.source) && keepIds.has(element.data.target);
+                });
+            }
+
+            // Hide unconnected nodes (nodes with zero edges in the current filtered set)
+            const hideUnconnected = document.getElementById('hideUnconnected').checked;
+            if (hideUnconnected) {
+                const connectedIds = new Set();
+                filteredElements.forEach(element => {
+                    if (element.group === 'edges') {
+                        connectedIds.add(element.data.source);
+                        connectedIds.add(element.data.target);
+                    }
+                });
+                filteredElements = filteredElements.filter(element => {
+                    if (element.group === 'edges') return true;
+                    return connectedIds.has(element.data.id);
                 });
             }
 

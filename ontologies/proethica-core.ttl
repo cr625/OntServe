@@ -17,12 +17,12 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.4.2"^^xsd:string ;
+    owl:versionInfo "2.5.0"^^xsd:string ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
     owl:imports <http://www.w3.org/2006/time#> ;
-    dc:description "Version 2.3.0 corrects BFO/IAO superclass alignments following formal audit against BFO 2020 (ISO/IEC 21838-2) and IAO definitions. Changes: Resource from independent continuant to information content entity; State from quality to specifically dependent continuant; Obligation refined to directive information entity (Donohue 2017); Principle and Constraint refined to directive information entity based on their prescriptive character (Frankel 1989, Ganascia 2007, Dennis et al. 2016); Capability from realizable entity to disposition."@en .
+    dc:description "Version 2.5.0 adds three defeasibility object properties (competesWith, prevailsOver, defeasibleUnder) that expose obligation competition as first-class structural relationships between typed individuals, supporting the architectural claim that defeasible patterns are queryable via SPARQL and available to external non-monotonic engines. Version 2.3.0 corrected BFO/IAO superclass alignments following formal audit against BFO 2020 (ISO/IEC 21838-2) and IAO definitions: Resource from independent continuant to information content entity; State from quality to specifically dependent continuant; Obligation refined to directive information entity (Donohue 2017); Principle and Constraint refined to directive information entity based on their prescriptive character (Frankel 1989, Ganascia 2007, Dennis et al. 2016); Capability from realizable entity to disposition."@en .
 
 ###############################################################
 # Core Formal Specification Classes -- BFO 2020 / IAO Aligned (v2.3.0)
@@ -220,6 +220,47 @@ proeth-core:constrainedBy a owl:ObjectProperty ;
     rdfs:label "constrained by"@en ;
     rdfs:comment "Relates an action to constraints that limit or restrict it."@en ;
     skos:definition "Relates an action to constraints that limit or restrict it."@en .
+
+###############################################################
+# Defeasibility Relations (v2.5.0)
+# Added: 2026-04-11 - Structural support for obligation competition
+#
+# These three properties expose the defeasibility pattern described in the
+# D-tuple formalism as first-class object properties between typed
+# individuals, rather than leaving the pattern implicit in class names or
+# narrative datatype fields. They do NOT encode non-monotonic inference
+# (OWL-DL cannot); they make the competing-obligation structure queryable
+# via SPARQL and available to external non-monotonic engines.
+#
+# Usage guidance:
+#   O1  proeth-core:competesWith     O2   (symmetric; two obligations in tension)
+#   O2  proeth-core:prevailsOver     O1   (directed; winner under defeat conditions)
+#   O1  proeth-core:defeasibleUnder  S    (obligation yields when state S obtains)
+###############################################################
+
+proeth-core:competesWith a owl:ObjectProperty, owl:SymmetricProperty ;
+    rdfs:domain proeth-core:Obligation ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "competes with"@en ;
+    rdfs:comment "Relates an obligation to another obligation with which it stands in normative tension within a case. Symmetric: if O1 competes with O2 then O2 competes with O1. Does not itself specify which obligation prevails; use prevailsOver for the directed resolution."@en ;
+    skos:definition "Links two Obligations that are in direct normative competition within a case scenario."@en ;
+    skos:scopeNote "Typical pattern: an obligation derived from one Principle competes with an obligation derived from another Principle of the same professional code, or with an obligation that inherits from a role-level constraint."@en .
+
+proeth-core:prevailsOver a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Obligation ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "prevails over"@en ;
+    rdfs:comment "Relates an obligation to another obligation that it defeats under the conditions of the case. The prevailing obligation retains its force; the defeated obligation is subordinated to it. Use together with defeasibleUnder to record the State that licenses the resolution."@en ;
+    skos:definition "Links a prevailing Obligation to a defeated Obligation within a specific case resolution."@en ;
+    skos:scopeNote "prevailsOver is NOT a logical override relation in OWL-DL. It records a case-specific resolution of an obligation competition; generalizing across cases is the job of an external non-monotonic engine."@en .
+
+proeth-core:defeasibleUnder a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Obligation ;
+    rdfs:range proeth-core:State ;
+    rdfs:label "defeasible under"@en ;
+    rdfs:comment "Relates an obligation to a State whose obtaining renders the obligation defeasible — that is, subject to override by a competing obligation with stronger normative support. The State specifies the context in which the obligation yields."@en ;
+    skos:definition "Links an Obligation to a State whose obtaining activates the obligation's defeasibility."@en ;
+    skos:scopeNote "Typical pattern: an obligation that normally holds becomes defeasible when a State representing risk, harm, or unrealizability obtains. This aligns with the deontic principle that obligation presupposes capacity (Govindarajulu and Bringsjord 2017): an Obligation is defeasible when the agent lacks the Capability required to fulfill it, or when fulfilling it would cause a harm the role exists to prevent."@en .
 
 ###############################################################
 # CodeProvision Properties
