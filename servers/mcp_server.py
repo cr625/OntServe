@@ -89,7 +89,14 @@ async def app_lifespan(server):
         source_text_manager = SourceTextManager(storage)
 
         try:
-            sparql_service = SPARQLService()
+            sparql_service = SPARQLService(db_storage=storage)
+            status = sparql_service.get_service_status()
+            logger.info(
+                "SPARQL service: %d ontologies loaded from %s, %d triples",
+                status.get("ontology_count", 0),
+                status.get("load_source", "unknown"),
+                status.get("total_triples", 0),
+            )
         except Exception as e:
             logger.warning(f"SPARQL service init failed: {e}")
             sparql_service = None
@@ -177,15 +184,42 @@ async def health_check(request: Request) -> JSONResponse:
     })
 
 
-@mcp.custom_route("/sparql", methods=["POST"])
-async def sparql_endpoint(request: Request) -> JSONResponse:
+async def _extract_sparql_query(request: Request) -> Optional[str]:
+    """Pull a SPARQL query string from a request via GET, POST form, or POST JSON.
+
+    Implements enough of the SPARQL 1.1 Protocol for standard clients
+    to hit GET /sparql?query=... or POST with application/x-www-form-urlencoded
+    or application/sparql-query bodies, in addition to the legacy
+    JSON {"query": ...} body shape.
+    """
+    if request.method == "GET":
+        return request.query_params.get("query")
+
+    content_type = (request.headers.get("content-type") or "").lower()
+    if "application/sparql-query" in content_type:
+        body_bytes = await request.body()
+        return body_bytes.decode("utf-8") if body_bytes else None
+
+    if "application/x-www-form-urlencoded" in content_type:
+        form = await request.form()
+        return form.get("query")
+
     try:
         body = await request.json()
-        query = body.get('query')
+    except json.JSONDecodeError:
+        return None
+    if isinstance(body, dict):
+        return body.get("query")
+    return None
+
+
+@mcp.custom_route("/sparql", methods=["GET", "POST"])
+async def sparql_endpoint(request: Request) -> JSONResponse:
+    try:
+        query = await _extract_sparql_query(request)
         if not query:
             return JSONResponse({"error": "No SPARQL query provided"}, status_code=400)
 
-        # Access sparql_service from app state
         sparql_service = request.app.state.lifespan_context.get("sparql_service")
         if not sparql_service:
             return JSONResponse(
@@ -194,11 +228,21 @@ async def sparql_endpoint(request: Request) -> JSONResponse:
 
         results = sparql_service.execute_query(query)
         return JSONResponse(results)
-    except json.JSONDecodeError:
-        return JSONResponse({"error": "Invalid JSON"}, status_code=400)
+    except ValueError as e:
+        # Raised by SPARQLService.execute_query on query syntax errors.
+        return JSONResponse({"error": str(e)}, status_code=400)
     except Exception as e:
         logger.error(f"SPARQL endpoint error: {e}")
         return JSONResponse({"error": "Internal server error"}, status_code=500)
+
+
+@mcp.custom_route("/sparql/status", methods=["GET"])
+async def sparql_status(request: Request) -> JSONResponse:
+    """Diagnostics: report how many ontologies are loaded in the SPARQL graph."""
+    sparql_service = request.app.state.lifespan_context.get("sparql_service")
+    if not sparql_service:
+        return JSONResponse({"error": "SPARQL service not available"}, status_code=503)
+    return JSONResponse(sparql_service.get_service_status())
 
 
 @mcp.custom_route("/api/guidelines/{domain}", methods=["GET"])
