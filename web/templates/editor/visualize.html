@@ -628,7 +628,7 @@
                 })
                 .catch(error => {
                     console.error('Inference error:', error);
-                    alert('Inference failed. This may be due to the enhanced processor configuration. Check console for details.');
+                    alert('Inference failed. Check console for details.');
                 })
                 .finally(() => {
                     button.disabled = false;
@@ -670,39 +670,6 @@
                 .finally(() => {
                     button.disabled = false;
                     button.innerHTML = originalText;
-                });
-        }
-
-        function triggerProcessing() {
-            const button = event.target;
-            button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-
-            fetch(`/editor/api/enhanced/process/${ontologyId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({})
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Reload the visualization data
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
-                    } else {
-                        alert('Processing failed: ' + (data.error || 'Unknown error'));
-                        button.disabled = false;
-                        button.innerHTML = '<i class="fas fa-cogs"></i> Process Ontology';
-                    }
-                })
-                .catch(error => {
-                    console.error('Processing error:', error);
-                    alert('Processing failed. Please check the console for details.');
-                    button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-cogs"></i> Process Ontology';
                 });
         }
 
@@ -912,10 +879,7 @@
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle"></i>
                                     <strong>No entities found for visualization</strong>
-                                    <p class="mb-2">This ontology may need to be processed to extract entities.</p>
-                                    <button class="btn btn-primary btn-sm" onclick="triggerProcessing()">
-                                        <i class="fas fa-cogs"></i> Process Ontology
-                                    </button>
+                                    <p class="mb-0">Entities are populated by the ontology sync service on startup or by saving a new version through the editor.</p>
                                 </div>
                             `;
                         } else {

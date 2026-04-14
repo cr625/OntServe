@@ -180,7 +180,7 @@ class ConfigLoader:
             logger.error(error_msg)
             raise ValueError(error_msg)
 
-        logger.info("✅ All required settings verified")
+        logger.info("All required settings verified")
         return True
 
     def get_database_url(self) -> str:

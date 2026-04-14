@@ -56,23 +56,15 @@ class OntologyManager:
         self.logger.info("OntologyManager initialized")
     
     def _initialize_storage(self):
-        """Initialize the storage backend based on configuration."""
-        storage_type = self.config.get('storage_type', 'file')
+        """Initialize the storage backend based on configuration.
+
+        OntologyManager uses file storage for the basic import/cache path.
+        The database-backed ontology storage lives in ``storage.postgresql_storage``
+        and is managed directly by the web app and MCP server.
+        """
         storage_config = self.config.get('storage_config', {})
-        
-        if storage_type == 'file':
-            self.storage = FileStorage(storage_config)
-            self.logger.info("Using file storage backend")
-        elif storage_type == 'database':
-            # TODO: Implement database storage
-            self.logger.warning("Database storage not yet implemented, falling back to file storage")
-            self.storage = FileStorage(storage_config)
-        elif storage_type == 'hybrid':
-            # TODO: Implement hybrid storage
-            self.logger.warning("Hybrid storage not yet implemented, falling back to file storage")
-            self.storage = FileStorage(storage_config)
-        else:
-            raise ValueError(f"Unknown storage type: {storage_type}")
+        self.storage = FileStorage(storage_config)
+        self.logger.info("Using file storage backend")
     
     def _initialize_importers(self):
         """Initialize available importers."""
@@ -88,9 +80,7 @@ class OntologyManager:
                 cache_dir=cache_dir
             )
         }
-        
-        # TODO: Add more importers (custom, etc.)
-        
+
         self.logger.info(f"Initialized {len(self.importers)} importers")
     
     def import_ontology(self, source: str, importer_type: str = 'prov',
