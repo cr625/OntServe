@@ -136,9 +136,42 @@ python -m pytest tests/ -v
 
 Tests are organized into `unit/`, `integration/`, and `api/` directories. See [tests/README.md](tests/README.md) for details on markers and fixtures.
 
+## Reproducing paper claims
+
+The live deployment is the primary artifact reviewers use to verify
+§4 and §5 of the KI2026 paper. The repository accompanies it. Concrete
+checks a reviewer can run without pulling the repo:
+
+| Paper claim | How to verify on https://ontserve.ontorealm.net |
+|---|---|
+| 134 ontologies (§4) | Homepage ontology listing with source/type facets |
+| Three professional codes of ethics (§4) | [ASCE](https://ontserve.ontorealm.net/ontology/ASCE%20Code%20of%20Ethics), [ASME](https://ontserve.ontorealm.net/ontology/ASME%20Code%20of%20Ethics), [IEEE](https://ontserve.ontorealm.net/ontology/IEEE%20Code%20of%20Ethics) |
+| Foundation ontologies (§4) | [BFO](https://ontserve.ontorealm.net/ontology/bfo), [IAO](https://ontserve.ontorealm.net/ontology/Information%20Artifact%20Ontology%202020), [Relations Ontology 2015](https://ontserve.ontorealm.net/ontology/Relations%20Ontology%202015) |
+| Core ontology and nine disjoint component classes (§3, §4) | [`proethica-core`](https://ontserve.ontorealm.net/ontology/proethica-core) |
+| Intermediate ontology with nine-component framework (§4) | [`proethica-intermediate`](https://ontserve.ontorealm.net/ontology/proethica-intermediate) |
+| Domain ontology for engineering ethics (§4) | [`engineering-ethics`](https://ontserve.ontorealm.net/ontology/engineering-ethics) |
+| 119 case ontologies spanning NSPE BER 1958-2025 (§5) | Homepage "Case" filter |
+| Figure 1 worked example, NSPE BER Case 72 | [`proethica-case-72`](https://ontserve.ontorealm.net/ontology/proethica-case-72), abbreviated fixture at [`fixtures/cases/case_072.ttl`](fixtures/cases/case_072.ttl) |
+| SPARQL endpoint (§4) | `POST https://ontserve.ontorealm.net/sparql` with a `{"query": "..."}` body, or `GET /sparql?query=...` |
+| SPARQL service load source + counts | `GET https://ontserve.ontorealm.net/sparql/status` |
+
+[`tools/verify_paper_claims.py`](tools/verify_paper_claims.py) runs
+the above checks automatically and prints a pass/fail table:
+
+```bash
+python tools/verify_paper_claims.py
+python tools/verify_paper_claims.py --json
+python tools/verify_paper_claims.py --base-url http://localhost:5003
+```
+
+Exit code is zero iff every claim resolves on the target deployment.
+
 ## Production Deployment
 
 The live deployment is managed by the systemd units in
 [`deploy/systemd/`](deploy/systemd/). The web interface and MCP server
 run as separate services behind a reverse proxy at
-https://ontserve.ontorealm.net.
+https://ontserve.ontorealm.net. The web app initializes the SPARQL
+service on startup against the PostgreSQL ``ontology_versions`` table,
+so `/sparql` and `/sparql/status` on the public domain serve the full
+graph without needing the MCP port.
