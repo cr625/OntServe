@@ -113,14 +113,17 @@ class SPARQLService:
         conn = self.db_storage._get_connection()
         try:
             cursor = conn.cursor()
+            # LEFT JOIN on domains: domain_name is used only as a label in
+            # logs and the loaded_ontologies list, not for query semantics,
+            # so ontologies without a domain must still be served.
             cursor.execute(
                 """
                 SELECT o.name, d.name AS domain_name, o.base_uri, ov.content
                 FROM ontologies o
-                JOIN domains d ON o.domain_id = d.id
+                LEFT JOIN domains d ON o.domain_id = d.id
                 JOIN ontology_versions ov ON ov.ontology_id = o.id
                 WHERE ov.is_current = TRUE
-                ORDER BY d.name, o.name
+                ORDER BY d.name NULLS LAST, o.name
                 """
             )
             rows = cursor.fetchall()
@@ -144,7 +147,7 @@ class SPARQLService:
                 continue
 
             fmt = _detect_format(content)
-            label = f"{domain}:{name}"
+            label = f"{domain}:{name}" if domain else name
             try:
                 self.graph.parse(data=content, format=fmt)
                 loaded.append(label)
@@ -207,10 +210,29 @@ class SPARQLService:
     # ------------------------------------------------------------------
 
     def execute_query(self, query: str) -> Dict[str, Any]:
-        """Execute a SPARQL query and return SPARQL JSON results."""
+        """Execute a SPARQL query and return SPARQL JSON results.
+
+        SELECT returns the standard ``{head: {vars}, results: {bindings}}``
+        envelope. ASK returns ``{head: {}, boolean: bool}`` per the SPARQL
+        1.1 JSON Results spec. CONSTRUCT and DESCRIBE return the graph
+        serialized as turtle under ``results.graph`` (non-standard but
+        JSON-serializable; consumers that want raw RDF should use a
+        content-negotiating endpoint instead).
+        """
         try:
             logger.debug("Executing SPARQL query: %s...", query[:200])
             results = self.graph.query(query)
+
+            if results.type == "ASK":
+                return {"head": {}, "boolean": bool(results.askAnswer)}
+
+            if results.type in ("CONSTRUCT", "DESCRIBE"):
+                return {
+                    "head": {},
+                    "results": {
+                        "graph": results.serialize(format="turtle").decode("utf-8"),
+                    },
+                }
 
             bindings = []
             for row in results:

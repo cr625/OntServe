@@ -161,3 +161,99 @@ def test_reload_clears_and_repopulates_graph():
     reload_status = service.reload()
     assert reload_status["source"] == "filesystem"
     assert reload_status["triples"] == baseline_triples
+
+
+# ---------------------------------------------------------------------------
+# ASK / CONSTRUCT result envelopes
+#
+# The paper-claim verifier posts an ASK query, and several downstream clients
+# (including the KI2026 review workflow) will consume ASK. rdflib's Result
+# for ASK has vars=None, which the SELECT-only binding loop trips over.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.integration
+def test_ask_query_returns_sparql_json_boolean_envelope():
+    """ASK must return the SPARQL 1.1 ``{head: {}, boolean: bool}`` shape."""
+    service = SPARQLService(ontology_storage_path=str(ONTOLOGIES_DIR))
+    result = service.execute_query(
+        """
+        PREFIX core: <http://proethica.org/ontology/core#>
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        ASK { core:competesWith a owl:ObjectProperty }
+        """
+    )
+    assert result == {"head": {}, "boolean": True}
+
+
+@pytest.mark.integration
+def test_ask_query_returns_false_for_missing_triple():
+    """ASK must return boolean False when the pattern doesn't match."""
+    service = SPARQLService(ontology_storage_path=str(ONTOLOGIES_DIR))
+    result = service.execute_query(
+        """
+        PREFIX core: <http://proethica.org/ontology/core#>
+        ASK { core:thisPredicateDoesNotExist <http://example.org/x> <http://example.org/y> }
+        """
+    )
+    assert result == {"head": {}, "boolean": False}
+
+
+@pytest.mark.integration
+def test_construct_query_returns_turtle_serialization():
+    """CONSTRUCT must return the resulting graph as a turtle string."""
+    service = SPARQLService(ontology_storage_path=str(ONTOLOGIES_DIR))
+    result = service.execute_query(
+        """
+        PREFIX core: <http://proethica.org/ontology/core#>
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        CONSTRUCT { ?p a owl:ObjectProperty }
+        WHERE {
+            VALUES ?p { core:competesWith core:prevailsOver core:defeasibleUnder }
+            ?p a owl:ObjectProperty .
+        }
+        """
+    )
+    assert "graph" in result["results"]
+    turtle = result["results"]["graph"]
+    assert "competesWith" in turtle
+    assert "prevailsOver" in turtle
+    assert "defeasibleUnder" in turtle
+
+
+# ---------------------------------------------------------------------------
+# Real-database loader shape
+#
+# Guards the commit message "serve the full graph from PostgreSQL, not five
+# hardcoded files." The stub-based test above exercises row parsing but
+# bypasses the SQL JOIN that silently dropped 129/134 ontologies when the
+# loader required a non-null domain_id. This test runs the real SQL against
+# the local ontserve DB (gated on ONTSERVE_DB_URL like the rest of the DB
+# tests) and asserts the loader picks up every current ontology version.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.integration
+@pytest.mark.database
+def test_database_loader_picks_up_every_current_version(pg_storage):
+    """SPARQLService must load one ontology per current ontology_versions row."""
+    conn = pg_storage._get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT count(*) FROM ontology_versions WHERE is_current = TRUE"
+        )
+        expected_count = cursor.fetchone()[0]
+    finally:
+        pg_storage._return_connection(conn)
+
+    service = SPARQLService(db_storage=pg_storage)
+    status = service.get_service_status()
+
+    assert status["load_source"] == "database"
+    assert status["ontology_count"] == expected_count, (
+        f"Expected {expected_count} ontologies from the real DB, "
+        f"got {status['ontology_count']}. A missing LEFT JOIN on domains "
+        "is the usual culprit."
+    )
+    assert status["total_triples"] > 0
