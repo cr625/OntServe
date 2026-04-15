@@ -57,7 +57,7 @@ def create_admin(username, email, password, first_name, last_name, organization)
     db.session.add(admin_user)
     db.session.commit()
     
-    click.echo(f"✅ Admin user '{username}' created successfully!")
+    click.echo(f"Admin user '{username}' created successfully.")
     click.echo(f"   Email: {email}")
     click.echo(f"   Full name: {admin_user.get_full_name()}")
     if organization:
@@ -115,17 +115,17 @@ def create_user(username, email, password, first_name, last_name, organization,
     db.session.add(user)
     db.session.commit()
     
-    click.echo(f"✅ User '{username}' created successfully!")
+    click.echo(f"User '{username}' created successfully.")
     click.echo(f"   Email: {email}")
     click.echo(f"   Full name: {user.get_full_name()}")
     if organization:
         click.echo(f"   Organization: {organization}")
     click.echo("   Permissions:")
-    click.echo(f"   - Import ontologies: {'✓' if can_import else '✗'}")
-    click.echo(f"   - Edit ontologies: {'✓' if can_edit else '✗'}")
-    click.echo(f"   - Delete ontologies: {'✓' if can_delete else '✗'}")
-    click.echo(f"   - Publish versions: {'✓' if can_publish else '✗'}")
-    click.echo(f"   - API access: {'✓' if can_api else '✗'}")
+    click.echo(f"   - Import ontologies: {'yes' if can_import else 'no'}")
+    click.echo(f"   - Edit ontologies: {'yes' if can_edit else 'no'}")
+    click.echo(f"   - Delete ontologies: {'yes' if can_delete else 'no'}")
+    click.echo(f"   - Publish versions: {'yes' if can_publish else 'no'}")
+    click.echo(f"   - API access: {'yes' if can_api else 'no'}")
 
 
 @click.command()
@@ -192,7 +192,7 @@ def delete_user(username, confirm):
     if not confirm:
         click.echo(f"User to delete: {user.username} ({user.email})")
         if user.is_admin:
-            click.echo("⚠️  WARNING: This is an admin user!")
+            click.echo("WARNING: This is an admin user.")
         
         if not click.confirm("Are you sure you want to delete this user?"):
             click.echo("Operation cancelled.")
@@ -201,7 +201,7 @@ def delete_user(username, confirm):
     db.session.delete(user)
     db.session.commit()
     
-    click.echo(f"✅ User '{username}' deleted successfully!")
+    click.echo(f"User '{username}' deleted successfully.")
 
 
 def init_cli(app):

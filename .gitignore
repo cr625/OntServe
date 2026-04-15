@@ -45,9 +45,7 @@ docs-internal/
 # Documentation directories (development/internal only)
 */docs/
 
-# Scripts and development artifacts
-scripts/
-*/scripts/
+# Development artifacts
 scratch/
 */scratch/
 pending_delete/
@@ -91,5 +89,3 @@ tests/test_log.txt
 .tox/
 .pids/
 
-# Local tool configuration
-pytest.ini

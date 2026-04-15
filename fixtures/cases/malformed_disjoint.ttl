@@ -1,0 +1,38 @@
+@prefix malformed: <http://proethica.org/ontology/case/malformed#> .
+@prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ---------------------------------------------------------------------------
+# Deliberately malformed fixture.
+#
+# This file exists only so that tests/integration/test_disjointness_enforcement.py
+# can verify that the owl:AllDisjointClasses assertion in proethica-core.ttl
+# (covering Role, Principle, Obligation, State, Resource, Action, Event,
+# Capability, Constraint) concretely produces an inconsistency when a single
+# individual is typed as both a State and an Action.
+#
+# Section 5 of the KI2026 paper claims:
+#
+#   "A query checking for entities with two incompatible component
+#    types will return empty because the ontology makes such a
+#    classification incoherent at the schema level. The Pellet
+#    reasoner confirms consistency for each case ontology submitted
+#    to inference."
+#
+# This fixture is the negative control that validates that claim.
+# ---------------------------------------------------------------------------
+
+<http://proethica.org/ontology/case/malformed> a owl:Ontology ;
+    rdfs:label "Malformed disjointness fixture"@en ;
+    owl:imports <http://proethica.org/ontology/core> .
+
+# A single individual declared as BOTH a State and an Action.
+# State is a BFO specifically dependent continuant; Action is a BFO
+# process (an occurrent). These are disjoint via the BFO
+# continuant/occurrent boundary and via the core AllDisjointClasses
+# axiom. Pellet MUST report this as inconsistent.
+malformed:BadIndividual a proeth-core:State ,
+        proeth-core:Action ,
+        owl:NamedIndividual ;
+    rdfs:label "State-and-Action (should be inconsistent)" .

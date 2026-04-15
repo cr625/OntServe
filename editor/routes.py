@@ -15,7 +15,6 @@ from sqlalchemy import select, func
 
 from web.models import db, Ontology, OntologyEntity, OntologyVersion
 from storage.file_storage import FileStorage
-from core.enhanced_processor import EnhancedOntologyProcessor, ProcessingOptions
 from .services import OntologyEntityService, OntologyValidationService
 from .utils import EntityTypeMapper, HierarchyBuilder, SearchHelper
 
@@ -48,7 +47,6 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
     # Initialize services
     entity_service = OntologyEntityService(storage_backend)
     validation_service = OntologyValidationService(storage_backend)
-    enhanced_processor = EnhancedOntologyProcessor(storage_backend)
     
     @bp.route('/')
     def index():
@@ -631,41 +629,6 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         status = 200 if result.get('success') else 404
         return jsonify(result), status
 
-    @bp.route('/api/enhanced/process/<ontology_id>', methods=['POST'])
-    def enhanced_process_ontology(ontology_id: str):
-        """Process ontology with enhanced processor (reasoning + embeddings)."""
-        try:
-            # Get processing options from request
-            data = request.get_json() or {}
-            
-            options = ProcessingOptions(
-                use_reasoning=data.get('use_reasoning', True),
-                reasoner_type=data.get('reasoner_type', 'hermit'),
-                validate_consistency=data.get('validate_consistency', True),
-                include_inferred=data.get('include_inferred', True),
-                extract_restrictions=data.get('extract_restrictions', True),
-                generate_embeddings=data.get('generate_embeddings', True),
-                cache_reasoning=data.get('cache_reasoning', True),
-                force_refresh=data.get('force_refresh', False)
-            )
-            
-            # Create fresh enhanced processor for this request to ensure proper app context
-            fresh_processor = EnhancedOntologyProcessor(storage_backend, db_session=db.session)
-            result = fresh_processor.process_ontology(ontology_id, options)
-            
-            return jsonify({
-                'success': result.success,
-                'processing_result': result.to_dict(),
-                'message': f"Enhanced processing {'completed' if result.success else 'failed'}"
-            })
-            
-        except Exception as e:
-            logger.error(f"Error in enhanced processing for {ontology_id}: {e}")
-            return jsonify({
-                'success': False,
-                'error': str(e)
-            }), 500
-    
     @bp.route('/api/simple/reasoning/<ontology_name>', methods=['POST'])
     def simple_reasoning(ontology_name: str):
         """Simple reasoning endpoint using owlready2 directly."""
@@ -690,154 +653,5 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         result = build_hierarchy_visualization(ontology_name)
         status = 200 if result.get('success') else (404 if 'not found' in result.get('error', '') else 500)
         return jsonify(result), status
-    
-    @bp.route('/api/enhanced/validate/<ontology_id>')
-    def enhanced_validate_ontology(ontology_id: str):
-        """Enhanced validation with reasoning and consistency checking."""
-        try:
-            validation_result = enhanced_processor.validate_ontology_enhanced(ontology_id)
-            
-            return jsonify({
-                'success': True,
-                'validation': validation_result
-            })
-            
-        except Exception as e:
-            logger.error(f"Error in enhanced validation for {ontology_id}: {e}")
-            return jsonify({
-                'success': False,
-                'error': str(e)
-            }), 500
-    
-    @bp.route('/api/enhanced/search')
-    def enhanced_search_entities():
-        """Enhanced semantic search with reasoning integration."""
-        try:
-            # Get search parameters
-            query = request.args.get('query', '').strip()
-            ontology_id = request.args.get('ontology_id')
-            entity_type = request.args.get('entity_type')
-            include_reasoning = request.args.get('include_reasoning', 'true').lower() == 'true'
-            limit = int(request.args.get('limit', 10))
-            
-            if not query:
-                raise BadRequest("Query parameter is required")
-            
-            # Perform enhanced semantic search
-            results = enhanced_processor.search_entities_enhanced(
-                query, ontology_id, entity_type, include_reasoning, limit
-            )
-            
-            # Add display information
-            for result in results:
-                result['display_name'] = EntityTypeMapper.get_display_name(result.get('entity_type', 'unknown'))
-                result['css_class'] = EntityTypeMapper.get_css_class(result.get('entity_type', 'unknown'))
-                result['icon'] = EntityTypeMapper.get_icon(result.get('entity_type', 'unknown'))
-                result['color'] = EntityTypeMapper.get_entity_color(result.get('entity_type', 'unknown'), result.get('uri', ''))
-            
-            return jsonify({
-                'success': True,
-                'results': results,
-                'query': query,
-                'total_count': len(results),
-                'reasoning_included': include_reasoning
-            })
-            
-        except Exception as e:
-            logger.error(f"Error in enhanced search: {e}")
-            return jsonify({
-                'success': False,
-                'error': str(e)
-            }), 500
-    
-    @bp.route('/api/enhanced/entity/<ontology_id>/<path:entity_uri>')
-    def enhanced_get_entity_data(ontology_id: str, entity_uri: str):
-        """Get enhanced entity data with reasoning information."""
-        try:
-            include_reasoning = request.args.get('include_reasoning', 'true').lower() == 'true'
-            
-            # Get enhanced entity data
-            entity_data = enhanced_processor.get_enhanced_entity_data(
-                ontology_id, entity_uri, include_reasoning
-            )
-            
-            if not entity_data:
-                raise NotFound(f"Entity {entity_uri} not found in {ontology_id}")
-            
-            # Add display information
-            if 'entity_type' in entity_data:
-                entity_data['display_name'] = EntityTypeMapper.get_display_name(entity_data['entity_type'])
-                entity_data['css_class'] = EntityTypeMapper.get_css_class(entity_data['entity_type'])
-                entity_data['icon'] = EntityTypeMapper.get_icon(entity_data['entity_type'])
-                entity_data['color'] = EntityTypeMapper.get_entity_color(entity_data['entity_type'], entity_uri)
-                entity_data['is_bfo_aligned'] = EntityTypeMapper.is_bfo_aligned(entity_uri)
-            
-            return jsonify({
-                'success': True,
-                'entity': entity_data,
-                'reasoning_included': include_reasoning
-            })
-            
-        except Exception as e:
-            logger.error(f"Error getting enhanced entity data for {entity_uri}: {e}")
-            return jsonify({
-                'success': False,
-                'error': str(e)
-            }), 500
-    
-    @bp.route('/api/enhanced/visualization/')
-    @bp.route('/api/enhanced/visualization/<ontology_name>')
-    def enhanced_visualization_data(ontology_name: str = None):
-        """Get enhanced visualization data optimized for Cytoscape.js with reasoning."""
-        from .visualization_service import build_enhanced_visualization
-
-        if not ontology_name:
-            ontology_name = request.args.get('ontology_name') or request.args.get('ontology_id')
-            if not ontology_name:
-                return jsonify({'error': 'ontology_name parameter is required'}), 400
-
-        include_reasoning = request.args.get('include_reasoning', 'true').lower() == 'true'
-        layout_type = request.args.get('layout', 'hierarchical')
-        entity_limit = int(request.args.get('limit', 1000))
-
-        result = build_enhanced_visualization(
-            ontology_name, include_reasoning, layout_type, entity_limit,
-        )
-        status = 200 if result.get('success') else 404
-        return jsonify(result), status
-    
-    @bp.route('/api/enhanced/capabilities')
-    def enhanced_capabilities():
-        """Get information about enhanced processor capabilities."""
-        try:
-            # Check processor capabilities
-            has_reasoning = hasattr(enhanced_processor, 'owlready_importer') and enhanced_processor.owlready_importer is not None
-            has_embeddings = enhanced_processor.embedding_model is not None
-            
-            return jsonify({
-                'success': True,
-                'capabilities': {
-                    'reasoning': has_reasoning,
-                    'embeddings': has_embeddings,
-                    'consistency_checking': has_reasoning,
-                    'semantic_search': has_embeddings,
-                    'bfo_validation': True,
-                    'visualization': True,
-                    'enhanced_processing': True
-                },
-                'processor_info': {
-                    'reasoning_available': has_reasoning,
-                    'embeddings_available': has_embeddings,
-                    'supported_reasoners': ['hermit', 'pellet'] if has_reasoning else [],
-                    'supported_formats': ['turtle', 'xml', 'n3', 'nt']
-                }
-            })
-            
-        except Exception as e:
-            logger.error(f"Error getting enhanced capabilities: {e}")
-            return jsonify({
-                'success': False,
-                'error': str(e)
-            }), 500
     
     return bp

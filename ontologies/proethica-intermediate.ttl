@@ -441,7 +441,7 @@ proeth:allenRelation a owl:DatatypeProperty ;
     rdfs:domain proeth:TemporalRelation ;
     rdfs:range xsd:string ;
     rdfs:label "Allen relation"@en ;
-    rdfs:comment "The Allen interval algebra relation name (before, after, meets, overlaps, during, starts, finishes, equals, and their inverses). Maps to OWL-Time properties via allen_owl_time_mapper.py."@en .
+    rdfs:comment "The Allen interval algebra relation name (before, after, meets, overlaps, during, starts, finishes, equals, and their inverses). Maps to OWL-Time properties via services/allen_owl_time_mapper.py."@en .
 
 proeth:owlTimeProperty a owl:DatatypeProperty ;
     rdfs:domain proeth:TemporalRelation ;
@@ -535,6 +535,19 @@ proeth:CollegialObligation a owl:Class ;
     rdfs:label "Collegial Obligation"@en ;
     rdfs:comment "Duties toward professional peers including respect, fairness, and credit for work"@en .
 
+# NSPE Code-specific obligation subclasses used by NSPE BER case ontologies
+# (e.g. Case 72, Public Welfare, Knowledge of Information Damaging to Client's Interest).
+
+proeth:FaithfulAgentObligation a owl:Class ;
+    rdfs:subClassOf proeth:ConfidentialityObligation ;
+    rdfs:label "Faithful Agent Obligation"@en ;
+    rdfs:comment "Duty of an engineer to act as a faithful agent or trustee of an employer or client (NSPE Code of Ethics, Section 1 / §II.4). Defeasible under states that confirm public-safety risk."@en .
+
+proeth:PostTermEnvRiskReportingObligation a owl:Class ;
+    rdfs:subClassOf proeth:ReportingObligation ;
+    rdfs:label "Post-Termination Environmental Risk Reporting Obligation"@en ;
+    rdfs:comment "Duty of an engineer to report environmental risks to a pollution-control authority after termination of the client relationship when the risk rises to a public-safety concern (NSPE Code §I.1, §II.1.a, §II.1.c). Derived from the paramount public-welfare principle."@en .
+
 # Obligation properties for temporal and contextual aspects
 proeth:hasEnforcementLevel a owl:DatatypeProperty ;  # was owl:ObjectProperty — corrected: range is xsd:string
     rdfs:domain proeth-core:Obligation ;
@@ -542,6 +555,23 @@ proeth:hasEnforcementLevel a owl:DatatypeProperty ;  # was owl:ObjectProperty �
     rdfs:label "has enforcement level"@en ;
     rdfs:comment "Specifies whether obligation is mandatory, strongly recommended, or recommended"@en ;
     skos:changeNote "v2.x: Changed from owl:ObjectProperty to owl:DatatypeProperty. Properties with rdfs:range xsd:string must be DatatypeProperties."@en .
+
+# Provenance datatype properties used by the extraction client when it
+# materializes typed individuals from case narratives. These record the
+# narrative source text for a typed individual and the agent to whom an
+# obligation is attributed. They are emitted by the LLM extraction client
+# described in Section 4 of the KI2026 paper.
+
+proeth:sourcetext a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "source text"@en ;
+    rdfs:comment "The narrative sentence or clause from a case text that grounds a typed individual. Preserved as a string alongside each extracted State, Action, Event, or Obligation to support provenance and qualitative inspection."@en .
+
+proeth:obligatedparty a owl:DatatypeProperty ;
+    rdfs:domain proeth-core:Obligation ;
+    rdfs:range xsd:string ;
+    rdfs:label "obligated party"@en ;
+    rdfs:comment "The agent label to which an obligation is attributed in a case (e.g. 'Engineer Doe'). This is a string rather than an Agent individual so that case text phrasing is preserved verbatim."@en .
 
 proeth:derivedFromPrinciple a owl:ObjectProperty ;
     rdfs:domain proeth-core:Obligation ;
@@ -961,6 +991,11 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:definition "Context where multiple professional obligations conflict and cannot all be fully satisfied simultaneously, requiring prioritization based on Rao et al. (2023) context-dependent moral evaluation." ;
     rdfs:comment "State requiring ethical prioritization between conflicting obligations" ;
     dcterms:references <https://doi.org/10.48550/arXiv.2302.00997> . # Rao et al. 2023
+
+proeth:ConfirmedRiskWithoutAdequateSafeguardsState a owl:Class ;
+    rdfs:subClassOf proeth-core:State ;
+    rdfs:label "Confirmed Risk Without Adequate Safeguards State"@en ;
+    rdfs:comment "State in which a professional has confirmed the existence of a concrete public-safety or environmental risk and adequate safeguards are known to be absent. Typical activator for post-termination reporting obligations and for defeating faithful-agent confidentiality (NSPE BER Case 72 pattern)."@en .
 
 # Risk States - Environmental conditions involving potential harm
 

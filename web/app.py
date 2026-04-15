@@ -100,6 +100,26 @@ def create_app(config_name=None):
         timeout=int(os.environ.get("WOLFRAM_TIMEOUT", "120")),
     )
 
+    # Initialize the SPARQL service over the full PostgreSQL graph so the
+    # web front end can honor the paper's claim that /sparql serves every
+    # ontology. Loads every current OntologyVersion into an rdflib graph.
+    try:
+        from storage.postgresql_storage import PostgreSQLStorage
+        from services.sparql_service import SPARQLService
+
+        pg_storage = PostgreSQLStorage({'db_url': app.config['SQLALCHEMY_DATABASE_URI']})
+        app.sparql_service = SPARQLService(db_storage=pg_storage)
+        status = app.sparql_service.get_service_status()
+        logging.info(
+            "SPARQL service ready: %d ontologies from %s, %d triples",
+            status.get('ontology_count', 0),
+            status.get('load_source', 'unknown'),
+            status.get('total_triples', 0),
+        )
+    except Exception as exc:
+        logging.warning("SPARQL service init failed (non-fatal): %s", exc)
+        app.sparql_service = None
+
     # Setup logging
     if not app.debug:
         logging.basicConfig(
