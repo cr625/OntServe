@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
-"""
-Populate the ontology_entities.embedding column for rows where it is NULL.
+"""Populate ``ontology_entities.embedding`` rows where it is NULL.
 
-The matcher described in proethica/app/services/auto_commit_service.py
-(line ~378 TODO) needs vector-similarity lookup against existing classes.
-The schema is in place (vector(384) column with an IVFFlat cosine index)
-but the column is empty: 0 of 5,555 classes have embeddings as of
-2026-05-02. This script populates it.
+The proethica auto-commit duplicate matcher does a pgvector cosine
+lookup against this column. The schema (``vector(384)`` with an
+IVFFlat cosine index) was already in place; this script fills it.
 
-Embedding text follows the ProEthica paper Section 3.5 pattern:
-    f"{label}: {comment}"
-This matches proethica/app/services/precedent/case_feature_extractor.py
-so candidate-side and stored-side embeddings are produced identically.
+Embedding text matches the ProEthica paper Section 3.5 pattern,
+``f"{label}: {comment}"``, so the matcher's candidate-side embedding
+and the stored class-side embedding share the same input format.
 
 Usage:
     python tools/populate_entity_embeddings.py
@@ -48,11 +44,8 @@ logger = logging.getLogger("populate_entity_embeddings")
 def build_text(entity) -> str:
     """Compose the embedding text for one entity.
 
-    Matches case_feature_extractor.py line 782-784:
-        text = entity.label
-        if entity.comment:
-            text = f"{label}: {comment}"
-    Falls back to URI if no label is available.
+    Returns ``"{label}: {comment}"`` when both are present, ``label``
+    alone if no comment, and the URI as a last resort.
     """
     label = (entity.label or "").strip()
     comment = (entity.comment or "").strip()
