@@ -415,6 +415,12 @@ proeth:temporalMarker a owl:DatatypeProperty ;
     rdfs:label "temporal marker"@en ;
     rdfs:comment "Narrative temporal marker indicating when an action or event occurred in case time (e.g. 'During preliminary design phase', 'Several months later'). Cases use narrative rather than calendar time."@en .
 
+proeth:temporalSequence a owl:DatatypeProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf (proeth-core:Action proeth-core:Event) ] ;
+    rdfs:range xsd:nonNegativeInteger ;
+    rdfs:label "temporal sequence"@en ;
+    rdfs:comment "Chronological position of an action or event within its case, 1-based, no gaps. Populated by an LLM ordering pass over the case's actions and events; consumed by the validation Timeline view to render entries in chronological order. Free-text temporalMarker is the human-readable signal; temporalSequence is the sortable companion."@en .
+
 proeth:TemporalRelation a owl:Class ;
     rdfs:label "Temporal Relation"@en ;
     rdfs:comment "A reified Allen interval algebra relation between two temporal entities (actions or events). Stores both the ProEthica relation name and the corresponding OWL-Time property URI."@en .
@@ -820,6 +826,12 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:range proeth-core:Obligation ;
     rdfs:label "violates obligation"@en ;
     rdfs:comment "Relates an action to an obligation it violates"@en .
+
+:raisesObligation rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "raises obligation"@en ;
+    rdfs:comment "Relates an action to an obligation it puts at stake but does not itself resolve. The fulfillment or violation occurs at a downstream action in the same chain. Distinguishes upstream choices that engage an obligation from the downstream actions that satisfy or breach it; without this third predicate, the same obligation appears as both fulfilled and violated across adjacent steps."@en .
 
 :constrainedBy rdf:type owl:ObjectProperty ;
     owl:equivalentProperty proeth-core:constrainedBy ;
