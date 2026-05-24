@@ -51,6 +51,9 @@ scratch/
 pending_delete/
 */pending_delete/
 
+# Generated archival deposit (large derivative dataset; published to Zenodo/tagged release, not the repo)
+deposit/
+
 # Cache
 cache/
 storage/cache/

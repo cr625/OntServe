@@ -1,0 +1,88 @@
+@prefix case86: <http://proethica.org/ontology/case/86#> .
+@prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ---------------------------------------------------------------------------
+# NSPE BER Case 04-8 -- Figure 1 fixture
+#
+# This file is the minimal OWL rendering of Figure 1 from:
+#
+#   Rauch, C. B. An Ontology-Grounded Representation for Defeasible
+#   Professional Ethics Analysis. KI2026 (camera-ready).
+#
+# The paper's figure caption says "Local names abbreviated. Provenance
+# triples omitted." This fixture uses the same abbreviated local names
+# that appear in the figure, so that a reviewer can load it into a
+# SPARQL engine or a Pellet reasoner and see exactly the pattern the
+# paper draws.
+#
+# Case 04-8 is a current-Code (post-1979) opinion. It is the modern
+# counterpart of the older BER Case 76-4 (1976), which used the retired
+# pre-1979 "Section 1 / Section 2(a)" numbering. 04-8 states the same
+# conflict, a client-loyalty duty against the paramount public-welfare
+# duty, under the current NSPE Code of Ethics, and cites the provisions
+# explicitly (I.1, II.1.c, II.1.f, II.4).
+#
+# The live Case 86 ontology on https://ontserve.ontorealm.net uses
+# longer, descriptive local names produced by the LLM extraction client
+# (e.g. Engineer_A_Public_Welfare_Paramount_Wetland_Fill_Environmental
+# rather than Obl_PublicWelfare). See fixtures/cases/README.md for how to
+# retrieve the full case ontology from the live site.
+# ---------------------------------------------------------------------------
+
+<http://proethica.org/ontology/case/86> a owl:Ontology ;
+    rdfs:label "NSPE BER Case 04-8 -- Figure 1 fixture"@en ;
+    dcterms:source "NSPE Board of Ethical Review, Case No. 04-8 (Public Welfare -- Client Action Following Engineer's Services)" ;
+    rdfs:comment "Abbreviated fixture for KI2026 Figure 1. Reviewers should see three typed individuals and three defeasibility edges."@en ;
+    owl:imports <http://proethica.org/ontology/intermediate> ,
+                <http://proethica.org/ontology/core> .
+
+# ---------------------------------------------------------------------------
+# State that activates the competition (from case 04-8 facts)
+# ---------------------------------------------------------------------------
+
+case86:State_WetlandViolation a proeth:UnpermittedWetlandFillViolationState ,
+        owl:NamedIndividual ;
+    rdfs:label "Client's unpermitted wetland fill; public safety at risk" ;
+    proeth:sourcetext "the client has installed a substantial amount of fill material ... without any permits, variances, or permissions ... a substantial violation of the federal and state laws and regulations" .
+
+# ---------------------------------------------------------------------------
+# Obligation A: derived from NSPE II.1.c (confidentiality / client loyalty)
+# ---------------------------------------------------------------------------
+
+case86:Obl_Confidentiality a proeth:ClientConfidentialityObligation ,
+        owl:NamedIndividual ;
+    rdfs:label "Confidentiality to (former) client" ;
+    proeth:obligatedparty "Engineer A" ;
+    proeth:sourcetext "shall not reveal facts, data, or information without the prior consent of the client (NSPE II.1.c)" .
+
+# ---------------------------------------------------------------------------
+# Obligation B: derived from NSPE I.1 (paramount public-welfare duty),
+# discharged through the report-to-authority mechanism of II.1.f
+# ---------------------------------------------------------------------------
+
+case86:Obl_PublicWelfare a proeth:PublicWelfareParamountObligation ,
+        owl:NamedIndividual ;
+    rdfs:label "Hold public welfare paramount; report to authority" ;
+    proeth:obligatedparty "Engineer A" ;
+    proeth:sourcetext "Hold paramount the safety, health, and welfare of the public (NSPE I.1); Engineer A has an obligation to bring this matter to the attention of the appropriate authorities" .
+
+# ---------------------------------------------------------------------------
+# Defeasibility edges (core ontology)
+#
+# Read: the confidentiality obligation competes with the public-welfare
+# obligation; under the confirmed wetland-violation state, the
+# confidentiality obligation is defeasible, and the public-welfare
+# obligation prevails.
+# ---------------------------------------------------------------------------
+
+case86:Obl_Confidentiality
+    proeth-core:competesWith case86:Obl_PublicWelfare ;
+    proeth-core:defeasibleUnder case86:State_WetlandViolation .
+
+case86:Obl_PublicWelfare
+    proeth-core:prevailsOver case86:Obl_Confidentiality .

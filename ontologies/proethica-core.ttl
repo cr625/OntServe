@@ -246,7 +246,7 @@ proeth-core:competesWith a owl:ObjectProperty, owl:SymmetricProperty ;
     skos:definition "Links two Obligations that are in direct normative competition within a case scenario."@en ;
     skos:scopeNote "Typical pattern: an obligation derived from one Principle competes with an obligation derived from another Principle of the same professional code, or with an obligation that inherits from a role-level constraint."@en .
 
-proeth-core:prevailsOver a owl:ObjectProperty ;
+proeth-core:prevailsOver a owl:ObjectProperty, owl:AsymmetricProperty, owl:IrreflexiveProperty ;
     rdfs:domain proeth-core:Obligation ;
     rdfs:range proeth-core:Obligation ;
     rdfs:label "prevails over"@en ;
