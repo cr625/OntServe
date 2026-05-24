@@ -42,6 +42,20 @@
                 <http://proethica.org/ontology/core> .
 
 # ---------------------------------------------------------------------------
+# Type-class declarations. Chain each LLM-minted class to its core category so
+# the fixture is reasoner-ready on its own, without depending on the
+# intermediate ontology happening to declare these exact class names. This is
+# what lets Pellet exercise the proeth-core:AllDisjointClasses axiom.
+# ---------------------------------------------------------------------------
+
+proeth:UnpermittedWetlandFillViolationState a owl:Class ;
+    rdfs:subClassOf proeth-core:State .
+proeth:ClientConfidentialityObligation a owl:Class ;
+    rdfs:subClassOf proeth-core:Obligation .
+proeth:PublicWelfareParamountObligation a owl:Class ;
+    rdfs:subClassOf proeth-core:Obligation .
+
+# ---------------------------------------------------------------------------
 # State that activates the competition (from case 04-8 facts)
 # ---------------------------------------------------------------------------
 

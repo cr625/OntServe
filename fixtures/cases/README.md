@@ -49,9 +49,18 @@ abbreviated OWL file.
 
 ## Running the Figure 1 test
 
-The Figure 1 integration test loads the fixture with the core and
-intermediate ontologies, runs Pellet via owlready2, asserts
-consistency, and checks that the three defeasibility edges are
-queryable by SPARQL. The existing test keyed to the older fixture
-(`tests/integration/test_case_72_figure1.py`) should be repointed to
-`case_086.ttl` when the camera-ready figure swap lands.
+The Figure 1 integration test is `tests/integration/test_case_86_figure1.py`.
+It loads `case_086.ttl` with the core and intermediate ontologies, strips
+imports, runs Pellet via owlready2, asserts consistency, checks that the three
+individuals chain to their core categories, and that the three defeasibility
+edges are queryable by SPARQL. It also includes a `prevailsOver` asymmetry
+check: adding a bidirectional `prevailsOver` pair must make Pellet report
+inconsistency (the `owl:AsymmetricProperty` characteristic added for KI2026).
+
+```bash
+python -m pytest tests/integration/test_case_86_figure1.py -v
+```
+
+The earlier `test_case_72_figure1.py` was removed when the figure swapped to
+case_086. The `case_072.ttl` fixture is retained for provenance but is no
+longer the worked example.
