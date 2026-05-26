@@ -8,6 +8,7 @@ Tools are auto-registered with schemas generated from type hints.
 
 import os
 import json
+import asyncio
 import logging
 from pathlib import Path
 from typing import Optional
@@ -262,7 +263,7 @@ async def guidelines_compat(request: Request) -> JSONResponse:
 
 
 # ---------------------------------------------------------------------------
-# MCP Tools (12 tools, schemas auto-generated from type hints)
+# MCP Tools (17 tools: 12 base + 5 reasoning/BFO; schemas auto-generated from type hints)
 # ---------------------------------------------------------------------------
 
 def _get_handlers(ctx: Context):
@@ -439,6 +440,62 @@ async def get_entity_by_label(
     result = await _get_handlers(ctx).handle_get_entity_by_label({
         "label": label,
     })
+    return json.dumps(result)
+
+
+# ---------------------------------------------------------------------------
+# Reasoning tools (Pellet over merged core+intermediate+case; BFO compliance).
+# Backed by servers/reasoning_tools.py -> validation/pellet_validate.py (the
+# 119/119-consistent harness) + editor/services.OntologyValidationService.
+# Pellet runs a blocking Java subprocess, so each call is offloaded to a thread.
+# (sparql_query already exists above.)
+# ---------------------------------------------------------------------------
+
+@mcp.tool
+async def reason_ontology(ontology_name: str, ctx: Context) -> str:
+    """Run the Pellet reasoner over a stored ontology (merged with proethica-core
+    + proethica-intermediate) and return consistency plus inferred-assertion counts
+    and timing. Use the ontology name, e.g. 'proethica-case-86' or 'engineering-ethics'."""
+    from servers import reasoning_tools as rt
+    result = await asyncio.to_thread(rt.reason_ontology, ontology_name)
+    return json.dumps(result)
+
+
+@mcp.tool
+async def check_consistency(ontology_name: str, ctx: Context) -> str:
+    """Check whether a stored ontology is logically consistent under OWL-DL reasoning
+    (Pellet, merged with core+intermediate). Returns a consistent flag, disjointness
+    violation count, and any inconsistency explanation."""
+    from servers import reasoning_tools as rt
+    result = await asyncio.to_thread(rt.check_consistency, ontology_name)
+    return json.dumps(result)
+
+
+@mcp.tool
+async def get_inferred_hierarchy(ontology_name: str, ctx: Context) -> str:
+    """Return the class-subsumption and type assertions the reasoner INFERS for a
+    stored ontology (the edges not asserted in the source TTL), capped to 300 each."""
+    from servers import reasoning_tools as rt
+    result = await asyncio.to_thread(rt.get_inferred_hierarchy, ontology_name)
+    return json.dumps(result)
+
+
+@mcp.tool
+async def get_inconsistent_classes(ontology_name: str, ctx: Context) -> str:
+    """List entities the reasoner forces to owl:Nothing (disjointness violations) in a
+    stored ontology, plus a hard-inconsistency flag/explanation if the whole ontology
+    is inconsistent."""
+    from servers import reasoning_tools as rt
+    result = await asyncio.to_thread(rt.get_inconsistent_classes, ontology_name)
+    return json.dumps(result)
+
+
+@mcp.tool
+async def validate_bfo_compliance(ontology_name: str, ctx: Context) -> str:
+    """Run BFO / PROV-O / proethica-intermediate compliance checks over a stored
+    ontology's TTL and return errors + warnings."""
+    from servers import reasoning_tools as rt
+    result = await asyncio.to_thread(rt.validate_bfo_compliance, ontology_name)
     return json.dumps(result)
 
 

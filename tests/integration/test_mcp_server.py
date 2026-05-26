@@ -32,15 +32,21 @@ class TestMCPServerBasics:
             'get_entity_by_uri',
             'get_entities_by_uris',
             'get_entity_by_label',
+            # reasoning + BFO tools (Phase 1.1, 2026-05-26)
+            'reason_ontology',
+            'check_consistency',
+            'get_inferred_hierarchy',
+            'get_inconsistent_classes',
+            'validate_bfo_compliance',
         }
 
         for name in required:
             assert name in tool_names, f"Missing tool: {name}"
 
     async def test_tool_count(self, mcp_client):
-        """Server exposes exactly 12 tools."""
+        """Server exposes exactly 17 tools (12 base + 5 reasoning/BFO tools)."""
         tools = await mcp_client.list_tools()
-        assert len(tools) == 12
+        assert len(tools) == 17
 
 
 @pytest.mark.integration

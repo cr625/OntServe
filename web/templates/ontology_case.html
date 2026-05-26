@@ -483,6 +483,69 @@
 
     <!-- Main content -->
     <div class="col-lg-9 col-md-8 order-md-1">
+
+        {% if competition and competition.has_edges %}
+        <!-- Obligation competition structure (defeasibility + R->P->O edges) -->
+        <div class="card case-section mb-4" id="section-competition">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-shield-exclamation me-1"></i> Obligation Competition</span>
+                <span class="badge bg-secondary" title="competesWith / prevailsOver / defeasibleUnder edges">
+                    {{ competition.edge_counts.competesWith }} competes ·
+                    {{ competition.edge_counts.prevailsOver }} prevails ·
+                    {{ competition.edge_counts.defeasibleUnder }} defeasible
+                </span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    How the obligations in this case compete, which prevail, and the states
+                    under which each is defeasible. Each obligation is one cluster; expand a
+                    quote to see the verbatim case text grounding it.
+                </p>
+                {% for c in competition.clusters %}
+                <div class="border rounded p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h6 class="mb-1" title="{{ c.iri }}">
+                            <i class="bi bi-asterisk text-warning me-1"></i>{{ c.label }}
+                        </h6>
+                    </div>
+                    {% if c.source_text %}
+                    <details class="small mb-2">
+                        <summary class="text-muted" style="cursor:pointer;">source text</summary>
+                        <blockquote class="border-start ps-2 ms-1 mt-1 text-muted small">{{ c.source_text }}</blockquote>
+                    </details>
+                    {% endif %}
+                    <ul class="list-unstyled mb-0 small">
+                        {% if c.prevails_over %}
+                        <li><i class="bi bi-arrow-up-circle text-success me-1"></i><strong>prevails over:</strong>
+                            {% for e in c.prevails_over %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                        </li>{% endif %}
+                        {% if c.prevailed_over_by %}
+                        <li><i class="bi bi-arrow-down-circle text-danger me-1"></i><strong>yields to:</strong>
+                            {% for e in c.prevailed_over_by %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                        </li>{% endif %}
+                        {% if c.competes_with %}
+                        <li><i class="bi bi-arrow-left-right text-primary me-1"></i><strong>competes with:</strong>
+                            {% for e in c.competes_with %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                        </li>{% endif %}
+                        {% if c.defeasible_under %}
+                        <li><i class="bi bi-shield-exclamation text-warning me-1"></i><strong>defeasible under:</strong>
+                            {% for e in c.defeasible_under %}<span class="badge bg-light text-dark border" title="{{ e.source_text or e.iri }}">{{ e.label }}</span> {% endfor %}
+                        </li>{% endif %}
+                        {% if c.derived_from_principle %}
+                        <li><i class="bi bi-diagram-2 text-info me-1"></i><strong>derived from principle:</strong>
+                            {% for e in c.derived_from_principle %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                        </li>{% endif %}
+                        {% if c.borne_by_roles %}
+                        <li><i class="bi bi-person me-1"></i><strong>borne by:</strong>
+                            {% for e in c.borne_by_roles %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                        </li>{% endif %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Sections -->
         {% for section in case_sections %}
         {{ render_section(section, ontology_name=ontology.name) }}

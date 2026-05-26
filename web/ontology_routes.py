@@ -175,10 +175,16 @@ def ontology_detail_or_uri_resolution(ontology_name):
         domain = get_domain_from_ontology(ontology_name)
         case_data = organize_entities_for_case(all_entities, domain)
 
+        # Obligation-competition view model (defeasibility + R->P->O edges grouped
+        # per obligation). Read-only; degrades to has_edges=False when absent.
+        from web.case_competition import build_competition_clusters
+        competition = build_competition_clusters(ontology.current_content)
+
         return render_template('ontology_case.html',
                              ontology=ontology,
                              case_sections=case_data['sections'],
-                             stats=case_data['stats'])
+                             stats=case_data['stats'],
+                             competition=competition)
 
     # Optional case filter: ?case=7 filters classes/individuals by discoveredInCase property
     case_filter = request.args.get('case', type=int)
