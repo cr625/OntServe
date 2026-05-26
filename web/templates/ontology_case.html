@@ -546,6 +546,57 @@
         </div>
         {% endif %}
 
+        {% if citations and citations.has_citations %}
+        <!-- NSPE citation chain: conclusion -> citesProvision -> provision -> establishes -> concept -->
+        <div class="card case-section mb-4" id="section-citations">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-link-45deg me-1"></i> Cited NSPE Provisions</span>
+                <span class="badge bg-secondary" title="distinct provisions cited / total citesProvision edges">
+                    {{ citations.provision_count }} provisions · {{ citations.citation_count }} citations
+                </span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    NSPE Code provisions cited by this case's board conclusions, and the
+                    Principles, Obligations, and Constraints each provision establishes in the
+                    NSPE Code of Ethics ontology.
+                </p>
+                {% for p in citations.provisions %}
+                <div class="border rounded p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h6 class="mb-1" title="{{ p.iri }}">
+                            <i class="bi bi-bookmark-fill text-primary me-1"></i>{{ p.label }}
+                            <span class="badge bg-light text-dark border ms-1">{{ p.code }}</span>
+                        </h6>
+                    </div>
+                    {% if p.text %}
+                    <details class="small mb-2">
+                        <summary class="text-muted" style="cursor:pointer;">provision text</summary>
+                        <blockquote class="border-start ps-2 ms-1 mt-1 text-muted small">{{ p.text }}</blockquote>
+                    </details>
+                    {% endif %}
+                    <ul class="list-unstyled mb-0 small">
+                        {% if p.establishes %}
+                        <li class="mb-1"><i class="bi bi-arrow-right-circle text-success me-1"></i><strong>establishes:</strong>
+                            {% for c in p.establishes %}
+                            <span class="badge border
+                                {%- if c.type == 'Principle' %} bg-info-subtle text-info-emphasis
+                                {%- elif c.type == 'Obligation' %} bg-warning-subtle text-warning-emphasis
+                                {%- elif c.type == 'Constraint' %} bg-danger-subtle text-danger-emphasis
+                                {%- else %} bg-light text-dark{% endif %}"
+                                title="{{ c.type }}: {{ c.iri }}">{{ c.label }}</span>
+                            {% endfor %}
+                        </li>{% endif %}
+                        <li><i class="bi bi-chat-left-quote text-muted me-1"></i><strong>cited by:</strong>
+                            {% for e in p.cited_by %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                        </li>
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Sections -->
         {% for section in case_sections %}
         {{ render_section(section, ontology_name=ontology.name) }}
