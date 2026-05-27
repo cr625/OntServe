@@ -182,7 +182,7 @@ def ontology_detail_or_uri_resolution(ontology_name):
 
         # NSPE citation chain: conclusion -> citesProvision -> provision -> establishes
         # -> concept. Joins the case TTL with the NSPE Code of Ethics ontology.
-        from web.case_citations import build_citation_chain
+        from web.case_citations import build_citation_chain, build_conclusions
         nspe_ont = db.session.execute(
             select(Ontology).where(Ontology.name == 'NSPE Code of Ethics')
         ).scalars().first()
@@ -190,13 +190,17 @@ def ontology_detail_or_uri_resolution(ontology_name):
             ontology.current_content,
             nspe_ont.current_content if nspe_ont else None,
         )
+        # Synthesized conclusions (the "cited by" chip targets) -- gives the chips
+        # an on-page anchor + readable text instead of an opaque IRI.
+        conclusions = build_conclusions(ontology.current_content)
 
         return render_template('ontology_case.html',
                              ontology=ontology,
                              case_sections=case_data['sections'],
                              stats=case_data['stats'],
                              competition=competition,
-                             citations=citations)
+                             citations=citations,
+                             conclusions=conclusions)
 
     # Optional case filter: ?case=7 filters classes/individuals by discoveredInCase property
     case_filter = request.args.get('case', type=int)
