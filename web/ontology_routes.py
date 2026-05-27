@@ -180,11 +180,23 @@ def ontology_detail_or_uri_resolution(ontology_name):
         from web.case_competition import build_competition_clusters
         competition = build_competition_clusters(ontology.current_content)
 
+        # NSPE citation chain: conclusion -> citesProvision -> provision -> establishes
+        # -> concept. Joins the case TTL with the NSPE Code of Ethics ontology.
+        from web.case_citations import build_citation_chain
+        nspe_ont = db.session.execute(
+            select(Ontology).where(Ontology.name == 'NSPE Code of Ethics')
+        ).scalars().first()
+        citations = build_citation_chain(
+            ontology.current_content,
+            nspe_ont.current_content if nspe_ont else None,
+        )
+
         return render_template('ontology_case.html',
                              ontology=ontology,
                              case_sections=case_data['sections'],
                              stats=case_data['stats'],
-                             competition=competition)
+                             competition=competition,
+                             citations=citations)
 
     # Optional case filter: ?case=7 filters classes/individuals by discoveredInCase property
     case_filter = request.args.get('case', type=int)
