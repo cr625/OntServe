@@ -50,9 +50,9 @@
 
 proeth:UnpermittedWetlandFillViolationState a owl:Class ;
     rdfs:subClassOf proeth-core:State .
-proeth:ClientConfidentialityObligation a owl:Class ;
+proeth:ConfidentialityObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation .
-proeth:PublicWelfareParamountObligation a owl:Class ;
+proeth:SafetyObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation .
 
 # ---------------------------------------------------------------------------
@@ -68,7 +68,7 @@ case86:State_WetlandViolation a proeth:UnpermittedWetlandFillViolationState ,
 # Obligation A: derived from NSPE II.1.c (confidentiality / client loyalty)
 # ---------------------------------------------------------------------------
 
-case86:Obl_Confidentiality a proeth:ClientConfidentialityObligation ,
+case86:Obl_Confidentiality a proeth:ConfidentialityObligation ,
         owl:NamedIndividual ;
     rdfs:label "Confidentiality to (former) client" ;
     proeth:obligatedparty "Engineer A" ;
@@ -79,7 +79,7 @@ case86:Obl_Confidentiality a proeth:ClientConfidentialityObligation ,
 # discharged through the report-to-authority mechanism of II.1.f
 # ---------------------------------------------------------------------------
 
-case86:Obl_PublicWelfare a proeth:PublicWelfareParamountObligation ,
+case86:Obl_PublicWelfare a proeth:SafetyObligation ,
         owl:NamedIndividual ;
     rdfs:label "Hold public welfare paramount; report to authority" ;
     proeth:obligatedparty "Engineer A" ;
