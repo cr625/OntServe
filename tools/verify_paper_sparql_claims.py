@@ -403,6 +403,80 @@ def cmd_obligations(args: argparse.Namespace) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Subcommand: temporal
+# Step-3 temporal-dynamics RDF: Action / Event individuals, Allen temporal
+# relations (proeth:TemporalRelation + the OWL-Time interval predicate set),
+# causal chains, per-case timelines. These come from the LangGraph pipeline at
+# proethica/app/services/temporal_dynamics/ ; before the 2026-05-28 fix the
+# commit serializer dropped them all into a bare label-only stub.
+# ---------------------------------------------------------------------------
+
+_TEMPORAL_QUERIES: Dict[str, str] = {
+    "Action_typed": "PREFIX core: <http://proethica.org/ontology/core#> SELECT (COUNT(*) AS ?n) { ?s a core:Action }",
+    "Event_typed":  "PREFIX core: <http://proethica.org/ontology/core#> SELECT (COUNT(*) AS ?n) { ?s a core:Event }",
+    "Event_via_subClassOf_chain":
+        "PREFIX core: <http://proethica.org/ontology/core#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
+        "SELECT (COUNT(*) AS ?n) { ?s a ?t . ?t rdfs:subClassOf* core:Event }",
+    "TemporalRelation": "PREFIX proeth: <http://proethica.org/ontology/intermediate#> SELECT (COUNT(*) AS ?n) { ?s a proeth:TemporalRelation }",
+    "CausalChain":      "PREFIX proeth: <http://proethica.org/ontology/intermediate#> SELECT (COUNT(*) AS ?n) { ?s a proeth:CausalChain }",
+    "TemporalEntity":   "PREFIX time: <http://www.w3.org/2006/time#> SELECT (COUNT(*) AS ?n) { ?s a time:TemporalEntity }",
+    "time_predicates_any":
+        "PREFIX time: <http://www.w3.org/2006/time#> SELECT (COUNT(*) AS ?n) "
+        "{ ?s ?p ?o FILTER(STRSTARTS(STR(?p), 'http://www.w3.org/2006/time#')) }",
+    "time_intervalBefore": "PREFIX time: <http://www.w3.org/2006/time#> SELECT (COUNT(*) AS ?n) { ?s time:intervalBefore ?o }",
+    "proeth_hasAgent":         'PREFIX proeth: <http://proethica.org/ontology/intermediate#> SELECT (COUNT(*) AS ?n) { ?s proeth:hasAgent ?o }',
+    "proeth_temporalSequence": 'PREFIX proeth: <http://proethica.org/ontology/intermediate#> SELECT (COUNT(*) AS ?n) { ?s proeth:temporalSequence ?o }',
+    "proeth_causalLanguage":   'PREFIX proeth: <http://proethica.org/ontology/intermediate#> SELECT (COUNT(*) AS ?n) { ?s proeth:causalLanguage ?o }',
+    "conceptCategory_Action_literal": 'PREFIX proeth: <http://proethica.org/ontology/intermediate#> SELECT (COUNT(*) AS ?n) { ?s proeth:conceptCategory "Action" }',
+    "conceptCategory_Event_literal":  'PREFIX proeth: <http://proethica.org/ontology/intermediate#> SELECT (COUNT(*) AS ?n) { ?s proeth:conceptCategory "Event" }',
+    "prov_Activity":  "PREFIX prov: <http://www.w3.org/ns/prov#> SELECT (COUNT(*) AS ?n) { ?s a prov:Activity }",
+}
+
+# Expected after the temporal data push lands on the live deployment. Measured
+# on dev 2026-05-28 post-augmentation. Until the data push completes (gated on
+# `project_pellet-corpus-drift`), prod will return 0/preserved values where dev
+# returns the augmented counts, so DIFF is the expected interim signal.
+_TEMPORAL_EXPECTED: Dict[str, int] = {
+    "Action_typed":               668,
+    "Event_typed":                691,
+    "TemporalRelation":          1263,
+    "CausalChain":                605,
+    "TemporalEntity":             119,
+    "time_predicates_any":       1263,
+    "time_intervalBefore":        998,
+    "proeth_hasAgent":            668,
+    "proeth_temporalSequence":   1359,
+    "proeth_causalLanguage":      605,
+    "conceptCategory_Action_literal": 688,  # preservation: must not lose stubs
+    "conceptCategory_Event_literal":  714,
+    # prov_Activity and Event_via_subClassOf_chain intentionally have no expected
+    # (PROV-O sync is a separate item; the subclass chain count varies with
+    # how many Event subclasses the corpus has defined).
+}
+
+
+def cmd_temporal(args: argparse.Namespace) -> int:
+    exit_code = 0
+    for name, q_text in _TEMPORAL_QUERIES.items():
+        try:
+            r = run(q_text, args.base_url)
+            v = _first_value(r)
+        except Exception as e:
+            safe_print(f"== {name} ==\n  ERROR: {e}")
+            exit_code = 1
+            continue
+        expected = _TEMPORAL_EXPECTED.get(name)
+        if expected is None:
+            safe_print(f"== {name} ==\n  live={v}   (no fixed expected)")
+        else:
+            mark = "OK" if str(v) == str(expected) else "DIFF"
+            if mark == "DIFF":
+                exit_code = 1
+            safe_print(f"== {name} ==\n  live={v}   expected={expected}   [{mark}]")
+    return exit_code
+
+
+# ---------------------------------------------------------------------------
 # Subcommand: all
 # ---------------------------------------------------------------------------
 
@@ -414,6 +488,7 @@ def cmd_all(args: argparse.Namespace) -> int:
         ("CASE 86 OBLIGATIONS", cmd_case86_obligations),
         ("CLASSES", cmd_classes),
         ("OBLIGATIONS", cmd_obligations),
+        ("TEMPORAL", cmd_temporal),
     ]:
         safe_print(f"\n###################  {label}  ###################")
         rc = fn(args) or rc
@@ -441,6 +516,8 @@ def main() -> int:
                    help="Comma-separated class local-names (default: 2026-05-28 audit set).")
     sub.add_parser("obligations",
                    help="Obligation subclass hierarchy + PublicWelfareParamount parentage.")
+    sub.add_parser("temporal",
+                   help="Step-3 temporal RDF: Action/Event/TemporalRelation/CausalChain/Timeline + time:* + PROV-O counts.")
     sub.add_parser("all", help="Run every subcommand in sequence.")
 
     args = p.parse_args()
@@ -457,6 +534,7 @@ def main() -> int:
         "case86-obligations": cmd_case86_obligations,
         "classes": cmd_classes,
         "obligations": cmd_obligations,
+        "temporal": cmd_temporal,
         "all": cmd_all,
     }
     return dispatch[args.cmd](args)
