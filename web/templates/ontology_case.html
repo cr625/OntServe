@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% from "macros/case_display.html" import render_entity_card, render_section %}
+{% from "macros/case_panels.html" import render_competition, render_citations, render_conclusions %}
 
-{% block title %}{{ ontology.name }} - Case View - OntServe{% endblock %}
+{% block title %}{{ ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else ontology.name }} - Case View - OntServe{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -159,14 +160,14 @@
         font-size: 0.75rem;
     }
 
-    /* Individual cards - more compact */
+    /* Individual cards - tightened */
     .entity-card {
         background: #fff;
         border: 1px solid #e9ecef;
         border-left: 3px solid var(--entity-color, #6c757d);
         border-radius: 0 0.375rem 0.375rem 0;
-        padding: 0.75rem 1rem;
-        margin-bottom: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.4rem;
         transition: box-shadow 0.15s, transform 0.15s;
     }
 
@@ -175,11 +176,54 @@
         transform: translateX(2px);
     }
 
+    /* Title row: concept chip + label */
+    .individual-head {
+        display: flex;
+        align-items: baseline;
+        gap: 0.45rem;
+    }
+
+    /* Concept-type chip (R, P, O, ...) marking the item as an individual of
+       that 9-concept type. Colour matches the concept. */
+    .concept-chip {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.35rem;
+        height: 1.35rem;
+        padding: 0 0.3rem;
+        border-radius: 0.3rem;
+        color: #fff;
+        font-size: 0.68rem;
+        font-weight: 700;
+        line-height: 1;
+        transform: translateY(1px);
+    }
+
+    /* "instance of > Class" line: makes the individual/class distinction explicit */
+    .instance-of {
+        font-size: 0.78rem;
+        color: #6c757d;
+        margin: 0.1rem 0 0.15rem 1.8rem;
+    }
+
+    .instance-of .bi { font-size: 0.65rem; }
+
+    .instance-of-label { font-style: italic; }
+
+    .instance-of-link {
+        color: var(--entity-color, #495057);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .instance-of-link:hover { text-decoration: underline; }
+
     .entity-label {
         font-weight: 600;
         font-size: 0.95rem;
         color: #212529;
-        margin-bottom: 0.25rem;
     }
 
     .entity-link {
@@ -280,6 +324,12 @@
         padding: 0.4rem 0;
     }
 
+    .subsection-count {
+        color: #6c757d;
+        font-weight: 400;
+        font-size: 0.85rem;
+    }
+
     .subsection-abbrev {
         display: inline-flex;
         align-items: center;
@@ -318,6 +368,48 @@
         font-size: 0.8rem;
         opacity: 0.9;
     }
+
+    /* Relationship (object-property) triples: visually distinct from literal
+       attributes. Bare camelCase predicate in monospace + linked target. */
+    .entity-relationships {
+        border-top: 1px dashed #e9ecef;
+        padding-top: 0.4rem;
+    }
+
+    .relationships-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #adb5bd;
+        font-weight: 600;
+        margin-bottom: 0.15rem;
+    }
+
+    .relationship-row {
+        font-size: 0.82rem;
+        line-height: 1.5;
+        color: #495057;
+    }
+
+    .relationship-row .bi {
+        color: #adb5bd;
+        font-size: 0.95rem;
+        vertical-align: -0.1rem;
+    }
+
+    .rel-predicate {
+        font-family: var(--bs-font-monospace, monospace);
+        color: #6f42c1;
+        font-size: 0.78rem;
+        margin-right: 0.35rem;
+    }
+
+    .rel-target-link {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+    .rel-target-link:hover { text-decoration: underline; }
 
     .show-more-btn {
         width: 100%;
@@ -359,6 +451,26 @@
 
     /* Individual type indicator */
     /* Removed: .individual-type-note was cluttering subsection headers */
+
+    /* Progressive disclosure: clamp long prose to a 3-line preview until the
+       reader expands it. Preview-first reduces the wall-of-text that long
+       conclusion or comment text would otherwise produce. */
+    .text-clamp {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .text-clamp.expanded {
+        -webkit-line-clamp: unset;
+        overflow: visible;
+    }
+
+    .clamp-toggle {
+        text-decoration: none;
+        font-size: 0.8rem;
+    }
 </style>
 {% endblock %}
 
@@ -376,11 +488,17 @@
 <div class="case-header">
     <div class="d-flex justify-content-between align-items-start">
         <div>
+            {% set display_title = ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else None %}
             <h1>
                 <i class="bi bi-briefcase me-2"></i>
-                {{ ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else ontology.name }}
+                {{ display_title if display_title else ontology.name }}
             </h1>
-            {% if ontology.description %}
+            {% if display_title %}
+            <div class="mt-1" style="font-size: 0.8rem; opacity: 0.85;">
+                <i class="bi bi-hash"></i>{{ ontology.name }}
+            </div>
+            {% endif %}
+            {% if ontology.description and not ontology.description.startswith('Auto-imported') %}
             <p class="mb-0 mt-2 opacity-90" style="font-size: 0.9rem;">{{ ontology.description }}</p>
             {% endif %}
             <div class="case-uri mt-2">
@@ -400,7 +518,7 @@
 <!-- 9-Concept Formalism Panel - Full width above content -->
 {% for section in case_sections %}
 {% if section.id == 'nine_concepts' and section.subsections %}
-<div class="formalism-panel">
+<div class="formalism-panel" id="formalism-top">
     <div class="formalism-panel-header">
         <h5><i class="bi bi-grid-3x3 me-2"></i>9-Concept Formalism</h5>
         <span class="stats-summary">
@@ -436,24 +554,18 @@
                     <i class="bi bi-list me-1"></i> Sections
                 </div>
                 <nav class="nav flex-column p-2">
-                    {% for section in case_sections %}
-                    {% set ns = namespace(count=section.entities|length) %}
-                    {% if section.subsections %}
-                    {% set ns.count = 0 %}
-                    {% for sub in section.subsections %}
-                    {% set ns.count = ns.count + sub.entities|length %}
-                    {% endfor %}
-                    {% endif %}
-                    {% set count = ns.count %}
-                    {% if count > 0 %}
-                    <a class="nav-link d-flex justify-content-between align-items-center" href="#section-{{ section.id }}">
+                    {# Single ordered list shared with the body (see build_ordered_blocks) #}
+                    {% for block in page_blocks %}
+                    {# nine_concepts links to the top filter panel (its concept-type
+                       chips), so the reader can jump between concept types; other
+                       blocks link to their section body. #}
+                    <a class="nav-link d-flex justify-content-between align-items-center" href="#{{ 'formalism-top' if block.id == 'nine_concepts' else 'section-' ~ block.id }}">
                         <span>
-                            {% if section.icon %}<i class="{{ section.icon }} me-1"></i>{% endif %}
-                            {{ section.title }}
+                            {% if block.icon %}<i class="{{ block.icon }} me-1"></i>{% endif %}
+                            {{ block.title }}
                         </span>
-                        <span class="badge bg-secondary">{{ count }}</span>
+                        <span class="badge bg-secondary">{{ block.count }}</span>
                     </a>
-                    {% endif %}
                     {% endfor %}
                 </nav>
             </div>
@@ -484,129 +596,38 @@
     <!-- Main content -->
     <div class="col-lg-9 col-md-8 order-md-1">
 
-        {% if competition and competition.has_edges %}
-        <!-- Obligation competition structure (defeasibility + R->P->O edges) -->
-        <div class="card case-section mb-4" id="section-competition">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-shield-exclamation me-1"></i> Obligation Competition</span>
-                <span class="badge bg-secondary" title="competesWith / prevailsOver / defeasibleUnder edges">
-                    {{ competition.edge_counts.competesWith }} competes ·
-                    {{ competition.edge_counts.prevailsOver }} prevails ·
-                    {{ competition.edge_counts.defeasibleUnder }} defeasible
-                </span>
-            </div>
-            <div class="card-body">
-                <p class="text-muted small mb-3">
-                    How the obligations in this case compete, which prevail, and the states
-                    under which each is defeasible. Each obligation is one cluster; expand a
-                    quote to see the verbatim case text grounding it.
-                </p>
-                {% for c in competition.clusters %}
-                <div class="border rounded p-3 mb-3">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <h6 class="mb-1" title="{{ c.iri }}">
-                            <i class="bi bi-asterisk text-warning me-1"></i>{{ c.label }}
-                        </h6>
-                    </div>
-                    {% if c.source_text %}
-                    <details class="small mb-2">
-                        <summary class="text-muted" style="cursor:pointer;">source text</summary>
-                        <blockquote class="border-start ps-2 ms-1 mt-1 text-muted small">{{ c.source_text }}</blockquote>
-                    </details>
-                    {% endif %}
-                    <ul class="list-unstyled mb-0 small">
-                        {% if c.prevails_over %}
-                        <li><i class="bi bi-arrow-up-circle text-success me-1"></i><strong>prevails over:</strong>
-                            {% for e in c.prevails_over %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
-                        </li>{% endif %}
-                        {% if c.prevailed_over_by %}
-                        <li><i class="bi bi-arrow-down-circle text-danger me-1"></i><strong>yields to:</strong>
-                            {% for e in c.prevailed_over_by %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
-                        </li>{% endif %}
-                        {% if c.competes_with %}
-                        <li><i class="bi bi-arrow-left-right text-primary me-1"></i><strong>competes with:</strong>
-                            {% for e in c.competes_with %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
-                        </li>{% endif %}
-                        {% if c.defeasible_under %}
-                        <li><i class="bi bi-shield-exclamation text-warning me-1"></i><strong>defeasible under:</strong>
-                            {% for e in c.defeasible_under %}<span class="badge bg-light text-dark border" title="{{ e.source_text or e.iri }}">{{ e.label }}</span> {% endfor %}
-                        </li>{% endif %}
-                        {% if c.derived_from_principle %}
-                        <li><i class="bi bi-diagram-2 text-info me-1"></i><strong>derived from principle:</strong>
-                            {% for e in c.derived_from_principle %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
-                        </li>{% endif %}
-                        {% if c.borne_by_roles %}
-                        <li><i class="bi bi-person me-1"></i><strong>borne by:</strong>
-                            {% for e in c.borne_by_roles %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
-                        </li>{% endif %}
-                    </ul>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+        {# Body renders from the same ordered list as the nav (page_blocks),
+           dispatching sections to render_section and the three bespoke panels
+           to their macros. This is the single source of truth for order. #}
+        {% for block in page_blocks %}
+        {% if block.kind == 'section' %}
+        {{ render_section(block.section, ontology_name=ontology.name) }}
+        {% elif block.id == 'competition' %}
+        {{ render_competition(competition) }}
+        {% elif block.id == 'citations' %}
+        {{ render_citations(citations) }}
+        {% elif block.id == 'conclusions' %}
+        {{ render_conclusions(conclusions) }}
         {% endif %}
-
-        {% if citations and citations.has_citations %}
-        <!-- NSPE citation chain: conclusion -> citesProvision -> provision -> establishes -> concept -->
-        <div class="card case-section mb-4" id="section-citations">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-link-45deg me-1"></i> Cited NSPE Provisions</span>
-                <span class="badge bg-secondary" title="distinct provisions cited / total citesProvision edges">
-                    {{ citations.provision_count }} provisions · {{ citations.citation_count }} citations
-                </span>
-            </div>
-            <div class="card-body">
-                <p class="text-muted small mb-3">
-                    NSPE Code provisions cited by this case's board conclusions, and the
-                    Principles, Obligations, and Constraints each provision establishes in the
-                    NSPE Code of Ethics ontology.
-                </p>
-                {% for p in citations.provisions %}
-                <div class="border rounded p-3 mb-3">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <h6 class="mb-1" title="{{ p.iri }}">
-                            <i class="bi bi-bookmark-fill text-primary me-1"></i>{{ p.label }}
-                            <span class="badge bg-light text-dark border ms-1">{{ p.code }}</span>
-                        </h6>
-                    </div>
-                    {% if p.text %}
-                    <details class="small mb-2">
-                        <summary class="text-muted" style="cursor:pointer;">provision text</summary>
-                        <blockquote class="border-start ps-2 ms-1 mt-1 text-muted small">{{ p.text }}</blockquote>
-                    </details>
-                    {% endif %}
-                    <ul class="list-unstyled mb-0 small">
-                        {% if p.establishes %}
-                        <li class="mb-1"><i class="bi bi-arrow-right-circle text-success me-1"></i><strong>establishes:</strong>
-                            {% for c in p.establishes %}
-                            <span class="badge border
-                                {%- if c.type == 'Principle' %} bg-info-subtle text-info-emphasis
-                                {%- elif c.type == 'Obligation' %} bg-warning-subtle text-warning-emphasis
-                                {%- elif c.type == 'Constraint' %} bg-danger-subtle text-danger-emphasis
-                                {%- else %} bg-light text-dark{% endif %}"
-                                title="{{ c.type }}: {{ c.iri }}">{{ c.label }}</span>
-                            {% endfor %}
-                        </li>{% endif %}
-                        <li><i class="bi bi-chat-left-quote text-muted me-1"></i><strong>cited by:</strong>
-                            {% for e in p.cited_by %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
-                        </li>
-                    </ul>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Sections -->
-        {% for section in case_sections %}
-        {{ render_section(section, ontology_name=ontology.name) }}
         {% endfor %}
     </div>
 </div>
 {% endblock %}
 
+
 {% block extra_js %}
 <script>
+// Progressive disclosure: expand/collapse clamped prose. Each .clamp-toggle
+// button immediately follows the .text-clamp element it controls.
+document.querySelectorAll('.clamp-toggle').forEach(btn => {
+    const clamped = btn.previousElementSibling;
+    if (!clamped || !clamped.classList.contains('text-clamp')) return;
+    btn.addEventListener('click', function() {
+        const expanded = clamped.classList.toggle('expanded');
+        btn.textContent = expanded ? 'Show less' : 'Show more';
+    });
+});
+
 // Toggle show more/less for individual lists
 function toggleMore(sectionId, btn) {
     const hiddenEl = document.getElementById('hidden-' + sectionId);

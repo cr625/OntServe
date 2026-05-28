@@ -182,7 +182,7 @@ def ontology_detail_or_uri_resolution(ontology_name):
 
         # NSPE citation chain: conclusion -> citesProvision -> provision -> establishes
         # -> concept. Joins the case TTL with the NSPE Code of Ethics ontology.
-        from web.case_citations import build_citation_chain
+        from web.case_citations import build_citation_chain, build_conclusions
         nspe_ont = db.session.execute(
             select(Ontology).where(Ontology.name == 'NSPE Code of Ethics')
         ).scalars().first()
@@ -190,13 +190,25 @@ def ontology_detail_or_uri_resolution(ontology_name):
             ontology.current_content,
             nspe_ont.current_content if nspe_ont else None,
         )
+        # Synthesized conclusions (the "cited by" chip targets) -- gives the chips
+        # an on-page anchor + readable text instead of an opaque IRI.
+        conclusions = build_conclusions(ontology.current_content)
+
+        # Single ordered block list shared by the sidebar nav and the body so
+        # the two render in identical order (and the redundant YAML conclusions
+        # section is dropped in favor of the richer conclusions panel).
+        from web.case_display import build_ordered_blocks
+        page_blocks = build_ordered_blocks(
+            case_data['sections'], competition, citations, conclusions)
 
         return render_template('ontology_case.html',
                              ontology=ontology,
                              case_sections=case_data['sections'],
+                             page_blocks=page_blocks,
                              stats=case_data['stats'],
                              competition=competition,
-                             citations=citations)
+                             citations=citations,
+                             conclusions=conclusions)
 
     # Optional case filter: ?case=7 filters classes/individuals by discoveredInCase property
     case_filter = request.args.get('case', type=int)
@@ -400,13 +412,9 @@ _PROPERTY_LABELS = {
 
 
 def _humanize_property_key(key):
-    """Convert a property key to a human-readable label."""
-    if key in _PROPERTY_LABELS:
-        return _PROPERTY_LABELS[key]
-    # Split camelCase: insert space before uppercase letters
-    spaced = _re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', key)
-    # Capitalize first letter
-    return spaced[0].upper() + spaced[1:] if spaced else key
+    """Convert a property key to a human-readable label (shared with the cards)."""
+    from web.property_labels import humanize_key
+    return humanize_key(key)
 
 
 def _format_property_value(value):
@@ -431,13 +439,16 @@ def _categorize_entity_properties(entity):
 
     Returns a dict with keys:
         description: list of (label, value) for case involvement text
-        core: list of (label, value) for primary entity properties
+        core: list of (label, value) for literal-valued entity attributes
+        relationships: list of (predicate_key, [iri, ...]) for IRI-valued
+            object-property triples (rendered like the case-page cards)
         evidence: list of (label, value) for source text references
         extraction_meta: list of (label, value) for provenance metadata
     """
     groups = {
         'description': [],
         'core': [],
+        'relationships': [],
         'evidence': [],
         'extraction_meta': [],
     }
@@ -446,7 +457,18 @@ def _categorize_entity_properties(entity):
         return groups
 
     for key, value in entity.properties.items():
-        if key in _SKIP_KEYS:
+        # Skip internal keys, the redundant conceptCategory (shown as the concept
+        # chip in the header instead), and the <concept>class key (shown as the
+        # "instance of" link instead).
+        if key in _SKIP_KEYS or key.lower() == 'conceptcategory' or key.lower().endswith('class'):
+            continue
+
+        # IRI-valued triples are object properties (R->P->O / defeasibility
+        # edges); group them as relationships, keeping the bare predicate and the
+        # target IRIs so the template can link them (mirrors the card view).
+        iris = _iri_values(value)
+        if iris is not None:
+            groups['relationships'].append((key, iris))
             continue
 
         label = _humanize_property_key(key)
@@ -467,6 +489,17 @@ def _categorize_entity_properties(entity):
             groups['core'].append(entry)
 
     return groups
+
+
+def _iri_values(value):
+    """Return a list of IRI strings if value is IRI-valued (object property),
+    else None. Mirrors the literal-vs-IRI split used by the case-page cards."""
+    if isinstance(value, str) and value.startswith(('http://', 'https://')):
+        return [value]
+    if isinstance(value, (list, tuple)) and value and isinstance(value[0], str) \
+            and value[0].startswith(('http://', 'https://')):
+        return [v for v in value if isinstance(v, str) and v.startswith(('http://', 'https://'))]
+    return None
 
 
 def _find_entity_by_fragment(ontology, fragment):

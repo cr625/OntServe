@@ -1,0 +1,154 @@
+{# Bespoke case-view panels (obligation competition, NSPE citations,
+   synthesized conclusions). Extracted from ontology_case.html so the body can
+   render them from the single ordered page_blocks loop, keeping the body in
+   lockstep with the sidebar nav. Each panel's outer element keeps its
+   id="section-<id>" so the nav anchors resolve. #}
+
+{% macro render_competition(competition) %}
+<div class="card case-section mb-4" id="section-competition">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-shield-exclamation me-1"></i> Obligation Competition</span>
+        <span class="badge bg-secondary" title="competesWith / prevailsOver / defeasibleUnder edges">
+            {{ competition.edge_counts.competesWith }} competes ·
+            {{ competition.edge_counts.prevailsOver }} prevails ·
+            {{ competition.edge_counts.defeasibleUnder }} defeasible
+        </span>
+    </div>
+    <div class="card-body">
+        <p class="text-muted small mb-3">
+            How the obligations in this case compete, which prevail, and the states
+            under which each is defeasible. Each obligation is one cluster; expand a
+            quote to see the verbatim case text grounding it.
+        </p>
+        {% for c in competition.clusters %}
+        <div class="border rounded p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <h6 class="mb-1" title="{{ c.iri }}">
+                    <i class="bi bi-asterisk text-warning me-1"></i>{{ c.label }}
+                </h6>
+            </div>
+            {% if c.source_text %}
+            <details class="small mb-2">
+                <summary class="text-muted" style="cursor:pointer;">source text</summary>
+                <blockquote class="border-start ps-2 ms-1 mt-1 text-muted small">{{ c.source_text }}</blockquote>
+            </details>
+            {% endif %}
+            <ul class="list-unstyled mb-0 small">
+                {% if c.prevails_over %}
+                <li><i class="bi bi-arrow-up-circle text-success me-1"></i><strong>prevails over:</strong>
+                    {% for e in c.prevails_over %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                </li>{% endif %}
+                {% if c.prevailed_over_by %}
+                <li><i class="bi bi-arrow-down-circle text-danger me-1"></i><strong>yields to:</strong>
+                    {% for e in c.prevailed_over_by %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                </li>{% endif %}
+                {% if c.competes_with %}
+                <li><i class="bi bi-arrow-left-right text-primary me-1"></i><strong>competes with:</strong>
+                    {% for e in c.competes_with %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                </li>{% endif %}
+                {% if c.defeasible_under %}
+                <li><i class="bi bi-shield-exclamation text-warning me-1"></i><strong>defeasible under:</strong>
+                    {% for e in c.defeasible_under %}<span class="badge bg-light text-dark border" title="{{ e.source_text or e.iri }}">{{ e.label }}</span> {% endfor %}
+                </li>{% endif %}
+                {% if c.derived_from_principle %}
+                <li><i class="bi bi-diagram-2 text-info me-1"></i><strong>derived from principle:</strong>
+                    {% for e in c.derived_from_principle %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                </li>{% endif %}
+                {% if c.borne_by_roles %}
+                <li><i class="bi bi-person me-1"></i><strong>borne by:</strong>
+                    {% for e in c.borne_by_roles %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                </li>{% endif %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro render_citations(citations) %}
+<div class="card case-section mb-4" id="section-citations">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-link-45deg me-1"></i> Cited NSPE Provisions</span>
+        <span class="badge bg-secondary" title="distinct provisions cited / total citesProvision edges">
+            {{ citations.provision_count }} provisions · {{ citations.citation_count }} citations
+        </span>
+    </div>
+    <div class="card-body">
+        <p class="text-muted small mb-3">
+            NSPE Code provisions cited by this case's board conclusions, and the
+            Principles, Obligations, and Constraints each provision establishes in the
+            NSPE Code of Ethics ontology.
+        </p>
+        {% for p in citations.provisions %}
+        <div class="border rounded p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <h6 class="mb-1" title="{{ p.iri }}">
+                    <i class="bi bi-bookmark-fill text-primary me-1"></i>{{ p.label }}
+                    <span class="badge bg-light text-dark border ms-1">{{ p.code }}</span>
+                </h6>
+            </div>
+            {% if p.text %}
+            <details class="small mb-2">
+                <summary class="text-muted" style="cursor:pointer;">provision text</summary>
+                <blockquote class="border-start ps-2 ms-1 mt-1 text-muted small">{{ p.text }}</blockquote>
+            </details>
+            {% endif %}
+            <ul class="list-unstyled mb-0 small">
+                {% if p.establishes %}
+                <li class="mb-1"><i class="bi bi-arrow-right-circle text-success me-1"></i><strong>establishes:</strong>
+                    {% for c in p.establishes %}
+                    {% set m = concept_meta(c.type) %}
+                    <span class="badge border" title="{{ c.type }}: {{ c.iri }}"
+                          style="{% if m %}background: {{ m.color }}; color: #fff; border-color: {{ m.color }} !important;{% else %}background: #e9ecef; color: #212529;{% endif %}">{{ c.label }}</span>
+                    {% endfor %}
+                </li>{% endif %}
+                <li><i class="bi bi-chat-left-quote text-muted me-1"></i><strong>cited by:</strong>
+                    {% for e in p.cited_by %}<a href="#conclusion-{{ e.anchor }}" class="badge bg-light text-dark border text-decoration-none" title="{{ e.snippet or e.iri }}">{{ e.label }}</a> {% endfor %}
+                </li>
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro render_conclusions(conclusions) %}
+<div class="card case-section mb-4" id="section-conclusions">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-chat-left-quote me-1"></i> Conclusions</span>
+        <span class="badge bg-secondary" title="ProEthica-synthesized ethical conclusions">
+            {{ conclusions.count }} conclusions
+        </span>
+    </div>
+    <div class="card-body">
+        <p class="text-muted small mb-3">
+            Ethical conclusions synthesized for this case (analytical extensions of
+            the Board's findings, question responses, and principle syntheses). These
+            are the targets of the "cited by" links above; the Board's verbatim
+            conclusion is in the case source text.
+        </p>
+        {% for c in conclusions.conclusions %}
+        <div class="border rounded p-3 mb-3" id="conclusion-{{ c.anchor }}">
+            <div class="d-flex justify-content-between align-items-start">
+                <h6 class="mb-1" title="{{ c.iri }}">
+                    <i class="bi bi-chat-left-text text-secondary me-1"></i>{{ c.label }}
+                </h6>
+                <span class="badge bg-light text-dark border">{{ c.type_label }}</span>
+            </div>
+            {% if c.text %}
+            {% if c.text|length > 240 %}
+            <div class="text-clamp small text-muted mb-1">{{ c.text }}</div>
+            <button type="button" class="clamp-toggle btn btn-link btn-sm p-0 mb-2">Show more</button>
+            {% else %}
+            <p class="small text-muted mb-2">{{ c.text }}</p>
+            {% endif %}
+            {% endif %}
+            {% if c.cited_provisions %}
+            <div class="small"><i class="bi bi-link-45deg text-muted me-1"></i><strong>cites:</strong>
+                {% for code in c.cited_provisions %}<span class="badge bg-light text-dark border">{{ code }}</span> {% endfor %}
+            </div>{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endmacro %}

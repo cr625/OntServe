@@ -2,18 +2,24 @@
 
 Pure rdflib parse of inline fixtures -- no DB, no reasoner.
 """
-from web.case_citations import build_citation_chain
+from web.case_citations import build_citation_chain, build_conclusions
 
 CASE_TTL = """
 @prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix cases: <http://proethica.org/ontology/cases#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix c: <http://proethica.org/ontology/case/99#> .
 @prefix nspe: <http://proethica.org/ontology/nspe#> .
 
-c:Conclusion_1 a owl:NamedIndividual ; rdfs:label "Conclusion_1" ;
+c:Conclusion_1 a owl:NamedIndividual, cases:EthicalConclusion ; rdfs:label "Conclusion_1" ;
+    proeth:conclusionType "analytical_extension" ; proeth:conclusionNumber 101 ;
+    proeth:conclusionText "Engineer must hold safety paramount." ;
     proeth-core:citesProvision nspe:II_1_f , nspe:I_1 .
-c:Conclusion_2 a owl:NamedIndividual ; rdfs:label "Conclusion_2" ;
+c:Conclusion_2 a owl:NamedIndividual, cases:EthicalConclusion ; rdfs:label "Conclusion_2" ;
+    proeth:conclusionType "analytical_extension" ; proeth:conclusionNumber 102 ;
+    proeth:conclusionText "Disclosure duty applies." ;
     proeth-core:citesProvision nspe:I_1 .
 """
 
@@ -65,7 +71,24 @@ def test_established_concepts_typed_and_sorted():
 def test_cited_by_lists_conclusions():
     vm = build_citation_chain(CASE_TTL, NSPE_TTL)
     i1 = next(p for p in vm["provisions"] if p["code"] == "I.1")
-    assert sorted(e["label"] for e in i1["cited_by"]) == ["Conclusion_1", "Conclusion_2"]
+    # human-readable derived labels, IRI localnames preserved as anchors
+    assert sorted(e["label"] for e in i1["cited_by"]) == ["Analytical Extension 1", "Analytical Extension 2"]
+    assert sorted(e["anchor"] for e in i1["cited_by"]) == ["Conclusion_1", "Conclusion_2"]
+
+
+def test_build_conclusions_human_labels_and_anchors():
+    vm = build_conclusions(CASE_TTL)
+    assert vm["has_conclusions"] is True
+    assert vm["count"] == 2
+    by_anchor = {c["anchor"]: c for c in vm["conclusions"]}
+    assert by_anchor["Conclusion_1"]["label"] == "Analytical Extension 1"
+    assert by_anchor["Conclusion_1"]["type_label"] == "Analytical Extension"
+    assert by_anchor["Conclusion_1"]["cited_provisions"] == ["I.1", "II.1.f"]
+
+
+def test_build_conclusions_empty_without_data():
+    assert build_conclusions(None)["has_conclusions"] is False
+    assert build_conclusions("@prefix x: <http://x#> .")["has_conclusions"] is False
 
 
 def test_missing_nspe_degrades_gracefully():

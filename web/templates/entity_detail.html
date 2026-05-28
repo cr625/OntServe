@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/entity_display.html" import render_iri_target %}
 
 {% block title %}{{ entity.label or fragment }} - {{ ontology.name }} - OntServe{% endblock %}
 
@@ -27,6 +28,35 @@
         flex: 1;
         word-break: break-word;
     }
+
+    /* Relationship (object-property) triples, matching the case-page cards */
+    .entity-relationships {
+        border-top: 1px dashed #e9ecef;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+    }
+    .relationships-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #adb5bd;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    .relationship-row {
+        font-size: 0.88rem;
+        line-height: 1.6;
+        color: #495057;
+    }
+    .relationship-row .bi { color: #adb5bd; vertical-align: -0.1rem; }
+    .rel-predicate {
+        font-family: var(--bs-font-monospace, monospace);
+        color: #6f42c1;
+        font-size: 0.82rem;
+        margin-right: 0.4rem;
+    }
+    .rel-target-link { color: #0d6efd; text-decoration: none; }
+    .rel-target-link:hover { text-decoration: underline; }
 
     .evidence-quote {
         border-left: 3px solid #dee2e6;
@@ -116,17 +146,21 @@
     {% endif %}
 
     <!-- Entity Header -->
-    <div class="entity-header type-{{ entity.entity_type }} mb-4">
+    {% set cc = entity.properties.conceptCategory if (entity.properties and entity.properties is mapping) else none %}
+    {% set cm = concept_meta(cc) if cc else none %}
+    <div class="entity-header type-{{ entity.entity_type }} mb-4"{% if cm %} style="border-color: {{ cm.color }};"{% endif %}>
         <div class="d-flex justify-content-between align-items-start">
             <div>
                 <h1 class="mb-1">{{ entity.label or fragment }}</h1>
                 <div class="mb-2">
+                    {% if entity.entity_type == 'individual' and cm %}
+                    <span class="badge" style="background: {{ cm.color }};" title="{{ cm.name }} (one of the 9 concepts)">
+                        {{ cm.abbrev }} &middot; {{ cm.name }}
+                    </span>
+                    <span class="badge bg-light text-muted border">Individual</span>
+                    {% else %}
                     <span class="badge bg-{{ 'primary' if entity.entity_type == 'class' else 'success' if entity.entity_type == 'property' else 'secondary' }}">
                         {{ entity.entity_type|capitalize }}
-                    </span>
-                    {% if entity.content_hash %}
-                    <span class="badge bg-light text-muted" title="Content hash: {{ entity.content_hash }}">
-                        <i class="bi bi-hash"></i> {{ entity.content_hash[:8] }}
                     </span>
                     {% endif %}
                 </div>
@@ -179,7 +213,7 @@
                 {% endif %}
 
                 <!-- Properties -->
-                {% set has_structural = entity.parent_uri or entity.domain or entity.range or prop_groups.core %}
+                {% set has_structural = entity.parent_uri or entity.domain or entity.range or prop_groups.core or prop_groups.relationships %}
                 {% if has_structural %}
                 <div class="card mb-3">
                     <div class="card-header"><h6 class="mb-0">Properties</h6></div>
@@ -187,7 +221,7 @@
                         {% if entity.parent_uri %}
                         <div class="property-row">
                             <div class="property-key">
-                                {% if entity.entity_type == 'class' %}Subclass of{% else %}Parent{% endif %}
+                                {% if entity.entity_type == 'class' %}Subclass of{% elif entity.entity_type == 'individual' %}Instance of{% else %}Parent{% endif %}
                             </div>
                             <div class="property-value">
                                 <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.parent_uri.split('#')[-1] if '#' in entity.parent_uri else entity.parent_uri.split('/')[-1]) }}">
@@ -226,6 +260,23 @@
                             <div class="property-value">{{ render_value(val) }}</div>
                         </div>
                         {% endfor %}
+
+                        {# IRI-valued object-property triples, same treatment as
+                           the case-page cards: bare camelCase predicate + linked
+                           target individual. #}
+                        {% if prop_groups.relationships %}
+                        <div class="entity-relationships">
+                            <div class="relationships-label">Relationships</div>
+                            {% for key, iris in prop_groups.relationships %}
+                            <div class="relationship-row">
+                                <i class="bi bi-arrow-right-short"></i><span class="rel-predicate" title="{{ key|qualify_pred }}">{{ key }}</span>
+                                <span class="rel-targets">
+                                    {%- for iri in iris -%}{{ render_iri_target(iri, ontology.name) }}{% if not loop.last %}, {% endif %}{%- endfor -%}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 {% endif %}
@@ -335,12 +386,6 @@
                         <div class="property-key">Type</div>
                         <div class="property-value">{{ entity.entity_type|capitalize }}</div>
                     </div>
-                    {% if entity.content_hash %}
-                    <div class="property-row">
-                        <div class="property-key">Content Hash</div>
-                        <div class="property-value"><code class="small">{{ entity.content_hash[:16] }}...</code></div>
-                    </div>
-                    {% endif %}
                     {% if entity.updated_at %}
                     <div class="property-row">
                         <div class="property-key">Last Updated</div>
@@ -350,17 +395,24 @@
                 </div>
             </div>
 
-            <!-- Extraction provenance (for case entities) -->
+            <!-- Extraction provenance (for case entities); collapsed by default -->
             {% if prop_groups.extraction_meta %}
             <div class="card mb-3">
-                <div class="card-header"><h6 class="mb-0">Extraction Provenance</h6></div>
-                <div class="card-body">
-                    {% for label, val in prop_groups.extraction_meta %}
-                    <div class="property-row">
-                        <div class="property-key">{{ label }}</div>
-                        <div class="property-value">{{ val }}</div>
+                <div class="card-header d-flex justify-content-between align-items-center"
+                     role="button" data-bs-toggle="collapse" data-bs-target="#provenancePanel"
+                     aria-expanded="false" aria-controls="provenancePanel">
+                    <h6 class="mb-0">Extraction details</h6>
+                    <i class="bi bi-chevron-down small"></i>
+                </div>
+                <div class="collapse" id="provenancePanel">
+                    <div class="card-body">
+                        {% for label, val in prop_groups.extraction_meta %}
+                        <div class="property-row">
+                            <div class="property-key">{{ label }}</div>
+                            <div class="property-value">{{ val }}</div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
             </div>
             {% endif %}

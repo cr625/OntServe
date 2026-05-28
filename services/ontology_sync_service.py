@@ -94,6 +94,23 @@ class OntologySyncService:
         logger.info(f"Sync complete: {results['updated']} updated, {results['skipped']} skipped, {len(results['errors'])} errors")
         return results
 
+    def _extract_dcterms_title(self, ttl_path: Path) -> Optional[str]:
+        """Return the dcterms:title of the owl:Ontology subject in a TTL file,
+        or None if absent. Used to seed display_name for newly synced case
+        ontologies (ProEthica emits the human case title in the header)."""
+        from rdflib import Graph
+        from rdflib.namespace import OWL, RDF, DCTERMS
+        try:
+            g = Graph()
+            g.parse(str(ttl_path), format='turtle')
+            for subj in g.subjects(RDF.type, OWL.Ontology):
+                title = g.value(subj, DCTERMS.title)
+                if title:
+                    return str(title).strip() or None
+        except Exception as e:
+            logger.warning(f"Could not read dcterms:title from {ttl_path.name}: {e}")
+        return None
+
     def _sync_single_ontology(self, ttl_path: Path, force: bool = False) -> Dict:
         """
         Sync a single TTL file.
@@ -117,11 +134,20 @@ class OntologySyncService:
         if not ontology:
             # Create new ontology record
             logger.info(f"Creating new ontology record for {ontology_name}")
+            # ProEthica emits the human case title as dcterms:title in the TTL
+            # header; carry it into display_name so the case view shows the real
+            # title instead of the opaque "proethica-case-N" id. Set on create
+            # only, so a manually edited display_name is never overwritten.
+            meta_data = {}
+            title = self._extract_dcterms_title(ttl_path)
+            if title:
+                meta_data['display_name'] = title
             ontology = Ontology(
                 name=ontology_name,
                 base_uri=f"http://proethica.org/ontology/{ontology_name}#",
                 description=f"Auto-imported from {ttl_path.name}",
-                is_editable=True
+                is_editable=True,
+                meta_data=meta_data
             )
             self.db_session.add(ontology)
             self.db_session.flush()

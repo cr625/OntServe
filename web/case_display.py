@@ -459,6 +459,149 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
     }
 
 
+# Canonical reading order for the case page. Drives BOTH the sidebar nav and
+# the body so the two cannot drift apart (the prior template listed YAML
+# sections and the bespoke panels in different orders). Ids are either YAML
+# section ids or the three bespoke panel ids (competition / citations /
+# conclusions). Any YAML section not named here is appended in its original
+# order, just before "other".
+PAGE_BLOCK_ORDER = [
+    'nine_concepts',     # the extracted entities (foundation)
+    'competition',       # panel: how the obligations compete / prevail
+    'citations',         # panel: NSPE provisions grounding the conclusions
+    'decision_points',
+    'arguments',
+    'questions',
+    'conclusions',       # panel: synthesized ethical conclusions (cited-by targets)
+    'validation',
+    'analysis',
+    'other',
+]
+
+_PANEL_META = {
+    'competition': {'title': 'Obligation Competition', 'icon': 'bi bi-shield-exclamation'},
+    'citations': {'title': 'Cited NSPE Provisions', 'icon': 'bi bi-link-45deg'},
+    'conclusions': {'title': 'Conclusions', 'icon': 'bi bi-chat-left-quote'},
+}
+
+
+def _section_count(section: Dict) -> int:
+    """Total entity count for a section, summing subsections when present."""
+    if section.get('subsections'):
+        return sum(len(s.get('entities', [])) for s in section['subsections'])
+    return len(section.get('entities', []))
+
+
+def build_ordered_blocks(case_sections: List[Dict], competition=None,
+                         citations=None, conclusions=None) -> List[Dict]:
+    """Build one ordered list of renderable page blocks for nav + body parity.
+
+    Each block is a dict with: kind ('section'|'panel'), id, title, icon,
+    count, and (for sections) the section object. Only blocks with content are
+    returned. The bespoke ``conclusions`` panel supersedes the YAML
+    ``conclusions`` section when the panel has data, so the redundant YAML
+    section is dropped (it previously produced a duplicate "Conclusions" entry
+    and an ``id="section-conclusions"`` collision).
+    """
+    sections_by_id = {s['id']: s for s in case_sections}
+
+    panel_present = {
+        'competition': bool(competition and getattr(competition, 'has_edges', competition.get('has_edges') if isinstance(competition, dict) else False)),
+        'citations': bool(citations and (citations.get('has_citations') if isinstance(citations, dict) else getattr(citations, 'has_citations', False))),
+        'conclusions': bool(conclusions and (conclusions.get('has_conclusions') if isinstance(conclusions, dict) else getattr(conclusions, 'has_conclusions', False))),
+    }
+
+    def _panel_count(name):
+        if name == 'competition':
+            return len(competition.get('clusters', [])) if isinstance(competition, dict) else len(getattr(competition, 'clusters', []))
+        if name == 'citations':
+            return citations.get('provision_count', 0) if isinstance(citations, dict) else getattr(citations, 'provision_count', 0)
+        if name == 'conclusions':
+            return conclusions.get('count', 0) if isinstance(conclusions, dict) else getattr(conclusions, 'count', 0)
+        return 0
+
+    blocks = []
+    consumed_sections = set()
+
+    for block_id in PAGE_BLOCK_ORDER:
+        if block_id in _PANEL_META:
+            if not panel_present.get(block_id):
+                continue
+            # Drop the redundant YAML section of the same id (panel wins).
+            consumed_sections.add(block_id)
+            meta = _PANEL_META[block_id]
+            blocks.append({
+                'kind': 'panel',
+                'id': block_id,
+                'title': meta['title'],
+                'icon': meta['icon'],
+                'count': _panel_count(block_id),
+            })
+        else:
+            section = sections_by_id.get(block_id)
+            if not section:
+                continue
+            consumed_sections.add(block_id)
+            count = _section_count(section)
+            if count <= 0:
+                continue
+            blocks.append({
+                'kind': 'section',
+                'id': block_id,
+                'title': section.get('title', block_id),
+                'icon': section.get('icon'),
+                'count': count,
+                'section': section,
+            })
+
+    # Append any YAML sections not named in PAGE_BLOCK_ORDER, in their original
+    # order, before the trailing "other" block if one was emitted.
+    extra = [s for s in case_sections
+             if s['id'] not in consumed_sections and _section_count(s) > 0]
+    if extra:
+        insert_at = len(blocks)
+        for i, b in enumerate(blocks):
+            if b['id'] == 'other':
+                insert_at = i
+                break
+        extra_blocks = [{
+            'kind': 'section', 'id': s['id'], 'title': s.get('title', s['id']),
+            'icon': s.get('icon'), 'count': _section_count(s), 'section': s,
+        } for s in extra]
+        blocks[insert_at:insert_at] = extra_blocks
+
+    return blocks
+
+
+_concept_meta_cache = None
+
+
+def concept_type_meta(concept_type: str) -> Optional[Dict[str, str]]:
+    """Return {abbrev, color, icon, name} for one of the 9 core concept types
+    (Role, Principle, ...), sourced from the nine_concepts subsections in
+    case_display.yaml. None for unknown types. Used to colour-code individuals
+    consistently across the case page and the entity detail page."""
+    global _concept_meta_cache
+    if _concept_meta_cache is None:
+        cache: Dict[str, Dict[str, str]] = {}
+        cfg = load_config()
+        for section in cfg.get('default', {}).get('sections', []):
+            if section.get('id') != 'nine_concepts':
+                continue
+            for sub in section.get('subsections', []):
+                for et in sub.get('entity_types', []):
+                    # The entity_type (Role, Capability, ...) is the singular
+                    # concept name; the subsection title is the plural section name.
+                    cache[et] = {
+                        'abbrev': sub.get('abbrev'),
+                        'color': sub.get('color'),
+                        'icon': sub.get('icon'),
+                        'name': et,
+                    }
+        _concept_meta_cache = cache
+    return _concept_meta_cache.get(concept_type) if concept_type else None
+
+
 def get_section_summary(sections: List[Dict]) -> List[Dict]:
     """
     Get summary information for each section (for sidebar/nav).

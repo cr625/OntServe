@@ -260,7 +260,7 @@ proeth-core:defeasibleUnder a owl:ObjectProperty ;
     rdfs:label "defeasible under"@en ;
     rdfs:comment "Relates an obligation to a State whose obtaining renders the obligation defeasible — that is, subject to override by a competing obligation with stronger normative support. The State specifies the context in which the obligation yields."@en ;
     skos:definition "Links an Obligation to a State whose obtaining activates the obligation's defeasibility."@en ;
-    skos:scopeNote "Typical pattern: an obligation that normally holds becomes defeasible when a State representing risk, harm, or unrealizability obtains. This aligns with the deontic principle that obligation presupposes capacity (Govindarajulu and Bringsjord 2017): an Obligation is defeasible when the agent lacks the Capability required to fulfill it, or when fulfilling it would cause a harm the role exists to prevent."@en .
+    skos:scopeNote "Typical pattern: an obligation that normally holds becomes defeasible when a State representing risk, harm, or unrealizability obtains. This reflects the deontic principle that obligation presupposes capacity (Stenseke 2024): an Obligation is defeasible when the agent lacks the Capability required to fulfill it, or when fulfilling it would cause a harm the role exists to prevent."@en .
 
 ###############################################################
 # CodeProvision Properties
