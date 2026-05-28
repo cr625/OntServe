@@ -1,11 +1,19 @@
 {# Case Display Macros - Rendering for case ontology entities #}
 {% from "macros/entity_display.html" import render_entity_properties %}
 
-{# Render an individual entity card with optional color #}
+{# Render an individual entity card. Individuals are colour-coded by their
+   9-concept type (the concept_meta chip + left accent), labelled as instances
+   of their class (clickable), and never repeat the class in the body. #}
 {% macro render_entity_card(entity, color=none, ontology_name=none) %}
-<div class="entity-card" style="{% if color %}--entity-color: {{ color }};{% endif %}">
-    <div class="d-flex justify-content-between align-items-start">
-        <div class="entity-label">
+{% set cc = entity.properties.conceptCategory if (entity.properties and entity.properties is mapping) else none %}
+{% set cm = concept_meta(cc) if cc else none %}
+{% set accent = (cm.color if cm else color) or '#6c757d' %}
+<div class="entity-card individual-card" style="--entity-color: {{ accent }};">
+    <div class="individual-head">
+        {% if cm %}
+        <span class="concept-chip" style="background: {{ cm.color }};" title="{{ cm.name }} (individual)">{{ cm.abbrev }}</span>
+        {% endif %}
+        <span class="entity-label">
             {% if ontology_name %}
             <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=entity.uri|extract_name) }}"
                class="entity-link">
@@ -14,20 +22,33 @@
             {% else %}
             {{ entity.label or entity.uri.split('#')[-1].split('/')[-1] | split_pascal }}
             {% endif %}
-        </div>
-        {% if entity.parent_uri %}
-        {% set raw_type = entity.parent_uri.split('#')[-1].split('/')[-1] %}
-        <span class="badge entity-type-badge" style="{% if color %}background: {{ color }};{% else %}background: #6c757d;{% endif %}" title="{{ raw_type }}">
-            {{ raw_type | split_pascal }}
         </span>
-        {% endif %}
     </div>
 
-    {% if entity.comment %}
-    <p class="entity-comment">{{ entity.comment }}</p>
+    {% if entity.parent_uri %}
+    {% set raw_type = entity.parent_uri.split('#')[-1].split('/')[-1] %}
+    <div class="instance-of">
+        <span class="instance-of-label">instance of</span>
+        <i class="bi bi-chevron-right"></i>
+        {% if ontology_name %}
+        <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=raw_type) }}"
+           class="instance-of-link" title="{{ entity.parent_uri }}">{{ raw_type | split_pascal }}</a>
+        {% else %}
+        <span class="instance-of-link">{{ raw_type | split_pascal }}</span>
+        {% endif %}
+    </div>
     {% endif %}
 
-    {{ render_entity_properties(entity) }}
+    {% if entity.comment %}
+    {% if entity.comment|length > 240 %}
+    <div class="entity-comment text-clamp">{{ entity.comment }}</div>
+    <button type="button" class="clamp-toggle btn btn-link btn-sm p-0">Show more</button>
+    {% else %}
+    <p class="entity-comment">{{ entity.comment }}</p>
+    {% endif %}
+    {% endif %}
+
+    {{ render_entity_properties(entity, ontology_name) }}
 </div>
 {% endmacro %}
 
@@ -66,7 +87,7 @@
             <div class="subsection-header">
                 <span class="subsection-abbrev" style="{% if subsection.color %}background: {{ subsection.color }};{% endif %}">{{ subsection.abbrev or subsection.id[:2]|upper }}</span>
                 <span class="subsection-title">{{ subsection.title }}</span>
-                <span class="badge" style="{% if subsection.color %}background: {{ subsection.color }};{% else %}background: #6c757d;{% endif %}">{{ subsection.entities|length }}</span>
+                <span class="subsection-count">({{ subsection.entities|length }})</span>
             </div>
 
             <div class="entity-list" id="list-{{ section.id }}-{{ subsection.id }}">

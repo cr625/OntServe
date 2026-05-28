@@ -77,10 +77,16 @@ def test_competition_panel_renders_in_case_template(model):
     app = create_app("testing")
     ont = SimpleNamespace(name="proethica-case-86", description=None, current_version=None)
 
+    from web.case_display import build_ordered_blocks
+
     with app.app_context(), app.test_request_context():
+        # The body and nav both render from page_blocks (built the same way the
+        # route does), so the test must supply it for the panel to appear.
+        blocks = build_ordered_blocks([], competition=model)
         html = render_template(
             "ontology_case.html",
-            ontology=ont, case_sections=[], stats={"total": 0}, competition=model,
+            ontology=ont, case_sections=[], page_blocks=blocks,
+            stats={"total": 0}, competition=model,
         )
         assert "Obligation Competition" in html
         assert "prevails over" in html
@@ -88,8 +94,10 @@ def test_competition_panel_renders_in_case_template(model):
         assert html.count("bi-asterisk") == model["obligation_count"]
 
         empty = build_competition_clusters(None)
+        empty_blocks = build_ordered_blocks([], competition=empty)
         html2 = render_template(
             "ontology_case.html",
-            ontology=ont, case_sections=[], stats={"total": 0}, competition=empty,
+            ontology=ont, case_sections=[], page_blocks=empty_blocks,
+            stats={"total": 0}, competition=empty,
         )
         assert "Obligation Competition" not in html2  # graceful: no panel, no error

@@ -273,6 +273,30 @@ def create_app(config_name=None):
 
     app.jinja_env.filters['split_pascal'] = split_pascal_case
 
+    # Shared, human-readable property-key labels for case cards + detail page.
+    from web.property_labels import humanize_key, qualify_predicate
+    app.jinja_env.filters['pretty_key'] = humanize_key
+    app.jinja_env.filters['qualify_pred'] = qualify_predicate
+
+    # Concept-type badge metadata (abbrev / colour / icon / name) sourced from
+    # config/case_display.yaml, so the 9-concept colour coding is consistent
+    # across the formalism filter row, the cards, and the entity detail page.
+    from web.case_display import concept_type_meta
+    app.jinja_env.globals['concept_meta'] = concept_type_meta
+
+    # Single source of truth for the front-end Bootstrap version, referenced by
+    # base.html and the two standalone editor pages (editor/edit.html,
+    # editor/visualize.html). Bumping the version here updates every page; see
+    # the "Bootstrap 5.3 upgrade" item in .claude/plans/ROADMAP.md before doing so
+    # (5.3 enables native bg-*-subtle / text-*-emphasis and color modes, but needs
+    # a visual regression pass across all page types).
+    _bootstrap_version = '5.1.3'
+    _bootstrap_icons_version = '1.8.1'
+    _cdn = 'https://cdn.jsdelivr.net/npm'
+    app.jinja_env.globals['BOOTSTRAP_CSS_URL'] = f'{_cdn}/bootstrap@{_bootstrap_version}/dist/css/bootstrap.min.css'
+    app.jinja_env.globals['BOOTSTRAP_JS_URL'] = f'{_cdn}/bootstrap@{_bootstrap_version}/dist/js/bootstrap.bundle.min.js'
+    app.jinja_env.globals['BOOTSTRAP_ICONS_CSS_URL'] = f'{_cdn}/bootstrap-icons@{_bootstrap_icons_version}/font/bootstrap-icons.css'
+
     # Initialize CLI commands
     from web.cli import init_cli
     init_cli(app)

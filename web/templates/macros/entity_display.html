@@ -32,21 +32,65 @@
 {%- endif -%}
 {% endmacro %}
 
-{# Main macro to render entity properties (filtered) #}
-{% macro render_entity_properties(entity) %}
+{# Render one IRI value as a link to the target individual's entity page
+   (falls back to a code span when no ontology context is available). #}
+{% macro render_iri_target(iri, ontology_name) %}
+{%- set frag = iri.split('#')[-1].split('/')[-1] -%}
+{%- set frag_label = frag.replace('_', ' ') | split_pascal -%}
+{%- if ontology_name -%}
+<a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=frag) }}" class="rel-target-link" title="{{ iri }}">{{ frag_label }}</a>
+{%- else -%}
+<code title="{{ iri }}">{{ frag_label }}</code>
+{%- endif -%}
+{% endmacro %}
+
+{# Main macro to render entity properties (filtered). Literal-valued triples are
+   shown as attributes (humanised "Label: value"); IRI-valued triples are object
+   properties, shown under a Relationships divider with the bare camelCase
+   predicate and the target rendered as a clickable link. #}
+{% macro render_entity_properties(entity, ontology_name=none) %}
 {% if entity.properties %}
 {% set props = entity.properties if entity.properties is mapping else {} %}
 {% if props|length > 0 %}
+{% set ns = namespace(attrs=[], rels=[]) %}
+{% for key, value in props.items() %}
+    {# Hide provenance/internal keys and the <concept>class key (restates the
+       class shown as the "instance of" link). #}
+    {% if value is not none and value != '' and key|lower not in HIDDEN_PROPERTY_KEYS and not (key|lower).endswith('class') %}
+    {% set is_iri = (value.startswith('http://') or value.startswith('https://')) if value is string
+        else ((value[0] is string and (value[0].startswith('http://') or value[0].startswith('https://'))) if (value is iterable and value is not string and value|length > 0) else false) %}
+    {% if is_iri %}{% set _ = ns.rels.append((key, value)) %}{% else %}{% set _ = ns.attrs.append((key, value)) %}{% endif %}
+    {% endif %}
+{% endfor %}
+
+{% if ns.attrs %}
 <div class="entity-properties mt-2">
-    {% for key, value in props.items() %}
-    {% if value is not none and value != '' and key|lower not in HIDDEN_PROPERTY_KEYS %}
+    {% for key, value in ns.attrs %}
     <div class="property-row">
-        <span class="property-key">{{ key|format_key }}:</span>
+        <span class="property-key">{{ key|pretty_key }}:</span>
         <span class="property-value">{{ format_value(value) }}</span>
     </div>
-    {% endif %}
     {% endfor %}
 </div>
+{% endif %}
+
+{% if ns.rels %}
+<div class="entity-relationships mt-2">
+    <div class="relationships-label">Relationships</div>
+    {% for key, value in ns.rels %}
+    <div class="relationship-row">
+        <i class="bi bi-arrow-right-short"></i><span class="rel-predicate" title="{{ key|qualify_pred }}">{{ key }}</span>
+        <span class="rel-targets">
+            {%- if value is string -%}
+            {{ render_iri_target(value, ontology_name) }}
+            {%- else -%}
+            {%- for v in value -%}{{ render_iri_target(v, ontology_name) }}{% if not loop.last %}, {% endif %}{%- endfor -%}
+            {%- endif -%}
+        </span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 {% endif %}
 {% endif %}
 {% endmacro %}
