@@ -165,6 +165,65 @@ def validate_conformance_file(ttl_path: str, domain: str = "engineering") -> Con
     return validate_conformance_content(p.name, content, domain=domain)
 
 
+# --- D1: repair-oriented report (grouped by signature + NL gloss) -----------------
+# The Phase-D loop's `validate_concept` evaluator. Groups violations by shape so the
+# repair tier handles an equivalence class once (the xpSHACL pattern), and attaches a
+# concise NL gloss (the repair INSTRUCTION) instead of raw Turtle. Domain-general for the
+# core shapes; per-domain shapes can extend SHAPE_GLOSS via their own entry.
+SHAPE_GLOSS: Dict[str, str] = {
+    "DisjointCoreCategoryShape": (
+        "Entity is typed to two disjoint core categories. Re-type it to the single category "
+        "its definition + properties support, or drop the conflicting type/property "
+        "(e.g. an obligation-domain property on a Principle-typed entity)."
+    ),
+    "NoOwlNothingShape": (
+        "Entity is unsatisfiable (inferred owl:Nothing). Resolve the underlying disjointness "
+        "or cardinality clash before committing."
+    ),
+}
+
+
+def conformance_report_content(
+    name: str, case_content: str, domain: str = "engineering",
+) -> Dict[str, Any]:
+    """JSON-serializable, repair-oriented report for the validate-repair loop.
+
+    {name, conforms, n_violations, groups:[{shape, gloss, focus_nodes:[...], count,
+     sample_message}], error?}
+    """
+    r = validate_conformance_content(name, case_content, domain=domain)
+    if r.error:
+        return {"name": name, "conforms": False, "error": r.error, "n_violations": 0, "groups": []}
+    groups: Dict[str, Dict[str, Any]] = {}
+    for v in r.violations:
+        sig = v.source_shape or "UnknownShape"
+        g = groups.setdefault(sig, {
+            "shape": sig,
+            "gloss": SHAPE_GLOSS.get(sig, (v.message or "")[:160]),
+            "focus_nodes": [],
+            "count": 0,
+            "sample_message": v.message,
+        })
+        if v.focus_node and v.focus_node not in g["focus_nodes"]:
+            g["focus_nodes"].append(v.focus_node)
+        g["count"] += 1
+    return {
+        "name": name,
+        "conforms": bool(r.conforms),
+        "n_violations": len(r.violations),
+        "groups": list(groups.values()),
+    }
+
+
+def conformance_report_case(case_name: str, domain: str = "engineering") -> Dict[str, Any]:
+    try:
+        content = _fetch_case_content_from_db(case_name)
+    except Exception as exc:  # noqa: BLE001
+        return {"name": case_name, "conforms": False, "error": f"db-fetch-failed: {exc}",
+                "n_violations": 0, "groups": []}
+    return conformance_report_content(case_name, content, domain=domain)
+
+
 def main():
     args = sys.argv[1:]
     if not args:

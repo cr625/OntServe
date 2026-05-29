@@ -499,6 +499,30 @@ async def validate_bfo_compliance(ontology_name: str, ctx: Context) -> str:
     return json.dumps(result)
 
 
+@mcp.tool
+async def validate_conformance(ontology_name: str, ctx: Context) -> str:
+    """SHACL + OWL-RL conformance check of a STORED case ontology against the core
+    conformance shapes (merged with core+intermediate, OWL-RL closure applied). Returns
+    a repair-oriented report: {conforms, n_violations, groups:[{shape, gloss, focus_nodes,
+    count}]}. Each group is an equivalence class of violations with an NL repair gloss.
+    Complements check_consistency (Pellet): this gives per-node, actionable violations."""
+    from validation import conformance as cf
+    result = await asyncio.to_thread(cf.conformance_report_case, ontology_name)
+    return json.dumps(result)
+
+
+@mcp.tool
+async def validate_conformance_ttl(ttl_content: str, ctx: Context) -> str:
+    """SHACL + OWL-RL conformance check of AD-HOC case TTL content (the extraction-time
+    path: validate a candidate graph from temporary_rdf_storage BEFORE commit, so the
+    extractor can repair in-loop). Same repair-oriented report as validate_conformance.
+    Pass the candidate case TTL as a string; it is merged with core+intermediate and
+    OWL-RL-expanded before the shapes run."""
+    from validation import conformance as cf
+    result = await asyncio.to_thread(cf.conformance_report_content, "candidate", ttl_content)
+    return json.dumps(result)
+
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
