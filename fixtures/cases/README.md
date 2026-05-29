@@ -13,7 +13,7 @@ indices, not NSPE case numbers. Internal case 86 is NSPE BER Case 04-8
 
 | File | Purpose |
 |---|---|
-| `case_086.ttl` | Current Figure 1 worked example: NSPE BER Case 04-8 (2004). Three typed individuals plus the three defeasibility edges the paper draws. Uses abbreviated local names from the figure caption. A confidentiality obligation (NSPE II.1.c) competes with the paramount public-welfare obligation (NSPE I.1, reported via II.1.f); under the client's unpermitted wetland-fill violation the confidentiality obligation is defeasible and the public-welfare obligation prevails. |
+| `case_086.ttl` | Current Figure 1 worked example: NSPE BER Case 04-8 (2004). Three typed individuals plus the three defeasibility edges the paper draws. Uses abbreviated local names from the figure caption. A confidentiality obligation (NSPE II.1.c) competes with the paramount public-welfare obligation (NSPE I.1, reported via II.1.a); under the client's unpermitted wetland-fill violation the confidentiality obligation is defeasible and the public-welfare obligation prevails. |
 | `case_072.ttl` | Superseded earlier worked example: NSPE BER Case 76-4 (1976). Retained for provenance. It states the same faithful-agent-versus-public-welfare conflict but under the retired pre-1979 "Section 1 / Section 2(a)" numbering. NSPE marks pre-1980 opinions as historical only, so the camera-ready figure was moved to the current-Code Case 04-8 above. |
 | `malformed_disjoint.ttl` | Deliberately incorrect fixture used by `tests/integration/test_disjointness_enforcement.py` to verify that the `owl:AllDisjointClasses` assertion in `proethica-core.ttl` produces an inconsistency when a single individual is typed as both a `State` and an `Action`. |
 

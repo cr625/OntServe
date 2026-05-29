@@ -25,7 +25,7 @@
 # pre-1979 "Section 1 / Section 2(a)" numbering. 04-8 states the same
 # conflict, a client-loyalty duty against the paramount public-welfare
 # duty, under the current NSPE Code of Ethics, and cites the provisions
-# explicitly (I.1, II.1.c, II.1.f, II.4).
+# explicitly (I.1, II.1.a, II.1.c, II.1.f, II.4, III.1, III.4).
 #
 # The live Case 86 ontology on https://ontserve.ontorealm.net uses
 # longer, descriptive local names produced by the LLM extraction client
@@ -65,7 +65,9 @@ case86:State_WetlandViolation a proeth:UnpermittedWetlandFillViolationState ,
     proeth:sourcetext "the client has installed a substantial amount of fill material ... without any permits, variances, or permissions ... a substantial violation of the federal and state laws and regulations" .
 
 # ---------------------------------------------------------------------------
-# Obligation A: derived from NSPE II.1.c (confidentiality / client loyalty)
+# Obligation A: derived from NSPE II.1.c / III.4 (confidentiality / client
+# loyalty; III.4 is the precise former-client business-affairs provision,
+# and the Board cites both)
 # ---------------------------------------------------------------------------
 
 case86:Obl_Confidentiality a proeth:ConfidentialityObligation ,
@@ -76,7 +78,11 @@ case86:Obl_Confidentiality a proeth:ConfidentialityObligation ,
 
 # ---------------------------------------------------------------------------
 # Obligation B: derived from NSPE I.1 (paramount public-welfare duty),
-# discharged through the report-to-authority mechanism of II.1.f
+# discharged through the report-to-authority mechanism of II.1.a
+# ("notify ... such other authority as may be appropriate"). NSPE II.1.f,
+# also cited by the opinion, governs reporting alleged violations of *this
+# Code* (engineer misconduct) and is not the hook for a client's
+# environmental-law violation.
 # ---------------------------------------------------------------------------
 
 case86:Obl_PublicWelfare a proeth:SafetyObligation ,
