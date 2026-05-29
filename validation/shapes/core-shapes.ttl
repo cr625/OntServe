@@ -1,0 +1,68 @@
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix core: <http://proethica.org/ontology/core#> .
+@prefix pcsh: <http://proethica.org/shapes/core#> .
+
+# ProEthica core conformance shapes (domain-GENERAL; shared by every domain).
+# Run with pyshacl inference='owlrl' so the OWL-RL closure (subClassOf* transitivity
+# scm-sco + rdfs:domain inference prp-dom) is materialized BEFORE validation; then the
+# disjoint-core-category check below catches the F2-class clash (an individual that
+# reaches two of the nine mutually-disjoint core categories, e.g. via a type chain to
+# Principle AND an Obligation-domain property) with an actionable per-node report --
+# which the raw OWL-DL "inconsistent" verdict cannot give. Per-domain shapes layer on
+# top of this file (see config/domains/<domain>.yaml shapes_files).
+
+pcsh: a owl:Ontology ;
+    rdfs:label "ProEthica core conformance shapes" ;
+    sh:declare [ sh:prefix "core" ; sh:namespace "http://proethica.org/ontology/core#"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "owl"  ; sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "rdf"  ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] .
+
+# RULE 1: no individual may resolve to two distinct disjoint core categories.
+# This is the structural projection of the nine-way owl:AllDisjointClasses. After the
+# OWL-RL closure, an offending individual carries rdf:type for two core classes directly.
+pcsh:DisjointCoreCategoryShape
+    a sh:NodeShape ;
+    sh:targetClass owl:NamedIndividual ;
+    rdfs:label "Single core category per individual" ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Individual reaches two disjoint core categories ({?c1} and {?c2}); violates the nine-way AllDisjointClasses. Re-type to one category or drop the conflicting property/type." ;
+        sh:severity sh:Violation ;
+        sh:prefixes pcsh: ;
+        sh:select """
+            SELECT $this ?c1 ?c2
+            WHERE {
+                $this rdf:type ?c1 .
+                $this rdf:type ?c2 .
+                FILTER(?c1 != ?c2)
+                FILTER(?c1 IN (core:Role, core:Principle, core:Obligation, core:State,
+                               core:Resource, core:Action, core:Event, core:Capability,
+                               core:Constraint))
+                FILTER(?c2 IN (core:Role, core:Principle, core:Obligation, core:State,
+                               core:Resource, core:Action, core:Event, core:Capability,
+                               core:Constraint))
+                FILTER(STR(?c1) < STR(?c2))
+            }
+        """ ;
+    ] .
+
+# RULE 2: belt-and-suspenders -- no individual may be inferred as owl:Nothing (a hard
+# clash some OWL-RL engines materialize directly).
+pcsh:NoOwlNothingShape
+    a sh:NodeShape ;
+    sh:targetClass owl:NamedIndividual ;
+    rdfs:label "No individual typed owl:Nothing" ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Individual is inferred to be owl:Nothing (an unsatisfiable / hard clash)." ;
+        sh:severity sh:Violation ;
+        sh:prefixes pcsh: ;
+        sh:select """
+            SELECT $this
+            WHERE { $this rdf:type owl:Nothing . }
+        """ ;
+    ] .
