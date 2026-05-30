@@ -638,6 +638,21 @@ proeth:conflictsWith a owl:ObjectProperty ;
 # Keep ProfessionalRole and ParticipantRole disjoint to avoid mixing semantics
 :ProfessionalRole owl:disjointWith :ParticipantRole .
 
+# Relational axis head. The duty-relationship archetypes below classify the
+# relationship a role establishes (provider-client, professional-peer, employer),
+# orthogonal to the occupational axis (ProfessionalRole/ParticipantRole). A
+# relational archetype spans both occupational sides (a provider-client relation
+# has a professional provider and a participant client), so it sits under
+# RelationalRole, NOT under either side of the occupational disjointness;
+# otherwise composing it with a Participant-side occupational archetype (e.g.
+# ClientRole) would be unsatisfiable.
+:RelationalRole rdf:type owl:Class ;
+    rdf:type :EntityType ;
+    rdfs:subClassOf proeth-core:Role ;
+    rdfs:label "Relational Role"@en ;
+    :archetypeAxis "relational" ;
+    rdfs:comment "Head of the relational archetype axis: the duty-relationship a role establishes. Orthogonal to the occupational axis, so a relational archetype composes with any occupational archetype without crossing the ProfessionalRole/ParticipantRole disjointness."@en .
+
 #################################################################
 # Professional Role Categories from Chapter 2.2.1 Literature
 #################################################################
@@ -645,28 +660,28 @@ proeth:conflictsWith a owl:ObjectProperty ;
 # Based on Kong et al. (2020) empirical analysis and Dennis et al. (2016) role-based filtering
 
 :ProviderClientRole rdf:type owl:Class ;
-    rdfs:subClassOf :ProfessionalRole ;
+    rdfs:subClassOf :RelationalRole ;
     rdfs:label "Provider-Client Role" ;
     skos:definition "Professional role defining relationships between service providers and their clients, creating duties of competent service delivery, confidentiality, and client welfare per Kong et al. (2020) identity role analysis." ;
     rdfs:comment "Service delivery relationship with duties of competence and care" ;
     dcterms:references <https://doi.org/10.1007/s10676-020-09524-4> . # Kong et al. 2020
 
 :ProfessionalPeerRole rdf:type owl:Class ;
-    rdfs:subClassOf :ProfessionalRole ;
+    rdfs:subClassOf :RelationalRole ;
     rdfs:label "Professional Peer Role" ;
     skos:definition "Professional role defining relationships between practitioners within the same professional domain, creating obligations for peer review, professional development, knowledge sharing, and standard maintenance per Kong et al. (2020)." ;
     rdfs:comment "Collegial relationship with mentoring and review obligations" ;
     dcterms:references <https://doi.org/10.1007/s10676-020-09524-4> . # Kong et al. 2020
 
 :EmployerRelationshipRole rdf:type owl:Class ;
-    rdfs:subClassOf :ProfessionalRole ;
+    rdfs:subClassOf :RelationalRole ;
     rdfs:label "Employer Relationship Role" ;
     skos:definition "Professional role defining relationships between professionals and their employing organizations, creating duties of loyalty, competent performance, and honest reporting while maintaining professional independence per Wendel (2024) moral complexity framework." ;
     rdfs:comment "Organizational relationship balancing loyalty and independence" ;
     dcterms:references <https://doi.org/10.1093/oso/9780198863335.001.0001> . # Wendel 2024
 
 :PublicResponsibilityRole rdf:type owl:Class ;
-    rdfs:subClassOf :ProfessionalRole ;
+    rdfs:subClassOf :RelationalRole ;
     rdfs:label "Public Responsibility Role" ;
     skos:definition "Professional role defining obligations to the broader public and society, creating duties of public welfare protection that can override client or employer interests per Thornton et al. (2017) collective morality framework." ;
     rdfs:comment "Societal obligation that can override other professional duties" ;
