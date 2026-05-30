@@ -1,0 +1,163 @@
+@prefix ifcrole: <http://proethica.org/vocab/ifc-roles#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<http://proethica.org/vocab/ifc-roles> a owl:Ontology ;
+    rdfs:label "IFC Actor Roles (crosswalk vocabulary)" ;
+    rdfs:comment "A locally-held crosswalk vocabulary of the standard roles parties play on a building/infrastructure project. The terms are NOT invented here: they are the IfcRoleEnum values from IFC (Industry Foundation Classes), the open ISO 16739-1 data standard published by buildingSMART for the AEC industry (AEC = Architecture, Engineering and Construction). Held as labels + definitions + provenance ONLY (no axioms) so ProEthica role archetypes can map to these authoritative role terms (via skos:exactMatch) without importing the full IFC schema. The IRI local name is a readable form; the verbatim IfcRoleEnum token is carried on skos:notation. Each term is a skos:Concept in the 'IFC Actor Roles' scheme below; for rendering it is also a named individual of IfcActorRoleValue." ;
+    dcterms:source <https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/IfcRoleEnum.htm> ;
+    owl:versionInfo "IFC4x3 IfcRoleEnum; stub retrieved 2026-05-29" .
+
+# The controlled-vocabulary scheme (the standard SKOS signal that these are external, borrowed terms).
+ifcrole:IfcActorRolesScheme a skos:ConceptScheme ;
+    rdfs:label "IFC Actor Roles (IfcRoleEnum)" ;
+    skos:definition "The enumeration of roles an actor can play on an AEC (Architecture, Engineering and Construction) project, defined by IFC (Industry Foundation Classes), the ISO 16739-1 openBIM data standard from buildingSMART. Native IFC stores these as IfcActorRole.Role enumeration values, not as classes." ;
+    dcterms:source <https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/IfcRoleEnum.htm> ;
+    rdfs:seeAlso <https://en.wikipedia.org/wiki/Industry_Foundation_Classes> .
+
+ifcrole:IfcActorRoleValue a owl:Class ;
+    rdfs:label "IFC Actor Role (IfcRoleEnum value)" ;
+    rdfs:comment "A role an actor plays on a building/infrastructure project, as enumerated by IFC for the AEC (Architecture, Engineering and Construction) industry. IFC (Industry Foundation Classes) is the ISO 16739-1 openBIM standard from buildingSMART. In native IFC this is a value of the IfcActorRole.Role attribute (IfcRoleEnum), i.e. an enumeration value, not a class. Held locally as a crosswalk target; see the 'IFC Actor Roles' scheme for the full provenance." ;
+    rdfs:seeAlso <https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/IfcActorRole.htm> .
+
+ifcrole:Engineer a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "ENGINEER" ;
+    rdfs:label "Engineer" ;
+    skos:definition "A professional who applies scientific and mathematical principles to design, analysis, and problem-solving on a project (generic engineering role)." ;
+    dcterms:source <https://ifc43-docs.standards.buildingsmart.org/IFC/RELEASE/IFC4x3/HTML/lexical/IfcRoleEnum.htm> .
+
+ifcrole:CivilEngineer a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "CIVILENGINEER" ;
+    rdfs:label "Civil Engineer" ;
+    skos:definition "An engineer specializing in the design and construction of infrastructure and the built environment (roads, structures, water, earthworks)." .
+
+ifcrole:StructuralEngineer a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "STRUCTURALENGINEER" ;
+    rdfs:label "Structural Engineer" ;
+    skos:definition "An engineer specializing in the load-bearing structure and structural integrity of a facility." .
+
+ifcrole:MechanicalEngineer a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "MECHANICALENGINEER" ;
+    rdfs:label "Mechanical Engineer" ;
+    skos:definition "An engineer specializing in mechanical systems (HVAC, plumbing, mechanical plant)." .
+
+ifcrole:ElectricalEngineer a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "ELECTRICALENGINEER" ;
+    rdfs:label "Electrical Engineer" ;
+    skos:definition "An engineer specializing in electrical systems and power distribution." .
+
+ifcrole:CostEngineer a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "COSTENGINEER" ;
+    rdfs:label "Cost Engineer" ;
+    skos:definition "An engineer specializing in cost estimation, control, and quantity surveying." .
+
+ifcrole:CommissioningEngineer a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "COMMISSIONINGENGINEER" ;
+    rdfs:label "Commissioning Engineer" ;
+    skos:definition "An engineer responsible for verifying that installed systems perform to design intent (commissioning)." .
+
+ifcrole:Architect a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "ARCHITECT" ;
+    rdfs:label "Architect" ;
+    skos:definition "A professional responsible for the design of buildings and oversight of their construction." .
+
+ifcrole:Consultant a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "CONSULTANT" ;
+    rdfs:label "Consultant" ;
+    skos:definition "A professional engaged to provide expert advice on a specific aspect of a project." .
+
+ifcrole:ProjectManager a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "PROJECTMANAGER" ;
+    rdfs:label "Project Manager" ;
+    skos:definition "The party responsible for planning, coordinating, and delivering a project." .
+
+ifcrole:ConstructionManager a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "CONSTRUCTIONMANAGER" ;
+    rdfs:label "Construction Manager" ;
+    skos:definition "The party managing the construction phase on behalf of the owner." .
+
+ifcrole:FieldConstructionManager a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "FIELDCONSTRUCTIONMANAGER" ;
+    rdfs:label "Field Construction Manager" ;
+    skos:definition "The on-site manager of construction operations." .
+
+ifcrole:FacilitiesManager a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "FACILITIESMANAGER" ;
+    rdfs:label "Facilities Manager" ;
+    skos:definition "The party responsible for operating and maintaining a facility in use." .
+
+ifcrole:BuildingOperator a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "BUILDINGOPERATOR" ;
+    rdfs:label "Building Operator" ;
+    skos:definition "The party operating a building during its occupancy phase." .
+
+ifcrole:Client a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "CLIENT" ;
+    rdfs:label "Client" ;
+    skos:definition "The party that commissions and is the primary customer for the project work." .
+
+ifcrole:Owner a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "OWNER" ;
+    rdfs:label "Owner" ;
+    skos:definition "The party that owns the asset or project." .
+
+ifcrole:BuildingOwner a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "BUILDINGOWNER" ;
+    rdfs:label "Building Owner" ;
+    skos:definition "The party that owns the building." .
+
+ifcrole:Contractor a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "CONTRACTOR" ;
+    rdfs:label "Contractor" ;
+    skos:definition "The party contracted to carry out construction work." .
+
+ifcrole:Subcontractor a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "SUBCONTRACTOR" ;
+    rdfs:label "Subcontractor" ;
+    skos:definition "A party contracted by the contractor to perform a portion of the work." .
+
+ifcrole:Supplier a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "SUPPLIER" ;
+    rdfs:label "Supplier" ;
+    skos:definition "A party that supplies materials, products, or equipment to the project." .
+
+ifcrole:Manufacturer a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "MANUFACTURER" ;
+    rdfs:label "Manufacturer" ;
+    skos:definition "A party that manufactures products or components used in the project." .
+
+ifcrole:Reseller a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "RESELLER" ;
+    rdfs:label "Reseller" ;
+    skos:definition "A party that resells products or equipment to the project." .
+
+ifcrole:UserDefined a owl:NamedIndividual, ifcrole:IfcActorRoleValue, skos:Concept ;
+    skos:inScheme ifcrole:IfcActorRolesScheme ;
+    skos:notation "USERDEFINED" ;
+    rdfs:label "User Defined" ;
+    skos:definition "An escape-hatch value for a role not covered by the enumeration (the role text is given separately). Precedent for a catch-all archetype." .

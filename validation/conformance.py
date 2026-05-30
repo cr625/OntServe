@@ -12,7 +12,7 @@ with the conceptCategory subClassOf fallback and external owl:imports stripped),
 pyshacl with inference='owlrl' so the OWL-RL closure (subClassOf* transitivity + rdfs:domain
 inference + disjointness) is materialized before the shapes run. The core shapes
 (validation/shapes/core-shapes.ttl) then flag any individual reaching two disjoint core
-categories -- the F2-class clash -- with a per-node message.
+categories, with a per-node message. This is the F2-class clash.
 
 Domain portability: core-shapes.ttl is domain-general; a per-domain
 validation/shapes/<domain>-shapes.ttl (or the list in config/domains/<domain>.yaml,

@@ -212,6 +212,27 @@
                 </div>
                 {% endif %}
 
+                <!-- Crosswalk mappings & provenance (skos:exactMatch/closeMatch, seeAlso, source) -->
+                {% if semantic_links %}
+                <div class="card mb-3">
+                    <div class="card-header"><h6 class="mb-0"><i class="bi bi-link-45deg"></i> Mappings &amp; provenance</h6></div>
+                    <div class="card-body">
+                        {% for link in semantic_links %}
+                        <div class="property-row">
+                            <div class="property-key">{{ link.relation }}</div>
+                            <div class="property-value">
+                                {% if link.external %}
+                                <a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.label }} <i class="bi bi-box-arrow-up-right small"></i></a>
+                                {% else %}
+                                <a href="{{ link.url }}">{{ link.label }}</a>{% if link.note %} <span class="small text-muted">({{ link.note }})</span>{% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Properties -->
                 {% set has_structural = entity.parent_uri or entity.domain or entity.range or prop_groups.core or prop_groups.relationships %}
                 {% if has_structural %}
@@ -221,7 +242,7 @@
                         {% if entity.parent_uri %}
                         <div class="property-row">
                             <div class="property-key">
-                                {% if entity.entity_type == 'class' %}Subclass of{% elif entity.entity_type == 'individual' %}Instance of{% else %}Parent{% endif %}
+                                {% if entity.entity_type == 'class' %}Subclass of{% elif entity.entity_type in ['individual', 'concept'] %}Instance of{% else %}Parent{% endif %}
                             </div>
                             <div class="property-value">
                                 <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.parent_uri.split('#')[-1] if '#' in entity.parent_uri else entity.parent_uri.split('/')[-1]) }}">
@@ -326,6 +347,23 @@
                 </div>
                 {% endif %}
 
+                <!-- Used in cases (computed live from individuals' rdf:type) -->
+                {% if using_cases %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0">Used in cases <span class="badge bg-secondary ms-1">{{ using_cases|length }}</span></h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted mb-2">Case ontologies that instantiate this class. Computed from each individual's type, so the list stays current as cases are extracted. The originating case is shown under Extraction details.</p>
+                        {% for c in using_cases %}
+                        <a href="{{ c.url }}" class="badge bg-light text-dark border text-decoration-none me-1 mb-1" title="{{ c.name }}">
+                            {% if c.num is not none %}Case {{ c.num }}{% else %}{{ c.name }}{% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- TTL representation -->
                 <div class="card mb-3">
                     <div class="card-header">
@@ -421,11 +459,11 @@
             <div class="card mb-3">
                 <div class="card-header"><h6 class="mb-0">Formats</h6></div>
                 <div class="card-body">
-                    <a href="/resolve?uri={{ entity.uri }}" class="btn btn-sm btn-outline-secondary me-1 mb-1">
+                    <a href="/resolve?uri={{ entity.uri | urlencode }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary me-1 mb-1">
                         <i class="bi bi-file-code"></i> TTL
                     </a>
-                    <a href="/resolve?uri={{ entity.uri }}" class="btn btn-sm btn-outline-secondary me-1 mb-1"
-                       onclick="event.preventDefault(); fetch(this.href, {headers:{'Accept':'application/json'}}).then(r=>r.json()).then(d=>{const w=window.open('','_blank');w.document.write('<pre>'+JSON.stringify(d,null,2)+'</pre>')})">
+                    <a href="/resolve?uri={{ entity.uri | urlencode }}" class="btn btn-sm btn-outline-secondary me-1 mb-1"
+                       onclick="event.preventDefault(); fetch(this.href, {headers:{'Accept':'application/json'}}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(d=>{const w=window.open('','_blank');w.document.write('<pre>'+JSON.stringify(d,null,2)+'</pre>');w.document.close()}).catch(e=>alert('Could not load JSON: '+e.message))">
                         <i class="bi bi-braces"></i> JSON
                     </a>
                 </div>

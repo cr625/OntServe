@@ -78,3 +78,60 @@ def test_ambiguous_clash_defers_not_loops_forever():
     assert r.conforms is False
     assert "no-fix-available" in r.reason or "no-progress" in r.reason
     assert len(r.rounds) <= 4  # terminated, did not spin
+
+
+# --- Phase D3: LLM repair tier (mock model, no API) -------------------------
+
+def test_llm_tier_repairs_pure_type_chain_clash():
+    """A clash between TWO type chains with NO disjoint-domain property: Tier-0 has no
+    authoritative signal (len(prop_cats) != 1) and defers; the LLM tier (here a mock that
+    chooses 'Obligation') resolves it, and the symbolic gate confirms conformance."""
+    from llm_repair import make_llm_repair
+
+    content = _HDR + """
+    case:FooPrinciple a owl:Class ; rdfs:subClassOf core:Principle .
+    case:BarObligation a owl:Class ; rdfs:subClassOf core:Obligation .
+    case:Ind2 a owl:NamedIndividual ; a case:FooPrinciple ; a case:BarObligation ;
+        int:conceptCategory "Obligation" .
+    """
+    calls = []
+
+    def fake_call_model(model, system, user):
+        calls.append((model, user))
+        return '{"category": "Obligation", "reason": "carries obligation semantics"}'
+
+    # Tier-0 alone cannot fix it (no property-domain signal).
+    r0 = repair_loop(content, max_rounds=3)
+    assert r0.conforms is False, (r0.reason, r0.rounds)
+
+    # With the LLM tier injected, it conforms.
+    repair = make_llm_repair(call_model=fake_call_model)
+    r1 = repair_loop(content, max_rounds=3, llm_repair=repair)
+    assert r1.conforms is True, (r1.reason, r1.rounds)
+    assert r1.repairs_applied >= 1
+    assert calls and calls[0][0] == "claude-haiku-4-5"  # Tier 1 first
+
+
+def test_llm_tier_escalates_model_when_unresolved():
+    """If the model's first choice does not clear the clash, the next round escalates to
+    the next model in the ladder (Haiku -> Sonnet)."""
+    from llm_repair import make_llm_repair
+
+    content = _HDR + """
+    case:FooPrinciple a owl:Class ; rdfs:subClassOf core:Principle .
+    case:BarObligation a owl:Class ; rdfs:subClassOf core:Obligation .
+    case:Ind3 a owl:NamedIndividual ; a case:FooPrinciple ; a case:BarObligation .
+    """
+    models_used = []
+
+    def fake_call_model(model, system, user):
+        models_used.append(model)
+        # First (Haiku) returns an INVALID category (no-op); escalate next round.
+        if model == "claude-haiku-4-5":
+            return '{"category": "NotACategory"}'
+        return '{"category": "Principle"}'
+
+    repair = make_llm_repair(call_model=fake_call_model)
+    r = repair_loop(content, max_rounds=4, llm_repair=repair)
+    assert r.conforms is True, (r.reason, r.rounds)
+    assert "claude-haiku-4-5" in models_used and "claude-sonnet-4-6" in models_used, models_used

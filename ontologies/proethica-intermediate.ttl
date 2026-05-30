@@ -11,6 +11,7 @@
 @prefix proeth: <http://proethica.org/ontology/intermediate#> .
 @prefix proeth-core: <http://proethica.org/ontology/core#> .
 @prefix proeth-cases: <http://proethica.org/ontology/cases#> .
+@prefix ifcrole: <http://proethica.org/vocab/ifc-roles#> .
 @prefix bfo: <http://purl.obolibrary.org/obo/> .
 @prefix time: <http://www.w3.org/2006/time#> .
 @base <http://proethica.org/ontology/intermediate> .
@@ -596,9 +597,11 @@ proeth:conflictsWith a owl:ObjectProperty ;
 # Engineering-specific role types
 :EngineerRole rdf:type owl:Class ;
     rdf:type :EntityType ;
-    rdfs:subClassOf proeth-core:Role ;
     rdfs:label "Engineer Role"@en ;
-    rdfs:comment "A professional role involving engineering practice and responsibilities"@en ;
+    rdfs:comment "A professional role involving engineering practice and responsibilities. Occupational archetype head for all engineer specializations and extracted engineer-role leaves."@en ;
+    skos:closeMatch ifcrole:Engineer ;
+    :archetypeAxis "occupational" ;
+    skos:altLabel "engineer"@en, "engineering"@en ;
     rdfs:subClassOf :ProfessionalRole .
 
 # Role specializations for classification of roles mentioned in guidelines and cases
@@ -1580,3 +1583,89 @@ proeth:requiresCapability a owl:ObjectProperty ;
 #   OPTIONAL { ?type rdfs:comment ?comment }
 # }
 # This will return: Role, Principle, Obligation, State, Resource, Action, Event, Capability
+
+#################################################################
+# Occupational role archetypes (2026-05-29)
+#################################################################
+# The OCCUPATIONAL axis of the role hierarchy. It says what kind of agent the role is.
+# This is distinct from the RELATIONAL axis above (ProviderClientRole, ProfessionalPeerRole,
+# and the rest), which says what duty-relationship the role creates. Extracted role leaves get
+# a primary occupational parent here. Where applicable they also get a cross-cutting relational
+# parent. The heads are seeded from IfcRoleEnum (ISO 16739) via SKOS crosswalk to the held
+# ifc-roles stub. They are NOT subclassed under IFC. IFC roles are enumeration values, not classes.
+# Engineer specializations and the obligation-bearing heads go under ProfessionalRole.
+# Non-obligation-bearing participant heads (Client, Owner, Public, and the rest) go under
+# ParticipantRole. That way they do not inherit the ProfessionalRole hasObligation restriction.
+# Spec: proethica/docs-internal/reextraction/role-archetype-spec.md.
+
+# archetypeAxis tags a role archetype's axis ("occupational" = what kind of agent;
+# "relational" = what duty-relationship). The extractor's occupational resolver loads the
+# classes tagged "occupational" and matches a role label against their rdfs:label +
+# skos:altLabel synonyms (longest match wins). The placement rules therefore live in the
+# ontology, per domain, not in code: a new domain ships its own archetype ontology with its
+# own altLabels and needs no resolver change.
+:archetypeAxis rdf:type owl:AnnotationProperty ;
+    rdfs:label "archetype axis"@en ;
+    rdfs:comment "Role-archetype axis marker: 'occupational' or 'relational'. Drives data-driven occupational placement; see the occupational resolver."@en .
+
+# Engineer specializations (under :EngineerRole, itself under :ProfessionalRole)
+:CivilEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Civil Engineer Role"@en ; skos:exactMatch ifcrole:CivilEngineer ;
+    :archetypeAxis "occupational" ;
+    rdfs:comment "Engineer specializing in infrastructure and the built environment."@en .
+:StructuralEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Structural Engineer Role"@en ; skos:exactMatch ifcrole:StructuralEngineer ;
+    :archetypeAxis "occupational" ;
+    rdfs:comment "Engineer specializing in load-bearing structure and structural integrity."@en .
+:MechanicalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Mechanical Engineer Role"@en ; skos:exactMatch ifcrole:MechanicalEngineer ;
+    :archetypeAxis "occupational" ;
+    rdfs:comment "Engineer specializing in mechanical systems."@en .
+:ElectricalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Electrical Engineer Role"@en ; skos:exactMatch ifcrole:ElectricalEngineer ;
+    :archetypeAxis "occupational" ;
+    rdfs:comment "Engineer specializing in electrical systems and power."@en .
+
+# Obligation-bearing occupational heads (under :ProfessionalRole)
+:ProjectManagerRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
+    rdfs:label "Project Manager Role"@en ; skos:exactMatch ifcrole:ProjectManager ;
+    :archetypeAxis "occupational" ; skos:altLabel "project manager"@en, "construction manager"@en, "program manager"@en ;
+    rdfs:comment "Party responsible for planning, coordinating, and delivering a project."@en .
+:ArchitectRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
+    rdfs:label "Architect Role"@en ; skos:exactMatch ifcrole:Architect ;
+    :archetypeAxis "occupational" ;
+    rdfs:comment "Professional responsible for building design and construction oversight."@en .
+:ConsultantRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
+    rdfs:label "Consultant Role"@en ; skos:exactMatch ifcrole:Consultant ;
+    :archetypeAxis "occupational" ;
+    rdfs:comment "Professional engaged for expert advice on a specific aspect of a project. Engineering consultants are classified under EngineerRole. This head covers non-engineering advisory roles."@en .
+:RegulatoryAuthorityRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
+    rdfs:label "Regulatory Authority Role"@en ;
+    :archetypeAxis "occupational" ; skos:altLabel "regulator"@en, "regulatory"@en, "authority"@en, "inspector"@en, "government"@en, "board of ethical"@en, "public official"@en, "public agency"@en ;
+    rdfs:comment "Code-enforcement officials, inspectors, boards, and government agencies acting in an oversight capacity. No IFC equivalent (IFC has no regulator role)."@en .
+
+# Non-obligation-bearing occupational heads (under :ParticipantRole, so no obligation restriction)
+:ClientRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
+    rdfs:label "Client Role"@en ; skos:exactMatch ifcrole:Client ;
+    :archetypeAxis "occupational" ;
+    rdfs:comment "Party that commissions the project work. This is the occupational archetype. The duty relationship is carried separately by :ProviderClientRole."@en .
+:OwnerRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
+    rdfs:label "Owner Role"@en ; skos:exactMatch ifcrole:Owner ; skos:closeMatch ifcrole:BuildingOwner ;
+    :archetypeAxis "occupational" ;
+    rdfs:comment "Party that owns the asset, project, or building."@en .
+:PublicRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
+    rdfs:label "Public Role"@en ;
+    :archetypeAxis "occupational" ; skos:altLabel "public"@en, "community"@en, "citizen"@en, "resident"@en, "neighbor"@en, "society"@en, "affected party"@en ;
+    rdfs:comment "The public, community members, and affected stakeholders. No IFC equivalent, since IFC has no public or society role. The professional duty side is :PublicResponsibilityRole."@en .
+:ContractorRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
+    rdfs:label "Contractor Role"@en ; skos:exactMatch ifcrole:Contractor ; skos:closeMatch ifcrole:Subcontractor ;
+    :archetypeAxis "occupational" ; skos:altLabel "contractor"@en, "subcontractor"@en ;
+    rdfs:comment "Party contracted to carry out construction work."@en .
+:SupplierRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
+    rdfs:label "Supplier Role"@en ; skos:exactMatch ifcrole:Supplier ; skos:closeMatch ifcrole:Manufacturer ;
+    :archetypeAxis "occupational" ; skos:altLabel "supplier"@en, "manufacturer"@en, "vendor"@en, "reseller"@en ;
+    rdfs:comment "Party that supplies materials, products, or equipment."@en .
+:EmployerRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
+    rdfs:label "Employer Role"@en ;
+    :archetypeAxis "occupational" ;
+    rdfs:comment "The employing organization as a participant. The duty relationship is carried separately by :EmployerRelationshipRole. No IFC equivalent."@en .

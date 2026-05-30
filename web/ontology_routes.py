@@ -230,7 +230,9 @@ def ontology_detail_or_uri_resolution(ontology_name):
     # Standard ontology view - group entities by type
     classes = [e for e in all_entities if e.entity_type == 'class']
     properties = [e for e in all_entities if e.entity_type == 'property']
-    individuals = [e for e in all_entities if e.entity_type == 'individual']
+    # SKOS concepts (borrowed vocabulary terms) are listed alongside individuals so
+    # they stay browsable; the entity page labels them "Concept", not "Individual".
+    individuals = [e for e in all_entities if e.entity_type in ('individual', 'concept')]
 
     entities = {
         'classes': classes,
@@ -305,13 +307,19 @@ def entity_detail(ontology_name, fragment):
     entity = _find_entity_by_fragment(ontology, fragment) if ontology else None
 
     # Cross-ontology fallback: entity may be in a related ontology
-    # (e.g., classes targeted to proethica-intermediate live in proethica-intermediate-extended)
+    # (e.g., classes targeted to proethica-intermediate live in proethica-intermediate-extended).
+    # A shared class exists both in the definitional ontology (intermediate / extended,
+    # which carries the provenance) and in each case ontology that uses it. Prefer the
+    # definitional copy so the page lands on the one holding firstDiscoveredInCase etc.
     if not entity:
-        cross_stmt = select(OntologyEntity).where(
-            OntologyEntity.uri.like(f'%#{fragment}')
-        ).limit(1)
-        entity = db.session.execute(cross_stmt).scalar_one_or_none()
-        if entity:
+        candidates = db.session.execute(
+            select(OntologyEntity).where(OntologyEntity.uri.like(f'%#{fragment}'))
+        ).scalars().all()
+        if candidates:
+            entity = next(
+                (e for e in candidates
+                 if e.ontology and not e.ontology.name.startswith('proethica-case-')),
+                candidates[0])
             ontology = entity.ontology
         else:
             from flask import abort
@@ -320,6 +328,8 @@ def entity_detail(ontology_name, fragment):
     children = _get_entity_children(ontology, entity)
     ttl_content = _generate_entity_ttl_display(entity, ontology)
     prop_groups = _categorize_entity_properties(entity)
+    semantic_links = _entity_semantic_links(entity, ontology)
+    using_cases = _entity_using_cases(entity)
 
     return render_template('entity_detail.html',
                          ontology=ontology,
@@ -328,6 +338,8 @@ def entity_detail(ontology_name, fragment):
                          children=children,
                          ttl_content=ttl_content,
                          prop_groups=prop_groups,
+                         semantic_links=semantic_links,
+                         using_cases=using_cases,
                          version_tag=None,
                          version_date=None)
 
@@ -367,6 +379,94 @@ def entity_detail_versioned(ontology_name, version_tag, fragment):
 
 
 import re as _re
+
+
+# SKOS / see-also / source crosswalk predicates surfaced on the entity page as links.
+_SEMANTIC_LINK_PREDS = [
+    ('http://www.w3.org/2004/02/skos/core#exactMatch', 'exactly matches'),
+    ('http://www.w3.org/2004/02/skos/core#closeMatch', 'closely matches'),
+    ('http://www.w3.org/2004/02/skos/core#broadMatch', 'broader match'),
+    ('http://www.w3.org/2004/02/skos/core#relatedMatch', 'related match'),
+    ('http://www.w3.org/2000/01/rdf-schema#seeAlso', 'see also'),
+    ('http://purl.org/dc/terms/source', 'source'),
+]
+
+
+def _entity_semantic_links(entity, ontology):
+    """Crosswalk links (SKOS mappings, seeAlso, source) for an entity, resolved at render
+    time from the ontology's current TTL. A target that is itself an OntServe entity becomes
+    an INTERNAL link. That is the navigable crosswalk. For example ClientRole links to the IFC
+    'Client' term, which carries the IFC and AEC provenance. An external IRI (buildingSMART,
+    Wikipedia) becomes an outbound link. This makes a borrowed term's origin reachable by
+    clicking, instead of an unexplained mapping that looks invented."""
+    try:
+        v = db.session.execute(
+            select(OntologyVersion).where(
+                OntologyVersion.ontology_id == ontology.id,
+                OntologyVersion.is_current.is_(True)
+            )
+        ).scalar_one_or_none()
+        if not v or not v.content:
+            return []
+        g = rdflib.Graph()
+        g.parse(data=v.content, format='turtle')
+    except Exception:
+        return []
+    subj = rdflib.URIRef(entity.uri)
+    links = []
+    seen = set()
+    for pred_uri, rel_label in _SEMANTIC_LINK_PREDS:
+        for o in g.objects(subj, rdflib.URIRef(pred_uri)):
+            tgt = str(o)
+            if (rel_label, tgt) in seen:
+                continue
+            seen.add((rel_label, tgt))
+            frag = tgt.rsplit('#', 1)[-1].rsplit('/', 1)[-1]
+            ent = db.session.execute(
+                select(OntologyEntity).where(OntologyEntity.uri == tgt)
+            ).scalar_one_or_none()
+            if ent is not None and ent.ontology is not None:
+                links.append({
+                    'relation': rel_label, 'label': ent.label or frag,
+                    'url': url_for('ontology.entity_detail',
+                                   ontology_name=ent.ontology.name, fragment=frag),
+                    'external': False, 'note': ent.ontology.name,
+                })
+            elif tgt.startswith('http'):
+                links.append({
+                    'relation': rel_label, 'label': frag or tgt,
+                    'url': tgt, 'external': True, 'note': None,
+                })
+    return links
+
+
+_CASE_ONTOLOGY_RE = _re.compile(r'^proethica-case-(\d+)$')
+
+
+def _entity_using_cases(entity):
+    """Case ontologies that instantiate this class. An individual's rdf:type is stored
+    as parent_uri, so this is a single equality scan. Computed live rather than
+    materialized on the class, so the list stays accurate as new cases are extracted;
+    the originating case is recorded separately as firstDiscoveredInCase."""
+    if not entity or entity.entity_type != 'class':
+        return []
+    names = db.session.execute(
+        select(Ontology.name)
+        .join(OntologyEntity, OntologyEntity.ontology_id == Ontology.id)
+        .where(OntologyEntity.parent_uri == entity.uri,
+               Ontology.name.like('proethica-case-%'))
+        .distinct()
+    ).scalars().all()
+    cases = []
+    for name in names:
+        m = _CASE_ONTOLOGY_RE.match(name)
+        cases.append({
+            'name': name,
+            'num': int(m.group(1)) if m else None,
+            'url': url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=name),
+        })
+    cases.sort(key=lambda c: (c['num'] is None, c['num'] or 0, c['name']))
+    return cases
 
 
 # Property keys that represent extraction/provenance metadata (sidebar)
@@ -533,7 +633,34 @@ def _get_entity_children(ontology, entity):
 
 
 def _generate_entity_ttl_display(entity, ontology):
-    """Generate TTL representation for display."""
+    """TTL for display. Render the entity's ACTUAL source triples from the ontology's
+    current version. This way skos:exactMatch, skos:inScheme, skos:Concept typing,
+    skos:definition, and dcterms:source all show, not just the few fields the entity
+    extractor stored. Fall back to the reconstruction if the source cannot be read."""
+    try:
+        v = db.session.execute(
+            select(OntologyVersion).where(
+                OntologyVersion.ontology_id == ontology.id,
+                OntologyVersion.is_current.is_(True)
+            )
+        ).scalar_one_or_none()
+        if v and v.content:
+            g = rdflib.Graph()
+            g.parse(data=v.content, format='turtle')
+            subj = rdflib.URIRef(entity.uri)
+            sub = rdflib.Graph()
+            for prefix, ns in g.namespaces():
+                sub.bind(prefix, ns)
+            for p, o in g.predicate_objects(subj):
+                sub.add((subj, p, o))
+                # Pull one level of blank-node closure so owl:Restriction nodes render.
+                if isinstance(o, rdflib.BNode):
+                    for p2, o2 in g.predicate_objects(o):
+                        sub.add((o, p2, o2))
+            if len(sub):
+                return sub.serialize(format='turtle')
+    except Exception:
+        pass
     from web.rdf_helpers import generate_entity_ttl
     return generate_entity_ttl(entity, ontology)
 

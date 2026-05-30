@@ -63,3 +63,40 @@ def test_clean_single_category_conforms():
     r = validate_conformance_content("synthetic-clean", content)
     assert r.error is None, r.error
     assert r.conforms is True, [(v.source_shape, v.focus_node, v.message) for v in r.violations]
+
+
+# --- engineering-shapes.ttl: RoleArchetypeShape -----------------------------
+
+def test_role_archetype_shape_flags_unmapped_tail():
+    """A role typed straight to core:Role (no occupational archetype) is flagged
+    as a WARNING by the engineering RoleArchetypeShape; it does not fail the gate."""
+    content = _HDR + """
+    case:FreshRole a owl:Class ; rdfs:subClassOf core:Role .
+    case:UnmappedTailRole a owl:NamedIndividual, case:FreshRole ;
+        int:conceptCategory "Role" .
+    """
+    r = validate_conformance_content("synthetic-role-tail", content, domain="engineering")
+    assert r.error is None, r.error
+    warns = [v for v in r.violations if v.source_shape == "RoleArchetypeShape"]
+    assert any("UnmappedTailRole" in v.focus_node for v in warns), \
+        [(v.source_shape, v.severity, v.focus_node) for v in r.violations]
+    assert all(v.severity == "Warning" for v in warns), warns
+    # A Warning must not flip conformance to False.
+    assert r.conforms is True, [(v.source_shape, v.severity, v.focus_node) for v in r.violations]
+
+
+def test_role_archetype_shape_passes_archetyped_role():
+    """A role facet typed through an occupational archetype (EngineerRole) and an
+    Agent (core:Agent, not core:Role) are both left unflagged."""
+    content = _HDR + """
+    case:EngineerADesignEngineer a owl:NamedIndividual, int:EngineerRole ;
+        int:conceptCategory "Role" .
+    case:Agent_EngineerA a owl:NamedIndividual, core:Agent ;
+        core:hasRole case:EngineerADesignEngineer .
+    """
+    r = validate_conformance_content("synthetic-role-archetyped", content, domain="engineering")
+    assert r.error is None, r.error
+    bad = [v for v in r.violations
+           if v.source_shape == "RoleArchetypeShape"
+           and ("EngineerADesignEngineer" in v.focus_node or "Agent_EngineerA" in v.focus_node)]
+    assert not bad, [(v.severity, v.focus_node) for v in bad]

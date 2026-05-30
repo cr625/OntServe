@@ -3,9 +3,9 @@
 Phase D spine: the validate-repair LOOP + Tier-0 deterministic repairs.
 
 Anthropic evaluator-optimizer workflow with a SYMBOLIC evaluator (conformance.py /
-SHACL+OWL-RL). Implemented as a plain while-loop -- the research-recommended minimum;
-a LangGraph wrapper (for per-case repair traces/checkpointing) is an optional later
-refinement, not needed for the fixed control flow.
+SHACL+OWL-RL). Implemented as a plain while-loop. That is the research-recommended
+minimum. A LangGraph wrapper (for per-case repair traces/checkpointing) is an optional
+later refinement, not needed for the fixed control flow.
 
 Tiering is by VIOLATION TYPE. This module is TIER 0: deterministic, no-LLM repairs keyed
 by violation shape. The LLM tiers (Haiku -> Sonnet -> Opus) plug in via the `llm_repair`
@@ -18,9 +18,9 @@ violation set does not strictly shrink (the oscillation/no-progress guard).
 
 Tier-0 DisjointCoreCategoryShape repair: an individual reaches two disjoint core categories.
 Defer to the PROPERTY-DOMAIN-implied category (a curated, authoritative signal in
-core+intermediate) over a type chain to an accumulated extended class -- the same authority
-rule the matcher gate applies at the source, here applied post-hoc. Coarse by design (re-types
-to the core category); the LLM tier refines the specific class choice.
+core+intermediate) over a type chain to an accumulated extended class. This is the same
+authority rule the matcher gate applies at the source, here applied post-hoc. Coarse by
+design (re-types to the core category); the LLM tier refines the specific class choice.
 
 Usage (library):
     from conformance_loop import repair_loop
@@ -102,7 +102,7 @@ def build_ontology_context() -> OntologyContext:
 
 def _resolve_class_core(cls, case_g: Graph, ctx: OntologyContext, _seen=None) -> Optional[str]:
     """Resolve a class to its core category via the ontology context (core+intermediate+
-    extended) AND the case graph's OWN subClassOf chains -- so case-LOCAL classes (declared
+    extended) AND the case graph's OWN subClassOf chains. This way case-LOCAL classes (declared
     only in the candidate TTL, e.g. a freshly minted FooObligation subClassOf core:Principle)
     resolve too, not just classes already in the curated/accumulated ontologies."""
     s = str(cls)
@@ -175,6 +175,54 @@ def _repair_disjoint_core(case_g: Graph, focus_node: str, ctx: OntologyContext) 
         case_g.remove((ind, CONCEPT_CATEGORY, old))
     case_g.add((ind, CONCEPT_CATEGORY, Literal(keep)))
     return True
+
+
+def retype_individual_to_category(case_g: Graph, ind: URIRef, keep: str,
+                                  ctx: OntologyContext) -> bool:
+    """Re-type an individual to a SINGLE core category `keep`: strip every rdf:type whose
+    resolved core category conflicts with keep, assert core:keep, and reconcile the
+    conceptCategory literal. Shared applier for the LLM tier (model-chosen category); the
+    deterministic Tier-0 `_repair_disjoint_core` has its own property-domain authority rule
+    and stripping guard. Returns True if the graph changed. `keep` must be one of CORE9."""
+    if keep not in CORE9:
+        return False
+    type_cats = _individual_type_cats(case_g, ind, ctx)
+    changed = False
+    for t, cat in list(type_cats.items()):
+        if cat != keep:
+            case_g.remove((ind, RDF.type, t))
+            changed = True
+    keep_uri = URIRef(CORE + keep)
+    if (ind, RDF.type, keep_uri) not in case_g:
+        case_g.add((ind, RDF.type, keep_uri))
+        changed = True
+    for old in list(case_g.objects(ind, CONCEPT_CATEGORY)):
+        if str(old) != keep:
+            case_g.remove((ind, CONCEPT_CATEGORY, old))
+            changed = True
+    if (ind, CONCEPT_CATEGORY, Literal(keep)) not in case_g:
+        case_g.add((ind, CONCEPT_CATEGORY, Literal(keep)))
+    return changed
+
+
+def individual_repair_context(case_g: Graph, ind: URIRef, ctx: OntologyContext) -> Dict[str, Any]:
+    """Assemble the facts an LLM tier needs to choose a single core category for a
+    clashing individual: its label, its type classes + resolved categories, and the
+    core categories implied by its properties' domains. Domain-general (no model)."""
+    label = next((str(o) for o in case_g.objects(ind, RDFS.label)), str(ind).rsplit("#", 1)[-1])
+    type_cats = _individual_type_cats(case_g, ind, ctx)
+    prop_cats = {}
+    for p, _o in case_g.predicate_objects(ind):
+        c = ctx.prop_domain_core.get(str(p))
+        if c:
+            prop_cats[str(p).rsplit("#", 1)[-1]] = c
+    return {
+        "individual": str(ind),
+        "label": label,
+        "type_classes": {str(t).rsplit("#", 1)[-1]: cat for t, cat in type_cats.items()},
+        "property_domain_categories": prop_cats,
+        "clashing_categories": sorted(set(type_cats.values()) | set(prop_cats.values())),
+    }
 
 
 TIER0: Dict[str, Callable[[Graph, str, OntologyContext], bool]] = {
