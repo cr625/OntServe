@@ -176,9 +176,9 @@
 # Constraint is imported from proethica-core, not redefined here
 
 # Legacy type references (maintained for backward compatibility)
-:Condition rdfs:subClassOf :State ;
+:Condition rdfs:subClassOf proeth-core:State ;
     rdfs:label "Condition"@en ;
-    rdfs:comment "Legacy term for State. Use State instead for new concepts."@en ;
+    rdfs:comment "Legacy term for State. Use proeth-core:State instead for new concepts."@en ;
     owl:deprecated true .
 
 :ConditionType rdf:type owl:Class ;
@@ -747,11 +747,9 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:comment "A normative restriction indicating that an action or state is disallowed."@en .
 
 # Compliance tracking
-:Violation rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    rdfs:subClassOf proeth-core:Event ;
-    rdfs:label "Violation"@en ;
-    rdfs:comment "An event indicating that an obligation, prohibition, or standard has been breached."@en .
+# :Violation is declared once above (subClassOf :ComplianceEvent, with a fuller
+# definition); the duplicate declaration that stood here (subClassOf proeth-core:Event)
+# was removed 2026-05-30.
 
 # Explainability / rationale
 :Justification rdf:type owl:Class ;

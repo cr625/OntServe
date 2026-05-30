@@ -391,7 +391,7 @@ proeth-core:provisionCategory a owl:DatatypeProperty ;
 # Link Resource to IAO document
 proeth-core:refersToDocument a owl:ObjectProperty ;
     rdfs:domain proeth-core:Resource ;
-    rdfs:range iao:0000300 ;  # IAO:document
+    rdfs:range iao:0000310 ;  # IAO_0000310 = document (was iao:0000300, which is "textual entity")
     rdfs:label "refers to document"@en ;
     rdfs:comment "Links a resource to the IAO document it represents or references. Used to connect ethical resources (NSPE Code, case precedents) to their document representations."@en ;
     skos:definition "Relates a Resource to an Information Artifact Ontology document that it represents."@en .
@@ -414,10 +414,10 @@ proeth-core:availableTo a owl:ObjectProperty ;
 # Indicate which agent cited a resource (analytic authority)
 proeth-core:citedByAgent a owl:ObjectProperty ;
     rdfs:domain proeth-core:Resource ;
-    rdfs:range proeth-core:Role ;  # BER, etc.
+    rdfs:range proeth-core:Agent ;
     rdfs:label "cited by agent"@en ;
-    rdfs:comment "Indicates which agent(s) cited this resource as an authoritative source in their ethical analysis. Distinguishes Citations (References section) from available resources."@en ;
-    skos:definition "Relates a Resource to a Role indicating who cited it as authority."@en .
+    rdfs:comment "Indicates which Agent(s) cited this resource as an authoritative source in their ethical analysis. Distinguishes citations (References section) from resources used by case participants (availableTo). Range broadened Role -> Agent on 2026-05-30 for parity with availableTo: citing is an actor-level fact, like resource usage."@en ;
+    skos:definition "Relates a Resource to an Agent indicating who cited it as authority."@en .
 
 # Link normative concepts to cited authorities
 proeth-core:citesAuthority a owl:ObjectProperty ;
@@ -427,7 +427,7 @@ proeth-core:citesAuthority a owl:ObjectProperty ;
     ] ;
     rdfs:range [
         a owl:Class ;
-        owl:unionOf (iao:0000300 iao:0000310)  # document or document part
+        owl:unionOf (iao:0000310 iao:0000314)  # document (IAO_0000310) or document part (IAO_0000314); was iao:0000300 "textual entity"
     ] ;
     rdfs:label "cites authority"@en ;
     rdfs:comment "Links an ethical concept (Principle, Obligation, Constraint) to the authoritative document that establishes or supports it. Used for tracking Board of Ethical Review citations."@en ;
