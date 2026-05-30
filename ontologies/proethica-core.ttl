@@ -263,6 +263,48 @@ proeth-core:defeasibleUnder a owl:ObjectProperty ;
     skos:scopeNote "Typical pattern: an obligation that normally holds becomes defeasible when a State representing risk, harm, or unrealizability obtains. This reflects the deontic principle that obligation presupposes capacity (Stenseke 2024): an Obligation is defeasible when the agent lacks the Capability required to fulfill it, or when fulfilling it would cause a harm the role exists to prevent."@en .
 
 ###############################################################
+# State-anchored structural properties (2026-05-30)
+# Materialize the state-extraction linkages that drive the methodology:
+#   S activatesObligation O   (a state makes an obligation applicable; the
+#                              forward complement of defeasibleUnder's yielding)
+#   S activatesConstraint Cs  (a state activates an action constraint)
+#   S activatedByEvent E      (Event Calculus initiation: the event that brings
+#                              the state into being)
+#   S terminatedByEvent E     (Event Calculus termination: the event that ends it)
+# Each is materialized at commit from the extracted state fields and carries a
+# prov:Derivation, so the state's role in obligation/constraint activation and
+# its temporal boundaries are first-class and SPARQL-queryable.
+###############################################################
+
+proeth-core:activatesObligation a owl:ObjectProperty ;
+    rdfs:domain proeth-core:State ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "activates obligation"@en ;
+    rdfs:comment "Relates a State whose obtaining makes an Obligation applicable. This is the forward, activating complement of defeasibleUnder (which records the State under which an obligation yields): a State of risk, harm, or commitment can bring an obligation into force for the role-bearers it concerns."@en ;
+    skos:definition "Links a State to an Obligation that the State's obtaining renders applicable."@en .
+
+proeth-core:activatesConstraint a owl:ObjectProperty ;
+    rdfs:domain proeth-core:State ;
+    rdfs:range proeth-core:Constraint ;
+    rdfs:label "activates constraint"@en ;
+    rdfs:comment "Relates a State whose obtaining activates a Constraint on the actions available to the role-bearers it concerns (the S->Cs linkage)."@en ;
+    skos:definition "Links a State to a Constraint that the State's obtaining activates."@en .
+
+proeth-core:activatedByEvent a owl:ObjectProperty ;
+    rdfs:domain proeth-core:State ;
+    rdfs:range proeth-core:Event ;
+    rdfs:label "activated by event"@en ;
+    rdfs:comment "Event Calculus initiation: relates a State to the Event whose occurrence brings the State into being (the fluent's start boundary)."@en ;
+    skos:definition "Links a State to the Event that initiates it."@en .
+
+proeth-core:terminatedByEvent a owl:ObjectProperty ;
+    rdfs:domain proeth-core:State ;
+    rdfs:range proeth-core:Event ;
+    rdfs:label "terminated by event"@en ;
+    rdfs:comment "Event Calculus termination: relates a State to the Event whose occurrence ends the State (the fluent's end boundary)."@en ;
+    skos:definition "Links a State to the Event that terminates it."@en .
+
+###############################################################
 # CodeProvision Properties
 # Added: 2026-01-12 - Support for provision-concept linkage
 ###############################################################
