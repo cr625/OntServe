@@ -396,13 +396,20 @@ proeth-core:refersToDocument a owl:ObjectProperty ;
     rdfs:comment "Links a resource to the IAO document it represents or references. Used to connect ethical resources (NSPE Code, case precedents) to their document representations."@en ;
     skos:definition "Relates a Resource to an Information Artifact Ontology document that it represents."@en .
 
-# Indicate which agent has access to a resource (case context)
+# Indicate which agent uses or has access to a resource (case context).
+# Range broadened Role -> Agent on 2026-05-30: under the Agent model an actor is
+# a proeth-core:Agent that bears Role facets, so resource usage is an actor-level
+# fact (the same level hasRole / hasCapability / performsAction attach at). This
+# property was previously declared but unused in every case; it is now
+# materialized at commit by proethica's resource_edges applier from the extracted
+# resource `used_by` field (Resource -> the case Agent(s) that use it), with a
+# prov:Derivation carrying the verbatim source text.
 proeth-core:availableTo a owl:ObjectProperty ;
     rdfs:domain proeth-core:Resource ;
-    rdfs:range proeth-core:Role ;  # agents in roles
+    rdfs:range proeth-core:Agent ;
     rdfs:label "available to"@en ;
-    rdfs:comment "Indicates which agent(s) in the case scenario have access to this resource. Distinguishes resources available to case participants from those cited by analysts."@en ;
-    skos:definition "Relates a Resource to a Role indicating who can access or use it within the case scenario."@en .
+    rdfs:comment "Indicates which Agent(s) in the case scenario use or have access to this resource. Distinguishes resources used by case participants from those cited by analysts (citedByAgent)."@en ;
+    skos:definition "Relates a Resource to an Agent indicating who uses or can access it within the case scenario."@en .
 
 # Indicate which agent cited a resource (analytic authority)
 proeth-core:citedByAgent a owl:ObjectProperty ;
