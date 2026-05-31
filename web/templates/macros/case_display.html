@@ -39,13 +39,33 @@
     </div>
     {% endif %}
 
+    {# Inherited / contextual definitions (skos:scopeNote). Each note carries a
+       leading [source] tag written at commit time (e.g. "[proethica-intermediate]
+       ...") so the primary definition (skos:definition, shown above) and the
+       inherited one are not confused when stacked. Mirrors the ProEthica review UI. #}
+    {% set scope_notes = entity.properties.get('scopeNote') if (entity.properties is mapping) else none %}
+    {% if scope_notes and scope_notes is string %}{% set scope_notes = [scope_notes] %}{% endif %}
+
     {% if entity.comment %}
+    {% if scope_notes %}<div class="text-uppercase text-muted" style="font-size:0.62em; letter-spacing:0.04em;">Definition</div>{% endif %}
     {% if entity.comment|length > 240 %}
     <div class="entity-comment text-clamp">{{ entity.comment }}</div>
     <button type="button" class="clamp-toggle btn btn-link btn-sm p-0">Show more</button>
     {% else %}
     <p class="entity-comment">{{ entity.comment }}</p>
     {% endif %}
+    {% endif %}
+
+    {% if scope_notes %}
+    {% for note in scope_notes %}
+    {% set has_tag = note.startswith('[') and ']' in note %}
+    <div class="ps-2 my-1 border-start border-3 border-info">
+        <div class="text-uppercase text-muted" style="font-size:0.62em; letter-spacing:0.04em;">
+            Inherited{% if has_tag %} from {{ note.split(']')[0][1:] }}{% endif %}
+        </div>
+        <div class="entity-comment small text-muted fst-italic">{{ note.split(']', 1)[1].strip() if has_tag else note }}</div>
+    </div>
+    {% endfor %}
     {% endif %}
 
     {{ render_entity_properties(entity, ontology_name) }}

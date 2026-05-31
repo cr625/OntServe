@@ -547,6 +547,7 @@ def _categorize_entity_properties(entity):
     """
     groups = {
         'description': [],
+        'scope_notes': [],
         'core': [],
         'relationships': [],
         'evidence': [],
@@ -561,6 +562,16 @@ def _categorize_entity_properties(entity):
         # chip in the header instead), and the <concept>class key (shown as the
         # "instance of" link instead).
         if key in _SKIP_KEYS or key.lower() == 'conceptcategory' or key.lower().endswith('class'):
+            continue
+
+        # skos:scopeNote is an inherited / contextual definition (e.g. the matched
+        # parent class's definition), distinct from the entity's own primary
+        # definition (rdfs:comment / skos:definition). Collect the raw values so the
+        # Definition card can render them demarcated rather than burying them as a
+        # core attribute. Each value carries a leading [source] tag from commit time.
+        if key.lower() == 'scopenote':
+            vals = value if isinstance(value, list) else [value]
+            groups['scope_notes'].extend(str(v) for v in vals if v)
             continue
 
         # IRI-valued triples are object properties (R->P->O / defeasibility

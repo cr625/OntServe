@@ -419,6 +419,20 @@ proeth-core:citedByAgent a owl:ObjectProperty ;
     rdfs:comment "Indicates which Agent(s) cited this resource as an authoritative source in their ethical analysis. Distinguishes citations (References section) from resources used by case participants (availableTo). Range broadened Role -> Agent on 2026-05-30 for parity with availableTo: citing is an actor-level fact, like resource usage."@en ;
     skos:definition "Relates a Resource to an Agent indicating who cited it as authority."@en .
 
+# State -> the Agent(s) it affects. Materialized from the state extractor's
+# `affectedParties` field (the actors a state bears on), resolved to the case
+# Agent(s) by embedding shortlist + LLM multi-select, with a prov:Derivation
+# carrying the verbatim party text (added 2026-05-31). Agent is outside the nine
+# disjoint D-tuple categories, so a State -> Agent edge is OWL-DL-safe, as with
+# availableTo. Generic affected parties ("future occupants and public") match no
+# Agent and correctly yield no edge.
+proeth-core:affects a owl:ObjectProperty ;
+    rdfs:domain proeth-core:State ;
+    rdfs:range proeth-core:Agent ;
+    rdfs:label "affects"@en ;
+    rdfs:comment "Relates a State to the Agent(s) it bears on in the case scenario (the parties whose situation the state changes), distinct from the obligations/constraints the state activates (activatesObligation / activatesConstraint)."@en ;
+    skos:definition "Relates a State to an Agent it affects within the case scenario."@en .
+
 # Link normative concepts to cited authorities
 proeth-core:citesAuthority a owl:ObjectProperty ;
     rdfs:domain [

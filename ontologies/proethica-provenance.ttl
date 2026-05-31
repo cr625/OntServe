@@ -90,6 +90,41 @@
                      rdfs:subPropertyOf prov:wasGeneratedBy .
 
 #################################################################
+#    Annotation properties (XAI: extraction-matcher decision provenance)
+#################################################################
+# Record WHY each entity received its rdf:type (which existing class the matcher
+# judged it to correspond to, how confident, and the natural-language rationale).
+# Declared owl:AnnotationProperty so they document the decision without entering
+# OWL-DL reasoning. The Pellet harness loads only core+intermediate+case, so the
+# commit serializer also emits these declarations inline into each generated graph;
+# this file is the canonical documentation home.
+
+###  http://proethica.org/provenance#matchedOntologyClass
+:matchedOntologyClass rdf:type owl:AnnotationProperty ;
+                      rdfs:label "matched ontology class" ;
+                      rdfs:comment "The canonical ontology class IRI the extraction matcher judged this entity to correspond to, and the basis of its rdf:type." .
+
+###  http://proethica.org/provenance#matchedOntologyLabel
+:matchedOntologyLabel rdf:type owl:AnnotationProperty ;
+                      rdfs:label "matched ontology label" ;
+                      rdfs:comment "Human-readable label of the matched ontology class (see matchedOntologyClass)." .
+
+###  http://proethica.org/provenance#matchConfidence
+:matchConfidence rdf:type owl:AnnotationProperty ;
+                 rdfs:label "match confidence" ;
+                 rdfs:comment "The matcher confidence (0.0 to 1.0) that this entity corresponds to the matched ontology class." .
+
+###  http://proethica.org/provenance#matchesExisting
+:matchesExisting rdf:type owl:AnnotationProperty ;
+                 rdfs:label "matches existing" ;
+                 rdfs:comment "True if the matcher reused an existing ontology class; false if it minted a new class for this entity." .
+
+###  http://proethica.org/provenance#matchReasoning
+:matchReasoning rdf:type owl:AnnotationProperty ;
+                rdfs:label "match reasoning" ;
+                rdfs:comment "Natural-language rationale the matcher gave for the type/match decision. Explainability (XAI) provenance for the rdf:type assertion." .
+
+#################################################################
 #    Annotations
 #################################################################
 
