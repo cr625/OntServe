@@ -17,12 +17,12 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.6.0"^^xsd:string ;
+    owl:versionInfo "2.7.0"^^xsd:string ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
     owl:imports <http://www.w3.org/2006/time#> ;
-    dc:description "Version 2.6.0 adds four participant object properties (obligatedParty, constrainedEntity, possessedBy, invokedBy) that wire the extracted 'who bears / is constrained by / possesses / invokes' fields of Obligation, Constraint, Capability, and Principle into first-class edges to the case Agent, joining the actor-edge family (availableTo, citedByAgent, affects). Their range is Agent, which is outside the nine disjoint D-tuple categories, so each edge is OWL-DL safe; possessedBy is declared owl:inverseOf hasCapability. Version 2.5.0 adds three defeasibility object properties (competesWith, prevailsOver, defeasibleUnder) that expose obligation competition as first-class structural relationships between typed individuals, supporting the architectural claim that defeasible patterns are queryable via SPARQL and available to external non-monotonic engines. Version 2.3.0 corrected BFO/IAO superclass alignments following formal audit against BFO 2020 (ISO/IEC 21838-2) and IAO definitions: Resource from independent continuant to information content entity; State from quality to specifically dependent continuant; Obligation refined to directive information entity (Donohue 2017); Principle and Constraint refined to directive information entity based on their prescriptive character (Frankel 1989, Ganascia 2007, Dennis et al. 2016); Capability from realizable entity to disposition."@en .
+    dc:description "Version 2.7.0 adds the canonical Event Calculus fluent-transition object properties initiates and terminates (a happening, Action or Event, initiates or terminates a State/fluent; Kowalski and Sergot 1986, Berreby et al. 2017), generalising the State-side activatedByEvent / terminatedByEvent to both happening kinds in the happening->State direction so the fluent layer connects the temporal components to the normative ones (Action/Event initiates State, State activatesObligation). Version 2.6.0 adds four participant object properties (obligatedParty, constrainedEntity, possessedBy, invokedBy) that wire the extracted 'who bears / is constrained by / possesses / invokes' fields of Obligation, Constraint, Capability, and Principle into first-class edges to the case Agent, joining the actor-edge family (availableTo, citedByAgent, affects). Their range is Agent, which is outside the nine disjoint D-tuple categories, so each edge is OWL-DL safe; possessedBy is declared owl:inverseOf hasCapability. Version 2.5.0 adds three defeasibility object properties (competesWith, prevailsOver, defeasibleUnder) that expose obligation competition as first-class structural relationships between typed individuals, supporting the architectural claim that defeasible patterns are queryable via SPARQL and available to external non-monotonic engines. Version 2.3.0 corrected BFO/IAO superclass alignments following formal audit against BFO 2020 (ISO/IEC 21838-2) and IAO definitions: Resource from independent continuant to information content entity; State from quality to specifically dependent continuant; Obligation refined to directive information entity (Donohue 2017); Principle and Constraint refined to directive information entity based on their prescriptive character (Frankel 1989, Ganascia 2007, Dennis et al. 2016); Capability from realizable entity to disposition."@en .
 
 ###############################################################
 # Core Formal Specification Classes -- BFO 2020 / IAO Aligned (v2.3.0)
@@ -303,6 +303,30 @@ proeth-core:terminatedByEvent a owl:ObjectProperty ;
     rdfs:label "terminated by event"@en ;
     rdfs:comment "Event Calculus termination: relates a State to the Event whose occurrence ends the State (the fluent's end boundary)."@en ;
     skos:definition "Links a State to the Event that terminates it."@en .
+
+# Fluent transitions (v2.7.0). The canonical Event Calculus direction (Kowalski and
+# Sergot 1986; Berreby et al. 2017): a happening Initiates or Terminates a fluent. Here a
+# happening is an Action (volitional) OR an Event (non-volitional), and a fluent is a
+# State. These generalise the State-side activatedByEvent / terminatedByEvent (which cover
+# Events only, from the State side) to BOTH happening kinds in the happening -> State
+# direction, so an action that brings a condition into being is recorded the same way an
+# event is. A State (fluent) that holds is the middle term between a happening and its
+# normative effect: Action/Event initiates State, then State activatesObligation /
+# activatesConstraint. OWL-DL safe: subject is Action or Event and object is State, all
+# distinct individuals, so no one individual is forced into two disjoint categories.
+proeth-core:initiates a owl:ObjectProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( proeth-core:Action proeth-core:Event ) ] ;
+    rdfs:range proeth-core:State ;
+    rdfs:label "initiates"@en ;
+    rdfs:comment "Event Calculus initiation: relates a happening (Action or Event) to a State (fluent) that begins to hold as a result and persists until terminated (inertial) or holds momentarily (non-inertial)."@en ;
+    skos:definition "Links an Action or Event to a State (fluent) it initiates."@en .
+
+proeth-core:terminates a owl:ObjectProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( proeth-core:Action proeth-core:Event ) ] ;
+    rdfs:range proeth-core:State ;
+    rdfs:label "terminates"@en ;
+    rdfs:comment "Event Calculus termination: relates a happening (Action or Event) to a State (fluent) that ceases to hold as a result."@en ;
+    skos:definition "Links an Action or Event to a State (fluent) it terminates."@en .
 
 ###############################################################
 # CodeProvision Properties
