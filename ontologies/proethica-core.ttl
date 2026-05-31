@@ -17,12 +17,12 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.5.0"^^xsd:string ;
+    owl:versionInfo "2.6.0"^^xsd:string ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
     owl:imports <http://www.w3.org/2006/time#> ;
-    dc:description "Version 2.5.0 adds three defeasibility object properties (competesWith, prevailsOver, defeasibleUnder) that expose obligation competition as first-class structural relationships between typed individuals, supporting the architectural claim that defeasible patterns are queryable via SPARQL and available to external non-monotonic engines. Version 2.3.0 corrected BFO/IAO superclass alignments following formal audit against BFO 2020 (ISO/IEC 21838-2) and IAO definitions: Resource from independent continuant to information content entity; State from quality to specifically dependent continuant; Obligation refined to directive information entity (Donohue 2017); Principle and Constraint refined to directive information entity based on their prescriptive character (Frankel 1989, Ganascia 2007, Dennis et al. 2016); Capability from realizable entity to disposition."@en .
+    dc:description "Version 2.6.0 adds four participant object properties (obligatedParty, constrainedEntity, possessedBy, invokedBy) that wire the extracted 'who bears / is constrained by / possesses / invokes' fields of Obligation, Constraint, Capability, and Principle into first-class edges to the case Agent, joining the actor-edge family (availableTo, citedByAgent, affects). Their range is Agent, which is outside the nine disjoint D-tuple categories, so each edge is OWL-DL safe; possessedBy is declared owl:inverseOf hasCapability. Version 2.5.0 adds three defeasibility object properties (competesWith, prevailsOver, defeasibleUnder) that expose obligation competition as first-class structural relationships between typed individuals, supporting the architectural claim that defeasible patterns are queryable via SPARQL and available to external non-monotonic engines. Version 2.3.0 corrected BFO/IAO superclass alignments following formal audit against BFO 2020 (ISO/IEC 21838-2) and IAO definitions: Resource from independent continuant to information content entity; State from quality to specifically dependent continuant; Obligation refined to directive information entity (Donohue 2017); Principle and Constraint refined to directive information entity based on their prescriptive character (Frankel 1989, Ganascia 2007, Dennis et al. 2016); Capability from realizable entity to disposition."@en .
 
 ###############################################################
 # Core Formal Specification Classes -- BFO 2020 / IAO Aligned (v2.3.0)
@@ -432,6 +432,49 @@ proeth-core:affects a owl:ObjectProperty ;
     rdfs:label "affects"@en ;
     rdfs:comment "Relates a State to the Agent(s) it bears on in the case scenario (the parties whose situation the state changes), distinct from the obligations/constraints the state activates (activatesObligation / activatesConstraint)."@en ;
     skos:definition "Relates a State to an Agent it affects within the case scenario."@en .
+
+# Participant edges (v2.6.0). Each Pass-2 normative component carries an extracted
+# field naming the actor it bears on -- the obligation's obligatedParty, the
+# constraint's constrainedEntity, the capability's possessedBy, the principle's
+# invokedBy. These were committed only as opaque literals (and read by
+# rpo_edges/defeasibility as string context); they are now ALSO materialized at
+# commit by proethica's participant_edges applier, which resolves the named party
+# to the case Agent(s) by embedding shortlist + LLM select, with a prov:Derivation
+# carrying the verbatim source text. The literal is retained (the wire-in is
+# additive). Range is Agent, which is outside the nine disjoint D-tuple categories,
+# so each edge is OWL-DL safe exactly as availableTo / citedByAgent / affects are
+# (the object resolves to no disjoint category; the commit-time guard still
+# validates the component subject). A generic or institutional party that matches
+# no case Agent correctly yields no edge.
+
+proeth-core:obligatedParty a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Obligation ;
+    rdfs:range proeth-core:Agent ;
+    rdfs:label "obligated party"@en ;
+    rdfs:comment "Relates an Obligation to the Agent that bears it (Dennis et al. 2016: 'by whom'). The duty-bearer of the obligation in the case scenario."@en ;
+    skos:definition "Relates an Obligation to the Agent who is obligated by it."@en .
+
+proeth-core:constrainedEntity a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Constraint ;
+    rdfs:range proeth-core:Agent ;
+    rdfs:label "constrained entity"@en ;
+    rdfs:comment "Relates a Constraint to the Agent whose conduct it limits in the case scenario. Distinct from constrainedBy (Action -> Constraint), which records that an action is subject to a constraint."@en ;
+    skos:definition "Relates a Constraint to the Agent it constrains."@en .
+
+proeth-core:possessedBy a owl:ObjectProperty ;
+    owl:inverseOf proeth-core:hasCapability ;
+    rdfs:domain proeth-core:Capability ;
+    rdfs:range proeth-core:Agent ;
+    rdfs:label "possessed by"@en ;
+    rdfs:comment "Relates a Capability to the Agent that possesses it in the case scenario. Inverse of hasCapability (Agent -> Capability), so the reasoner sees both directions from one asserted edge."@en ;
+    skos:definition "Relates a Capability to the Agent who possesses it. Inverse of hasCapability."@en .
+
+proeth-core:invokedBy a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Principle ;
+    rdfs:range proeth-core:Agent ;
+    rdfs:label "invoked by"@en ;
+    rdfs:comment "Relates a Principle to the Agent(s) that invoke it in the case scenario (the parties who appeal to the principle to justify or evaluate conduct). May name several agents."@en ;
+    skos:definition "Relates a Principle to an Agent who invokes it."@en .
 
 # Link normative concepts to cited authorities
 proeth-core:citesAuthority a owl:ObjectProperty ;
