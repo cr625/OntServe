@@ -1004,6 +1004,106 @@ proeth:conflictsWith a owl:ObjectProperty ;
 #    State Classes - Based on Chapter 2.2.4 Literature Review
 #################################################################
 
+# =================================================================
+# STATE ARCHETYPES (deontic-function axis) -- added 2026-05-30
+# =================================================================
+# A state's KIND is grounded by its deontic function within the role-based
+# structure: a state matters because of what it does to a role-derived obligation.
+# This keeps states role-relative (the framework's premise) rather than abstracting
+# them into a content taxonomy, and requires no virtue-ethics commitment. The nine
+# archetypes are the recurring deontic functions a state performs on an obligation:
+# activating it, constraining the action it governs, putting it in conflict/defeat,
+# conditioning it on capacity or on knowledge, scoping it to a relationship, or
+# bounding it in time. Each is realized by the proeth-core state edges
+# (activatesObligation, activatesConstraint, defeasibleUnder, activatedByEvent /
+# terminatedByEvent), so the category axis is the static shadow of those edges.
+#
+# Grounding: Berreby et al. (2017) Event-Calculus fluents that trigger and terminate
+# obligations; Almpani et al. (2023) context-based scenarios that set dynamic
+# obligation priorities; Sarmiento et al. (2023) causal chains that initiate states;
+# Stenseke (2024) obligation-presupposes-capacity; Govindarajulu & Bringsjord (2017)
+# obligation's dependence on knowledge state. NOT a Jones (1991) typology: Jones moral
+# intensity SCORES a situation's salience (a state attribute, e.g. urgency_level); it
+# does not classify state kinds. The archetypes are intentionally non-disjoint -- a
+# single state often performs several deontic functions at once (a risk that also
+# creates a conflict).
+# =================================================================
+
+:RiskState a owl:Class ;
+    rdfs:subClassOf proeth-core:State ;
+    rdfs:label "Risk State"@en ;
+    skos:definition "A condition of potential harm to public welfare, safety, or a protected interest. Its deontic function is to ACTIVATE the protective obligations a role exists to discharge, and to license defeat of competing obligations such as confidentiality when the harm is grave, per Berreby et al. (2017) and the dynamic priority tiers of Almpani et al. (2023)."@en ;
+    rdfs:comment "Obligation-activating condition of potential harm (realized by activatesObligation / defeasibleUnder)."@en ;
+    skos:scopeNote "Deontic-function archetype; case-specific risk states subclass this. The salience of the risk (magnitude, probability, immediacy) is a state ATTRIBUTE (Jones 1991), not a subkind."@en ;
+    dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> , # Berreby et al. 2017
+                       <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
+
+:EmergencyState a owl:Class ;
+    rdfs:subClassOf proeth-core:State ;
+    rdfs:label "Emergency State"@en ;
+    skos:definition "An acute, time-critical condition demanding immediate response. Its deontic function is to activate emergency-response obligations and to override or suspend constraints that normally bound action, per the emergency-priority determination of Almpani et al. (2023)."@en ;
+    rdfs:comment "Obligation-activating, constraint-overriding acute condition."@en ;
+    skos:scopeNote "Deontic-function archetype; distinguished from RiskState by acuteness that licenses overriding ordinary constraints."@en ;
+    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
+
+:ConflictState a owl:Class ;
+    rdfs:subClassOf proeth-core:State ;
+    rdfs:label "Conflict State"@en ;
+    skos:definition "A condition under which two or more role-derived obligations compete and cannot all be fully satisfied. Its deontic function is to render obligations defeasible against one another: it is the licensing context of the defeasibility relation, where an Obligation is defeasibleUnder a Conflict State."@en ;
+    rdfs:comment "Obligation-competing context (realized by defeasibleUnder; the prima-facie-duty conflict situation)."@en ;
+    skos:scopeNote "Deontic-function archetype; case-specific conflict states (ConflictOfInterest, CompetingDuties) subclass this. Grounds the competesWith / prevailsOver / defeasibleUnder edge family."@en .
+
+:CompetenceState a owl:Class ;
+    rdfs:subClassOf proeth-core:State ;
+    rdfs:label "Competence State"@en ;
+    skos:definition "A condition bearing on whether a role-bearer has the capacity -- expertise, qualification, means -- to fulfil a duty. Its deontic function is to condition an obligation on capacity: obligation presupposes capacity, so a competence shortfall renders the duty defeasible or shifts it (for example to refer or disclose), per Stenseke (2024)."@en ;
+    rdfs:comment "Capacity-conditioning condition (ought-implies-can)."@en ;
+    skos:scopeNote "Deontic-function archetype; case-specific competence states (OutsideCompetence) subclass this."@en ;
+    dcterms:references <https://doi.org/10.1007/s10676-024-09775-5> . # Stenseke 2024
+
+:RelationshipState a owl:Class ;
+    rdfs:subClassOf proeth-core:State ;
+    rdfs:label "Relationship State"@en ;
+    skos:definition "A condition defining which professional relationship holds among the parties (provider-client, professional-peer, employer-employee, public trust). Its deontic function is to SCOPE which relational obligations apply, since duties are relative to the role-relationship in force."@en ;
+    rdfs:comment "Obligation-scoping condition (which role-relation, hence which relational duties, are active)."@en ;
+    skos:scopeNote "Deontic-function archetype; pairs with the relational role archetypes (ProviderClientRole, ProfessionalPeerRole, ...). The relationship in force selects the applicable obligations."@en .
+
+:InformationState a owl:Class ;
+    rdfs:subClassOf proeth-core:State ;
+    rdfs:label "Information State"@en ;
+    skos:definition "An epistemic condition: what is known, disclosed, uncertain, or concealed. Its deontic function is to condition obligations on the agent's knowledge state, governing disclosure, notification, informed-consent, and decision-under-uncertainty duties, per Govindarajulu & Bringsjord (2017) on the dependence of obligation on intention and knowledge."@en ;
+    rdfs:comment "Epistemic condition conditioning disclosure / informed obligations."@en ;
+    skos:scopeNote "Deontic-function archetype; covers states of disclosure, notification, concealment, and uncertainty."@en ;
+    dcterms:references <https://doi.org/10.1609/aimag.v38i2.2743> . # Govindarajulu & Bringsjord 2017
+
+:RegulatoryState a owl:Class ;
+    rdfs:subClassOf proeth-core:State ;
+    rdfs:label "Regulatory State"@en ;
+    skos:definition "A condition in which a code provision, standard, statute, or contractual requirement is in force for the situation. Its deontic function is to ACTIVATE a constraint or compliance obligation on the available actions (the State-to-Constraint linkage)."@en ;
+    rdfs:comment "Constraint-activating condition (realized by activatesConstraint)."@en ;
+    skos:scopeNote "Deontic-function archetype; the state under which a regulatory constraint becomes binding for the case."@en .
+
+:TemporalState a owl:Class ;
+    rdfs:subClassOf proeth-core:State ;
+    rdfs:label "Temporal State"@en ;
+    skos:definition "A condition defined by phase or timing (pre/post-termination, before/after notification, a deadline window). Its deontic function is to bound when a time-relative obligation holds: the state is the Event-Calculus fluent whose initiation and termination start and end the obligation, per Berreby et al. (2017)."@en ;
+    rdfs:comment "Obligation-bounding condition (Event-Calculus fluent; realized by activatedByEvent / terminatedByEvent)."@en ;
+    skos:scopeNote "Deontic-function archetype; the persistence of the fluent (inertial vs non-inertial) is an orthogonal ATTRIBUTE, not a subkind."@en ;
+    dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> . # Berreby et al. 2017
+
+:ResourceAvailabilityState a owl:Class ;
+    rdfs:subClassOf proeth-core:State ;
+    rdfs:label "Resource Availability State"@en ;
+    skos:definition "A condition of availability or scarcity of the means to act (time, budget, personnel, safeguards, access to information). Its deontic function is to condition the FEASIBILITY of obligations and to set dynamic priorities among them when means are constrained, per Almpani et al. (2023)."@en ;
+    rdfs:comment "Feasibility-conditioning condition of resource availability or scarcity."@en ;
+    skos:scopeNote "Deontic-function archetype; distinct from the Resource (Rs) component, which is a knowledge artifact. This is the situational availability of the means to act."@en ;
+    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
+
+# =================================================================
+# Case-specific state leaves (grouped below by the same deontic categories;
+# subclass the archetypes above as the corpus is re-extracted).
+# =================================================================
+
 # Conflict States - Context where competing interests or obligations arise
 
 :ConflictOfInterest a owl:Class ;
@@ -1148,25 +1248,32 @@ proeth:ConfirmedRiskWithoutAdequateSafeguardsState a owl:Class ;
 # Professional resources provide extensional grounding for ethical decision-making
 # Based on McLaren (2003) extensional principles approach
 
+# Resource-type attributions corrected 2026-05-30 (verified against the reference
+# corpus): McLaren grounds the precedent/interpretation types; professional codes are
+# Frankel/Davis; the remaining four are practical (house) extensions, not attributable
+# to a cited ethics-reasoning source. See each class's skos:scopeNote.
+
 :ProfessionalCode rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     rdfs:label "Professional Code" ;
-    skos:definition "Formal codified professional ethics standards (e.g., NSPE Code, IEEE Code) that establish professional identity, create accountability, and provide deliberation frameworks beyond mere rules per McLaren (2003) extensional approach." ;
+    skos:definition "Formal codified professional ethics standards (e.g., NSPE Code, IEEE Code) that establish professional identity, create accountability, and provide deliberation frameworks beyond mere rules. As an ethics knowledge resource the code is grounded in Frankel (1989), who frames it as an enabling document and a distillation of collective professional experience, and Davis (1991), who frames it as a convention among professionals." ;
     rdfs:comment "Distillations of collective experience that guide and justify actions" ;
-    dcterms:references <https://doi.org/10.1023/A:1024195425598> .
+    skos:scopeNote "Attribution: Frankel (1989) 'Professional Codes: Why, How, and with What Impact?' and Davis (1991) 'Thinking Like an Engineer'. McLaren (2003) USES codes as extensional inputs but does not originate this resource type (the prior blanket McLaren citation was corrected)." .
 
 :CasePrecedent rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     rdfs:label "Case Precedent" ;
-    skos:definition "Documented cases from ethics review boards providing precedential knowledge and analogical reasoning patterns for similar situations, grounding abstract principles in professional reality per McLaren (2003)." ;
+    skos:definition "Documented cases from ethics review boards providing precedential knowledge and analogical reasoning patterns for similar situations, grounding abstract principles in professional reality per McLaren (2003): citing past cases provides the extensional definition of the principles." ;
     rdfs:comment "Concrete instances that exemplify principle application" ;
+    skos:scopeNote "Attribution: McLaren (Ashley & McLaren 1995; McLaren 2003, SIROCCO). This is McLaren's core contribution to the Resource component." ;
     dcterms:references <https://doi.org/10.1023/A:1024195425598> .
 
 :ExpertInterpretation rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     rdfs:label "Expert Interpretation" ;
-    skos:definition "Authoritative explanations bridging principles to specific contexts, providing nuanced understanding of how principles apply in complex situations based on professional consensus." ;
+    skos:definition "Authoritative explanations bridging principles to specific contexts, providing nuanced understanding of how principles apply in complex situations. Per McLaren (2003), the review board's explanations of how and why codes apply operationalize the abstract principles." ;
     rdfs:comment "Professional consensus on principle application in edge cases" ;
+    skos:scopeNote "Attribution: McLaren (2003) -- the expert/board explanation that links codes to facts." ;
     dcterms:references <https://doi.org/10.1023/A:1024195425598> .
 
 :TechnicalStandard rdf:type owl:Class ;
@@ -1174,25 +1281,28 @@ proeth:ConfirmedRiskWithoutAdequateSafeguardsState a owl:Class ;
     rdfs:label "Technical Standard" ;
     skos:definition "Industry standards and specifications defining acceptable practice (e.g., ISO, IEEE, ASME standards) that embody collective professional agreement on technical acceptability and minimum competence benchmarks." ;
     rdfs:comment "Collective professional agreement on technical acceptability" ;
-    dcterms:references <https://doi.org/10.1023/A:1024195425598> .
+    skos:scopeNote "House extension (engineering domain): technical standards treated as an ethics knowledge resource. Not directly attributable to a cited ethics-reasoning source (the prior McLaren citation was removed)." .
 
 :LegalResource rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     rdfs:label "Legal Resource" ;
     skos:definition "Laws, regulations, and statutes governing professional practice that establish legal boundaries and compliance requirements for professional activities." ;
-    rdfs:comment "Legal framework constraining professional practice" .
+    rdfs:comment "Legal framework constraining professional practice" ;
+    skos:scopeNote "House extension with roots in legal case-based reasoning (Bench-Capon & Sartor 2003); treating legal materials as an ethics resource reflects the society-profession nexus (Frankel 1989)." .
 
 :DecisionTool rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     rdfs:label "Decision Tool" ;
     skos:definition "Frameworks, methodologies, and assessment tools for ethical analysis that provide structured approaches to ethical decision-making in professional contexts." ;
-    rdfs:comment "Structured approaches for ethical analysis" .
+    rdfs:comment "Structured approaches for ethical analysis" ;
+    skos:scopeNote "House extension: decision-support and ethics-workup schemas formalized as a distinct resource type. Not directly attributable to a cited source." .
 
 :ReferenceMaterial rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     rdfs:label "Reference Material" ;
     skos:definition "Handbooks, manuals, guides, and other documentation supporting professional practice with technical and procedural knowledge." ;
-    rdfs:comment "Supporting documentation for professional practice" .
+    rdfs:comment "Supporting documentation for professional practice" ;
+    skos:scopeNote "House extension grounded structurally in the Information Artifact Ontology: documents and manuals as Information Content Entities (iao:0000030, the parent of proeth-core:Resource). Not from a cited ethics source." .
 
 # Specific instances of professional codes (examples)
 :NSPECodeOfEthics rdf:type owl:NamedIndividual ;
