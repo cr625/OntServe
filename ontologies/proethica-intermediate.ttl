@@ -413,6 +413,11 @@ proeth:CausalChain a owl:Class ;
     rdfs:label "Causal Chain"@en ;
     rdfs:comment "A cause-to-effect linkage in the case timeline carrying a NESS responsibility analysis (Sarmiento et al. 2023). Not one of the nine disjoint D-tuple categories."@en .
 
+proeth:analyzesAction a owl:ObjectProperty ;
+    rdfs:range proeth-core:Action ;
+    rdfs:label "analyzes action"@en ;
+    rdfs:comment "Links a synthesis causal-normative-link (reasoning) node to the committed Action it analyzes, so the reasoning is grounded in the graph and the action's obligation edges are reachable from it. Range Action; the subject is a non-D-tuple analysis node, so no domain restriction (and no disjointness impact)."@en .
+
 proeth:cause a owl:ObjectProperty ;
     rdfs:domain proeth:CausalChain ;
     rdfs:label "cause"@en ;
