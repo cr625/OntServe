@@ -405,6 +405,31 @@ proeth:altersPriority a owl:ObjectProperty ;
     rdfs:label "alters priority"@en ;
     rdfs:comment "Indicates how events change obligation priorities"@en .
 
+# Causal-chain class + endpoint edges (Step-3 Stage-5 causal analysis; Sarmiento et al.
+# 2023 NESS). cause/effect omit rdfs:range deliberately: their endpoints are Action OR
+# Event, and the Action/Event union is enforced at edge materialization by the unified
+# domain/range guard (rpo_edges._CAUSAL_EDGE_RANGE) rather than by a blank-node owl:unionOf.
+proeth:CausalChain a owl:Class ;
+    rdfs:label "Causal Chain"@en ;
+    rdfs:comment "A cause-to-effect linkage in the case timeline carrying a NESS responsibility analysis (Sarmiento et al. 2023). Not one of the nine disjoint D-tuple categories."@en .
+
+proeth:cause a owl:ObjectProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:label "cause"@en ;
+    rdfs:comment "Links a causal chain to the Action or Event that is its cause."@en .
+
+proeth:effect a owl:ObjectProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:label "effect"@en ;
+    rdfs:comment "Links a causal chain to the Action or Event that is its effect or outcome."@en .
+
+proeth:responsibleAgent a owl:ObjectProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range proeth-core:Agent ;
+    rdfs:label "responsible agent"@en ;
+    rdfs:comment "Links a causal chain to the agent(s) bearing responsibility for it (NESS causal responsibility, Sarmiento et al. 2023)."@en ;
+    dcterms:references <https://doi.org/10.1007/s10458-023-09609-6> .
+
 ###############################################################
 # OWL-Time Temporal Properties (Allen Interval Algebra)
 # Maps to http://www.w3.org/2006/time# vocabulary
