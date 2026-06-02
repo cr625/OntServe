@@ -34,6 +34,13 @@ sys.path.insert(0, str(WEB_DIR))
 FOUNDATION_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-foundation.ttl"
 CORE_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-core.ttl"
 INTERMEDIATE_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-intermediate.ttl"
+# NOTE: the discovered-class store (proethica-intermediate-extended.ttl) is deliberately
+# NOT loaded here. It is cross-case and append-only, so loading it wholesale imports every
+# case's drift into every other case's validation (measured 2026-06-01: it dropped the corpus
+# from 119/119 to 117/119 and carries a SafetyObligation self-loop). The per-case
+# _add_missing_subclass_declarations patch reconstructs each case's own subClassOf-core from
+# its individuals' conceptCategory, which is local and drift-free. A normalized (D15) lean
+# case validates correctly under that patch with no extended load. See ontology-architecture.md.
 
 log = logging.getLogger(__name__)
 
