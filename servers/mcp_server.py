@@ -7,6 +7,7 @@ Tools are auto-registered with schemas generated from type hints.
 """
 
 import os
+import sys
 import json
 import asyncio
 import logging
@@ -26,6 +27,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 project_root = Path(__file__).parent.parent
+# Put OntServe root on sys.path so the namespace package `validation` (no __init__.py) is
+# importable by the conformance tools regardless of how the server is launched (the prior
+# tools relied on the launcher's PYTHONPATH; a plain `python servers/mcp_server.py` did not
+# have it, so `from validation import ...` raised ModuleNotFoundError).
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 
 # ---------------------------------------------------------------------------
@@ -520,6 +527,37 @@ async def validate_conformance_ttl(ttl_content: str, ctx: Context) -> str:
     OWL-RL-expanded before the shapes run."""
     from validation import conformance as cf
     result = await asyncio.to_thread(cf.conformance_report_content, "candidate", ttl_content)
+    return json.dumps(result)
+
+
+@mcp.tool
+async def repair_conformance_ttl(ttl_content: str, ctx: Context, domain: str = "engineering") -> str:
+    """SHACL + OWL-RL conformance check WITH deterministic Tier-0 repair (no LLM) of ad-hoc
+    case TTL. Runs the validate-repair loop with Tier-0 only (defer a disjoint-core clash to the
+    property-domain category, etc.), and returns the repaired TTL, whether it now conforms, the
+    number of repairs applied, and any residual violations the deterministic tier could not fix.
+    The pre-commit gate path: ProEthica calls this after materialising edges and before persisting
+    a case, writes the repaired TTL back, and (until the LLM repair tiers are wired) flags any
+    residual for the pilot. The LLM tiers (Haiku->Sonnet->Opus) run caller-side, not here, because
+    this server has no model key."""
+    from validation import conformance_loop as cl
+    from validation import conformance as cf
+
+    def _run():
+        r = cl.repair_loop(ttl_content, domain=domain, llm_repair=None)
+        remaining = {"violations": []}
+        if not r.conforms:
+            rep = cf.conformance_report_content("repaired", r.case_content)
+            remaining = {"violations": rep.get("violations", [])} if isinstance(rep, dict) else {"violations": []}
+        return {
+            "conforms": r.conforms,
+            "repairs_applied": r.repairs_applied,
+            "reason": r.reason,
+            "repaired_ttl": r.case_content,
+            "remaining": remaining,
+        }
+
+    result = await asyncio.to_thread(_run)
     return json.dumps(result)
 
 
