@@ -31,6 +31,7 @@ WEB_DIR = ONTSERVE_ROOT / "web"
 sys.path.insert(0, str(ONTSERVE_ROOT))
 sys.path.insert(0, str(WEB_DIR))
 
+FOUNDATION_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-foundation.ttl"
 CORE_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-core.ttl"
 INTERMEDIATE_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-intermediate.ttl"
 
@@ -133,6 +134,10 @@ def _add_missing_subclass_declarations(g: Graph) -> int:
 
 def _build_merged_graph(case_content: str) -> Graph:
     g = Graph()
+    # Foundation stub first: the curated BFO/IAO/RO subset core aligns to, declared
+    # locally so the alignment is reasoned (branch disjointness + subclass chains) rather
+    # than dangling. Replaces reliance on the stripped external bfo.owl/iao.owl/ro.owl.
+    g.parse(str(FOUNDATION_TTL), format="turtle")
     g.parse(str(CORE_TTL), format="turtle")
     g.parse(str(INTERMEDIATE_TTL), format="turtle")
     g.parse(data=case_content, format="turtle")

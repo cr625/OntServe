@@ -1822,3 +1822,15 @@ proeth:requiresCapability a owl:ObjectProperty ;
     rdfs:label "Employer Role"@en ;
     :archetypeAxis "occupational" ;
     rdfs:comment "The employing organization as a participant. The duty relationship is carried separately by :EmployerRelationshipRole. No IFC equivalent."@en .
+
+#################################################################
+#    Deprecated legacy classes (audit 2026-06-01, F4)
+#    Superseded by proeth-cases:* or by :Principle; retained with a
+#    machine-readable owl:deprecated marker rather than deleted so any
+#    historical reference still resolves. The extractor must not emit them.
+#################################################################
+:EthicalArgument  owl:deprecated true .   # superseded by proeth-cases:Argument
+:BoardConclusion  owl:deprecated true .   # superseded by proeth-cases:EthicalConclusion
+:DecisionOption   owl:deprecated true .   # superseded by proeth-cases:DecisionOption
+:EthicalQuestion  owl:deprecated true .   # superseded by proeth-cases:EthicalQuestion
+:EthicalPrinciple owl:deprecated true .   # legacy synonym for :Principle

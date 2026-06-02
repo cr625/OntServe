@@ -17,12 +17,13 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.7.0"^^xsd:string ;
+    owl:versionInfo "2.7.2"^^xsd:string ;
+    owl:imports <http://proethica.org/ontology/foundation> ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
     owl:imports <http://www.w3.org/2006/time#> ;
-    dc:description "Version 2.7.0 adds the canonical Event Calculus fluent-transition object properties initiates and terminates (a happening, Action or Event, initiates or terminates a State/fluent; Kowalski and Sergot 1986, Berreby et al. 2017), generalising the State-side activatedByEvent / terminatedByEvent to both happening kinds in the happening->State direction so the fluent layer connects the temporal components to the normative ones (Action/Event initiates State, State activatesObligation). Version 2.6.0 adds four participant object properties (obligatedParty, constrainedEntity, possessedBy, invokedBy) that wire the extracted 'who bears / is constrained by / possesses / invokes' fields of Obligation, Constraint, Capability, and Principle into first-class edges to the case Agent, joining the actor-edge family (availableTo, citedByAgent, affects). Their range is Agent, which is outside the nine disjoint D-tuple categories, so each edge is OWL-DL safe; possessedBy is declared owl:inverseOf hasCapability. Version 2.5.0 adds three defeasibility object properties (competesWith, prevailsOver, defeasibleUnder) that expose obligation competition as first-class structural relationships between typed individuals, supporting the architectural claim that defeasible patterns are queryable via SPARQL and available to external non-monotonic engines. Version 2.3.0 corrected BFO/IAO superclass alignments following formal audit against BFO 2020 (ISO/IEC 21838-2) and IAO definitions: Resource from independent continuant to information content entity; State from quality to specifically dependent continuant; Obligation refined to directive information entity (Donohue 2017); Principle and Constraint refined to directive information entity based on their prescriptive character (Frankel 1989, Ganascia 2007, Dennis et al. 2016); Capability from realizable entity to disposition."@en .
+    dc:description "Version 2.7.2 grounds the role and action relations in the OBO Relations Ontology and imports the curated proethica-foundation stub (a BFO/IAO/RO subset declared locally so the alignment resolves and is reasoned). hasRole was already subPropertyOf ro:has_role; v2.7.2 adds isRoleOf (inverse of hasRole) subPropertyOf ro:role_of, and grounds performsAction subPropertyOf ro:participates_in and isPerformedBy subPropertyOf ro:has_participant. The normative participant edges (obligatedParty, constrainedEntity, invokedBy) are deliberately NOT grounded under ro:has_participant: their subject is an information content entity, not a process, so process-participation does not apply (the same reason v2.3.0 removed has_participant from fulfillsObligation). Version 2.7.1 asserts Agent disjointWith Role, Capability, and Resource explicitly. These separations would follow from the BFO alignment (material entity versus role, disposition, and information content entity), but the validation harness strips owl:imports and does not load BFO, so without the explicit axiom an individual could be typed both Agent and Role (or Capability, or Resource) with no consistency violation. Agent was already disjoint with Action, Event, State, Principle, Obligation, and Constraint. Version 2.7.0 adds the canonical Event Calculus fluent-transition object properties initiates and terminates (a happening, Action or Event, initiates or terminates a State/fluent; Kowalski and Sergot 1986, Berreby et al. 2017), generalising the State-side activatedByEvent / terminatedByEvent to both happening kinds in the happening->State direction so the fluent layer connects the temporal components to the normative ones (Action/Event initiates State, State activatesObligation). Version 2.6.0 adds four participant object properties (obligatedParty, constrainedEntity, possessedBy, invokedBy) that wire the extracted 'who bears / is constrained by / possesses / invokes' fields of Obligation, Constraint, Capability, and Principle into first-class edges to the case Agent, joining the actor-edge family (availableTo, citedByAgent, affects). Their range is Agent, which is outside the nine disjoint D-tuple categories, so each edge is OWL-DL safe; possessedBy is declared owl:inverseOf hasCapability. Version 2.5.0 adds three defeasibility object properties (competesWith, prevailsOver, defeasibleUnder) that expose obligation competition as first-class structural relationships between typed individuals, supporting the architectural claim that defeasible patterns are queryable via SPARQL and available to external non-monotonic engines. Version 2.3.0 corrected BFO/IAO superclass alignments following formal audit against BFO 2020 (ISO/IEC 21838-2) and IAO definitions: Resource from independent continuant to information content entity; State from quality to specifically dependent continuant; Obligation refined to directive information entity (Donohue 2017); Principle and Constraint refined to directive information entity based on their prescriptive character (Frankel 1989, Ganascia 2007, Dennis et al. 2016); Capability from realizable entity to disposition."@en .
 
 ###############################################################
 # Core Formal Specification Classes -- BFO 2020 / IAO Aligned (v2.3.0)
@@ -137,6 +138,15 @@ proeth-core:hasRole a owl:ObjectProperty ;
     rdfs:comment "Relates an agent to a role it bears."@en ;
     skos:definition "Relates an agent to a role it bears."@en .
 
+proeth-core:isRoleOf a owl:ObjectProperty ;
+    owl:inverseOf proeth-core:hasRole ;
+    rdfs:subPropertyOf ro:0000081 ;  # RO:role of
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Agent ;
+    rdfs:label "is role of"@en ;
+    rdfs:comment "Relates a role to the agent that bears it. Inverse of hasRole, so the reasoner sees both directions from one asserted edge. Grounded under RO:role of (v2.7.2)."@en ;
+    skos:definition "Relates a Role to the Agent who bears it. Inverse of hasRole."@en .
+
 proeth-core:hasObligation a owl:ObjectProperty ;
     rdfs:domain proeth-core:Role ;
     rdfs:range proeth-core:Obligation ;
@@ -160,6 +170,7 @@ proeth-core:hasCapability a owl:ObjectProperty ;
     skos:definition "Relates an agent to capabilities they possess."@en .
 
 proeth-core:performsAction a owl:ObjectProperty ;
+    rdfs:subPropertyOf ro:0000056 ;  # RO:participates in (a continuant participates in a process)
     rdfs:domain proeth-core:Agent ;
     rdfs:range proeth-core:Action ;
     rdfs:label "performs action"@en ;
@@ -168,6 +179,7 @@ proeth-core:performsAction a owl:ObjectProperty ;
 
 proeth-core:isPerformedBy a owl:ObjectProperty ;
     owl:inverseOf proeth-core:performsAction ;
+    rdfs:subPropertyOf ro:0000057 ;  # RO:has participant (a process has a continuant participant)
     rdfs:domain proeth-core:Action ;
     rdfs:range proeth-core:Agent ;
     rdfs:label "is performed by"@en ;
@@ -600,6 +612,13 @@ proeth-core:Event owl:disjointWith proeth-core:Agent, proeth-core:Resource, proe
 
 # SDC (State) is disjoint from material entities, ICEs, and other SDC subtypes
 proeth-core:State owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .
+
+# Agent (material entity) cannot also be a Role, Capability, or Resource (v2.7.1).
+# Asserted explicitly because the validation harness strips owl:imports, so the BFO
+# separation (material entity vs role / disposition / information content entity) is not
+# loaded. Agent is already disjoint with Action, Event, State, Principle, Obligation,
+# and Constraint above.
+proeth-core:Agent owl:disjointWith proeth-core:Role, proeth-core:Capability, proeth-core:Resource .
 
 # Core formal specification components remain disjoint
 [] a owl:AllDisjointClasses ;
