@@ -232,7 +232,15 @@ def validate_bfo_compliance(ontology_name: str) -> Dict[str, Any]:
         if not ver or not ver.content:
             return {"ontology_name": ontology_name, "error": "no current version content"}
         try:
-            result = OntologyValidationService(storage_backend=None).validate_ontology(ver.content)
+            # Resolve BFO inheritance over the merged foundation+core+intermediate+case
+            # graph (read from disk by pellet_validate), so transitive subClassOf chains
+            # through proethica-core and IAO are visible and indirect BFO inheritance is
+            # recognised instead of false-flagged. Same merge recipe the reasoning tools use.
+            from validation.pellet_validate import _build_merged_graph
+            merged = _build_merged_graph(ver.content)
+            result = OntologyValidationService(storage_backend=None).validate_ontology(
+                ver.content, context_graph=merged
+            )
         except Exception as exc:  # noqa: BLE001
             return {"ontology_name": ontology_name,
                     "error": f"validation-failed: {type(exc).__name__}: {exc}"}

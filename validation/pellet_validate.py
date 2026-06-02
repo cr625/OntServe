@@ -104,6 +104,20 @@ def _add_missing_subclass_declarations(g: Graph) -> int:
     field of its instances and add the missing declaration.
 
     Returns the number of subClassOf triples added.
+
+    LOAD-BEARING; not made redundant by the foundation stub (verified 2026-06-01).
+    Modern staged re-extraction commits (e.g. case-15 run 52) leave a case TTL
+    whose compound classes carry no subClassOf-core in the case file itself; that
+    declaration lives in proethica-intermediate-extended, which this harness does
+    NOT load (it merges foundation + core + intermediate + case only). Without
+    this patch those classes are orphan to Pellet and the nine-way disjointness
+    cannot fire on their individuals (case-15 needs 43 such patches; older
+    corpus cases such as case-72 bake subClassOf-core into the TTL and need none).
+    The patch supplies case-class -> core; the foundation stub supplies core ->
+    BFO, so together the reconstructed chain reaches BFO and the alignment is
+    fully resolved. The non-self-contained modern case TTL is the long-standing
+    "subclass emission from conceptCategory" open item (proethica/CLAUDE.md); it
+    affects Section C and is tracked separately, not here.
     """
     added = 0
     # Collect all (class_uri -> conceptCategory) from individual instances
