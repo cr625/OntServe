@@ -170,7 +170,16 @@ def _build_merged_graph(case_content: str) -> Graph:
     # Add missing rdfs:subClassOf for LLM-generated types
     n = _add_missing_subclass_declarations(g)
     if n:
-        log.info("Added %d missing subClassOf declarations from conceptCategory", n)
+        # R1 self-contained-TTL safety net (2026-06-04): a self-contained case TTL
+        # (commit-time subClassOf-core emission) needs ZERO patches here. A non-zero
+        # count means this case was persisted WITHOUT its subclass chain and is being
+        # validated against a reconstructed graph, not the stored artifact -- WARN so
+        # it is visible rather than silently reconstructed.
+        log.warning(
+            "pellet_validate patched %d missing subClassOf-core declarations from "
+            "conceptCategory -- this case TTL is NOT self-contained (validated against a "
+            "reconstructed graph, not the persisted one). Re-commit/backfill to fix.", n
+        )
 
     return g
 
