@@ -15,18 +15,31 @@ from datetime import datetime, timezone
 
 import rdflib
 from rdflib import RDF, RDFS, OWL
+from rdflib.namespace import SKOS
 from sqlalchemy import select
 
 from web.models import db, OntologyEntity
 
-# OWL structural types to skip in the catch-all pass
+# OWL/SKOS structural types to skip in the catch-all pass. ConceptScheme is
+# captured by its own pass below, so the catch-all must not also grab it.
 _OWL_STRUCTURAL_TYPES = frozenset([
     OWL.Class, OWL.ObjectProperty, OWL.DatatypeProperty, OWL.AnnotationProperty,
     OWL.NamedIndividual, OWL.Ontology, OWL.Restriction, OWL.AllDisjointClasses,
     OWL.AllDifferent, OWL.FunctionalProperty, OWL.InverseFunctionalProperty,
     OWL.SymmetricProperty, OWL.TransitiveProperty, OWL.IrreflexiveProperty,
     OWL.AsymmetricProperty, OWL.ReflexiveProperty,
+    SKOS.ConceptScheme,
 ])
+
+
+def _comment_or_definition(g, subject):
+    """rdfs:comment if present, else skos:definition. SKOS vocabularies carry the
+    human description on skos:definition, so the entity page would otherwise show
+    no description for borrowed crosswalk terms."""
+    val = next(g.objects(subject, RDFS.comment), None)
+    if val is None:
+        val = next(g.objects(subject, SKOS.definition), None)
+    return str(val) if val else None
 
 
 def extract_entities_from_content(ontology, content, format_hint='turtle'):
@@ -84,16 +97,16 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
 
     now = datetime.now(timezone.utc)
 
-    # Predicates to skip when collecting class properties
-    class_skip_predicates = {RDF.type, RDFS.label, RDFS.comment, RDFS.subClassOf}
+    # Predicates to skip when collecting class properties. skos:definition is
+    # surfaced as the entity comment, so it is not also repeated as a property.
+    class_skip_predicates = {RDF.type, RDFS.label, RDFS.comment, RDFS.subClassOf, SKOS.definition}
 
     # --- Pass 1: Standard OWL classes ---
     for cls in g.subjects(RDF.type, OWL.Class):
         label = next(g.objects(cls, RDFS.label), None)
-        comment = next(g.objects(cls, RDFS.comment), None)
         subclass_of = list(g.objects(cls, RDFS.subClassOf))
         label_str = str(label) if label else None
-        comment_str = str(comment) if comment else None
+        comment_str = _comment_or_definition(g, cls)
 
         # Collect additional properties (e.g., discoveredInCase, importance)
         properties = _collect_properties(g, cls, class_skip_predicates)
@@ -162,21 +175,27 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         entity_counts['property'] += 1
 
     # --- Pass 4: Named individuals (with full property collection) ---
-    skip_predicates = {RDF.type, RDFS.label, RDFS.comment}
+    skip_predicates = {RDF.type, RDFS.label, RDFS.comment, SKOS.definition}
     for indiv in g.subjects(RDF.type, OWL.NamedIndividual):
         uri_str = str(indiv)
         if uri_str in captured_uris:
             continue
 
         label = next(g.objects(indiv, RDFS.label), None)
-        comment = next(g.objects(indiv, RDFS.comment), None)
         label_str = str(label) if label else None
-        comment_str = str(comment) if comment else None
+        comment_str = _comment_or_definition(g, indiv)
 
         # Get rdf:type URIs excluding owl:NamedIndividual for parent_uri
         types = [str(t) for t in g.objects(indiv, RDF.type)
                  if t != OWL.NamedIndividual]
-        parent_uri = types[0] if types else None
+        # A skos:Concept that is serialized as a NamedIndividual (e.g. a borrowed
+        # crosswalk term) is a vocabulary concept, not a case individual. Type it
+        # 'concept' so the UI does not label it "Individual", which here means a
+        # unique case entity. Prefer a real class over skos:Concept for "instance of".
+        is_concept = (indiv, RDF.type, SKOS.Concept) in g
+        entity_type = 'concept' if is_concept else 'individual'
+        non_skos_types = [t for t in types if t != str(SKOS.Concept)]
+        parent_uri = (non_skos_types or types or [None])[0]
 
         # Collect all non-standard properties into JSON
         properties = _collect_properties(g, indiv, skip_predicates)
@@ -185,7 +204,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
 
         entity = OntologyEntity(
             ontology_id=ontology.id,
-            entity_type='individual',
+            entity_type=entity_type,
             uri=uri_str,
             label=label_str,
             comment=comment_str,
@@ -196,9 +215,39 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         )
         db.session.add(entity)
         captured_uris.add(uri_str)
-        entity_counts['individual'] += 1
+        entity_counts[entity_type] = entity_counts.get(entity_type, 0) + 1
 
-    # --- Pass 5: Catch-all for labeled resources not captured above ---
+    # --- Pass 5: SKOS concept schemes (resolvable vocabulary nodes) ---
+    # A skos:ConceptScheme groups borrowed crosswalk terms (e.g. the IFC actor
+    # roles). Terms carry skos:inScheme pointing here, so the scheme must resolve
+    # to its own page rather than 404. entity_type 'scheme' keeps it out of the
+    # class/property/individual lists while staying directly resolvable.
+    scheme_skip_predicates = {RDF.type, RDFS.label, RDFS.comment, SKOS.definition}
+    for scheme in g.subjects(RDF.type, SKOS.ConceptScheme):
+        uri_str = str(scheme)
+        if uri_str in captured_uris:
+            continue
+
+        label = next(g.objects(scheme, RDFS.label), None)
+        label_str = str(label) if label else None
+        comment_str = _comment_or_definition(g, scheme)
+        properties = _collect_properties(g, scheme, scheme_skip_predicates)
+
+        entity = OntologyEntity(
+            ontology_id=ontology.id,
+            entity_type='scheme',
+            uri=uri_str,
+            label=label_str,
+            comment=comment_str,
+            properties=properties if properties else None,
+            content_hash=OntologyEntity.compute_content_hash(uri_str, label_str, comment_str),
+            updated_at=now
+        )
+        db.session.add(entity)
+        captured_uris.add(uri_str)
+        entity_counts['scheme'] = entity_counts.get('scheme', 0) + 1
+
+    # --- Pass 6: Catch-all for labeled resources not captured above ---
     # Handles domain-typed individuals (e.g., rdf:type proethica:Obligation),
     # OBO-style bare resources, and other non-standard patterns.
     for subj in set(g.subjects(RDFS.label, None)):
@@ -214,9 +263,8 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             continue
 
         label = next(g.objects(subj, RDFS.label), None)
-        comment = next(g.objects(subj, RDFS.comment), None)
         label_str = str(label) if label else None
-        comment_str = str(comment) if comment else None
+        comment_str = _comment_or_definition(g, subj)
 
         # Determine entity_type and parent_uri from rdf:type
         domain_types = [str(t) for t in types if t not in _OWL_STRUCTURAL_TYPES]

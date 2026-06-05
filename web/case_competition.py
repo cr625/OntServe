@@ -20,6 +20,7 @@ from rdflib import Graph, Namespace, RDFS, URIRef
 
 CORE = Namespace("http://proethica.org/ontology/core#")
 PROETH = Namespace("http://proethica.org/ontology/intermediate#")
+PROETH_PROV = Namespace("http://proethica.org/provenance#")
 
 COMPETES_WITH = CORE.competesWith
 PREVAILS_OVER = CORE.prevailsOver
@@ -27,7 +28,11 @@ DEFEASIBLE_UNDER = CORE.defeasibleUnder
 HAS_OBLIGATION = CORE.hasObligation
 ADHERES_TO_PRINCIPLE = CORE.adheresToPrinciple
 DERIVED_FROM_PRINCIPLE = PROETH.derivedFromPrinciple
-SOURCETEXT = PROETH.sourcetext
+# Grounding quote. The commit serializer emits it as proeth-prov:sourceText
+# (typed provenance). Older case TTLs (pre the 2026-05 serializer cleanup, before
+# the corpus is re-extracted) carry it as proeth:sourceText / proeth:sourcetext, so
+# all three are tried in order for the transition window.
+SOURCETEXT_CANDIDATES = (PROETH_PROV.sourceText, PROETH.sourceText, PROETH.sourcetext)
 
 
 def _localname(iri: str) -> str:
@@ -65,8 +70,11 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
         return str(lbl) if lbl else _localname(str(iri))
 
     def source_text(iri: URIRef) -> Optional[str]:
-        st = g.value(iri, SOURCETEXT)
-        return str(st) if st else None
+        for pred in SOURCETEXT_CANDIDATES:
+            st = g.value(iri, pred)
+            if st:
+                return str(st)
+        return None
 
     def ref(iri: URIRef) -> Dict[str, Optional[str]]:
         return {"iri": str(iri), "label": label(iri)}

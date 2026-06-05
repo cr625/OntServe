@@ -1,0 +1,183 @@
+@prefix : <http://proethica.org/ontology/foundation#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix iao: <http://purl.obolibrary.org/obo/IAO_> .
+@prefix ro: <http://purl.obolibrary.org/obo/RO_> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+#################################################################
+# ProEthica Foundation Stub
+#
+# A curated subset of BFO 2020, IAO, and the OBO Relations Ontology holding
+# only the foundational terms that proethica-core and proethica-intermediate
+# actually reference, with authentic labels, definitions, and source IRIs.
+# Same pattern as ifc-roles.ttl: reuse external vocabulary by transparent
+# local declaration rather than importing the full upstream ontologies (which
+# would drag in biomedical and unrelated material).
+#
+# Purpose: make core's bfo:/iao:/ro: references resolve AND make the BFO
+# alignment reasoned. Once this stub is merged with core, the BFO branch
+# disjointness (continuant vs occurrent; independent continuant vs SDC vs GDC)
+# plus the subclass chains entail the category separations that core would
+# otherwise have to assert one pair at a time (for example Agent, a material
+# entity, is then derivably disjoint from Role/Capability/State, which are
+# SDC subtypes, and from Resource, an ICE under GDC).
+#
+# Definitions are quoted verbatim from BFO 2020 (bfo-2.0.owl) and IAO
+# (iao-2020.owl) where present; the two BFO terms whose local files carry no
+# IAO_0000115 definition (entity, disposition) use the BFO 2020 Reference
+# gloss. RO terms use the OBO RO definitions (RO is not held locally).
+#################################################################
+
+<http://proethica.org/ontology/foundation> a owl:Ontology ;
+    rdfs:label "ProEthica Foundation Stub"@en ;
+    dc:creator "ProEthica AI"@en ;
+    dc:date "2026-06-01"^^xsd:date ;
+    owl:versionInfo "1.0.0"^^xsd:string ;
+    rdfs:comment "Curated BFO 2020 / IAO / RO subset: the foundational terms proethica-core references, declared locally so the alignment resolves and is reasoned. Not a substitute for the upstream ontologies; holds only the cited terms."@en .
+
+#################################################################
+# BFO 2020 classes (the upper backbone core aligns to)
+#################################################################
+
+bfo:0000001 a owl:Class ;
+    rdfs:label "entity"@en ;
+    skos:definition "Anything that exists, has existed, or will exist (BFO 2020 Reference gloss; the local BFO file carries no IAO_0000115 definition for this term)."@en ;
+    rdfs:isDefinedBy obo:bfo.owl .
+
+bfo:0000002 a owl:Class ;
+    rdfs:subClassOf bfo:0000001 ;
+    rdfs:label "continuant"@en ;
+    skos:definition "An entity that exists in full at any time in which it exists at all, persists through time while maintaining its identity and has no temporal parts."@en ;
+    rdfs:isDefinedBy obo:bfo.owl .
+
+bfo:0000003 a owl:Class ;
+    rdfs:subClassOf bfo:0000001 ;
+    rdfs:label "occurrent"@en ;
+    skos:definition "An entity that has temporal parts and that happens, unfolds or develops through time."@en ;
+    rdfs:isDefinedBy obo:bfo.owl .
+
+bfo:0000004 a owl:Class ;
+    rdfs:subClassOf bfo:0000002 ;
+    rdfs:label "independent continuant"@en ;
+    skos:definition "b is an independent continuant = Def. b is a continuant which is such that there is no c and no t such that b s-depends_on c at t. (axiom label in BFO2 Reference: [017-002])"@en ;
+    rdfs:isDefinedBy obo:bfo.owl .
+
+bfo:0000020 a owl:Class ;
+    rdfs:subClassOf bfo:0000002 ;
+    rdfs:label "specifically dependent continuant"@en ;
+    skos:definition "b is a specifically dependent continuant = Def. b is a continuant & there is some independent continuant c which is not a spatial region and which is such that b s-depends_on c at every time t during the course of b's existence. (axiom label in BFO2 Reference: [050-003])"@en ;
+    rdfs:isDefinedBy obo:bfo.owl .
+
+bfo:0000031 a owl:Class ;
+    rdfs:subClassOf bfo:0000002 ;
+    rdfs:label "generically dependent continuant"@en ;
+    skos:definition "b is a generically dependent continuant = Def. b is a continuant that g-depends_on one or more other entities. (axiom label in BFO2 Reference: [074-001])"@en ;
+    rdfs:isDefinedBy obo:bfo.owl .
+
+bfo:0000017 a owl:Class ;
+    rdfs:subClassOf bfo:0000020 ;
+    rdfs:label "realizable entity"@en ;
+    skos:definition "A specifically dependent continuant that inheres in continuant entities and is not exhibited in full at every time in which it inheres in an entity or group of entities. The exhibition or actualization of a realizable entity is a particular manifestation, functioning or process that occurs under certain circumstances."@en ;
+    rdfs:isDefinedBy obo:bfo.owl .
+
+bfo:0000023 a owl:Class ;
+    rdfs:subClassOf bfo:0000017 ;
+    rdfs:label "role"@en ;
+    skos:definition "A realizable entity the manifestation of which brings about some result or end that is not essential to a continuant in virtue of the kind of thing that it is but that can be served or participated in by that kind of continuant in some kinds of natural, social or institutional contexts."@en ;
+    rdfs:isDefinedBy obo:bfo.owl .
+
+bfo:0000016 a owl:Class ;
+    rdfs:subClassOf bfo:0000017 ;
+    rdfs:label "disposition"@en ;
+    skos:definition "A realizable entity whose realization occurs when its bearer is in some special physical circumstances, and this realization occurs in virtue of the bearer's physical make-up (BFO 2020 Reference gloss; the local BFO file carries no IAO_0000115 definition for this term)."@en ;
+    rdfs:isDefinedBy obo:bfo.owl .
+
+bfo:0000015 a owl:Class ;
+    rdfs:subClassOf bfo:0000003 ;
+    rdfs:label "process"@en ;
+    skos:definition "p is a process = Def. p is an occurrent that has temporal proper parts and for some time t, p s-depends_on some material entity at t. (axiom label in BFO2 Reference: [083-003])"@en ;
+    rdfs:isDefinedBy obo:bfo.owl .
+
+bfo:0000040 a owl:Class ;
+    rdfs:subClassOf bfo:0000004 ;
+    rdfs:label "material entity"@en ;
+    skos:definition "An independent continuant that is spatially extended whose identity is independent of that of other entities and can be maintained through time."@en ;
+    rdfs:isDefinedBy obo:bfo.owl .
+
+#################################################################
+# BFO 2020 foundational disjointness (verbatim from bfo-2.0.owl)
+# These are what make core's alignment do reasoning work.
+#################################################################
+
+bfo:0000002 owl:disjointWith bfo:0000003 .   # continuant vs occurrent
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( bfo:0000004 bfo:0000020 bfo:0000031 ) .  # independent cont / SDC / GDC
+
+#################################################################
+# IAO classes (the information-artifact branch core aligns to)
+#################################################################
+
+iao:0000030 a owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;
+    rdfs:label "information content entity"@en ;
+    skos:definition "A generically dependent continuant that is about some thing."@en ;
+    rdfs:isDefinedBy obo:iao.owl .
+
+iao:0000033 a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;
+    rdfs:label "directive information entity"@en ;
+    skos:definition "An information content entity whose concretizations indicate to their bearer how to realize them in a process."@en ;
+    rdfs:isDefinedBy obo:iao.owl ;
+    skos:scopeNote "Used by proethica-core for Principle, Obligation, and Constraint (the prescriptive, world-to-word components). IAO declares no descriptive-ICE counterpart and no directive/descriptive disjointness; the Resource-vs-normative separation in proethica-core is a domain stipulation of the D-tuple methodology, not an IAO entailment."@en .
+
+iao:0000310 a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;
+    rdfs:label "document"@en ;
+    skos:definition "A collection of information content entities intended to be understood together as a whole."@en ;
+    rdfs:isDefinedBy obo:iao.owl .
+
+iao:0000314 a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;
+    rdfs:label "document part"@en ;
+    skos:definition "An information content entity that is part of a document."@en ;
+    rdfs:isDefinedBy obo:iao.owl .
+
+#################################################################
+# OBO Relations Ontology object properties (the relation superproperties
+# core grounds its own properties under). RO is not held locally; labels and
+# definitions are the OBO RO definitions.
+#################################################################
+
+ro:0000087 a owl:ObjectProperty ;
+    rdfs:label "has role"@en ;
+    skos:definition "A relation between an independent continuant (the bearer) and a role, in which the role specifically depends on the bearer."@en ;
+    rdfs:isDefinedBy obo:ro.owl .
+
+ro:0000081 a owl:ObjectProperty ;
+    owl:inverseOf ro:0000087 ;
+    rdfs:label "role of"@en ;
+    skos:definition "A relation between a role and its bearer. Inverse of has role."@en ;
+    rdfs:isDefinedBy obo:ro.owl .
+
+ro:0000056 a owl:ObjectProperty ;
+    rdfs:label "participates in"@en ;
+    skos:definition "A relation between a continuant and a process, in which the continuant is somehow involved in the process."@en ;
+    rdfs:isDefinedBy obo:ro.owl .
+
+ro:0000057 a owl:ObjectProperty ;
+    owl:inverseOf ro:0000056 ;
+    rdfs:label "has participant"@en ;
+    skos:definition "A relation between a process and a continuant, in which the continuant is somehow involved in the process. Inverse of participates in."@en ;
+    rdfs:isDefinedBy obo:ro.owl .
+
+ro:0002411 a owl:ObjectProperty ;
+    rdfs:label "causally upstream of"@en ;
+    skos:definition "p is causally upstream of q iff p is causally related to q, the start of p precedes the start of q, and the end of p precedes the end of q."@en ;
+    rdfs:isDefinedBy obo:ro.owl .

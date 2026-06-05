@@ -1,0 +1,59 @@
+@prefix sh:     <http://www.w3.org/ns/shacl#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:   <http://proethica.org/ontology/core#> .
+@prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix pesh:   <http://proethica.org/shapes/engineering#> .
+
+# ProEthica ENGINEERING-domain conformance shapes. Layers on core-shapes.ttl
+# (auto-loaded by validation/conformance.py for domain=engineering). Run with
+# pyshacl inference='owlrl' so the subClassOf* closure (scm-sco) is materialized
+# before validation: a role facet whose leaf class chains through an occupational
+# archetype then carries the archetype as an inferred rdf:type, which the shape
+# below checks for. A different domain (e.g. legal) ships its own
+# <domain>-shapes.ttl with its own archetype set; no code changes.
+
+pesh: a owl:Ontology ;
+    rdfs:label "ProEthica engineering conformance shapes" ;
+    sh:declare [ sh:prefix "core"   ; sh:namespace "http://proethica.org/ontology/core#"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "proeth" ; sh:namespace "http://proethica.org/ontology/intermediate#"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "rdf"    ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] .
+
+# RoleArchetypeShape: every role must pass through an OCCUPATIONAL archetype on
+# its way to core:Role; nothing attaches directly to core:Role (or bfo:0000023)
+# without an occupational kind. The occupational archetypes (EngineerRole,
+# ClientRole, OwnerRole, ...) are tagged proeth:archetypeAxis "occupational" in
+# proethica-intermediate.ttl. After the OWL-RL closure, a correctly-archetyped
+# role facet carries one of those archetypes as an inferred rdf:type; a facet
+# typed straight to core:Role (or only to a RELATIONAL archetype such as
+# ProfessionalPeerRole) does not, and is flagged.
+#
+# Severity is sh:Warning, not sh:Violation: an un-archetyped role is not
+# logically inconsistent (Pellet stays consistent), it is architecturally
+# incomplete. The warning surfaces the "unmapped tail" -- roles whose label
+# matched no archetype synonym in the commit-time resolver -- so it can be
+# repaired (add a synonym / archetype) without failing the conformance gate.
+pesh:RoleArchetypeShape
+    a sh:NodeShape ;
+    sh:targetClass core:Role ;
+    rdfs:label "Role passes through an occupational archetype" ;
+    # Severity is set on the shape (pyshacl reads sh:severity from the shape, not
+    # the constraint node) so the result is a Warning, not a Violation: an
+    # un-archetyped role is architecturally incomplete, not logically inconsistent.
+    sh:severity sh:Warning ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Role individual does not chain through any occupational archetype (it attaches to core:Role without an occupational kind such as EngineerRole/ClientRole/OwnerRole). Add the occupational archetype as a parent of its role class, or extend the resolver synonyms." ;
+        sh:prefixes pesh: ;
+        sh:select """
+            SELECT $this
+            WHERE {
+                FILTER NOT EXISTS {
+                    $this rdf:type ?arch .
+                    ?arch proeth:archetypeAxis "occupational" .
+                }
+            }
+        """ ;
+    ] .

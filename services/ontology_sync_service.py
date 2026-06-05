@@ -111,6 +111,35 @@ class OntologySyncService:
             logger.warning(f"Could not read dcterms:title from {ttl_path.name}: {e}")
         return None
 
+    def _extract_ontology_meta(self, ttl_path: Path) -> Dict:
+        """Read owl:Ontology-level provenance from a TTL: rdfs:comment (-> description),
+        dcterms:source, owl:versionInfo, dcterms:title. Lets imported vocabularies (e.g. the
+        ifc-roles crosswalk stub) carry their provenance into the OntServe ontology record
+        instead of the generic 'Auto-imported from ...' default."""
+        from rdflib import Graph
+        from rdflib.namespace import OWL, RDF, RDFS, DCTERMS
+        out: Dict = {}
+        try:
+            g = Graph()
+            g.parse(str(ttl_path), format='turtle')
+            for subj in g.subjects(RDF.type, OWL.Ontology):
+                comment = g.value(subj, RDFS.comment)
+                if comment:
+                    out['description'] = str(comment).strip()
+                source = g.value(subj, DCTERMS.source)
+                if source:
+                    out['source'] = str(source).strip()
+                version = g.value(subj, OWL.versionInfo)
+                if version:
+                    out['version'] = str(version).strip()
+                title = g.value(subj, DCTERMS.title)
+                if title:
+                    out['title'] = str(title).strip()
+                break  # one owl:Ontology subject expected
+        except Exception as e:
+            logger.warning(f"Could not read owl:Ontology metadata from {ttl_path.name}: {e}")
+        return out
+
     def _sync_single_ontology(self, ttl_path: Path, force: bool = False) -> Dict:
         """
         Sync a single TTL file.
@@ -138,14 +167,18 @@ class OntologySyncService:
             # header; carry it into display_name so the case view shows the real
             # title instead of the opaque "proethica-case-N" id. Set on create
             # only, so a manually edited display_name is never overwritten.
+            ometa = self._extract_ontology_meta(ttl_path)
             meta_data = {}
-            title = self._extract_dcterms_title(ttl_path)
-            if title:
-                meta_data['display_name'] = title
+            if ometa.get('title'):
+                meta_data['display_name'] = ometa['title']
+            if ometa.get('source'):
+                meta_data['source'] = ometa['source']
+            if ometa.get('version'):
+                meta_data['version'] = ometa['version']
             ontology = Ontology(
                 name=ontology_name,
                 base_uri=f"http://proethica.org/ontology/{ontology_name}#",
-                description=f"Auto-imported from {ttl_path.name}",
+                description=ometa.get('description') or f"Auto-imported from {ttl_path.name}",
                 is_editable=True,
                 meta_data=meta_data
             )
@@ -171,6 +204,21 @@ class OntologySyncService:
             }
 
         logger.info(f"Updating {ontology_name} - {'forced' if force else 'hash changed'}")
+
+        # Refresh ontology-level provenance from the TTL on every (re)sync, preserving a
+        # manually-set display_name. Lets a vocabulary's owl:Ontology comment/source/version
+        # reach the OntServe record instead of the generic 'Auto-imported' default.
+        ometa = self._extract_ontology_meta(ttl_path)
+        if ometa.get('description'):
+            ontology.description = ometa['description']
+        md = dict(ontology.meta_data or {})
+        if ometa.get('source'):
+            md['source'] = ometa['source']
+        if ometa.get('version'):
+            md['version'] = ometa['version']
+        if ometa.get('title') and not md.get('display_name'):
+            md['display_name'] = ometa['title']
+        ontology.meta_data = md
 
         # Read TTL content
         with open(ttl_path, 'r', encoding='utf-8') as f:
@@ -254,9 +302,20 @@ class OntologySyncService:
             if entity:
                 entities.append(entity)
 
-        # Extract named individuals
+        # Extract named individuals. A NamedIndividual that is also a skos:Concept
+        # is a borrowed vocabulary term, not a case individual; type it 'concept'
+        # so the UI does not mislabel it "Individual".
         for s in graph.subjects(RDF.type, OWL.NamedIndividual):
-            entity = self._create_entity_from_subject(graph, s, 'individual', ontology.id)
+            etype = 'concept' if (s, RDF.type, SKOS.Concept) in graph else 'individual'
+            entity = self._create_entity_from_subject(graph, s, etype, ontology.id)
+            if entity:
+                entities.append(entity)
+
+        # Extract SKOS concept schemes so a borrowed-vocabulary scheme (e.g. the
+        # IFC actor roles) resolves to its own page; terms point here via
+        # skos:inScheme. Must match the entity_type used by web/entity_extraction.py.
+        for s in graph.subjects(RDF.type, SKOS.ConceptScheme):
+            entity = self._create_entity_from_subject(graph, s, 'scheme', ontology.id)
             if entity:
                 entities.append(entity)
 
@@ -318,23 +377,36 @@ class OntologySyncService:
                 if not obj_str.startswith('_:'):
                     parent_uri = obj_str
                     break
-        elif entity_type == 'individual':
-            skip_types = {str(OWL.NamedIndividual), str(OWL.Class), str(OWL.Thing)}
+        elif entity_type in ('individual', 'concept'):
+            # Prefer a real class (e.g. IfcActorRoleValue) over skos:Concept itself
+            # for the "instance of" link.
+            skip_types = {str(OWL.NamedIndividual), str(OWL.Class), str(OWL.Thing),
+                          str(SKOS.Concept)}
             for obj in graph.objects(subject, RDF.type):
                 obj_str = str(obj)
                 if obj_str not in skip_types and not obj_str.startswith('_:'):
                     parent_uri = obj_str
                     break
 
-        # Collect all properties for individuals
+        # Collect annotation/provenance properties for classes, individuals, and
+        # concepts so class-level provenance (proeth-prov:firstDiscoveredInCase,
+        # sourceText, and so on, written on the reusable extended-ontology classes)
+        # is surfaced on the entity page. Predicates rendered elsewhere are skipped:
+        # label/comment/definition and the subClassOf parent (shown structurally),
+        # and the SKOS crosswalk + seeAlso/source (shown in the Mappings card), so
+        # they do not duplicate into a plain Relationships row.
         properties = None
-        if entity_type == 'individual':
+        if entity_type in ('individual', 'concept', 'class', 'scheme'):
+            prop_skip = {
+                str(RDF.type), str(RDFS.label), str(RDFS.comment), str(SKOS.definition),
+                str(RDFS.subClassOf), str(RDFS.seeAlso),
+                str(SKOS.exactMatch), str(SKOS.closeMatch), str(SKOS.broadMatch),
+                str(SKOS.relatedMatch), 'http://purl.org/dc/terms/source',
+            }
             props = {}
             for p, o in graph.predicate_objects(subject):
                 p_str = str(p)
-                # Skip standard RDF/OWL predicates already handled above
-                if p_str in (str(RDF.type), str(RDFS.label), str(RDFS.comment),
-                             str(SKOS.definition)):
+                if p_str in prop_skip:
                     continue
                 key = p_str.split('#')[-1].split('/')[-1]
                 val = str(o)

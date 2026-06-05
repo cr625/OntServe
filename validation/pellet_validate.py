@@ -31,8 +31,16 @@ WEB_DIR = ONTSERVE_ROOT / "web"
 sys.path.insert(0, str(ONTSERVE_ROOT))
 sys.path.insert(0, str(WEB_DIR))
 
+FOUNDATION_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-foundation.ttl"
 CORE_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-core.ttl"
 INTERMEDIATE_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-intermediate.ttl"
+# NOTE: the discovered-class store (proethica-intermediate-extended.ttl) is deliberately
+# NOT loaded here. It is cross-case and append-only, so loading it wholesale imports every
+# case's drift into every other case's validation (measured 2026-06-01: it dropped the corpus
+# from 119/119 to 117/119 and carries a SafetyObligation self-loop). The per-case
+# _add_missing_subclass_declarations patch reconstructs each case's own subClassOf-core from
+# its individuals' conceptCategory, which is local and drift-free. A normalized (D15) lean
+# case validates correctly under that patch with no extended load. See ontology-architecture.md.
 
 log = logging.getLogger(__name__)
 
@@ -103,6 +111,20 @@ def _add_missing_subclass_declarations(g: Graph) -> int:
     field of its instances and add the missing declaration.
 
     Returns the number of subClassOf triples added.
+
+    LOAD-BEARING; not made redundant by the foundation stub (verified 2026-06-01).
+    Modern staged re-extraction commits (e.g. case-15 run 52) leave a case TTL
+    whose compound classes carry no subClassOf-core in the case file itself; that
+    declaration lives in proethica-intermediate-extended, which this harness does
+    NOT load (it merges foundation + core + intermediate + case only). Without
+    this patch those classes are orphan to Pellet and the nine-way disjointness
+    cannot fire on their individuals (case-15 needs 43 such patches; older
+    corpus cases such as case-72 bake subClassOf-core into the TTL and need none).
+    The patch supplies case-class -> core; the foundation stub supplies core ->
+    BFO, so together the reconstructed chain reaches BFO and the alignment is
+    fully resolved. The non-self-contained modern case TTL is the long-standing
+    "subclass emission from conceptCategory" open item (proethica/CLAUDE.md); it
+    affects Section C and is tracked separately, not here.
     """
     added = 0
     # Collect all (class_uri -> conceptCategory) from individual instances
@@ -133,6 +155,10 @@ def _add_missing_subclass_declarations(g: Graph) -> int:
 
 def _build_merged_graph(case_content: str) -> Graph:
     g = Graph()
+    # Foundation stub first: the curated BFO/IAO/RO subset core aligns to, declared
+    # locally so the alignment is reasoned (branch disjointness + subclass chains) rather
+    # than dangling. Replaces reliance on the stripped external bfo.owl/iao.owl/ro.owl.
+    g.parse(str(FOUNDATION_TTL), format="turtle")
     g.parse(str(CORE_TTL), format="turtle")
     g.parse(str(INTERMEDIATE_TTL), format="turtle")
     g.parse(data=case_content, format="turtle")
@@ -144,7 +170,16 @@ def _build_merged_graph(case_content: str) -> Graph:
     # Add missing rdfs:subClassOf for LLM-generated types
     n = _add_missing_subclass_declarations(g)
     if n:
-        log.info("Added %d missing subClassOf declarations from conceptCategory", n)
+        # R1 self-contained-TTL safety net (2026-06-04): a self-contained case TTL
+        # (commit-time subClassOf-core emission) needs ZERO patches here. A non-zero
+        # count means this case was persisted WITHOUT its subclass chain and is being
+        # validated against a reconstructed graph, not the stored artifact -- WARN so
+        # it is visible rather than silently reconstructed.
+        log.warning(
+            "pellet_validate patched %d missing subClassOf-core declarations from "
+            "conceptCategory -- this case TTL is NOT self-contained (validated against a "
+            "reconstructed graph, not the persisted one). Re-commit/backfill to fix.", n
+        )
 
     return g
 

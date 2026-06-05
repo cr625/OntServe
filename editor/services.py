@@ -570,12 +570,17 @@ class OntologyValidationService:
             logger.warning(f"Error loading foundation ontologies: {e}")
             logger.info("Validation service will run without foundation ontology checks")
     
-    def validate_ontology(self, ttl_content: str) -> Dict[str, Any]:
+    def validate_ontology(self, ttl_content: str, context_graph: Optional[Graph] = None) -> Dict[str, Any]:
         """
         Validate an ontology against BFO and other standards.
 
         Args:
             ttl_content: The TTL content to validate
+            context_graph: Optional merged graph (foundation + core + intermediate +
+                target) used to resolve transitive BFO inheritance. When supplied,
+                the BFO-compliance check runs even if no per-name foundation graph
+                was loaded from the database, because the merged graph already
+                carries the BFO backbone.
 
         Returns:
             Validation result with errors and warnings
@@ -593,9 +598,11 @@ class OntologyValidationService:
 
             # Basic syntax validation (already done by parsing)
 
-            # BFO compliance checks
-            if self.bfo_graph:
-                bfo_warnings = self._check_bfo_compliance(graph)
+            # BFO compliance checks. Run when either a per-name foundation graph
+            # was loaded from the DB, or a merged context graph was supplied (the
+            # latter carries the BFO backbone via the foundation stub).
+            if self.bfo_graph or context_graph is not None:
+                bfo_warnings = self._check_bfo_compliance(graph, context_graph=context_graph)
                 warnings.extend(bfo_warnings)
             
             # Check for common ontology patterns
@@ -619,23 +626,41 @@ class OntologyValidationService:
             }
         }
     
-    def _check_bfo_compliance(self, graph: Graph) -> List[str]:
-        """Check BFO compliance patterns."""
+    def _check_bfo_compliance(self, graph: Graph, context_graph: Optional[Graph] = None) -> List[str]:
+        """Check that each class in `graph` reaches a BFO class through its
+        transitive rdfs:subClassOf chain.
+
+        Inheritance is resolved over `context_graph` when provided (the merged
+        foundation + core + intermediate + target graph), so a class that
+        inherits from BFO indirectly is recognised as compliant: for example
+        EngineerRole -> core:Role -> bfo:role, or Principle -> iao:directive
+        information entity -> iao:information content entity -> bfo:generically
+        dependent continuant. Without the merged context the check sees only a
+        class's direct parent in the target TTL and false-flags every non-core
+        class. Falls back to `graph` itself when no context is supplied
+        (backward compatible with callers that pass a self-contained TTL).
+        """
         warnings = []
-        
-        # Check if classes properly inherit from BFO
+        resolver = context_graph if context_graph is not None else graph
+
+        def reaches_bfo(cls: URIRef) -> bool:
+            # transitive_objects yields the start node then all subClassOf ancestors
+            for ancestor in resolver.transitive_objects(cls, RDFS.subClassOf):
+                if isinstance(ancestor, URIRef) and "purl.obolibrary.org/obo/BFO" in str(ancestor):
+                    return True
+            return False
+
         for subj in graph.subjects(RDF.type, OWL.Class):
-            if isinstance(subj, URIRef):
-                # Check if it has a BFO superclass
-                has_bfo_parent = False
-                for obj in graph.objects(subj, RDFS.subClassOf):
-                    if isinstance(obj, URIRef) and "purl.obolibrary.org/obo/BFO" in str(obj):
-                        has_bfo_parent = True
-                        break
-                
-                if not has_bfo_parent and "purl.obolibrary.org/obo/BFO" not in str(subj):
-                    warnings.append(f"Class {subj} does not inherit from BFO")
-        
+            if not isinstance(subj, URIRef):
+                continue
+            # Skip the foundational terms themselves (BFO/IAO/RO declarations).
+            if "purl.obolibrary.org/obo/" in str(subj):
+                continue
+            if not reaches_bfo(subj):
+                warnings.append(
+                    f"Class {subj} does not inherit from BFO (no transitive subClassOf path to a BFO class)"
+                )
+
         return warnings
     
     def _check_ontology_patterns(self, graph: Graph) -> List[str]:
