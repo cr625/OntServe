@@ -2068,6 +2068,11 @@ proeth:hasAgent a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:comment "Intended on Action: the acting agent name."@en .
 
+proeth:agentRelation a owl:DatatypeProperty ;
+    rdfs:label "agent relation"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Action: the joining keyword (and / or / with / in_conjunction_with) for a composite multi-actor agent (rdf_converter.decompose_agents)."@en .
+
 proeth:eventRoleContext a owl:DatatypeProperty ;
     rdfs:label "event role context"@en ;
     rdfs:range xsd:string ;
