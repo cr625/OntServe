@@ -2208,3 +2208,13 @@ proeth:technicalBackground a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:comment "Controlled Role attribute: technical background (maps technicalBackground)."@en .
 
+proeth:roleNature a owl:DatatypeProperty ;
+    rdfs:label "role nature"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Controlled Role attribute: the kind/nature of the role-bearer, e.g. 'Affected public', 'Manufacturing corporation' (maps the recurring type, entityType attribute keys)."@en .
+
+proeth:otherAttribute a owl:DatatypeProperty ;
+    rdfs:label "other attribute"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Closed-vocabulary overflow for a genuinely case-specific role attribute not in the controlled set. Carries the original key and value as a 'key: value' literal, so the data is preserved while the datatype-predicate space stays finite and fully declared."@en .
+
