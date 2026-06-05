@@ -1834,3 +1834,377 @@ proeth:requiresCapability a owl:ObjectProperty ;
 :DecisionOption   owl:deprecated true .   # superseded by proeth-cases:DecisionOption
 :EthicalQuestion  owl:deprecated true .   # superseded by proeth-cases:EthicalQuestion
 :EthicalPrinciple owl:deprecated true .   # legacy synonym for :Principle
+
+
+#################################################################
+# Controlled extraction datatype vocabulary (added 2026-06-04)
+# Declares the stable per-component literal fields the extraction pipeline
+# emits, so the 'grounded in a controlled ontology vocabulary' claim covers
+# datatype predicates, not only typed individuals + object-property edges.
+# No rdfs:domain (intended component noted per property) to avoid weaponising
+# the residual cross-category field leak into a disjointness clash.
+#################################################################
+
+
+# --- Shared (all nine components) ---
+proeth:conceptCategory a owl:DatatypeProperty ;
+    rdfs:label "concept category"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Base nine-component category tag (Role/Principle/...); display grouping, not reasoner-visible typing."@en .
+
+proeth:confidence a owl:DatatypeProperty ;
+    rdfs:label "confidence"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Extraction confidence for the individual, 0..1 as a string."@en .
+
+proeth:textReferences a owl:DatatypeProperty ;
+    rdfs:label "text references"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Verbatim source spans grounding the individual."@en .
+
+
+# --- Role ---
+proeth:actor a owl:DatatypeProperty ;
+    rdfs:label "actor"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Role: the actor/agent name the role-bearer is (also drives the Agent layer)."@en .
+
+proeth:roleCategory a owl:DatatypeProperty ;
+    rdfs:label "role category"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Role: coarse role category (e.g. public_responsibility)."@en .
+
+proeth:roleClass a owl:DatatypeProperty ;
+    rdfs:label "role class"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Role: the LLM-suggested ontology role class label."@en .
+
+proeth:caseInvolvement a owl:DatatypeProperty ;
+    rdfs:label "case involvement"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Role: how the role-bearer is involved in this case."@en .
+
+
+# --- Principle ---
+proeth:interpretation a owl:DatatypeProperty ;
+    rdfs:label "interpretation"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Principle: how the principle is read in this case."@en .
+
+proeth:concreteExpression a owl:DatatypeProperty ;
+    rdfs:label "concrete expression"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Principle: the case-specific concrete expression."@en .
+
+proeth:appliedTo a owl:DatatypeProperty ;
+    rdfs:label "applied to"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Principle: what the principle is applied to."@en .
+
+proeth:balancingWith a owl:DatatypeProperty ;
+    rdfs:label "balancing with"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Principle: the competing consideration it is balanced against."@en .
+
+proeth:tensionResolution a owl:DatatypeProperty ;
+    rdfs:label "tension resolution"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Principle: how a tension involving it is resolved."@en .
+
+proeth:principleClass a owl:DatatypeProperty ;
+    rdfs:label "principle class"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Principle: the LLM-suggested ontology principle class label."@en .
+
+
+# --- Obligation ---
+proeth:obligationStatement a owl:DatatypeProperty ;
+    rdfs:label "obligation statement"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Obligation: the statement of the duty."@en .
+
+proeth:complianceStatus a owl:DatatypeProperty ;
+    rdfs:label "compliance status"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Obligation: met / unmet / partial / unclear judgment."@en .
+
+proeth:temporalScope a owl:DatatypeProperty ;
+    rdfs:label "temporal scope"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Obligation/Constraint: when the duty/limit applies."@en .
+
+proeth:caseContext a owl:DatatypeProperty ;
+    rdfs:label "case context"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Obligation/Capability/Constraint: case-specific grounding context."@en .
+
+proeth:obligationClass a owl:DatatypeProperty ;
+    rdfs:label "obligation class"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Obligation: the LLM-suggested ontology obligation class label."@en .
+
+
+# --- State ---
+proeth:subject a owl:DatatypeProperty ;
+    rdfs:label "subject"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on State: the entity the state holds of."@en .
+
+proeth:affectedParties a owl:DatatypeProperty ;
+    rdfs:label "affected parties"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on State: parties the state bears on (also resolved to proeth-core:affects edges)."@en .
+
+proeth:activePeriod a owl:DatatypeProperty ;
+    rdfs:label "active period"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on State: the period over which the state holds."@en .
+
+proeth:triggeringEvent a owl:DatatypeProperty ;
+    rdfs:label "triggering event"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on State: the event bringing the state into being."@en .
+
+proeth:terminatedBy a owl:DatatypeProperty ;
+    rdfs:label "terminated by"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on State: what removes the state."@en .
+
+proeth:urgencyLevel a owl:DatatypeProperty ;
+    rdfs:label "urgency level"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on State/Event: urgency judgment."@en .
+
+proeth:principleTransformation a owl:DatatypeProperty ;
+    rdfs:label "principle transformation"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on State: state-edge annotation grounding an R->P->O derivation."@en .
+
+proeth:stateClass a owl:DatatypeProperty ;
+    rdfs:label "state class"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on State: the LLM-suggested ontology state class label."@en .
+
+
+# --- Resource ---
+proeth:documentTitle a owl:DatatypeProperty ;
+    rdfs:label "document title"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Resource: the resource/document title."@en .
+
+proeth:usedInContext a owl:DatatypeProperty ;
+    rdfs:label "used in context"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Resource: the context the resource is used in."@en .
+
+proeth:usedBy a owl:DatatypeProperty ;
+    rdfs:label "used by"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Resource: who uses it (also resolved to proeth-core:availableTo edges)."@en .
+
+proeth:createdBy a owl:DatatypeProperty ;
+    rdfs:label "created by"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Resource: who created it."@en .
+
+proeth:version a owl:DatatypeProperty ;
+    rdfs:label "version"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Resource: resource version/edition."@en .
+
+proeth:resourceClass a owl:DatatypeProperty ;
+    rdfs:label "resource class"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Resource: the LLM-suggested ontology resource class label."@en .
+
+
+# --- Capability ---
+proeth:capabilityStatement a owl:DatatypeProperty ;
+    rdfs:label "capability statement"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Capability: the statement of the competence."@en .
+
+proeth:demonstratedThrough a owl:DatatypeProperty ;
+    rdfs:label "demonstrated through"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Capability: textual evidence the capability was exercised."@en .
+
+proeth:proficiencyLevel a owl:DatatypeProperty ;
+    rdfs:label "proficiency level"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Capability: proficiency rating (e.g. expert)."@en .
+
+proeth:capabilityClass a owl:DatatypeProperty ;
+    rdfs:label "capability class"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Capability: the LLM-suggested ontology capability class label."@en .
+
+
+# --- Constraint ---
+proeth:constraintStatement a owl:DatatypeProperty ;
+    rdfs:label "constraint statement"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Constraint: the statement of the limit."@en .
+
+proeth:severity a owl:DatatypeProperty ;
+    rdfs:label "severity"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Constraint/Event: severity judgment."@en .
+
+proeth:source a owl:DatatypeProperty ;
+    rdfs:label "source"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Constraint: the source of the constraint."@en .
+
+proeth:constraintClass a owl:DatatypeProperty ;
+    rdfs:label "constraint class"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Constraint: the LLM-suggested ontology constraint class label."@en .
+
+
+# --- Action / Event (temporal) ---
+proeth:hasAgent a owl:DatatypeProperty ;
+    rdfs:label "has agent"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Action: the acting agent name."@en .
+
+proeth:eventRoleContext a owl:DatatypeProperty ;
+    rdfs:label "event role context"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Action: the per-event role context of the agent."@en .
+
+proeth:intendedOutcome a owl:DatatypeProperty ;
+    rdfs:label "intended outcome"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Action: the intended outcome."@en .
+
+proeth:hasMentalState a owl:DatatypeProperty ;
+    rdfs:label "has mental state"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Action: the agent's mental state."@en .
+
+proeth:foreseenUnintendedEffects a owl:DatatypeProperty ;
+    rdfs:label "foreseen unintended effects"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Action: foreseen unintended effects."@en .
+
+proeth:withinCompetence a owl:DatatypeProperty ;
+    rdfs:label "within competence"@en ;
+    rdfs:range xsd:boolean ;
+    rdfs:comment "Intended on Action: whether the action was within the agent's competence."@en .
+
+proeth:temporalExtent a owl:DatatypeProperty ;
+    rdfs:label "temporal extent"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Action/Event: instant or interval."@en .
+
+proeth:eventType a owl:DatatypeProperty ;
+    rdfs:label "event type"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Event: Event-Calculus occurrence type."@en .
+
+proeth:causesStateChange a owl:DatatypeProperty ;
+    rdfs:label "causes state change"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Event: prose summary of the state change."@en .
+
+
+# --- Object-property literal shadows (datatype siblings of object properties) ---
+proeth:fulfillsObligationText a owl:DatatypeProperty ;
+    rdfs:label "fulfills obligation text"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Literal shadow of the fulfillsObligation edge (Action)."@en .
+
+proeth:violatesObligationText a owl:DatatypeProperty ;
+    rdfs:label "violates obligation text"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Literal shadow of the violatesObligation edge (Action)."@en .
+
+proeth:guidedByPrincipleText a owl:DatatypeProperty ;
+    rdfs:label "guided by principle text"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Literal shadow of the guidedByPrinciple edge (Action)."@en .
+
+proeth:requiresCapabilityText a owl:DatatypeProperty ;
+    rdfs:label "requires capability text"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Literal shadow of the requiresCapability relation (Action)."@en .
+
+proeth:initiatesText a owl:DatatypeProperty ;
+    rdfs:label "initiates text"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Literal shadow of the initiates fluent edge (Action/Event)."@en .
+
+proeth:terminatesText a owl:DatatypeProperty ;
+    rdfs:label "terminates text"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Literal shadow of the terminates fluent edge (Action/Event)."@en .
+
+# Participant 'who' literal shadows. These are the intermediate# literal
+# (proeth:invokedBy ...), DISTINCT from the core# object-property edge
+# (proeth-core:invokedBy <Agent>) the participant applier materialises -- different
+# IRIs, so no punning. rpo_edges / defeasibility_pipeline read these literals off the
+# committed graph as string context, so they keep the bare name (NOT redirected to a
+# Text sibling, which would blind those readers).
+proeth:invokedBy a owl:DatatypeProperty ;
+    rdfs:label "invoked by (literal)"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Principle: literal naming who invokes it; mirrored by the proeth-core:invokedBy edge."@en .
+
+proeth:obligatedParty a owl:DatatypeProperty ;
+    rdfs:label "obligated party (literal)"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Obligation: literal naming who bears it; mirrored by the proeth-core:obligatedParty edge."@en .
+
+proeth:possessedBy a owl:DatatypeProperty ;
+    rdfs:label "possessed by (literal)"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Capability: literal naming who possesses it; mirrored by the proeth-core:possessedBy edge."@en .
+
+proeth:constrainedEntity a owl:DatatypeProperty ;
+    rdfs:label "constrained entity (literal)"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Constraint: literal naming who/what is constrained; mirrored by the proeth-core:constrainedEntity edge."@en .
+
+
+# --- Controlled professional attributes (Role attributes dict, Part B) ---
+proeth:hasLicense a owl:DatatypeProperty ;
+    rdfs:label "has license"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Controlled Role attribute: professional license/licensure (maps license, licensure, licenseStatus)."@en .
+
+proeth:hasSpecialty a owl:DatatypeProperty ;
+    rdfs:label "has specialty"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Controlled Role attribute: area of specialisation (maps specialty, specialization)."@en .
+
+proeth:experienceLevel a owl:DatatypeProperty ;
+    rdfs:label "experience level"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Controlled Role attribute: professional experience (maps experience, yearsOfExperience)."@en .
+
+proeth:hasEmployer a owl:DatatypeProperty ;
+    rdfs:label "has employer"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Controlled Role attribute: employer/affiliation (maps employer, employedBy)."@en .
+
+proeth:hasJurisdiction a owl:DatatypeProperty ;
+    rdfs:label "has jurisdiction"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Controlled Role attribute: licensing/practice jurisdiction (maps jurisdiction)."@en .
+
+proeth:registrationStatus a owl:DatatypeProperty ;
+    rdfs:label "registration status"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Controlled Role attribute: professional registration status (maps registration)."@en .
+
+proeth:roleInOrganization a owl:DatatypeProperty ;
+    rdfs:label "role in organization"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Controlled Role attribute: position within the organisation (maps position, roleInOrganization)."@en .
+
+proeth:technicalBackground a owl:DatatypeProperty ;
+    rdfs:label "technical background"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Controlled Role attribute: technical background (maps technicalBackground)."@en .
+
