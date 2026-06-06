@@ -5,7 +5,8 @@ Provides generic stats computation from TTL content when OntologyEntity
 records aren't populated, and display_config based customization.
 """
 
-from rdflib import Graph, RDF, RDFS, OWL, Namespace
+from rdflib import Graph, RDF, RDFS, OWL, Namespace, BNode
+from rdflib.collection import Collection
 from collections import defaultdict
 import re
 
@@ -53,6 +54,8 @@ def compute_stats_from_ttl(ttl_content: str) -> dict:
     # Count classes
     classes = []
     for s in g.subjects(RDF.type, OWL.Class):
+        if isinstance(s, BNode):
+            continue  # anonymous class expression (owl:unionOf / owl:Restriction), not a named class
         label = g.value(s, RDFS.label)
         comment = g.value(s, RDFS.comment)
         classes.append({
@@ -63,6 +66,8 @@ def compute_stats_from_ttl(ttl_content: str) -> dict:
 
     # Also check for rdfs:Class
     for s in g.subjects(RDF.type, RDFS.Class):
+        if isinstance(s, BNode):
+            continue
         if s not in [c['uri'] for c in classes]:
             label = g.value(s, RDFS.label)
             comment = g.value(s, RDFS.comment)
@@ -83,8 +88,8 @@ def compute_stats_from_ttl(ttl_content: str) -> dict:
             'uri': str(s),
             'label': str(label) if label else extract_local_name(str(s)),
             'comment': str(comment) if comment else None,
-            'domain': str(domain) if domain else None,
-            'range': str(range_val) if range_val else None
+            'domain': humanize_domain_range(g, domain),
+            'range': humanize_domain_range(g, range_val)
         })
 
     # Count datatype properties
@@ -200,6 +205,33 @@ def extract_local_name(uri: str) -> str:
     return uri
 
 
+def humanize_domain_range(graph, node, full_uri=False):
+    """Readable label for a property's domain or range node.
+
+    Resolves an anonymous owl:unionOf / owl:intersectionOf class expression to a
+    readable label (e.g. "Action or Event") instead of the raw blank-node id that
+    extract_local_name would otherwise emit. For a named class, returns its full
+    URI when full_uri is True (callers that store the URI or build links) or its
+    local name otherwise. Returns None for an anonymous node that is neither a
+    union nor an intersection -- better hidden than shown as a blank-node id.
+    """
+    if node is None:
+        return None
+    if isinstance(node, BNode):
+        for prop, sep in ((OWL.unionOf, ' or '), (OWL.intersectionOf, ' and ')):
+            collection = graph.value(node, prop)
+            if collection is not None:
+                try:
+                    members = [extract_local_name(str(m))
+                               for m in Collection(graph, collection)]
+                except Exception:
+                    members = []
+                if members:
+                    return sep.join(members)
+        return None
+    return str(node) if full_uri else extract_local_name(str(node))
+
+
 def compute_category_entities(ttl_content: str, categories: list) -> dict:
     """Compute entities grouped by category for the Concepts tab.
 
@@ -290,7 +322,9 @@ def compute_axioms(ttl_content: str) -> dict:
     subclass_axioms = []
     for s, p, o in g.triples((None, RDFS.subClassOf, None)):
         # Skip blank nodes
-        if str(s).startswith('_:') or str(o).startswith('_:'):
+        # str(BNode) is the bare id (no '_:'), so an anonymous endpoint (e.g. a
+        # class equivalentTo/subClassOf an owl:unionOf) must be caught by type.
+        if isinstance(s, BNode) or isinstance(o, BNode):
             continue
         subclass_axioms.append({
             'subject': extract_local_name(str(s)),
@@ -302,7 +336,9 @@ def compute_axioms(ttl_content: str) -> dict:
     # EquivalentClass axioms
     equivalent_axioms = []
     for s, p, o in g.triples((None, OWL.equivalentClass, None)):
-        if str(s).startswith('_:') or str(o).startswith('_:'):
+        # str(BNode) is the bare id (no '_:'), so an anonymous endpoint (e.g. a
+        # class equivalentTo/subClassOf an owl:unionOf) must be caught by type.
+        if isinstance(s, BNode) or isinstance(o, BNode):
             continue
         equivalent_axioms.append({
             'class1': extract_local_name(str(s)),
@@ -314,7 +350,9 @@ def compute_axioms(ttl_content: str) -> dict:
     # DisjointWith axioms
     disjoint_axioms = []
     for s, p, o in g.triples((None, OWL.disjointWith, None)):
-        if str(s).startswith('_:') or str(o).startswith('_:'):
+        # str(BNode) is the bare id (no '_:'), so an anonymous endpoint (e.g. a
+        # class equivalentTo/subClassOf an owl:unionOf) must be caught by type.
+        if isinstance(s, BNode) or isinstance(o, BNode):
             continue
         disjoint_axioms.append({
             'class1': extract_local_name(str(s)),
@@ -332,10 +370,10 @@ def compute_axioms(ttl_content: str) -> dict:
             property_constraints.append({
                 'property': extract_local_name(str(s)),
                 'property_uri': str(s),
-                'domain': extract_local_name(str(domain)) if domain else None,
-                'domain_uri': str(domain) if domain else None,
-                'range': extract_local_name(str(range_val)) if range_val else None,
-                'range_uri': str(range_val) if range_val else None
+                'domain': humanize_domain_range(g, domain),
+                'domain_uri': str(domain) if domain and not isinstance(domain, BNode) else None,
+                'range': humanize_domain_range(g, range_val),
+                'range_uri': str(range_val) if range_val and not isinstance(range_val, BNode) else None
             })
 
     return {
