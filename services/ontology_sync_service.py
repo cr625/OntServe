@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timezone
 
-from rdflib import Graph, RDF, RDFS, OWL, SKOS, Namespace
+from rdflib import Graph, RDF, RDFS, OWL, SKOS, Namespace, BNode
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -332,8 +332,10 @@ class OntologySyncService:
 
         uri = str(subject)
 
-        # Skip blank nodes
-        if uri.startswith('_:'):
+        # Skip blank nodes. str(BNode) is the bare id (no '_:' prefix), so an
+        # anonymous class expression (owl:unionOf / owl:Restriction) must be
+        # caught by type, not by the serialized '_:' form.
+        if isinstance(subject, BNode) or uri.startswith('_:'):
             return None
 
         # Get label
@@ -360,11 +362,15 @@ class OntologySyncService:
         domain = None
         range_ = None
         if entity_type == 'property':
+            # Resolve owl:unionOf / intersectionOf blank-node domains/ranges to a
+            # readable label ("Action or Event"); keep the full URI for named
+            # classes so the entity-detail links still resolve.
+            from web.ontology_stats import humanize_domain_range
             for obj in graph.objects(subject, RDFS.domain):
-                domain = str(obj)
+                domain = humanize_domain_range(graph, obj, full_uri=True)
                 break
             for obj in graph.objects(subject, RDFS.range):
-                range_ = str(obj)
+                range_ = humanize_domain_range(graph, obj, full_uri=True)
                 break
 
         # Determine parent_uri:
