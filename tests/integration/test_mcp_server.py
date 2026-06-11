@@ -44,9 +44,9 @@ class TestMCPServerBasics:
             assert name in tool_names, f"Missing tool: {name}"
 
     async def test_tool_count(self, mcp_client):
-        """Server exposes exactly 19 tools (12 base + 5 reasoning/BFO + 2 conformance)."""
+        """Server exposes exactly 20 tools (12 base + 5 reasoning/BFO + 3 conformance)."""
         tools = await mcp_client.list_tools()
-        assert len(tools) == 19
+        assert len(tools) == 20
 
 
 @pytest.mark.integration
