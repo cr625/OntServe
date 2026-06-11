@@ -37,13 +37,17 @@ _HDR = f"""
 
 
 def test_flags_cross_category_via_chain_and_property_domain():
-    # Ind1 is typed to a class that chains to Principle, AND carries obligatedparty
-    # (rdfs:domain core:Obligation in the real intermediate). OWL-RL infers both
-    # Principle and Obligation -> the disjoint-core-category shape must flag it.
+    # Ind1 is typed to a class that chains to Principle, AND carries
+    # derivedFromPrinciple (an OBJECT property, rdfs:domain core:Obligation in the
+    # real intermediate). OWL-RL infers both Principle and Obligation -> the
+    # disjoint-core-category shape must flag it.
+    # (The fixture formerly used the DATATYPE property obligatedparty; its domain
+    # was removed by ee0fab8 under the leak-safe datatype-property convention, so
+    # the property-domain channel now exists only for curated object properties.)
     content = _HDR + """
     case:FooObligation a owl:Class ; rdfs:subClassOf core:Principle .
     case:Ind1 a owl:NamedIndividual ; a case:FooObligation ;
-        int:obligatedparty "Engineer X" .
+        int:derivedFromPrinciple case:P1 .
     """
     r = validate_conformance_content("synthetic-cross-category", content)
     assert r.error is None, r.error
@@ -54,7 +58,8 @@ def test_flags_cross_category_via_chain_and_property_domain():
 
 
 def test_clean_single_category_conforms():
-    # Ind2 is an Obligation by chain AND by obligatedparty domain -> agreement, no clash.
+    # Ind2 is an Obligation by chain; obligatedparty (datatype, domain-free since
+    # ee0fab8) is carried verbatim and implies nothing -> agreement, no clash.
     content = _HDR + """
     case:BarObligation a owl:Class ; rdfs:subClassOf core:Obligation .
     case:Ind2 a owl:NamedIndividual ; a case:BarObligation ;
@@ -63,6 +68,43 @@ def test_clean_single_category_conforms():
     r = validate_conformance_content("synthetic-clean", content)
     assert r.error is None, r.error
     assert r.conforms is True, [(v.source_shape, v.focus_node, v.message) for v in r.violations]
+
+
+def test_datatype_property_does_not_retype_leak_safety():
+    # Regression guard for ee0fab8 (2026-06-06): a datatype property landing on an
+    # individual of ANY category must not re-type it. Before ee0fab8,
+    # obligatedparty carried rdfs:domain core:Obligation, so this exact fixture
+    # went OWL-inconsistent from one string property on a mis-resolved subject.
+    # Under the domain-free datatype-property convention it must CONFORM.
+    content = _HDR + """
+    case:FooPrinciple a owl:Class ; rdfs:subClassOf core:Principle .
+    case:Ind3 a owl:NamedIndividual ; a case:FooPrinciple ;
+        int:obligatedparty "Engineer X" .
+    """
+    r = validate_conformance_content("synthetic-leak-safety", content)
+    assert r.error is None, r.error
+    assert r.conforms is True, [(v.source_shape, v.focus_node, v.message) for v in r.violations]
+
+
+def test_no_datatype_property_carries_core_category_domain():
+    # Locks the ee0fab8 invariant at the ontology layer: no owl:DatatypeProperty in
+    # core or intermediate may declare rdfs:domain on one of the nine disjoint core
+    # categories. A reintroduced domain would silently restore the leak (one
+    # mis-resolved subject flips a whole case OWL-inconsistent).
+    from rdflib import Graph, RDF, RDFS, OWL, URIRef
+    g = Graph()
+    g.parse(ONTSERVE_ROOT / "ontologies" / "proethica-core.ttl", format="turtle")
+    g.parse(ONTSERVE_ROOT / "ontologies" / "proethica-intermediate.ttl", format="turtle")
+    nine = {URIRef(CORE + c) for c in (
+        "Role", "Principle", "Obligation", "State", "Resource",
+        "Action", "Event", "Capability", "Constraint")}
+    offenders = [
+        str(p)
+        for p in g.subjects(RDF.type, OWL.DatatypeProperty)
+        for d in g.objects(p, RDFS.domain)
+        if d in nine
+    ]
+    assert offenders == [], offenders
 
 
 # --- engineering-shapes.ttl: RoleArchetypeShape -----------------------------
