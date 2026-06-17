@@ -452,16 +452,3 @@ class SourceTextManager:
         # Normalize extractor name
         extractor_safe = extractor_name.lower().replace(' ', '_').replace('-', '_')
         return f"http://proethica.org/extractors/{extractor_safe}"
-
-
-def create_source_text_manager(storage) -> SourceTextManager:
-    """
-    Factory function to create SourceTextManager instance.
-
-    Args:
-        storage: PostgreSQLStorage instance
-
-    Returns:
-        SourceTextManager instance
-    """
-    return SourceTextManager(storage)

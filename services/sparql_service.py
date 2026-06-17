@@ -277,14 +277,6 @@ class SPARQLService:
             ],
         }
 
-    def validate_query(self, query: str) -> Dict[str, Any]:
-        """Validate SPARQL syntax without executing."""
-        try:
-            self.graph.query(query, dryrun=True)
-            return {"valid": True, "message": "Query syntax is valid"}
-        except Exception as exc:
-            return {"valid": False, "error": str(exc)}
-
 
 def _detect_format(content: str) -> str:
     """Best-effort RDF format detection from serialized content."""

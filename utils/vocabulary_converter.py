@@ -287,29 +287,6 @@ class VocabularyConverter:
                 for p, o in input_graph.predicate_objects(entity):
                     output_graph.add((entity, p, o))
     
-    def convert_vocabulary_file(self, file_path: str, output_format: str = 'turtle',
-                              ontology_uri: str = None) -> str:
-        """
-        Convert a vocabulary file to OWL format.
-        
-        Args:
-            file_path: Path to input vocabulary file
-            output_format: Output format ('turtle', 'xml', 'n3', etc.)
-            ontology_uri: URI for the resulting ontology
-            
-        Returns:
-            Converted ontology as string
-        """
-        # Load input graph
-        input_graph = Graph()
-        input_graph.parse(file_path)
-        
-        # Convert to OWL
-        output_graph = self.convert_to_owl(input_graph, ontology_uri=ontology_uri)
-        
-        # Serialize and return
-        return output_graph.serialize(format=output_format)
-    
     def convert_vocabulary_content(self, content: str, input_format: str = 'turtle',
                                  output_format: str = 'turtle', ontology_uri: str = None) -> str:
         """

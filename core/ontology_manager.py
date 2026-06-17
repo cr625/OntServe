@@ -6,7 +6,7 @@ a unified interface for ontology management.
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 
 from storage.base import StorageBackend, StorageError

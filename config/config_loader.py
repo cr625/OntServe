@@ -157,32 +157,6 @@ class ConfigLoader:
             return "****"
         return "****" + key[-4:]
 
-    def verify_required_settings(self, required: list = None) -> bool:
-        """
-        Verify that required settings are present.
-
-        Args:
-            required: List of required environment variable names
-
-        Returns:
-            True if all required settings are present
-
-        Raises:
-            ValueError: If required settings are missing
-        """
-        if required is None:
-            required = ['ONTSERVE_DB_URL']
-
-        missing = [key for key in required if not os.environ.get(key)]
-
-        if missing:
-            error_msg = f"Missing required configuration: {', '.join(missing)}"
-            logger.error(error_msg)
-            raise ValueError(error_msg)
-
-        logger.info("All required settings verified")
-        return True
-
     def get_database_url(self) -> str:
         """Get database URL from ONTSERVE_DB_URL environment variable."""
         url = os.environ.get('ONTSERVE_DB_URL')
