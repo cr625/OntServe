@@ -6,7 +6,7 @@ a unified interface for ontology management.
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 
 from storage.base import StorageBackend, StorageError
@@ -306,18 +306,6 @@ class OntologyManager:
         
         return importer.extract_individuals(ontology_id)
     
-    def get_versions(self, ontology_id: str) -> List[Dict[str, Any]]:
-        """
-        Get available versions of an ontology.
-        
-        Args:
-            ontology_id: Unique identifier for the ontology
-            
-        Returns:
-            List of version metadata dictionaries
-        """
-        return self.storage.list_versions(ontology_id)
-    
     def create_version(self, ontology_id: str, content: str,
                       version_info: Dict[str, Any] = None) -> str:
         """
@@ -360,69 +348,3 @@ class OntologyManager:
             True if update was successful
         """
         return self.storage.update_metadata(ontology_id, metadata, version)
-    
-    def backup_ontology(self, ontology_id: str, backup_path: str) -> bool:
-        """
-        Create a backup of an ontology.
-        
-        Args:
-            ontology_id: Unique identifier for the ontology
-            backup_path: Path where backup should be stored
-            
-        Returns:
-            True if backup was successful
-        """
-        return self.storage.backup(ontology_id, backup_path)
-    
-    def restore_ontology(self, ontology_id: str, backup_path: str) -> bool:
-        """
-        Restore an ontology from backup.
-        
-        Args:
-            ontology_id: Unique identifier for the ontology
-            backup_path: Path to backup file
-            
-        Returns:
-            True if restoration was successful
-        """
-        return self.storage.restore(ontology_id, backup_path)
-    
-    def clear_cache(self):
-        """Clear all caches (loaded ontologies and importer caches)."""
-        self.loaded_ontologies = {}
-        
-        for importer in self.importers.values():
-            importer.clear_cache()
-        
-        self.logger.info("All caches cleared")
-    
-    def get_loaded_ontologies(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Get information about currently loaded ontologies.
-        
-        Returns:
-            Dictionary mapping ontology IDs to their metadata
-        """
-        return self.loaded_ontologies
-    
-    def get_importer_types(self) -> List[str]:
-        """
-        Get available importer types.
-        
-        Returns:
-            List of importer type names
-        """
-        return list(self.importers.keys())
-    
-    def shutdown(self):
-        """Clean shutdown of the ontology manager."""
-        self.logger.info("Shutting down OntologyManager")
-        
-        # Clear caches
-        self.clear_cache()
-        
-        # Close storage backend
-        if hasattr(self.storage, 'close'):
-            self.storage.close()
-        
-        self.logger.info("OntologyManager shutdown complete")

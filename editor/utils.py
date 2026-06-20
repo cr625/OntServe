@@ -102,11 +102,6 @@ class EntityTypeMapper:
         return icon_mapping.get(entity_type, '❓')
     
     @classmethod
-    def is_proethica_type(cls, entity_type: str) -> bool:
-        """Check if an entity type is a ProEthica-specific type."""
-        return entity_type in cls.PROETHICA_TYPES
-    
-    @classmethod
     def is_bfo_aligned(cls, uri: str) -> bool:
         """Check if a URI indicates BFO alignment."""
         if not uri:
@@ -388,58 +383,6 @@ class HierarchyBuilder:
         # Local/custom entities
         return 'custom'
     
-    def get_flat_entity_list(self, hierarchy: Dict[str, Any], entity_type_filter: str = None) -> List[Dict[str, Any]]:
-        """
-        Extract a flat list of entities from a hierarchy.
-        
-        Args:
-            hierarchy: Hierarchical structure
-            entity_type_filter: Optional filter by entity type
-            
-        Returns:
-            Flat list of entity dictionaries
-        """
-        entities = []
-        
-        def extract_entities(node):
-            # Skip root node
-            if node.get('type') != 'root' and 'uri' in node:
-                if entity_type_filter is None or node.get('entity_type') == entity_type_filter:
-                    entities.append(node)
-            
-            # Recursively process children
-            for child in node.get('children', []):
-                extract_entities(child)
-        
-        extract_entities(hierarchy)
-        return entities
-    
-    def get_entity_paths(self, hierarchy: Dict[str, Any], target_uri: str) -> List[List[str]]:
-        """
-        Find all paths from root to a target entity.
-        
-        Args:
-            hierarchy: Hierarchical structure
-            target_uri: URI of the target entity
-            
-        Returns:
-            List of paths, where each path is a list of entity names
-        """
-        paths = []
-        
-        def find_paths(node, current_path):
-            current_path = current_path + [node.get('name', 'Unknown')]
-            
-            if node.get('uri') == target_uri:
-                paths.append(current_path)
-                return
-            
-            for child in node.get('children', []):
-                find_paths(child, current_path)
-        
-        find_paths(hierarchy, [])
-        return paths
-    
     def calculate_hierarchy_stats(self, hierarchy: Dict[str, Any]) -> Dict[str, Any]:
         """
         Calculate statistics about the hierarchy.
@@ -522,44 +465,3 @@ class SearchHelper:
         
         return filtered
     
-    @staticmethod
-    def group_entities_by_type(entities: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
-        """
-        Group entities by their type.
-        
-        Args:
-            entities: List of entity dictionaries
-            
-        Returns:
-            Dictionary mapping entity types to lists of entities
-        """
-        groups = defaultdict(list)
-        
-        for entity in entities:
-            entity_type = entity.get('entity_type', 'unknown')
-            groups[entity_type].append(entity)
-        
-        return dict(groups)
-    
-    @staticmethod
-    def sort_entities(entities: List[Dict[str, Any]], sort_by: str = 'name', reverse: bool = False) -> List[Dict[str, Any]]:
-        """
-        Sort entities by a specified field.
-        
-        Args:
-            entities: List of entity dictionaries
-            sort_by: Field to sort by ('name', 'type', 'uri')
-            reverse: Whether to sort in reverse order
-            
-        Returns:
-            Sorted list of entities
-        """
-        sort_key_map = {
-            'name': lambda x: (x.get('name', '') or '').lower(),
-            'type': lambda x: x.get('entity_type', ''),
-            'uri': lambda x: x.get('uri', '')
-        }
-        
-        sort_key = sort_key_map.get(sort_by, sort_key_map['name'])
-        
-        return sorted(entities, key=sort_key, reverse=reverse)

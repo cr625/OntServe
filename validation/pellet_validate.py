@@ -61,12 +61,6 @@ class ValidationResult:
     error_explanation: Optional[str] = None
 
 
-def _load_graph(ttl_path: Path) -> Graph:
-    g = Graph()
-    g.parse(str(ttl_path), format="turtle")
-    return g
-
-
 def _fetch_case_content_from_db(ontology_name: str) -> str:
     """Load case TTL from ontology_versions (current)."""
     from config.config_loader import load_ontserve_config
