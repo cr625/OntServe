@@ -135,9 +135,12 @@ def resolve_uri_path(ontology_path, entity_name):
     if entity_name in reserved_names and '/' not in ontology_path:
         ontology_name = ontology_path
 
-        from web.ontology_routes import ontology_content
         if entity_name == 'content':
-            return ontology_content(ontology_name)
+            # The handler now lives in the ontology_routes package (register-fn
+            # sub-module), so call it by endpoint via view_functions (current_app
+            # is imported module-level) rather than importing the nested function.
+            # Still a direct call (no redirect loop).
+            return current_app.view_functions['ontology.ontology_content'](ontology_name)
         elif entity_name == 'edit':
             return redirect(url_for('ontology.edit_ontology', ontology_name=ontology_name))
         elif entity_name == 'save':
