@@ -206,7 +206,7 @@
 </div>
 
 <script>
-    window.OntServeEditorMain = { importOntologyUrl: '{{ url_for("import_ontology") }}' };
+    window.OntServeEditorMain = { importOntologyUrl: '{{ url_for("ontology.import_ontology") }}' };
 </script>
 <script src="{{ url_for('static', filename='js/editor/main.js') }}"></script>
 {% endblock %}
