@@ -56,7 +56,8 @@ def build_text(entity) -> str:
     return entity.uri  # last resort; URI is always non-null
 
 
-def populate(entity_type: str | None, batch_size: int, dry_run: bool, force: bool) -> int:
+def populate(entity_type: str | None, batch_size: int, dry_run: bool, force: bool,
+             ontology_names: list[str] | None = None) -> int:
     """Returns number of embeddings written (or that would be written in dry-run)."""
     from flask import Flask
     import importlib.util
@@ -80,6 +81,18 @@ def populate(entity_type: str | None, batch_size: int, dry_run: bool, force: boo
         query = OntologyEntity.query
         if entity_type:
             query = query.filter(OntologyEntity.entity_type == entity_type)
+        if ontology_names:
+            from sqlalchemy import text as _text
+            rows = db.session.execute(
+                _text("SELECT name, id FROM ontologies WHERE name = ANY(:names)"),
+                {"names": ontology_names},
+            ).fetchall()
+            found = {r[0]: r[1] for r in rows}
+            missing = [n for n in ontology_names if n not in found]
+            if missing:
+                raise SystemExit(f"Unknown ontology name(s): {', '.join(missing)}")
+            query = query.filter(OntologyEntity.ontology_id.in_(list(found.values())))
+            logger.info("Restricting to ontologies: %s", ", ".join(ontology_names))
         if not force:
             query = query.filter(OntologyEntity.embedding.is_(None))
 
@@ -140,6 +153,10 @@ def main() -> int:
     parser.add_argument("--batch", type=int, default=128, help="Batch size (default: 128).")
     parser.add_argument("--dry-run", action="store_true", help="Report counts and a few samples; do not write.")
     parser.add_argument("--force", action="store_true", help="Re-embed rows that already have an embedding.")
+    parser.add_argument(
+        "--ontology", dest="ontology_names", action="append", default=None, metavar="NAME",
+        help="Restrict to one or more ontologies by name (repeatable). Default: all ontologies.",
+    )
     args = parser.parse_args()
 
     entity_type = args.entity_type or None
@@ -148,6 +165,7 @@ def main() -> int:
         batch_size=args.batch,
         dry_run=args.dry_run,
         force=args.force,
+        ontology_names=args.ontology_names,
     )
     if args.dry_run:
         logger.info("Dry-run complete. Would process %d rows.", written)

@@ -13,8 +13,11 @@ from pathlib import Path
 
 # Set up paths BEFORE any other imports
 # This needs careful ordering to avoid conflicts between config/ directory and config.py module
+# (script lives at OntServe/tools/, so the OntServe root is one level up -- matching
+# populate_entity_embeddings.py. The prior `.parent.parent` resolved to /home/chris/onto,
+# which made run_cleanup's extended-refresh a silent no-op behind subprocess.run.)
 script_dir = Path(__file__).parent
-ontserve_root = script_dir.parent.parent
+ontserve_root = script_dir.parent
 web_dir = ontserve_root / 'web'
 
 # Add OntServe root first (for config/ package), then web dir (for models)
@@ -130,7 +133,7 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
             # First try parsing from original file if it exists
             # Use script directory to find ontologies folder (works on both dev and production)
             _script_dir = os.path.dirname(os.path.abspath(__file__))
-            ontologies_dir = os.path.join(os.path.dirname(os.path.dirname(_script_dir)), 'ontologies')
+            ontologies_dir = os.path.join(os.path.dirname(_script_dir), 'ontologies')
             ontology_file = os.path.join(ontologies_dir, f"{ontology_name}.ttl")
             if os.path.exists(ontology_file):
                 logger.info(f"Parsing from TTL file: {ontology_file}")
