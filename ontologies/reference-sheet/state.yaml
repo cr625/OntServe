@@ -1,0 +1,447 @@
+# Canonical Reference Sheet -- STATE component (S)  [DRAFT for format sign-off]
+#
+# Purpose (two uses):
+#   (1) INPUT: injected into the state extractor prompt so the model reuses a canonical
+#       condition TYPE + expresses per-occurrence detail (bearer, trigger, what-it-activates)
+#       as individual-level edges/literals, instead of minting a context-laden State class.
+#   (2) JUDGE: compare_extraction.py `judge` flags any NEW State class that matches a
+#       `do_not_mint:` label (should-decompose) or is an over-compound mint.
+#
+# State is the SINK for context moved off the other components. The canonical set below
+# includes the State TYPES the roles/obligations/capability/constraint sheets decompose into.
+#
+# Locked decisions reflected here:
+#   - State attaches to the Agent via core#affects (State -> Agent). NO hasState->Role. (decision 1)
+#     Where the State does normative work it also carries core#activatesObligation /
+#     core#activatesConstraint, and the conditioned Obligation carries core#defeasibleUnder -> State.
+#   - A State class is canonical only when the CONDITION is a reusable KIND. Per-occurrence detail
+#     (which engineer, which tool instance, which case, which document) is the State INDIVIDUAL,
+#     never a class. (decision 2 + discipline rule)
+#   - Reuse is driven by alt_labels (deterministic alias tier), not fuzzy matching. (decision 3)
+#   - Idioms / terms of art kept + allow-listed, status: canonical. (decision 4/5)
+#
+# status: canonical = reuse this; provisional = needs your curation; the `curate:` key flags an open call.
+# Cross-component targets (Obligation/Constraint IRIs) are named here but defined in their own sheets.
+
+component: State
+core_category: State                        # feeds the matcher category-compatibility guard
+namespace: http://proethica.org/ontology/intermediate#
+canonical_parents:                          # the reusable State parents already in proethica-intermediate
+  - State                                   # proeth-core:State (root)
+  - RiskState
+  - ConflictState
+  - CompetenceState
+  - RelationshipState
+  - InformationState
+  - RegulatoryState
+
+# ---------------------------------------------------------------------------
+# 1. CANONICAL STATES (keep; reuse on match). Reusable condition TYPES that recur across cases.
+#    Per-occurrence facts (bearer/trigger/activated-thing) are the INDIVIDUAL, expressed via:
+#      bearer        -> core#affects (State -> Agent)
+#      trigger       -> core#activatedByEvent / inbound core#initiates (Event -> State)
+#      what it does  -> core#activatesObligation / core#activatesConstraint; Obligation defeasibleUnder State
+#      period        -> activePeriod literal
+# ---------------------------------------------------------------------------
+canonical:
+
+  # --- tool / technology reliance (the ToolReliant chain sink; roles/capability decompose here) ---
+  - iri: ToolRelianceState
+    label: Tool Reliance State
+    parent: RiskState
+    definition: >-
+      A condition in which a professional relies on a computational or automated tool to a
+      degree that risks substituting tool output for independent professional judgment.
+    alt_labels:
+      - Technology Dependency Risk State        # tool=CADD/CD-ROM, the named sink from cluster 1/8
+      - Software-Enabled Competence Claim State  # tool-enabled competence claim is a reliance condition
+    status: canonical
+    source_cases: [120, 121]
+    cross_component_family: AI Tool Disclosure
+    # tool identity (AI / CD-ROM / CADD) -> otherAttribute literal on the individual, not a class.
+
+  - iri: InadequateToolReviewState
+    label: Inadequate Tool Review State
+    parent: CompetenceState
+    definition: >-
+      A condition in which a professional has performed only a superficial review of tool-generated
+      or AI-assisted work product, short of the verification responsible charge requires.
+    alt_labels:
+      - Inadequate AI Review State              # "AI" is the tool instance -> literal
+    status: canonical
+    source_cases: [7]
+    cross_component_family: AI Tool Disclosure
+
+  # --- conflict of interest / dual capacity (the 15-class Dual* family sink) ---
+  - iri: ConflictOfInterestState
+    label: Conflict Of Interest State
+    parent: ConflictState
+    definition: >-
+      A condition in which a professional holds competing interests or loyalties that bias the
+      exercise of professional judgment.
+    alt_labels:
+      - Client Advocacy Bias State              # advocacy bias is a conflict-of-interest condition
+      - Self-Interested Advisory State          # self-interest in advice = conflict of interest
+      - Adversarial Expert Engagement State     # adversarial engagement biases the expert's judgment
+    status: canonical
+    source_cases: [14, 71]
+    cross_component_family: Dual Capacity
+
+  - iri: DualCapacityState
+    label: Dual Capacity State
+    parent: ConflictState
+    definition: >-
+      A condition in which a professional serves in two distinct functional capacities at once
+      (such as designing work and reviewing or approving that same work), creating self-review risk.
+    alt_labels:
+      - Dual Role Service State                 # public+private dual service -> the same dual-capacity condition
+      - Single Client Dual Capacity State       # "single client" is occurrence detail -> literal
+      - Supplemental Engagement State           # an added engagement that creates the dual capacity
+    status: canonical
+    source_cases: [103]
+    cross_component_family: Dual Capacity
+
+  - iri: WhistleblowingState
+    label: Whistleblowing State
+    parent: ConflictState
+    definition: >-
+      A condition in which a professional faces a tension between an employer or client loyalty and
+      a duty to report wrongdoing, licensing protective and disclosure obligations.
+    alt_labels:
+      - Whistleblower Personal Conscience State  # personal-conscience framing of the whistleblowing tension
+    status: canonical
+    source_cases: [85]
+    cross_component_family: Whistleblower Personal Conscience
+
+  # --- competence (the CompetenceGap / mentorship sink) ---
+  - iri: CompetenceGapState
+    label: Competence Gap State
+    parent: CompetenceState
+    definition: >-
+      A condition in which a professional lacks or has not exercised the competence required for the
+      work at hand, undercutting the obligations that attach to it.
+    alt_labels:
+      - Competence Recognition Failure State    # failure to recognize one's own competence limit
+      - Fact Gathering Deficiency State          # deficient fact-gathering = an exercised-competence gap
+    status: canonical
+    source_cases: [71, 85]
+    cross_component_family: Expertise-Calibrated Disclosure
+
+  - iri: MentorUnavailabilityState
+    label: Mentor Unavailability State
+    parent: CompetenceState
+    definition: >-
+      A condition in which a professional has lost access to a previously relied-upon mentor or
+      reviewer, heightening independent quality-assurance obligations.
+    alt_labels:
+      - Mentorship State                         # roles.yaml MentorshipState target -> this availability condition
+    status: canonical
+    source_cases: [7]
+
+  # --- relationship / engagement consent and scope (Rs/Cs sinks) ---
+  - iri: PeerReviewConsentState
+    label: Peer Review Consent State
+    parent: RelationshipState
+    definition: >-
+      A condition in which a party has consented to (or contracted for) peer review of work, activating
+      cooperation obligations.
+    alt_labels:
+      - Contractual Peer Review Consent State    # "contractual" is the consent instrument -> literal
+      - Mandatory Cooperation State              # consented review makes cooperation mandatory
+    status: canonical
+    source_cases: [15]
+    cross_component_family: Peer Review Cooperation
+
+  - iri: ScopeLimitationState
+    label: Scope Limitation State
+    parent: RelationshipState
+    definition: >-
+      A condition in which a professional's engagement is limited in scope, bounding the duties that
+      attach to work outside that scope.
+    alt_labels:
+      - Non-Engineering Expert Service State     # service confined to a non-engineering scope
+    status: canonical
+    source_cases: [60]
+    cross_component_family: Non-Engineering Expert Scope
+
+  - iri: SupervisoryDirectionState
+    label: Supervisory Direction State
+    parent: RelationshipState
+    definition: >-
+      A condition in which a professional acts under the direction or responsible charge of a supervising
+      engineer, allocating accountability between them.
+    alt_labels:
+      - Responsible Charge Review State          # responsible-charge review is a supervisory-direction condition
+    status: canonical
+    source_cases: [120]
+    cross_component_family: Responsible Charge Active Engagement
+
+  - iri: VerificationActivityState
+    label: Verification Activity State
+    parent: RelationshipState
+    definition: >-
+      A condition in which a professional is engaged in verifying or checking work product under
+      responsible charge, distinct from producing it.
+    status: canonical
+    source_cases: [7]
+    cross_component_family: Responsible Charge Active Engagement
+    # No inventory row of its own; this is the State sink for roles.yaml do_not_mint
+    # "Responsible Charge Verification Engineer" (verification is an activity, not a role kind).
+
+  # --- information / disclosure-omission and concealment (InformationState sink) ---
+  - iri: SelectiveReportingState
+    label: Selective Reporting State
+    parent: InformationState
+    definition: >-
+      A condition of transient case conduct in which a professional withholds or selectively presents
+      material information, options, or attribution.
+    alt_labels:
+      - AI Tool Disclosure Omission State        # omitting AI-tool disclosure (tool=AI -> literal)
+      - Attribution Omission State               # omitting attribution
+      - Selective Option Omission State          # omitting options
+      - Material Omission in Report State         # omitting material from a report
+      - Incomplete Deliverable Concealment State  # concealing an incomplete deliverable
+    status: canonical
+    source_cases: [7, 14, 71, 85]
+    cross_component_family: AI Tool Disclosure
+
+  - iri: IncompleteSubmissionState
+    label: Incomplete Submission State
+    parent: InformationState
+    definition: >-
+      A condition of transient case conduct in which a professional submits or delivers incomplete or
+      deficient work product.
+    alt_labels:
+      - Deficient Design Delivery State          # deficient delivery = incomplete submission
+      - Incomplete Investigation State           # incomplete investigation work product
+    status: canonical
+    source_cases: [7, 71, 85]
+
+  - iri: CredentialMisrepresentationState
+    label: Credential Misrepresentation State
+    parent: InformationState
+    definition: >-
+      A condition in which a professional's credentials, title, or qualifications are misrepresented,
+      activating accuracy and licensure obligations.
+    status: canonical
+    source_cases: [60]
+    cross_component_family: Non-Engineering Expert Scope
+
+  - iri: ConfidentialInformationExposureState
+    label: Confidential Information Exposure State
+    parent: InformationState
+    definition: >-
+      A condition in which confidential client or third-party information is exposed or at risk of
+      exposure, activating confidentiality obligations.
+    alt_labels:
+      - Client Data Exposure State               # client data is the confidential-information instance
+    status: canonical
+    source_cases: [7]
+
+  - iri: UndisclosedAssumptionState
+    label: Undisclosed Assumption State
+    parent: InformationState
+    definition: >-
+      A condition in which a professional proceeds on an unstated or unverified assumption that bears
+      on the validity of the work product.
+    alt_labels:
+      - Funding Source Assumption State          # assuming a funding source is one such assumption
+    status: canonical
+    source_cases: [85]
+
+  - iri: PostEngagementDiscoveryState
+    label: Post-Engagement Discovery State
+    parent: InformationState
+    definition: >-
+      A condition in which material facts come to light after an engagement has concluded or work has
+      been delivered, reactivating duties to the affected parties.
+    alt_labels:
+      - Post-Engagement Site Discovery State     # "site" is the discovery instance -> literal
+      - Prior Design Error Discovery State        # discovering a prior design error is a post-hoc discovery
+    status: canonical
+    source_cases: [15, 86]
+
+  # --- risk / hazard conditions (RiskState sink) ---
+  - iri: PublicSafetyRiskState
+    label: Public Safety Risk State
+    parent: RiskState
+    definition: >-
+      A condition in which work product or circumstances pose a risk to public safety, activating
+      the paramount public-safety obligations.
+    alt_labels:
+      - Public Fund Misuse Risk State            # risk to public funds is a public-interest risk condition
+    status: canonical
+    source_cases: [85]
+
+  - iri: UnquantifiedRiskState
+    label: Unquantified Risk State
+    parent: RiskState
+    definition: >-
+      A condition in which a known hazard or risk has not been quantified or adequately characterized,
+      bearing on the adequacy of safeguards.
+    alt_labels:
+      - Unquantified Risk Awareness State        # awareness of an unquantified risk
+      - Speculative Risk Finding State           # a speculative (unquantified) risk finding
+    status: canonical
+    source_cases: [8, 86]
+
+  - iri: DeadlinePressureState
+    label: Deadline Pressure State
+    parent: RiskState
+    definition: >-
+      A condition in which schedule or deadline pressure risks compromising the quality or completeness
+      of professional work.
+    alt_labels:
+      - Deadline Pressure Compromise State       # the compromise framing of deadline pressure
+    status: canonical
+    source_cases: [85]
+
+  - iri: UnbuildableDesignState
+    label: Unbuildable Design State
+    parent: RiskState
+    definition: >-
+      A condition in which a design or contract as specified cannot be constructed as intended, bearing
+      on constructability and disclosure obligations.
+    alt_labels:
+      - Unbuildable Contract Bid State           # an unbuildable contract bid is this condition
+    status: canonical
+    source_cases: [85]
+
+  # --- regulatory / licensure conditions (RegulatoryState sink) ---
+  - iri: RegulatoryViolationState
+    label: Regulatory Violation State
+    parent: RegulatoryState
+    definition: >-
+      A condition in which a regulatory or permit requirement is being violated, activating reporting
+      and corrective-action obligations.
+    alt_labels:
+      - Confirmed Environmental Violation State    # a confirmed environmental violation
+      - Unpermitted Environmental Violation State  # an unpermitted environmental violation
+      - Engineering Title Misuse State             # misuse of an engineering title violates licensure rules
+      - Unlicensed Jurisdiction Practice State     # practicing without jurisdiction licensure
+    status: canonical
+    source_cases: [60, 86]
+
+  - iri: SealAuthorityState
+    label: Seal Authority State
+    parent: RegulatoryState
+    definition: >-
+      A condition defined by the scope and responsibility of a professional's seal or stamp authority
+      over work product.
+    alt_labels:
+      - Professional Seal Authority State
+    status: canonical
+    source_cases: [120]
+    cross_component_family: Responsible Charge Active Engagement
+
+  - iri: EvolvingStandardState
+    label: Evolving Standard State
+    parent: RegulatoryState
+    definition: >-
+      A condition in which the applicable professional standard of care is changing or unsettled,
+      bearing on what conduct satisfies the duty of care.
+    alt_labels:
+      - Evolving Professional Standard State
+    status: canonical
+    source_cases: [120]
+
+  # --- client-capacity / counterparty conditions (RelationshipState sink) ---
+  - iri: ClientTechnicalIncapacityState
+    label: Client Technical Incapacity State
+    parent: RelationshipState
+    definition: >-
+      A condition in which a client lacks the technical capacity to evaluate the professional's work,
+      heightening the professional's explanatory and protective duties.
+    status: canonical
+    source_cases: [85]
+
+# ---------------------------------------------------------------------------
+# 2. DO-NOT-MINT (context-laden State labels -> canonical State + the off-class fact as an edge/literal).
+#    `affects` is core#affects per locked decision 1. Obligation/Constraint targets defined in their sheets.
+#    These are labels where the baked-in dimension is NOT a new condition KIND but a bearer, trigger,
+#    activated-obligation, or compliance status that belongs on the individual or on another component.
+# ---------------------------------------------------------------------------
+do_not_mint:
+
+  # --- a State label that names the OBLIGATION it activates (the obligation is not part of the state kind) ---
+  - label: Remediation Monitoring Obligation State
+    decompose:
+      state: { iri: RegulatoryViolationState, via: "core#affects" }
+      obligation: { iri: CorrectiveActionMonitoringObligation, via: "core#activatesObligation",
+                    note: "the monitoring obligation is the activated duty, not the state kind; see Corrective Action Monitoring family" }
+    source_cases: [86]
+    cross_component_family: Corrective Action Monitoring
+
+  # --- a State label that names the AGREEMENT/instrument it rests on (instrument is a literal/relation) ---
+  - label: Peer Review Confidentiality Agreement State
+    decompose:
+      state: { iri: ConfidentialInformationExposureState, via: "core#affects",
+               note: "peer-review confidentiality is a confidential-information condition" }
+      relation: { note: "the confidentiality agreement -> otherAttribute literal + PeerReviewConsentState where consent is the point" }
+    source_cases: [15]
+    cross_component_family: Peer Review Cooperation
+
+  # --- a State label that names a RESOLUTION/conflict-axis better carried as the conflict-of-interest state ---
+  - label: Client Interest versus Public Interest Conflict State
+    decompose:
+      state: { iri: ConflictOfInterestState, via: "core#affects",
+               note: "client-vs-public is the conflicting-interest pair; the pair is occurrence detail, not a separate kind. Token-identical to the existing CompetingDuties archetype." }
+    source_cases: [86]
+
+  # --- a State label that names a COMPLIANCE-DEFERRAL stance (status, not a condition kind) ---
+  - label: Client Deferred Compliance State
+    decompose:
+      state: { iri: RegulatoryViolationState, via: "core#affects",
+               note: "client deferring compliance keeps a regulatory-violation condition live; 'deferred' is a complianceStatus literal" }
+    source_cases: [8]
+
+  # --- a State label that names a WAIVER act (the waiver is an Event/relation; the residual risk is the state) ---
+  - label: Client Waived Independent Review State
+    decompose:
+      state: { iri: DualCapacityState, via: "core#affects",
+               note: "waiving independent review leaves the self-review risk of the dual capacity; the waiver -> an Event/initiates + otherAttribute literal" }
+    source_cases: [103]
+    cross_component_family: Dual Capacity
+
+  # --- a State label that names a REQUEST act (covert review request is an Action; the state is the conflict) ---
+  - label: Covert Review Request State
+    decompose:
+      state: { iri: ConflictOfInterestState, via: "core#affects" }
+      relation: { note: "the covert review request itself is an Action; covertness -> otherAttribute literal" }
+    source_cases: [15]
+    cross_component_family: Peer Review Cooperation
+
+  # --- a State label that names a third party's OBJECTION (the objection is an Event by another agent) ---
+  - label: Subject Professional Objection State
+    decompose:
+      state: { iri: PeerReviewConsentState, via: "core#affects",
+               note: "the reviewed professional's objection bears on consent/cooperation; the objection itself is an Event by that agent, not a state kind" }
+    source_cases: [15]
+    cross_component_family: Peer Review Cooperation
+
+# ---------------------------------------------------------------------------
+# 3. CURATE -- open calls the rules do not fully resolve.
+# ---------------------------------------------------------------------------
+curate:
+
+  - iri: InadequateToolReviewState
+    question: >-
+      Keep InadequateToolReviewState distinct from CompetenceGapState, or fold it in? The corpus
+      definition explicitly distinguishes them (the professional may be capable but failed to apply
+      capability to tool output). Recommended: keep distinct (it licenses a different defeasibility
+      pattern under responsible charge); confirm at full-set curation.
+
+  - label: Client Interest versus Public Interest Conflict State
+    question: >-
+      This row already matched the intermediate archetype "Competing Duties State" (see inventory
+      `matched` column). Decompose to ConflictOfInterestState (recommended, above) OR map directly to
+      the existing :CompetingDuties archetype class? Reconcile with the Principle/Obligation sheets,
+      which may carry the same client-vs-public tension.
+
+  - iri: SupplementalEngagementState
+    question: >-
+      "Supplemental Engagement State" is folded into DualCapacityState as an alt_label because in
+      case 103 the supplemental engagement is what creates the dual capacity. If a supplemental
+      engagement that does NOT create a conflict appears in another case, it is a plain
+      RelationshipState/engagement literal, not a conflict state. Confirm the case-103 reading holds
+      corpus-wide or split.

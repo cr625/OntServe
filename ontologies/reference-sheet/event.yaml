@@ -1,0 +1,384 @@
+# Canonical Reference Sheet -- EVENT component (E)  [DRAFT for format sign-off]
+#
+# SPECIAL CASE: Event (like Action) has ZERO classes in the proethica-intermediate-extended
+# accumulator (Report B confirmed: A and E are emitted only as per-case INDIVIDUALS via the
+# Step-3 temporal-dynamics path, never accumulated as classes; there is no _inventory_Event.tsv).
+# In practice the temporal extractor still mints a free-text TYPE per occurrence and slugifies it
+# inline into the case TTL (e.g. proeth:StructuralFailure, proeth:RegulatoryApproval,
+# proeth:CodeExceptionClauseActivation), so the same compound-mint disease that the class sheets
+# fix for R/P/O/S/Rs/Ca/Cs reappears at the temporal type AND the individual layer.
+# This sheet therefore governs TWO things instead of the usual canonical/do_not_mint/curate split:
+#
+#   (1) canonical_types:  a small reusable set of Event (occurrence) TYPE classes the temporal
+#       extractor should reuse via rdf:type instead of inventing a free-text type per occurrence.
+#       These are NEW additive classes (status: provisional) for the user to confirm and seed into
+#       proethica-intermediate under proeth-core:Event, gated on Pellet re-validation.
+#   (2) iri_rule:  the IRI-SHORTENING rule for Event INDIVIDUALS. Report B found 980 individual IRI
+#       occurrences encoding a _before_/_during_/_after_ narrative (worst at 23-29 underscore tokens,
+#       e.g. case 94). The narrative/causal context must become EDGES and literals, not a baked-in
+#       identifier.
+#
+# SIBLING SHEET: action.yaml shares this special case (A and E both ride the Step-3 temporal path).
+# The act-side TYPES (Disclosure, Reporting, Submission, DesignReview, Verification, ...) live in
+# action.yaml; this sheet carries the occurrence-side TYPES and the Event facets of the paired
+# act/occurrence splits (Submission/SubmissionEvent, Resignation/Retirement). The iri_rule is the
+# SAME rule for both components; it is restated here so event.yaml is self-contained.
+#
+# Purpose (two uses, same as the other sheets):
+#   (1) INPUT: injected into the Step-3 temporal-dynamics prompt so the model types each Event
+#       individual to a canonical occurrence type + a SHORT identifier, and emits the story as edges.
+#   (2) JUDGE: compare_extraction.py `judge` flags any individual IRI exceeding the token budget or
+#       carrying a _before_/_during_/_after_ narrative transition (should-shorten), and any Event
+#       individual typed to an off-sheet compound occurrence type (should-reuse-type).
+#
+# Locked decisions reflected here:
+#   - State context attaches via core#affects (State -> Agent); an Event begins/ends a State via the
+#     State inverses activatedByEvent/terminatedByEvent (and outbound initiates/terminates). (decision 1)
+#   - A State is created only when it does normative work or is transient conduct. (decision 2)
+#   - Reuse is driven by alt_labels (deterministic alias tier), not fuzzy matching. (decision 3)
+#   - Canonical terms of art kept + allow-listed. (decision 5)
+#
+# status: provisional = NEW class, needs user confirmation + a Pellet-validated seed into the TTL.
+# Wiring properties cited below are already declared in proethica-core.ttl (no core change required).
+
+component: Event
+core_category: Event                      # feeds the matcher category-compatibility guard
+namespace: http://proethica.org/ontology/intermediate#
+canonical_parents:                        # the reusable occurrence parent in proethica-core
+  - Event                                 # proeth-core:Event (the occurrence TYPE root)
+
+# Edge vocabulary an Event individual uses to carry context OFF its identifier
+# (all declared in OntServe/ontologies/proethica-core.ttl; line numbers for the lead):
+wiring:
+  activatedByEvent: { domain: State, range: Event, line: 305, note: "the Event that activates/begins a State (State-side inverse; the canonical Event->State link)" }
+  terminatedByEvent: { domain: State, range: Event, line: 312, note: "the Event that ends a State (State-side inverse)" }
+  initiates: { domain: [Action, Event], range: State, line: 329, note: "the State the Event begins (Event-side fluent transition; mirror of activatedByEvent)" }
+  terminates: { domain: [Action, Event], range: State, line: 336, note: "the State the Event ends (Event-side fluent transition; mirror of terminatedByEvent)" }
+  triggersEvent: { domain: Action, range: Event, line: 220, note: "inbound: the upstream Action (or Event chain) that causes this Event" }
+  isPerformedBy: { domain: Action, range: Agent, line: 180, note: "agentive Events that are also acts use the act-side link; pure occurrences omit it" }
+  # Temporal ordering between two happenings is the EXISTING proeth:TemporalRelation reification
+  # (allenRelation + proeth:owlTimeProperty time:intervalBefore/During/After + fromEntityText/
+  # toEntityText + evidence), NOT a token in either happening's IRI. The _before_/_during_/_after_
+  # story belongs on that relation node (verified: proethica-case-94.ttl:2875-2881).
+
+# ---------------------------------------------------------------------------
+# 1. CANONICAL EVENT TYPES (NEW additive classes; reuse via rdf:type on match).
+#    Reusable occurrence KINDS that recur across the corpus. The case-specific WHAT (what failed,
+#    what was approved, which obligation triggered) is the individual's label + edges, NOT a type.
+#    The corpus currently mints these as inline compounds (StructuralFailure, DesignFailure,
+#    PEExamFailure, RegulatoryApproval, FederalApproval, CodeExceptionClauseActivation, ...); each
+#    collapses to one occurrence kind below with the specifics on edges/literals.
+# ---------------------------------------------------------------------------
+canonical_types:
+
+  - iri: Failure
+    label: Failure
+    parent: Event
+    definition: >-
+      The occurrence of a structure, system, process, test, or duty failing; what failed and its
+      cause are edges/literals, not the occurrence kind.
+    alt_labels:
+      - Structural Failure
+      - Design Failure
+      - Systemic Failure
+      - Equipment Failure
+      - Mechanical Product Failure
+      - PE Exam Failure
+      - Repeated Exam Failure
+      - Internal Escalation Failure
+      - Ethical Violation Found
+      - Selection Process Integrity Compromised
+    status: provisional
+    source_cases: [8]
+
+  - iri: Approval
+    label: Approval
+    parent: Event
+    definition: >-
+      The occurrence of an approval, authorization, certification, or grant being issued by an
+      authority. The authority and what was approved are edges/literals.
+    alt_labels:
+      - Regulatory Approval
+      - Federal Approval
+      - Prior Employment Approval
+      - State DOT Prior Approval
+      - Unlicensed Reviewer Approval
+      - Public Official Private Plan Approval
+      - Certificate of Authority Obtained
+      - Board Decision Point Reached
+      - Federal Grant Funding
+    status: provisional
+    source_cases: [85, 94]
+
+  - iri: Retirement
+    label: Retirement
+    parent: Event
+    definition: >-
+      The occurrence of a person leaving practice or of an asset reaching end of service; distinct
+      from the Action Resignation (action.yaml), which is the deliberate act of leaving.
+    alt_labels:
+      - Generator End-of-Life Reached
+      - Asset End-of-Service
+    status: provisional
+    cross_component_family: Resignation / Retirement
+    source_cases: [7]
+
+  - iri: SubmissionEvent
+    label: Submission Event
+    parent: Event
+    definition: >-
+      The occurrence of a deliverable being received or a process step completing; the Event facet
+      of the Action Submission (action.yaml), used when the case narrates the receipt rather than
+      the act.
+    alt_labels:
+      - Solicitation Delivery
+      - Solar Energy Equivalence Confirmed
+      - Deliverable Received
+    status: provisional
+    cross_component_family: Submission
+    source_cases: [94]
+
+  - iri: RiskIdentification
+    label: Risk Identification
+    parent: Event
+    definition: >-
+      The occurrence of a hazard, gap, or risk condition becoming known or established during the
+      case; the identified condition is typically also a State (state.yaml) when it does normative
+      work, with this Event as its activatedByEvent.
+    alt_labels:
+      - Storage Gap Identified
+      - Tidal Saltmarsh Crossing Identified
+      - Upstream Habitability Risk Established
+      - Flood Risk Knowledge Activated
+      - Hazard Discovered
+    status: provisional
+    source_cases: [94]
+
+  - iri: ObligationActivation
+    label: Obligation Activation
+    parent: Event
+    definition: >-
+      The occurrence of an obligation or constraint becoming active because a triggering condition
+      is met; pairs with State activatesObligation/activatesConstraint and Obligation
+      defeasibleUnder State.
+    alt_labels:
+      - Public Safety Obligation Triggered
+      - Stakeholder Carbon Pressure Emerges
+      - Code Exception Clause Activation
+      - Consent Requirement Activation
+      - Conditional Defense Activation
+    status: provisional
+    source_cases: [8]
+
+  - iri: Discovery
+    label: Discovery
+    parent: Event
+    definition: >-
+      The occurrence of a fact, defect, conflict, or violation becoming known to a party after an
+      engagement is under way; what is discovered and by whom are edges/literals. Pairs with
+      PostEngagementDiscoveryState (state.yaml) when the discovery does normative work.
+    alt_labels:
+      - Defect Discovered
+      - Conflict Discovered
+      - Violation Discovered
+      - Information Disclosed to Engineer
+    status: provisional
+    source_cases: [60, 71]
+
+  - iri: EngagementStart
+    label: Engagement Start
+    parent: Event
+    definition: >-
+      The occurrence of a professional engagement, retention, or appointment beginning; who is
+      retained by whom is an edge (employedBy/hasClient on the role), not the occurrence kind.
+    alt_labels:
+      - Retention
+      - Appointment
+      - Engineer Retained
+      - Engagement Commenced
+    status: provisional
+    source_cases: [94, 103]
+
+  - iri: EngagementEnd
+    label: Engagement End
+    parent: Event
+    definition: >-
+      The occurrence of an engagement, project, or relationship ending (terminated, completed, or
+      abandoned); distinct from Retirement (leaving practice) and the Action Resignation. Commonly
+      the terminatedByEvent of an engagement-scoped State.
+    alt_labels:
+      - Project Completed
+      - Project Terminated
+      - Contract Ended
+      - Formal Written Project Failure
+    status: provisional
+    source_cases: [85]
+
+  - iri: Incident
+    label: Incident
+    parent: Event
+    definition: >-
+      The occurrence of an unplanned harmful event (collapse, injury, release, accident) in the
+      world that the case turns on; what occurred and its consequences are edges/literals.
+    alt_labels:
+      - Accident
+      - Collapse
+      - Release
+      - Injury
+      - Damage Event
+    status: provisional
+    source_cases: [8]
+
+  - iri: DecisionPoint
+    label: Decision Point
+    parent: Event
+    definition: >-
+      The occurrence of a juncture at which a party must choose among courses of action; the choice
+      itself is an Action (action.yaml). Used by the Step-4 decision-point layer to anchor the
+      narrative branch.
+    alt_labels:
+      - Board Decision Point Reached
+      - Decision Required
+      - Choice Point
+    status: provisional
+    source_cases: [94]
+
+# ---------------------------------------------------------------------------
+# 2. IRI-SHORTENING RULE for Event INDIVIDUALS (replaces do_not_mint for this component).
+#    Same rule as action.yaml; restated so this sheet is self-contained.
+# ---------------------------------------------------------------------------
+iri_rule:
+
+  problem: >-
+    Report B found 980 non-provenance individual IRI occurrences that encode a
+    _before_/_during_/_after_ narrative transition (107 of the 119 case files contain the pattern;
+    1218 proeth:TemporalRelation nodes total). The extractor slugifies the full rdfs:label (an
+    entire two-event story) into one local-name, so a single IRI bakes in actor, counterparty,
+    project, two events, a precedent citation, and their temporal relation. This is the same
+    bake-context-into-identity failure the class sheets fix, generalized to the temporal individual
+    layer. It compounds with the type-level problem: those individuals are also typed to inline
+    compound occurrence classes (StructuralFailure, RegulatoryApproval, CodeExceptionClauseActivation)
+    that section 1 collapses to a reusable Event type.
+
+  rule: >-
+    Each Event individual gets a SHORT, stable local-name = its canonical Event type local-name + a
+    minimal per-case disambiguator (a short noun phrase, or a numeric suffix when two of the same
+    type occur in one case). The narrative and causal context becomes EDGES (activatedByEvent /
+    terminatedByEvent linking the State it begins/ends, triggersEvent for the upstream cause,
+    initiates/terminates, isPerformedBy for agentive occurrences) and literals (rdfs:label keeps the
+    readable phrase; proeth:evidence keeps the source quote), NOT IRI tokens. Temporal ordering
+    between two happenings is the EXISTING proeth:TemporalRelation reification (allenRelation +
+    proeth:owlTimeProperty time:intervalBefore/During/After + fromEntityText/toEntityText), so NO
+    Event individual IRI ever contains _before_/_during_/_after_; only the relation node may, because
+    that node IS the relation, not a happening.
+
+  budget:
+    max_underscore_tokens: 6              # judge flags Event individual local-names above this
+    forbidden_substrings: ["_before_", "_during_", "_after_"]   # any hit on a happening IRI -> should-shorten
+    disambiguator: "short noun phrase or numeric suffix (Failure_Landfill, Approval_FederalGrant, Failure_2)"
+    type_reuse: "the Event individual's rdf:type must be a section-1 canonical type, not an inline compound"
+
+  worked_examples:
+
+    - name: case 94 narrative collapse (the bad case, 29 tokens)
+      case: 94
+      before:
+        iri: case94:Engineers_A_and_B_study_of_landfill_contours_BER_Case_No._79-2_before_Engineer_C_publicly_contending_the_higher_level_design_would_be_environmentally_unsound_BER_Case_No._79-2
+        rdf_type: proeth:TemporalRelation
+        token_count: 29
+        verified_at: "OntServe/ontologies/proethica-case-94.ttl:2875-2881"
+        problem: >-
+          One name bakes two distinct happenings (the A/B contour study; C's public contention),
+          both actors, a precedent citation, and the temporal _before_ relation. The two happenings
+          have no individual IRIs of their own; the story exists only inside this single relation
+          name plus its fromEntityText/toEntityText literals.
+      after:
+        individuals:
+          - iri: case94:Study_LandfillContours
+            rdf_type: SubmissionEvent          # the receipt/completion of the contour study (or DesignReview act in action.yaml if narrated as the act)
+            label: '"Engineers A and B study of landfill contours"'
+            edges:
+              - "triggersEvent case94:Contention_PublicDispute   # the study leads to C's contention"
+            literals:
+              - 'proeth:textReferences "BER Case No. 79-2"'
+          - iri: case94:Contention_PublicDispute
+            rdf_type: RiskIdentification        # C establishes the environmental-soundness risk
+            label: '"Engineer C publicly contending the higher level design would be environmentally unsound"'
+            edges:
+              - "isPerformedBy case94:Agent_Engineer_C"
+            literals:
+              - 'proeth:textReferences "BER Case No. 79-2"'
+        temporal_relation:
+          iri: case94:Study_LandfillContours_before_Contention_PublicDispute
+          note: >-
+            The ordering stays on the EXISTING proeth:TemporalRelation node (allenRelation "before",
+            proeth:owlTimeProperty "time:intervalBefore", fromEntityText/toEntityText pointing at the
+            two short happening IRIs). This is the one place a _before_ token is legitimate because
+            the node IS the relation, not an Event. The 29-token name collapses to two 2-token Event
+            IRIs plus one relation node.
+
+    - name: case 94 inline-compound-type Failure (type reuse + shortening)
+      case: 94
+      before:
+        iri: case94:several_redesigns_not_accepted_by_town_council_BER_Case_No._79-2_before_town_council_requesting_new_design_resulting_in_acceptable_solution_BER_Case_No._79-2
+        rdf_type: proeth:TemporalRelation
+        token_count: 23
+        verified_at: "OntServe/ontologies/proethica-case-94.ttl:5096"
+        problem: >-
+          A redesign-rejection occurrence and a council re-request occurrence are fused with their
+          _before_ relation into one 23-token name; the rejection occurrence would otherwise be typed
+          to an inline compound like proeth:FormalWrittenProjectFailure.
+      after:
+        individuals:
+          - iri: case94:Failure_RedesignRejected
+            rdf_type: Failure                   # section-1 canonical type, NOT FormalWrittenProjectFailure
+            label: '"Several redesigns not accepted by town council"'
+            literals:
+              - 'proeth:textReferences "BER Case No. 79-2"'
+          - iri: case94:Approval_AcceptableDesign
+            rdf_type: Approval                  # the council request resulting in an acceptable solution
+            label: '"Town council request for new design resulting in acceptable solution"'
+        temporal_relation:
+          iri: case94:Failure_RedesignRejected_before_Approval_AcceptableDesign
+          note: >-
+            allenRelation "before" + time:intervalBefore on the TemporalRelation node; neither Event
+            IRI carries the _before_ token, and each is typed to a reusable occurrence kind rather
+            than a one-off compound.
+
+# ---------------------------------------------------------------------------
+# 3. CURATE -- open calls for the lead at full-set curation.
+# ---------------------------------------------------------------------------
+curate:
+  - item: Event/Action duplication with action.yaml
+    question: >-
+      action.yaml already lists Retirement, SubmissionEvent, Failure, Approval, RiskIdentification,
+      and ObligationActivation under its "EVENT types" tail (A and E share that sheet). event.yaml
+      is the Event-component source of truth and adds Discovery, EngagementStart, EngagementEnd,
+      Incident, and DecisionPoint. Confirm event.yaml is canonical for the Event component and that
+      action.yaml's Event tail is trimmed to a pointer to avoid two definitions of the same type.
+  - item: Event type granularity
+    question: >-
+      The corpus mints highly specific Failure/Approval/Activation compounds (StructuralFailure,
+      PEExamFailure, CodeExceptionClauseActivation, UnlicensedReviewerApproval). The discipline rule
+      routes the specifics to edges/literals, collapsing them to Failure/Approval/ObligationActivation.
+      Confirm this granularity, or whether a small number of genuinely distinct occurrence kinds
+      (e.g. StructuralFailure as a physical-world Incident vs an Ethical/Process Failure) warrant a
+      separate type because they wire to different States.
+  - item: agentive Event vs Action
+    question: >-
+      Several "Events" in the data are deliberate acts narrated as occurrences (a council request, a
+      board questioning). The boundary is: a deliberate act by an Agent is an Action (action.yaml)
+      with isPerformedBy; a happening the case treats as a state-changing occurrence is an Event.
+      Confirm Discovery and DecisionPoint belong on the Event side rather than as Actions, since both
+      can read either way depending on framing.
+  - item: numeric disambiguator policy
+    question: >-
+      When two same-type Events occur in one case the rule allows a numeric suffix (Failure_2).
+      Confirm a numeric suffix is acceptable over requiring a distinct noun phrase, and whether the
+      judge should warn on bare numeric suffixes as a hint to choose a better disambiguator.
+  - item: seeding gate
+    question: >-
+      All canonical_types are status: provisional and must be seeded into proethica-intermediate
+      under proeth-core:Event and Pellet-revalidated before the run. Confirm this seed is in scope
+      for Phase 1 (these are the only NEW Event classes the corpus will carry), jointly with the
+      action.yaml act-type seed.

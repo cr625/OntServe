@@ -1,0 +1,219 @@
+# Cross-component concept manifest (reconciliation pass, 2026-06-24)  [DRAFT for sign-off]
+#
+# Purpose: many concepts shadow themselves across components (one idea emitted as a Principle AND an
+# Obligation AND a Capability AND a Constraint). The 9-component formalism legitimately has DISTINCT
+# facets of one concept; the problem is redundant COPY-PASTE shadows that do no distinct work and are
+# not structurally linked. This manifest declares, per concept, which facets are GENUINE (kept + linked)
+# and which are shadows (dropped, content folded into the kept facet). It is the single place that links
+# the per-component sheets into concepts.
+#
+# POLICY APPLIED (facet-retention rules) -- CONFIRMED by user 2026-06-24.
+# Loader contract: the per-component <component>.yaml files hold canonical/alt_labels/do_not_mint; THIS
+# manifest is the cross-component authority -- entries in `constraint_fold` (and the dropped Capability
+# shadows in `concepts[].drop_shadows`) are EXCLUDED from the injected canonical set and instead act as
+# alias/redirects to the named Obligation. Component files are not physically pruned; the manifest wins.
+policy:
+  principle:  keep the underlying value (one per genuine value).
+  obligation: keep the positive action-guiding duty; link `derivedFromPrinciple` -> its Principle.
+  state:      keep conditions that activate/defeat; link `activatesObligation` / `defeasibleUnder`.
+  action_event: keep the act / occurrence.
+  capability: keep ONLY a genuinely distinct competence; DROP restatements of the duty/value
+              (e.g. "Disclosure Capability", "Professional Accountability Capability").
+  constraint: keep ONLY a HARD prohibition / inviolable limit that is NOT merely the negation of an
+              existing Obligation. Defeasible competition ("safety overrides confidentiality") is
+              expressed with prevailsOver / defeasibleUnder edges on the Obligations, NOT a duplicate
+              Constraint class.
+  idioms: proper-noun terms of art kept canonical regardless (decision 5).
+
+# ===========================================================================
+# CONCEPTS (the 15 cross-component families; facets kept + linked, shadows dropped)
+# ===========================================================================
+concepts:
+
+  - concept: AI Tool Disclosure
+    facets:
+      principle: TransparencyPrinciple
+      obligation: AIToolDisclosureObligation        # derivedFromPrinciple TransparencyPrinciple
+      state: ToolRelianceState                       # activatesObligation AIToolDisclosureObligation
+      action: Disclosure
+    drop_shadows:
+      - {component: constraint, label: AI Tool Disclosure Constraint, fold_into: AIToolDisclosureObligation}
+      - {component: capability, label: Disclosure Capability, action: "KEEP as umbrella competence (absorbs the case-specific *Disclosure Capability variants as alt_labels)"}
+      - {component: resource,  label: AI Tool Use Standard Resource, fold_into: TechnicalStandard}
+    links:
+      - AIToolDisclosureObligation derivedFromPrinciple TransparencyPrinciple
+      - ToolRelianceState activatesObligation AIToolDisclosureObligation
+
+  - concept: Peer Review Cooperation
+    facets:
+      principle: PeerReviewCooperationPrinciple
+      obligation: PeerReviewCooperationObligation
+      state: PeerReviewConsentState
+      action: DesignReview                            # peer review folds into the general DesignReview act (alt_label)
+    drop_shadows:
+      - {component: constraint, label: Peer Review Cooperation Constraint, fold_into: PeerReviewCooperationObligation}
+      - {component: constraint, label: Covert Review Prohibition Constraint, curate: "genuine prohibition? or = Secret Review Refusal Obligation"}
+      - {component: capability, label: Professional Accountability Capability, action: "KEEP as umbrella competence (absorbs accountability/cooperation capability variants)"}
+      - {component: obligation, label: Secret Review Refusal Obligation, action: "merge into PeerReviewCooperationObligation OR keep as the prohibition facet -- curate"}
+    links:
+      - PeerReviewCooperationObligation derivedFromPrinciple PeerReviewCooperationPrinciple
+
+  - concept: Corrective Action Monitoring
+    facets:
+      principle: CorrectiveActionMonitoringPrinciple
+      obligation: CorrectiveActionMonitoringObligation   # absorbs "Regulatory Compliance Verification Obligation"
+      # no distinct State facet: "remediation monitoring" is the activated duty (the Obligation), not a state kind
+    drop_shadows:
+      - {component: constraint, label: Corrective Action Monitoring Constraint, fold_into: CorrectiveActionMonitoringObligation}
+      - {component: obligation, label: Regulatory Compliance Verification Obligation, fold_into: CorrectiveActionMonitoringObligation}
+
+  - concept: Responsible Charge Active Engagement
+    facets:
+      role: ResponsibleChargeEngineer                # (roles.yaml)
+      principle: ResponsibleChargePrinciple
+      obligation: DelegatedWorkReviewObligation
+      state: SupervisoryDirectionState               # + VerificationActivityState, SealAuthorityState
+    drop_shadows:
+      - {component: constraint, label: Responsible Charge Supervision Constraint, fold_into: DelegatedWorkReviewObligation}
+      - {component: constraint, label: Detailed Review Sufficiency Constraint, fold_into: DelegatedWorkReviewObligation}
+      - {component: constraint, label: Personal Preparation Seal Constraint, action: "KEEP -- bright-line (seal only personally-prepared work); genuine inviolable limit"}
+
+  - concept: Non-Engineering Expert Scope
+    facets:
+      role: NonEngineerExpertWitness                 # (roles.yaml)
+      principle: NonEngineeringExpertServicesPrinciple
+      obligation: NonEngineeringExpertScopeLimitationObligation
+      state: ScopeLimitationState                     # + CredentialMisrepresentationState
+    drop_shadows:
+      - {component: constraint, label: Non-Engineering Expert Scope Constraint, fold_into: NonEngineeringExpertScopeLimitationObligation}
+      - {component: capability, label: Scope Boundary Recognition Capability, action: "KEEP -- a genuine recognition competence (distinct from the duty)"}
+
+  - concept: Expertise-Calibrated Disclosure
+    facets:
+      principle: ExpertiseCalibratedDisclosurePrinciple
+      state: CompetenceGapState
+    drop_shadows:
+      - {component: constraint, label: Expertise Domain Reporting Constraint, fold_into: ExpertiseCalibratedDisclosurePrinciple-derived obligation}
+
+  - concept: Dual Capacity / Self-Review
+    facets:
+      state: DualCapacityState                        # + ConflictOfInterestState
+      obligation: DualRoleConflictDisclosureObligation  # + ObjectivityObligation
+    drop_shadows:
+      - {component: constraint, label: Dual Capacity Constraint, fold_into: ObjectivityObligation, via: "DualCapacityState activatesObligation"}
+      - {component: constraint, label: Self-Review Prohibition Constraint, action: "KEEP -- bright-line (do not review/approve own work); genuine prohibition"}
+
+  - concept: Confidentiality
+    facets:
+      principle: ConfidentialityPrinciple
+      obligation: ConfidentialityObligation
+    links:
+      - ConfidentialityObligation derivedFromPrinciple ConfidentialityPrinciple
+    note: clean 2-facet concept; no shadows to drop.
+
+  - concept: Faithful Agent  (idiom; kept)
+    facets:
+      principle: LoyaltyPrinciple
+      obligation: FaithfulAgentObligation
+    drop_shadows:
+      - {component: constraint, label: Faithful Agent Limit Constraint, fold_into: ConfidentialityOverrideSafetyObligation, via: "SafetyObligation prevailsOver ConfidentialityObligation"}
+    note: ConfidentialityOverrideSafety is a COMPETITION rule -> materialize as prevailsOver/defeasibleUnder, not a class. (curate)
+
+  - concept: Public Safety Paramount  (idiom; kept)
+    facets:
+      principle: PublicWelfarePrinciple
+      obligation: PublicSafetyParamountObligation
+    drop_shadows:
+      - {component: constraint, label: Public Safety Paramount Constraint, fold_into: PublicSafetyParamountObligation, via: "prevailsOver every competing obligation"}
+    note: paramount = prevailsOver edges, not a duplicate Constraint class.
+
+  - concept: Self-Certification Prohibition
+    facets:
+      principle: SelfCertificationProhibitionPrinciple
+      constraint: SelfCertificationProhibitionConstraint   # KEEP -- genuine hard prohibition
+    note: prohibition is the primary facet; principle is the value behind it.
+
+  - concept: Tool Substitution Prohibition
+    facets:
+      principle: ToolSubstitutionProhibitionPrinciple
+      constraint: ToolSubstitutionProhibitionConstraint    # KEEP -- genuine hard prohibition
+    note: Technology Replacement Prohibition merges in as an alt_label.
+
+  - concept: Schedule Pressure Resistance
+    facets:
+      principle: SchedulePressureResistancePrinciple
+      capability: RiskAssessmentCapability             # KEEP -- genuine competence (distinct)
+      state: DeadlinePressureState                     # (alt_label: Deadline Pressure Compromise State)
+    note: principle + a real competence + the pressure State; no redundant shadow.
+
+  - concept: Whistleblower Personal Conscience
+    facets:
+      principle: WhistleblowerPersonalConsciencePrinciple
+      state: WhistleblowingState
+    drop_shadows:
+      - {component: constraint, label: Whistleblower Scope Constraint, curate: "genuine scope limit on whistleblowing, or fold to the principle/obligation?"}
+
+  - concept: Submission (A/E boundary)
+    facets:
+      action: Submission
+      event: SubmissionEvent
+    note: legitimately both -- the act (Action) and its completion (Event); keep both, link via triggersEvent.
+
+# ===========================================================================
+# CONSTRAINT reconciliation (fixes the 42->~12 over-retention)
+# A Constraint stays ONLY if it is a hard prohibition/limit not captured by an Obligation.
+# ===========================================================================
+constraint_keep:        # genuine bright-line / inviolable limits
+  - Scope of Practice Competence Constraint
+  - Self-Certification Prohibition Constraint
+  - Tool Substitution Prohibition Constraint
+  - Self-Review Prohibition Constraint
+  - Jurisdictional Licensure Practice Constraint
+  - Personal Preparation Seal Constraint
+  - Fraud Misrepresentation Constraint
+  - Credential Title Accuracy Constraint
+  - Client Waiver Scope Constraint
+  - Client Data Platform Consent Constraint
+  - Expertise Domain Reporting Constraint    # no distinct obligation to fold into -> genuine reporting limit
+  - Whistleblower Scope Constraint           # no distinct obligation -> genuine scope limit
+  - Client Override Escalation Constraint     # no distinct obligation -> genuine escalation limit
+constraint_keep_curate_RESOLVED: # 2026-06-24 user decision: KEEP all 4 as distinct prohibitions
+  - Conflict of Interest Avoidance Constraint
+  - Adversarial Bias Prohibition Constraint
+  - Covert Review Prohibition Constraint
+  - Prevailing Practice Conformance Constraint
+# Constraint result: 10 + 4 = 14 kept (down from 42).
+constraint_fold:        # drop; content lives in the named Obligation (+ defeasibility edges)
+  - {label: AI Tool Disclosure Constraint, into: AIToolDisclosureObligation}
+  - {label: Constructability Disclosure Constraint, into: DisclosureObligation}
+  - {label: Incomplete Submission Disclosure Constraint, into: DisclosureObligation}
+  - {label: Credential Disclosure Constraint, into: DisclosureObligation}
+  - {label: Test Validity Disclosure Constraint, into: DisclosureObligation}
+  - {label: Adverse Evidence Omission Constraint, into: ObjectivityObligation}
+  - {label: Speculative Finding Reporting Constraint, into: ObjectivityObligation}
+  - {label: Responsible Charge Supervision Constraint, into: DelegatedWorkReviewObligation}
+  - {label: Detailed Review Sufficiency Constraint, into: DelegatedWorkReviewObligation}
+  - {label: Faithful Agent Limit Constraint, into: ConfidentialityOverrideSafetyObligation}
+  - {label: Public Safety Paramount Constraint, into: PublicSafetyParamountObligation}
+  - {label: Confidentiality Safety Override Constraint, into: ConfidentialityOverrideSafetyObligation}
+  - {label: Risk Disclosure Timing Constraint, into: ProactiveRiskDisclosureObligation}
+  - {label: Unquantified Risk Communication Constraint, into: ProactiveRiskDisclosureObligation}
+  - {label: Complete Options Advisory Constraint, into: ObjectivityObligation}
+  - {label: Environmental Violation Reporting Constraint, into: EnvironmentalViolationDisclosureObligation}
+  - {label: Environmental Protection Regulatory Constraint, into: EnvironmentalProtectionObligation}
+  - {label: Client Confrontation Prior Reporting Constraint, into: ClientConfrontationBeforeReportingObligation}
+  - {label: Corrective Action Monitoring Constraint, into: CorrectiveActionMonitoringObligation}
+  - {label: Peer Review Cooperation Constraint, into: PeerReviewCooperationObligation}
+  - {label: Non-Engineering Expert Scope Constraint, into: NonEngineeringExpertScopeLimitationObligation}
+  - {label: Design Error Accountability Constraint, into: ProfessionalAccountabilityObligation}
+  - {label: Dual Capacity Constraint, into: ObjectivityObligation}
+# result: Constraint 42 -> 10 kept + 4 curate = ~14 (down from 42).
+
+# ===========================================================================
+# CONSOLIDATED CURATE QUESTIONS (your sign-off)
+# ===========================================================================
+curate:
+  - "POLICY: confirm the facet-retention rules above (esp. Constraint = hard-limit-only; competition via prevailsOver, not duplicate classes)."
+  - "Peer Review: keep 'Secret Review Refusal Obligation' as a distinct prohibition facet, or merge into PeerReviewCooperationObligation?"
+  - "Faithful Agent / Public Safety: confirm the override rules become prevailsOver/defeasibleUnder edges (not Constraint classes)."
+  - "The 4 borderline constraints (constraint_keep_curate): keep as prohibitions or fold to their Objectivity/Conformance obligations?"

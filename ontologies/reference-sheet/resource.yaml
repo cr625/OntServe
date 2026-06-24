@@ -1,0 +1,336 @@
+# Canonical Reference Sheet -- RESOURCE component (Rs)  [DRAFT]
+#
+# Purpose (two uses):
+#   (1) INPUT: injected into the resource extractor prompt so the model reuses a canonical
+#       knowledge-source TYPE (EthicalCode, TechnicalStandard, CasePrecedent, ...) and expresses
+#       topic / who-cited / which-document as literals or individual-level edges, instead of
+#       minting a >=4-word compound "* Standard Resource" class per case.
+#   (2) JUDGE: compare_extraction.py `judge` flags any NEW resource class that matches a
+#       `decompose:` label (should-decompose) or is an over-compound mint.
+#
+# Locked decisions reflected here (canonicalization-design.md DECISIONS LOCKED):
+#   - A Resource class names a reusable knowledge-source KIND only. Topic, who-used/cited, and the
+#     specific document are context, not class identity. (discipline rule)
+#   - who-used/cited -> availableTo (core L443) / citedByAgent (core L451); the specific document
+#     -> refersToDocument (core L428); consumption -> Action usesResource (core L213). (section 3, Rs row)
+#   - Incidental topic that does no normative work -> otherAttribute / textReferences literal,
+#     NOT an invented subclass. (decision 2, applied to Resource: topic literals)
+#   - Reuse driven by alt_labels (deterministic alias tier), not fuzzy matching. (decision 3)
+#   - Idioms / terms of art kept, status: canonical (decision 5). NSPE Code of Ethics is one.
+#
+# DISCIPLINE RULE for Resource (component-specific): canonical = the SOURCE KIND
+# (code / standard / precedent / regulation / report / record). The subject matter the document
+# addresses (AI tool use, CADD practice, wave-equation analysis, wetland delineation) is a topic
+# literal, never a sibling class. 100% of this component's classes are >=4-word compounds; all of
+# them bake a topic onto an existing source kind.
+#
+# status: canonical = reuse this; provisional = needs curation; `curate:` flags an open call.
+
+component: Resource
+core_category: Resource                    # feeds the matcher category-compatibility guard
+namespace: http://proethica.org/ontology/intermediate#
+canonical_parents:                         # the reusable Resource kinds already in proethica-intermediate
+  - EthicalCode                            # subClassOf core#Guideline
+  - ProfessionalCode                       # subClassOf core#Resource
+  - TechnicalStandard                      # subClassOf core#Resource
+  - LegalResource                          # subClassOf core#Resource
+  - CasePrecedent                          # subClassOf core#Resource
+  - ReferenceMaterial                      # subClassOf core#Resource
+
+# ---------------------------------------------------------------------------
+# 1. CANONICAL RESOURCES (keep; reuse on match). Reusable knowledge-source kinds.
+#    The per-case "topic" is carried as a topic literal on the resource INDIVIDUAL
+#    (otherAttribute) plus who-used -> availableTo / cited -> citedByAgent / the document
+#    -> refersToDocument. None of these is a class.
+# ---------------------------------------------------------------------------
+canonical:
+
+  - iri: EthicalCode
+    label: Ethical Code
+    parent: EthicalCode
+    definition: >-
+      A formal codified statement of professional ethical obligations and canons that governs
+      professional conduct (the NSPE Code of Ethics being the prototypical instance).
+    alt_labels:                            # these labels MAP to this canonical class (no new class)
+      - Professional Ethics Code Resource  # the NSPE code idiom (cases 8, 71)
+    status: canonical                      # NSPE Code of Ethics term of art (decision 5)
+    source_cases: [8, 71]
+
+  - iri: ProfessionalCode
+    label: Professional Code
+    parent: ProfessionalCode
+    definition: >-
+      A professional standard or ethical norm establishing a duty of conduct; the specific duty
+      (completeness, competence, inquiry) is a topic of the resource, not a separate code kind.
+    alt_labels:
+      - Engineer Recommendation Completeness Standard Resource   # topic=advisory-recommendation completeness
+      - Expert Completeness Standard Resource                    # topic=expert-report completeness
+      - Expert Inquiry Obligation Standard Resource              # topic=expert inquiry/due-diligence
+      - Professional Competence Standard Resource                # topic=scope-of-competence
+    status: canonical
+    source_cases: [14, 71, 121]
+    # All four are "a professional norm about <topic>"; the topic moves to a literal, the duty it
+    # supports is the Obligation/Constraint component's job, not a Resource subclass.
+
+  - iri: TechnicalStandard
+    label: Technical Standard
+    parent: TechnicalStandard
+    definition: >-
+      A technical standard, methodology, or practice guideline for an area of engineering work;
+      the subject area is a topic of the standard, not a distinct standard kind.
+    alt_labels:
+      - AI Tool Use Standard Resource              # topic=AI tool use
+      - CADD Practice Standard Resource            # topic=CADD practice
+      - Wave Equation Analysis Standard Resource   # topic=pile wave-equation analysis
+      - Wetland Delineation Practice Standard Resource  # topic=wetland delineation
+      - Peer Review Practice Standard Resource     # topic=peer-review conduct
+      - Contractor Bid Responsibility Standard Resource  # topic=contractor bid review
+      - Engineering Design Completeness Standard Resource # topic=design completeness/buildability
+      - Project Delivery Method Standard Resource  # topic=approved project-delivery methods
+      - Emerging Contaminant Regulatory Standard Resource # topic=emerging-contaminant monitoring
+    status: canonical
+    source_cases: [7, 14, 15, 71, 85, 86, 120, 121]
+    cross_component_family: AI Tool Disclosure   # "AI Tool Use Standard Resource" shadows the AI Tool Disclosure family (Cap/Cs/O/P/R)
+    # This is the "* Standard Resource" n=15 family: collapses to TechnicalStandard + a topic literal.
+    # Where a topic is also a regulatory instrument (emerging-contaminant), the LegalResource facet
+    # may apply instead; see curate.
+
+  - iri: LegalResource
+    label: Legal Resource
+    parent: LegalResource
+    definition: >-
+      A statute, regulation, permit requirement, or other legally binding instrument that constrains
+      professional practice; the regulated subject is a topic of the instrument, not a kind of law.
+    alt_labels:
+      - Environmental Protection Standard Resource   # topic=environmental/water-source protection
+      - Wetland Protection Regulation Resource       # topic=wetland protection
+      - Local Safety Regulation Resource             # topic=local safety features
+      - State Licensure Statute Resource             # topic=PE licensure/practice jurisdiction
+      - Federal Grant Project Requirement Resource   # topic=federal-grant project conditions
+      - Engineering Document Seal Standard Resource  # topic=conditions for sealing documents
+    status: canonical
+    source_cases: [7, 8, 60, 85, 86]
+    # The "* Regulation/Statute/Requirement Resource" cluster. Regulated subject -> topic literal;
+    # the regulatory authority (state, federal, municipal) -> citedByAgent / refersToDocument, not a
+    # subclass. Engineering Document Seal kept here as a legal/sealing requirement (its parent in the
+    # accumulator is LegalResource).
+
+  - iri: CasePrecedent
+    label: Case Precedent
+    parent: CasePrecedent
+    definition: >-
+      A documented Board of Ethical Review case decision cited as precedent; the matter the
+      precedent addresses is a topic, not a precedent kind.
+    alt_labels:
+      - Client Confidentiality Ethics Case Precedent Resource  # topic=confidentiality vs public safety
+      - Engineering Competency Case Precedent Resource         # topic=scope of competency
+      - Whistleblower Ethics Case Precedent Resource           # topic=whistleblower rights/duties
+    status: canonical
+    source_cases: [85, 86, 121]
+    # The "* Case Precedent Resource" cluster. The cited case number / matter -> refersToDocument +
+    # topic literal; the precedent KIND is one class.
+
+  - iri: ReferenceMaterial
+    label: Reference Material
+    parent: ReferenceMaterial
+    definition: >-
+      A document, report, record, certification, or position statement consulted as a knowledge
+      source; the document subject and issuing body are context, not distinct reference kinds.
+    alt_labels:
+      - Forensic Engineering Report Resource          # topic=forensic investigation findings
+      - Forensic Engineering Certification Resource   # topic=forensic-engineering credential
+      - Geotechnical Test Record Resource             # topic=geotechnical/pile-driving field data
+      - Responsible Charge Position Statement Resource # topic=responsible-charge position statement
+      - Municipal Engineering Service Resource        # topic=municipal retainer service arrangement
+    status: provisional
+    source_cases: [7, 60, 71, 103]
+    curate: >-
+      OPEN CALL: ReferenceMaterial is a catch-all for report/record/certification/position-statement.
+      If a future curation wants finer source kinds (TechnicalReport, FieldRecord, Credential), mint
+      those as stable Resource subclasses in the TTL and re-home these alt_labels. For the Stage-C run,
+      one ReferenceMaterial class + topic literal is the conservative collapse. NOTE: "Municipal
+      Engineering Service Resource" describes a service/retainer ARRANGEMENT (case 103), arguably a
+      relation (employedBy + otherAttribute) rather than a knowledge resource at all; see do_not_mint.
+
+# ---------------------------------------------------------------------------
+# 2. DO-NOT-MINT (compound resource labels -> canonical Resource kind + topic literal / edge).
+#    Every "* Standard/Regulation/Precedent/Report Resource" compound decomposes to a canonical
+#    parent above + a topic literal (otherAttribute) and, where applicable, who-cited (citedByAgent)
+#    or the specific document (refersToDocument). The alt_labels above already fold the clean cases;
+#    the entries here flag the labels that ALSO carry a non-topic dimension that must move to an edge.
+# ---------------------------------------------------------------------------
+do_not_mint:
+
+  # --- the "* Standard Resource" n=15 family: collapse to a source kind + topic literal ---
+  - label: AI Tool Use Standard Resource
+    decompose:
+      resource: TechnicalStandard
+      topic: { literal: "AI tool use", via: "otherAttribute" }
+    cross_component_family: AI Tool Disclosure
+    source_cases: [7]
+  - label: CADD Practice Standard Resource
+    decompose:
+      resource: TechnicalStandard
+      topic: { literal: "CADD practice", via: "otherAttribute" }
+    source_cases: [120, 121]
+  - label: Wave Equation Analysis Standard Resource
+    decompose:
+      resource: TechnicalStandard
+      topic: { literal: "wave-equation pile analysis", via: "otherAttribute" }
+    source_cases: [71]
+  - label: Wetland Delineation Practice Standard Resource
+    decompose:
+      resource: TechnicalStandard
+      topic: { literal: "wetland delineation", via: "otherAttribute" }
+    source_cases: [86]
+  - label: Peer Review Practice Standard Resource
+    decompose:
+      resource: TechnicalStandard
+      topic: { literal: "peer-review conduct", via: "otherAttribute" }
+    cross_component_family: Peer Review Cooperation
+    source_cases: [15]
+  - label: Contractor Bid Responsibility Standard Resource
+    decompose:
+      resource: TechnicalStandard
+      topic: { literal: "contractor bid review responsibility", via: "otherAttribute" }
+    source_cases: [85]
+  - label: Engineering Design Completeness Standard Resource
+    decompose:
+      resource: TechnicalStandard
+      topic: { literal: "design completeness and buildability", via: "otherAttribute" }
+    source_cases: [85]
+  - label: Project Delivery Method Standard Resource
+    decompose:
+      resource: TechnicalStandard
+      topic: { literal: "approved project-delivery methods", via: "otherAttribute" }
+    source_cases: [14]
+  - label: Emerging Contaminant Regulatory Standard Resource
+    decompose:
+      resource: LegalResource
+      topic: { literal: "emerging-contaminant monitoring and reporting", via: "otherAttribute" }
+      note: "regulatory instrument -> LegalResource, not TechnicalStandard, despite the 'Standard' label"
+    source_cases: [7]
+
+  # --- "* Standard Resource" entries that are really professional codes/norms ---
+  - label: Engineer Recommendation Completeness Standard Resource
+    decompose:
+      resource: ProfessionalCode
+      topic: { literal: "advisory-recommendation completeness", via: "otherAttribute" }
+    source_cases: [14]
+  - label: Expert Completeness Standard Resource
+    decompose:
+      resource: ProfessionalCode
+      topic: { literal: "expert-report completeness", via: "otherAttribute" }
+    source_cases: [71]
+  - label: Expert Inquiry Obligation Standard Resource
+    decompose:
+      resource: ProfessionalCode
+      topic: { literal: "expert inquiry / due diligence", via: "otherAttribute" }
+    source_cases: [71]
+  - label: Professional Competence Standard Resource
+    decompose:
+      resource: ProfessionalCode
+      topic: { literal: "scope of professional competence", via: "otherAttribute" }
+    source_cases: [121]
+  - label: Engineering Document Seal Standard Resource
+    decompose:
+      resource: LegalResource
+      topic: { literal: "conditions for sealing engineering documents", via: "otherAttribute" }
+    source_cases: [7]
+
+  # --- "* Regulation / Statute / Requirement Resource" -> LegalResource + topic ---
+  - label: Environmental Protection Standard Resource
+    decompose:
+      resource: LegalResource
+      topic: { literal: "environmental / water-source protection", via: "otherAttribute" }
+    source_cases: [8]
+  - label: Wetland Protection Regulation Resource
+    decompose:
+      resource: LegalResource
+      topic: { literal: "wetland protection / permitting", via: "otherAttribute" }
+    source_cases: [86]
+  - label: Local Safety Regulation Resource
+    decompose:
+      resource: LegalResource
+      topic: { literal: "local safety features", via: "otherAttribute" }
+    source_cases: [7]
+  - label: State Licensure Statute Resource
+    decompose:
+      resource: LegalResource
+      topic: { literal: "PE licensure / jurisdictional practice", via: "otherAttribute" }
+    source_cases: [60]
+  - label: Federal Grant Project Requirement Resource
+    decompose:
+      resource: LegalResource
+      topic: { literal: "federal-grant project conditions", via: "otherAttribute" }
+      relation: { citedByAgent: Agent, note: "federal funding authority -> citedByAgent" }
+    source_cases: [85]
+
+  # --- "* Case Precedent Resource" -> CasePrecedent + topic (+ the cited BER case -> refersToDocument) ---
+  - label: Client Confidentiality Ethics Case Precedent Resource
+    decompose:
+      resource: CasePrecedent
+      topic: { literal: "client confidentiality vs public safety", via: "otherAttribute" }
+      document: { via: "refersToDocument", note: "the cited BER case -> refersToDocument" }
+    source_cases: [86]
+  - label: Engineering Competency Case Precedent Resource
+    decompose:
+      resource: CasePrecedent
+      topic: { literal: "scope of professional competency", via: "otherAttribute" }
+      document: { via: "refersToDocument" }
+    source_cases: [121]
+  - label: Whistleblower Ethics Case Precedent Resource
+    decompose:
+      resource: CasePrecedent
+      topic: { literal: "whistleblower rights and duties", via: "otherAttribute" }
+      document: { via: "refersToDocument" }
+    source_cases: [85]
+
+  # --- "* Report / Record / Certification / Position Statement Resource" -> ReferenceMaterial + topic ---
+  - label: Forensic Engineering Report Resource
+    decompose:
+      resource: ReferenceMaterial
+      topic: { literal: "forensic investigation findings", via: "otherAttribute" }
+      document: { via: "refersToDocument", note: "the specific report -> refersToDocument" }
+    source_cases: [71]
+  - label: Forensic Engineering Certification Resource
+    decompose:
+      resource: ReferenceMaterial
+      topic: { literal: "forensic-engineering credential", via: "otherAttribute" }
+    source_cases: [60]
+  - label: Geotechnical Test Record Resource
+    decompose:
+      resource: ReferenceMaterial
+      topic: { literal: "geotechnical / pile-driving field data", via: "otherAttribute" }
+      document: { via: "refersToDocument" }
+    source_cases: [71]
+  - label: Responsible Charge Position Statement Resource
+    decompose:
+      resource: ReferenceMaterial
+      topic: { literal: "responsible-charge position statement", via: "otherAttribute" }
+    source_cases: [7]
+
+# ---------------------------------------------------------------------------
+# 3. CURATE -- open calls that the rules cannot fully resolve.
+# ---------------------------------------------------------------------------
+curate:
+
+  - label: Municipal Engineering Service Resource
+    parent: ReferenceMaterial
+    source_cases: [103]
+    question: >-
+      This "resource" (case 103) describes a part-time / retainer SERVICE arrangement (scope, duties,
+      compensation), not a consulted knowledge source. Per the discipline rule it reads as a
+      relation/engagement fact (Role employedBy Agent + otherAttribute compensation literal), already
+      captured on the Role side as the "Retainer Engineer" decompose. RECOMMENDATION: do NOT mint any
+      Resource for it; drop it as a Resource and let the Role/relation carry it. Folded provisionally
+      under ReferenceMaterial above only as a fallback if the extractor insists on a Resource.
+
+  - label: ReferenceMaterial source-kind granularity
+    source_cases: [7, 60, 71, 103]
+    question: >-
+      ReferenceMaterial currently absorbs report + record + certification + position-statement. If the
+      lead wants reasoner-visible distinctions (a precedent search that separates field records from
+      credentials), mint stable subclasses (TechnicalReport, FieldRecord, ProfessionalCredential) in
+      the TTL under core#Resource and re-home the four alt_labels. Conservative default for Stage-C =
+      one ReferenceMaterial class + topic literal (no new mints).

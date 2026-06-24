@@ -1,0 +1,604 @@
+# Canonical Reference Sheet -- CONSTRAINT component (Cs)  [DRAFT]
+#
+# Purpose (two uses):
+#   (1) INPUT: injected into the constraint extractor prompt so the model reuses a canonical
+#       constraint TYPE and expresses case context as constrainedEntity/constrainedBy/State/literal,
+#       instead of minting a compound constraint class.
+#   (2) JUDGE: compare_extraction.py `judge` flags any NEW constraint class that matches a
+#       `decompose:` label (should-decompose) or is an over-compound mint.
+#
+# Locked decisions reflected here (canonicalization-design.md DECISIONS LOCKED):
+#   - Whose-conduct -> constrainedEntity (core L493); which-action -> constrainedBy (Action->Constraint, L229).
+#   - Activation context -> a State that activatesConstraint (core L298); State attaches to the agent via affects (decision 1).
+#   - A State is created only when it does normative work (activatesConstraint / licenses a defeasibility edge)
+#     or is clearly transient case conduct (decision 2). Incidental facts -> constraintStatement literal, not a State.
+#   - Reuse is driven by alt_labels (deterministic alias tier), not fuzzy matching (decision 3).
+#   - Canonical terms of art / idioms kept, status: canonical, not flagged (decision 4/5).
+#   - Narrative "in this case ..." text -> constraintStatement literal, never class identity.
+#
+# DISCIPLINE RULE: a reusable prohibition/limit KIND is a canonical class; whose conduct / which
+#   activity / which counterparty / which engagement is context (edge, State, or literal), never a sibling class.
+#
+# status: canonical = reuse this; provisional = needs curation; `curate:` flags an open call.
+# cross_component_family: this concept also surfaces as a Principle/Obligation/Capability; the lead reconciles.
+
+component: Constraint
+core_category: Constraint                  # feeds the matcher category-compatibility guard
+namespace: http://proethica.org/ontology/intermediate#
+canonical_parents:                         # the reusable constraint parents already in proethica-intermediate
+  - EthicalConstraint
+  - DefeasibleConstraint
+  - InviolableConstraint
+  - CompetenceConstraint
+  - ConfidentialityConstraint
+  - JurisdictionalConstraint
+  - RegulatoryConstraint
+
+# ---------------------------------------------------------------------------
+# 1. CANONICAL CONSTRAINTS (keep; reuse on match). Reusable prohibition/limit TYPES.
+# ---------------------------------------------------------------------------
+canonical:
+
+  # --- conflict of interest / dual-capacity family ---
+  - iri: ConflictOfInterestAvoidanceConstraint
+    label: Conflict of Interest Avoidance Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A prohibition on a professional allowing a personal, financial, or relational interest to
+      influence professional judgment rendered on behalf of a client or the public.
+    alt_labels:
+      - Personal Interest Influence Constraint
+      - Advisory Self-Promotion Constraint
+      - Free Services Solicitation Constraint
+      - Funding Restriction Disclosure Constraint
+    status: canonical
+    cross_component_family: Conflict of Interest Avoidance
+    source_cases: [14, 85, 103]
+
+  - iri: DualCapacityConstraint
+    label: Dual Capacity Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A limit on a professional who serves a single client in two distinct capacities (such as
+      advisor and designer) requiring that the relationship not distort independent judgment.
+    alt_labels:
+      - Dual Capacity Bias Constraint
+      - Dual Capacity Disclosure Constraint
+    status: canonical
+    cross_component_family: Dual Capacity / Self-Review
+    source_cases: [103]
+    # activation (the engagement is dual-capacity) -> a DualCapacityState that activatesConstraint.
+
+  - iri: SelfReviewProhibitionConstraint
+    label: Self-Review Prohibition Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A prohibition on a professional serving as the sole reviewer or approver of work that the
+      professional personally prepared.
+    status: canonical
+    cross_component_family: Dual Capacity / Self-Review
+    source_cases: [103]
+    # "Self-Review Heightened Care Constraint" is the defeasible relaxation under a client waiver;
+    # see do_not_mint (express via defeasibleUnder a ClientWaiverState, not a separate class).
+
+  - iri: ClientWaiverScopeConstraint
+    label: Client Waiver Scope Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A boundary establishing that a client waiver of independent review permits a dual-capacity
+      arrangement but does not eliminate the professional's residual duties.
+    status: canonical
+    source_cases: [103]
+
+  # --- disclosure constraints (the "* Disclosure Constraint" n=8 family) ---
+  - iri: AIToolDisclosureConstraint
+    label: AI Tool Disclosure Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A requirement that a professional who uses AI or automated tools to substantially generate
+      engineering work product disclose that use to the client.
+    alt_labels:
+      - AI Disclosure Best Practice Constraint
+      - Prudential Disclosure Constraint
+    status: canonical
+    cross_component_family: AI Tool Disclosure
+    source_cases: [7, 8]
+    # AI-tool use is a State of the engagement (AIToolUseState activatesConstraint), not class identity.
+
+  - iri: AIContributionAttributionConstraint
+    label: AI Contribution Attribution Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A requirement that a professional who uses AI tools to shape a work product include
+      appropriate attribution and citation of technical authority sources.
+    alt_labels:
+      - Attribution Accuracy Constraint
+    status: canonical
+    cross_component_family: AI Contribution Attribution
+    source_cases: [7]
+
+  - iri: ConstructabilityDisclosureConstraint
+    label: Constructability Disclosure Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A requirement that a professional who identifies materially incomplete or unbuildable
+      engineering documents at the pre-construction stage disclose that deficiency.
+    status: canonical
+    cross_component_family: Constructability Disclosure
+    source_cases: [85]
+
+  - iri: IncompleteSubmissionDisclosureConstraint
+    label: Incomplete Submission Disclosure Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A prohibition on submitting signed and sealed documents the professional knows to be
+      materially incomplete without disclosing that incompleteness.
+    status: canonical
+    source_cases: [85]
+
+  - iri: CredentialDisclosureConstraint
+    label: Credential Disclosure Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A requirement that a professional who signs a document accurately and completely represent
+      licensure status, including disclosing the absence of licensure where applicable.
+    alt_labels:
+      - Engagement Scope Honesty Constraint
+    status: canonical
+    cross_component_family: Credential / Title Accuracy
+    source_cases: [60]
+
+  - iri: TestValidityDisclosureConstraint
+    label: Test Validity Disclosure Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A requirement that a professional who relies on physical testing to support expert
+      conclusions disclose procedural irregularities, equipment failures, or deviations.
+    status: canonical
+    source_cases: [71]
+
+  # --- credential / title accuracy ---
+  - iri: CredentialTitleAccuracyConstraint
+    label: Credential Title Accuracy Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A prohibition on claiming a credential title that incorporates or implies engineering
+      licensure in a jurisdiction where the professional does not hold the required license.
+    alt_labels:
+      - Title Use Licensure Constraint
+    status: canonical
+    cross_component_family: Credential / Title Accuracy
+    source_cases: [60]
+
+  - iri: JurisdictionalLicensurePracticeConstraint
+    label: Jurisdictional Licensure Practice Constraint
+    parent: JurisdictionalConstraint
+    definition: >-
+      A requirement that a professional hold the licensure required by the jurisdiction in which
+      professional services are rendered.
+    status: canonical
+    source_cases: [60]
+
+  # --- forensic / expert-report objectivity (case 71 family) ---
+  - iri: AdversarialBiasProhibitionConstraint
+    label: Adversarial Bias Prohibition Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A prohibition on allowing the adversarial posture of an engagement to shape the selection,
+      presentation, or weighting of technical facts.
+    alt_labels:
+      - Selective Data Use Constraint
+    status: canonical
+    cross_component_family: Forensic Objectivity
+    source_cases: [71]
+
+  - iri: AdverseEvidenceOmissionConstraint
+    label: Adverse Evidence Omission Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A prohibition on omitting from a forensic or expert report material technical evidence that
+      would substantially alter the report's conclusions.
+    alt_labels:
+      - Excluded Evidence Rationale Constraint
+    status: canonical
+    source_cases: [71]
+
+  - iri: SpeculativeFindingReportingConstraint
+    label: Speculative Finding Reporting Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A boundary prohibiting inclusion in a formal report of findings based solely on surmise,
+      speculation, or visual observation without supporting evidence.
+    alt_labels:
+      - Fact-Based Opinion Constraint
+      - Expert Report Preclusion Constraint
+    status: canonical
+    cross_component_family: Fact-Based Opinion
+    source_cases: [8, 71, 86]
+
+  - iri: ExpertInquiryDiligenceConstraint
+    label: Expert Inquiry Diligence Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A requirement that a professional retained as a forensic expert make reasonable efforts to
+      consult accessible sources of relevant factual information before publishing conclusions.
+    status: canonical
+    source_cases: [71]
+
+  # --- competence / scope of practice (the CompetenceConstraint family) ---
+  - iri: ScopeOfPracticeCompetenceConstraint
+    label: Scope of Practice Competence Constraint
+    parent: CompetenceConstraint
+    definition: >-
+      A requirement that a professional who lacks the education, training, or experience for
+      requested services either decline the engagement or retain qualified specialists.
+    alt_labels:
+      - Competence Referral Constraint
+      - Profit Motive Competence Constraint
+    status: canonical
+    cross_component_family: Competence Referral
+    source_cases: [121]
+
+  - iri: SelfCertificationProhibitionConstraint
+    label: Self-Certification Prohibition Constraint
+    parent: CompetenceConstraint
+    definition: >-
+      A prohibition on treating acquisition of a product, course, or shortcut as a basis for
+      self-certifying competence in a discipline.
+    status: canonical
+    cross_component_family: Self-Certification Prohibition
+    source_cases: [121]
+
+  - iri: ToolSubstitutionProhibitionConstraint
+    label: Tool Substitution Prohibition Constraint
+    parent: CompetenceConstraint
+    definition: >-
+      A prohibition on employing a computational or automated tool as a replacement for
+      professional competence and judgment, allowing such tools only as aids.
+    alt_labels:
+      - Technology Replacement Prohibition Constraint   # confirmed synonym (Report B: merge)
+      - Software Competence Substitution Constraint
+      - Unfamiliar Tool Competence Constraint
+      - Technology Neutral Standard Constraint
+    status: canonical
+    cross_component_family: Tool Substitution Prohibition
+    source_cases: [7, 120, 121]
+
+  # --- AI output / detailed review sufficiency (sealing + responsible-charge family) ---
+  - iri: DetailedReviewSufficiencyConstraint
+    label: Detailed Review Sufficiency Constraint
+    parent: InviolableConstraint
+    definition: >-
+      A requirement that a professional who seals documents prepared by others (or by automated
+      tools) review them in sufficient detail to assume full professional responsibility.
+    alt_labels:
+      - AI Output Verification Constraint
+      - AI Review Sufficiency Constraint
+      - Federal Review Adequacy Constraint
+    status: canonical
+    cross_component_family: Detailed Review Sufficiency
+    source_cases: [7, 85, 120]
+
+  - iri: PersonalPreparationSealConstraint
+    label: Personal Preparation Seal Constraint
+    parent: InviolableConstraint
+    definition: >-
+      A requirement that a professional sign and seal only documents personally prepared or over
+      which the professional exercised genuine direction and control.
+    alt_labels:
+      - Direction and Control Verification Constraint
+    status: canonical
+    cross_component_family: Personal Preparation Seal
+    source_cases: [85, 120]
+
+  - iri: ResponsibleChargeSupervisionConstraint
+    label: Responsible Charge Supervision Constraint
+    parent: InviolableConstraint
+    definition: >-
+      A requirement that a professional who seals subordinate-prepared documents have exercised
+      genuine direction and control over their preparation.
+    alt_labels:
+      - Responsible Charge Active Engagement Constraint
+    status: canonical
+    cross_component_family: Responsible Charge Active Engagement
+    source_cases: [7, 120]
+
+  # --- faithful agency limits (client instruction / safety override) ---
+  - iri: FaithfulAgentLimitConstraint
+    label: Faithful Agent Limit Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A boundary on the duty of faithful agency prohibiting execution of client instructions that
+      would create an unmitigated risk to public safety, health, or welfare.
+    alt_labels:
+      - Client Instruction Override Constraint
+      - Work Continuation Constraint
+    status: canonical                      # "Faithful Agent" is the NSPE idiom (decision 4/5)
+    cross_component_family: Faithful Agent Limit
+    source_cases: [8, 15]
+
+  - iri: PublicSafetyParamountConstraint
+    label: Public Safety Paramount Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A requirement that a professional hold the safety, health, and welfare of the public above
+      all other professional duties.
+    status: canonical                      # allow-listed idiom (decision 5; "Public Safety Paramount")
+    cross_component_family: Public Safety Paramount
+    source_cases: [8]
+
+  - iri: ClientOverrideEscalationConstraint
+    label: Client Override Escalation Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A requirement that when a client overrides a safety or environmental recommendation and an
+      unmitigated public risk remains, the professional consider escalating to regulatory authorities.
+    status: canonical
+    source_cases: [8]
+
+  # --- risk communication ---
+  - iri: RiskDisclosureTimingConstraint
+    label: Risk Disclosure Timing Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A requirement that a professional communicate identified or foreseeable risks within a
+      timeframe that allows meaningful protective action.
+    status: canonical
+    cross_component_family: Risk Disclosure Timing
+    source_cases: [8, 86]
+
+  - iri: UnquantifiedRiskCommunicationConstraint
+    label: Unquantified Risk Communication Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A requirement that a professional communicate known qualitative risks even when quantitative
+      assessment is incomplete.
+    status: canonical
+    source_cases: [8]
+
+  # --- advisory completeness (case 14 family) ---
+  - iri: CompleteOptionsAdvisoryConstraint
+    label: Complete Options Advisory Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A requirement that a professional providing advisory recommendations present all eligible
+      options under the applicable framework rather than a partial or selective set.
+    alt_labels:
+      - Partial Analysis Prohibition Constraint
+      - Informal Referral Option Constraint
+    status: canonical
+    cross_component_family: Complete Options Advisory
+    source_cases: [14]
+
+  # --- confidentiality ---
+  - iri: ConfidentialitySafetyOverrideConstraint
+    label: Confidentiality Safety Override Constraint
+    parent: ConfidentialityConstraint
+    definition: >-
+      A requirement recognizing that the duty of confidentiality owed to a client is overridden
+      when the professional possesses information about a substantial violation posing public risk.
+    status: canonical
+    cross_component_family: Confidentiality Safety Override
+    source_cases: [86]
+
+  - iri: ClientDataPlatformConsentConstraint
+    label: Client Data Platform Consent Constraint
+    parent: ConfidentialityConstraint
+    definition: >-
+      A requirement that a professional obtain explicit client consent before transmitting
+      confidential client information to a third-party platform, including AI interfaces.
+    status: canonical
+    source_cases: [7]
+
+  # --- environmental / regulatory reporting ---
+  - iri: EnvironmentalViolationReportingConstraint
+    label: Environmental Violation Reporting Constraint
+    parent: InviolableConstraint
+    definition: >-
+      A requirement that a professional who becomes aware of a substantial violation of
+      environmental law report that violation to appropriate authorities.
+    status: canonical
+    cross_component_family: Environmental Violation Reporting
+    source_cases: [86]
+
+  - iri: EnvironmentalProtectionRegulatoryConstraint
+    label: Environmental Protection Regulatory Constraint
+    parent: RegulatoryConstraint
+    definition: >-
+      A binding requirement arising from environmental regulation that engineers incorporate
+      protective measures into designs to prevent harm to public environmental resources.
+    status: canonical
+    source_cases: [8]
+
+  - iri: ClientConfrontationPriorReportingConstraint
+    label: Client Confrontation Prior Reporting Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A requirement that a professional who observes an apparent client violation contact the
+      client directly to demand correction before reporting to regulatory authorities.
+    status: canonical
+    source_cases: [86]
+
+  - iri: CorrectiveActionMonitoringConstraint
+    label: Corrective Action Monitoring Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A requirement that a professional who has identified and notified a client of a violation
+      continue to monitor the situation until adequate corrective action has been taken.
+    status: canonical
+    cross_component_family: Corrective Action Monitoring
+    source_cases: [86]
+
+  # --- peer review (case 15 family) ---
+  - iri: PeerReviewCooperationConstraint
+    label: Peer Review Cooperation Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A requirement that a professional whose work is subject to a legitimately initiated peer
+      review cooperate with that review.
+    alt_labels:
+      - Peer Review Consent Scope Constraint
+      - Confidential Review Structure Constraint
+    status: canonical
+    cross_component_family: Peer Review Cooperation
+    source_cases: [15]
+
+  - iri: CovertReviewProhibitionConstraint
+    label: Covert Review Prohibition Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A prohibition on conducting a peer review of another professional's work for the same client
+      without first notifying the professional whose work is under review.
+    status: canonical
+    source_cases: [15]
+
+  - iri: DesignErrorAccountabilityConstraint
+    label: Design Error Accountability Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A requirement that a professional whose prior work is found to contain significant errors
+      accept responsibility and not obstruct corrective review.
+    status: canonical
+    source_cases: [15]
+
+  # --- fraud / honesty ---
+  - iri: FraudMisrepresentationConstraint
+    label: Fraud Misrepresentation Constraint
+    parent: EthicalConstraint
+    definition: >-
+      A prohibition on offering explanations or justifications for deficient work product that
+      border on fraud or misrepresentation.
+    status: canonical
+    source_cases: [85]
+
+  # --- expertise-calibrated reporting / non-engineering expert scope ---
+  - iri: ExpertiseDomainReportingConstraint
+    label: Expertise Domain Reporting Constraint
+    parent: CompetenceConstraint
+    definition: >-
+      A boundary establishing that the threshold and form of a professional's disclosure of a
+      suspected violation is calibrated to the professional's expertise in the relevant domain.
+    status: canonical
+    cross_component_family: Expertise-Calibrated Disclosure
+    source_cases: [86]
+
+  - iri: NonEngineeringExpertScopeConstraint
+    label: Non-Engineering Expert Scope Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A boundary establishing that a professional retained in a non-engineering expert capacity
+      may do so in an unlicensed jurisdiction only if qualified without reference to licensure.
+    status: canonical
+    cross_component_family: Non-Engineering Expert Scope
+    source_cases: [60]
+
+  # --- whistleblower scope ---
+  - iri: WhistleblowerScopeConstraint
+    label: Whistleblower Scope Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A boundary establishing that a professional's duty to escalate or disclose improper conduct
+      not rising to a public-safety danger is permissive rather than mandatory.
+    alt_labels:
+      - Non-Safety Whistleblower Scope Constraint
+      - Whistleblower Personal Conscience Constraint
+    status: canonical
+    cross_component_family: Whistleblower Scope
+    source_cases: [85]
+
+  # --- prevailing-practice meta-constraint ---
+  - iri: PrevailingPracticeConformanceConstraint
+    label: Prevailing Practice Conformance Constraint
+    parent: DefeasibleConstraint
+    definition: >-
+      A requirement that ethics codes and their interpretations remain consonant with generally
+      prevailing and customary practice within the profession.
+    status: canonical
+    source_cases: [120]
+
+# ---------------------------------------------------------------------------
+# 2. DO-NOT-MINT (compound constraint labels -> canonical constraint + State/edge/literal).
+#    constrainedEntity = whose conduct (core L493); constrainedBy = which action (Action->Constraint, L229);
+#    activation -> State activatesConstraint (L298); narrative -> constraintStatement literal.
+# ---------------------------------------------------------------------------
+do_not_mint:
+
+  - label: Bid Document Review Constraint
+    decompose:
+      constraint: DetailedReviewSufficiencyConstraint
+      constrainedBy: { action: BidDocumentReview, note: "bid-review activity = which-action context, not a constraint kind" }
+    source_cases: [85]
+
+  - label: Funding Source Rationalization Constraint
+    decompose:
+      constraint: ConflictOfInterestAvoidanceConstraint
+      state: { iri: FundingPressureState, via: "core#affects", activates: "core#activatesConstraint",
+               note: "availability of grant funds as a rationalization = a pressure State, not a class" }
+    source_cases: [85]
+
+  - label: Schedule Pressure Seal Constraint
+    decompose:
+      constraint: PersonalPreparationSealConstraint
+      state: { iri: SchedulePressureState, via: "core#affects", activates: "core#activatesConstraint",
+               note: "schedule pressure is a transient State; see capabilities Schedule Pressure Resistance" }
+    source_cases: [85]
+
+  - label: Single Client Conflict Distinction Constraint
+    decompose:
+      constraint: DualCapacityConstraint
+      note: "single-consenting-client distinction = a constraintStatement literal scoping DualCapacityConstraint"
+    source_cases: [103]
+
+  - label: Self-Review Heightened Care Constraint
+    decompose:
+      constraint: SelfReviewProhibitionConstraint
+      state: { iri: ClientWaiverState, via: "core#affects",
+               defeasibleUnder: true, note: "heightened-care relaxation under client waiver = defeasibleUnder a ClientWaiverState" }
+    source_cases: [103]
+
+  - label: Post-Engagement Reporting Constraint
+    decompose:
+      constraint: EnvironmentalViolationReportingConstraint
+      note: "post-engagement timing = constraintStatement literal, not a distinct constraint kind"
+    source_cases: [86]
+
+  - label: Regulatory Escalation Timing Constraint
+    decompose:
+      constraint: RiskDisclosureTimingConstraint
+      note: "regulatory-escalation timing is the same timing limit applied to the escalation action (constrainedBy)"
+    source_cases: [86]
+
+  - label: Contradictory Scope Explanation Constraint
+    decompose:
+      constraint: AdverseEvidenceOmissionConstraint
+      note: "inconsistent scope explanations = the narrative form of evidence omission -> constraintStatement literal"
+    source_cases: [71]
+
+# ---------------------------------------------------------------------------
+# 3. CURATE -- genuine open calls (resolve at full-set curation).
+# ---------------------------------------------------------------------------
+curate:
+
+  - iri: ClientWaiverScopeConstraint
+    question: >-
+      ClientWaiverScopeConstraint and SelfReviewProhibitionConstraint / Self-Review Heightened Care both
+      arise from the single-consenting-client waiver in case 103. Keep ClientWaiverScopeConstraint as a
+      distinct residual-duty limit, or fold it into DualCapacityConstraint as the waiver-scoped facet?
+    leaning: keep distinct (it states a residual-duty boundary, not the dual-capacity limit itself)
+
+  - iri: ExpertReportPreclusionConstraint
+    question: >-
+      Folded into SpeculativeFindingReportingConstraint as an alt_label (both bar overreaching report
+      language in case 71). Confirm the merge: preclusion concerns over-absolute language foreclosing
+      alternatives, speculative-finding concerns under-evidenced inclusion; arguably two facets of one
+      "report epistemic discipline" constraint. If the lead wants them separate, split ExpertReportPreclusionConstraint
+      back out under DefeasibleConstraint.
+    leaning: merge (both are the epistemic-discipline limit on expert-report assertions)
+
+  - iri: TechnologyNeutralStandardConstraint
+    question: >-
+      Folded into ToolSubstitutionProhibitionConstraint as an alt_label, but it reads as the dual of that
+      prohibition (standards are not LOWERED by tool use, vs tools do not REPLACE judgment). Both enforce
+      "tool use does not change the professional's responsibility." Confirm the merge or keep as a sibling
+      under EthicalConstraint.
+    leaning: "merge (same underlying limit: tool use does not alter the standard of responsibility)"

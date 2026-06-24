@@ -1,0 +1,482 @@
+# Canonical Reference Sheet -- ACTION component (A)  [DRAFT for format sign-off]
+#
+# SPECIAL CASE: Action (and Event) have ZERO classes in the proethica-intermediate-extended
+# accumulator (Report B confirmed: A and E are emitted only as per-case INDIVIDUALS via the
+# Step-3 temporal-dynamics path, never accumulated as classes). There is no _inventory_Action.tsv.
+# This sheet therefore governs TWO things instead of the usual canonical/do_not_mint/curate split:
+#
+#   (1) canonical_types:  a small reusable set of Action (and Event) TYPE classes that the
+#       temporal extractor should reuse via rdf:type instead of inventing a free-text type per
+#       occurrence. These are NEW additive classes (status: provisional) for the user to confirm
+#       and seed into proethica-intermediate, gated on Pellet re-validation.
+#   (2) iri_rule:  the IRI-SHORTENING rule for Action/Event INDIVIDUALS. Report B found 980
+#       individual IRIs encode a _before_/_during_/_after_ narrative (worst at 19-29 underscore
+#       tokens, e.g. case 94). The narrative/causal context must become EDGES and literals, not
+#       a baked-in identifier.
+#
+# Purpose (two uses, same as the other sheets):
+#   (1) INPUT: injected into the Step-3 temporal-dynamics prompt so the model types each Action/Event
+#       individual to a canonical type + a SHORT identifier, and emits the story as edges.
+#   (2) JUDGE: compare_extraction.py `judge` flags any individual IRI exceeding the token budget or
+#       carrying a _before_/_during_/_after_ narrative transition (should-shorten).
+#
+# Locked decisions reflected here:
+#   - State context attaches via core#affects (State -> Agent) + Action core#hasState State. (decision 1)
+#   - A State is created only when it does normative work or is transient conduct. (decision 2)
+#   - Reuse is driven by alt_labels (deterministic alias tier), not fuzzy matching. (decision 3)
+#   - Canonical terms of art kept + allow-listed. (decision 5)
+#
+# status: provisional = NEW class, needs user confirmation + a Pellet-validated seed into the TTL.
+# Wiring properties cited below are already declared in proethica-core.ttl (no core change required).
+
+component: Action
+core_category: Action                     # feeds the matcher category-compatibility guard
+namespace: http://proethica.org/ontology/intermediate#
+canonical_parents:                        # the reusable happening parents in proethica-core
+  - Action                                # proeth-core:Action (the act TYPE root)
+  - Event                                 # proeth-core:Event (the occurrence TYPE root; A/E share this sheet)
+
+# Edge vocabulary an Action/Event individual uses to carry context OFF its identifier
+# (all declared in OntServe/ontologies/proethica-core.ttl; line numbers for the lead):
+wiring:
+  isPerformedBy: { domain: Action, range: Agent, line: 180, note: "who performed it" }
+  performsAction: { domain: Agent, range: Action, line: 172, note: "inverse of isPerformedBy" }
+  fulfillsObligation: { domain: Action, range: Obligation, line: 190, note: "what duty the act discharges" }
+  realizesCapability: { domain: Action, range: Capability, line: 198, note: "what competence the act exercises" }
+  usesResource: { domain: Action, range: Resource, line: 213, note: "what knowledge-source the act consumes" }
+  hasState: { domain: Action, range: State, line: 205, note: "contextual State conditioning the act (decision 1 sink)" }
+  triggersEvent: { domain: Action, range: Event, line: 220, note: "the downstream Event the act causes" }
+  constrainedBy: { domain: Action, range: Constraint, line: 229, note: "the prohibition the act is bound by" }
+  initiates: { domain: [Action, Event], range: State, line: 329, note: "the State the happening begins (fluent transition)" }
+  terminates: { domain: [Action, Event], range: State, line: 336, note: "the State the happening ends (fluent transition)" }
+  activatedByEvent: { domain: State, range: Event, line: 305, note: "Event-side: the Event that activates a State" }
+  terminatedByEvent: { domain: State, range: Event, line: 312, note: "Event-side: the Event that ends a State" }
+  # Temporal ordering between two happenings is the EXISTING proeth:TemporalRelation reification
+  # (allenRelation + time:intervalBefore/During/After + fromEntityText/toEntityText), NOT a token
+  # in either happening's IRI. The _before_/_during_/_after_ story belongs on that relation node.
+
+# ---------------------------------------------------------------------------
+# 1. CANONICAL ACTION/EVENT TYPES (NEW additive classes; reuse via rdf:type on match).
+#    Reusable act/occurrence KINDS that recur across the corpus. The case-specific WHAT
+#    (which document, which client, which project) is the individual's label + edges, NOT a type.
+# ---------------------------------------------------------------------------
+canonical_types:
+
+  # --- ACTION types (act KINDS) ---
+  - iri: Disclosure
+    label: Disclosure
+    parent: Action
+    definition: >-
+      An act of revealing material information to an affected party, client, employer, or
+      authority. What is disclosed and to whom are edges/literals, not the act kind.
+    alt_labels:
+      - Disclose
+      - Disclosing
+      - Verbally Disclose Concern to Client
+      - Unambiguously Express Safety Concerns
+      - Verbal Warning to Commissioners
+      - Verbally Warning Client of Danger
+    status: provisional
+    cross_component_family: AI Tool Disclosure
+    source_cases: [7, 8, 94]
+
+  - iri: Reporting
+    label: Reporting
+    parent: Action
+    definition: >-
+      An act of formally communicating findings, defects, or violations to a recipient. The
+      recipient and subject matter are edges/literals.
+    alt_labels:
+      - Report
+      - Reporting
+      - Verbally Report Findings to Client
+      - Verbally Report Defect to Client
+      - Threaten Regulatory Agency Report
+    status: provisional
+    source_cases: [8, 71]
+
+  - iri: Notification
+    label: Notification
+    parent: Action
+    definition: >-
+      An act of giving notice to a party; distinguished from Reporting in that it conveys a
+      decision or status rather than analytical findings.
+    alt_labels:
+      - Notify
+      - Notifying
+      - Verbal Notification to Client B
+      - Vague Client Notification Decision
+    status: provisional
+    source_cases: [85]
+
+  - iri: Withholding
+    label: Withholding
+    parent: Action
+    definition: >-
+      An act of declining to reveal or supply information or resources that could have been
+      disclosed. The omitted content is a literal/edge, not the act kind.
+    alt_labels:
+      - Withhold
+      - Withholding
+      - Withheld
+      - Omit
+      - Omitting
+      - Withhold Unprompted Traffic Disclosure
+      - Withhold Company X Confidential Information
+    status: provisional
+    source_cases: [94]
+
+  - iri: Submission
+    label: Submission
+    parent: Action
+    definition: >-
+      An act of formally transmitting a deliverable (plans, bid, report, application) to a
+      recipient. The deliverable and recipient are edges/literals.
+    alt_labels:
+      - Submit
+      - Submitting
+      - Submittal
+    status: provisional
+    cross_component_family: Submission
+    source_cases: [85]
+
+  - iri: SealingDocuments
+    label: Sealing Documents
+    parent: Action
+    definition: >-
+      An act of affixing a professional seal to engineering documents, attesting responsible charge.
+    alt_labels:
+      - Seal
+      - Sealing
+      - Seal Documents
+    status: provisional
+    source_cases: [7]
+
+  - iri: DesignReview
+    label: Design Review
+    parent: Action
+    definition: >-
+      An act of reviewing a design, plan, or another professional's work for adequacy,
+      constructability, or compliance.
+    alt_labels:
+      - Review
+      - Reviewing
+      - Constructability Review
+      - Peer Review
+    status: provisional
+    cross_component_family: Peer Review Cooperation
+    source_cases: [15, 85]
+
+  - iri: Verification
+    label: Verification
+    parent: Action
+    definition: >-
+      An act of confirming that work, data, or a representation meets a required standard before
+      relying on or transmitting it.
+    alt_labels:
+      - Verify
+      - Verifying
+      - Confirm Findings
+    status: provisional
+    source_cases: [7]
+
+  - iri: DesignPreparation
+    label: Design Preparation
+    parent: Action
+    definition: >-
+      An act of producing a design, plan, calculation, or specification. The project/discipline
+      is an edge/literal, not a separate act kind.
+    alt_labels:
+      - Design
+      - Designing
+      - Prepare
+      - Preparing
+      - Prepare Design
+      - Utility-Avoidance Compliant Design
+    status: provisional
+    source_cases: [71, 94]
+
+  - iri: Recusal
+    label: Recusal
+    parent: Action
+    definition: >-
+      An act of withdrawing from a decision, project, or engagement to avoid a conflict of interest.
+    alt_labels:
+      - Recuse
+      - Recusal
+      - Voluntary Recusal from City Projects
+      - Withdraw from Project
+    status: provisional
+    source_cases: [103]
+
+  - iri: Recommendation
+    label: Recommendation
+    parent: Action
+    definition: >-
+      An act of advising a course of action to a client, employer, or authority. The advised
+      content is an edge/literal.
+    alt_labels:
+      - Recommend
+      - Recommending
+      - Advise
+      - Advising
+      - Recommend Additional Safety Testing
+      - Verbally Advising Client of Adverse Findings
+    status: provisional
+    source_cases: [14]
+
+  - iri: Acceptance
+    label: Acceptance
+    parent: Action
+    definition: >-
+      An act of agreeing to an engagement, deliverable, gift, or term. What is accepted and from
+      whom are edges/literals; the high label frequency (42) reflects narrative phrasing, not a
+      proliferation of act kinds.
+    alt_labels:
+      - Accept
+      - Accepting
+      - Unsolicited Material Acceptance
+      - Water Source Evaluation Accepted
+    status: provisional
+    source_cases: [94]
+
+  - iri: Refusal
+    label: Refusal
+    parent: Action
+    definition: >-
+      An act of declining a request, instruction, engagement, or term. Distinct from Recusal in
+      that it does not withdraw from an existing relationship.
+    alt_labels:
+      - Refuse
+      - Refusing
+      - Decline
+      - Declining
+    status: provisional
+    source_cases: [85]
+
+  - iri: Resignation
+    label: Resignation
+    parent: Action
+    definition: >-
+      An act of terminating one's own employment or engagement. Distinct from the Event Retirement,
+      which is the occurrence of an engagement ending.
+    alt_labels:
+      - Resign
+      - Resignation
+      - Time Resignations Strategically
+    status: provisional
+    source_cases: [85]
+
+  - iri: ExpertTestimony
+    label: Expert Testimony
+    parent: Action
+    definition: >-
+      An act of giving testimony or an expert opinion in a hearing, deposition, or litigation.
+    alt_labels:
+      - Testify
+      - Testifying
+      - Testify for Low Dams
+      - Negative Impacts Testified
+    status: provisional
+    source_cases: [60]
+
+  - iri: Escalation
+    label: Escalation
+    parent: Action
+    definition: >-
+      An act of raising an unresolved concern to a higher authority (supervisor, board, regulator)
+      after a lower-level channel fails.
+    alt_labels:
+      - Escalate
+      - Escalating
+    status: provisional
+    source_cases: [85]
+
+  # --- EVENT types (occurrence KINDS; A and E share this sheet per the special case) ---
+  - iri: Retirement
+    label: Retirement
+    parent: Event
+    definition: >-
+      The occurrence of a person leaving practice or of an asset reaching end of service. Distinct
+      from the Action Resignation; Retirement is the happening, not the deliberate act.
+    alt_labels:
+      - Generator End-of-Life Reached
+    status: provisional
+    source_cases: [7]
+
+  - iri: SubmissionEvent
+    label: Submission Event
+    parent: Event
+    definition: >-
+      The occurrence of a deliverable being received or a process step completing; the Event facet
+      of the Action Submission (use when the case narrates the receipt rather than the act).
+    alt_labels:
+      - Solicitation Delivery
+      - Solar Energy Equivalence Confirmed
+    status: provisional
+    cross_component_family: Submission
+    source_cases: [94]
+
+  - iri: Failure
+    label: Failure
+    parent: Event
+    definition: >-
+      The occurrence of a structure, system, process, or duty failing. What failed is an
+      edge/literal.
+    alt_labels:
+      - Ethical Violation Found
+      - Selection Process Integrity Compromised
+    status: provisional
+    source_cases: [8]
+
+  - iri: Approval
+    label: Approval
+    parent: Event
+    definition: >-
+      The occurrence of an approval, authorization, or certification being granted by an authority.
+    alt_labels:
+      - Certificate of Authority Obtained
+      - Board Decision Point Reached
+      - Federal Grant Funding
+    status: provisional
+    source_cases: [85, 94]
+
+  - iri: RiskIdentification
+    label: Risk Identification
+    parent: Event
+    definition: >-
+      The occurrence of a hazard, gap, or risk condition being identified or established during the
+      case. The identified condition is typically also a State (see state.yaml) when it does
+      normative work.
+    alt_labels:
+      - Storage Gap Identified
+      - Tidal Saltmarsh Crossing Identified
+      - Upstream Habitability Risk Established
+      - Flood Risk Knowledge Activated
+    status: provisional
+    source_cases: [94]
+
+  - iri: ObligationActivation
+    label: Obligation Activation
+    parent: Event
+    definition: >-
+      The occurrence of an obligation becoming active because a triggering condition is met; pairs
+      with State activatesObligation and Obligation defeasibleUnder State.
+    alt_labels:
+      - Public Safety Obligation Triggered
+      - Stakeholder Carbon Pressure Emerges
+    status: provisional
+    source_cases: [8]
+
+# ---------------------------------------------------------------------------
+# 2. IRI-SHORTENING RULE for Action/Event INDIVIDUALS (replaces do_not_mint for this component).
+# ---------------------------------------------------------------------------
+iri_rule:
+
+  problem: >-
+    Report B found 980 non-provenance individual IRIs that encode a _before_/_during_/_after_
+    narrative transition, worst at 19-29 underscore tokens. The extractor slugifies the full
+    rdfs:label (an entire two-event story) into one local-name, so a single IRI bakes in actor,
+    counterparty, project, two events, and their temporal relation. This is the same
+    bake-context-into-identity failure that the class sheets fix for R/P/O/S/Rs/Ca/Cs, generalized
+    to the temporal individual layer.
+
+  rule: >-
+    Each Action/Event individual gets a SHORT, stable local-name = its canonical type local-name +
+    a minimal per-case disambiguator (a short noun phrase, or a numeric suffix when two of the same
+    type occur in one case). The narrative and causal context becomes EDGES (isPerformedBy,
+    triggersEvent, initiates/terminates a State, fulfillsObligation, constrainedBy) and literals
+    (rdfs:label keeps the readable phrase; proeth:evidence keeps the source quote), NOT IRI tokens.
+    Temporal ordering between two happenings is the EXISTING proeth:TemporalRelation reification
+    (allenRelation + time:intervalBefore/During/After + fromEntityText/toEntityText), so NO
+    happening IRI ever contains _before_/_during_/_after_.
+
+  budget:
+    max_underscore_tokens: 6              # judge flags individual local-names above this
+    forbidden_substrings: ["_before_", "_during_", "_after_"]   # any hit -> should-shorten flag
+    disambiguator: "short noun phrase or numeric suffix (Disclosure_PublicHearing, Disclosure_2)"
+
+  worked_examples:
+
+    - name: case 94 narrative collapse (the bad case)
+      case: 94
+      before:
+        iri: case94:Engineers_A_and_B_study_of_landfill_contours_BER_Case_No._79-2_before_Engineer_C_publicly_contending_..._BER_Case_No._79-2
+        token_count: 29
+        problem: >-
+          One IRI bakes two distinct events (the A/B study; C's public contention), both actors, a
+          precedent citation, and the temporal _before_ relation into a single name.
+      after:
+        individuals:
+          - iri: case94:Study_LandfillContours
+            rdf_type: DesignReview
+            label: '"Engineers A and B study of landfill contours"'
+            edges:
+              - "isPerformedBy case94:Agent_Engineer_A"
+              - "isPerformedBy case94:Agent_Engineer_B"
+            literals:
+              - 'proeth:textReferences "BER Case No. 79-2"'
+          - iri: case94:Contention_PublicDispute
+            rdf_type: ExpertTestimony
+            label: '"Engineer C publicly contending the contour findings"'
+            edges:
+              - "isPerformedBy case94:Agent_Engineer_C"
+        temporal_relation:
+          iri: case94:Study_LandfillContours_before_Contention_PublicDispute
+          note: >-
+            The ordering stays on the EXISTING proeth:TemporalRelation node (allenRelation "before",
+            time:intervalBefore, fromEntityText/toEntityText), which is the one place a _before_
+            token is legitimate because that node IS the relation, not a happening.
+
+    - name: case 94 questioning-during (the during case)
+      case: 94
+      before:
+        iri: case94:City_Planning_Board_members_questioning_Engineer_A_during_Engineer_As_public_hearing_presentation
+        token_count: 14
+        problem: >-
+          One IRI fuses the questioning Event, the actor questioned, and the containing presentation
+          Action plus their _during_ relation.
+      after:
+        individuals:
+          - iri: case94:Questioning_PlanningBoard
+            rdf_type: RiskIdentification
+            label: '"City Planning Board members questioning Engineer A"'
+            edges:
+              - "isPerformedBy case94:Agent_City_Planning_Board"
+          - iri: case94:Presentation_PublicHearing
+            rdf_type: Disclosure
+            label: '"Engineer A''s public hearing presentation"'
+            edges:
+              - "isPerformedBy case94:Agent_Engineer_A"
+        temporal_relation:
+          iri: case94:Questioning_PlanningBoard_during_Presentation_PublicHearing
+          note: >-
+            allenRelation "during" + time:intervalDuring on the TemporalRelation node; neither
+            happening IRI carries the _during_ token.
+
+# ---------------------------------------------------------------------------
+# 3. CURATE -- open calls for the lead at full-set curation.
+# ---------------------------------------------------------------------------
+curate:
+  - item: Action/Event type granularity
+    question: >-
+      Confirm the ~22 proposed types are the right granularity. Acceptance (42 label hits) and
+      Disclosure are deliberately single types absorbing many narrative phrasings; confirm no
+      finer split is wanted (e.g. GiftAcceptance vs EngagementAcceptance), since the WHAT is an
+      edge/literal per the discipline rule.
+  - item: Action vs Event pairing
+    question: >-
+      Submission/SubmissionEvent and Resignation/Retirement are deliberately split across the act
+      kind and the occurrence kind. Confirm both facets are wanted, or collapse each pair to one
+      with the act/occurrence distinction carried by parent only.
+  - item: numeric disambiguator policy
+    question: >-
+      When two same-type happenings occur in one case, the rule allows a numeric suffix
+      (Disclosure_2). Confirm a numeric suffix is acceptable over requiring a distinct noun phrase,
+      and whether the judge should warn on bare numeric suffixes as a hint to choose a better
+      disambiguator.
+  - item: seeding gate
+    question: >-
+      All canonical_types are status: provisional and must be seeded into proethica-intermediate
+      under proeth-core:Action / proeth-core:Event and Pellet-revalidated before the run. Confirm
+      this seed is in scope for Phase 1 (these are the only NEW A/E classes the corpus will carry).

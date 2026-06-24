@@ -1,0 +1,375 @@
+# Canonical Reference Sheet -- CAPABILITY component (Ca)  [DRAFT]
+#
+# Purpose (two uses):
+#   (1) INPUT: injected into the capability extractor prompt so the model reuses a canonical
+#       competence TYPE and expresses the subject/domain/who-possesses as context, instead of
+#       minting a per-case compound capability class.
+#   (2) JUDGE: compare_extraction.py `judge` flags any NEW capability class that matches a
+#       `decompose:` label (should-decompose) or is an over-compound mint.
+#
+# Locked decisions reflected here:
+#   - A capability is a reusable COMPETENCE KIND. The subject it operates on (AI tool, geotechnical
+#     test, federal review), who possesses it, and whether it is realized are NOT class identity.
+#   - who-possesses -> core#possessedBy / core#hasCapability (Agent <-> Capability). (design 3, Ca row)
+#   - realization -> an Action core#realizesCapability Capability. (design 3, Ca row)
+#   - a MISSING / insufficient / absent capability is NOT a capability class: it is a State
+#     (CompetenceGapState) that core#affects the Agent and licenses core#defeasibleUnder on the
+#     obligation it undercuts. (design 3, Ca row + decision 2)
+#   - State is created only when it does normative work or is transient conduct. (decision 2)
+#   - Reuse is driven by alt_labels (deterministic alias tier), not fuzzy matching. (decision 3)
+#   - Idioms / canonical terms of art kept, status: canonical. (decision 5)
+#
+# DISCIPLINE RULE: a reusable competence KIND is a canonical class; the activity, project,
+# counterparty, subject-matter, or who-bears-it is context -> an individual-level edge, a State,
+# or a literal, never a sibling capability class.
+#
+# status: canonical = reuse this; provisional = needs curation; `curate:` flags an open call.
+# Cross-component targets (State/Obligation IRIs) are named here but defined in their own sheets.
+
+component: Capability
+core_category: Capability                  # feeds the matcher category-compatibility guard
+namespace: http://proethica.org/ontology/intermediate#
+canonical_parents:                         # the reusable competence parent in proethica-core
+  - Capability                             # core#Capability (no intermediate Capability taxonomy exists yet)
+
+# ---------------------------------------------------------------------------
+# 1. CANONICAL CAPABILITIES (keep; reuse on match). Reusable competence kinds.
+#    Subject/domain/who/realization are context, folded as alt_labels here.
+# ---------------------------------------------------------------------------
+canonical:
+
+  # --- the three named collapse families (Assessment n=9, Recognition n=9, Disclosure n=8) ---
+
+  - iri: RiskAssessmentCapability
+    label: Risk Assessment Capability
+    definition: >-
+      The competence to identify, characterize, and weigh risks bearing on a professional decision.
+    alt_labels:
+      - Concern Threshold Assessment Capability
+      - Environmental Risk Assessment Capability
+      - Schedule Pressure Resistance Capability   # judging and withstanding a risk/pressure condition
+    status: canonical
+    source_cases: [8, 85]
+    cross_component_family: Schedule Pressure Resistance
+    curate: >-
+      OPEN CALL: "Schedule Pressure Resistance Capability" is borderline; the underlying schedule
+      pressure is a RiskState/ConflictState (B_inventory cluster 10). Folded here as the competence
+      to recognize and resist that pressure; confirm at full-set curation whether it belongs with
+      ObjectivityMaintenanceCapability instead.
+
+  - iri: AdequacyAssessmentCapability
+    label: Adequacy Assessment Capability
+    definition: >-
+      The competence to judge whether a document, analysis, review, or process meets the standard required.
+    alt_labels:
+      - Bid Document Adequacy Assessment Capability
+      - Constructability Assessment Capability
+      - Federal Review Adequacy Capability
+      - Analytical Framework Completeness Capability
+      - Partial Analysis Avoidance Capability          # avoiding partial analysis = judging analysis completeness
+      - Options Completeness Disclosure Capability      # completeness of options is an adequacy judgment
+      - Client Consent Waiver Assessment Capability
+    status: canonical
+    source_cases: [14, 71, 85, 103]
+
+  - iri: NormativeFrameworkAssessmentCapability
+    label: Normative Framework Assessment Capability
+    definition: >-
+      The competence to identify and apply the governing canon, code, standard, or precedent to a situation.
+    alt_labels:
+      - Applicable Canon Identification Capability
+      - Regulatory Compliance Verification Capability
+      - Regulatory Standards Awareness Capability
+      - Technology Neutral Standards Application Capability
+      - Peer Review Norm Recognition Capability
+      - Antitrust and Procurement Law Contextual Awareness Capability
+    status: canonical
+    source_cases: [7, 8, 15, 103, 120]
+
+  - iri: PrecedentReasoningCapability
+    label: Precedent Reasoning Capability
+    definition: >-
+      The competence to retrieve, distinguish, and reason analogically from prior cases and precedents.
+    alt_labels:
+      - Precedent-Based Ethical Reasoning Capability
+      - Precedent Distinction Capability
+      - Precedent Analogical Distinction Capability
+      - Ethics Code Evolution Capability                # awareness of how the code/precedent evolves over time
+    status: canonical
+    source_cases: [8, 86, 103, 120]
+
+  - iri: SituationRecognitionCapability
+    label: Situation Recognition Capability
+    definition: >-
+      The competence to perceive that an ethically salient condition (conflict, violation, harm,
+      override, or boundary) is present in a situation.
+    alt_labels:
+      - Client Disservice Recognition Capability
+      - Client Override Recognition Capability
+      - Dual Role Conflict Recognition Capability
+      - Single Client Dual Capacity Recognition Capability
+      - Environmental Violation Recognition Capability
+      - Referral Alternative Recognition Capability
+      - Whistleblower Right Recognition Capability
+    status: canonical
+    source_cases: [8, 14, 71, 85, 86, 103]
+
+  - iri: ScopeBoundaryRecognitionCapability
+    label: Scope Boundary Recognition Capability
+    definition: >-
+      The competence to recognize the limits of one's role, discipline, scope of practice, or authority.
+    alt_labels:
+      - Discipline Boundary Recognition Capability
+      - Non-Engineering Scope Maintenance Capability
+      - Scope Limitation Consistency Capability
+      - Technology Role Boundary Capability
+      - Credential Title Scope Awareness Capability
+      - Faithful Agent Boundary Capability               # NSPE faithful-agent boundary (idiom-anchored)
+    status: canonical
+    source_cases: [15, 60, 71, 86, 120, 121]
+    cross_component_family: Non-Engineering Expert Scope
+
+  - iri: DisclosureCapability
+    label: Disclosure Capability
+    definition: >-
+      The competence to communicate material facts, risks, limitations, or affiliations to the parties
+      entitled to them; subject of the disclosure is context, not a distinct capability.
+    alt_labels:
+      - AI Tool Disclosure Capability
+      - Expertise Calibrated Disclosure Capability
+      - Incomplete Submission Disclosure Capability
+      - Informed Bid Disclosure Capability
+      - Pre-Engagement Scope Disclosure Capability
+      - Equipment Failure Disclosure Capability
+      - Proactive Risk Disclosure Capability
+      - Peer Review Notification Capability
+      - Regulatory Authority Reporting Capability
+      - Funding Constraint Communication Capability
+    status: canonical
+    source_cases: [7, 8, 14, 15, 60, 71, 85, 86]
+    cross_component_family: AI Tool Disclosure
+
+  # --- objectivity / independence (resistance to bias and improper influence) ---
+
+  - iri: ObjectivityMaintenanceCapability
+    label: Objectivity Maintenance Capability
+    definition: >-
+      The competence to maintain independent, unbiased professional judgment under pressure, advocacy,
+      solicitation, or cost-rationalization influence.
+    alt_labels:
+      - Advisory Independence Maintenance Capability
+      - Adversarial Objectivity Maintenance Capability
+      - Advocacy Bias Resistance Capability
+      - Cost Rationalization Bias Avoidance Capability
+      - Free Services Solicitation Resistance Capability
+      - Commercial Solicitation Critical Evaluation Capability
+      - Heightened Self-Review Diligence Capability
+    status: canonical
+    source_cases: [14, 71, 85, 103, 121]
+
+  - iri: JudgmentNonSubstitutionCapability
+    label: Judgment Non-Substitution Capability
+    definition: >-
+      The competence to retain personal professional judgment rather than substituting a tool's,
+      delegate's, or third party's output for it.
+    alt_labels:
+      - AI Substitution Avoidance Capability
+      - AI Output Critical Review Capability
+      - Delegated Work Review Capability
+    status: canonical
+    source_cases: [7, 120]
+
+  # --- competence self-knowledge (and its honest reporting) ---
+
+  - iri: CompetenceSelfAssessmentCapability
+    label: Competence Self-Assessment Capability
+    definition: >-
+      The competence to honestly appraise and verify one's own qualifications before undertaking work.
+    alt_labels:
+      - Self-Competence Honest Assessment Capability
+      - Independent Competence Verification Capability
+      - Competence Self-Certification Resistance Capability
+      - Technology Proficiency Assessment Capability
+      - AI Tool Proficiency Assessment Capability
+    status: canonical
+    source_cases: [7, 120, 121]
+
+  # --- confidentiality (boundary and override judgment) ---
+
+  - iri: ConfidentialityJudgmentCapability
+    label: Confidentiality Judgment Capability
+    definition: >-
+      The competence to determine the boundaries of confidentiality and when an overriding duty
+      (public safety) licenses disclosure.
+    alt_labels:
+      - Confidentiality Override Judgment Capability
+      - Confidentiality Structure Assessment Capability
+      - Client Data Confidentiality Boundary Capability
+      - Confidential Data Upload Consent Capability
+      - Covert Instruction Refusal Capability        # refusing covert/confidential-breaching instruction
+    status: canonical
+    source_cases: [7, 15, 86]
+
+  # --- credential / representation accuracy ---
+
+  - iri: RepresentationAccuracyCapability
+    label: Representation Accuracy Capability
+    definition: >-
+      The competence to represent one's credentials, licensure, and qualifications accurately and
+      without deception.
+    alt_labels:
+      - Credential Representation Accuracy Capability
+      - Jurisdictional Licensure Verification Capability
+      - Deceptive Justification Avoidance Capability
+      - Omission Rationale Articulation Capability
+      - Report Language Precision Capability
+    status: canonical
+    source_cases: [60, 71, 85]
+
+  # --- accountability / cooperation in error and oversight ---
+
+  - iri: ProfessionalAccountabilityCapability
+    label: Professional Accountability Capability
+    definition: >-
+      The competence to accept responsibility for one's work and cooperate in error correction,
+      peer review, and oversight.
+    alt_labels:
+      - Professional Accountability Acceptance Capability
+      - Error Accountability Cooperation Capability
+      - Peer Review Cooperation Capability
+      - Public Safety Cooperation Motivation Capability
+      - Corrective Action Monitoring Capability
+      - Post-Engagement Observation Duty Capability
+      - Remediation Advisory Capability
+      - Peer Competence Reporting Capability
+    status: canonical
+    source_cases: [8, 15, 86, 121]
+    cross_component_family: Peer Review Cooperation
+
+  # --- supervisory / responsible-charge control ---
+
+  - iri: SupervisoryControlCapability
+    label: Supervisory Control Capability
+    definition: >-
+      The competence to exercise responsible-charge control, direct supervision, and sealing authority
+      over work product.
+    alt_labels:
+      - Supervisory Control Verification Capability
+      - Document Sealing Competence Capability
+      - Geotechnical Test Supervision Capability
+    status: canonical
+    source_cases: [71, 120]
+
+  # --- fact-gathering / evidentiary diligence ---
+
+  - iri: FactGatheringDiligenceCapability
+    label: Fact Gathering Diligence Capability
+    definition: >-
+      The competence to gather, consult, and weigh the witnesses, records, and evidence needed to
+      reach a sound professional conclusion.
+    alt_labels:
+      - Witness and Record Consultation Capability
+    status: canonical
+    source_cases: [71]
+
+  # --- decision / work-refusal judgment ---
+
+  - iri: WorkRefusalJudgmentCapability
+    label: Work Refusal Judgment Capability
+    definition: >-
+      The competence to determine when professional duty requires declining or ceasing a task.
+    alt_labels:
+      - Client Confrontation Capability     # confronting a client to refuse improper direction
+    status: canonical
+    source_cases: [8, 86]
+    curate: >-
+      OPEN CALL: "Client Confrontation Capability" (case 86) is folded here as the competence to
+      decline/push back on improper client direction. If it reads more as a communication act,
+      route to DisclosureCapability instead. Confirm at full-set curation.
+
+  # --- AI attribution (transparency about AI authorship) ---
+
+  - iri: AIAttributionCapability
+    label: AI Attribution Capability
+    definition: >-
+      The competence to attribute AI-tool contribution in work product and representations.
+    status: canonical
+    source_cases: [7]
+    cross_component_family: AI Tool Disclosure
+    curate: >-
+      OPEN CALL: candidate alt_label of DisclosureCapability (attribution is a disclosure act). Kept
+      distinct for now because AI authorship attribution is an emerging, named term of art in the
+      corpus; the lead may fold it into DisclosureCapability at reconciliation.
+
+  # --- analytical-distinction (threshold discrimination) ---
+
+  - iri: ThresholdDistinctionCapability
+    label: Threshold Distinction Capability
+    definition: >-
+      The competence to discriminate the threshold at which a concern, consent, or scope condition
+      changes the required professional response.
+    alt_labels:
+      - Retainer Scope Delineation Capability
+    status: canonical
+    source_cases: [103]
+    curate: >-
+      OPEN CALL: thin (one folded member). May merge into AdequacyAssessmentCapability or
+      ScopeBoundaryRecognitionCapability at full-set curation; kept as a distinct head because
+      "threshold discrimination" recurs across the broader DB capability set.
+
+# ---------------------------------------------------------------------------
+# 2. DO-NOT-MINT (compound capability labels -> canonical capability + context/State/Action edge).
+#    A MISSING capability is a State, not a capability (decision 2 + Ca design row).
+# ---------------------------------------------------------------------------
+do_not_mint:
+
+  # --- "missing/avoidance-of-incompetence" framed as a capability -> the GAP is a State ---
+  - label: Litigation Support Test Engineer competence gap   # illustrative; see roles sheet for the role facet
+    note: "any 'X competence gap / out-of-discipline / lacks-Y' capability label is NOT a capability"
+    decompose:
+      state: { iri: CompetenceGapState, via: "core#affects", note: "in states.yaml; licenses defeasibleUnder on the undercut obligation" }
+    source_cases: []
+
+  # The following inventory rows are NOT decomposed away (they are real competences, folded as
+  # alt_labels above). They are listed here ONLY as the explicit do-not-mint instruction the judge
+  # emits when the extractor re-mints the compound instead of reusing the canonical:
+  - label: AI Tool Disclosure Capability
+    decompose: { capability: DisclosureCapability, note: "subject 'AI tool' is context, not a capability kind; see DisclosureCapability alt_labels" }
+    source_cases: [7]
+  - label: AI Tool Proficiency Assessment Capability
+    decompose: { capability: CompetenceSelfAssessmentCapability, note: "subject 'AI tool' is context" }
+    source_cases: [7]
+  - label: Constructability Assessment Capability
+    decompose: { capability: AdequacyAssessmentCapability, note: "subject 'constructability' is context" }
+    source_cases: [85]
+  - label: Environmental Risk Assessment Capability
+    decompose: { capability: RiskAssessmentCapability, note: "domain 'environmental' is context" }
+    source_cases: [8]
+  - label: Geotechnical Test Supervision Capability
+    decompose: { capability: SupervisoryControlCapability, note: "subject 'geotechnical test' is context" }
+    source_cases: [71]
+  - label: Dual Role Conflict Recognition Capability
+    decompose:
+      capability: SituationRecognitionCapability
+      state: { iri: DualCapacityState, via: "core#affects", note: "the dual-role condition itself is a State (roles/states sheets)" }
+    source_cases: [103]
+
+# ---------------------------------------------------------------------------
+# 3. CURATE -- open calls not resolvable by the rules alone.
+# ---------------------------------------------------------------------------
+curate:
+  - question: >-
+      Granularity of the Assessment family. The inventory has Risk / Adequacy / NormativeFramework /
+      Precedent / CompetenceSelf as distinct heads. They could collapse further into ONE
+      AssessmentCapability, or stay split as here. Recommendation: keep split (each names a
+      distinct object of assessment: risk vs document-adequacy vs governing-norm vs precedent vs
+      self-competence); confirm.
+  - question: >-
+      Recognition vs Assessment overlap. SituationRecognitionCapability (perceiving a condition) and
+      the Assessment heads (judging adequacy/threshold) are adjacent. The split is recognition =
+      "is condition X present" vs assessment = "does X meet the standard". Confirm this is the
+      intended cut.
+  - question: >-
+      AIAttributionCapability and AI Attribution (P/O/Cs shadows) form the AI Tool Disclosure
+      cross-component family. Capability facet kept; flag for the lead to link the Principle /
+      Obligation / Constraint shadows to one concept root at reconciliation.

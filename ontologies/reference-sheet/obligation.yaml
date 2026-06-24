@@ -1,0 +1,584 @@
+# Canonical Reference Sheet -- OBLIGATION component (O)  [DRAFT]
+#
+# Purpose (two uses):
+#   (1) INPUT: injected into the obligation extractor prompt so the model reuses a canonical
+#       duty TYPE and expresses bearer/trigger/defeater/status as edges or literals, instead of
+#       minting a compound obligation class that fuses case context into the duty identity.
+#   (2) JUDGE: compare_extraction.py `judge` flags any NEW obligation class that matches a
+#       `decompose:` label (should-decompose) or is an over-compound mint.
+#
+# Locked decisions reflected here (canonicalization-design.md "DECISIONS LOCKED"):
+#   - A reusable duty TYPE is a canonical class; bearer/trigger/defeater/status is per-occurrence
+#     context -> an individual-level edge, a State, or a literal, never a sibling obligation class.
+#   - bearer  -> core#obligatedParty (Obligation -> Agent/Role).
+#   - trigger -> a State, wired State core#activatesObligation Obligation.
+#   - defeater/competition -> core#defeasibleUnder (Obligation -> State) + core#competesWith /
+#     core#prevailsOver (Obligation <-> Obligation).
+#   - source Principle -> core#derivedFromPrinciple (Obligation -> Principle).
+#   - compliance/status -> complianceStatus literal (decision 2: do not invent a State for it).
+#   - State created ONLY when it does normative work or is transient conduct (decision 2).
+#   - Reuse driven by alt_labels (deterministic alias tier), not fuzzy matching (decision 3).
+#   - Idioms / terms of art kept, status: canonical (decision 5).
+#
+# 47% of obligation classes shadow a Principle (B_inventory s.3). The 9-component formalism
+# legitimately has a Principle AND an Obligation derived from it; the canonical Obligation entry is
+# KEPT and tagged cross_component_family so the lead can link it to the Principle/Capability facets.
+#
+# Cross-component decompose targets (State / Principle / Constraint IRIs) are named here by
+# local-name and defined in their own sheets (states.yaml / principle.yaml / constraint.yaml).
+
+component: Obligation
+core_category: Obligation                    # feeds the matcher category-compatibility guard
+namespace: http://proethica.org/ontology/intermediate#
+canonical_parents:                           # reusable duty parents already in proethica-intermediate
+  - ConfidentialityObligation
+  - DisclosureObligation
+  - CompetenceObligation
+  - ReportingObligation
+  - SafetyObligation
+  - CollegialObligation
+  - LegalObligation
+  - EthicalObligation                        # core#Obligation residual parent
+  - ProfessionalObligation
+
+# ---------------------------------------------------------------------------
+# 1. CANONICAL OBLIGATIONS (keep; reuse on match). Reusable duty TYPES that recur across cases.
+#    Bearer/trigger/defeater/status are per-occurrence facts and never appear in these labels.
+# ---------------------------------------------------------------------------
+canonical:
+
+  # --- DISCLOSURE family: the "* Disclosure Obligation" n=14 head collapses here ---
+  - iri: DisclosureObligation
+    label: Disclosure Obligation
+    parent: EthicalObligation
+    definition: >-
+      A duty to disclose material information (risks, conflicts, scope, funding, options, credentials)
+      to a client, employer, or the public.
+    alt_labels:
+      - Complete Options Disclosure Obligation
+      - Concern Threshold Disclosure Obligation
+      - Funding Constraint Disclosure Obligation
+      - Engagement Scope Honesty Obligation
+      - Scope Limitation Honesty Obligation
+      - Retainer Scope Transparency Obligation
+      - Expertise Calibrated Disclosure Obligation
+      - Informed Bid Disclosure Obligation
+      - Credential Accuracy Disclosure Obligation
+      - Engineering Title Accuracy Obligation
+    status: canonical
+    cross_component_family: Disclosure
+    source_cases: [8, 14, 60, 71, 85, 86, 103]
+    note: >-
+      The disclosed subject (options/funding/scope/credentials/bid) and the recipient are case
+      context -> obligatedParty + textReferences, not a duty kind. Specialised disclosure duties
+      that do distinct normative work (AI-tool disclosure, environmental-risk disclosure, dual-role
+      conflict disclosure) are kept as separate canonical entries below.
+
+  - iri: AIToolDisclosureObligation
+    label: AI Tool Disclosure Obligation
+    parent: DisclosureObligation
+    definition: >-
+      A duty to disclose the use of an AI or computational tool, and its limitations, to the
+      affected client or reviewer.
+    alt_labels:
+      - AI Disclosure Client Notification Obligation
+      - AI Attribution Obligation
+    status: canonical
+    cross_component_family: AI Tool Disclosure
+    source_cases: [7]
+    note: >-
+      Triggered by an AI-tool-use State (State_AIToolUse activatesObligation this). The "client
+      notification" / "attribution" variants are the same duty with the recipient/medium as context.
+
+  - iri: ProactiveRiskDisclosureObligation
+    label: Proactive Risk Disclosure Obligation
+    parent: DisclosureObligation
+    definition: >-
+      A duty to proactively disclose an identified risk to safety, the environment, or constructability
+      without waiting to be asked.
+    alt_labels:
+      - Proactive Environmental Risk Disclosure Obligation
+      - Constructability Disclosure Obligation
+    status: canonical
+    cross_component_family: Proactive Risk Disclosure
+    source_cases: [8, 85, 86]
+    note: >-
+      The risk domain (environmental / constructability) is context -> textReferences; the
+      triggering hazard is a RiskState that activatesObligation this.
+
+  - iri: EnvironmentalViolationDisclosureObligation
+    label: Environmental Violation Disclosure Obligation
+    parent: DisclosureObligation
+    definition: >-
+      A duty to disclose a known environmental regulatory violation to the appropriate authority
+      or affected party.
+    status: canonical
+    cross_component_family: Environmental Reporting
+    source_cases: [86]
+    note: >-
+      Triggered by a ConfirmedEnvironmentalViolationState (activatesObligation). Distinct from the
+      reporting-after-engagement duty, which is ReportingObligation below.
+
+  - iri: DualRoleConflictDisclosureObligation
+    label: Dual Role Conflict Disclosure Obligation
+    parent: DisclosureObligation
+    definition: >-
+      A duty to disclose a dual-capacity or self-interest conflict to all affected parties.
+    alt_labels:
+      - Advisory Self-Interest Disclosure Obligation
+    status: canonical
+    cross_component_family: Dual Capacity
+    source_cases: [14, 103]
+    note: >-
+      Triggered by a DualCapacityState / self-interested-advisory State (activatesObligation);
+      defeasibleUnder is not applicable, this duty is itself activated by the conflict state.
+
+  # --- CONFIDENTIALITY family ---
+  - iri: ConfidentialityObligation
+    label: Confidentiality Obligation
+    parent: EthicalObligation
+    definition: >-
+      A duty to protect confidential client or employer information from unauthorized disclosure
+      or exposure.
+    alt_labels:
+      - Client Data Upload Consent Obligation
+    status: canonical
+    cross_component_family: Confidentiality
+    source_cases: [7]
+    note: >-
+      The "client data upload consent" variant fuses a transient State (client data exposure via an
+      AI tool) into the duty name; the duty is plain confidentiality, triggered by a
+      ClientDataExposureState.
+
+  # --- REPORTING / WHISTLEBLOWING family ---
+  - iri: ReportingObligation
+    label: Reporting Obligation
+    parent: EthicalObligation
+    definition: >-
+      A duty to report a hazard, violation, equipment failure, or peer incompetence to the party
+      with authority to act on it.
+    alt_labels:
+      - Equipment Failure Reporting Obligation
+      - Peer Competence Reporting Obligation
+      - Client Override Reporting Obligation
+      - Post-Engagement Environmental Reporting Obligation
+      - Post-Termination Environmental Risk Reporting Obligation
+      - Complete Technical Reporting Obligation
+      - Report Language Completeness Obligation
+    status: canonical
+    cross_component_family: Environmental Reporting
+    source_cases: [8, 71, 86, 121]
+    note: >-
+      The reported subject (equipment / peer / environmental risk) and the timing (post-engagement)
+      are context -> obligatedParty + activatesObligation from the triggering State, not duty kinds.
+
+  - iri: WhistleblowerRightAcknowledgmentObligation
+    label: Whistleblower Right Acknowledgment Obligation
+    parent: EthicalObligation
+    definition: >-
+      A duty of an employer or supervisor to acknowledge and not retaliate against an engineer who
+      reports a safety or ethics concern.
+    status: canonical
+    source_cases: [85]
+    note: >-
+      Bearer is the employer/supervisor -> obligatedParty; do not confuse with the engineer's own
+      ReportingObligation. cross-references a WhistleblowingState on the reporting engineer.
+
+  # --- COMPETENCE family: the "* Competence/Verification Obligation" classes collapse here ---
+  - iri: CompetenceObligation
+    label: Competence Obligation
+    parent: EthicalObligation
+    definition: >-
+      A duty to perform only work within one's area of competence and to maintain proficiency in it.
+    alt_labels:
+      - Discipline Competence Obligation
+      - Technology Proficiency Obligation
+      - AI Tool Competence Obligation
+    status: canonical
+    cross_component_family: Competence
+    source_cases: [7, 120, 121]
+    note: >-
+      The competence domain (discipline / technology / AI tool) is context. A competence GAP is a
+      State (CompetenceGapState) that defeasibleUnder this duty, not a separate obligation class.
+
+  - iri: CompetenceVerificationObligation
+    label: Competence Verification Obligation
+    parent: CompetenceObligation
+    definition: >-
+      A duty to verify one's own competence (and that of delegated or AI-assisted work) before
+      certifying or relying on it.
+    alt_labels:
+      - Self-Certification Avoidance Obligation
+      - Supervisory Control Verification Obligation
+      - Mentor Transition Competence Obligation
+      - Federal Review Adequacy Obligation
+    status: canonical
+    cross_component_family: Competence Verification
+    source_cases: [7, 85, 120, 121]
+    note: >-
+      The "avoidance" framing (self-certification) is the same positive verification duty stated as
+      a prohibition -> keep the positive duty; the prohibition facet belongs in constraint.yaml.
+
+  - iri: CompetenceReferralObligation
+    label: Competence Referral Obligation
+    parent: CompetenceObligation
+    definition: >-
+      A duty to refer or escalate work beyond one's competence to a qualified party.
+    alt_labels:
+      - Competence Escalation Obligation
+      - Informal Referral Alternative Obligation
+    status: canonical
+    cross_component_family: Competence
+    source_cases: [14, 85, 121]
+
+  - iri: DelegatedWorkReviewObligation
+    label: Delegated Work Review Obligation
+    parent: CompetenceObligation
+    definition: >-
+      A duty of an engineer in responsible charge to review and verify work delegated to others
+      (including AI-generated content) before adopting it.
+    alt_labels:
+      - AI Content Review Obligation
+      - Responsible Charge Active Engagement Obligation
+    status: canonical
+    cross_component_family: Responsible Charge Active Engagement
+    source_cases: [7, 120]
+    note: >-
+      "AI content" is the reviewed-work context. "Responsible charge active engagement" is the same
+      review-and-supervise duty named from the role; bearer -> obligatedParty (ResponsibleChargeEngineer).
+
+  - iri: NonEngineeringExpertScopeLimitationObligation
+    label: Non-Engineering Expert Scope Limitation Obligation
+    parent: CompetenceObligation
+    definition: >-
+      A duty of a non-engineer expert witness to limit testimony to the witness's actual area of
+      expertise and not opine on engineering matters.
+    status: canonical
+    source_cases: [60]
+    note: >-
+      Bearer (non-engineer expert witness) -> obligatedParty; kept as a distinct duty because the
+      scope limit is the duty content, not context.
+
+  # --- OBJECTIVITY / NEUTRALITY family ---
+  - iri: ObjectivityObligation
+    label: Objectivity Obligation
+    parent: EthicalObligation
+    definition: >-
+      A duty to provide objective, unbiased professional advice and analysis, free of self-interest,
+      cost, or partisan pressure.
+    alt_labels:
+      - Advisory Objectivity Obligation
+      - Adversarial Context Objectivity Obligation
+      - Adversarial Neutrality Obligation
+      - Partial Analysis Avoidance Obligation
+      - Dual Capacity Bias Avoidance Obligation
+      - Cost Allocation Bias Avoidance Obligation
+    status: canonical
+    cross_component_family: Advisory Objectivity
+    source_cases: [14, 71, 85, 103]
+    note: >-
+      The bias source (adversarial context / dual capacity / cost allocation / self-interest) is the
+      triggering State (defeasibleUnder / activatesObligation), not a separate objectivity duty.
+
+  # --- SAFETY / PUBLIC-WELFARE family ---
+  - iri: PublicSafetyParamountObligation
+    label: Public Safety Paramount Obligation
+    parent: SafetyObligation
+    definition: >-
+      The paramount duty to hold the safety, health, and welfare of the public above all other
+      professional obligations.
+    status: canonical                       # allow-listed NSPE idiom (decision 5)
+    cross_component_family: Public Safety
+    source_cases: [121]
+
+  - iri: EnvironmentalProtectionObligation
+    label: Environmental Protection Obligation
+    parent: SafetyObligation
+    definition: >-
+      A duty to protect the environment and disclose or mitigate environmental harm arising from
+      professional work.
+    status: canonical
+    cross_component_family: Environmental Reporting
+    source_cases: [8]
+
+  - iri: ConfidentialityOverrideSafetyObligation
+    label: Confidentiality Override Safety Obligation
+    parent: SafetyObligation
+    definition: >-
+      The duty that public safety overrides client confidentiality when an imminent hazard is known.
+    alt_labels:
+      - Faithful Agent Limit Obligation
+    status: canonical
+    cross_component_family: Faithful Agent
+    source_cases: [8, 86]
+    note: >-
+      This is a competition rule, not a standalone duty: it is realized as SafetyObligation
+      prevailsOver ConfidentialityObligation, defeasibleUnder a public-safety-hazard State. Kept as a
+      canonical entry because it is a recurring named tension, but the lead should materialize it as
+      a prevailsOver edge rather than a third obligation in committed TTLs.
+
+  - iri: RegulatoryComplianceVerificationObligation
+    label: Regulatory Compliance Verification Obligation
+    parent: SafetyObligation
+    definition: >-
+      A duty to verify that a design or process complies with applicable codes, regulations, and
+      permits.
+    status: canonical
+    cross_component_family: Corrective Action Monitoring
+    source_cases: [7]
+
+  - iri: CorrectiveActionMonitoringObligation
+    label: Corrective Action Monitoring Obligation
+    parent: ReportingObligation
+    definition: >-
+      A duty to monitor that a required corrective or remedial action is actually carried out and to
+      report failure to do so.
+    alt_labels:
+      - Remediation Compliance Advisory Obligation
+    status: canonical
+    cross_component_family: Corrective Action Monitoring
+    source_cases: [86]
+
+  # --- FAITHFUL AGENT / CLIENT-INTEREST family ---
+  - iri: FaithfulAgentObligation
+    label: Faithful Agent Obligation
+    parent: ProfessionalObligation
+    definition: >-
+      The duty to act as a faithful agent or trustee for each client or employer.
+    alt_labels:
+      - Client Interest Cooperation Obligation
+    status: canonical                       # allow-listed NSPE idiom (decision 5)
+    cross_component_family: Faithful Agent
+    source_cases: [15]
+
+  - iri: ClientDisserviceAvoidanceObligation
+    label: Client Disservice Avoidance Obligation
+    parent: ProfessionalObligation
+    definition: >-
+      A duty not to disserve the client by delivering incomplete, deficient, or substandard work.
+    alt_labels:
+      - Complete Design Delivery Obligation
+      - Incomplete Submission Disclosure Obligation
+    status: canonical
+    cross_component_family: Client Disservice
+    source_cases: [85]
+    note: >-
+      "Complete design delivery" states the positive duty; "incomplete submission disclosure" is the
+      disclosure variant triggered by an IncompleteSubmissionState. Both reuse this duty + the State.
+
+  # --- ACCOUNTABILITY family ---
+  - iri: ProfessionalAccountabilityObligation
+    label: Professional Accountability Obligation
+    parent: EthicalObligation
+    definition: >-
+      A duty to take personal professional responsibility for one's work, errors, and judgments,
+      including work performed with tools.
+    alt_labels:
+      - Technology Neutral Accountability Obligation
+      - Design Error Accountability Obligation
+    status: canonical
+    cross_component_family: Professional Accountability
+    source_cases: [8, 15, 120]
+    note: >-
+      "Technology neutral" asserts the duty is unchanged by tool use -> tool context, not a new duty;
+      "design error accountability" attaches the same duty to a PriorDesignErrorDiscoveryState.
+
+  # --- LEGAL / LICENSURE family ---
+  - iri: DocumentSealingObligation
+    label: Document Sealing Obligation
+    parent: LegalObligation
+    definition: >-
+      A duty to seal only documents prepared by or under the responsible charge of the sealing
+      engineer, and to seal those that require it.
+    status: canonical
+    source_cases: [120]
+
+  - iri: JurisdictionalLicensureComplianceObligation
+    label: Jurisdictional Licensure Compliance Obligation
+    parent: LegalObligation
+    definition: >-
+      A duty to hold and comply with the professional licensure required in the jurisdiction of
+      practice.
+    status: canonical
+    source_cases: [60]
+
+  - iri: EvolvingStandardsConformanceObligation
+    label: Evolving Standards Conformance Obligation
+    parent: EthicalObligation
+    definition: >-
+      A duty to keep practice conformant with evolving professional standards and codes over time.
+    status: canonical
+    source_cases: [120]
+    note: >-
+      The "evolving" qualifier reflects an EvolvingProfessionalStandardState that activatesObligation
+      this; kept as a duty type because standards-conformance is a reusable duty.
+
+  # --- PEER REVIEW family ---
+  - iri: PeerReviewCooperationObligation
+    label: Peer Review Cooperation Obligation
+    parent: CollegialObligation
+    definition: >-
+      A duty to cooperate with a legitimate peer review, including participating in and not
+      obstructing it.
+    alt_labels:
+      - Peer Review Participation Obligation
+      - Confidential Peer Review Cooperation Obligation
+      - Peer Review Notification Obligation
+    status: canonical
+    cross_component_family: Peer Review Cooperation
+    source_cases: [15]
+    note: >-
+      "Confidential" reflects a PeerReviewConfidentialityAgreementState (context); "notification" and
+      "participation" are facets of the same cooperation duty, folded as alt_labels.
+
+  - iri: SecretReviewRefusalObligation
+    label: Secret Review Refusal Obligation
+    parent: CollegialObligation
+    definition: >-
+      A duty to refuse to conduct a covert review of another engineer's work without that engineer's
+      knowledge.
+    status: canonical
+    cross_component_family: Peer Review Cooperation
+    source_cases: [15]
+    note: >-
+      Triggered by a CovertReviewRequestState (activatesObligation); kept distinct from the
+      cooperation duty because it is a refusal duty with different normative force.
+
+  # --- ESCALATION / WORK-REFUSAL family ---
+  - iri: WorkRefusalObligation
+    label: Work Refusal Obligation
+    parent: EthicalObligation
+    definition: >-
+      A duty to refuse to proceed with work whose continuation would endanger public safety or
+      violate professional standards.
+    status: canonical
+    source_cases: [8]
+    note: >-
+      Triggered by a hazard / unethical-instruction State (activatesObligation); competesWith the
+      ClientDisserviceAvoidanceObligation / FaithfulAgentObligation, resolved by prevailsOver.
+
+  - iri: ClientConfrontationBeforeReportingObligation
+    label: Client Confrontation Before Reporting Obligation
+    parent: ReportingObligation
+    definition: >-
+      A duty to raise a concern with the client and seek correction before escalating it to an
+      external authority.
+    status: canonical
+    source_cases: [86]
+    note: >-
+      Encodes a procedural ordering (confront, then report); kept because the sequencing is the duty
+      content. The reporting step itself reuses ReportingObligation.
+
+# ---------------------------------------------------------------------------
+# 2. DO-NOT-MINT (compound obligation labels -> decompose to a canonical duty + State/edge/literal).
+#    `via` is the proeth-core property per the locked decisions. State/Principle targets live in
+#    their own sheets.
+# ---------------------------------------------------------------------------
+do_not_mint:
+
+  # --- bias/conflict obligations that are really one duty + a triggering State ---
+  - label: Single Client Conflict Distinction Obligation
+    decompose:
+      obligation: ObjectivityObligation
+      state: { iri: SingleClientDualCapacityState, via: "core#activatesObligation",
+               note: "the single-client-vs-dual-capacity distinction is a conflict State" }
+    source_cases: [103]
+  - label: Self-Review Avoidance Obligation
+    decompose:
+      obligation: ObjectivityObligation
+      state: { iri: DualRoleServiceState, via: "core#activatesObligation" }
+      constraint: { iri: Self-ReviewAvoidanceConstraint, note: "prohibition facet -> constraint.yaml" }
+    source_cases: [103]
+  - label: Heightened Scrutiny Obligation
+    decompose:
+      obligation: ObjectivityObligation
+      state: { iri: DualRoleServiceState, via: "core#activatesObligation",
+               note: "heightened scrutiny = the response a conflict State activates, not a new duty" }
+    source_cases: [103]
+
+  # --- "* Avoidance Obligation" n=9: positive duty + a prohibition Constraint facet ---
+  - label: Deceptive Justification Avoidance Obligation
+    decompose:
+      obligation: ProfessionalAccountabilityObligation
+      constraint: { iri: DeceptiveJustificationProhibitionConstraint, note: "constraint.yaml" }
+    source_cases: [85]
+  - label: Free Services Solicitation Avoidance Obligation
+    decompose:
+      obligation: ObjectivityObligation
+      constraint: { iri: FreeServicesSolicitationProhibitionConstraint, note: "constraint.yaml" }
+    source_cases: [14]
+  - label: Profit Motive Resistance Obligation
+    decompose:
+      obligation: ObjectivityObligation
+      state: { iri: SelfInterestedAdvisoryState, via: "core#activatesObligation",
+               note: "profit motive = a self-interest State that the objectivity duty resists" }
+    source_cases: [121]
+  - label: Schedule Pressure Resistance Obligation
+    decompose:
+      obligation: ProfessionalAccountabilityObligation
+      state: { iri: DeadlinePressureCompromiseState, via: "core#defeasibleUnder",
+               note: "schedule pressure is the defeating State the duty holds against" }
+    source_cases: [85]
+  - label: Tool Substitution Avoidance Obligation
+    decompose:
+      obligation: CompetenceObligation
+      constraint: { iri: ToolSubstitutionProhibitionConstraint, note: "constraint.yaml; Technology Non-Substitution synonym" }
+    source_cases: [121]
+  - label: Technology Non-Substitution Obligation
+    decompose:
+      obligation: CompetenceObligation
+      constraint: { iri: ToolSubstitutionProhibitionConstraint, note: "constraint.yaml" }
+    source_cases: ["120", "121"]
+
+  # --- competence/technology obligations folded into the competence duty types ---
+  # (Discipline/Technology/AI-Tool Competence + Self-Certification/Supervisory/Mentor/Federal
+  #  Verification are alt_labels above; the remaining compound below is pure context.)
+
+  # --- disclosure obligations that are the disclosure duty + a triggering State ---
+  - label: Unsuccessful Project Advisory Obligation
+    decompose:
+      obligation: DisclosureObligation
+      state: { iri: SpeculativeRiskFindingState, via: "core#activatesObligation",
+               note: "advising on an unsuccessful/speculative project outcome is context for disclosure" }
+    source_cases: [8]
+
+  # --- witness / forensic obligations ---
+  - label: Witness Consultation Obligation
+    decompose:
+      obligation: ObjectivityObligation
+      note: "the duty to consult/coordinate with co-experts is an objectivity facet; consultee -> obligatedParty"
+    source_cases: [71]
+
+  # --- "complete reporting / report language" already folded into ReportingObligation alt_labels ---
+
+# ---------------------------------------------------------------------------
+# 3. CURATE -- genuine ambiguities requiring lead sign-off.
+# ---------------------------------------------------------------------------
+curate:
+
+  - label: Confidentiality Override Safety Obligation
+    iri: ConfidentialityOverrideSafetyObligation
+    question: >-
+      Keep as a canonical obligation class, or materialize ONLY as a prevailsOver edge
+      (SafetyObligation prevailsOver ConfidentialityObligation, defeasibleUnder a hazard State) and
+      drop the standalone class? Recommended: drop the class, emit the edge; listed canonical above
+      so the judge does not flag the existing instances mid-run.
+
+  - label: Remediation Monitoring Obligation State
+    question: >-
+      This appears in the State component (parent State) but reads as an obligation baked into a
+      State name. Confirm with states.yaml owner that it resolves to CorrectiveActionMonitoringObligation
+      (here) + a RemediationMonitoringState, with no obligation-named State class surviving.
+
+  - label: Client Confrontation Before Reporting Obligation
+    iri: ClientConfrontationBeforeReportingObligation
+    question: >-
+      Kept canonical for its procedural sequencing. Confirm it is not better modeled as two ordered
+      Actions (confront, then report) each fulfilling ReportingObligation, with the ordering as a
+      temporal relation rather than a distinct duty type.
+
+  - label: Whistleblower Right Acknowledgment Obligation
+    iri: WhistleblowerRightAcknowledgmentObligation
+    question: >-
+      Bearer is the employer, not the engineer. Confirm the extractor assigns obligatedParty to the
+      EmployerRole and that this is not collapsed into the engineer's ReportingObligation.

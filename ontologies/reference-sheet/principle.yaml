@@ -1,0 +1,400 @@
+# Canonical Reference Sheet -- PRINCIPLE component (P)  [DRAFT for format sign-off]
+#
+# Purpose (two uses):
+#   (1) INPUT: injected into the principle extractor prompt so the model reuses a canonical
+#       ethical value + expresses case context (who invoked it, what it applied to, the
+#       balancing narrative) as relations/literals, instead of minting a compound Principle class.
+#   (2) JUDGE: compare_extraction.py `judge` flags any NEW principle class that matches a
+#       `decompose:` label (should-decompose) or is an over-compound mint.
+#
+# Locked decisions reflected here:
+#   - A Principle class is a reusable ethical VALUE; it carries no actor, application, or
+#     resolution narrative. (decision: discipline rule)
+#   - who-invoked moves to core#invokedBy; what-it-applied-to / the balancing-resolution
+#     narrative moves to literals (otherAttribute / textReferences). (section 3, P row)
+#   - Reuse is driven by alt_labels (deterministic alias tier), not fuzzy matching. (decision 3)
+#   - Idioms ("Faithful Agent", "Public Safety Paramount") kept + allow-listed. (decision 5)
+#   - 41% of Principle classes are cross-component shadows of an Obligation/Capability/Constraint;
+#     a legitimate Principle facet is KEPT and tagged cross_component_family for the lead to link.
+#
+# status: canonical = reuse this; provisional = needs your curation; the `curate:` key flags an open call.
+# Off-class facts move via: invokedBy (core#invokedBy) for the appealing agent; balancing/resolution
+# narrative -> otherAttribute / textReferences literals; derivation of an Obligation FROM a Principle
+# is an Obligation-side edge (derivedFromPrinciple), not represented here.
+
+component: Principle
+core_category: Principle                   # feeds the matcher category-compatibility guard
+namespace: http://proethica.org/ontology/intermediate#
+canonical_parents:                         # the reusable principle parents already in proethica-intermediate
+  - FundamentalEthicalPrinciple
+  - ProfessionalVirtuePrinciple
+  - RelationalPrinciple
+  - DomainSpecificPrinciple
+
+# ---------------------------------------------------------------------------
+# 1. CANONICAL PRINCIPLES (keep; reuse on match). Reusable ethical values that recur across cases.
+# ---------------------------------------------------------------------------
+canonical:
+
+  - iri: PublicWelfarePrinciple
+    label: Public Welfare Principle
+    parent: FundamentalEthicalPrinciple
+    definition: >-
+      The value that the safety, health, and welfare of the public is the paramount
+      consideration in professional practice.
+    alt_labels:                            # these labels MAP to this canonical principle (no new class)
+      - Public Welfare Paramount Principle
+      - Refusal of Unsafe Work Principle   # refusing unsafe work is an Action expressing this value, not a value kind
+      - Client Loyalty Limits Principle    # "loyalty is limited by public welfare" is the application of this value
+    status: canonical                      # allow-listed idiom: "Public Safety Paramount" (decision 5)
+    source_cases: [8, 86]
+    cross_component_family: Public Safety Paramount
+
+  - iri: ConfidentialityPrinciple
+    label: Confidentiality Principle
+    parent: RelationalPrinciple
+    definition: >-
+      The value that information entrusted by a client or employer is protected from
+      unauthorized disclosure.
+    alt_labels:
+      - Client Data Confidentiality Principle   # "client data" is the application target, not a value kind
+    status: canonical
+    source_cases: [7]
+    cross_component_family: Confidentiality
+
+  - iri: PeerReviewCooperationPrinciple
+    label: Peer Review Cooperation Principle
+    parent: DomainSpecificPrinciple
+    definition: >-
+      The value that an engineer cooperates with the peer review of another's work; the
+      confidentiality of the reviewed material is a State context, not part of the value.
+    alt_labels:
+      - Confidential Peer Review Cooperation Principle   # "confidential" -> PeerReviewConfidentialityState
+      - Peer Review Notification Principle               # notification is an Action/Obligation expressing this value
+    status: canonical
+    source_cases: [15]
+    cross_component_family: Peer Review Cooperation
+
+  - iri: LoyaltyPrinciple
+    label: Loyalty Principle
+    parent: RelationalPrinciple
+    definition: >-
+      The value that a professional acts as a faithful agent or trustee for the client
+      or employer in professional matters.
+    alt_labels:
+      - Faithful Agent Loyalty Principle        # "Faithful Agent" is the NSPE idiom for this value
+      - Loyalty
+    status: canonical                           # allow-listed idiom: "Faithful Agent" (decision 5)
+    source_cases: [8]
+    cross_component_family: Faithful Agent
+
+  - iri: ObjectivityPrinciple
+    label: Objectivity Principle
+    parent: ProfessionalVirtuePrinciple
+    definition: >-
+      The value that professional judgments and opinions are issued objectively and
+      truthfully, free from bias or undue influence.
+    alt_labels:
+      - Adversarial Context Objectivity Principle      # adversarial context = application, not a value kind
+      - Adversarial Engagement Objectivity Principle
+      - Dual Role Objectivity Principle                # dual role is a State that conditions the duty, not a value kind
+      - Report Language Fairness Principle             # fairness of report language is objectivity applied to wording
+    status: canonical
+    source_cases: [71, 103]
+
+  - iri: HonestyPrinciple
+    label: Honesty Principle
+    parent: ProfessionalVirtuePrinciple
+    definition: >-
+      The value that a professional is truthful and avoids deception or misrepresentation
+      in professional dealings.
+    alt_labels:
+      - Fact-Based Opinion Principle                   # basing opinions on fact is honesty applied to opinion-giving
+      - Scope of Engagement Honesty Principle          # "scope of engagement" is the application target
+      - Deceptive Submission Prohibition Principle     # prohibiting deceptive submission is honesty stated as a prohibition
+      - Credential Misrepresentation Prohibition Principle
+    status: canonical
+    source_cases: [8, 60, 85]
+
+  - iri: TransparencyPrinciple
+    label: Transparency Principle
+    parent: RelationalPrinciple
+    definition: >-
+      The value that a professional proactively discloses material information, risks,
+      and limitations relevant to a client or affected party.
+    alt_labels:
+      - Proactive Risk Disclosure Principle
+      - Complete Options Disclosure Principle          # disclosing all options is transparency applied to advice
+      - Incomplete Work Disclosure Principle           # disclosing that work is incomplete = transparency
+      - Informed Bid Disclosure Principle              # bid-stage disclosure is the application context
+    status: canonical
+    source_cases: [8, 14, 85]
+    cross_component_family: AI Tool Disclosure
+
+  - iri: ConflictOfInterestDisclosurePrinciple
+    label: Conflict of Interest Disclosure Principle
+    parent: RelationalPrinciple
+    definition: >-
+      The value that a professional discloses, and where required avoids, conflicts of
+      interest affecting professional judgment.
+    alt_labels:
+      - Advisory Self-Interest Disclosure Principle    # advisory self-interest is a kind of conflict; context, not a value
+      - Divided Loyalty Prohibition Principle          # divided loyalty is a conflict-of-interest condition
+      - Client Consent Conflict Waiver Principle       # consent/waiver is the resolution narrative, not a value kind
+    status: canonical
+    source_cases: [14, 103]
+
+  - iri: CompetencePrinciple
+    label: Competence Principle
+    parent: ProfessionalVirtuePrinciple
+    definition: >-
+      The value that a professional performs services only in areas of competence and
+      maintains the competence required for the work undertaken.
+    alt_labels:
+      - Technology Competence Principle                # technology is the application domain, not a value kind
+      - Discipline Boundary Competence Principle       # discipline boundary = scope application of competence
+      - Competence Referral Obligation Principle       # referral when out of competence is competence stated as a duty
+    status: canonical
+    source_cases: [120, 121]
+
+  - iri: ResponsibleChargePrinciple
+    label: Responsible Charge Principle
+    parent: DomainSpecificPrinciple
+    definition: >-
+      The value that an engineer in responsible charge exercises actual direct control and
+      personal supervision over the work for which responsibility is taken.
+    alt_labels:
+      - Responsible Charge Active Engagement Principle
+      - Supervisory Control Adequacy Principle         # adequacy of supervisory control = responsible charge applied
+      - Professional Sealing Responsibility Principle  # sealing only work in responsible charge expresses this value
+    status: canonical
+    source_cases: [7, 120]
+    cross_component_family: Responsible Charge Active Engagement
+
+  - iri: ReviewAdequacyPrinciple
+    label: Review Adequacy Principle
+    parent: DomainSpecificPrinciple
+    definition: >-
+      The value that a professional reviews work in sufficient depth to take responsibility
+      for its correctness before relying on or adopting it.
+    alt_labels:
+      - AI Review Adequacy Principle                   # AI is the reviewed-tool context, not a value kind
+      - Detailed Review Adequacy Principle
+    status: canonical
+    source_cases: [7, 120]
+    cross_component_family: AI Tool Disclosure
+
+  - iri: SelfCertificationProhibitionPrinciple
+    label: Self-Certification Prohibition Principle
+    parent: DomainSpecificPrinciple
+    definition: >-
+      The value that a professional does not certify or approve their own work in a capacity
+      meant to provide independent oversight.
+    status: canonical
+    source_cases: [121]
+    cross_component_family: Self-Certification Prohibition
+
+  - iri: ToolSubstitutionProhibitionPrinciple
+    label: Tool Substitution Prohibition Principle
+    parent: DomainSpecificPrinciple
+    definition: >-
+      The value that a tool or technology does not substitute for the professional judgment
+      and competence the work requires.
+    alt_labels:
+      - Technology Replacement Prohibition Principle    # the merged synonym (see manifest Tool Substitution Prohibition)
+    status: canonical
+    source_cases: [121]
+    cross_component_family: Tool Substitution Prohibition
+    # NOTE: the `matched` column points this at Technology Competence Principle; it is a distinct
+    # concept (substitution vs competence), so it is kept and tagged for the lead to link, not folded.
+
+  - iri: ProfessionalAccountabilityPrinciple
+    label: Professional Accountability Principle
+    parent: ProfessionalVirtuePrinciple
+    definition: >-
+      The value that a professional takes personal responsibility for, and acknowledges
+      error in, work performed under their authority.
+    alt_labels:
+      - Error Acknowledgment Principle                 # acknowledging error is accountability in practice
+      - Professional Accountability
+    status: canonical
+    source_cases: [8, 15]
+
+  - iri: CorrectiveActionMonitoringPrinciple
+    label: Corrective Action Monitoring Principle
+    parent: DomainSpecificPrinciple
+    definition: >-
+      The value that a professional monitors a hazardous or deficient condition through to
+      the completion of corrective action.
+    alt_labels:
+      - Post-Engagement Observation Duty Principle     # post-engagement observation is this duty stated for one phase
+    status: canonical
+    source_cases: [86]
+    cross_component_family: Corrective Action Monitoring
+
+  - iri: ExpertiseCalibratedDisclosurePrinciple
+    label: Expertise-Calibrated Disclosure Principle
+    parent: FundamentalEthicalPrinciple
+    definition: >-
+      The value that the scope and certainty of professional statements is calibrated to
+      the professional's actual expertise in the matter.
+    status: canonical
+    source_cases: [86]
+    cross_component_family: Expertise-Calibrated Disclosure
+
+  - iri: NonEngineeringExpertServicesPrinciple
+    label: Non-Engineering Expert Services Principle
+    parent: DomainSpecificPrinciple
+    definition: >-
+      The value governing an engineer who provides expert services outside engineering, that
+      such services not trade on engineering authority they do not warrant.
+    status: canonical
+    source_cases: [60]
+    cross_component_family: Non-Engineering Expert Scope
+
+  - iri: JurisdictionalLicensureCompliancePrinciple
+    label: Jurisdictional Licensure Compliance Principle
+    parent: DomainSpecificPrinciple
+    definition: >-
+      The value that a professional practices only within the jurisdictions and license
+      scope for which the professional is authorized.
+    alt_labels:
+      - Engineering Title Invocation Principle          # invoking the engineering title is licensure compliance applied
+    status: canonical
+    source_cases: [60]
+
+  - iri: SelectiveReportingProhibitionPrinciple
+    label: Selective Reporting Prohibition Principle
+    parent: ProfessionalVirtuePrinciple
+    definition: >-
+      The value that a professional reports findings completely and does not omit material
+      facts that qualify or contradict a favored conclusion.
+    alt_labels:
+      - Technical Completeness Principle                # completeness of technical reporting is this value
+      - Client Disservice by Incompleteness Principle   # disservice-by-incompleteness is the application framing
+      - Expert Fact Gathering Diligence Principle        # gathering all facts is the diligence side of complete reporting
+    status: canonical
+    source_cases: [71]
+
+  - iri: FreeServicesProhibitionPrinciple
+    label: Free Services Prohibition Principle
+    parent: RelationalPrinciple
+    definition: >-
+      The value that a professional does not offer or provide services without compensation
+      in a manner that undermines fair competition or professional independence.
+    status: canonical
+    source_cases: [14]
+
+  - iri: SchedulePressureResistancePrinciple
+    label: Schedule Pressure Resistance Principle
+    parent: ProfessionalVirtuePrinciple
+    definition: >-
+      The value that a professional does not compromise technical or ethical standards in
+      response to schedule or commercial pressure.
+    status: canonical
+    source_cases: [85]
+    cross_component_family: Schedule Pressure Resistance
+
+  - iri: WhistleblowerPersonalConsciencePrinciple
+    label: Whistleblower Personal Conscience Principle
+    parent: ProfessionalVirtuePrinciple
+    definition: >-
+      The value that a professional may act on personal conscience to disclose conduct that
+      endangers the public, beyond the minimum the rules compel.
+    status: canonical
+    source_cases: [85]
+    cross_component_family: Whistleblower Personal Conscience
+
+  - iri: EvolvingStandardsResponsivenessPrinciple
+    label: Evolving Standards Responsiveness Principle
+    parent: FundamentalEthicalPrinciple
+    definition: >-
+      The value that a professional keeps current with and applies evolving technical and
+      ethical standards of practice.
+    status: canonical
+    source_cases: [120]
+
+  - iri: MentorDependencyTransitionPrinciple
+    label: Mentor Dependency Transition Principle
+    parent: ProfessionalVirtuePrinciple
+    definition: >-
+      The value that an engineer develops independent competence and does not remain
+      indefinitely dependent on a mentor for professional judgment.
+    status: provisional
+    source_cases: [7]
+    curate: >-
+      OPEN CALL: this may be a narrow restatement of the Competence Principle (developing
+      independent competence) rather than a distinct value. Keep as a domain-specific value,
+      or fold into CompetencePrinciple as an alt_label? Mentor availability/dependency is also
+      a State (MentorUnavailabilityState, case 7).
+
+# ---------------------------------------------------------------------------
+# 2. DO-NOT-MINT (compound principle labels -> reuse canonical value + move context off-class).
+#    Off-class moves: invokedBy (the appealing agent), and literals for application/balancing/
+#    resolution narrative. A Principle never carries actor, application target, or resolution.
+# ---------------------------------------------------------------------------
+do_not_mint:
+
+  # --- AI/tool context fused into a value -> reuse the underlying value; the AI tool is a State ---
+  - label: AI Attribution Disclosure Principle
+    decompose:
+      principle: TransparencyPrinciple
+      note: "AI attribution = the transparency value applied to AI tool use; tool=AI is a State (AIToolDisclosureState) on the engagement, not a value kind"
+    cross_component_family: AI Tool Disclosure
+    source_cases: [7]
+  - label: AI Tool Transparency Principle
+    decompose:
+      principle: TransparencyPrinciple
+      note: "tool=AI is engagement context (State), not a value kind"
+    cross_component_family: AI Tool Disclosure
+    source_cases: [7]
+
+  # --- dual-capacity context fused into a value -> reuse the value; dual-capacity is a State ---
+  - label: Dual Capacity Self-Review Caution Principle
+    decompose:
+      principle: SelfCertificationProhibitionPrinciple
+      note: "dual-capacity self-review is a State (DualCapacityState) that activates the self-certification prohibition; not a value kind. See Cs/O facets of the Dual* family"
+    source_cases: [103]
+
+  # --- application target / engagement context fused into a value ---
+  - label: Client Confrontation Before Disclosure Principle
+    decompose:
+      principle: TransparencyPrinciple
+      note: "confront-client-before-disclosure is a sequencing/resolution narrative -> otherAttribute literal; the value is transparency/disclosure"
+    source_cases: [86]
+  - label: Environmental Regulatory Violation Disclosure Principle
+    decompose:
+      principle: TransparencyPrinciple
+      note: "environmental regulatory violation = the application target (a RegulatoryViolationState); value is disclosure/transparency"
+    cross_component_family: Corrective Action Monitoring
+    source_cases: [86]
+  - label: Litigation Scope Limitation Principle
+    decompose:
+      principle: ObjectivityPrinciple
+      note: "litigation scope limitation is engagement context (a ScopeLimitationState) + the objectivity value in adversarial work"
+    source_cases: [71]
+  - label: Cost Allocation Bias Avoidance Principle
+    decompose:
+      principle: ObjectivityPrinciple
+      note: "cost-allocation bias is the application target; the value is objectivity / freedom from bias"
+    source_cases: [85]
+
+# ---------------------------------------------------------------------------
+# 3. CURATE -- open calls not resolvable by the discipline rule alone.
+# ---------------------------------------------------------------------------
+curate:
+  - iri: MentorDependencyTransitionPrinciple
+    question: >-
+      Keep as a distinct domain value, or fold into CompetencePrinciple (it is "develop
+      independent competence")? See its provisional entry above.
+  - label: Tool Substitution Prohibition Principle
+    question: >-
+      The accumulator `matched` column links this to Technology Competence Principle and the
+      brief's cluster 8 merges "Technology Replacement Prohibition" as a synonym. Confirm
+      ToolSubstitutionProhibitionPrinciple stays distinct from CompetencePrinciple (substitution
+      of judgment vs lack of competence) rather than folding; tagged cross_component_family for now.
+  - label: Confidential Peer Review Cooperation Principle
+    question: >-
+      Two facets exist in this component: "Confidential Peer Review Cooperation Principle" (15)
+      and "Peer Review Cooperation Principle" (15). They are folded to one canonical here. Confirm
+      "Confidential" is a context modifier (a confidentiality State on the review) and not a second value.
