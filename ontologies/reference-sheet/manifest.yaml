@@ -26,6 +26,35 @@ policy:
   idioms: proper-noun terms of art kept canonical regardless (decision 5).
 
 # ===========================================================================
+# GLOBAL RULES (cross-component hygiene; declared ONCE here, applied to all 9 components)
+# ===========================================================================
+# These are the domain-portable rules that are NOT specific to any one component (contrast the
+# per-component do_not_mint recipes, which encode each component's distinct canonicalization
+# semantics). One declarative source, three consumers: (1) injected into every component's
+# reuse-bias prompt block (reference_sheet.prompt_block), (2) the future commit-time normalizer
+# enforces them deterministically, (3) SHACL/judge validate them. A second domain (legal ethics)
+# defines its own global_rules here (the principles are portable; the examples are domain-flavored).
+# scope: "all" (every component) or a list of core Categories (e.g. [Constraint, Resource]).
+global_rules:
+  - id: context-not-in-class-identity
+    scope: all
+    rule: >-
+      Express case-specific context (a particular tool, domain, bearer, conduct, or trigger) as a
+      State, an edge, or a literal on the individual; never bake it into a new class name.
+  - id: no-tool-technology-prefix
+    scope: all
+    rule: >-
+      Do NOT prefix a class name with a specific tool or technology (e.g. AI, CADD, CD-ROM, software):
+      reuse the tool-neutral canonical class and record the specific tool as an otherAttribute literal
+      on the individual or as a State. For example, a tool-substitution prohibition is
+      ToolSubstitutionProhibitionConstraint, NOT AITechnologySubstitutionConstraint.
+  - id: no-actor-in-class-label
+    scope: all
+    rule: >-
+      Do NOT put a specific actor (e.g. Engineer A, Client W) in a class label; the actor is an
+      individual, not part of the class identity.
+
+# ===========================================================================
 # CONCEPTS (the 15 cross-component families; facets kept + linked, shadows dropped)
 # ===========================================================================
 concepts:
