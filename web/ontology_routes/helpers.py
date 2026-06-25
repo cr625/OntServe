@@ -421,6 +421,56 @@ def class_hierarchy(entity, child_cap=25):
     return {'chain': chain, 'children': children, 'children_overflow': len(rows) > child_cap}
 
 
+def _entity_disjoint_classes(entity, ontology):
+    """All classes disjoint with this entity: explicit owl:disjointWith (either direction) PLUS the
+    co-members of any owl:AllDisjointClasses it belongs to. Parsed from the current version content,
+    because the AllDisjointClasses node is not stored as an entity triple (so the entity page would
+    otherwise show only the explicit pairwise disjointness)."""
+    try:
+        from rdflib.collection import Collection
+        v = db.session.execute(
+            select(OntologyVersion).where(
+                OntologyVersion.ontology_id == ontology.id, OntologyVersion.is_current.is_(True)
+            )).scalar_one_or_none()
+        if not (v and v.content):
+            return []
+        g = rdflib.Graph()
+        g.parse(data=v.content, format='turtle')
+        subj = rdflib.URIRef(entity.uri)
+        OWL, RDF = rdflib.OWL, rdflib.RDF
+        disjoint = set()
+        for o in g.objects(subj, OWL.disjointWith):
+            if isinstance(o, rdflib.URIRef):
+                disjoint.add(str(o))
+        for s in g.subjects(OWL.disjointWith, subj):
+            if isinstance(s, rdflib.URIRef):
+                disjoint.add(str(s))
+        for adc in g.subjects(RDF.type, OWL.AllDisjointClasses):
+            ml = next(g.objects(adc, OWL.members), None)
+            if ml is None:
+                continue
+            members = list(Collection(g, ml))
+            if subj in members:
+                for m in members:
+                    if isinstance(m, rdflib.URIRef) and m != subj:
+                        disjoint.add(str(m))
+        disjoint.discard(str(subj))
+        out = []
+        for uri in disjoint:
+            frag = _uri_fragment(uri)
+            row = db.session.execute(
+                select(OntologyEntity.label, Ontology.name)
+                .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
+                .where(OntologyEntity.uri == uri).limit(1)).first()
+            out.append({"uri": uri, "fragment": frag,
+                        "label": (row[0] if row and row[0] else frag),
+                        "ontology": row[1] if row else ontology.name})
+        out.sort(key=lambda d: d["label"].lower())
+        return out
+    except Exception:
+        return []
+
+
 def class_property_schema(entity):
     """For a CLASS entity, the property schema applicable to its instances:
     object/datatype properties whose rdfs:domain is this class or an ancestor, plus -- for

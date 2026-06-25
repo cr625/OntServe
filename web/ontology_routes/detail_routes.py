@@ -20,6 +20,7 @@ from web.ontology_routes.helpers import (
     _extract_entity_from_ttl,
     class_property_schema,
     class_hierarchy,
+    _entity_disjoint_classes,
 )
 
 
@@ -336,6 +337,7 @@ def register_detail_routes(bp):
         using_cases = _entity_using_cases(entity)
         class_schema = class_property_schema(entity)
         hierarchy = class_hierarchy(entity)
+        disjoint_classes = _entity_disjoint_classes(entity, ontology)
 
         return render_template('entity_detail.html',
                              ontology=ontology,
@@ -343,6 +345,7 @@ def register_detail_routes(bp):
                              fragment=fragment,
                              children=children,
                              hierarchy=hierarchy,
+                             disjoint_classes=disjoint_classes,
                              ttl_content=ttl_content,
                              prop_groups=prop_groups,
                              semantic_links=semantic_links,
