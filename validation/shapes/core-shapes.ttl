@@ -107,15 +107,10 @@ pcsh:RolePropertyShape
     a sh:NodeShape ;
     sh:targetClass core:Role ;
     rdfs:label "Role-bearer attributes (individual data, non-definitional)" ;
-    rdfs:comment "Per-occupant data a role-bearing INDIVIDUAL may have (license, specialty, employer, ...). Descriptive only; these do NOT define the role type (cf. Davis 1991: license is not role-defining) -- the type-level definition is RoleDefinitionShape. Values are asserted on the individual." ;
+    rdfs:comment "Per-occupant data a role-bearing INDIVIDUAL may have (license, specialty, employer, technical background). Descriptive only; these do NOT define the role type (cf. Davis 1991: license is not role-defining) -- the type-level definition is RoleDefinitionShape. Values are asserted on the individual. Tightened 2026-06-25: dropped roleNature/roleClass (extraction provenance, not bearer data; reclassify to PROV-O) and jurisdiction/registrationStatus/roleInOrganization (weak controlled-vocab; captured via otherAttribute overflow when actually present)." ;
     sh:property [ sh:path proeth:hasLicense ;          sh:name "license" ;              sh:description "Professional license / licensure." ;                      sh:order 1 ] ;
     sh:property [ sh:path proeth:hasSpecialty ;        sh:name "specialty" ;            sh:description "Area of specialisation." ;                                sh:order 2 ] ;
     sh:property [ sh:path proeth:experienceLevel ;     sh:name "experience level" ;     sh:description "Professional experience." ;                               sh:order 3 ] ;
     sh:property [ sh:path proeth:hasEmployer ;         sh:name "employer" ;             sh:description "Employer / affiliation." ;                                sh:order 4 ] ;
-    sh:property [ sh:path proeth:hasJurisdiction ;     sh:name "jurisdiction" ;         sh:description "Licensing / practice jurisdiction." ;                     sh:order 5 ] ;
-    sh:property [ sh:path proeth:registrationStatus ;  sh:name "registration status" ;  sh:description "Professional registration status." ;                      sh:order 6 ] ;
-    sh:property [ sh:path proeth:roleInOrganization ;  sh:name "role in organization" ; sh:description "Position within the organisation." ;                      sh:order 7 ] ;
-    sh:property [ sh:path proeth:technicalBackground ; sh:name "technical background" ; sh:description "Technical background." ;                                  sh:order 8 ] ;
-    sh:property [ sh:path proeth:roleNature ;          sh:name "role nature" ;          sh:description "The kind / nature of the role-bearer." ;                   sh:order 9 ] ;
-    sh:property [ sh:path proeth:roleClass ;           sh:name "role class" ;           sh:description "Suggested ontology role-class label." ;                    sh:order 11 ] ;
-    sh:property [ sh:path proeth:otherAttribute ;      sh:name "other attribute" ;      sh:description "Overflow 'key: value' literal for a case-specific attribute outside the controlled set." ; sh:order 12 ] .
+    sh:property [ sh:path proeth:technicalBackground ; sh:name "technical background" ; sh:description "Technical background." ;                                  sh:order 5 ] ;
+    sh:property [ sh:path proeth:otherAttribute ;      sh:name "other attribute" ;      sh:description "Overflow 'key: value' literal for a case-specific attribute outside the controlled set." ; sh:order 6 ] .
