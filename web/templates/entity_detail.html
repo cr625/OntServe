@@ -239,14 +239,14 @@
                         {% if entity.comment %}<hr class="my-2">{% endif %}
                         <p class="mb-0">{{ val }}</p>
                         {% endfor %}
-                        {# Inherited / contextual definitions (skos:scopeNote), demarcated
-                           from the primary definition above. Each note carries a leading
-                           [source] tag (e.g. "[proethica-intermediate] ..."). #}
+                        {# skos:scopeNote, demarcated from the primary definition above. A note this
+                           class defines itself is labelled "Scope note"; a note pulled down from an
+                           ancestor carries a leading "[source]" tag and is labelled "Inherited from <source>". #}
                         {% for note in prop_groups.scope_notes %}
                         {% set has_tag = note.startswith('[') and ']' in note %}
                         <div class="ps-2 mt-2 border-start border-3 border-info">
                             <div class="text-uppercase text-muted" style="font-size:0.7em; letter-spacing:0.04em;">
-                                Inherited{% if has_tag %} from {{ note.split(']')[0][1:] }}{% endif %}
+                                {% if has_tag %}Inherited from {{ note.split(']')[0][1:] }}{% else %}Scope note{% endif %}
                             </div>
                             <p class="mb-0 small text-muted fst-italic">{{ note.split(']', 1)[1].strip() if has_tag else note }}</p>
                         </div>
