@@ -352,6 +352,62 @@ def _class_ancestor_uris(entity, cap=16):
     return uris
 
 
+def _uri_fragment(uri):
+    return uri.split('#')[-1] if '#' in uri else uri.rstrip('/').split('/')[-1]
+
+
+def _is_bfo_uri(uri):
+    return '/obo/BFO_' in uri or _uri_fragment(uri).startswith('BFO_')
+
+
+def _hierarchy_node(uri, is_current=False):
+    """Resolve a class URI to a display node for the Class Hierarchy tree."""
+    frag = _uri_fragment(uri)
+    # owl:Thing is the formal top; not a stored entity and not linkable.
+    if uri.endswith('#Thing') or uri.endswith('/Thing'):
+        return {'uri': uri, 'label': 'Thing', 'ontology': None, 'fragment': frag,
+                'is_bfo': False, 'purl': None, 'is_current': False, 'linkable': False}
+    is_bfo = _is_bfo_uri(uri)
+    # The same upper-level IRI is copied into several ontologies (bfo, RO, IAO, the
+    # proethica-foundation stub). Resolve to the home ontology: BFO classes to the canonical
+    # `bfo`, otherwise prefer any base ontology over the stub.
+    q = (select(OntologyEntity.label, Ontology.name)
+         .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
+         .where(OntologyEntity.uri == uri))
+    if is_bfo:
+        q = q.order_by((Ontology.name == 'bfo').desc(), Ontology.is_base.desc(), Ontology.name)
+    else:
+        q = q.order_by(Ontology.is_base.desc(), Ontology.name)
+    row = db.session.execute(q.limit(1)).first()
+    label = (row[0] if row and row[0] else frag)
+    ontology = row[1] if row else None
+    purl = uri if uri.startswith('http://purl.obolibrary.org/obo/') else (
+        f'http://purl.obolibrary.org/obo/{frag}' if is_bfo else None)
+    return {'uri': uri, 'label': label, 'ontology': ontology, 'fragment': frag,
+            'is_bfo': is_bfo, 'purl': purl, 'is_current': is_current,
+            'linkable': ontology is not None}
+
+
+def class_hierarchy(entity, child_cap=25):
+    """Build the BFO-rooted ancestry chain (owl:Thing first, this class last) plus this
+    class's direct structural subclasses (core + intermediate layers, not per-case ABoxes),
+    for the Class Hierarchy display. Reuses the cross-ontology _class_ancestor_uris walk."""
+    anc_uris = _class_ancestor_uris(entity)          # [entity.uri, parent, ..., owl:Thing]
+    chain = [_hierarchy_node(u, is_current=(u == entity.uri)) for u in reversed(anc_uris)]
+    rows = db.session.execute(
+        select(OntologyEntity.uri, OntologyEntity.label, Ontology.name)
+        .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
+        .where(OntologyEntity.parent_uri == entity.uri,
+               OntologyEntity.entity_type == 'class',
+               ~Ontology.name.like('proethica-case-%'))
+        .order_by(Ontology.name, OntologyEntity.label).limit(child_cap + 1)
+    ).all()
+    children = [{'uri': u, 'label': lbl or _uri_fragment(u),
+                 'fragment': _uri_fragment(u), 'ontology': name}
+                for (u, lbl, name) in rows[:child_cap]]
+    return {'chain': chain, 'children': children, 'children_overflow': len(rows) > child_cap}
+
+
 def class_property_schema(entity):
     """For a CLASS entity, the property schema applicable to its instances:
     object/datatype properties whose rdfs:domain is this class or an ancestor, plus -- for

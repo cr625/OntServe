@@ -19,6 +19,7 @@ from web.ontology_routes.helpers import (
     _generate_entity_ttl_display,
     _extract_entity_from_ttl,
     class_property_schema,
+    class_hierarchy,
 )
 
 
@@ -334,12 +335,14 @@ def register_detail_routes(bp):
         semantic_links = _entity_semantic_links(entity, ontology)
         using_cases = _entity_using_cases(entity)
         class_schema = class_property_schema(entity)
+        hierarchy = class_hierarchy(entity)
 
         return render_template('entity_detail.html',
                              ontology=ontology,
                              entity=entity,
                              fragment=fragment,
                              children=children,
+                             hierarchy=hierarchy,
                              ttl_content=ttl_content,
                              prop_groups=prop_groups,
                              semantic_links=semantic_links,
