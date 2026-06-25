@@ -288,6 +288,18 @@ def _get_entity_children(ontology, entity):
 _CORE_ROLE_URI = "http://proethica.org/ontology/core#Role"
 _ROLE_ATTR_SCHEMA_CACHE = {"mtime": None, "attrs": None}
 
+# Universal/abstract top classes. A property whose rdfs:domain is one of these applies to
+# (almost) everything -- extraction provenance (extractedBy/extractedFromSection/sourceText
+# are domained owl:Thing) and over-broad case-structural predicates (hasQuestion is domained
+# BFO entity). These are NOT "properties of this class" so they are excluded from the
+# per-class schema, even though every class transitively chains to them.
+_UNIVERSAL_TOP_URIS = {
+    "http://www.w3.org/2002/07/owl#Thing",
+    "http://purl.obolibrary.org/obo/BFO_0000001",  # entity
+    "http://purl.obolibrary.org/obo/BFO_0000002",  # continuant
+    "http://purl.obolibrary.org/obo/BFO_0000003",  # occurrent
+}
+
 
 def _role_attr_schema():
     """The controlled role-attribute schema, parsed from the descriptive
@@ -348,7 +360,9 @@ def class_property_schema(entity):
     Read-only. Returns None for non-class entities or when nothing applies."""
     if not entity or entity.entity_type != "class":
         return None
-    ancestor_set = set(_class_ancestor_uris(entity))
+    # Drop the universal/abstract tops: properties domained to them (extraction provenance,
+    # over-broad structural predicates) apply to everything, not specifically to this class.
+    ancestor_set = set(_class_ancestor_uris(entity)) - _UNIVERSAL_TOP_URIS
 
     prop_rows = db.session.execute(
         select(OntologyEntity).where(
