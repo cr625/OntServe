@@ -37,6 +37,7 @@
                             <i class="bi bi-house"></i> Home
                         </a>
                     </li>
+                    {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('ontology.import_ontology') }}">
                             <i class="bi bi-cloud-upload"></i> Import
@@ -52,6 +53,7 @@
                             <i class="bi bi-file-earmark-text"></i> Drafts
                         </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('main.search') }}">
                             <i class="bi bi-search"></i> Search

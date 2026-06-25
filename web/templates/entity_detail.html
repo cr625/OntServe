@@ -277,25 +277,13 @@
                 {% endif %}
 
                 <!-- Properties -->
-                {% set has_structural = entity.parent_uri or entity.domain or entity.range or prop_groups.core or prop_groups.relationships %}
+                {% set has_structural = entity.domain or entity.range or prop_groups.core or prop_groups.relationships %}
                 {% if has_structural %}
                 <div class="card mb-3">
                     <div class="card-header"><h6 class="mb-0">Properties</h6></div>
                     <div class="card-body">
-                        {% if entity.parent_uri %}
-                        <div class="property-row">
-                            <div class="property-key">
-                                {% if entity.entity_type == 'class' %}Subclass of{% elif entity.entity_type in ['individual', 'concept'] %}Instance of{% else %}Parent{% endif %}
-                            </div>
-                            <div class="property-value">
-                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.parent_uri.split('#')[-1] if '#' in entity.parent_uri else entity.parent_uri.split('/')[-1]) }}">
-                                    {{ entity.parent_uri.split('#')[-1] if '#' in entity.parent_uri else entity.parent_uri.split('/')[-1] }}
-                                </a>
-                                <br><code class="small text-muted">{{ entity.parent_uri }}</code>
-                            </div>
-                        </div>
-                        {% endif %}
-
+                        {# parent/subclass-of intentionally omitted here: the Class Hierarchy card above
+                           shows the full BFO-rooted ancestry with working cross-ontology links. #}
                         {% if entity.domain %}
                         <div class="property-row">
                             <div class="property-key">Domain</div>
@@ -573,7 +561,7 @@
                 </div>
             </div>
 
-            <!-- Wolfram Lookup -->
+            {# Wolfram Lookup -- temporarily removed; restore later (the wolframLookup() JS + CSS remain).
             <div class="card mb-3">
                 <div class="card-header d-flex justify-content-between align-items-center"
                      role="button" data-bs-toggle="collapse" data-bs-target="#wolframPanel"
@@ -601,6 +589,7 @@
                     </div>
                 </div>
             </div>
+            #}
 
             {% if version_tag %}
             <!-- Version info for historical views -->
