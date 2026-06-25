@@ -54,11 +54,14 @@ PROETHICA_CORE_NS = 'http://proethica.org/ontology/core#'
 
 
 def _pick_best_parent(g, class_uri):
-    """Select the best rdfs:subClassOf parent for CTE hierarchy walks.
+    """Select the best rdfs:subClassOf parent for this class.
 
-    Priority: proethica intermediate > proethica core > any other proethica URI.
-    BFO / OBO parents are ignored (outside the proethica namespace, break CTE).
-    Returns a URI string or None.
+    Priority: proethica intermediate > proethica core > other proethica URI >
+    any named (BFO/IAO/OBO) superclass. The proethica-first ordering keeps the
+    category-walk CTEs terminating at the proethica boundary; the named-parent
+    fallback lets a core class (whose only named parent is BFO) root in the BFO
+    tree for the entity-page Class Hierarchy. Blank-node restrictions are
+    excluded. Returns a URI string or None.
     """
     all_parents = [str(p) for p in g.objects(class_uri, RDFS.subClassOf)]
     if not all_parents:
@@ -75,8 +78,13 @@ def _pick_best_parent(g, class_uri):
         return core[0]
     if other_proethica:
         return other_proethica[0]
-    # All parents are outside proethica namespace (BFO, etc.) -- skip
-    return None
+    # No proethica-namespace parent: fall back to the true named superclass
+    # (BFO/IAO/OBO) so the entity-page Class Hierarchy can root a core class in
+    # the BFO tree. Category-walk CTEs are unaffected -- they match the category
+    # in the core class's own URI and terminate at the core class, which sits
+    # below these upper parents. Blank-node restrictions (str not http) excluded.
+    named = [p for p in all_parents if p.startswith('http')]
+    return named[0] if named else None
 
 
 def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
@@ -179,10 +187,10 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
             label = next(g.objects(class_uri, RDFS.label), None)
             comment = next(g.objects(class_uri, RDFS.comment), None)
             definition = next(g.objects(class_uri, SKOS.definition), None)
-            # Get rdfs:subClassOf for hierarchy traversal (CTE queries).
-            # Pick the best parent: prefer proethica intermediate > core > other.
-            # BFO parents (purl.obolibrary.org) are skipped since they're
-            # outside the proethica namespace and break CTE category walks.
+            # Get rdfs:subClassOf for hierarchy traversal. Prefer a proethica
+            # parent (keeps the category CTEs terminating at the proethica
+            # boundary); fall back to the named BFO/IAO superclass so a core
+            # class roots in the BFO tree for the entity-page Class Hierarchy.
             parent_uri = _pick_best_parent(g, class_uri)
 
             label_str = str(label) if label else None
