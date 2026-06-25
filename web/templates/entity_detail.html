@@ -359,58 +359,65 @@
                 {% if class_schema %}
                 <div class="card mb-3">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="bi bi-diagram-3"></i> Properties of instances of this class</h6>
+                        <h6 class="mb-0"><i class="bi bi-diagram-3"></i> Property structure</h6>
                     </div>
                     <div class="card-body">
-                        <p class="small text-muted mb-3">
-                            {% if class_schema.is_role %}What this class carries, in three layers: the
-                            <strong>type-level definition</strong> (what individuates the role per the literature, values on the
-                            role class), the <strong>relational &amp; data properties</strong> (its edges), and the
-                            <strong>bearer attributes</strong> (per-occupant data on the individual).{% else %}The properties that
-                            apply to instances of this class, via <code>rdfs:domain</code> on this class or an ancestor.
-                            Property <em>values</em> are on the individual, not on the class.{% endif %}
-                        </p>
+                        {% if class_schema.is_role %}
+                        <p class="small text-muted mb-3">A role is described at three independent levels. Each block states <em>what</em> it is, <em>where</em> it is declared, and <em>how</em> it is populated.</p>
+                        {% else %}
+                        <p class="small text-muted mb-3">Properties whose <code>rdfs:domain</code> is this class or an ancestor. These are edges/attributes on instances; their <em>values</em> are on the individual, not the class.</p>
+                        {% endif %}
 
+                        {# 1. Definitional attributes -- the LLM-extracted, literature-grounded class fields #}
                         {% if class_schema.role_definition %}
-                        <div class="mb-1">
-                            <small class="text-muted fw-bold">Role definition (type-level)</small>
-                            <span class="small text-muted">(literature-grounded schema; SHACL <code>RoleDefinitionShape</code>. Values are asserted on the role <em>class</em>.)</span>
+                        <div class="mb-3 ps-3 border-start border-3 border-primary">
+                            <div class="fw-bold">1 &middot; Definitional attributes
+                                <span class="badge rounded-pill bg-light text-muted border fw-normal">SHACL RoleDefinitionShape</span></div>
+                            <div class="small text-muted mb-2">The literature-grounded fields that individuate a role <strong>type</strong>. The extractor finds these for each role and commits them to JSON; they are then asserted on the role <em>class</em>.</div>
+                            {% for a in class_schema.role_definition %}
+                            <div class="property-row">
+                                <div class="property-key">{{ a.name }}</div>
+                                <div class="property-value"><div class="small text-muted">{{ a.description }}</div></div>
+                            </div>
+                            {% endfor %}
                         </div>
-                        {% for a in class_schema.role_definition %}
-                        <div class="property-row">
-                            <div class="property-key">{{ a.name }}</div>
-                            <div class="property-value"><div class="small text-muted">{{ a.description }}</div></div>
-                        </div>
-                        {% endfor %}
                         {% endif %}
 
+                        {# 2. Relations -- object/data properties via rdfs:domain (graph edges, not the per-role JSON) #}
                         {% if class_schema.domain_props %}
-                        <div class="mt-3 mb-1"><small class="text-muted fw-bold">Relational &amp; data properties</small></div>
-                        {% for p in class_schema.domain_props %}
-                        <div class="property-row">
-                            <div class="property-key">
-                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=p.name) }}">{{ p.name }}</a>
-                                {% if not p.on_self %}<span class="badge bg-light text-muted border" title="rdfs:domain is an ancestor class">inherited</span>{% endif %}
+                        <div class="mb-3 ps-3 border-start border-3 border-success">
+                            <div class="fw-bold">{% if class_schema.is_role %}2 &middot; {% endif %}Relations &amp; data properties
+                                <span class="badge rounded-pill bg-light text-muted border fw-normal">rdfs:domain on this class</span></div>
+                            <div class="small text-muted mb-2">Object- and data-property <strong>edges</strong> that link this class to others, materialized in the graph{% if class_schema.is_role %} (e.g. the R&rarr;P&rarr;O obligation edges){% endif %}. These are relations between entities, <strong>not</strong> per-instance JSON fields.</div>
+                            {% for p in class_schema.domain_props %}
+                            <div class="property-row">
+                                <div class="property-key">
+                                    <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=p.name) }}">{{ p.name }}</a>
+                                    {% if not p.on_self %}<span class="badge bg-light text-muted border" title="rdfs:domain is an ancestor class">inherited</span>{% endif %}
+                                </div>
+                                <div class="property-value">
+                                    {% if p.range_name %}<span class="badge bg-success">&rarr; {{ p.range_name }}</span>{% endif %}
+                                    {% if p.comment %}<div class="small text-muted">{{ p.comment }}</div>{% endif %}
+                                </div>
                             </div>
-                            <div class="property-value">
-                                {% if p.range_name %}<span class="badge bg-success">&rarr; {{ p.range_name }}</span>{% endif %}
-                                {% if p.comment %}<div class="small text-muted">{{ p.comment }}</div>{% endif %}
-                            </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
                         {% endif %}
 
+                        {# 3. Bearer attributes -- per-occupant individual data (non-definitional) #}
                         {% if class_schema.role_attrs %}
-                        <div class="mt-3 mb-1">
-                            <small class="text-muted fw-bold">Role-bearer attributes (individual data)</small>
-                            <span class="small text-muted">(per-occupant data; SHACL <code>RolePropertyShape</code>. NOT role-defining; values are on the individual.)</span>
+                        <div class="mb-1 ps-3 border-start border-3 border-secondary">
+                            <div class="fw-bold">3 &middot; Bearer attributes
+                                <span class="badge rounded-pill bg-light text-muted border fw-normal">SHACL RolePropertyShape</span>
+                                <span class="badge rounded-pill bg-light text-muted border fw-normal">individual data</span></div>
+                            <div class="small text-muted mb-2">Per-occupant facts a specific role-<em>holder</em> may have (license, specialty, employer, ...). These do <strong>not</strong> define the role type (cf. Davis 1991: license is not role-defining); their values are on the individual.</div>
+                            {% for a in class_schema.role_attrs %}
+                            <div class="property-row">
+                                <div class="property-key">{{ a.name }}</div>
+                                <div class="property-value"><div class="small text-muted">{{ a.description }}</div></div>
+                            </div>
+                            {% endfor %}
                         </div>
-                        {% for a in class_schema.role_attrs %}
-                        <div class="property-row">
-                            <div class="property-key">{{ a.name }}</div>
-                            <div class="property-value"><div class="small text-muted">{{ a.description }}</div></div>
-                        </div>
-                        {% endfor %}
                         {% endif %}
                     </div>
                 </div>
