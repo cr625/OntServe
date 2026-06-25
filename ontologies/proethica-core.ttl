@@ -150,7 +150,7 @@ proeth-core:componentOf a owl:AnnotationProperty ;
     rdfs:comment "Relates a component class to the representational framework it is a component of. An annotation property (not owl:ObjectProperty / part-of) to avoid asserting a class as a member of an individual."@en .
 
 # The framework as an information artifact (the formal specification this ontology implements). This is
-# the single foundational meta-individual in core; domain particulars still live in the case files, so the
+# the single foundational meta-individual in core; domain particulars are still recorded in the case files, so the
 # TBox/ABox separation holds for the domain layer.
 proeth-core:DTupleFramework a owl:NamedIndividual, iao:0000030 ;  # IAO:information content entity
     rdfs:label "Nine-component D-tuple framework"@en ;

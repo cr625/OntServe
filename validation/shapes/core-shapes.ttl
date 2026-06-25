@@ -79,7 +79,7 @@ pcsh:RoleDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Role ;
     rdfs:label "Role definition schema (type-level, descriptive)" ;
-    rdfs:comment "What a role TYPE is individuated by, per the cited literature: distinguishing features, professional scope, typical qualifications, associated virtues, audience-relationship category, and the obligations it generates. Values live on the role CLASS, not the bearer." ;
+    rdfs:comment "What a role TYPE is individuated by, per the cited literature: distinguishing features, professional scope, typical qualifications, associated virtues, audience-relationship category, and the obligations it generates. Values are asserted on the role CLASS, not the bearer." ;
     sh:property [ sh:path core:distinguishingFeatures ; sh:name "distinguishing features" ; sh:description "What sets this role type apart from related roles (its distinctive ends/practices)." ; sh:order 1 ] ;
     sh:property [ sh:path core:professionalScope ;      sh:name "professional scope" ;      sh:description "Areas of responsibility and authority of the role type (Oakley & Cocking 2001)." ; sh:order 2 ] ;
     sh:property [ sh:path core:typicalQualifications ;  sh:name "typical qualifications" ;  sh:description "Generic credentials the role TYPE requires (a descriptor of the type, not an individual's license)." ; sh:order 3 ] ;
@@ -94,7 +94,7 @@ pcsh:RoleDefinitionShape
 # cannot change conformance; it makes the "intended on Role" association -- previously only
 # in an rdfs:comment on each datatype property -- machine-readable for tooling and UI.
 #
-# Why this lives in SHACL and NOT as rdfs:domain on the properties: rdfs:domain is an OWL
+# Why this is in SHACL and NOT as rdfs:domain on the properties: rdfs:domain is an OWL
 # INFERENCE axiom (W3C OWL 2 Primer: a domain statement "is not a constraint... but allows
 # a reasoner to infer further knowledge"), so "hasLicense rdfs:domain Role" would infer any
 # value-holder INTO Role; under the nine-way owl:AllDisjointClasses (conformance runs at
@@ -102,12 +102,12 @@ pcsh:RoleDefinitionShape
 # inconsistency. The role attributes are therefore deliberately domain-less ("leak-safe");
 # this shape carries the class association safely. Turn any attribute into a real
 # closed-world constraint later by adding sh:minCount / sh:datatype / sh:in here (the
-# controlled-property-vocabulary work item) -- the values still live on the individual.
+# controlled-property-vocabulary work item) -- the values are still asserted on the individual.
 pcsh:RolePropertyShape
     a sh:NodeShape ;
     sh:targetClass core:Role ;
     rdfs:label "Role-bearer attributes (individual data, non-definitional)" ;
-    rdfs:comment "Per-occupant data a role-bearing INDIVIDUAL may carry (license, specialty, employer, ...). Descriptive only; these do NOT define the role type (cf. Davis 1991: license is not role-defining) -- the type-level definition is RoleDefinitionShape. Values live on the individual." ;
+    rdfs:comment "Per-occupant data a role-bearing INDIVIDUAL may have (license, specialty, employer, ...). Descriptive only; these do NOT define the role type (cf. Davis 1991: license is not role-defining) -- the type-level definition is RoleDefinitionShape. Values are asserted on the individual." ;
     sh:property [ sh:path proeth:hasLicense ;          sh:name "license" ;              sh:description "Professional license / licensure." ;                      sh:order 1 ] ;
     sh:property [ sh:path proeth:hasSpecialty ;        sh:name "specialty" ;            sh:description "Area of specialisation." ;                                sh:order 2 ] ;
     sh:property [ sh:path proeth:experienceLevel ;     sh:name "experience level" ;     sh:description "Professional experience." ;                               sh:order 3 ] ;

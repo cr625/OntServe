@@ -368,13 +368,13 @@
                             role class), the <strong>relational &amp; data properties</strong> (its edges), and the
                             <strong>bearer attributes</strong> (per-occupant data on the individual).{% else %}The properties that
                             apply to instances of this class, via <code>rdfs:domain</code> on this class or an ancestor.
-                            Property <em>values</em> live on the individual, not on the class.{% endif %}
+                            Property <em>values</em> are on the individual, not on the class.{% endif %}
                         </p>
 
                         {% if class_schema.role_definition %}
                         <div class="mb-1">
                             <small class="text-muted fw-bold">Role definition (type-level)</small>
-                            <span class="small text-muted">(literature-grounded schema; SHACL <code>RoleDefinitionShape</code>. Values live on the role <em>class</em>.)</span>
+                            <span class="small text-muted">(literature-grounded schema; SHACL <code>RoleDefinitionShape</code>. Values are asserted on the role <em>class</em>.)</span>
                         </div>
                         {% for a in class_schema.role_definition %}
                         <div class="property-row">
@@ -403,7 +403,7 @@
                         {% if class_schema.role_attrs %}
                         <div class="mt-3 mb-1">
                             <small class="text-muted fw-bold">Role-bearer attributes (individual data)</small>
-                            <span class="small text-muted">(per-occupant data; SHACL <code>RolePropertyShape</code>. NOT role-defining; values live on the individual.)</span>
+                            <span class="small text-muted">(per-occupant data; SHACL <code>RolePropertyShape</code>. NOT role-defining; values are on the individual.)</span>
                         </div>
                         {% for a in class_schema.role_attrs %}
                         <div class="property-row">

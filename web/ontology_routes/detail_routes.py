@@ -312,7 +312,7 @@ def register_detail_routes(bp):
         entity = _find_entity_by_fragment(ontology, fragment) if ontology else None
 
         # Cross-ontology fallback: entity may be in a related ontology
-        # (e.g., classes targeted to proethica-intermediate live in proethica-intermediate-extended).
+        # (e.g., classes targeted to proethica-intermediate are in proethica-intermediate-extended).
         # A shared class exists both in the definitional ontology (intermediate / extended,
         # which carries the provenance) and in each case ontology that uses it. Prefer the
         # definitional copy so the page lands on the one holding firstDiscoveredInCase etc.
