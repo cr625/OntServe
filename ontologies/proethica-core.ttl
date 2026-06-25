@@ -115,9 +115,11 @@ proeth-core:CodeProvision a owl:Class ;
 # Guideline: Container for provisions (the full code document)
 proeth-core:Guideline a owl:Class ;
     rdfs:subClassOf iao:0000310 ;  # IAO:document (IAO_0000310 = "document"; codes of ethics are documents)
+    rdfs:subClassOf proeth-core:Resource ;  # a guideline document IS a professional knowledge source (Rs); both are IAO ICEs
     rdfs:label "Guideline"@en ;
     rdfs:comment "A professional code of ethics or guideline document containing multiple provisions. Examples include NSPE Code of Ethics, NEA Code of Ethics, ACM Code of Ethics."@en ;
-    skos:definition "A formal document establishing ethical standards for a profession, containing individual CodeProvisions."@en .
+    skos:definition "A formal document establishing ethical standards for a profession, containing individual CodeProvisions."@en ;
+    skos:changeNote "v2.7.3: Added rdfs:subClassOf proeth-core:Resource and removed the former Guideline owl:disjointWith Resource axiom. A guideline document (e.g. an ethical code) is itself a professional knowledge source (the Rs component); both Guideline and Resource are IAO information content entities, so the subsumption is BFO-sound. This lets EthicalCode -- both a Guideline (document) and the Resource cases cite -- be typed consistently, fixing the unsatisfiability that propagated to every ProfessionalRole via 'governedByCode some EthicalCode'."@en .
 
 # Agent: Supporting class for role bearers
 proeth-core:Agent a owl:Class ;
@@ -604,7 +606,7 @@ proeth-core:Principle owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 proeth-core:Obligation owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 proeth-core:Constraint owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 proeth-core:CodeProvision owl:disjointWith proeth-core:Agent, proeth-core:Resource .
-proeth-core:Guideline owl:disjointWith proeth-core:Agent, proeth-core:Resource .
+proeth-core:Guideline owl:disjointWith proeth-core:Agent .  # NOT disjoint with Resource: a guideline document is a kind of Resource (v2.7.3)
 
 # Processes (occurrents) are disjoint from continuants
 proeth-core:Action owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .
