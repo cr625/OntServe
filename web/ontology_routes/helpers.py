@@ -286,7 +286,7 @@ def _get_entity_children(ontology, entity):
 # ---------------------------------------------------------------------------
 
 _CORE_ROLE_URI = "http://proethica.org/ontology/core#Role"
-_ROLE_ATTR_SCHEMA_CACHE = {"mtime": None, "attrs": None}
+_ROLE_ATTR_SCHEMA_CACHE = {"mtime": None, "shapes": {}}
 
 # Universal/abstract top classes. A property whose rdfs:domain is one of these applies to
 # (almost) everything -- extraction provenance (extractedBy/extractedFromSection/sourceText
@@ -301,25 +301,28 @@ _UNIVERSAL_TOP_URIS = {
 }
 
 
-def _role_attr_schema():
-    """The controlled role-attribute schema, parsed from the descriptive
-    pcsh:RolePropertyShape in validation/shapes/core-shapes.ttl. Cached on file mtime.
-    Returns [{name, uri, description, order}] (the shape is the single source of truth)."""
+def _shape_attr_schema(shape_name):
+    """Parse a descriptive SHACL property shape (sh:path/sh:name/sh:description/sh:order) by local
+    name from validation/shapes/core-shapes.ttl. Cached per shape on file mtime; the shape is the
+    single source of truth. Returns [{name, uri, description, order}]."""
     from pathlib import Path
     shapes = Path(__file__).resolve().parents[2] / "validation" / "shapes" / "core-shapes.ttl"
     try:
         mtime = shapes.stat().st_mtime
     except OSError:
         return []
-    if _ROLE_ATTR_SCHEMA_CACHE["mtime"] == mtime and _ROLE_ATTR_SCHEMA_CACHE["attrs"] is not None:
-        return _ROLE_ATTR_SCHEMA_CACHE["attrs"]
+    cache = _ROLE_ATTR_SCHEMA_CACHE
+    if cache["mtime"] != mtime:
+        cache.update(mtime=mtime, shapes={})  # file changed -> drop all cached shapes
+    if shape_name in cache["shapes"]:
+        return cache["shapes"][shape_name]
     SH = rdflib.Namespace("http://www.w3.org/ns/shacl#")
     PCSH = rdflib.Namespace("http://proethica.org/shapes/core#")
     attrs = []
     try:
         g = rdflib.Graph()
         g.parse(str(shapes), format="turtle")
-        for pshape in g.objects(PCSH["RolePropertyShape"], SH.property):
+        for pshape in g.objects(PCSH[shape_name], SH.property):
             path = next(g.objects(pshape, SH.path), None)
             if path is None:
                 continue
@@ -335,8 +338,18 @@ def _role_attr_schema():
         attrs.sort(key=lambda a: a["order"])
     except Exception:  # malformed/absent shape must not break the entity page
         attrs = []
-    _ROLE_ATTR_SCHEMA_CACHE.update(mtime=mtime, attrs=attrs)
+    cache["shapes"][shape_name] = attrs
     return attrs
+
+
+def _role_attr_schema():
+    """Per-bearer (individual) role attributes -- non-definitional."""
+    return _shape_attr_schema("RolePropertyShape")
+
+
+def _role_definition_schema():
+    """Role-TYPE definitional attributes (the literature-grounded class schema)."""
+    return _shape_attr_schema("RoleDefinitionShape")
 
 
 def _class_ancestor_uris(entity, cap=16):
@@ -453,11 +466,13 @@ def class_property_schema(entity):
     domain_props.sort(key=lambda x: (not x["on_self"], x["name"].lower()))
 
     is_role = _CORE_ROLE_URI in ancestor_set
+    role_definition = _role_definition_schema() if is_role else []
     role_attrs = _role_attr_schema() if is_role else []
 
-    if not (domain_props or role_attrs):
+    if not (domain_props or role_attrs or role_definition):
         return None
-    return {"is_role": is_role, "domain_props": domain_props, "role_attrs": role_attrs}
+    return {"is_role": is_role, "domain_props": domain_props,
+            "role_definition": role_definition, "role_attrs": role_attrs}
 
 
 def _generate_entity_ttl_display(entity, ontology):

@@ -35,7 +35,11 @@ proeth-core:Role a owl:Class ;
     rdfs:label "Role"@en ;
     rdfs:comment "The professional position a party occupies in a case (the R component of D=(R,P,O,S,Rs,A,E,Ca,Cs)). A role is an obligation-generating entity, not a job title: borne by an agent, it determines which obligations and principles apply through the professional code and precedent."@en ;
     skos:definition "A BFO realizable role borne by an agent that generates the professional obligations the agent is held to and selects which principles apply. Following the professional-ethics literature, a role is individuated by what it generates and how it relates, not by occupant data: the obligations it carries (Dennis 2016; Oakley and Cocking 2001), its relationship and audience categories (Kong et al. 2020), and its associated virtues. The R component of D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:scopeNote "Obligation-generation is axiomatized as Role subClassOf (hasObligation some Obligation). Relationship categories and virtues are definitional properties of the role TYPE; per-occupant facts such as license, specialty, or employer attach to the role individual, not the class (cf. Davis 1991: most US engineers are unlicensed yet remain role-bound, so license is not role-defining)."@en .
+    skos:scopeNote "Obligation-generation is axiomatized as Role subClassOf (hasObligation some Obligation). Relationship categories and virtues are definitional properties of the role TYPE; per-occupant facts such as license, specialty, or employer attach to the role individual, not the class (cf. Davis 1991: most US engineers are unlicensed yet remain role-bound, so license is not role-defining)."@en ;
+    iao:0000119 "Dennis, Fisher, Slavkovik, Webster (2016). Formal verification of ethical choices in autonomous systems." ,
+                "Oakley, Cocking (2001). Virtue Ethics and Professional Roles." ,
+                "Kong et al. (2020). Analysis of professional codes: audience-oriented identity roles and identity virtues." ;
+    iao:0000116 "Extraction framing: a role is an obligation-generating entity, not a job title. It is an ethical filter that transforms general duties into role-specific obligations (Dennis 2016), a locus of identity formation through the profession's distinctive ends and virtues (Oakley and Cocking 2001), and a structure of professional relationships and their duties grouped into four audience-relationship categories (Kong 2020)."@en .
 
 # P - Principle: Ethical principles as directive information entities
 proeth-core:Principle a owl:Class ;
@@ -164,6 +168,32 @@ proeth-core:adheresToPrinciple a owl:ObjectProperty ;
     rdfs:comment "Relates a role to principles that guide its conduct."@en ;
     skos:definition "Relates a role to principles that guide its conduct."@en ;
     skos:changeNote "v2.3.0: Removed subPropertyOf iao:0000136 (is about). The is_about relation links information content to what it represents; adheresToPrinciple links a role to the directive content that governs it, which is a different semantic relation."@en .
+
+# --- IAO annotation properties: definition provenance + editor framing (declared locally so the
+# alignment is self-contained when the validation harness strips owl:imports). ---
+iao:0000119 a owl:AnnotationProperty ;
+    rdfs:label "definition source"@en ;
+    rdfs:comment "The literature source(s) a class definition is grounded in."@en .
+iao:0000116 a owl:AnnotationProperty ;
+    rdfs:label "editor note"@en ;
+    rdfs:comment "Editor note; used here to carry the literature-grounded extraction framing for a component."@en .
+
+# --- Role-type definitional attributes (the R component's class-level schema, Fix 2B).
+# Annotation properties applied to role CLASSES (the role-type carries them), distinct from the
+# per-bearer individual data (license, specialty, ...) which attach to role individuals. The
+# extraction prompt's class attributes derive from these (hybrid: ontology owns the definition). ---
+proeth-core:distinguishingFeatures a owl:AnnotationProperty ;
+    rdfs:label "distinguishing features"@en ;
+    rdfs:comment "What sets this role type apart from related roles (the distinctive ends/practices that individuate the role)."@en .
+proeth-core:professionalScope a owl:AnnotationProperty ;
+    rdfs:label "professional scope"@en ;
+    rdfs:comment "The areas of responsibility and authority of the role type (Oakley and Cocking 2001)."@en .
+proeth-core:typicalQualifications a owl:AnnotationProperty ;
+    rdfs:label "typical qualifications"@en ;
+    rdfs:comment "Generic credentials the role TYPE requires (a descriptor of the type, e.g. 'Professional Engineer license' as a requirement, NOT an individual's license value)."@en .
+proeth-core:associatedVirtues a owl:AnnotationProperty ;
+    rdfs:label "associated virtues"@en ;
+    rdfs:comment "Virtues and dispositions characteristic of the role type (Kong et al. 2020 identity virtues; Oakley and Cocking 2001). A literal for now; may be promoted to edges toward a Virtue class."@en .
 
 proeth-core:hasCapability a owl:ObjectProperty ;
     rdfs:domain proeth-core:Agent ;

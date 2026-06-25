@@ -68,6 +68,25 @@ pcsh:NoOwlNothingShape
         """ ;
     ] .
 
+# RoleDefinitionShape: the literature-grounded definitional schema of a role TYPE (the R
+# component's class-level attributes). These individuate the role per the professional-ethics
+# literature (Dennis 2016 obligation-generation; Kong 2020 relationship categories + identity
+# virtues; Oakley & Cocking 2001 teleology/scope). Descriptive only (sh:path/sh:name/
+# sh:description/sh:order) so it adds no validation. Values are carried by the role CLASS (the
+# type), distinct from RolePropertyShape below (per-occupant bearer data). The extraction
+# prompt's class attributes derive from this shape (hybrid: ontology owns the definition).
+pcsh:RoleDefinitionShape
+    a sh:NodeShape ;
+    sh:targetClass core:Role ;
+    rdfs:label "Role definition schema (type-level, descriptive)" ;
+    rdfs:comment "What a role TYPE is individuated by, per the cited literature: distinguishing features, professional scope, typical qualifications, associated virtues, audience-relationship category, and the obligations it generates. Values live on the role CLASS, not the bearer." ;
+    sh:property [ sh:path core:distinguishingFeatures ; sh:name "distinguishing features" ; sh:description "What sets this role type apart from related roles (its distinctive ends/practices)." ; sh:order 1 ] ;
+    sh:property [ sh:path core:professionalScope ;      sh:name "professional scope" ;      sh:description "Areas of responsibility and authority of the role type (Oakley & Cocking 2001)." ; sh:order 2 ] ;
+    sh:property [ sh:path core:typicalQualifications ;  sh:name "typical qualifications" ;  sh:description "Generic credentials the role TYPE requires (a descriptor of the type, not an individual's license)." ; sh:order 3 ] ;
+    sh:property [ sh:path core:associatedVirtues ;      sh:name "associated virtues" ;      sh:description "Virtues/dispositions characteristic of the role type (Kong 2020 identity virtues; Oakley & Cocking 2001)." ; sh:order 4 ] ;
+    sh:property [ sh:path proeth:roleCategory ;         sh:name "role category" ;           sh:description "The role's audience-relationship category (the four Kong 2020 categories): provider_client, professional_peer, employer_relationship, public_responsibility." ; sh:order 5 ] ;
+    sh:property [ sh:path core:hasObligation ;          sh:name "generated obligations" ;   sh:description "The obligations the role generates, via the R->P->O hasObligation edges (obligation-generation; Dennis 2016)." ; sh:order 6 ] .
+
 # RolePropertyShape: the controlled property SCHEMA for professional roles -- a
 # machine-visible declaration of which attributes a well-formed role-bearing individual
 # MAY carry. PURELY DESCRIPTIVE: each sh:property carries only sh:path + sh:name +
@@ -87,8 +106,8 @@ pcsh:NoOwlNothingShape
 pcsh:RolePropertyShape
     a sh:NodeShape ;
     sh:targetClass core:Role ;
-    rdfs:label "Role property schema (descriptive)" ;
-    rdfs:comment "The controlled attribute set a role-bearing individual may carry. Descriptive only (no validation); attribute VALUES live on the role-bearing individual, not on the role class." ;
+    rdfs:label "Role-bearer attributes (individual data, non-definitional)" ;
+    rdfs:comment "Per-occupant data a role-bearing INDIVIDUAL may carry (license, specialty, employer, ...). Descriptive only; these do NOT define the role type (cf. Davis 1991: license is not role-defining) -- the type-level definition is RoleDefinitionShape. Values live on the individual." ;
     sh:property [ sh:path proeth:hasLicense ;          sh:name "license" ;              sh:description "Professional license / licensure." ;                      sh:order 1 ] ;
     sh:property [ sh:path proeth:hasSpecialty ;        sh:name "specialty" ;            sh:description "Area of specialisation." ;                                sh:order 2 ] ;
     sh:property [ sh:path proeth:experienceLevel ;     sh:name "experience level" ;     sh:description "Professional experience." ;                               sh:order 3 ] ;
@@ -98,6 +117,5 @@ pcsh:RolePropertyShape
     sh:property [ sh:path proeth:roleInOrganization ;  sh:name "role in organization" ; sh:description "Position within the organisation." ;                      sh:order 7 ] ;
     sh:property [ sh:path proeth:technicalBackground ; sh:name "technical background" ; sh:description "Technical background." ;                                  sh:order 8 ] ;
     sh:property [ sh:path proeth:roleNature ;          sh:name "role nature" ;          sh:description "The kind / nature of the role-bearer." ;                   sh:order 9 ] ;
-    sh:property [ sh:path proeth:roleCategory ;        sh:name "role category" ;        sh:description "Coarse role category (e.g. public_responsibility)." ;      sh:order 10 ] ;
     sh:property [ sh:path proeth:roleClass ;           sh:name "role class" ;           sh:description "Suggested ontology role-class label." ;                    sh:order 11 ] ;
     sh:property [ sh:path proeth:otherAttribute ;      sh:name "other attribute" ;      sh:description "Overflow 'key: value' literal for a case-specific attribute outside the controlled set." ; sh:order 12 ] .
