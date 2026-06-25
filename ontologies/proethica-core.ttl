@@ -31,10 +31,11 @@
 
 # R - Role: Professional roles with BFO alignment
 proeth-core:Role a owl:Class ;
-    rdfs:subClassOf bfo:0000023 ;  # BFO:role
+    rdfs:subClassOf bfo:0000023 ;  # BFO:role (a realizable entity realized in processes of professional practice)
     rdfs:label "Role"@en ;
-    rdfs:comment "A role that can be realized by processes involving professional duties and ethical obligations. This is the R component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:definition "A role that can be realized by processes involving professional duties and ethical obligations. This is the R component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+    rdfs:comment "The professional position a party occupies in a case (the R component of D=(R,P,O,S,Rs,A,E,Ca,Cs)). A role is an obligation-generating entity, not a job title: borne by an agent, it determines which obligations and principles apply through the professional code and precedent."@en ;
+    skos:definition "A BFO realizable role borne by an agent that generates the professional obligations the agent is held to and selects which principles apply. Following the professional-ethics literature, a role is individuated by what it generates and how it relates, not by occupant data: the obligations it carries (Dennis 2016; Oakley and Cocking 2001), its relationship and audience categories (Kong et al. 2020), and its associated virtues. The R component of D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:scopeNote "Obligation-generation is axiomatized as Role subClassOf (hasObligation some Obligation). Relationship categories and virtues are definitional properties of the role TYPE; per-occupant facts such as license, specialty, or employer attach to the role individual, not the class (cf. Davis 1991: most US engineers are unlicensed yet remain role-bound, so license is not role-defining)."@en .
 
 # P - Principle: Ethical principles as directive information entities
 proeth-core:Principle a owl:Class ;
