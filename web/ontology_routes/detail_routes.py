@@ -18,6 +18,7 @@ from web.ontology_routes.helpers import (
     _get_entity_children,
     _generate_entity_ttl_display,
     _extract_entity_from_ttl,
+    class_property_schema,
 )
 
 
@@ -332,6 +333,7 @@ def register_detail_routes(bp):
         prop_groups = _categorize_entity_properties(entity)
         semantic_links = _entity_semantic_links(entity, ontology)
         using_cases = _entity_using_cases(entity)
+        class_schema = class_property_schema(entity)
 
         return render_template('entity_detail.html',
                              ontology=ontology,
@@ -342,6 +344,7 @@ def register_detail_routes(bp):
                              prop_groups=prop_groups,
                              semantic_links=semantic_links,
                              using_cases=using_cases,
+                             class_schema=class_schema,
                              version_tag=None,
                              version_date=None)
 

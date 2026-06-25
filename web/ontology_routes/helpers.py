@@ -277,6 +277,119 @@ def _get_entity_children(ontology, entity):
     return db.session.execute(stmt).scalars().all()
 
 
+# ---------------------------------------------------------------------------
+# Per-class property schema: which properties apply to instances of a class.
+# Object/datatype properties via rdfs:domain on the class or an ancestor, PLUS the
+# controlled role-attribute schema declared (descriptively) in the SHACL RolePropertyShape
+# for classes that are Roles. This makes the class<->property association visible on the
+# class page instead of leaving classes and properties as two disconnected lists.
+# ---------------------------------------------------------------------------
+
+_CORE_ROLE_URI = "http://proethica.org/ontology/core#Role"
+_ROLE_ATTR_SCHEMA_CACHE = {"mtime": None, "attrs": None}
+
+
+def _role_attr_schema():
+    """The controlled role-attribute schema, parsed from the descriptive
+    pcsh:RolePropertyShape in validation/shapes/core-shapes.ttl. Cached on file mtime.
+    Returns [{name, uri, description, order}] (the shape is the single source of truth)."""
+    from pathlib import Path
+    shapes = Path(__file__).resolve().parents[2] / "validation" / "shapes" / "core-shapes.ttl"
+    try:
+        mtime = shapes.stat().st_mtime
+    except OSError:
+        return []
+    if _ROLE_ATTR_SCHEMA_CACHE["mtime"] == mtime and _ROLE_ATTR_SCHEMA_CACHE["attrs"] is not None:
+        return _ROLE_ATTR_SCHEMA_CACHE["attrs"]
+    SH = rdflib.Namespace("http://www.w3.org/ns/shacl#")
+    PCSH = rdflib.Namespace("http://proethica.org/shapes/core#")
+    attrs = []
+    try:
+        g = rdflib.Graph()
+        g.parse(str(shapes), format="turtle")
+        for pshape in g.objects(PCSH["RolePropertyShape"], SH.property):
+            path = next(g.objects(pshape, SH.path), None)
+            if path is None:
+                continue
+            name = next(g.objects(pshape, SH.name), None)
+            desc = next(g.objects(pshape, SH.description), None)
+            order = next(g.objects(pshape, SH.order), None)
+            attrs.append({
+                "uri": str(path),
+                "name": str(name) if name is not None else str(path).rsplit("#", 1)[-1],
+                "description": str(desc) if desc is not None else "",
+                "order": int(order) if order is not None else 999,
+            })
+        attrs.sort(key=lambda a: a["order"])
+    except Exception:  # malformed/absent shape must not break the entity page
+        attrs = []
+    _ROLE_ATTR_SCHEMA_CACHE.update(mtime=mtime, attrs=attrs)
+    return attrs
+
+
+def _class_ancestor_uris(entity, cap=16):
+    """Walk the (single-valued) parent_uri chain across ontologies to collect this class's
+    ancestor URIs, including itself. Cycle- and depth-guarded."""
+    seen, uris, cur = set(), [], entity.uri
+    while cur and cur not in seen and len(uris) < cap:
+        seen.add(cur)
+        uris.append(cur)
+        cur = db.session.execute(
+            select(OntologyEntity.parent_uri).where(OntologyEntity.uri == cur).limit(1)
+        ).scalar_one_or_none()
+    return uris
+
+
+def class_property_schema(entity):
+    """For a CLASS entity, the property schema applicable to its instances:
+    object/datatype properties whose rdfs:domain is this class or an ancestor, plus -- for
+    roles (core:Role in the ancestor chain) -- the controlled role-attribute schema from the
+    SHACL RolePropertyShape (those properties are deliberately domain-less / leak-safe).
+    Read-only. Returns None for non-class entities or when nothing applies."""
+    if not entity or entity.entity_type != "class":
+        return None
+    ancestor_set = set(_class_ancestor_uris(entity))
+
+    prop_rows = db.session.execute(
+        select(OntologyEntity).where(
+            OntologyEntity.entity_type == "property",
+            OntologyEntity.domain.isnot(None),
+        )
+    ).scalars().all()
+
+    def _local(u):
+        return u.rsplit("#", 1)[-1].rsplit("/", 1)[-1] if isinstance(u, str) else None
+
+    domain_props, seen = [], set()
+    for p in prop_rows:
+        dom = p.domain
+        dom_uris = dom if isinstance(dom, list) else [dom]
+        if not any(isinstance(d, str) and d in ancestor_set for d in dom_uris):
+            continue
+        name = _local(p.uri)
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        rng = p.range
+        rng_uri = (rng[0] if isinstance(rng, list) and rng else rng) if rng else None
+        domain_props.append({
+            "name": name,
+            "uri": p.uri,
+            "comment": (p.comment or ""),
+            "range_name": _local(rng_uri),
+            "range_uri": rng_uri if isinstance(rng_uri, str) else None,
+            "on_self": any(isinstance(d, str) and d == entity.uri for d in dom_uris),
+        })
+    domain_props.sort(key=lambda x: (not x["on_self"], x["name"].lower()))
+
+    is_role = _CORE_ROLE_URI in ancestor_set
+    role_attrs = _role_attr_schema() if is_role else []
+
+    if not (domain_props or role_attrs):
+        return None
+    return {"is_role": is_role, "domain_props": domain_props, "role_attrs": role_attrs}
+
+
 def _generate_entity_ttl_display(entity, ontology):
     """TTL for display. Render the entity's ACTUAL source triples from the ontology's
     current version. This way skos:exactMatch, skos:inScheme, skos:Concept typing,

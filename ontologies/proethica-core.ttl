@@ -115,7 +115,7 @@ proeth-core:CodeProvision a owl:Class ;
 # Guideline: Container for provisions (the full code document)
 proeth-core:Guideline a owl:Class ;
     rdfs:subClassOf iao:0000310 ;  # IAO:document (IAO_0000310 = "document"; codes of ethics are documents)
-    rdfs:subClassOf proeth-core:Resource ;  # a guideline document IS a professional knowledge source (Rs); both are IAO ICEs
+    rdfs:subClassOf proeth-core:Resource ;  # a guideline document IS a professional knowledge source (Rs); both are IAO ICEs (v2.7.3)
     rdfs:label "Guideline"@en ;
     rdfs:comment "A professional code of ethics or guideline document containing multiple provisions. Examples include NSPE Code of Ethics, NEA Code of Ethics, ACM Code of Ethics."@en ;
     skos:definition "A formal document establishing ethical standards for a profession, containing individual CodeProvisions."@en ;

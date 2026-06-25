@@ -314,6 +314,52 @@
                 </div>
                 {% endif %}
 
+                <!-- Property schema: which properties apply to instances of this class -->
+                {% if class_schema %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-diagram-3"></i> Properties of instances of this class</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted mb-3">
+                            The properties that apply to instances of this class&mdash;via
+                            <code>rdfs:domain</code> on this class or an ancestor{% if class_schema.is_role %}, plus the
+                            controlled <strong>role-attribute schema</strong>{% endif %}. Property <em>values</em> live on the
+                            individual (the role-bearer), not on the class.
+                        </p>
+
+                        {% if class_schema.domain_props %}
+                        <div class="mb-1"><small class="text-muted fw-bold">Relational &amp; data properties</small></div>
+                        {% for p in class_schema.domain_props %}
+                        <div class="property-row">
+                            <div class="property-key">
+                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=p.name) }}">{{ p.name }}</a>
+                                {% if not p.on_self %}<span class="badge bg-light text-muted border" title="rdfs:domain is an ancestor class">inherited</span>{% endif %}
+                            </div>
+                            <div class="property-value">
+                                {% if p.range_name %}<span class="badge bg-success">&rarr; {{ p.range_name }}</span>{% endif %}
+                                {% if p.comment %}<div class="small text-muted">{{ p.comment }}</div>{% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+
+                        {% if class_schema.role_attrs %}
+                        <div class="mt-3 mb-1">
+                            <small class="text-muted fw-bold">Role attribute schema</small>
+                            <span class="small text-muted">(declared in the SHACL <code>RolePropertyShape</code>; deliberately domain-less / leak-safe)</span>
+                        </div>
+                        {% for a in class_schema.role_attrs %}
+                        <div class="property-row">
+                            <div class="property-key">{{ a.name }}</div>
+                            <div class="property-value"><div class="small text-muted">{{ a.description }}</div></div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Source Evidence -->
                 {% if prop_groups.evidence %}
                 <div class="card mb-3">
