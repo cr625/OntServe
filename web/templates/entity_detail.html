@@ -371,7 +371,7 @@
                         {# 1. Relations FIRST -- the formal OWL object/data properties (graph edges) #}
                         {% if class_schema.domain_props %}
                         <div class="mb-3 ps-3 border-start border-3 border-success">
-                            <div class="fw-bold">{% if class_schema.is_role %}1 &middot; {% endif %}Relations &amp; data properties
+                            <div class="fw-bold text-success pb-1 mb-2 border-bottom">{% if class_schema.is_role %}1 &middot; {% endif %}Relations &amp; data properties
                                 <span class="badge rounded-pill bg-light text-muted border fw-normal">rdfs:domain on this class</span></div>
                             <div class="small text-muted mb-2">Object- and data-property <strong>edges</strong> that link this class to others, materialized in the graph{% if class_schema.is_role %} (e.g. the R&rarr;P&rarr;O obligation edges){% endif %}. These are relations between entities, <strong>not</strong> per-instance JSON fields. <em>Range</em> is the target type the relation points to.</div>
                             <table class="table table-sm align-middle mb-0">
@@ -392,7 +392,7 @@
                         {# 2. Definitional attributes -- the LLM-extracted, literature-grounded class fields #}
                         {% if class_schema.role_definition %}
                         <div class="mb-3 ps-3 border-start border-3 border-primary">
-                            <div class="fw-bold">2 &middot; Definitional attributes
+                            <div class="fw-bold text-primary pb-1 mb-2 border-bottom">2 &middot; Definitional attributes
                                 <span class="badge rounded-pill bg-light text-muted border fw-normal">SHACL RoleDefinitionShape</span></div>
                             <div class="small text-muted mb-2">The literature-grounded fields that individuate a role <strong>type</strong>. The extractor finds these for each role and commits them to JSON; they are then asserted on the role <em>class</em>.</div>
                             <table class="table table-sm align-middle mb-0">
@@ -409,7 +409,7 @@
                         {# 3. Bearer attributes -- per-occupant individual data (non-definitional) #}
                         {% if class_schema.role_attrs %}
                         <div class="mb-1 ps-3 border-start border-3 border-secondary">
-                            <div class="fw-bold">3 &middot; Bearer attributes
+                            <div class="fw-bold text-secondary pb-1 mb-2 border-bottom">3 &middot; Bearer attributes
                                 <span class="badge rounded-pill bg-light text-muted border fw-normal">SHACL RolePropertyShape</span>
                                 <span class="badge rounded-pill bg-light text-muted border fw-normal">individual data</span></div>
                             <div class="small text-muted mb-2">Per-occupant facts a specific role-<em>holder</em> may have (license, specialty, employer, ...). These do <strong>not</strong> define the role type (cf. Davis 1991: license is not role-defining); their values are on the individual.</div>
