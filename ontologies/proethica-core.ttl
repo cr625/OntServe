@@ -134,6 +134,39 @@ proeth-core:Agent a owl:Class ;
     skos:definition "A material entity capable of bearing roles and performing intentional actions in professional contexts."@en .
 
 ###############################################################
+# Nine-component D-tuple framework membership
+###############################################################
+# Which slot each component class fills (R, P, O, ...) is metadata about the representational
+# framework, not a domain fact, so it is carried by ANNOTATION properties. componentOf links a
+# component class to the framework individual via an annotation property, NOT an object property,
+# so a class is never asserted to be a logical member of an individual (no class-as-member punning).
+# The mutually-disjoint structure of the nine is already formalized by the owl:AllDisjointClasses below.
+
+proeth-core:dtupleComponent a owl:AnnotationProperty ;
+    rdfs:label "D-tuple component symbol"@en ;
+    rdfs:comment "The symbol (R, P, O, S, Rs, A, E, Ca, Cs) this class fills in the D-tuple framework."@en .
+proeth-core:componentOf a owl:AnnotationProperty ;
+    rdfs:label "component of"@en ;
+    rdfs:comment "Relates a component class to the representational framework it is a component of. An annotation property (not owl:ObjectProperty / part-of) to avoid asserting a class as a member of an individual."@en .
+
+# The framework as an information artifact (the formal specification this ontology implements). This is
+# the single foundational meta-individual in core; domain particulars still live in the case files, so the
+# TBox/ABox separation holds for the domain layer.
+proeth-core:DTupleFramework a owl:NamedIndividual, iao:0000030 ;  # IAO:information content entity
+    rdfs:label "Nine-component D-tuple framework"@en ;
+    skos:definition "The formal nine-component specification D=(R,P,O,S,Rs,A,E,Ca,Cs) that this ontology implements: the contextual components (Role, State, Resource), the normative components (Principle, Obligation, Capability, Constraint), and the temporal components (Action, Event). An information content entity: a formal representational specification."@en .
+
+proeth-core:Role        proeth-core:dtupleComponent "R"  ; proeth-core:componentOf proeth-core:DTupleFramework .
+proeth-core:Principle   proeth-core:dtupleComponent "P"  ; proeth-core:componentOf proeth-core:DTupleFramework .
+proeth-core:Obligation  proeth-core:dtupleComponent "O"  ; proeth-core:componentOf proeth-core:DTupleFramework .
+proeth-core:State       proeth-core:dtupleComponent "S"  ; proeth-core:componentOf proeth-core:DTupleFramework .
+proeth-core:Resource    proeth-core:dtupleComponent "Rs" ; proeth-core:componentOf proeth-core:DTupleFramework .
+proeth-core:Action      proeth-core:dtupleComponent "A"  ; proeth-core:componentOf proeth-core:DTupleFramework .
+proeth-core:Event       proeth-core:dtupleComponent "E"  ; proeth-core:componentOf proeth-core:DTupleFramework .
+proeth-core:Capability  proeth-core:dtupleComponent "Ca" ; proeth-core:componentOf proeth-core:DTupleFramework .
+proeth-core:Constraint  proeth-core:dtupleComponent "Cs" ; proeth-core:componentOf proeth-core:DTupleFramework .
+
+###############################################################
 # Core Object Properties 
 ###############################################################
 

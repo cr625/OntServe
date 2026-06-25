@@ -148,6 +148,7 @@
     <!-- Entity Header -->
     {% set cc = entity.properties.conceptCategory if (entity.properties and entity.properties is mapping) else none %}
     {% set cm = concept_meta(cc) if cc else none %}
+    {% set comp = concept_meta(fragment) if entity.entity_type == 'class' else none %}
     <div class="entity-header type-{{ entity.entity_type }} mb-4"{% if cm %} style="border-color: {{ cm.color }};"{% endif %}>
         <div class="d-flex justify-content-between align-items-start">
             <div>
@@ -159,6 +160,13 @@
                     </span>
                     <span class="badge bg-light text-muted border">Individual</span>
                     {% else %}
+                    {% if comp %}
+                    <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment='DTupleFramework') }}"
+                       class="badge text-decoration-none" style="background: {{ comp.color }};"
+                       title="D-tuple component {{ comp.abbrev }}; click for the framework">
+                        {{ comp.abbrev }} &middot; D-tuple component
+                    </a>
+                    {% endif %}
                     <span class="badge bg-{{ 'primary' if entity.entity_type == 'class' else 'success' if entity.entity_type == 'property' else 'secondary' }}">
                         {{ entity.entity_type|capitalize }}
                     </span>
