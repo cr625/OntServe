@@ -602,7 +602,7 @@ class ConceptManager:
                     -- Seed: the core/intermediate concept class itself
                     SELECT e.id, e.uri, e.label, e.comment as description,
                            e.entity_type, e.parent_uri, e.created_at,
-                           o.name as ontology_name, 1 as depth
+                           o.name as ontology_name, e.properties::jsonb AS properties, 1 as depth
                     FROM ontology_entities e
                     JOIN ontologies o ON e.ontology_id = o.id
                     WHERE LOWER(e.entity_type) = 'class'
@@ -616,7 +616,7 @@ class ConceptManager:
                     SELECT child.id, child.uri, child.label,
                            child.comment as description, child.entity_type,
                            child.parent_uri, child.created_at,
-                           o.name as ontology_name, parent.depth + 1
+                           o.name as ontology_name, child.properties::jsonb, parent.depth + 1
                     FROM ontology_entities child
                     JOIN ontologies o ON child.ontology_id = o.id
                     JOIN hierarchy parent ON child.parent_uri = parent.uri
@@ -625,7 +625,7 @@ class ConceptManager:
                       AND parent.depth < 10
                 )
                 SELECT DISTINCT id, uri, label, description,
-                       entity_type, parent_uri, created_at, ontology_name
+                       entity_type, parent_uri, created_at, ontology_name, properties
                 FROM hierarchy
                 ORDER BY label
             """
@@ -654,6 +654,7 @@ class ConceptManager:
                             'parent_uri': row['parent_uri'],
                             'created_at': row['created_at'].isoformat() if row['created_at'] else None,
                             'source': row.get('ontology_name', 'ontology'),
+                            'properties': row.get('properties') or {},
                         }
                         entities.append(entity)
                     except Exception as row_error:

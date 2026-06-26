@@ -177,6 +177,14 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
         # Extract entities
         entities_added = 0
         
+        # Predicates captured elsewhere (dedicated columns / provenance); every other
+        # predicate on a class becomes a structured property below.
+        class_standard_predicates = {
+            RDF.type, RDFS.label, RDFS.comment, RDFS.subClassOf, SKOS.definition,
+            rdflib.URIRef('http://www.w3.org/ns/prov#generatedAtTime'),
+            rdflib.URIRef('http://www.w3.org/ns/prov#wasGeneratedBy'),
+        }
+
         # Extract classes
         for class_uri in g.subjects(RDF.type, OWL.Class):
             # Skip blank nodes (rdflib artefacts without proper URIs)
@@ -193,6 +201,25 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
             # class roots in the BFO tree for the entity-page Class Hierarchy.
             parent_uri = _pick_best_parent(g, class_uri)
 
+            # Collect non-standard predicates (archetypeAxis, specializationAxis, skos
+            # crosswalks, ...) into the structured properties JSON, mirroring the
+            # individual loop, so class annotations reach the MCP/category readers.
+            # subClassOf is captured as parent_uri; blank-node objects (restrictions)
+            # are skipped.
+            properties = {}
+            for predicate, obj in g.predicate_objects(class_uri):
+                if predicate in class_standard_predicates or isinstance(obj, rdflib.BNode):
+                    continue
+                pred_name = str(predicate).split('#')[-1].split('/')[-1]
+                obj_value = str(obj)
+                if pred_name in properties:
+                    if isinstance(properties[pred_name], list):
+                        properties[pred_name].append(obj_value)
+                    else:
+                        properties[pred_name] = [properties[pred_name], obj_value]
+                else:
+                    properties[pred_name] = obj_value
+
             label_str = str(label) if label else None
             comment_str = str(comment) if comment else str(definition) if definition else None
             entity = OntologyEntity(
@@ -202,6 +229,7 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
                 label=label_str,
                 comment=comment_str,
                 parent_uri=parent_uri,
+                properties=properties if properties else None,
                 content_hash=_compute_content_hash(uri_str, label_str, comment_str),
                 updated_at=datetime.now(timezone.utc)
             )
