@@ -142,12 +142,16 @@ def resolve_uri_path(ontology_path, entity_name):
             # Still a direct call (no redirect loop).
             return current_app.view_functions['ontology.ontology_content'](ontology_name)
         elif entity_name == 'edit':
-            return redirect(url_for('ontology.edit_ontology', ontology_name=ontology_name))
+            # Direct call (not redirect): url_for would point back at this same
+            # catch-all and loop. The direct call also lets edit_ontology's
+            # @login_required fire, redirecting anonymous users to /auth/login.
+            return current_app.view_functions['ontology.edit_ontology'](ontology_name)
         elif entity_name == 'save':
             from flask import abort
             abort(405)
         elif entity_name == 'settings':
-            return redirect(url_for('ontology.ontology_settings', ontology_name=ontology_name))
+            # Direct call (see the edit branch): redirecting here would loop.
+            return current_app.view_functions['ontology.ontology_settings'](ontology_name)
         else:
             from flask import abort
             abort(404)
