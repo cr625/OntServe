@@ -56,6 +56,26 @@ def build_text(entity) -> str:
     return entity.uri  # last resort; URI is always non-null
 
 
+def _resolve_device() -> str:
+    """Pick the embedding device. EMBEDDINGS_DEVICE overrides; otherwise use the GPU only after a
+    real kernel op succeeds, else CPU. Machine-adaptive: the RTX 4090 dev box (Area51) uses CUDA,
+    while a dev box with a mismatched CUDA build (cudaErrorNoKernelImageForDevice) or a no-GPU server
+    falls back to CPU. Embeddings are computed on whichever local box is capable and shipped to
+    production via the DB dump/restore; production never computes them."""
+    pref = os.environ.get("EMBEDDINGS_DEVICE")
+    if pref:
+        return pref
+    try:
+        import torch
+        if torch.cuda.is_available():
+            t = torch.zeros(1, device="cuda")
+            _ = (t + 1).item()  # force a real kernel; raises on a mismatched build
+            return "cuda"
+    except Exception as exc:  # no torch, no GPU, or a broken CUDA build -> CPU
+        logger.info("GPU probe failed (%s); using CPU", type(exc).__name__)
+    return "cpu"
+
+
 def populate(entity_type: str | None, batch_size: int, dry_run: bool, force: bool,
              ontology_names: list[str] | None = None) -> int:
     """Returns number of embeddings written (or that would be written in dry-run)."""
@@ -113,9 +133,9 @@ def populate(entity_type: str | None, batch_size: int, dry_run: bool, force: boo
                 logger.info("  [dry-run sample] %s -> %s", entity.uri, preview[:120])
             return total
 
-        # Default to CPU: this box's CUDA reports available but cannot run kernels
-        # (cudaErrorNoKernelImageForDevice) and would fail silently. Override with EMBEDDINGS_DEVICE.
-        device = os.environ.get("EMBEDDINGS_DEVICE", "cpu")
+        # Pick the device (GPU when its kernels actually run, else CPU; see _resolve_device).
+        # Computed on a capable local box and shipped to production via the DB dump; prod never computes.
+        device = _resolve_device()
         logger.info("Loading sentence-transformer model all-MiniLM-L6-v2 on %s ...", device)
         model = SentenceTransformer("all-MiniLM-L6-v2", device=device)
         logger.info("Model loaded.")
