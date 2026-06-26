@@ -363,7 +363,7 @@
                     </div>
                     <div class="card-body">
                         {% if class_schema.is_role %}
-                        <p class="small text-muted mb-3">A role is described at three independent levels. Each block states <em>what</em> it is, <em>where</em> it is declared, and <em>how</em> it is populated.</p>
+                        <p class="small text-muted mb-3">A role is described at three levels here, each a <strong>schema</strong> on the class rather than a particular role individual's values. A property can appear in more than one level (e.g. <code>hasObligation</code> is both a relation and definitional).</p>
                         {% else %}
                         <p class="small text-muted mb-3">Properties whose <code>rdfs:domain</code> is this class or an ancestor. These are edges/attributes on instances; their <em>values</em> are on the individual, not the class.</p>
                         {% endif %}
@@ -373,7 +373,7 @@
                         <div class="mb-3 ps-3 border-start border-3 border-success">
                             <div class="fw-bold text-success pb-1 mb-2 border-bottom">{% if class_schema.is_role %}1 &middot; {% endif %}Relations &amp; data properties
                                 <span class="badge rounded-pill bg-light text-muted border fw-normal">rdfs:domain on this class</span></div>
-                            <div class="small text-muted mb-2">Object- and data-property <strong>edges</strong> that link this class to others, materialized in the graph{% if class_schema.is_role %} (e.g. the R&rarr;P&rarr;O obligation edges){% endif %}. These are relations between entities, <strong>not</strong> per-instance JSON fields. <em>Range</em> is the target type the relation points to.</div>
+                            <div class="small text-muted mb-2">Object and data properties whose <code>rdfs:domain</code> is this class or an ancestor. On an instance, an object property is a graph <strong>edge</strong> to another entity (its <em>Range</em>) and a data property is a literal value.{% if class_schema.is_role %} Unlike the definitional and bearer schemas below, these are relations in the graph, not JSON fields.{% endif %}</div>
                             <table class="table table-sm align-middle mb-0">
                                 <thead><tr class="small text-muted"><th style="width:28%">Property</th><th style="width:22%">Range</th><th>Description</th></tr></thead>
                                 <tbody>
@@ -394,7 +394,7 @@
                         <div class="mb-3 ps-3 border-start border-3 border-primary">
                             <div class="fw-bold text-primary pb-1 mb-2 border-bottom">2 &middot; Definitional attributes
                                 <span class="badge rounded-pill bg-light text-muted border fw-normal">SHACL RoleDefinitionShape</span></div>
-                            <div class="small text-muted mb-2">The literature-grounded fields that individuate a role <strong>type</strong>. The extractor finds these for each role and commits them to JSON; they are then asserted on the role <em>class</em>.</div>
+                            <div class="small text-muted mb-2">The literature-grounded fields that individuate a role <strong>type</strong>. This is the controlled schema (the same fields for every role type); a specific role type fills them in on the role <em>class</em>.</div>
                             <table class="table table-sm align-middle mb-0">
                                 <thead><tr class="small text-muted"><th style="width:28%">Attribute</th><th>Description</th></tr></thead>
                                 <tbody>
@@ -412,7 +412,7 @@
                             <div class="fw-bold text-secondary pb-1 mb-2 border-bottom">3 &middot; Bearer attributes
                                 <span class="badge rounded-pill bg-light text-muted border fw-normal">SHACL RolePropertyShape</span>
                                 <span class="badge rounded-pill bg-light text-muted border fw-normal">individual data</span></div>
-                            <div class="small text-muted mb-2">Per-occupant facts a specific role-<em>holder</em> may have (license, specialty, employer, ...). These do <strong>not</strong> define the role type (cf. Davis 1991: license is not role-defining); their values are on the individual.</div>
+                            <div class="small text-muted mb-2">The controlled schema of per-occupant facts a role-<em>holder</em> may carry (license, specialty, employer, ...). These do <strong>not</strong> define the role type (cf. Davis 1991: license is not role-defining); their values are on the <em>individual</em>, not the class.</div>
                             <table class="table table-sm align-middle mb-0">
                                 <thead><tr class="small text-muted"><th style="width:28%">Attribute</th><th>Description</th></tr></thead>
                                 <tbody>
