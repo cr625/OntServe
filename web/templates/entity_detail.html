@@ -16,6 +16,10 @@
     /* Wider, left-aligned tooltips for the Property structure info icons */
     .desc-tip .tooltip-inner { max-width: 360px; text-align: left; }
 
+    /* TTL card collapse caret (rotates when the section is expanded) */
+    .collapse-caret { transition: transform 0.15s ease; }
+    [data-bs-toggle="collapse"]:not(.collapsed) .collapse-caret { transform: rotate(90deg); }
+
     .property-row {
         display: flex;
         padding: 0.5rem 0;
@@ -494,11 +498,19 @@
 
                 <!-- TTL representation -->
                 <div class="card mb-3">
-                    <div class="card-header">
-                        <h6 class="mb-0"><i class="bi bi-file-code"></i> TTL</h6>
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <a class="text-reset text-decoration-none d-flex align-items-center collapsed" style="cursor: pointer;" role="button" data-bs-toggle="collapse" data-bs-target="#ttlCollapse" aria-expanded="false" aria-controls="ttlCollapse">
+                            <i class="bi bi-chevron-right collapse-caret me-2 small"></i>
+                            <h6 class="mb-0"><i class="bi bi-file-code"></i> TTL</h6>
+                        </a>
+                        <button type="button" id="ttlCopyBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Copy TTL to clipboard">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="ttl-block">{{ ttl_content }}</div>
+                    <div class="collapse" id="ttlCollapse">
+                        <div class="card-body p-0">
+                            <div class="ttl-block" id="ttlContent">{{ ttl_content }}</div>
+                        </div>
                     </div>
                 </div>
             </div>

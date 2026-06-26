@@ -100,4 +100,28 @@
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
             new bootstrap.Tooltip(el);
         });
+
+        // Copy the TTL block to the clipboard, with success/failure feedback.
+        var ttlCopyBtn = document.getElementById('ttlCopyBtn');
+        if (ttlCopyBtn) {
+            ttlCopyBtn.addEventListener('click', function () {
+                var icon = ttlCopyBtn.querySelector('i');
+                var ttl = document.getElementById('ttlContent').textContent;
+                navigator.clipboard.writeText(ttl).then(function () {
+                    icon.className = 'bi bi-clipboard-check';
+                    ttlCopyBtn.classList.replace('btn-outline-secondary', 'btn-success');
+                    setTimeout(function () {
+                        icon.className = 'bi bi-clipboard';
+                        ttlCopyBtn.classList.replace('btn-success', 'btn-outline-secondary');
+                    }, 1500);
+                }, function () {
+                    icon.className = 'bi bi-clipboard-x';
+                    ttlCopyBtn.classList.replace('btn-outline-secondary', 'btn-danger');
+                    setTimeout(function () {
+                        icon.className = 'bi bi-clipboard';
+                        ttlCopyBtn.classList.replace('btn-danger', 'btn-outline-secondary');
+                    }, 1500);
+                });
+            });
+        }
     });
