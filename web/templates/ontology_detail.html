@@ -88,10 +88,10 @@
                     data-bs-target="#tagVersionModal">
                     <i class="bi bi-tag"></i> Tag Version
                 </button>
-                {% endif %}
                 <a href="{{ url_for('ontology.edit_ontology', ontology_name=ontology.name) }}" class="btn btn-primary">
                     <i class="bi bi-pencil-square"></i> Edit TTL
                 </a>
+                {% endif %}
                 <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}"
                     class="btn btn-success">
                     <i class="bi bi-diagram-3"></i> Visualize
