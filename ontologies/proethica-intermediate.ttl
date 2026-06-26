@@ -54,6 +54,7 @@
 :FundamentalEthicalPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
+    :specializationAxis "fundamental" ;
     rdfs:label "Fundamental Ethical Principle"@en ;
     iao:0000115 "A universal moral foundation that serves as the highest-level abstraction in professional ethics, requiring extensive interpretation through concrete cases (BFO: generically dependent continuant)"@en ;
     skos:definition "According to McLaren (2003), fundamental principles like public welfare and respect for persons cannot be applied through formal deduction alone but require extensional definition through landmark ethics cases and professional code applications. These principles function as constitutional-like foundations (Taddeo et al. 2024) that mediate moral ideals into professional practice (Hallamaa & Kalliokoski 2022)."@en ;
@@ -65,6 +66,7 @@
 :ProfessionalVirtuePrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
+    :specializationAxis "virtue" ;
     rdfs:label "Professional Virtue Principle"@en ;
     iao:0000115 "A character-based principle defining professional excellence and ethical sensitivities specific to professional identity (BFO: generically dependent continuant)"@en ;
     skos:definition "Professional virtue principles guide professional identity formation and ethical sensitivities (Oakley & Cocking 2001). These principles are learned through expert examples (Anderson & Anderson 2018) and exemplified through model professional behavior cases, creating role-generated moral demands that shape professional character."@en ;
@@ -75,6 +77,7 @@
 :RelationalPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
+    :specializationAxis "relational" ;
     rdfs:label "Relational Principle"@en ;
     iao:0000115 "A principle governing professional relationships and establishing frameworks for trust and stakeholder interactions (BFO: generically dependent continuant)"@en ;
     skos:definition "Relational principles establish frameworks for managing professional relationships and stakeholder trust. Following McLaren's extensional approach, these principles gain meaning through precedents from client-professional disputes and resolutions, defining how professionals navigate competing interests and maintain trustworthy relationships."@en ;
@@ -85,6 +88,7 @@
 :DomainSpecificPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
+    :specializationAxis "domain" ;
     rdfs:label "Domain-Specific Principle"@en ;
     iao:0000115 "A principle particular to professional domain contexts that bridges general ethics to specific technical practices (BFO: generically dependent continuant)"@en ;
     skos:definition "Domain-specific principles bridge general ethical guidance to particular professional contexts. As identified by Prem (2023), these principles face inherent challenges in operationalization but remain essential for contextual guidance. They are grounded through industry-specific cases and technical standards applications."@en ;
@@ -96,6 +100,7 @@
 :PublicWelfarePrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :FundamentalEthicalPrinciple ;
+    :specializationAxis "fundamental" ;
     rdfs:label "Public Welfare Principle"@en ;
     iao:0000115 "The fundamental principle that public safety, health, and welfare must be held paramount in professional practice (BFO: generically dependent continuant)"@en ;
     skos:definition "The public welfare principle, as articulated in NSPE Fundamental Canon 1, requires professionals to hold paramount the safety, health, and welfare of the public. This principle exemplifies McLaren's challenge of operationalizing abstract guidance - 'hold paramount' gains meaning only through NSPE case applications and precedents like the Challenger disaster."@en ;
@@ -108,6 +113,7 @@
 :IntegrityPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :ProfessionalVirtuePrinciple ;
+    :specializationAxis "virtue" ;
     rdfs:label "Integrity Principle"@en ;
     iao:0000115 "The professional virtue principle of maintaining honesty, truthfulness, and ethical consistency in professional practice (BFO: generically dependent continuant)"@en ;
     skos:definition "Professional integrity requires contextual interpretation through cases (Kong et al. 2020) and manifests differently across professional contexts. It encompasses honesty in professional communications, truthfulness in representations, and consistency between professional values and actions."@en ;
@@ -119,6 +125,7 @@
 :CompetencePrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :ProfessionalVirtuePrinciple ;
+    :specializationAxis "virtue" ;
     rdfs:label "Competence Principle"@en ;
     iao:0000115 "The professional virtue principle requiring maintenance and application of professional knowledge and skill within areas of competence (BFO: generically dependent continuant)"@en ;
     skos:definition "The competence principle requires professionals to perform services only in areas of their competence and to maintain professional knowledge through continuous learning. This principle generates obligations for professional development and honest self-assessment of capabilities."@en ;
@@ -130,6 +137,7 @@
 :ConfidentialityPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :RelationalPrinciple ;
+    :specializationAxis "relational" ;
     rdfs:label "Confidentiality Principle"@en ;
     iao:0000115 "The relational principle protecting client information and maintaining trust in professional relationships (BFO: generically dependent continuant)"@en ;
     skos:definition "Confidentiality establishes trust frameworks in professional relationships by protecting client information from unauthorized disclosure. This principle requires balancing through precedents when it conflicts with public welfare or legal obligations."@en ;
@@ -141,6 +149,7 @@
 :TransparencyPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :RelationalPrinciple ;
+    :specializationAxis "relational" ;
     rdfs:label "Transparency Principle"@en ;
     iao:0000115 "The relational principle requiring openness and disclosure in professional communications and decision-making (BFO: generically dependent continuant)"@en ;
     skos:definition "Transparency requires professionals to be open about conflicts of interest, limitations, and decision-making processes. This principle supports accountability and enables informed consent from stakeholders."@en ;
@@ -152,6 +161,7 @@
 :EnvironmentalStewardshipPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :DomainSpecificPrinciple ;
+    :specializationAxis "domain" ;
     rdfs:label "Environmental Stewardship Principle"@en ;
     iao:0000115 "The domain-specific principle in engineering requiring consideration of environmental impact and sustainability (BFO: generically dependent continuant)"@en ;
     skos:definition "Environmental stewardship in engineering requires balancing technical solutions with environmental protection and sustainable development. This principle has evolved through cases addressing pollution, resource depletion, and climate change impacts."@en ;
@@ -159,6 +169,120 @@
                    <https://doi.org/10.1007/s00146-023-01687-0> ; # Prem 2023
     proeth:nspeReference "Professional Obligation III.2.d" ;
     rdfs:comment "Bridges engineering practice with broader environmental and societal responsibilities."@en .
+
+# Corpus-actual principles promoted from the canonicalization reference sheet 2026-06-26
+# (parented to their kind; specializationAxis = kind; per-principle NSPE-canon grounding still TODO).
+:PeerReviewCooperationPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
+    rdfs:label "Peer Review Cooperation Principle"@en ;
+    :specializationAxis "domain" ;
+    skos:altLabel "confidential peer review cooperation principle"@en, "peer review notification principle"@en ;
+    rdfs:comment "The value that an engineer cooperates with the peer review of another's work; the confidentiality of the reviewed material is a State context, not part of the value."@en .
+
+:LoyaltyPrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
+    rdfs:label "Loyalty Principle"@en ;
+    :specializationAxis "relational" ;
+    skos:altLabel "faithful agent loyalty principle"@en, "loyalty"@en ;
+    rdfs:comment "The value that a professional acts as a faithful agent or trustee for the client or employer in professional matters."@en .
+
+:ObjectivityPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
+    rdfs:label "Objectivity Principle"@en ;
+    :specializationAxis "virtue" ;
+    skos:altLabel "adversarial context objectivity principle"@en, "adversarial engagement objectivity principle"@en, "dual role objectivity principle"@en, "report language fairness principle"@en ;
+    rdfs:comment "The value that professional judgments and opinions are issued objectively and truthfully, free from bias or undue influence."@en .
+
+:HonestyPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
+    rdfs:label "Honesty Principle"@en ;
+    :specializationAxis "virtue" ;
+    skos:altLabel "fact-based opinion principle"@en, "scope of engagement honesty principle"@en, "deceptive submission prohibition principle"@en, "credential misrepresentation prohibition principle"@en ;
+    rdfs:comment "The value that a professional is truthful and avoids deception or misrepresentation in professional dealings."@en .
+
+:ConflictOfInterestDisclosurePrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
+    rdfs:label "Conflict of Interest Disclosure Principle"@en ;
+    :specializationAxis "relational" ;
+    skos:altLabel "advisory self-interest disclosure principle"@en, "divided loyalty prohibition principle"@en, "client consent conflict waiver principle"@en ;
+    rdfs:comment "The value that a professional discloses, and where required avoids, conflicts of interest affecting professional judgment."@en .
+
+:ResponsibleChargePrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
+    rdfs:label "Responsible Charge Principle"@en ;
+    :specializationAxis "domain" ;
+    skos:altLabel "responsible charge active engagement principle"@en, "supervisory control adequacy principle"@en, "professional sealing responsibility principle"@en ;
+    rdfs:comment "The value that an engineer in responsible charge exercises actual direct control and personal supervision over the work for which responsibility is taken."@en .
+
+:ReviewAdequacyPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
+    rdfs:label "Review Adequacy Principle"@en ;
+    :specializationAxis "domain" ;
+    skos:altLabel "ai review adequacy principle"@en, "detailed review adequacy principle"@en ;
+    rdfs:comment "The value that a professional reviews work in sufficient depth to take responsibility for its correctness before relying on or adopting it."@en .
+
+:SelfCertificationProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
+    rdfs:label "Self-Certification Prohibition Principle"@en ;
+    :specializationAxis "domain" ;
+    rdfs:comment "The value that a professional does not certify or approve their own work in a capacity meant to provide independent oversight."@en .
+
+:ToolSubstitutionProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
+    rdfs:label "Tool Substitution Prohibition Principle"@en ;
+    :specializationAxis "domain" ;
+    skos:altLabel "technology replacement prohibition principle"@en ;
+    rdfs:comment "The value that a tool or technology does not substitute for the professional judgment and competence the work requires."@en .
+
+:ProfessionalAccountabilityPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
+    rdfs:label "Professional Accountability Principle"@en ;
+    :specializationAxis "virtue" ;
+    skos:altLabel "error acknowledgment principle"@en, "professional accountability"@en ;
+    rdfs:comment "The value that a professional takes personal responsibility for, and acknowledges error in, work performed under their authority."@en .
+
+:CorrectiveActionMonitoringPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
+    rdfs:label "Corrective Action Monitoring Principle"@en ;
+    :specializationAxis "domain" ;
+    skos:altLabel "post-engagement observation duty principle"@en ;
+    rdfs:comment "The value that a professional monitors a hazardous or deficient condition through to the completion of corrective action."@en .
+
+:ExpertiseCalibratedDisclosurePrinciple rdf:type owl:Class ; rdfs:subClassOf :FundamentalEthicalPrinciple ;
+    rdfs:label "Expertise-Calibrated Disclosure Principle"@en ;
+    :specializationAxis "fundamental" ;
+    rdfs:comment "The value that the scope and certainty of professional statements is calibrated to the professional's actual expertise in the matter."@en .
+
+:NonEngineeringExpertServicesPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
+    rdfs:label "Non-Engineering Expert Services Principle"@en ;
+    :specializationAxis "domain" ;
+    rdfs:comment "The value governing an engineer who provides expert services outside engineering, that such services not trade on engineering authority they do not warrant."@en .
+
+:JurisdictionalLicensureCompliancePrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
+    rdfs:label "Jurisdictional Licensure Compliance Principle"@en ;
+    :specializationAxis "domain" ;
+    skos:altLabel "engineering title invocation principle"@en ;
+    rdfs:comment "The value that a professional practices only within the jurisdictions and license scope for which the professional is authorized."@en .
+
+:SelectiveReportingProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
+    rdfs:label "Selective Reporting Prohibition Principle"@en ;
+    :specializationAxis "virtue" ;
+    skos:altLabel "technical completeness principle"@en, "client disservice by incompleteness principle"@en, "expert fact gathering diligence principle"@en ;
+    rdfs:comment "The value that a professional reports findings completely and does not omit material facts that qualify or contradict a favored conclusion."@en .
+
+:FreeServicesProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
+    rdfs:label "Free Services Prohibition Principle"@en ;
+    :specializationAxis "relational" ;
+    rdfs:comment "The value that a professional does not offer or provide services without compensation in a manner that undermines fair competition or professional independence."@en .
+
+:SchedulePressureResistancePrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
+    rdfs:label "Schedule Pressure Resistance Principle"@en ;
+    :specializationAxis "virtue" ;
+    rdfs:comment "The value that a professional does not compromise technical or ethical standards in response to schedule or commercial pressure."@en .
+
+:WhistleblowerPersonalConsciencePrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
+    rdfs:label "Whistleblower Personal Conscience Principle"@en ;
+    :specializationAxis "virtue" ;
+    rdfs:comment "The value that a professional may act on personal conscience to disclose conduct that endangers the public, beyond the minimum the rules compel."@en .
+
+:EvolvingStandardsResponsivenessPrinciple rdf:type owl:Class ; rdfs:subClassOf :FundamentalEthicalPrinciple ;
+    rdfs:label "Evolving Standards Responsiveness Principle"@en ;
+    :specializationAxis "fundamental" ;
+    rdfs:comment "The value that a professional keeps current with and applies evolving technical and ethical standards of practice."@en .
+
+:MentorDependencyTransitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
+    rdfs:label "Mentor Dependency Transition Principle"@en ;
+    :specializationAxis "virtue" ;
+    rdfs:comment "The value that an engineer develops independent competence and does not remain indefinitely dependent on a mentor for professional judgment."@en .
 
 
 # Obligation is imported from proethica-core, not redefined here
