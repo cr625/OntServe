@@ -93,3 +93,11 @@
             errorEl.classList.remove('d-none');
         });
     }
+
+    // main.js (the global tooltip initializer) is not loaded on the entity page,
+    // so the entity page initializes Bootstrap tooltips for its info icons here.
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+            new bootstrap.Tooltip(el);
+        });
+    });
