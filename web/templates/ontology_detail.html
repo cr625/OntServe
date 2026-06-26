@@ -302,6 +302,40 @@
         {% set has_schema = (stats.class_count + stats.property_count) > 0 %}
         {% set default_tab = 'schema' if has_schema else ('individuals' if stats.individual_count > 0 else 'schema') %}
 
+        {% if stats.framework %}
+        <!-- Core nine-component framework overview (core-framework display_style) -->
+        <div class="card mb-4 border-primary">
+            <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between flex-wrap">
+                <h5 class="mb-0"><i class="bi bi-grid-3x3-gap-fill"></i> Nine-Component Framework</h5>
+                <code class="text-white small">D = ( R &middot; P &middot; O &middot; S &middot; Rs &middot; A &middot; E &middot; Ca &middot; Cs )</code>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    {% for c in stats.framework %}
+                    {% set m = concept_meta(c.fragment) %}
+                    <div class="col-md-4">
+                        <div class="border rounded h-100 p-2" style="border-left: 4px solid {{ m.color if m else '#0d6efd' }} !important;">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="badge me-2" style="background: {{ m.color if m else '#0d6efd' }};" title="D-tuple component {{ c.letter }}">{{ c.letter }}</span>
+                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=c.fragment) }}" class="fw-bold text-decoration-none">{{ c.name }}</a>
+                                {% if c.grounding_frag %}
+                                <a href="{{ url_for('ontology.entity_detail', ontology_name='bfo', fragment=c.grounding_frag) }}" class="badge bg-light text-muted border text-decoration-none ms-auto" title="Foundational grounding">{{ c.grounding_label }}</a>
+                                {% endif %}
+                            </div>
+                            {% if c.definition %}<div class="small text-muted">{{ c.definition }}</div>{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <hr class="my-3">
+                <div class="small text-muted d-flex flex-wrap gap-3">
+                    <span><i class="bi bi-diagram-2 me-1"></i><strong>Dependency:</strong> Role &rarr; adheres to Principle &rarr; derives Obligation</span>
+                    <span><i class="bi bi-shuffle me-1"></i><strong>Defeasibility:</strong> competesWith &middot; prevailsOver &middot; defeasibleUnder</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Tabs for different views -->
         <ul class="nav nav-tabs" id="ontologyTabs" role="tablist">
             <li class="nav-item" role="presentation">

@@ -399,6 +399,64 @@ def get_display_config(ontology) -> dict:
     return ontology.meta_data.get('display_config', {})
 
 
+# The nine components in canonical D-tuple order: D = (R, P, O, S, Rs, A, E, Ca, Cs).
+_DTUPLE_ORDER = ['R', 'P', 'O', 'S', 'Rs', 'A', 'E', 'Ca', 'Cs']
+
+# Readable labels for the BFO/IAO upper classes the core components ground in
+# (stable reference data; the core backbone uses these seven).
+_GROUNDING_LABELS = {
+    'BFO_0000023': 'BFO role',
+    'BFO_0000020': 'BFO specifically dependent continuant',
+    'BFO_0000015': 'BFO process',
+    'BFO_0000016': 'BFO disposition',
+    'BFO_0000040': 'BFO material entity',
+    'IAO_0000033': 'IAO directive information entity',
+    'IAO_0000030': 'IAO information content entity',
+}
+
+_SKOS_NS = Namespace('http://www.w3.org/2004/02/skos/core#')
+_CORE_NS = Namespace('http://proethica.org/ontology/core#')
+
+
+def compute_dtuple_framework(ttl_content: str) -> list:
+    """Ordered list of the proethica-core classes carrying a dtupleComponent
+    annotation (the nine framework components), for the core 'framework' overview.
+
+    Each item: {letter, name, fragment, definition, grounding_frag, grounding_label}.
+    Returns [] for ontologies that carry no dtupleComponent annotations.
+    """
+    g = Graph()
+    try:
+        g.parse(data=ttl_content, format='turtle')
+    except Exception:
+        return []
+    out = []
+    for subj in g.subjects(_CORE_NS.dtupleComponent, None):
+        letter = next(g.objects(subj, _CORE_NS.dtupleComponent), None)
+        frag = str(subj).rsplit('#', 1)[-1].rsplit('/', 1)[-1]
+        label = next(g.objects(subj, RDFS.label), None)
+        definition = (next(g.objects(subj, _SKOS_NS.definition), None)
+                      or next(g.objects(subj, RDFS.comment), None))
+        grounding_frag = grounding_label = None
+        for parent in g.objects(subj, RDFS.subClassOf):
+            pf = str(parent).rsplit('/', 1)[-1]
+            if pf in _GROUNDING_LABELS:
+                grounding_frag, grounding_label = pf, _GROUNDING_LABELS[pf]
+                break
+        text = str(definition) if definition else ''
+        out.append({
+            'letter': str(letter) if letter else '',
+            'name': str(label) if label else frag,
+            'fragment': frag,
+            'definition': (text[:150].rstrip() + '...') if len(text) > 150 else text,
+            'grounding_frag': grounding_frag,
+            'grounding_label': grounding_label,
+        })
+    order = {ltr: i for i, ltr in enumerate(_DTUPLE_ORDER)}
+    out.sort(key=lambda c: order.get(c['letter'], 99))
+    return out
+
+
 def build_stats_context(ontology, entities: dict, relationships: dict) -> dict:
     """Build complete stats context for template.
 
@@ -470,6 +528,12 @@ def build_stats_context(ontology, entities: dict, relationships: dict) -> dict:
     stats['banner'] = display_config.get('banner', {})
     stats['show_banner'] = bool(stats['banner'].get('title'))
 
+    # Core nine-component framework overview (the D-tuple grid above the tabs)
+    if stats['display_style'] == 'core-framework' and ontology.current_content:
+        stats['framework'] = compute_dtuple_framework(ontology.current_content)
+    else:
+        stats['framework'] = []
+
     return stats
 
 
@@ -495,7 +559,10 @@ DEFAULT_DISPLAY_CONFIGS = {
             {'label': 'Constraints', 'prefix': 'Constraint', 'color': '#6c757d', 'icon': 'bi-exclamation-triangle'}
         ],
         'description': 'Bridges core ethical concepts with domain-specific professional ethics knowledge.'
-    }
+    },
+    'proethica-core': {
+        'display_style': 'core-framework',
+    },
 }
 
 
