@@ -462,16 +462,38 @@ def class_hierarchy(entity, child_cap=25):
     anc_uris = _class_ancestor_uris(entity)          # [entity.uri, parent, ..., owl:Thing]
     chain = [_hierarchy_node(u, is_current=(u == entity.uri)) for u in reversed(anc_uris)]
     rows = db.session.execute(
-        select(OntologyEntity.uri, OntologyEntity.label, Ontology.name)
+        select(OntologyEntity.uri, OntologyEntity.label, Ontology.name, OntologyEntity.properties)
         .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
         .where(OntologyEntity.parent_uri == entity.uri,
                OntologyEntity.entity_type == 'class',
                ~Ontology.name.like('proethica-case-%'))
         .order_by(Ontology.name, OntologyEntity.label).limit(child_cap + 1)
     ).all()
-    children = [{'uri': u, 'label': lbl or _uri_fragment(u),
-                 'fragment': _uri_fragment(u), 'ontology': name}
-                for (u, lbl, name) in rows[:child_cap]]
+
+    def _axes(props):
+        # archetypeAxis (occupational/relational) + specializationAxis (discipline/function), so the
+        # Class Hierarchy can show WHY a subclass sits where it does, not just list it flat.
+        if isinstance(props, str):
+            import json as _json
+            try:
+                props = _json.loads(props)
+            except Exception:
+                props = {}
+        p = props or {}
+        return ((p.get('archetypeAxis') or '').strip() or None,
+                (p.get('specializationAxis') or '').strip() or None)
+
+    children = []
+    for (u, lbl, name, props) in rows[:child_cap]:
+        arch, spec = _axes(props)
+        children.append({'uri': u, 'label': lbl or _uri_fragment(u),
+                         'fragment': _uri_fragment(u), 'ontology': name,
+                         'archetype_axis': arch, 'specialization_axis': spec})
+    # Group by axis so like sits with like (occupational discipline, then function, then unspecialized,
+    # then relational), each still alphabetized within its group.
+    _rank = {('occupational', 'discipline'): 0, ('occupational', 'function'): 1, ('occupational', None): 2}
+    children.sort(key=lambda c: (_rank.get((c['archetype_axis'], c['specialization_axis']), 3),
+                                 (c['label'] or '').lower()))
     return {'chain': chain, 'children': children, 'children_overflow': len(rows) > child_cap}
 
 

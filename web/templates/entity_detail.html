@@ -231,6 +231,8 @@
                             <li style="padding-left: {{ hierarchy.chain|length * 1.5 }}rem;">
                                 <span class="text-muted">&#8627; </span>
                                 <a href="{{ url_for('ontology.entity_detail', ontology_name=child.ontology, fragment=child.fragment) }}">{{ child.label }}</a>
+                                {% if child.specialization_axis %}<span class="badge bg-info text-dark small" title="specialization axis">{{ child.specialization_axis }}</span>{% endif %}
+                                {% if child.archetype_axis %}<span class="badge bg-light text-muted border small" title="archetype axis">{{ child.archetype_axis }}</span>{% endif %}
                                 {% if child.ontology != ontology.name %}<span class="text-muted small">({{ child.ontology }})</span>{% endif %}
                             </li>
                             {% endfor %}
