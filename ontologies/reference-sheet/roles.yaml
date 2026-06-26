@@ -32,7 +32,7 @@ canonical_parents:                        # the reusable role parents already in
 # ---------------------------------------------------------------------------
 canonical:
 
-  - iri: EnvironmentalEngineer
+  - iri: EnvironmentalEngineerRole
     label: Environmental Engineer
     parent: EngineerRole
     definition: >-
@@ -44,7 +44,7 @@ canonical:
     status: canonical
     source_cases: [7, 86]
 
-  - iri: DesignEngineer
+  - iri: DesignEngineerRole
     label: Design Engineer
     parent: EngineerRole
     definition: >-
@@ -59,12 +59,12 @@ canonical:
     status: canonical
     source_cases: [8, 15, 71, 85]
     curate: >-
-      OPEN CALL: keep ONE DesignEngineer (recommended) vs split by discipline
+      OPEN CALL: keep ONE DesignEngineerRole (recommended) vs split by discipline
       (CivilEngineer/StructuralEngineer). The 5 source labels carry project (Dam/Stormwater/Dock)
       or relationship (Cooperating/Original) context -> route to domain context / collaboration relation,
       not 5 role classes.
 
-  - iri: MunicipalEngineer
+  - iri: MunicipalEngineerRole
     label: Municipal Engineer
     parent: EngineerRole
     definition: >-
@@ -72,7 +72,7 @@ canonical:
     status: canonical                     # allow-listed idiom (decision 5)
     source_cases: [103]
 
-  - iri: ResponsibleChargeEngineer
+  - iri: ResponsibleChargeEngineerRole
     label: Responsible Charge Engineer
     parent: EngineerRole
     definition: >-
@@ -84,7 +84,7 @@ canonical:
     source_cases: [7, 120]
     # NOTE: "Responsible Charge Verification Engineer" is decomposed below (verification is an activity/state).
 
-  - iri: ForensicExpertWitnessEngineer
+  - iri: ForensicExpertWitnessEngineerRole
     label: Forensic Expert Witness Engineer
     parent: EngineerRole
     definition: >-
@@ -92,16 +92,16 @@ canonical:
     status: canonical
     source_cases: [60]
 
-  - iri: ConsultantEngineer
+  - iri: ConsultantEngineerRole
     label: Consultant Engineer
     parent: ConsultantRole
     definition: >-
       An engineer engaged in a consulting/advisory capacity to a client.
     status: canonical
     source_cases: [71, 103]
-    # "Conflicted Consultant" (103) -> ConsultantEngineer + ConflictOfInterestState (see do_not_mint).
+    # "Conflicted Consultant" (103) -> ConsultantEngineerRole + ConflictOfInterestState (see do_not_mint).
 
-  - iri: GeotechnicalEngineer
+  - iri: GeotechnicalEngineerRole
     label: Geotechnical Engineer
     parent: EngineerRole
     definition: >-
@@ -111,18 +111,18 @@ canonical:
     status: canonical                         # discipline rule: real practice area -> canonical class
     source_cases: [71]
 
-  - iri: NonEngineerExpertWitness
+  - iri: NonEngineerExpertWitnessRole
     label: Non-Engineer Expert Witness
     parent: ProviderClientRole
     definition: >-
-      An expert witness who is not an engineer; kept distinct from ForensicExpertWitnessEngineer because
+      An expert witness who is not an engineer; kept distinct from ForensicExpertWitnessEngineerRole because
       the engineer-vs-non-engineer distinction carries different professional obligations.
     alt_labels:
       - Non-Engineering Expert Witness
     status: canonical
     source_cases: [60]
 
-  - iri: MentorEngineer
+  - iri: MentorEngineerRole
     label: Mentor Engineer
     parent: EngineerRole
     definition: >-
@@ -133,7 +133,7 @@ canonical:
     source_cases: [7]
     curate: >-
       OPEN CALL: the "retired" status is arguably a State (MentorUnavailabilityState already exists in
-      case 7). Keep MentorEngineer as the role + the availability State, or drop the role entirely?
+      case 7). Keep MentorEngineerRole as the role + the availability State, or drop the role entirely?
 
   # --- relational / participant roles (counterparty kinds; context is a relation or State) ---
   - iri: ProviderClientRole
@@ -210,24 +210,24 @@ do_not_mint:
   # --- dual-capacity / conflict (the 15-class Dual* family collapses to ONE state) ---
   - label: Dual Capacity Engineer
     decompose:
-      role: MunicipalEngineer
+      role: MunicipalEngineerRole
       state: { iri: DualCapacityState, via: "core#affects" }
     source_cases: [103]
   - label: Conflicted Consultant
     decompose:
-      role: ConsultantEngineer
+      role: ConsultantEngineerRole
       state: { iri: ConflictOfInterestState, via: "core#affects" }
     source_cases: [103]
   - label: Retainer Engineer
     decompose:
-      role: MunicipalEngineer
+      role: MunicipalEngineerRole
       relation: { employedBy: Agent, note: "part-time retainer engagement -> employedBy + otherAttribute literal" }
     source_cases: [103]
 
   # --- "obligated/duty" roles -> role + Obligation (the duty is not a role kind) ---
   - label: AI Disclosure Obligated Engineer
     decompose:
-      role: EnvironmentalEngineer
+      role: EnvironmentalEngineerRole
       obligation: { iri: AIToolDisclosureObligation, via: "core#obligatedParty" }
     source_cases: [7]
   - label: Confidentiality Bound Engineer
@@ -244,7 +244,7 @@ do_not_mint:
   # --- conduct/behavioral-state roles -> role + transient-conduct State ---
   - label: Incomplete Document Submitting Engineer
     decompose:
-      role: DesignEngineer
+      role: DesignEngineerRole
       state: { iri: IncompleteSubmissionState, via: "core#affects" }
     source_cases: [85]
   - label: Selective Reporting Engineer
@@ -270,7 +270,7 @@ do_not_mint:
     source_cases: [85]
   - label: Responsible Charge Verification Engineer
     decompose:
-      role: ResponsibleChargeEngineer
+      role: ResponsibleChargeEngineerRole
       state: { iri: VerificationActivityState, via: "core#affects" }
     source_cases: [7]
 
@@ -291,7 +291,7 @@ do_not_mint:
     decompose: { role: EngineerRole, obligation: { iri: CompetenceVerificationObligation } }
     source_cases: [85]
   - label: Litigation Support Test Engineer
-    decompose: { role: ForensicExpertWitnessEngineer, note: "litigation-support testing = activity context" }
+    decompose: { role: ForensicExpertWitnessEngineerRole, note: "litigation-support testing = activity context" }
     source_cases: [71]
   - label: Federal Approval Engineer
     decompose: { role: EngineerRole, note: "federal-approval interaction = Action/relation to a Regulatory Authority agent" }
@@ -312,12 +312,12 @@ do_not_mint:
 # ---------------------------------------------------------------------------
 # 3. CURATE -- RESOLVED per the discipline rule (real disciplines = classes; activity/conduct = context)
 # ---------------------------------------------------------------------------
-# - Non-Engineering Expert Witness -> RESOLVED: NonEngineerExpertWitness canonical (kept distinct from
+# - Non-Engineering Expert Witness -> RESOLVED: NonEngineerExpertWitnessRole canonical (kept distinct from
 #   the engineer expert witness; the engineer/non-engineer split carries different obligations).
-# - Geotechnical Observation Consultant -> RESOLVED: GeotechnicalEngineer canonical (geotechnical is a
+# - Geotechnical Observation Consultant -> RESOLVED: GeotechnicalEngineerRole canonical (geotechnical is a
 #   real discipline); "observation" is activity context.
 # - Peer Review Engineer -> RESOLVED: decompose to EngineerRole + a peer-review Action (peer review is an
 #   activity, not a discipline); see do_not_mint.
-# - Retired Mentor Engineer -> MentorEngineer (provisional) + a retirement/availability State; confirm at
-#   full-set curation whether MentorEngineer is worth keeping as a role at all.
+# - Retired Mentor Engineer -> MentorEngineerRole (provisional) + a retirement/availability State; confirm at
+#   full-set curation whether MentorEngineerRole is worth keeping as a role at all.
 curate: []   # no open role calls; remaining nuance handled at full-set curation
