@@ -350,14 +350,60 @@ def _shape_attr_schema(shape_name):
     return attrs
 
 
-def _role_attr_schema():
-    """Per-bearer (individual) role attributes -- non-definitional."""
-    return _shape_attr_schema("RolePropertyShape")
+def _shape_target_map():
+    """All descriptive NodeShapes in core-shapes.ttl -> their targetClass URI. Cached on file mtime
+    (shares the shape cache). Used to pick the shapes that apply along an entity's class chain."""
+    from pathlib import Path
+    shapes = Path(__file__).resolve().parents[2] / "validation" / "shapes" / "core-shapes.ttl"
+    try:
+        mtime = shapes.stat().st_mtime
+    except OSError:
+        return {}
+    cache = _ROLE_ATTR_SCHEMA_CACHE
+    if cache["mtime"] != mtime:
+        cache.update(mtime=mtime, shapes={})
+    if "__targets__" in cache["shapes"]:
+        return cache["shapes"]["__targets__"]
+    SH = rdflib.Namespace("http://www.w3.org/ns/shacl#")
+    out = {}
+    try:
+        g = rdflib.Graph()
+        g.parse(str(shapes), format="turtle")
+        for s in g.subjects(rdflib.RDF.type, SH.NodeShape):
+            tgt = next(g.objects(s, SH.targetClass), None)
+            if tgt is not None:
+                out[str(s).rsplit("#", 1)[-1]] = str(tgt)
+    except Exception:
+        out = {}
+    cache["shapes"]["__targets__"] = out
+    return out
 
 
-def _role_definition_schema():
-    """Role-TYPE definitional attributes (the literature-grounded class schema)."""
-    return _shape_attr_schema("RoleDefinitionShape")
+def _role_shape_schemas(ancestor_list):
+    """The role property schema for a class = the UNION of the SHACL shapes whose targetClass is in the
+    class chain (general -> specific): a base Role gets RoleDefinitionShape; a ProfessionalRole also gets
+    ProfessionalRoleDefinitionShape + ProfessionalRolePropertyShape; a StakeholderRole only the universal
+    one. *DefinitionShape -> definitional (type-level), *PropertyShape -> bearer (individual). Returns
+    (definitional, bearer)."""
+    targets = _shape_target_map()
+    by_target = {}
+    for name, tgt in targets.items():
+        by_target.setdefault(tgt, []).append(name)
+    definitional, bearer = [], []
+    seen_d, seen_b = set(), set()
+    for cls in reversed(ancestor_list):  # general (Role) -> specific (ProfessionalRole, ...)
+        for name in sorted(by_target.get(cls, [])):
+            if name.endswith("DefinitionShape"):
+                tier, seen = definitional, seen_d
+            elif name.endswith("PropertyShape"):
+                tier, seen = bearer, seen_b
+            else:
+                continue
+            for a in _shape_attr_schema(name):
+                if a["uri"] not in seen:
+                    seen.add(a["uri"])
+                    tier.append(a)
+    return definitional, bearer
 
 
 def _class_ancestor_uris(entity, cap=16):
@@ -489,7 +535,8 @@ def class_property_schema(entity):
         return None
     # Drop the universal/abstract tops: properties domained to them (extraction provenance,
     # over-broad structural predicates) apply to everything, not specifically to this class.
-    ancestor_set = set(_class_ancestor_uris(entity)) - _UNIVERSAL_TOP_URIS
+    anc_list = _class_ancestor_uris(entity)
+    ancestor_set = set(anc_list) - _UNIVERSAL_TOP_URIS
 
     prop_rows = db.session.execute(
         select(OntologyEntity).where(
@@ -524,8 +571,10 @@ def class_property_schema(entity):
     domain_props.sort(key=lambda x: (not x["on_self"], x["name"].lower()))
 
     is_role = _CORE_ROLE_URI in ancestor_set
-    role_definition = _role_definition_schema() if is_role else []
-    role_attrs = _role_attr_schema() if is_role else []
+    if is_role:
+        role_definition, role_attrs = _role_shape_schemas(anc_list)
+    else:
+        role_definition, role_attrs = [], []
 
     if not (domain_props or role_attrs or role_definition):
         return None

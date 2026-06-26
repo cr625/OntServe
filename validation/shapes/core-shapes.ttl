@@ -68,24 +68,37 @@ pcsh:NoOwlNothingShape
         """ ;
     ] .
 
-# RoleDefinitionShape: the literature-grounded definitional schema of a role TYPE (the R
-# component's class-level attributes). These individuate the role per the professional-ethics
-# literature (Dennis 2016 obligation-generation; Kong 2020 relationship categories + identity
-# virtues; Oakley & Cocking 2001 teleology/scope). Descriptive only (sh:path/sh:name/
-# sh:description/sh:order) so it adds no validation. Values are carried by the role CLASS (the
-# type), distinct from RolePropertyShape below (per-occupant bearer data). The extraction
-# prompt's class attributes derive from this shape (hybrid: ontology owns the definition).
+# RoleDefinitionShape: the UNIVERSAL definitional schema of any role TYPE (the R component's
+# class-level attributes that every role has, professional or not). Trimmed 2026-06-26: the
+# professional-role-specific definitional attrs (scope, qualifications, virtues, generated obligations,
+# adhered principles) moved to ProfessionalRoleDefinitionShape, and the bearer data moved to
+# ProfessionalRolePropertyShape, because a participant/stakeholder role (e.g. an affected citizen) has
+# none of those. Descriptive only (sh:path/sh:name/sh:description/sh:order); no validation. Values are
+# carried by the role CLASS. The extraction schema for a role is the UNION of the shapes along its class
+# chain (hybrid: ontology owns the definition).
 pcsh:RoleDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Role ;
-    rdfs:label "Role definition schema (type-level, descriptive)" ;
-    rdfs:comment "What a role TYPE is individuated by, per the cited literature: distinguishing features, professional scope, typical qualifications, associated virtues, audience-relationship category, and the obligations it generates. Values are asserted on the role CLASS, not the bearer." ;
+    rdfs:label "Role definition schema (universal, type-level, descriptive)" ;
+    rdfs:comment "What ANY role TYPE is individuated by, universal across professional and participant roles: its distinguishing features and its audience-relationship category. Professional-specific definitional attrs are on ProfessionalRoleDefinitionShape; bearer data on ProfessionalRolePropertyShape." ;
     sh:property [ sh:path core:distinguishingFeatures ; sh:name "distinguishing features" ; sh:description "What sets this role type apart from related roles (its distinctive ends/practices)." ; sh:order 1 ] ;
-    sh:property [ sh:path core:professionalScope ;      sh:name "professional scope" ;      sh:description "Areas of responsibility and authority of the role type (Oakley & Cocking 2001)." ; sh:order 2 ] ;
-    sh:property [ sh:path core:typicalQualifications ;  sh:name "typical qualifications" ;  sh:description "Generic credentials the role TYPE requires (a descriptor of the type, not an individual's license)." ; sh:order 3 ] ;
-    sh:property [ sh:path core:associatedVirtues ;      sh:name "associated virtues" ;      sh:description "Virtues/dispositions characteristic of the role type (Kong 2020 identity virtues; Oakley & Cocking 2001)." ; sh:order 4 ] ;
-    sh:property [ sh:path proeth:roleCategory ;         sh:name "role category" ;           sh:description "The role's audience-relationship category (the four Kong 2020 categories): provider_client, professional_peer, employer_relationship, public_responsibility." ; sh:order 5 ] ;
-    sh:property [ sh:path core:hasObligation ;          sh:name "generated obligations" ;   sh:description "The obligations the role generates, via the R->P->O hasObligation edges (obligation-generation; Dennis 2016)." ; sh:order 6 ] .
+    sh:property [ sh:path proeth:roleCategory ;         sh:name "role category" ;           sh:description "The role's audience-relationship category (the four Kong 2020 categories plus participant/stakeholder): provider_client, professional_peer, employer_relationship, public_responsibility, participant, stakeholder." ; sh:order 2 ] .
+
+# ProfessionalRoleDefinitionShape: the PROFESSIONAL-role-specific definitional attrs (type-level), on top
+# of the universal RoleDefinitionShape. These individuate a professional role (Engineer, Architect, ...),
+# not a participant/stakeholder role: professional scope, the qualifications the type requires, the virtues
+# of the profession, and the R->P->O the type carries (the obligations it generates + the principles it
+# adheres to). Targets proeth:ProfessionalRole so participant/stakeholder roles do not offer them.
+pcsh:ProfessionalRoleDefinitionShape
+    a sh:NodeShape ;
+    sh:targetClass proeth:ProfessionalRole ;
+    rdfs:label "Professional-role definition schema (type-level, descriptive)" ;
+    rdfs:comment "Professional-role-specific definitional attributes, layered on the universal RoleDefinitionShape. A participant/stakeholder role (e.g. an affected citizen) carries none of these." ;
+    sh:property [ sh:path core:professionalScope ;     sh:name "professional scope" ;      sh:description "Areas of responsibility and authority of the role type (Oakley & Cocking 2001)." ; sh:order 1 ] ;
+    sh:property [ sh:path core:typicalQualifications ; sh:name "typical qualifications" ;  sh:description "Generic credentials the role TYPE requires (a descriptor of the type, not an individual's license)." ; sh:order 2 ] ;
+    sh:property [ sh:path core:associatedVirtues ;     sh:name "associated virtues" ;      sh:description "Virtues/dispositions characteristic of the professional role type (Kong 2020 identity virtues; Oakley & Cocking 2001)." ; sh:order 3 ] ;
+    sh:property [ sh:path core:hasObligation ;         sh:name "generated obligations" ;   sh:description "The obligations the role generates, via the R->P->O hasObligation edges (obligation-generation; Dennis 2016). Range: Obligation." ; sh:order 4 ] ;
+    sh:property [ sh:path core:adheresToPrinciple ;    sh:name "adhered principles" ;      sh:description "The principles the role serves/adheres to, via the R->P->O adheresToPrinciple edges (the P side of the triple; sibling of generated obligations). Range: Principle." ; sh:order 5 ] .
 
 # RolePropertyShape: the controlled property SCHEMA for professional roles -- a
 # machine-visible declaration of which attributes a well-formed role-bearing individual
@@ -103,11 +116,11 @@ pcsh:RoleDefinitionShape
 # this shape carries the class association safely. Turn any attribute into a real
 # closed-world constraint later by adding sh:minCount / sh:datatype / sh:in here (the
 # controlled-property-vocabulary work item) -- the values are still asserted on the individual.
-pcsh:RolePropertyShape
+pcsh:ProfessionalRolePropertyShape
     a sh:NodeShape ;
-    sh:targetClass core:Role ;
-    rdfs:label "Role-bearer attributes (individual data, non-definitional)" ;
-    rdfs:comment "Per-occupant data a role-bearing INDIVIDUAL may have (license, specialty, employer, technical background). Descriptive only; these do NOT define the role type (cf. Davis 1991: license is not role-defining) -- the type-level definition is RoleDefinitionShape. Values are asserted on the individual. Tightened 2026-06-25: dropped roleNature/roleClass (extraction provenance, not bearer data; reclassify to PROV-O) and jurisdiction/registrationStatus/roleInOrganization (weak controlled-vocab; captured via otherAttribute overflow when actually present)." ;
+    sh:targetClass proeth:ProfessionalRole ;
+    rdfs:label "Professional-role-bearer attributes (individual data, non-definitional)" ;
+    rdfs:comment "Per-occupant data a PROFESSIONAL role-bearing INDIVIDUAL may have (license, specialty, employer, technical background). Descriptive only; these do NOT define the role type (cf. Davis 1991: license is not role-defining). Retargeted 2026-06-26 from core:Role to proeth:ProfessionalRole: a participant/stakeholder role (an affected citizen) has none of these; the universal role schema is RoleDefinitionShape. Values are asserted on the individual. Tightened 2026-06-25: dropped roleNature/roleClass (extraction provenance, not bearer data; reclassify to PROV-O) and jurisdiction/registrationStatus/roleInOrganization (weak controlled-vocab; captured via otherAttribute overflow when actually present)." ;
     sh:property [ sh:path proeth:hasLicense ;          sh:name "license" ;              sh:description "Professional license / licensure." ;                      sh:order 1 ] ;
     sh:property [ sh:path proeth:hasSpecialty ;        sh:name "specialty" ;            sh:description "Area of specialisation." ;                                sh:order 2 ] ;
     sh:property [ sh:path proeth:experienceLevel ;     sh:name "experience level" ;     sh:description "Professional experience." ;                               sh:order 3 ] ;
