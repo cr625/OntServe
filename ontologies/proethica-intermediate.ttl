@@ -1757,22 +1757,34 @@ proeth:requiresCapability a owl:ObjectProperty ;
     rdfs:label "archetype axis"@en ;
     rdfs:comment "Role-archetype axis marker: 'occupational' or 'relational'. Drives data-driven occupational placement; see the occupational resolver."@en .
 
+# specializationAxis is a finer cut than archetypeAxis for occupational role leaves under an
+# archetype head (e.g. EngineerRole): "discipline" = a branch of the profession (CivilEngineerRole,
+# crosswalked to an IFC discipline role); "function" = a cross-discipline job function
+# (QualityEngineerRole, applicable across all disciplines). The two axes are orthogonal.
+:specializationAxis rdf:type owl:AnnotationProperty ;
+    rdfs:label "specialization axis"@en ;
+    rdfs:comment "Role specialization axis: 'discipline' (a branch of the profession) or 'function' (a cross-discipline job function). Finer than archetypeAxis; applies to occupational role leaves under an archetype head."@en .
+
 # Engineer specializations (under :EngineerRole, itself under :ProfessionalRole)
 :CivilEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Civil Engineer Role"@en ; skos:exactMatch ifcrole:CivilEngineer ;
     :archetypeAxis "occupational" ;
+    :specializationAxis "discipline" ;
     rdfs:comment "Engineer specializing in infrastructure and the built environment."@en .
 :StructuralEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Structural Engineer Role"@en ; skos:exactMatch ifcrole:StructuralEngineer ;
     :archetypeAxis "occupational" ;
+    :specializationAxis "discipline" ;
     rdfs:comment "Engineer specializing in load-bearing structure and structural integrity."@en .
 :MechanicalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Mechanical Engineer Role"@en ; skos:exactMatch ifcrole:MechanicalEngineer ;
     :archetypeAxis "occupational" ;
+    :specializationAxis "discipline" ;
     rdfs:comment "Engineer specializing in mechanical systems."@en .
 :ElectricalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Electrical Engineer Role"@en ; skos:exactMatch ifcrole:ElectricalEngineer ;
     :archetypeAxis "occupational" ;
+    :specializationAxis "discipline" ;
     rdfs:comment "Engineer specializing in electrical systems and power."@en .
 
 # Obligation-bearing occupational heads (under :ProfessionalRole)

@@ -196,9 +196,10 @@ proethica:engineering_standards a owl:Ontology ;
     skos:definition "Required safety analysis process for risk identification",
         "The systematic identification and analysis of potential hazards according to applicable safety standards" .
 
-<http://proethica.org/ontology/engineering_standards#QualityEngineer> a owl:Class ;
+<http://proethica.org/ontology/engineering_standards#QualityEngineerRole> a owl:Class ;
     rdfs:subClassOf ns1:EngineerRole ;
-    rdfs:label "Quality Engineer" ;
+    rdfs:label "Quality Engineer Role" ;
+    ns1:specializationAxis "function" ;
     ns1:appliesToDomain "all_engineering" ;
     ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#MaintainQualityDocumentation> ;
     rdfs:comment "Role focused on quality assurance and continuous improvement" ;
@@ -214,9 +215,10 @@ proethica:engineering_standards a owl:Ontology ;
     skos:definition "Binding legal constraint with potential civil and criminal liability",
         "Legal requirement to comply with applicable technical standards as mandated by regulatory authorities" .
 
-<http://proethica.org/ontology/engineering_standards#SafetyEngineer> a owl:Class ;
+<http://proethica.org/ontology/engineering_standards#SafetyEngineerRole> a owl:Class ;
     rdfs:subClassOf ns1:EngineerRole ;
-    rdfs:label "Safety Engineer" ;
+    rdfs:label "Safety Engineer Role" ;
+    ns1:specializationAxis "function" ;
     ns1:appliesToDomain "all_engineering" ;
     ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#ComplyWithSafetyStandards>,
         <http://proethica.org/ontology/engineering_standards#ConductRiskAssessment> ;
@@ -235,9 +237,10 @@ proethica:engineering_standards a owl:Ontology ;
     skos:definition "Quantitative safety requirements with verification obligations",
         "Technical requirement to achieve specified Safety Integrity Levels (SIL/ASIL) based on risk assessment" .
 
-<http://proethica.org/ontology/engineering_standards#StandardsEngineer> a owl:Class ;
+<http://proethica.org/ontology/engineering_standards#StandardsEngineerRole> a owl:Class ;
     rdfs:subClassOf ns1:EngineerRole ;
-    rdfs:label "Standards Engineer" ;
+    rdfs:label "Standards Engineer Role" ;
+    ns1:specializationAxis "function" ;
     ns1:appliesToDomain "all_engineering" ;
     ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#ComplyWithSafetyStandards>,
         <http://proethica.org/ontology/engineering_standards#MaintainQualityDocumentation> ;
