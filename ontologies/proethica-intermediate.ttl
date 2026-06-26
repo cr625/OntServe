@@ -175,36 +175,48 @@
 :PeerReviewCooperationPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Peer Review Cooperation Principle"@en ;
     :specializationAxis "domain" ;
+    proeth:nspeReference "Professional Obligation III.7.a" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.7.a" ;
     skos:altLabel "confidential peer review cooperation principle"@en, "peer review notification principle"@en ;
     rdfs:comment "The value that an engineer cooperates with the peer review of another's work; the confidentiality of the reviewed material is a State context, not part of the value."@en .
 
 :LoyaltyPrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
     rdfs:label "Loyalty Principle"@en ;
     :specializationAxis "relational" ;
+    proeth:nspeReference "Rule of Practice II.4" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.4" ;
     skos:altLabel "faithful agent loyalty principle"@en, "loyalty"@en ;
     rdfs:comment "The value that a professional acts as a faithful agent or trustee for the client or employer in professional matters."@en .
 
 :ObjectivityPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Objectivity Principle"@en ;
     :specializationAxis "virtue" ;
+    proeth:nspeReference "Rule of Practice II.3.a" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.a" ;
     skos:altLabel "adversarial context objectivity principle"@en, "adversarial engagement objectivity principle"@en, "dual role objectivity principle"@en, "report language fairness principle"@en ;
     rdfs:comment "The value that professional judgments and opinions are issued objectively and truthfully, free from bias or undue influence."@en .
 
 :HonestyPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Honesty Principle"@en ;
     :specializationAxis "virtue" ;
+    proeth:nspeReference "Fundamental Canon 5" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Fundamental Canon 5" ;
     skos:altLabel "fact-based opinion principle"@en, "scope of engagement honesty principle"@en, "deceptive submission prohibition principle"@en, "credential misrepresentation prohibition principle"@en ;
     rdfs:comment "The value that a professional is truthful and avoids deception or misrepresentation in professional dealings."@en .
 
 :ConflictOfInterestDisclosurePrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
     rdfs:label "Conflict of Interest Disclosure Principle"@en ;
     :specializationAxis "relational" ;
+    proeth:nspeReference "Rule of Practice II.4.a" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.4.a" ;
     skos:altLabel "advisory self-interest disclosure principle"@en, "divided loyalty prohibition principle"@en, "client consent conflict waiver principle"@en ;
     rdfs:comment "The value that a professional discloses, and where required avoids, conflicts of interest affecting professional judgment."@en .
 
 :ResponsibleChargePrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Responsible Charge Principle"@en ;
     :specializationAxis "domain" ;
+    proeth:nspeReference "Rule of Practice II.2.b" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.2.b" ;
     skos:altLabel "responsible charge active engagement principle"@en, "supervisory control adequacy principle"@en, "professional sealing responsibility principle"@en ;
     rdfs:comment "The value that an engineer in responsible charge exercises actual direct control and personal supervision over the work for which responsibility is taken."@en .
 
@@ -231,18 +243,24 @@
 :ProfessionalAccountabilityPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Professional Accountability Principle"@en ;
     :specializationAxis "virtue" ;
+    proeth:nspeReference "Professional Obligation III.8" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.8" ;
     skos:altLabel "error acknowledgment principle"@en, "professional accountability"@en ;
     rdfs:comment "The value that a professional takes personal responsibility for, and acknowledges error in, work performed under their authority."@en .
 
 :CorrectiveActionMonitoringPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Corrective Action Monitoring Principle"@en ;
     :specializationAxis "domain" ;
+    proeth:nspeReference "Rule of Practice II.1.a" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.1.a" ;
     skos:altLabel "post-engagement observation duty principle"@en ;
     rdfs:comment "The value that a professional monitors a hazardous or deficient condition through to the completion of corrective action."@en .
 
 :ExpertiseCalibratedDisclosurePrinciple rdf:type owl:Class ; rdfs:subClassOf :FundamentalEthicalPrinciple ;
     rdfs:label "Expertise-Calibrated Disclosure Principle"@en ;
     :specializationAxis "fundamental" ;
+    proeth:nspeReference "Rule of Practice II.3.b" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.b" ;
     rdfs:comment "The value that the scope and certainty of professional statements is calibrated to the professional's actual expertise in the matter."@en .
 
 :NonEngineeringExpertServicesPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
@@ -254,18 +272,33 @@
 :JurisdictionalLicensureCompliancePrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Jurisdictional Licensure Compliance Principle"@en ;
     :specializationAxis "domain" ;
+    proeth:nspeReference "Professional Obligation III.8.a" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.8.a" ;
     skos:altLabel "engineering title invocation principle"@en ;
     rdfs:comment "The value that a professional practices only within the jurisdictions and license scope for which the professional is authorized."@en .
 
 :SelectiveReportingProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Selective Reporting Prohibition Principle"@en ;
     :specializationAxis "virtue" ;
+    proeth:nspeReference "Rule of Practice II.3.a" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.a" ;
     skos:altLabel "technical completeness principle"@en, "client disservice by incompleteness principle"@en, "expert fact gathering diligence principle"@en ;
     rdfs:comment "The value that a professional reports findings completely and does not omit material facts that qualify or contradict a favored conclusion."@en .
+
+# U.S. Supreme Court decision recording the revision (rescission) of an NSPE provision.
+:NSPEvUnitedStates1978 rdf:type owl:NamedIndividual ;
+    rdfs:label "National Society of Professional Engineers v. United States (1978)"@en ;
+    dcterms:source <https://supreme.justia.com/cases/federal/us/435/679/> ;
+    rdfs:comment "U.S. Supreme Court, 435 U.S. 679 (1978): held the NSPE Code ban on competitive bidding an unreasonable restraint of trade under the Sherman Act; the provision was rescinded by court order. Basis for the rescinded grounding of FreeServicesProhibitionPrinciple."@en .
 
 :FreeServicesProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
     rdfs:label "Free Services Prohibition Principle"@en ;
     :specializationAxis "relational" ;
+    proeth:revisionStatus "rescinded" ;
+    proeth:rescindedBy :NSPEvUnitedStates1978 ;
+    proeth:rescindedDate "1978" ;
+    proeth:groundingStatus "Rescinded NSPE basis: derived from the Code former competitive-bidding prohibition, struck down as an antitrust restraint of trade (see :NSPEvUnitedStates1978); retained as a historical/contested norm, not a current code duty. Realizes McLaren Principle Revision." ;
+    dcterms:source <https://supreme.justia.com/cases/federal/us/435/679/> ;
     rdfs:comment "The value that a professional does not offer or provide services without compensation in a manner that undermines fair competition or professional independence."@en .
 
 :SchedulePressureResistancePrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
@@ -277,12 +310,16 @@
 :WhistleblowerPersonalConsciencePrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Whistleblower Personal Conscience Principle"@en ;
     :specializationAxis "virtue" ;
+    proeth:nspeReference "Rule of Practice II.1.f" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.1.f" ;
     proeth:groundingStatus "Partially derived: the reporting duty grounds to NSPE II.1.f / II.1.a; the personal-conscience surplus beyond what the rules compel is extensional/derived." ;
     rdfs:comment "The value that a professional may act on personal conscience to disclose conduct that endangers the public, beyond the minimum the rules compel."@en .
 
 :EvolvingStandardsResponsivenessPrinciple rdf:type owl:Class ; rdfs:subClassOf :FundamentalEthicalPrinciple ;
     rdfs:label "Evolving Standards Responsiveness Principle"@en ;
     :specializationAxis "fundamental" ;
+    proeth:nspeReference "Professional Obligation III.2.e" ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.2.e" ;
     rdfs:comment "The value that a professional keeps current with and applies evolving technical and ethical standards of practice."@en .
 
 :MentorDependencyTransitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
