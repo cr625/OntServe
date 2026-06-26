@@ -113,8 +113,11 @@ def populate(entity_type: str | None, batch_size: int, dry_run: bool, force: boo
                 logger.info("  [dry-run sample] %s -> %s", entity.uri, preview[:120])
             return total
 
-        logger.info("Loading sentence-transformer model all-MiniLM-L6-v2 ...")
-        model = SentenceTransformer("all-MiniLM-L6-v2")
+        # Default to CPU: this box's CUDA reports available but cannot run kernels
+        # (cudaErrorNoKernelImageForDevice) and would fail silently. Override with EMBEDDINGS_DEVICE.
+        device = os.environ.get("EMBEDDINGS_DEVICE", "cpu")
+        logger.info("Loading sentence-transformer model all-MiniLM-L6-v2 on %s ...", device)
+        model = SentenceTransformer("all-MiniLM-L6-v2", device=device)
         logger.info("Model loaded.")
 
         # Stream in batches by primary key to keep memory bounded.

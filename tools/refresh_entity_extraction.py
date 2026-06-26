@@ -131,6 +131,16 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
         
         logger.info(f"Using version {current_version.version_number} created at {current_version.created_at}")
         
+        # Capture existing embeddings (uri -> content_hash, embedding) BEFORE the delete, so the
+        # delete/re-insert below does not blank them. The embedding text is "{label}: {comment}" and
+        # content_hash is over (uri, label, comment), so an unchanged content_hash means the embedding
+        # is still valid; changed/new entities keep NULL (populate_entity_embeddings fills those).
+        prev_embeddings = {
+            e.uri: (e.content_hash, e.embedding)
+            for e in OntologyEntity.query.filter_by(ontology_id=ontology.id).all()
+        }
+        n_prev_emb = sum(1 for _ch, emb in prev_embeddings.values() if emb is not None)
+
         # Clear existing entities for this ontology
         deleted_count = OntologyEntity.query.filter_by(ontology_id=ontology.id).delete()
         logger.info(f"Cleared {deleted_count} existing entities")
@@ -348,6 +358,18 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
         try:
             db.session.commit()
             logger.info(f"Successfully updated {entities_added} entities for ontology '{ontology_name}'")
+
+            # Restore embeddings for entities whose (uri, content_hash) is unchanged, so a reload
+            # preserves embeddings instead of blanking them. Changed/new entities stay NULL.
+            if n_prev_emb:
+                restored = 0
+                for ent in OntologyEntity.query.filter_by(ontology_id=ontology.id).all():
+                    prev = prev_embeddings.get(ent.uri)
+                    if prev and prev[1] is not None and prev[0] == ent.content_hash:
+                        ent.embedding = prev[1]
+                        restored += 1
+                db.session.commit()
+                logger.info(f"Preserved {restored}/{n_prev_emb} embeddings across reload")
             
             # Update the MCP server cache timestamp
             ontology.updated_at = datetime.now()
