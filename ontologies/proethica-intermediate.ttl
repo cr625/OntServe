@@ -58,7 +58,7 @@
     rdfs:label "Fundamental Ethical Principle"@en ;
     iao:0000115 "A universal moral foundation that serves as the highest-level abstraction in professional ethics, requiring extensive interpretation through concrete cases (BFO: generically dependent continuant)"@en ;
     skos:definition "According to McLaren (2003), fundamental principles like public welfare and respect for persons cannot be applied through formal deduction alone but require extensional definition through landmark ethics cases and professional code applications. These principles function as constitutional-like foundations (Taddeo et al. 2024) that mediate moral ideals into professional practice (Hallamaa & Kalliokoski 2022)."@en ;
-    dcterms:source <https://doi.org/10.1023/A:1024195425598> , # McLaren 2003
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
                    <https://doi.org/10.1007/s00146-024-01870-x> , # Taddeo et al. 2024
                    <https://doi.org/10.1080/08989621.2022.2054267> ; # Hallamaa & Kalliokoski 2022
     rdfs:comment "Examples: Public Welfare Paramount, Respect for Persons, Justice, Beneficence. These require extensive interpretation and balancing in specific contexts."@en .
@@ -81,7 +81,7 @@
     rdfs:label "Relational Principle"@en ;
     iao:0000115 "A principle governing professional relationships and establishing frameworks for trust and stakeholder interactions (BFO: generically dependent continuant)"@en ;
     skos:definition "Relational principles establish frameworks for managing professional relationships and stakeholder trust. Following McLaren's extensional approach, these principles gain meaning through precedents from client-professional disputes and resolutions, defining how professionals navigate competing interests and maintain trustworthy relationships."@en ;
-    dcterms:source <https://doi.org/10.1023/A:1024195425598> , # McLaren 2003
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
                    <https://doi.org/10.1080/10508422.2016.1155099> ; # Dennis et al. 2016
     rdfs:comment "Examples: Confidentiality, Loyalty, Fairness, Transparency, Respect for Autonomy. These govern interpersonal professional dynamics."@en .
 
@@ -104,7 +104,7 @@
     rdfs:label "Public Welfare Principle"@en ;
     iao:0000115 "The fundamental principle that public safety, health, and welfare must be held paramount in professional practice (BFO: generically dependent continuant)"@en ;
     skos:definition "The public welfare principle, as articulated in NSPE Fundamental Canon 1, requires professionals to hold paramount the safety, health, and welfare of the public. This principle exemplifies McLaren's challenge of operationalizing abstract guidance - 'hold paramount' gains meaning only through NSPE case applications and precedents like the Challenger disaster."@en ;
-    dcterms:source <https://doi.org/10.1023/A:1024195425598> , # McLaren 2003
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
                    "NSPE Code of Ethics Fundamental Canon 1" ;
     proeth:nspeReference "Fundamental Canon 1" ;
     proeth:extensionalCases "NSPE BER Case 92-6", "Challenger Disaster", "Hyatt Regency Walkway Collapse" ;
@@ -118,8 +118,8 @@
     iao:0000115 "The professional virtue principle of maintaining honesty, truthfulness, and ethical consistency in professional practice (BFO: generically dependent continuant)"@en ;
     skos:definition "Professional integrity requires contextual interpretation through cases (Kong et al. 2020) and manifests differently across professional contexts. It encompasses honesty in professional communications, truthfulness in representations, and consistency between professional values and actions."@en ;
     dcterms:source <https://doi.org/10.1007/s10676-020-09538-y> , # Kong et al. 2020
-                   "NSPE Code of Ethics II.3" ;
-    proeth:nspeReference "Rule of Practice II.3" ;
+                   "NSPE Code of Ethics III.1" ;
+    proeth:nspeReference "Professional Obligation III.1" ;
     rdfs:comment "Central to professional identity formation and trust maintenance in professional relationships."@en .
 
 :CompetencePrinciple rdf:type owl:Class ;
@@ -142,7 +142,7 @@
     iao:0000115 "The relational principle protecting client information and maintaining trust in professional relationships (BFO: generically dependent continuant)"@en ;
     skos:definition "Confidentiality establishes trust frameworks in professional relationships by protecting client information from unauthorized disclosure. This principle requires balancing through precedents when it conflicts with public welfare or legal obligations."@en ;
     dcterms:source "NSPE Code of Ethics II.1.c" ,
-                   <https://doi.org/10.1023/A:1024195425598> ; # McLaren 2003
+                   <https://doi.org/10.1016/S0004-3702(03)00135-8> ; # McLaren 2003
     proeth:nspeReference "Rule of Practice II.1.c" ;
     rdfs:comment "Must be balanced against public safety obligations and legal disclosure requirements."@en .
 
@@ -153,9 +153,9 @@
     rdfs:label "Transparency Principle"@en ;
     iao:0000115 "The relational principle requiring openness and disclosure in professional communications and decision-making (BFO: generically dependent continuant)"@en ;
     skos:definition "Transparency requires professionals to be open about conflicts of interest, limitations, and decision-making processes. This principle supports accountability and enables informed consent from stakeholders."@en ;
-    dcterms:source "NSPE Code of Ethics II.4" ,
+    dcterms:source "NSPE Code of Ethics II.3.a" ,
                    <https://doi.org/10.1080/10508422.2016.1155099> ; # Dennis et al. 2016
-    proeth:nspeReference "Rule of Practice II.4" ;
+    proeth:nspeReference "Rule of Practice II.3.a (composite disclosure value; also II.4.a / III.1.a)" ;
     rdfs:comment "Essential for maintaining trust and enabling stakeholder participation in professional decisions."@en .
 
 :EnvironmentalStewardshipPrinciple rdf:type owl:Class ;
@@ -211,17 +211,20 @@
 :ReviewAdequacyPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Review Adequacy Principle"@en ;
     :specializationAxis "domain" ;
+    proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     skos:altLabel "ai review adequacy principle"@en, "detailed review adequacy principle"@en ;
     rdfs:comment "The value that a professional reviews work in sufficient depth to take responsibility for its correctness before relying on or adopting it."@en .
 
 :SelfCertificationProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Self-Certification Prohibition Principle"@en ;
     :specializationAxis "domain" ;
+    proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value that a professional does not certify or approve their own work in a capacity meant to provide independent oversight."@en .
 
 :ToolSubstitutionProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Tool Substitution Prohibition Principle"@en ;
     :specializationAxis "domain" ;
+    proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     skos:altLabel "technology replacement prohibition principle"@en ;
     rdfs:comment "The value that a tool or technology does not substitute for the professional judgment and competence the work requires."@en .
 
@@ -245,6 +248,7 @@
 :NonEngineeringExpertServicesPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Non-Engineering Expert Services Principle"@en ;
     :specializationAxis "domain" ;
+    proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value governing an engineer who provides expert services outside engineering, that such services not trade on engineering authority they do not warrant."@en .
 
 :JurisdictionalLicensureCompliancePrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
@@ -267,11 +271,13 @@
 :SchedulePressureResistancePrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Schedule Pressure Resistance Principle"@en ;
     :specializationAxis "virtue" ;
+    proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value that a professional does not compromise technical or ethical standards in response to schedule or commercial pressure."@en .
 
 :WhistleblowerPersonalConsciencePrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Whistleblower Personal Conscience Principle"@en ;
     :specializationAxis "virtue" ;
+    proeth:groundingStatus "Partially derived: the reporting duty grounds to NSPE II.1.f / II.1.a; the personal-conscience surplus beyond what the rules compel is extensional/derived." ;
     rdfs:comment "The value that a professional may act on personal conscience to disclose conduct that endangers the public, beyond the minimum the rules compel."@en .
 
 :EvolvingStandardsResponsivenessPrinciple rdf:type owl:Class ; rdfs:subClassOf :FundamentalEthicalPrinciple ;
@@ -282,6 +288,7 @@
 :MentorDependencyTransitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Mentor Dependency Transition Principle"@en ;
     :specializationAxis "virtue" ;
+    proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value that an engineer develops independent competence and does not remain indefinitely dependent on a mentor for professional judgment."@en .
 
 
@@ -343,7 +350,7 @@ proeth:CommunicationAction a owl:Class ;
     skos:definition "Professional actions involving disclosure, informing, notifying stakeholders, and communicating relevant information per Tolmeijer et al. (2021) explanation requirements and McLaren (2003) transparency obligations."@en ;
     rdfs:comment "Actions involving disclosure, informing, and transparent communication"@en ;
     dcterms:references <https://doi.org/10.1007/s11948-020-00230-4> , # Tolmeijer et al. 2021
-                      <https://doi.org/10.1023/A:1024195425598> . # McLaren 2003
+                      <https://doi.org/10.1016/S0004-3702(03)00135-8> . # McLaren 2003
 
 proeth:PreventionAction a owl:Class ;
     rdfs:subClassOf proeth-core:Action ;
@@ -1142,7 +1149,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
                  owl:unionOf ( proeth-core:Principle proeth-core:Obligation proeth-core:Constraint ) ] ;
     rdfs:label "establishes"@en ;
     rdfs:comment "Relates a code provision to the ethical concepts (Principles, Obligations, Constraints) it establishes or reinforces. For example, NSPE Canon I.1 establishes the Public Safety Principle."@en ;
-    dcterms:source <https://doi.org/10.1023/A:1024195425598> . # McLaren 2003 - extensional grounding
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> . # McLaren 2003 - extensional grounding
 
 :establishedBy rdf:type owl:ObjectProperty ;
     owl:inverseOf :establishes ;
@@ -1418,7 +1425,7 @@ proeth:ConfirmedRiskWithoutAdequateSafeguardsState a owl:Class ;
     skos:definition "Documented cases from ethics review boards providing precedential knowledge and analogical reasoning patterns for similar situations, grounding abstract principles in professional reality per McLaren (2003): citing past cases provides the extensional definition of the principles." ;
     rdfs:comment "Concrete instances that exemplify principle application" ;
     skos:scopeNote "Attribution: McLaren (Ashley & McLaren 1995; McLaren 2003, SIROCCO). This is McLaren's core contribution to the Resource component." ;
-    dcterms:references <https://doi.org/10.1023/A:1024195425598> .
+    dcterms:references <https://doi.org/10.1016/S0004-3702(03)00135-8> .
 
 :ExpertInterpretation rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
@@ -1426,7 +1433,7 @@ proeth:ConfirmedRiskWithoutAdequateSafeguardsState a owl:Class ;
     skos:definition "Authoritative explanations bridging principles to specific contexts, providing nuanced understanding of how principles apply in complex situations. Per McLaren (2003), the review board's explanations of how and why codes apply operationalize the abstract principles." ;
     rdfs:comment "Professional consensus on principle application in edge cases" ;
     skos:scopeNote "Attribution: McLaren (2003) -- the expert/board explanation that links codes to facts." ;
-    dcterms:references <https://doi.org/10.1023/A:1024195425598> .
+    dcterms:references <https://doi.org/10.1016/S0004-3702(03)00135-8> .
 
 :TechnicalStandard rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
@@ -1704,7 +1711,7 @@ proeth:requiresCapability a owl:ObjectProperty ;
     rdfs:label "Ethical Question"@en ;
     iao:0000115 "A question about ethical conduct posed for Board of Ethical Review consideration, representing a specific inquiry about professional ethics requiring formal determination."@en ;
     skos:definition "Questions submitted to ethics review boards articulate specific ethical uncertainties requiring authoritative interpretation. Per McLaren (2003), these questions provide the extensional grounding for principle application, with each Board determination adding to the precedential knowledge base."@en ;
-    dcterms:source <https://doi.org/10.1023/A:1024195425598> ; # McLaren 2003
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> ; # McLaren 2003
     rdfs:comment "Extracted from case 'Questions' sections. Each question frames a specific ethical issue for Board determination. DEPRECATED: use proeth-cases:EthicalQuestion."@en ;
     skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:EthicalQuestion. Added owl:equivalentClass to bridge existing references. Case data uses the proeth-cases: version."@en .
 
@@ -1717,7 +1724,7 @@ proeth:requiresCapability a owl:ObjectProperty ;
     rdfs:label "Board Conclusion"@en ;
     iao:0000115 "The Board of Ethical Review's formal determination on an ethical question, representing authoritative professional judgment with precedential value."@en ;
     skos:definition "Board conclusions represent the culmination of ethical deliberation, providing precedential guidance for future cases. Per McLaren (2003), these determinations give concrete meaning to abstract principles through their application to specific factual contexts."@en ;
-    dcterms:source <https://doi.org/10.1023/A:1024195425598> ; # McLaren 2003
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> ; # McLaren 2003
     rdfs:comment "Extracted from case 'Conclusions' sections. Each conclusion answers a specific ethical question and establishes precedent. DEPRECATED: use proeth-cases:EthicalConclusion."@en ;
     skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:EthicalConclusion. Added owl:equivalentClass to bridge existing references."@en .
 

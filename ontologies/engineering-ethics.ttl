@@ -352,7 +352,7 @@ proeth-cases:CodeReferenceSection a owl:Class ;
     rdfs:label "Code Reference Section"@en ;
     rdfs:comment "Section type for professional code citations that provide extensional definition through accumulated precedents rather than abstract theoretical principles."@en ;
     skos:definition "Section providing specific references to NSPE Code of Ethics provisions and their interpretations through Board of Ethical Review precedents. Enables extensional definition of abstract principles like 'hold paramount public safety' through accumulated case applications rather than intensional logical specification. Essential for professional engineering analysis grounded in established standards."@en ;
-    dcterms:source <https://www.nspe.org/resources/ethics/code-ethics>, <https://doi.org/10.1016/j.artint.2003.09.005> ;
+    dcterms:source <https://www.nspe.org/resources/ethics/code-ethics>, <https://doi.org/10.1016/S0004-3702(03)00135-8> ;
     proeth-cases:hasExtractionTarget "code_provisions, precedent_interpretations, principle_applications, board_determinations" ;
     proeth-cases:analysisPriority 4 .
 
@@ -362,7 +362,7 @@ proeth-cases:DissentingSection a owl:Class ;
     rdfs:label "Dissenting Section"@en ;
     rdfs:comment "Section type for minority professional opinions that reveal complexity in applying professional codes to specific contextual factors."@en ;
     skos:definition "Section presenting dissenting opinions and alternative professional viewpoints that demonstrate how identical principles may lead to different concrete obligations when contextual factors modify their application. Reflects collegial review processes essential for professional ethical reasoning and reveals tensions between competing professional obligations."@en ;
-    dcterms:source <https://www.nspe.org/resources/ethics/ethics-resources>, <https://doi.org/10.1016/j.artint.2003.09.005> ;
+    dcterms:source <https://www.nspe.org/resources/ethics/ethics-resources>, <https://doi.org/10.1016/S0004-3702(03)00135-8> ;
     proeth-cases:hasExtractionTarget "minority_positions, alternative_reasoning, contextual_modifications, obligation_conflicts" ;
     proeth-cases:analysisPriority 6 .
 
