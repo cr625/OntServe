@@ -197,7 +197,7 @@ proethica:engineering_standards a owl:Ontology ;
         "The systematic identification and analysis of potential hazards according to applicable safety standards" .
 
 <http://proethica.org/ontology/engineering_standards#QualityEngineer> a owl:Class ;
-    rdfs:subClassOf proeth-core:Role ;
+    rdfs:subClassOf ns1:EngineerRole ;
     rdfs:label "Quality Engineer" ;
     ns1:appliesToDomain "all_engineering" ;
     ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#MaintainQualityDocumentation> ;
@@ -215,7 +215,7 @@ proethica:engineering_standards a owl:Ontology ;
         "Legal requirement to comply with applicable technical standards as mandated by regulatory authorities" .
 
 <http://proethica.org/ontology/engineering_standards#SafetyEngineer> a owl:Class ;
-    rdfs:subClassOf proeth-core:Role ;
+    rdfs:subClassOf ns1:EngineerRole ;
     rdfs:label "Safety Engineer" ;
     ns1:appliesToDomain "all_engineering" ;
     ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#ComplyWithSafetyStandards>,
@@ -236,7 +236,7 @@ proethica:engineering_standards a owl:Ontology ;
         "Technical requirement to achieve specified Safety Integrity Levels (SIL/ASIL) based on risk assessment" .
 
 <http://proethica.org/ontology/engineering_standards#StandardsEngineer> a owl:Class ;
-    rdfs:subClassOf proeth-core:Role ;
+    rdfs:subClassOf ns1:EngineerRole ;
     rdfs:label "Standards Engineer" ;
     ns1:appliesToDomain "all_engineering" ;
     ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#ComplyWithSafetyStandards>,
