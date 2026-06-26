@@ -196,15 +196,7 @@ proethica:engineering_standards a owl:Ontology ;
     skos:definition "Required safety analysis process for risk identification",
         "The systematic identification and analysis of potential hazards according to applicable safety standards" .
 
-<http://proethica.org/ontology/engineering_standards#QualityEngineerRole> a owl:Class ;
-    rdfs:subClassOf ns1:EngineerRole ;
-    rdfs:label "Quality Engineer Role" ;
-    ns1:specializationAxis "function" ;
-    ns1:appliesToDomain "all_engineering" ;
-    ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#MaintainQualityDocumentation> ;
-    rdfs:comment "Role focused on quality assurance and continuous improvement" ;
-    skos:definition "Engineer responsible for implementing quality management systems and ensuring compliance with quality standards",
-        "Role focused on quality assurance and continuous improvement" .
+# QualityEngineerRole moved to proethica-intermediate (role-home consolidation, 2026-06-26).
 
 <http://proethica.org/ontology/engineering_standards#RegulatoryCompliance> a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
@@ -215,16 +207,7 @@ proethica:engineering_standards a owl:Ontology ;
     skos:definition "Binding legal constraint with potential civil and criminal liability",
         "Legal requirement to comply with applicable technical standards as mandated by regulatory authorities" .
 
-<http://proethica.org/ontology/engineering_standards#SafetyEngineerRole> a owl:Class ;
-    rdfs:subClassOf ns1:EngineerRole ;
-    rdfs:label "Safety Engineer Role" ;
-    ns1:specializationAxis "function" ;
-    ns1:appliesToDomain "all_engineering" ;
-    ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#ComplyWithSafetyStandards>,
-        <http://proethica.org/ontology/engineering_standards#ConductRiskAssessment> ;
-    rdfs:comment "Critical role for safety-critical systems and applications" ;
-    skos:definition "Critical role for safety-critical systems and applications",
-        "Engineer specializing in system safety analysis and compliance with safety-critical standards" .
+# SafetyEngineerRole moved to proethica-intermediate (role-home consolidation, 2026-06-26).
 
 <http://proethica.org/ontology/engineering_standards#SafetyIntegrityLevels> a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
@@ -237,16 +220,7 @@ proethica:engineering_standards a owl:Ontology ;
     skos:definition "Quantitative safety requirements with verification obligations",
         "Technical requirement to achieve specified Safety Integrity Levels (SIL/ASIL) based on risk assessment" .
 
-<http://proethica.org/ontology/engineering_standards#StandardsEngineerRole> a owl:Class ;
-    rdfs:subClassOf ns1:EngineerRole ;
-    rdfs:label "Standards Engineer Role" ;
-    ns1:specializationAxis "function" ;
-    ns1:appliesToDomain "all_engineering" ;
-    ns1:hasResponsibilities <http://proethica.org/ontology/engineering_standards#ComplyWithSafetyStandards>,
-        <http://proethica.org/ontology/engineering_standards#MaintainQualityDocumentation> ;
-    rdfs:comment "Specialized role focusing on standards compliance and implementation" ;
-    skos:definition "Engineer responsible for ensuring compliance with applicable technical standards and regulations",
-        "Specialized role focusing on standards compliance and implementation" .
+# StandardsEngineerRole moved to proethica-intermediate (role-home consolidation, 2026-06-26).
 
 <http://proethica.org/ontology/engineering_standards#StandardsUpdate> a owl:Class ;
     rdfs:subClassOf proeth-core:Event ;

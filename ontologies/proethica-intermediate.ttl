@@ -1808,17 +1808,17 @@ proeth:requiresCapability a owl:ObjectProperty ;
     rdfs:comment "An engineer responsible for producing a design (plans, calculations, specifications) for a project. Project and discipline are case context, not separate role kinds."@en .
 :ResponsibleChargeEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Responsible Charge Engineer Role"@en ;
-    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    :archetypeAxis "relational" ;
     skos:altLabel "responsible charge engineer"@en, "reviewing charge engineer"@en ;
     rdfs:comment "An engineer in responsible charge of work, exercising direct control and personal supervision over its production."@en .
 :ForensicExpertWitnessEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Forensic Expert Witness Engineer Role"@en ;
-    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    :archetypeAxis "relational" ;
     skos:altLabel "forensic expert witness engineer"@en, "forensic engineer"@en ;
     rdfs:comment "An engineer retained to provide forensic analysis and expert testimony in a dispute or litigation."@en .
 :MentorEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Mentor Engineer Role"@en ;
-    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    :archetypeAxis "relational" ;
     skos:altLabel "mentor engineer"@en, "retired mentor engineer"@en ;
     rdfs:comment "An experienced engineer who mentors another. Availability such as retired status is a State, not a role kind."@en .
 :MunicipalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
@@ -1836,6 +1836,25 @@ proeth:requiresCapability a owl:ObjectProperty ;
     :archetypeAxis "occupational" ;
     skos:altLabel "non-engineer expert witness"@en, "non-engineering expert witness"@en ;
     rdfs:comment "An expert witness who is not an engineer, kept distinct from ForensicExpertWitnessEngineerRole because the engineer-versus-non-engineer distinction carries different professional obligations."@en .
+
+# Function-axis engineer roles consolidated here from the engineering-ethics ontology 2026-06-26
+# (all engineer roles share one home: proethica-intermediate). hasResponsibilities links dropped
+# (engineering-ethics-internal detail); appliesToDomain folded into the comment.
+:QualityEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Quality Engineer Role"@en ;
+    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    skos:altLabel "quality engineer"@en ;
+    rdfs:comment "Engineer responsible for implementing quality management systems and ensuring compliance with quality standards. Applies across engineering disciplines."@en .
+:SafetyEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Safety Engineer Role"@en ;
+    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    skos:altLabel "safety engineer"@en ;
+    rdfs:comment "Engineer specializing in system safety analysis and compliance with safety-critical standards. Applies across engineering disciplines."@en .
+:StandardsEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Standards Engineer Role"@en ;
+    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    skos:altLabel "standards engineer"@en ;
+    rdfs:comment "Engineer responsible for ensuring compliance with applicable technical standards and regulations. Applies across engineering disciplines."@en .
 
 # Obligation-bearing occupational heads (under :ProfessionalRole)
 :ProjectManagerRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
