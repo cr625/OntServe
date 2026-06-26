@@ -1787,6 +1787,56 @@ proeth:requiresCapability a owl:ObjectProperty ;
     :specializationAxis "discipline" ;
     rdfs:comment "Engineer specializing in electrical systems and power."@en .
 
+# Corpus-derived engineer + participant role specializations promoted from the NSPE case
+# reference sheet 2026-06-26 (the labels the corpus actually uses). Six carry a discipline/function
+# specializationAxis; ConsultantEngineerRole/MunicipalEngineerRole/NonEngineerExpertWitnessRole are
+# relational/sector/participant and stay unaxed. alt_labels carried over as skos:altLabel.
+:EnvironmentalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Environmental Engineer Role"@en ;
+    :archetypeAxis "occupational" ; :specializationAxis "discipline" ;
+    skos:altLabel "environmental engineer"@en, "environmental site engineer"@en, "wetland delineation engineer"@en ;
+    rdfs:comment "A licensed engineer whose practice area is environmental engineering (site assessment, contamination, wetlands, permitting)."@en .
+:GeotechnicalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Geotechnical Engineer Role"@en ;
+    :archetypeAxis "occupational" ; :specializationAxis "discipline" ;
+    skos:altLabel "geotechnical engineer"@en, "geotechnical observation consultant"@en ;
+    rdfs:comment "An engineer whose practice area is geotechnical engineering (soils, foundations, site observation)."@en .
+:DesignEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Design Engineer Role"@en ;
+    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    skos:altLabel "design engineer"@en, "cooperating design engineer"@en, "original design engineer"@en, "dam design engineer"@en, "dock foundation design engineer"@en, "stormwater design engineer"@en ;
+    rdfs:comment "An engineer responsible for producing a design (plans, calculations, specifications) for a project. Project and discipline are case context, not separate role kinds."@en .
+:ResponsibleChargeEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Responsible Charge Engineer Role"@en ;
+    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    skos:altLabel "responsible charge engineer"@en, "reviewing charge engineer"@en ;
+    rdfs:comment "An engineer in responsible charge of work, exercising direct control and personal supervision over its production."@en .
+:ForensicExpertWitnessEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Forensic Expert Witness Engineer Role"@en ;
+    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    skos:altLabel "forensic expert witness engineer"@en, "forensic engineer"@en ;
+    rdfs:comment "An engineer retained to provide forensic analysis and expert testimony in a dispute or litigation."@en .
+:MentorEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Mentor Engineer Role"@en ;
+    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    skos:altLabel "mentor engineer"@en, "retired mentor engineer"@en ;
+    rdfs:comment "An experienced engineer who mentors another. Availability such as retired status is a State, not a role kind."@en .
+:MunicipalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:label "Municipal Engineer Role"@en ;
+    :archetypeAxis "occupational" ;
+    skos:altLabel "municipal engineer"@en ;
+    rdfs:comment "An engineer engaged by a municipality to advise on and approve public engineering works. An employer-sector idiom, not a discipline or function specialization."@en .
+:ConsultantEngineerRole rdf:type owl:Class ; rdfs:subClassOf :ConsultantRole ;
+    rdfs:label "Consultant Engineer Role"@en ;
+    :archetypeAxis "occupational" ;
+    skos:altLabel "consultant engineer"@en ;
+    rdfs:comment "An engineer engaged in a consulting or advisory capacity to a client. A relational specialization under ConsultantRole, not a discipline or function."@en .
+:NonEngineerExpertWitnessRole rdf:type owl:Class ; rdfs:subClassOf :ProviderClientRole ;
+    rdfs:label "Non-Engineer Expert Witness Role"@en ;
+    :archetypeAxis "occupational" ;
+    skos:altLabel "non-engineer expert witness"@en, "non-engineering expert witness"@en ;
+    rdfs:comment "An expert witness who is not an engineer, kept distinct from ForensicExpertWitnessEngineerRole because the engineer-versus-non-engineer distinction carries different professional obligations."@en .
+
 # Obligation-bearing occupational heads (under :ProfessionalRole)
 :ProjectManagerRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
     rdfs:label "Project Manager Role"@en ; skos:exactMatch ifcrole:ProjectManager ;
