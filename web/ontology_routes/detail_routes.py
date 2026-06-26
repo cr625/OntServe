@@ -15,6 +15,7 @@ from web.ontology_routes.helpers import (
     _entity_using_cases,
     _categorize_entity_properties,
     _find_entity_by_fragment,
+    _uri_ends_with_fragment,
     _get_entity_children,
     _generate_entity_ttl_display,
     _extract_entity_from_ttl,
@@ -318,7 +319,7 @@ def register_detail_routes(bp):
         # definitional copy so the page lands on the one holding firstDiscoveredInCase etc.
         if not entity:
             candidates = db.session.execute(
-                select(OntologyEntity).where(OntologyEntity.uri.like(f'%#{fragment}'))
+                select(OntologyEntity).where(_uri_ends_with_fragment(fragment))
             ).scalars().all()
             if candidates:
                 entity = next(

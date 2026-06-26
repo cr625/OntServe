@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app
 from flask_login import login_required, current_user
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 import rdflib
 
 from web.models import db, Ontology, OntologyEntity, OntologyVersion
@@ -247,9 +247,17 @@ def _iri_values(value):
     return None
 
 
+def _uri_ends_with_fragment(fragment):
+    """SQLAlchemy predicate matching a URI whose final segment is `fragment`,
+    delimited by either '#' (proethica URIs) or '/' (OBO/BFO URIs). Lets the
+    entity page resolve slash-delimited BFO links such as obo/BFO_0000001."""
+    return or_(OntologyEntity.uri.like(f'%#{fragment}'),
+               OntologyEntity.uri.like(f'%/{fragment}'))
+
+
 def _find_entity_by_fragment(ontology, fragment):
-    """Find entity by URI fragment (the part after #)."""
-    # Try exact fragment match against known base URIs
+    """Find entity by URI fragment (the final segment after # or /)."""
+    # Try exact fragment match against the ontology's base URI (hash form).
     if ontology.base_uri:
         full_uri = f"{ontology.base_uri.rstrip('/#')}#{fragment}"
         stmt = select(OntologyEntity).where(
@@ -260,12 +268,12 @@ def _find_entity_by_fragment(ontology, fragment):
         if entity:
             return entity
 
-    # Fallback: search by URI ending with #fragment
+    # Fallback: URI ending with #fragment or /fragment (OBO/BFO are slash-delimited).
     stmt = select(OntologyEntity).where(
         OntologyEntity.ontology_id == ontology.id,
-        OntologyEntity.uri.like(f'%#{fragment}')
-    )
-    return db.session.execute(stmt).scalar_one_or_none()
+        _uri_ends_with_fragment(fragment)
+    ).limit(1)
+    return db.session.execute(stmt).scalars().first()
 
 
 def _get_entity_children(ontology, entity):
