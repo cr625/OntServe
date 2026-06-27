@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "macros/entity_display.html" import render_iri_target %}
-{% from "macros/component_sections.html" import property_structure, definition_card %}
+{% from "macros/component_sections.html" import property_structure, definition_card, relationships_block %}
 
 {% block title %}{{ entity.label or fragment }} - {{ ontology.name }} - OntServe{% endblock %}
 
@@ -306,37 +306,8 @@
                         </div>
                         {% endfor %}
 
-                        {# IRI-valued object-property triples, same treatment as
-                           the case-page cards: bare camelCase predicate + linked
-                           target individual. #}
-                        {% if prop_groups.relationships %}
-                        <div class="entity-relationships">
-                            <div class="relationships-label">Relationships</div>
-                            <div class="small text-muted mb-2">Asserted object-property edges to other entities. Logical class axioms such as <code>owl:disjointWith</code> are shown separately below.</div>
-                            {% for key, iris in prop_groups.relationships %}
-                            {# disjointWith is shown completely in the "Disjoint with" row below (it also
-                               folds in owl:AllDisjointClasses membership), so skip the partial one here. #}
-                            {% if key != 'disjointWith' %}
-                            <div class="relationship-row">
-                                <i class="bi bi-arrow-right-short"></i><span class="rel-predicate" title="{{ key|qualify_pred }}">{{ key }}</span>
-                                <span class="rel-targets">
-                                    {%- for iri in iris -%}{{ render_iri_target(iri, ontology.name) }}{% if not loop.last %}, {% endif %}{%- endfor -%}
-                                </span>
-                            </div>
-                            {% endif %}
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-
-                        {% if disjoint_classes %}
-                        <div class="property-row">
-                            <div class="property-key" title="owl:disjointWith plus owl:AllDisjointClasses membership">Disjoint with</div>
-                            <div class="property-value">
-                                {% for d in disjoint_classes %}<a href="{{ url_for('ontology.entity_detail', ontology_name=d.ontology, fragment=d.fragment) }}">{{ d.label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
-                                <div class="small text-muted">From <code>owl:disjointWith</code> and <code>owl:AllDisjointClasses</code> membership (the nine D-tuple components are mutually disjoint).</div>
-                            </div>
-                        </div>
-                        {% endif %}
+                        <!-- Relationships + disjointness (data-driven; see macros/component_sections.html) -->
+                        {{ relationships_block(prop_groups, disjoint_classes, ontology) }}
                     </div>
                 </div>
                 {% endif %}

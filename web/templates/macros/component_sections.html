@@ -1,3 +1,4 @@
+{% from "macros/entity_display.html" import render_iri_target %}
 {# Shared section macros for entity / core-component pages.
 
    Every macro here is driven by the schema DATA (what the ontology supplies), not by component type.
@@ -135,6 +136,38 @@
             </ul>
         </div>
         {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endmacro %}
+
+
+{# Relationships block: asserted object-property edges (IRI-valued triples), then the logical
+   disjointness row. disjointWith is skipped in the edge list because the Disjoint-with row folds in
+   owl:AllDisjointClasses membership and shows the complete set. Rendered inside the Properties card. #}
+{% macro relationships_block(prop_groups, disjoint_classes, ontology) %}
+{% if prop_groups.relationships %}
+<div class="entity-relationships">
+    <div class="relationships-label">Relationships</div>
+    <div class="small text-muted mb-2">Asserted object-property edges to other entities. Logical class axioms such as <code>owl:disjointWith</code> are shown separately below.</div>
+    {% for key, iris in prop_groups.relationships %}
+    {% if key != 'disjointWith' %}
+    <div class="relationship-row">
+        <i class="bi bi-arrow-right-short"></i><span class="rel-predicate" title="{{ key|qualify_pred }}">{{ key }}</span>
+        <span class="rel-targets">
+            {%- for iri in iris -%}{{ render_iri_target(iri, ontology.name) }}{% if not loop.last %}, {% endif %}{%- endfor -%}
+        </span>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+{% if disjoint_classes %}
+<div class="property-row">
+    <div class="property-key" title="owl:disjointWith plus owl:AllDisjointClasses membership">Disjoint with</div>
+    <div class="property-value">
+        {% for d in disjoint_classes %}<a href="{{ url_for('ontology.entity_detail', ontology_name=d.ontology, fragment=d.fragment) }}">{{ d.label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+        <div class="small text-muted">From <code>owl:disjointWith</code> and <code>owl:AllDisjointClasses</code> membership (the nine D-tuple components are mutually disjoint).</div>
     </div>
 </div>
 {% endif %}
