@@ -708,6 +708,21 @@ def class_property_schema(entity):
     # roles have such shapes, so non-role classes get empty lists; written generically so a future
     # per-component shape (e.g. a PrincipleDefinitionShape) renders through the same path with no change.
     definitional, bearer = _class_shape_schemas(anc_list)
+    # Copy (the attr dicts come from a shared cache) and resolve each definitional/bearer attribute's
+    # sh:path property to its home ontology, so the macro can LINK the property each field maps to --
+    # demystifying where the schema comes from. render_iri_target falls back to a code label (full IRI
+    # on hover) when the property is not a stored entity.
+    definitional = [dict(a) for a in definitional]
+    bearer = [dict(a) for a in bearer]
+    attr_uris = {a["uri"] for a in definitional} | {a["uri"] for a in bearer}
+    if attr_uris:
+        attr_ont = dict(db.session.execute(
+            select(OntologyEntity.uri, Ontology.name)
+            .join(Ontology, OntologyEntity.ontology_id == Ontology.id)
+            .where(OntologyEntity.uri.in_(list(attr_uris)))
+        ).all())
+        for a in definitional + bearer:
+            a["path_ontology"] = attr_ont.get(a["uri"])
 
     # Merge the data rows with the view chrome from the component-page rulebook (the single source of
     # the group labels/badges/tooltips, harmonized across all nine component pages). The macro renders
@@ -721,11 +736,45 @@ def class_property_schema(entity):
     return {"groups": groups}
 
 
+def _class_target_shapes_graph(entity):
+    """rdflib.Graph of the descriptive SHACL shapes (validation/shapes/core-shapes.ttl) whose
+    sh:targetClass is this class or an ancestor -- the shape node plus its sh:property blank-node
+    closure. Returned separately so the entity TTL can APPEND it: SHACL shapes are NOT entailed by the
+    ontology (a separate graph that must travel with the data to be applied), so without this the
+    exported TTL would omit the definitional field schema the entity page shows."""
+    out = rdflib.Graph()
+    if not entity or getattr(entity, "entity_type", None) != "class":
+        return out
+    try:
+        from pathlib import Path
+        shapes_path = Path(__file__).resolve().parents[2] / "validation" / "shapes" / "core-shapes.ttl"
+        anc = set(_class_ancestor_uris(entity))
+        SH = rdflib.Namespace("http://www.w3.org/ns/shacl#")
+        sg = rdflib.Graph()
+        sg.parse(str(shapes_path), format="turtle")
+        for prefix, ns in sg.namespaces():
+            out.bind(prefix, ns)
+        for shape in sg.subjects(rdflib.RDF.type, SH.NodeShape):
+            tgt = next(sg.objects(shape, SH.targetClass), None)
+            if tgt is None or str(tgt) not in anc:
+                continue
+            for p, o in sg.predicate_objects(shape):
+                out.add((shape, p, o))
+                if isinstance(o, rdflib.BNode):  # the sh:property nodes
+                    for p2, o2 in sg.predicate_objects(o):
+                        out.add((o, p2, o2))
+    except Exception:
+        pass
+    return out
+
+
 def _generate_entity_ttl_display(entity, ontology):
     """TTL for display. Render the entity's ACTUAL source triples from the ontology's
     current version. This way skos:exactMatch, skos:inScheme, skos:Concept typing,
     skos:definition, and dcterms:source all show, not just the few fields the entity
-    extractor stored. Fall back to the reconstruction if the source cannot be read."""
+    extractor stored, PLUS the descriptive SHACL shapes targeting the class (so the TTL is
+    self-contained: the class and its definitional field schema). Fall back to the reconstruction
+    if the source cannot be read."""
     try:
         v = db.session.execute(
             select(OntologyVersion).where(
@@ -746,6 +795,14 @@ def _generate_entity_ttl_display(entity, ontology):
                 if isinstance(o, rdflib.BNode):
                     for p2, o2 in g.predicate_objects(o):
                         sub.add((o, p2, o2))
+            # Append the descriptive SHACL shapes targeting this class (self-contained TTL): SHACL is
+            # a separate graph (not entailed), so the field schema would otherwise be absent.
+            shapes_g = _class_target_shapes_graph(entity)
+            if len(shapes_g):
+                for prefix, ns in shapes_g.namespaces():
+                    sub.bind(prefix, ns)
+                for t in shapes_g:
+                    sub.add(t)
             if len(sub):
                 return sub.serialize(format='turtle')
     except Exception:
