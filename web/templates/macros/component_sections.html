@@ -69,20 +69,30 @@
 
 
 {# Definition card: the full definition layer for any entity, in one place.
-   rdfs:comment and IAO_0000115 are the definition text; skos:scopeNote is the contextual/inherited
-   note; IAO_0000116 is the editor note (extraction framing); IAO_0000119 is the definition source
-   (citations). The IAO keys are routed here by _categorize_entity_properties so they no longer appear
-   as raw rows in the Properties card. #}
+   The PRIMARY definition text is the formal definition (skos:definition / IAO_0000115), routed into
+   prop_groups.definition by _categorize_entity_properties. The shorter rdfs:comment is shown as a
+   SECONDARY muted gloss beneath it (suppressed when it merely repeats the definition); when no formal
+   definition exists, rdfs:comment is the primary text instead. skos:scopeNote is the contextual/
+   inherited note; IAO_0000116 is the editor note (extraction framing); IAO_0000119 is the definition
+   source (citations). These keys are routed here so they no longer appear as raw rows in Properties. #}
 {% macro definition_card(entity, prop_groups) %}
 {% if entity.comment or prop_groups.definition or prop_groups.description or prop_groups.scope_notes or prop_groups.editor_note or prop_groups.definition_source %}
 <div class="card mb-3">
     <div class="card-header"><h6 class="mb-0">Definition</h6></div>
     <div class="card-body">
-        {% if entity.comment %}<p class="mb-0">{{ entity.comment }}</p>{% endif %}
+        {# Primary: the formal definition. Fall back to the rdfs:comment gloss only if there is none. #}
+        {% if prop_groups.definition %}
         {% for val in prop_groups.definition %}
-        {% if entity.comment or not loop.first %}<hr class="my-2">{% endif %}
+        {% if not loop.first %}<hr class="my-2">{% endif %}
         <p class="mb-0">{{ val }}</p>
         {% endfor %}
+        {# Secondary: the rdfs:comment gloss, muted, unless it just repeats the definition. #}
+        {% if entity.comment and entity.comment not in prop_groups.definition %}
+        <p class="mb-0 small text-muted mt-2">{{ entity.comment }}</p>
+        {% endif %}
+        {% elif entity.comment %}
+        <p class="mb-0">{{ entity.comment }}</p>
+        {% endif %}
         {% for label, val in prop_groups.description %}
         <hr class="my-2">
         <p class="mb-0">{{ val }}</p>

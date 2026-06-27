@@ -122,9 +122,10 @@ _DESCRIPTION_KEYS = frozenset({'caseinvolvement'})
 # dtupleComponent: the D-tuple letter (R/P/O/...) is already shown in the page header.
 _SKIP_KEYS = frozenset({'type', 'NamedIndividual', 'rdf_types', 'dtupleComponent'})
 
-# IAO definition-layer keys -> the Definition card (kept out of the raw "core" property list).
+# Definition-layer keys -> the Definition card (kept out of the raw "core" property list).
 _DEFINITION_LAYER_GROUP = {
-    'IAO_0000115': 'definition',         # textual definition
+    'definition': 'definition',          # skos:definition textual definition (primary)
+    'IAO_0000115': 'definition',         # IAO textual definition (primary; same group)
     'IAO_0000119': 'definition_source',  # definition source / citations
     'IAO_0000116': 'editor_note',        # editor note / extraction framing
 }

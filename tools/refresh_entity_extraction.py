@@ -188,9 +188,13 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
         entities_added = 0
         
         # Predicates captured elsewhere (dedicated columns / provenance); every other
-        # predicate on a class becomes a structured property below.
+        # predicate on a class becomes a structured property below. skos:definition is
+        # NOT skipped: it is the formal definition and is collected into properties as
+        # 'definition' so the entity page can show it as the primary definition text
+        # (the entity 'comment' column holds the shorter rdfs:comment gloss). It is still
+        # read separately below as a comment fallback for classes lacking rdfs:comment.
         class_standard_predicates = {
-            RDF.type, RDFS.label, RDFS.comment, RDFS.subClassOf, SKOS.definition,
+            RDF.type, RDFS.label, RDFS.comment, RDFS.subClassOf,
             rdflib.URIRef('http://www.w3.org/ns/prov#generatedAtTime'),
             rdflib.URIRef('http://www.w3.org/ns/prov#wasGeneratedBy'),
         }
