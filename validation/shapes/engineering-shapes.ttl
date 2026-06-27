@@ -5,6 +5,7 @@
 @prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
 @prefix core:   <http://proethica.org/ontology/core#> .
 @prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
 @prefix pesh:   <http://proethica.org/shapes/engineering#> .
 
 # ProEthica ENGINEERING-domain conformance shapes. Layers on core-shapes.ttl
@@ -19,7 +20,8 @@ pesh: a owl:Ontology ;
     rdfs:label "ProEthica engineering conformance shapes" ;
     sh:declare [ sh:prefix "core"   ; sh:namespace "http://proethica.org/ontology/core#"^^xsd:anyURI ] ;
     sh:declare [ sh:prefix "proeth" ; sh:namespace "http://proethica.org/ontology/intermediate#"^^xsd:anyURI ] ;
-    sh:declare [ sh:prefix "rdf"    ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] .
+    sh:declare [ sh:prefix "rdf"    ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] ;
+    sh:declare [ sh:prefix "skos"   ; sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ] .
 
 # RoleArchetypeShape: every role must pass through an OCCUPATIONAL archetype on
 # its way to core:Role; nothing attaches directly to core:Role (or bfo:0000023)
@@ -54,6 +56,47 @@ pesh:RoleArchetypeShape
                     $this rdf:type ?arch .
                     ?arch proeth:archetypeAxis "occupational" .
                 }
+            }
+        """ ;
+    ] .
+
+# AxisValueShapes: each archetypeAxis / specializationAxis annotation value must be a skos:notation of
+# a concept in the matching SKOS controlled vocabulary (RoleArchetypeAxisScheme / RoleSpecializationScheme),
+# which is the single source of allowed values -- so a typo or drift (e.g. "occupatonal") is caught. The
+# allowed set is NOT hardcoded here; it is read from the scheme, so extending the vocabulary is a one-line
+# concept addition in the scheme. sh:Violation: an out-of-vocabulary axis value is a real data error.
+pesh:ArchetypeAxisValueShape
+    a sh:NodeShape ;
+    sh:targetSubjectsOf proeth:archetypeAxis ;
+    rdfs:label "archetypeAxis value is a RoleArchetypeAxisScheme notation" ;
+    sh:severity sh:Violation ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "proeth:archetypeAxis value {?value} is not a skos:notation of a concept in proeth:RoleArchetypeAxisScheme." ;
+        sh:prefixes pesh: ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this proeth:archetypeAxis ?value .
+                FILTER NOT EXISTS { ?c skos:inScheme proeth:RoleArchetypeAxisScheme ; skos:notation ?value . }
+            }
+        """ ;
+    ] .
+
+pesh:SpecializationAxisValueShape
+    a sh:NodeShape ;
+    sh:targetSubjectsOf proeth:specializationAxis ;
+    rdfs:label "specializationAxis value is a RoleSpecializationScheme notation" ;
+    sh:severity sh:Violation ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "proeth:specializationAxis value {?value} is not a skos:notation of a concept in proeth:RoleSpecializationScheme." ;
+        sh:prefixes pesh: ;
+        sh:select """
+            SELECT $this ?value
+            WHERE {
+                $this proeth:specializationAxis ?value .
+                FILTER NOT EXISTS { ?c skos:inScheme proeth:RoleSpecializationScheme ; skos:notation ?value . }
             }
         """ ;
     ] .

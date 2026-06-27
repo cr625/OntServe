@@ -54,7 +54,6 @@
 :FundamentalEthicalPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
-    :specializationAxis "fundamental" ;
     rdfs:label "Fundamental Ethical Principle"@en ;
     iao:0000115 "A universal moral foundation that serves as the highest-level abstraction in professional ethics, requiring extensive interpretation through concrete cases (BFO: generically dependent continuant)"@en ;
     skos:definition "According to McLaren (2003), fundamental principles like public welfare and respect for persons cannot be applied through formal deduction alone but require extensional definition through landmark ethics cases and professional code applications. These principles function as constitutional-like foundations (Taddeo et al. 2024) that mediate moral ideals into professional practice (Hallamaa & Kalliokoski 2022)."@en ;
@@ -66,7 +65,6 @@
 :ProfessionalVirtuePrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
-    :specializationAxis "virtue" ;
     rdfs:label "Professional Virtue Principle"@en ;
     iao:0000115 "A character-based principle defining professional excellence and ethical sensitivities specific to professional identity (BFO: generically dependent continuant)"@en ;
     skos:definition "Professional virtue principles guide professional identity formation and ethical sensitivities (Oakley & Cocking 2001). These principles are learned through expert examples (Anderson & Anderson 2018) and exemplified through model professional behavior cases, creating role-generated moral demands that shape professional character."@en ;
@@ -77,7 +75,6 @@
 :RelationalPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
-    :specializationAxis "relational" ;
     rdfs:label "Relational Principle"@en ;
     iao:0000115 "A principle governing professional relationships and establishing frameworks for trust and stakeholder interactions (BFO: generically dependent continuant)"@en ;
     skos:definition "Relational principles establish frameworks for managing professional relationships and stakeholder trust. Following McLaren's extensional approach, these principles gain meaning through precedents from client-professional disputes and resolutions, defining how professionals navigate competing interests and maintain trustworthy relationships."@en ;
@@ -88,7 +85,6 @@
 :DomainSpecificPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
-    :specializationAxis "domain" ;
     rdfs:label "Domain-Specific Principle"@en ;
     iao:0000115 "A principle particular to professional domain contexts that bridges general ethics to specific technical practices (BFO: generically dependent continuant)"@en ;
     skos:definition "Domain-specific principles bridge general ethical guidance to particular professional contexts. As identified by Prem (2023), these principles face inherent challenges in operationalization but remain essential for contextual guidance. They are grounded through industry-specific cases and technical standards applications."@en ;
@@ -100,7 +96,6 @@
 :PublicWelfarePrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :FundamentalEthicalPrinciple ;
-    :specializationAxis "fundamental" ;
     rdfs:label "Public Welfare Principle"@en ;
     iao:0000115 "The fundamental principle that public safety, health, and welfare must be held paramount in professional practice (BFO: generically dependent continuant)"@en ;
     skos:definition "The public welfare principle, as articulated in NSPE Fundamental Canon 1, requires professionals to hold paramount the safety, health, and welfare of the public. This principle exemplifies McLaren's challenge of operationalizing abstract guidance - 'hold paramount' gains meaning only through NSPE case applications and precedents like the Challenger disaster."@en ;
@@ -113,7 +108,6 @@
 :IntegrityPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :ProfessionalVirtuePrinciple ;
-    :specializationAxis "virtue" ;
     rdfs:label "Integrity Principle"@en ;
     iao:0000115 "The professional virtue principle of maintaining honesty, truthfulness, and ethical consistency in professional practice (BFO: generically dependent continuant)"@en ;
     skos:definition "Professional integrity requires contextual interpretation through cases (Kong et al. 2020) and manifests differently across professional contexts. It encompasses honesty in professional communications, truthfulness in representations, and consistency between professional values and actions."@en ;
@@ -125,7 +119,6 @@
 :CompetencePrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :ProfessionalVirtuePrinciple ;
-    :specializationAxis "virtue" ;
     rdfs:label "Competence Principle"@en ;
     iao:0000115 "The professional virtue principle requiring maintenance and application of professional knowledge and skill within areas of competence (BFO: generically dependent continuant)"@en ;
     skos:definition "The competence principle requires professionals to perform services only in areas of their competence and to maintain professional knowledge through continuous learning. This principle generates obligations for professional development and honest self-assessment of capabilities."@en ;
@@ -137,7 +130,6 @@
 :ConfidentialityPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :RelationalPrinciple ;
-    :specializationAxis "relational" ;
     rdfs:label "Confidentiality Principle"@en ;
     iao:0000115 "The relational principle protecting client information and maintaining trust in professional relationships (BFO: generically dependent continuant)"@en ;
     skos:definition "Confidentiality establishes trust frameworks in professional relationships by protecting client information from unauthorized disclosure. This principle requires balancing through precedents when it conflicts with public welfare or legal obligations."@en ;
@@ -149,7 +141,6 @@
 :TransparencyPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :RelationalPrinciple ;
-    :specializationAxis "relational" ;
     rdfs:label "Transparency Principle"@en ;
     iao:0000115 "The relational principle requiring openness and disclosure in professional communications and decision-making (BFO: generically dependent continuant)"@en ;
     skos:definition "Transparency requires professionals to be open about conflicts of interest, limitations, and decision-making processes. This principle supports accountability and enables informed consent from stakeholders."@en ;
@@ -161,7 +152,6 @@
 :EnvironmentalStewardshipPrinciple rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf :DomainSpecificPrinciple ;
-    :specializationAxis "domain" ;
     rdfs:label "Environmental Stewardship Principle"@en ;
     iao:0000115 "The domain-specific principle in engineering requiring consideration of environmental impact and sustainability (BFO: generically dependent continuant)"@en ;
     skos:definition "Environmental stewardship in engineering requires balancing technical solutions with environmental protection and sustainable development. This principle has evolved through cases addressing pollution, resource depletion, and climate change impacts."@en ;
@@ -174,7 +164,6 @@
 # (parented to their kind; specializationAxis = kind; per-principle NSPE-canon grounding still TODO).
 :PeerReviewCooperationPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Peer Review Cooperation Principle"@en ;
-    :specializationAxis "domain" ;
     proeth:nspeReference "Professional Obligation III.7.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.7.a" ;
     skos:altLabel "confidential peer review cooperation principle"@en, "peer review notification principle"@en ;
@@ -182,7 +171,6 @@
 
 :LoyaltyPrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
     rdfs:label "Loyalty Principle"@en ;
-    :specializationAxis "relational" ;
     proeth:nspeReference "Rule of Practice II.4" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.4" ;
     skos:altLabel "faithful agent loyalty principle"@en, "loyalty"@en ;
@@ -190,7 +178,6 @@
 
 :ObjectivityPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Objectivity Principle"@en ;
-    :specializationAxis "virtue" ;
     proeth:nspeReference "Rule of Practice II.3.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.a" ;
     skos:altLabel "adversarial context objectivity principle"@en, "adversarial engagement objectivity principle"@en, "dual role objectivity principle"@en, "report language fairness principle"@en ;
@@ -198,7 +185,6 @@
 
 :HonestyPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Honesty Principle"@en ;
-    :specializationAxis "virtue" ;
     proeth:nspeReference "Fundamental Canon 5" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Fundamental Canon 5" ;
     skos:altLabel "fact-based opinion principle"@en, "scope of engagement honesty principle"@en, "deceptive submission prohibition principle"@en, "credential misrepresentation prohibition principle"@en ;
@@ -206,7 +192,6 @@
 
 :ConflictOfInterestDisclosurePrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
     rdfs:label "Conflict of Interest Disclosure Principle"@en ;
-    :specializationAxis "relational" ;
     proeth:nspeReference "Rule of Practice II.4.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.4.a" ;
     skos:altLabel "advisory self-interest disclosure principle"@en, "divided loyalty prohibition principle"@en, "client consent conflict waiver principle"@en ;
@@ -214,7 +199,6 @@
 
 :ResponsibleChargePrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Responsible Charge Principle"@en ;
-    :specializationAxis "domain" ;
     proeth:nspeReference "Rule of Practice II.2.b" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.2.b" ;
     skos:altLabel "responsible charge active engagement principle"@en, "supervisory control adequacy principle"@en, "professional sealing responsibility principle"@en ;
@@ -222,27 +206,23 @@
 
 :ReviewAdequacyPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Review Adequacy Principle"@en ;
-    :specializationAxis "domain" ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     skos:altLabel "ai review adequacy principle"@en, "detailed review adequacy principle"@en ;
     rdfs:comment "The value that a professional reviews work in sufficient depth to take responsibility for its correctness before relying on or adopting it."@en .
 
 :SelfCertificationProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Self-Certification Prohibition Principle"@en ;
-    :specializationAxis "domain" ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value that a professional does not certify or approve their own work in a capacity meant to provide independent oversight."@en .
 
 :ToolSubstitutionProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Tool Substitution Prohibition Principle"@en ;
-    :specializationAxis "domain" ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     skos:altLabel "technology replacement prohibition principle"@en ;
     rdfs:comment "The value that a tool or technology does not substitute for the professional judgment and competence the work requires."@en .
 
 :ProfessionalAccountabilityPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Professional Accountability Principle"@en ;
-    :specializationAxis "virtue" ;
     proeth:nspeReference "Professional Obligation III.8" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.8" ;
     skos:altLabel "error acknowledgment principle"@en, "professional accountability"@en ;
@@ -250,7 +230,6 @@
 
 :CorrectiveActionMonitoringPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Corrective Action Monitoring Principle"@en ;
-    :specializationAxis "domain" ;
     proeth:nspeReference "Rule of Practice II.1.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.1.a" ;
     skos:altLabel "post-engagement observation duty principle"@en ;
@@ -258,20 +237,17 @@
 
 :ExpertiseCalibratedDisclosurePrinciple rdf:type owl:Class ; rdfs:subClassOf :FundamentalEthicalPrinciple ;
     rdfs:label "Expertise-Calibrated Disclosure Principle"@en ;
-    :specializationAxis "fundamental" ;
     proeth:nspeReference "Rule of Practice II.3.b" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.b" ;
     rdfs:comment "The value that the scope and certainty of professional statements is calibrated to the professional's actual expertise in the matter."@en .
 
 :NonEngineeringExpertServicesPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Non-Engineering Expert Services Principle"@en ;
-    :specializationAxis "domain" ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value governing an engineer who provides expert services outside engineering, that such services not trade on engineering authority they do not warrant."@en .
 
 :JurisdictionalLicensureCompliancePrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Jurisdictional Licensure Compliance Principle"@en ;
-    :specializationAxis "domain" ;
     proeth:nspeReference "Professional Obligation III.8.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.8.a" ;
     skos:altLabel "engineering title invocation principle"@en ;
@@ -279,7 +255,6 @@
 
 :SelectiveReportingProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Selective Reporting Prohibition Principle"@en ;
-    :specializationAxis "virtue" ;
     proeth:nspeReference "Rule of Practice II.3.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.a" ;
     skos:altLabel "technical completeness principle"@en, "client disservice by incompleteness principle"@en, "expert fact gathering diligence principle"@en ;
@@ -293,7 +268,6 @@
 
 :FreeServicesProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
     rdfs:label "Free Services Prohibition Principle"@en ;
-    :specializationAxis "relational" ;
     proeth:revisionStatus "rescinded" ;
     proeth:rescindedBy :NSPEvUnitedStates1978 ;
     proeth:rescindedDate "1978" ;
@@ -303,13 +277,11 @@
 
 :SchedulePressureResistancePrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Schedule Pressure Resistance Principle"@en ;
-    :specializationAxis "virtue" ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value that a professional does not compromise technical or ethical standards in response to schedule or commercial pressure."@en .
 
 :WhistleblowerPersonalConsciencePrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Whistleblower Personal Conscience Principle"@en ;
-    :specializationAxis "virtue" ;
     proeth:nspeReference "Rule of Practice II.1.f" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.1.f" ;
     proeth:groundingStatus "Partially derived: the reporting duty grounds to NSPE II.1.f / II.1.a; the personal-conscience surplus beyond what the rules compel is extensional/derived." ;
@@ -317,14 +289,12 @@
 
 :EvolvingStandardsResponsivenessPrinciple rdf:type owl:Class ; rdfs:subClassOf :FundamentalEthicalPrinciple ;
     rdfs:label "Evolving Standards Responsiveness Principle"@en ;
-    :specializationAxis "fundamental" ;
     proeth:nspeReference "Professional Obligation III.2.e" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.2.e" ;
     rdfs:comment "The value that a professional keeps current with and applies evolving technical and ethical standards of practice."@en .
 
 :MentorDependencyTransitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Mentor Dependency Transition Principle"@en ;
-    :specializationAxis "virtue" ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value that an engineer develops independent competence and does not remain indefinitely dependent on a mentor for professional judgment."@en .
 
@@ -1976,17 +1946,66 @@ proeth:requiresCapability a owl:ObjectProperty ;
 # skos:altLabel synonyms (longest match wins). The placement rules therefore live in the
 # ontology, per domain, not in code: a new domain ships its own archetype ontology with its
 # own altLabels and needs no resolver change.
+#################################################################
+# Controlled vocabularies for the role-archetype axes (SKOS).
+# The genuine axis MARKERS (occupational/relational; discipline/function) have no OWL class -- they
+# are orthogonal cross-cuts that cannot sit on the single-inheritance disjoint backbone -- so they are
+# modelled as SKOS concept schemes (a proper controlled vocabulary: URIs, definitions, citations,
+# crosswalkable) rather than ad-hoc strings. The annotation VALUE is the concept's skos:notation, so
+# consumers that read the string keep working. Mirrors the ifc-roles.ttl pattern. (The principle-kind /
+# roleCategory / conceptCategory "axes" are deliberately NOT here: they shadow existing OWL classes and
+# are read from those, not from a SKOS scheme.)
+#################################################################
+
+proeth:RoleArchetypeAxisScheme a skos:ConceptScheme ;
+    rdfs:label "Role archetype axis"@en ;
+    skos:definition "The archetype axis a role classification sits on: occupational (what KIND of agent the bearer is) vs relational (the duty-RELATIONSHIP the role establishes). The two are orthogonal -- a role can be both -- so neither is an OWL class on the ProfessionalRole/ParticipantRole disjoint backbone; this scheme is their controlled vocabulary. proeth:archetypeAxis takes a concept's skos:notation as its value."@en ;
+    dcterms:source "Kong et al. (2020), audience-oriented identity roles; Oakley & Cocking (2001), Virtue Ethics and Professional Roles." .
+
+proeth:OccupationalArchetype a owl:NamedIndividual, skos:Concept ;
+    skos:inScheme proeth:RoleArchetypeAxisScheme ;
+    skos:notation "occupational" ; skos:prefLabel "occupational"@en ;
+    rdfs:label "Occupational archetype"@en ;
+    skos:definition "Classifies the bearer by their occupational/positional KIND (engineer, architect, client, owner, the public). Spans both ProfessionalRole and ParticipantRole, so it is the primitive single-inheritance backbone, not a disjoint subtype."@en ;
+    dcterms:source "Kong et al. (2020); Oakley & Cocking (2001)." .
+
+proeth:RelationalArchetype a owl:NamedIndividual, skos:Concept ;
+    skos:inScheme proeth:RoleArchetypeAxisScheme ;
+    skos:notation "relational" ; skos:prefLabel "relational"@en ;
+    rdfs:label "Relational archetype"@en ;
+    skos:definition "Classifies the bearer by the duty-RELATIONSHIP the role establishes (provider-client, professional-peer, employer, public-responsibility)."@en ;
+    skos:scopeNote "No longer used as a proeth:archetypeAxis annotation value: the relational archetype is now a reasoner-inferred owl:equivalentClass defined class (ProviderClientRole etc.) derived from the role-to-role relationship edge. Retained to document the axis."@en ;
+    dcterms:source "Kong et al. (2020)." .
+
+proeth:RoleSpecializationScheme a skos:ConceptScheme ;
+    rdfs:label "Role specialization axis"@en ;
+    skos:definition "How an occupational role leaf specializes its archetype head: discipline (a branch of the profession, e.g. Civil/Electrical) vs function (a cross-discipline job function, e.g. design/quality/safety). Finer than the archetype axis; an orthogonal cross-cut with no OWL class. proeth:specializationAxis (on a ROLE) takes a concept's skos:notation as its value."@en ;
+    dcterms:source "ProEthica engineering role taxonomy; IFC discipline crosswalk (ifc-roles.ttl)." .
+
+proeth:DisciplineSpecialization a owl:NamedIndividual, skos:Concept ;
+    skos:inScheme proeth:RoleSpecializationScheme ;
+    skos:notation "discipline" ; skos:prefLabel "discipline"@en ;
+    rdfs:label "Discipline specialization"@en ;
+    skos:definition "A branch of the profession -- a recognised engineering discipline (Civil, Electrical, Mechanical, Structural, Environmental, Geotechnical). Crosswalked to IFC actor roles via skos:exactMatch on the role class."@en .
+
+proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
+    skos:inScheme proeth:RoleSpecializationScheme ;
+    skos:notation "function" ; skos:prefLabel "function"@en ;
+    rdfs:label "Function specialization"@en ;
+    skos:definition "A cross-discipline job function a role performs (design, quality, safety, standards), independent of engineering discipline."@en .
+
 :archetypeAxis rdf:type owl:AnnotationProperty ;
     rdfs:label "archetype axis"@en ;
-    rdfs:comment "Role-archetype axis marker: 'occupational' or 'relational'. Drives data-driven occupational placement; see the occupational resolver."@en .
+    rdfs:seeAlso proeth:RoleArchetypeAxisScheme ;
+    rdfs:comment "Role-archetype axis marker. The value is the skos:notation of a concept in proeth:RoleArchetypeAxisScheme (currently 'occupational'; the 'relational' pole is now a reasoner-inferred defined class, not an annotation). Drives data-driven occupational placement; see the occupational resolver."@en .
 
-# specializationAxis is a finer cut than archetypeAxis for occupational role leaves under an
-# archetype head (e.g. EngineerRole): "discipline" = a branch of the profession (CivilEngineerRole,
-# crosswalked to an IFC discipline role); "function" = a cross-discipline job function
-# (QualityEngineerRole, applicable across all disciplines). The two axes are orthogonal.
+# specializationAxis applies to occupational role leaves under an archetype head (e.g. EngineerRole):
+# "discipline" = a branch of the profession (CivilEngineerRole, crosswalked to an IFC discipline role);
+# "function" = a cross-discipline job function (QualityEngineerRole). Orthogonal to archetypeAxis.
 :specializationAxis rdf:type owl:AnnotationProperty ;
     rdfs:label "specialization axis"@en ;
-    rdfs:comment "Role specialization axis: 'discipline' (a branch of the profession) or 'function' (a cross-discipline job function). Finer than archetypeAxis; applies to occupational role leaves under an archetype head."@en .
+    rdfs:seeAlso proeth:RoleSpecializationScheme ;
+    rdfs:comment "Role specialization axis. On an occupational ROLE leaf the value is the skos:notation of a concept in proeth:RoleSpecializationScheme ('discipline' or 'function'). The former principle-kind use (values fundamental/virtue/relational/domain) was a shadow of the principle-kind classes and was retired 2026-06-27 in favour of rdfs:subClassOf the kind class."@en .
 
 # Engineer specializations (under :EngineerRole, itself under :ProfessionalRole)
 :CivilEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
