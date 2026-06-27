@@ -846,8 +846,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Role ;
     rdfs:label "Relational Role"@en ;
-    :archetypeAxis "relational" ;
-    rdfs:comment "Head of the relational archetype axis: the duty-relationship a role establishes. Orthogonal to the occupational axis, so a relational archetype composes with any occupational archetype without crossing the ProfessionalRole/ParticipantRole disjointness."@en .
+    rdfs:comment "Head of the relational archetype axis: the duty-relationship a role establishes. Orthogonal to the occupational axis, so a relational archetype composes with any occupational archetype without crossing the ProfessionalRole/ParticipantRole disjointness. Does not self-tag :archetypeAxis -- it IS the structural head of the axis; the annotation marks only leaves whose archetype diverges from their structural parent (e.g. a relational Mentor/Forensic engagement under the occupational EngineerRole)."@en .
 
 #################################################################
 # Professional Role Categories from Chapter 2.2.1 Literature
