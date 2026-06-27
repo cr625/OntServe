@@ -121,6 +121,13 @@ _DESCRIPTION_KEYS = frozenset({'caseinvolvement'})
 # dtupleComponent: the D-tuple letter (R/P/O/...) is already shown in the page header.
 _SKIP_KEYS = frozenset({'type', 'NamedIndividual', 'rdf_types', 'dtupleComponent'})
 
+# IAO definition-layer keys -> the Definition card (kept out of the raw "core" property list).
+_DEFINITION_LAYER_GROUP = {
+    'IAO_0000115': 'definition',         # textual definition
+    'IAO_0000119': 'definition_source',  # definition source / citations
+    'IAO_0000116': 'editor_note',        # editor note / extraction framing
+}
+
 # Human-readable labels for property keys
 _PROPERTY_LABELS = {
     'conceptCategory': 'Concept Category',
@@ -182,6 +189,9 @@ def _categorize_entity_properties(entity):
     """
     groups = {
         'description': [],
+        'definition': [],
+        'definition_source': [],
+        'editor_note': [],
         'scope_notes': [],
         'core': [],
         'relationships': [],
@@ -207,6 +217,13 @@ def _categorize_entity_properties(entity):
         if key.lower() == 'scopenote':
             vals = value if isinstance(value, list) else [value]
             groups['scope_notes'].extend(str(v) for v in vals if v)
+            continue
+
+        # IAO definition layer -> the Definition card, not the raw core list:
+        # IAO_0000115 (definition text), IAO_0000119 (definition source), IAO_0000116 (editor note).
+        if key in _DEFINITION_LAYER_GROUP:
+            vals = value if isinstance(value, list) else [value]
+            groups[_DEFINITION_LAYER_GROUP[key]].extend(str(v) for v in vals if v)
             continue
 
         # IRI-valued triples are object properties (R->P->O / defeasibility

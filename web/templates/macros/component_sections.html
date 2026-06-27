@@ -87,3 +87,55 @@
 </div>
 {% endif %}
 {% endmacro %}
+
+
+{# Definition card: the full definition layer for any entity, in one place.
+   rdfs:comment and IAO_0000115 are the definition text; skos:scopeNote is the contextual/inherited
+   note; IAO_0000116 is the editor note (extraction framing); IAO_0000119 is the definition source
+   (citations). The IAO keys are routed here by _categorize_entity_properties so they no longer appear
+   as raw rows in the Properties card. #}
+{% macro definition_card(entity, prop_groups) %}
+{% if entity.comment or prop_groups.definition or prop_groups.description or prop_groups.scope_notes or prop_groups.editor_note or prop_groups.definition_source %}
+<div class="card mb-3">
+    <div class="card-header"><h6 class="mb-0">Definition</h6></div>
+    <div class="card-body">
+        {% if entity.comment %}<p class="mb-0">{{ entity.comment }}</p>{% endif %}
+        {% for val in prop_groups.definition %}
+        {% if entity.comment or not loop.first %}<hr class="my-2">{% endif %}
+        <p class="mb-0">{{ val }}</p>
+        {% endfor %}
+        {% for label, val in prop_groups.description %}
+        <hr class="my-2">
+        <p class="mb-0">{{ val }}</p>
+        {% endfor %}
+        {# skos:scopeNote, demarcated. A self-defined note is "Scope note"; a note pulled from an
+           ancestor carries a leading "[source]" tag and is labelled "Inherited from <source>". #}
+        {% for note in prop_groups.scope_notes %}
+        {% set has_tag = note.startswith('[') and ']' in note %}
+        <div class="ps-2 mt-2 border-start border-3 border-info">
+            <div class="text-uppercase text-muted" style="font-size:0.7em; letter-spacing:0.04em;">
+                {% if has_tag %}Inherited from {{ note.split(']')[0][1:] }}{% else %}Scope note{% endif %}
+            </div>
+            <p class="mb-0 small text-muted fst-italic">{{ note.split(']', 1)[1].strip() if has_tag else note }}</p>
+        </div>
+        {% endfor %}
+        {# IAO_0000116 editor note (extraction framing) #}
+        {% for note in prop_groups.editor_note %}
+        <div class="ps-2 mt-2 border-start border-3 border-secondary">
+            <div class="text-uppercase text-muted" style="font-size:0.7em; letter-spacing:0.04em;">Editor note</div>
+            <p class="mb-0 small text-muted">{{ note }}</p>
+        </div>
+        {% endfor %}
+        {# IAO_0000119 definition source (citations) #}
+        {% if prop_groups.definition_source %}
+        <div class="mt-2 pt-2 border-top">
+            <div class="text-uppercase text-muted mb-1" style="font-size:0.7em; letter-spacing:0.04em;">Definition source</div>
+            <ul class="small text-muted mb-0 ps-3">
+            {% for src in prop_groups.definition_source %}<li>{{ src }}</li>{% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endmacro %}

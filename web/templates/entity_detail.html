@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "macros/entity_display.html" import render_iri_target %}
-{% from "macros/component_sections.html" import property_structure %}
+{% from "macros/component_sections.html" import property_structure, definition_card %}
 
 {% block title %}{{ entity.label or fragment }} - {{ ontology.name }} - OntServe{% endblock %}
 
@@ -245,33 +245,8 @@
                 </div>
                 {% endif %}
 
-                <!-- Definition/Comment -->
-                {% if entity.comment or prop_groups.description or prop_groups.scope_notes %}
-                <div class="card mb-3">
-                    <div class="card-header"><h6 class="mb-0">Definition</h6></div>
-                    <div class="card-body">
-                        {% if entity.comment %}
-                        <p class="mb-0">{{ entity.comment }}</p>
-                        {% endif %}
-                        {% for label, val in prop_groups.description %}
-                        {% if entity.comment %}<hr class="my-2">{% endif %}
-                        <p class="mb-0">{{ val }}</p>
-                        {% endfor %}
-                        {# skos:scopeNote, demarcated from the primary definition above. A note this
-                           class defines itself is labelled "Scope note"; a note pulled down from an
-                           ancestor carries a leading "[source]" tag and is labelled "Inherited from <source>". #}
-                        {% for note in prop_groups.scope_notes %}
-                        {% set has_tag = note.startswith('[') and ']' in note %}
-                        <div class="ps-2 mt-2 border-start border-3 border-info">
-                            <div class="text-uppercase text-muted" style="font-size:0.7em; letter-spacing:0.04em;">
-                                {% if has_tag %}Inherited from {{ note.split(']')[0][1:] }}{% else %}Scope note{% endif %}
-                            </div>
-                            <p class="mb-0 small text-muted fst-italic">{{ note.split(']', 1)[1].strip() if has_tag else note }}</p>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
+                <!-- Definition (data-driven; see macros/component_sections.html) -->
+                {{ definition_card(entity, prop_groups) }}
 
                 <!-- Crosswalk mappings & provenance (skos:exactMatch/closeMatch, seeAlso, source) -->
                 {% if semantic_links %}
