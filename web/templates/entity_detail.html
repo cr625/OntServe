@@ -373,7 +373,7 @@
                     </div>
                     <div class="card-body">
                         {% if class_schema.is_role %}
-                        <p class="small text-muted mb-3">A role is described at three levels here, each a <strong>schema</strong> on the class rather than a particular role individual's values. A property can appear in more than one level (e.g. <code>hasObligation</code> is both a relation and definitional).</p>
+                        <p class="small text-muted mb-3">These are the property schemas that apply to instances of this class: the relations and data properties, and, where defined, the definitional and bearer-attribute schemas. Each is a <strong>schema</strong> on the class, not values on one particular individual; the same property can appear in more than one schema.</p>
                         {% else %}
                         <p class="small text-muted mb-3">Properties whose <code>rdfs:domain</code> is this class or an ancestor. These are edges/attributes on instances; their <em>values</em> are on the individual, not the class.</p>
                         {% endif %}
@@ -382,7 +382,7 @@
                         {% if class_schema.domain_props %}
                         <div class="mb-3 ps-3 border-start border-3 border-success">
                             <div class="fw-bold text-success pb-1 mb-2 border-bottom">{% if class_schema.is_role %}1 &middot; {% endif %}Relations &amp; data properties
-                                <span class="badge rounded-pill bg-light text-muted border fw-normal">rdfs:domain on this class</span>
+                                <span class="badge rounded-pill bg-light text-muted border fw-normal">rdfs:domain on this class or ancestor</span>
                                 <i class="bi bi-info-circle text-success ms-1" style="cursor: help;" tabindex="0" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="desc-tip" title="Object and data properties whose <code>rdfs:domain</code> is this class or an ancestor. On an instance, an object property is a graph <strong>edge</strong> to another entity (its <em>Range</em>) and a data property is a literal value.{% if class_schema.is_role %} Unlike the definitional and bearer schemas below, these are relations in the graph, not JSON fields.{% endif %}"></i></div>
                             <table class="table table-sm align-middle mb-0">
                                 <thead><tr class="small text-muted"><th style="width:28%">Property</th><th style="width:22%">Range</th><th>Description</th></tr></thead>
