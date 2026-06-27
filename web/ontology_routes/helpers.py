@@ -380,8 +380,8 @@ def _shape_target_map():
     return out
 
 
-def _role_shape_schemas(ancestor_list):
-    """The role property schema for a class = the UNION of the SHACL shapes whose targetClass is in the
+def _class_shape_schemas(ancestor_list):
+    """The SHACL property schema for a class = the UNION of the descriptive shapes whose targetClass is in the
     class chain (general -> specific): a base Role gets RoleDefinitionShape; a ProfessionalRole also gets
     ProfessionalRoleDefinitionShape + ProfessionalRolePropertyShape; a StakeholderRole only the universal
     one. *DefinitionShape -> definitional (type-level), *PropertyShape -> bearer (individual). Returns
@@ -593,16 +593,15 @@ def class_property_schema(entity):
         })
     domain_props.sort(key=lambda x: (not x["on_self"], x["name"].lower()))
 
-    is_role = _CORE_ROLE_URI in ancestor_set
-    if is_role:
-        role_definition, role_attrs = _role_shape_schemas(anc_list)
-    else:
-        role_definition, role_attrs = [], []
+    # SHACL definitional/bearer schemas for ANY class a shape targets along its chain. Currently only
+    # roles have such shapes, so non-role classes get empty lists; written generically so a future
+    # per-component shape (e.g. a PrincipleDefinitionShape) renders through the same path with no change.
+    definitional, bearer = _class_shape_schemas(anc_list)
 
-    if not (domain_props or role_attrs or role_definition):
+    if not (domain_props or bearer or definitional):
         return None
-    return {"is_role": is_role, "domain_props": domain_props,
-            "role_definition": role_definition, "role_attrs": role_attrs}
+    return {"domain_props": domain_props,
+            "definitional": definitional, "bearer": bearer}
 
 
 def _generate_entity_ttl_display(entity, ontology):
