@@ -117,8 +117,9 @@ _EVIDENCE_KEYS = frozenset({'sourcetext', 'textreferences'})
 # Property keys rendered as the entity description (below Definition)
 _DESCRIPTION_KEYS = frozenset({'caseinvolvement'})
 
-# Property keys to skip entirely (redundant or internal)
-_SKIP_KEYS = frozenset({'type', 'NamedIndividual', 'rdf_types'})
+# Property keys to skip entirely (redundant or internal).
+# dtupleComponent: the D-tuple letter (R/P/O/...) is already shown in the page header.
+_SKIP_KEYS = frozenset({'type', 'NamedIndividual', 'rdf_types', 'dtupleComponent'})
 
 # Human-readable labels for property keys
 _PROPERTY_LABELS = {
