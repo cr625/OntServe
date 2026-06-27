@@ -227,7 +227,7 @@ do_not_mint:
   # --- "obligated/duty" roles -> role + Obligation (the duty is not a role kind) ---
   - label: AI Disclosure Obligated Engineer
     decompose:
-      role: EnvironmentalEngineerRole
+      role: EngineerRole
       obligation: { iri: AIToolDisclosureObligation, via: "core#obligatedParty" }
     source_cases: [7]
   - label: Confidentiality Bound Engineer
