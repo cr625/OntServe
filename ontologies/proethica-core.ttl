@@ -47,6 +47,12 @@ proeth-core:Principle a owl:Class ;
     rdfs:label "Principle"@en ;
     rdfs:comment "A directive information entity representing ethical values and guidelines for conduct. Principles prescribe professional behavior and gain operational meaning through accumulated case precedents (McLaren 2003). This is the P component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A directive information entity representing ethical values and guidelines for conduct. This is the P component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:scopeNote "The principle TYPE is defined by the value it expresses and its source provision, not by who invokes it or how it is balanced in a given case; per-occasion invocation, application target, and resolution narrative attach to the case individuals and edges, not to the class."@en ;
+    iao:0000119 "McLaren, B.M. (2003). Extensionally defining principles and cases in ethics: an AI model. Artificial Intelligence 150." ,
+                "Frankel, M.S. (1989). Professional codes: why, how, and with what impact? Journal of Business Ethics." ,
+                "Taddeo et al. (2024). Principles as constitutional-style provisions requiring contextual interpretation (doi:10.1007/s00146-024-01870-x)." ,
+                "Prem, E. (2023). The open-textured, hard-to-operationalize character of ethics principles (doi:10.1007/s00146-023-01687-0)." ;
+    iao:0000116 "Extraction framing: a principle is a reusable ethical value, not a duty, action, or actor. It carries no actor, application target, or resolution narrative (those move to invokedBy, States, and literals); an abstract open-textured value (Prem 2023), it gains concrete meaning extensionally through the NSPE Board of Ethical Review cases that instantiate it (McLaren 2003), and is keyed to its source provision via proeth:nspeReference."@en ;
     skos:changeNote "v2.3.0: Refined from IAO:information content entity to IAO:directive information entity. Professional principles occupy the aspirational level of code hierarchies (Frankel 1989) and function analogously to constitutional provisions requiring interpretation in context (Taddeo et al. 2024). Their prescriptive character (world-to-word fit) distinguishes them from descriptive information content."@en .
 
 # O - Obligation: Professional obligations as directive information entities (Donohue 2017)
