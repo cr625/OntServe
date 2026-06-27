@@ -54,31 +54,30 @@ pesh:RoleArchetypeShape
             WHERE {
                 FILTER NOT EXISTS {
                     $this rdf:type ?arch .
-                    ?arch proeth:archetypeAxis "occupational" .
+                    ?arch proeth:archetypeAxis proeth:OccupationalArchetype .
                 }
             }
         """ ;
     ] .
 
-# AxisValueShapes: each archetypeAxis / specializationAxis annotation value must be a skos:notation of
-# a concept in the matching SKOS controlled vocabulary (RoleArchetypeAxisScheme / RoleSpecializationScheme),
-# which is the single source of allowed values -- so a typo or drift (e.g. "occupatonal") is caught. The
-# allowed set is NOT hardcoded here; it is read from the scheme, so extending the vocabulary is a one-line
-# concept addition in the scheme. sh:Violation: an out-of-vocabulary axis value is a real data error.
+# AxisValueShapes: each archetypeAxis / specializationAxis value must be a skos:Concept in the matching
+# SKOS controlled vocabulary (RoleArchetypeAxisScheme / RoleSpecializationScheme) -- the single source of
+# allowed values. Since the value is now the concept URI (not a string code), this is a referential-
+# integrity check (skos:inScheme), so a dangling or wrong concept is caught. sh:Violation.
 pesh:ArchetypeAxisValueShape
     a sh:NodeShape ;
     sh:targetSubjectsOf proeth:archetypeAxis ;
-    rdfs:label "archetypeAxis value is a RoleArchetypeAxisScheme notation" ;
+    rdfs:label "archetypeAxis value is a RoleArchetypeAxisScheme concept" ;
     sh:severity sh:Violation ;
     sh:sparql [
         a sh:SPARQLConstraint ;
-        sh:message "proeth:archetypeAxis value {?value} is not a skos:notation of a concept in proeth:RoleArchetypeAxisScheme." ;
+        sh:message "proeth:archetypeAxis value {?value} is not a concept in proeth:RoleArchetypeAxisScheme." ;
         sh:prefixes pesh: ;
         sh:select """
             SELECT $this ?value
             WHERE {
                 $this proeth:archetypeAxis ?value .
-                FILTER NOT EXISTS { ?c skos:inScheme proeth:RoleArchetypeAxisScheme ; skos:notation ?value . }
+                FILTER NOT EXISTS { ?value skos:inScheme proeth:RoleArchetypeAxisScheme . }
             }
         """ ;
     ] .
@@ -86,17 +85,17 @@ pesh:ArchetypeAxisValueShape
 pesh:SpecializationAxisValueShape
     a sh:NodeShape ;
     sh:targetSubjectsOf proeth:specializationAxis ;
-    rdfs:label "specializationAxis value is a RoleSpecializationScheme notation" ;
+    rdfs:label "specializationAxis value is a RoleSpecializationScheme concept" ;
     sh:severity sh:Violation ;
     sh:sparql [
         a sh:SPARQLConstraint ;
-        sh:message "proeth:specializationAxis value {?value} is not a skos:notation of a concept in proeth:RoleSpecializationScheme." ;
+        sh:message "proeth:specializationAxis value {?value} is not a concept in proeth:RoleSpecializationScheme." ;
         sh:prefixes pesh: ;
         sh:select """
             SELECT $this ?value
             WHERE {
                 $this proeth:specializationAxis ?value .
-                FILTER NOT EXISTS { ?c skos:inScheme proeth:RoleSpecializationScheme ; skos:notation ?value . }
+                FILTER NOT EXISTS { ?value skos:inScheme proeth:RoleSpecializationScheme . }
             }
         """ ;
     ] .

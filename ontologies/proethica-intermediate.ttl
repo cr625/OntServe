@@ -766,7 +766,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:label "Engineer Role"@en ;
     rdfs:comment "A professional role involving engineering practice and responsibilities. Occupational archetype head for all engineer specializations and extracted engineer-role leaves."@en ;
     skos:closeMatch ifcrole:Engineer ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "engineer"@en, "engineering"@en ;
     rdfs:subClassOf :ProfessionalRole .
 
@@ -1959,7 +1959,7 @@ proeth:requiresCapability a owl:ObjectProperty ;
 
 proeth:RoleArchetypeAxisScheme a skos:ConceptScheme ;
     rdfs:label "Role archetype axis"@en ;
-    skos:definition "The archetype axis a role classification sits on: occupational (what KIND of agent the bearer is) vs relational (the duty-RELATIONSHIP the role establishes). The two are orthogonal -- a role can be both -- so neither is an OWL class on the ProfessionalRole/ParticipantRole disjoint backbone; this scheme is their controlled vocabulary. proeth:archetypeAxis takes a concept's skos:notation as its value."@en ;
+    skos:definition "The archetype axis a role classification sits on: occupational (what KIND of agent the bearer is) vs relational (the duty-RELATIONSHIP the role establishes). The two are orthogonal -- a role can be both -- so neither is an OWL class on the ProfessionalRole/ParticipantRole disjoint backbone; this scheme is their controlled vocabulary. proeth:archetypeAxis takes a concept (URI) of this scheme as its value; skos:notation carries the short code."@en ;
     dcterms:source "Kong et al. (2020), audience-oriented identity roles; Oakley & Cocking (2001), Virtue Ethics and Professional Roles." .
 
 proeth:OccupationalArchetype a owl:NamedIndividual, skos:Concept ;
@@ -1979,7 +1979,7 @@ proeth:RelationalArchetype a owl:NamedIndividual, skos:Concept ;
 
 proeth:RoleSpecializationScheme a skos:ConceptScheme ;
     rdfs:label "Role specialization axis"@en ;
-    skos:definition "How an occupational role leaf specializes its archetype head: discipline (a branch of the profession, e.g. Civil/Electrical) vs function (a cross-discipline job function, e.g. design/quality/safety). Finer than the archetype axis; an orthogonal cross-cut with no OWL class. proeth:specializationAxis (on a ROLE) takes a concept's skos:notation as its value."@en ;
+    skos:definition "How an occupational role leaf specializes its archetype head: discipline (a branch of the profession, e.g. Civil/Electrical) vs function (a cross-discipline job function, e.g. design/quality/safety). Finer than the archetype axis; an orthogonal cross-cut with no OWL class. proeth:specializationAxis (on a ROLE) takes a concept (URI) of this scheme as its value; skos:notation carries the short code."@en ;
     dcterms:source "ProEthica engineering role taxonomy; IFC discipline crosswalk (ifc-roles.ttl)." .
 
 proeth:DisciplineSpecialization a owl:NamedIndividual, skos:Concept ;
@@ -1997,7 +1997,7 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 :archetypeAxis rdf:type owl:AnnotationProperty ;
     rdfs:label "archetype axis"@en ;
     rdfs:seeAlso proeth:RoleArchetypeAxisScheme ;
-    rdfs:comment "Role-archetype axis marker. The value is the skos:notation of a concept in proeth:RoleArchetypeAxisScheme (currently 'occupational'; the 'relational' pole is now a reasoner-inferred defined class, not an annotation). Drives data-driven occupational placement; see the occupational resolver."@en .
+    rdfs:comment "Role-archetype axis marker. The value is a concept (URI) in proeth:RoleArchetypeAxisScheme (currently :OccupationalArchetype; the relational pole is now a reasoner-inferred defined class, not an annotation). skos:notation carries the short code. Drives data-driven occupational placement; see the occupational resolver."@en .
 
 # specializationAxis applies to occupational role leaves under an archetype head (e.g. EngineerRole):
 # "discipline" = a branch of the profession (CivilEngineerRole, crosswalked to an IFC discipline role);
@@ -2005,28 +2005,28 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 :specializationAxis rdf:type owl:AnnotationProperty ;
     rdfs:label "specialization axis"@en ;
     rdfs:seeAlso proeth:RoleSpecializationScheme ;
-    rdfs:comment "Role specialization axis. On an occupational ROLE leaf the value is the skos:notation of a concept in proeth:RoleSpecializationScheme ('discipline' or 'function'). The former principle-kind use (values fundamental/virtue/relational/domain) was a shadow of the principle-kind classes and was retired 2026-06-27 in favour of rdfs:subClassOf the kind class."@en .
+    rdfs:comment "Role specialization axis. On an occupational ROLE leaf the value is a concept (URI) in proeth:RoleSpecializationScheme (:DisciplineSpecialization or :FunctionSpecialization; skos:notation carries the short code). The former principle-kind use (values fundamental/virtue/relational/domain) was a shadow of the principle-kind classes and was retired 2026-06-27 in favour of rdfs:subClassOf the kind class."@en .
 
 # Engineer specializations (under :EngineerRole, itself under :ProfessionalRole)
 :CivilEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Civil Engineer Role"@en ; skos:exactMatch ifcrole:CivilEngineer ;
-    :archetypeAxis "occupational" ;
-    :specializationAxis "discipline" ;
+    :archetypeAxis :OccupationalArchetype ;
+    :specializationAxis :DisciplineSpecialization ;
     rdfs:comment "Engineer specializing in infrastructure and the built environment."@en .
 :StructuralEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Structural Engineer Role"@en ; skos:exactMatch ifcrole:StructuralEngineer ;
-    :archetypeAxis "occupational" ;
-    :specializationAxis "discipline" ;
+    :archetypeAxis :OccupationalArchetype ;
+    :specializationAxis :DisciplineSpecialization ;
     rdfs:comment "Engineer specializing in load-bearing structure and structural integrity."@en .
 :MechanicalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Mechanical Engineer Role"@en ; skos:exactMatch ifcrole:MechanicalEngineer ;
-    :archetypeAxis "occupational" ;
-    :specializationAxis "discipline" ;
+    :archetypeAxis :OccupationalArchetype ;
+    :specializationAxis :DisciplineSpecialization ;
     rdfs:comment "Engineer specializing in mechanical systems."@en .
 :ElectricalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Electrical Engineer Role"@en ; skos:exactMatch ifcrole:ElectricalEngineer ;
-    :archetypeAxis "occupational" ;
-    :specializationAxis "discipline" ;
+    :archetypeAxis :OccupationalArchetype ;
+    :specializationAxis :DisciplineSpecialization ;
     rdfs:comment "Engineer specializing in electrical systems and power."@en .
 
 # Corpus-derived engineer + participant role specializations promoted from the NSPE case
@@ -2035,17 +2035,17 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 # relational/sector/participant and stay unaxed. alt_labels carried over as skos:altLabel.
 :EnvironmentalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Environmental Engineer Role"@en ;
-    :archetypeAxis "occupational" ; :specializationAxis "discipline" ;
+    :archetypeAxis :OccupationalArchetype ; :specializationAxis :DisciplineSpecialization ;
     skos:altLabel "environmental engineer"@en, "environmental site engineer"@en, "wetland delineation engineer"@en ;
     rdfs:comment "A licensed engineer whose practice area is environmental engineering (site assessment, contamination, wetlands, permitting)."@en .
 :GeotechnicalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Geotechnical Engineer Role"@en ;
-    :archetypeAxis "occupational" ; :specializationAxis "discipline" ;
+    :archetypeAxis :OccupationalArchetype ; :specializationAxis :DisciplineSpecialization ;
     skos:altLabel "geotechnical engineer"@en, "geotechnical observation consultant"@en ;
     rdfs:comment "An engineer whose practice area is geotechnical engineering (soils, foundations, site observation)."@en .
 :DesignEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Design Engineer Role"@en ;
-    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    :archetypeAxis :OccupationalArchetype ; :specializationAxis :FunctionSpecialization ;
     skos:altLabel "design engineer"@en, "cooperating design engineer"@en, "original design engineer"@en, "dam design engineer"@en, "dock foundation design engineer"@en, "stormwater design engineer"@en ;
     rdfs:comment "An engineer responsible for producing a design (plans, calculations, specifications) for a project. Project and discipline are case context, not separate role kinds."@en .
 # The three formerly dual-archetype leaves keep their occupational primitive parent (:EngineerRole) and
@@ -2054,34 +2054,34 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 # reclassified as purely occupational (responsible charge is a mode of practice, not a duty-relationship).
 :ResponsibleChargeEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Responsible Charge Engineer Role"@en ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "responsible charge engineer"@en, "reviewing charge engineer"@en ;
     rdfs:comment "An engineer in responsible charge of work, exercising direct control and personal supervision over its production. An occupational mode of practice, not a duty-relationship archetype."@en .
 :ForensicExpertWitnessEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty proeth-core:hasClient ; owl:someValuesFrom proeth-core:Role ] ;
     rdfs:label "Forensic Expert Witness Engineer Role"@en ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "forensic expert witness engineer"@en, "forensic engineer"@en ;
     rdfs:comment "An engineer retained to provide forensic analysis and expert testimony in a dispute or litigation. Inferred :ProviderClientRole via proeth-core:hasClient (the retained provider side)."@en .
 :MentorEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty proeth-core:professionalPeerOf ; owl:someValuesFrom proeth-core:Role ] ;
     rdfs:label "Mentor Engineer Role"@en ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "mentor engineer"@en, "retired mentor engineer"@en ;
     rdfs:comment "An experienced engineer who mentors another. Inferred :ProfessionalPeerRole via proeth-core:professionalPeerOf. Availability such as retired status is a State, not a role kind."@en .
 :MunicipalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Municipal Engineer Role"@en ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "municipal engineer"@en ;
     rdfs:comment "An engineer engaged by a municipality to advise on and approve public engineering works. An employer-sector idiom, not a discipline or function specialization."@en .
 :ConsultantEngineerRole rdf:type owl:Class ; rdfs:subClassOf :ConsultantRole ;
     rdfs:label "Consultant Engineer Role"@en ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "consultant engineer"@en ;
     rdfs:comment "An engineer engaged in a consulting or advisory capacity to a client. A relational specialization under ConsultantRole, not a discipline or function."@en .
 :NonEngineerExpertWitnessRole rdf:type owl:Class ; rdfs:subClassOf :ProviderClientRole ;
     rdfs:label "Non-Engineer Expert Witness Role"@en ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "non-engineer expert witness"@en, "non-engineering expert witness"@en ;
     rdfs:comment "An expert witness who is not an engineer, kept distinct from ForensicExpertWitnessEngineerRole because the engineer-versus-non-engineer distinction carries different professional obligations."@en .
 
@@ -2090,62 +2090,62 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 # (engineering-ethics-internal detail); appliesToDomain folded into the comment.
 :QualityEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Quality Engineer Role"@en ;
-    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    :archetypeAxis :OccupationalArchetype ; :specializationAxis :FunctionSpecialization ;
     skos:altLabel "quality engineer"@en ;
     rdfs:comment "Engineer responsible for implementing quality management systems and ensuring compliance with quality standards. Applies across engineering disciplines."@en .
 :SafetyEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Safety Engineer Role"@en ;
-    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    :archetypeAxis :OccupationalArchetype ; :specializationAxis :FunctionSpecialization ;
     skos:altLabel "safety engineer"@en ;
     rdfs:comment "Engineer specializing in system safety analysis and compliance with safety-critical standards. Applies across engineering disciplines."@en .
 :StandardsEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Standards Engineer Role"@en ;
-    :archetypeAxis "occupational" ; :specializationAxis "function" ;
+    :archetypeAxis :OccupationalArchetype ; :specializationAxis :FunctionSpecialization ;
     skos:altLabel "standards engineer"@en ;
     rdfs:comment "Engineer responsible for ensuring compliance with applicable technical standards and regulations. Applies across engineering disciplines."@en .
 
 # Obligation-bearing occupational heads (under :ProfessionalRole)
 :ProjectManagerRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
     rdfs:label "Project Manager Role"@en ; skos:exactMatch ifcrole:ProjectManager ;
-    :archetypeAxis "occupational" ; skos:altLabel "project manager"@en, "construction manager"@en, "program manager"@en ;
+    :archetypeAxis :OccupationalArchetype ; skos:altLabel "project manager"@en, "construction manager"@en, "program manager"@en ;
     rdfs:comment "Party responsible for planning, coordinating, and delivering a project."@en .
 :ArchitectRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
     rdfs:label "Architect Role"@en ; skos:exactMatch ifcrole:Architect ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     rdfs:comment "Professional responsible for building design and construction oversight."@en .
 :ConsultantRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
     rdfs:label "Consultant Role"@en ; skos:exactMatch ifcrole:Consultant ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     rdfs:comment "Professional engaged for expert advice on a specific aspect of a project. Engineering consultants are classified under EngineerRole. This head covers non-engineering advisory roles."@en .
 :RegulatoryAuthorityRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
     rdfs:label "Regulatory Authority Role"@en ;
-    :archetypeAxis "occupational" ; skos:altLabel "regulator"@en, "regulatory"@en, "authority"@en, "inspector"@en, "government"@en, "board of ethical"@en, "public official"@en, "public agency"@en ;
+    :archetypeAxis :OccupationalArchetype ; skos:altLabel "regulator"@en, "regulatory"@en, "authority"@en, "inspector"@en, "government"@en, "board of ethical"@en, "public official"@en, "public agency"@en ;
     rdfs:comment "Code-enforcement officials, inspectors, boards, and government agencies acting in an oversight capacity. No IFC equivalent (IFC has no regulator role)."@en .
 
 # Non-obligation-bearing occupational heads (under :ParticipantRole, so no obligation restriction)
 :ClientRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Client Role"@en ; skos:exactMatch ifcrole:Client ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     rdfs:comment "Party that commissions the project work. This is the occupational archetype. The duty relationship is carried separately by :ProviderClientRole."@en .
 :OwnerRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Owner Role"@en ; skos:exactMatch ifcrole:Owner ; skos:closeMatch ifcrole:BuildingOwner ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     rdfs:comment "Party that owns the asset, project, or building."@en .
 :PublicRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Public Role"@en ;
-    :archetypeAxis "occupational" ; skos:altLabel "public"@en, "community"@en, "citizen"@en, "resident"@en, "neighbor"@en, "society"@en, "affected party"@en ;
+    :archetypeAxis :OccupationalArchetype ; skos:altLabel "public"@en, "community"@en, "citizen"@en, "resident"@en, "neighbor"@en, "society"@en, "affected party"@en ;
     rdfs:comment "The public, community members, and affected stakeholders. No IFC equivalent, since IFC has no public or society role. The professional duty side is :PublicResponsibilityRole."@en .
 :ContractorRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Contractor Role"@en ; skos:exactMatch ifcrole:Contractor ; skos:closeMatch ifcrole:Subcontractor ;
-    :archetypeAxis "occupational" ; skos:altLabel "contractor"@en, "subcontractor"@en ;
+    :archetypeAxis :OccupationalArchetype ; skos:altLabel "contractor"@en, "subcontractor"@en ;
     rdfs:comment "Party contracted to carry out construction work."@en .
 :SupplierRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Supplier Role"@en ; skos:exactMatch ifcrole:Supplier ; skos:closeMatch ifcrole:Manufacturer ;
-    :archetypeAxis "occupational" ; skos:altLabel "supplier"@en, "manufacturer"@en, "vendor"@en, "reseller"@en ;
+    :archetypeAxis :OccupationalArchetype ; skos:altLabel "supplier"@en, "manufacturer"@en, "vendor"@en, "reseller"@en ;
     rdfs:comment "Party that supplies materials, products, or equipment."@en .
 :EmployerRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Employer Role"@en ;
-    :archetypeAxis "occupational" ;
+    :archetypeAxis :OccupationalArchetype ;
     rdfs:comment "The employing organization as a participant. The duty relationship is carried separately by :EmployerRelationshipRole. No IFC equivalent."@en .
 
 #################################################################

@@ -316,6 +316,9 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
         for individual_uri in g.subjects(RDF.type, OWL.NamedIndividual):
             label = next(g.objects(individual_uri, RDFS.label), None)
             comment = next(g.objects(individual_uri, RDFS.comment), None)
+            # Fall back to skos:definition when there is no rdfs:comment (mirrors the class loop), so a
+            # SKOS concept individual (e.g. an axis-vocabulary concept) carries its definition for display.
+            definition = next(g.objects(individual_uri, SKOS.definition), None)
 
             # Get the types of this individual (excluding NamedIndividual itself)
             types = []
@@ -340,7 +343,7 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
 
             uri_str = str(individual_uri)
             label_str = str(label) if label else None
-            comment_str = str(comment) if comment else None
+            comment_str = str(comment) if comment else str(definition) if definition else None
             entity = OntologyEntity(
                 ontology_id=ontology.id,
                 entity_type='individual',

@@ -505,33 +505,38 @@ def class_hierarchy(entity, child_cap=25):
 
     children = []
     for (u, lbl, name, props) in rows[:child_cap]:
-        arch, spec = _axes(props)
+        arch, spec = _axes(props)  # now SKOS concept URIs (RoleArchetypeAxis/RoleSpecialization scheme)
         children.append({'uri': u, 'label': lbl or _uri_fragment(u),
                          'fragment': _uri_fragment(u), 'ontology': name,
                          'archetype_axis': arch, 'specialization_axis': spec})
+
+    # The axis values are SKOS concept URIs. Resolve each to its concept so the badge shows the concept's
+    # skos:notation (not the raw URI), links to the concept page, and shows its definition on hover. Then
+    # the axis fields hold the notation (for display + the rank sort). Scoped query; fires only when tagged.
+    axis_uris = {c['archetype_axis'] for c in children} | {c['specialization_axis'] for c in children}
+    axis_uris.discard(None)
+    cmap = {}
+    if axis_uris:
+        crows = db.session.execute(
+            select(OntologyEntity.uri, OntologyEntity.comment, Ontology.name,
+                   OntologyEntity.properties.op('->>')('notation').label('notation'))
+            .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
+            .where(OntologyEntity.uri.in_(list(axis_uris)))
+        ).all()
+        cmap = {r.uri: {'fragment': _uri_fragment(r.uri), 'ontology': r.name,
+                        'notation': r.notation or _uri_fragment(r.uri),
+                        'definition': (r.comment or '')} for r in crows}
+    for c in children:
+        ac, sc = cmap.get(c['archetype_axis']), cmap.get(c['specialization_axis'])
+        c['archetype_concept'], c['specialization_concept'] = ac, sc
+        c['archetype_axis'] = ac['notation'] if ac else None        # display + rank by the notation
+        c['specialization_axis'] = sc['notation'] if sc else None
+
     # Group by axis so like sits with like (occupational discipline, then function, then unspecialized,
     # then relational), each still alphabetized within its group.
     _rank = {('occupational', 'discipline'): 0, ('occupational', 'function'): 1, ('occupational', None): 2}
     children.sort(key=lambda c: (_rank.get((c['archetype_axis'], c['specialization_axis']), 3),
                                  (c['label'] or '').lower()))
-
-    # Resolve each axis value (a skos:notation) to its SKOS concept so the badge links to the concept's
-    # definition -- the controlled-vocabulary value is no longer an opaque string. Scoped query: fires
-    # only when there ARE axis-badged children, and only for the notations present.
-    axis_values = {c['archetype_axis'] for c in children} | {c['specialization_axis'] for c in children}
-    axis_values.discard(None)
-    if axis_values:
-        note_rows = db.session.execute(
-            select(OntologyEntity.uri, OntologyEntity.comment, Ontology.name,
-                   OntologyEntity.properties.op('->>')('notation').label('notation'))
-            .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
-            .where(OntologyEntity.properties.op('->>')('notation').in_(list(axis_values)))
-        ).all()
-        note_map = {r.notation: {'fragment': _uri_fragment(r.uri), 'ontology': r.name,
-                                 'definition': (r.comment or '')} for r in note_rows}
-        for c in children:
-            c['archetype_concept'] = note_map.get(c['archetype_axis'])
-            c['specialization_concept'] = note_map.get(c['specialization_axis'])
     return {'chain': chain, 'children': children, 'children_overflow': len(rows) > child_cap}
 
 
