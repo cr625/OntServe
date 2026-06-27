@@ -37,6 +37,19 @@
                 {% endfor %}
                 </tbody>
             </table>
+            {% elif g.kind == 'referenced_by' %}
+            <table class="table table-sm align-middle mb-0">
+                <thead><tr class="small text-muted"><th style="width:28%">From</th><th style="width:22%">Property</th><th>Description</th></tr></thead>
+                <tbody>
+                {% for p in g.rows %}
+                <tr>
+                    <td>{% if p.from_uri %}{{ render_iri_target(p.from_uri, p.from_ontology) }}{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
+                    <td>{{ render_iri_target(p.uri, p.prop_ontology) }}{% if not p.on_self %} <span class="badge bg-light text-muted border" title="rdfs:range is an ancestor class">inherited</span>{% endif %}</td>
+                    <td class="small text-muted">{{ p.comment }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
             {% else %}
             <table class="table table-sm align-middle mb-0">
                 <thead><tr class="small text-muted"><th style="width:28%">Attribute</th><th>Description</th></tr></thead>

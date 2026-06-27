@@ -580,10 +580,7 @@ def class_property_schema(entity):
     ancestor_set = set(anc_list) - _UNIVERSAL_TOP_URIS
 
     prop_rows = db.session.execute(
-        select(OntologyEntity).where(
-            OntologyEntity.entity_type == "property",
-            OntologyEntity.domain.isnot(None),
-        )
+        select(OntologyEntity).where(OntologyEntity.entity_type == "property")
     ).scalars().all()
 
     def _local(u):
@@ -611,6 +608,44 @@ def class_property_schema(entity):
         })
     domain_props.sort(key=lambda x: (not x["on_self"], x["name"].lower()))
 
+    # Incoming: properties whose rdfs:range is this class or a (non-universal) ancestor -- the edges that
+    # point AT instances of this class (its in-degree). Mirrors domain_props but keyed on range, and
+    # records the source class (the property's rdfs:domain) as "from".
+    referenced_by, seen_r = [], set()
+    for p in prop_rows:
+        rng = p.range
+        rng_uris = rng if isinstance(rng, list) else [rng]
+        if not any(isinstance(r, str) and r in ancestor_set for r in rng_uris):
+            continue
+        name = _local(p.uri)
+        if not name or name in seen_r:
+            continue
+        seen_r.add(name)
+        dom = p.domain
+        dom_uri = (dom[0] if isinstance(dom, list) and dom else dom) if dom else None
+        referenced_by.append({
+            "name": name,
+            "uri": p.uri,
+            "comment": (p.comment or ""),
+            "from_name": _local(dom_uri),
+            "from_uri": dom_uri if isinstance(dom_uri, str) else None,
+            "on_self": any(isinstance(r, str) and r == entity.uri for r in rng_uris),
+        })
+    referenced_by.sort(key=lambda x: (not x["on_self"], (x["from_name"] or "").lower(), x["name"].lower()))
+
+    # Resolve the actual ontology of each referenced-by source class and property so the macro links
+    # them cross-ontology correctly (e.g. derivedFromPrinciple lives in proethica-intermediate, not core).
+    if referenced_by:
+        link_uris = {r["uri"] for r in referenced_by} | {r["from_uri"] for r in referenced_by if r["from_uri"]}
+        uri_to_ont = dict(db.session.execute(
+            select(OntologyEntity.uri, Ontology.name)
+            .join(Ontology, OntologyEntity.ontology_id == Ontology.id)
+            .where(OntologyEntity.uri.in_(list(link_uris)))
+        ).all())
+        for r in referenced_by:
+            r["prop_ontology"] = uri_to_ont.get(r["uri"])
+            r["from_ontology"] = uri_to_ont.get(r["from_uri"])
+
     # SHACL definitional/bearer schemas for ANY class a shape targets along its chain. Currently only
     # roles have such shapes, so non-role classes get empty lists; written generically so a future
     # per-component shape (e.g. a PrincipleDefinitionShape) renders through the same path with no change.
@@ -620,7 +655,8 @@ def class_property_schema(entity):
     # the group labels/badges/tooltips, harmonized across all nine component pages). The macro renders
     # the returned groups generically.
     groups = property_structure_groups(
-        {"domain_props": domain_props, "definitional": definitional, "bearer": bearer}
+        {"domain_props": domain_props, "definitional": definitional,
+         "bearer": bearer, "referenced_by": referenced_by}
     )
     if not groups:
         return None

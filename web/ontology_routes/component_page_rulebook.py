@@ -31,7 +31,8 @@ is placed in a ``title="..."`` attribute).
 #   colour       -- Bootstrap contextual colour (border / text / icon)
 #   badge        -- pill badge naming the backing (e.g. the SHACL shape or rdfs:domain)
 #   badge2       -- optional second pill badge
-#   kind         -- table layout: 'relations' (Property/Range/Description) or 'attributes' (Attribute/Description)
+#   kind         -- table layout: 'relations' (Property/Range/Description), 'attributes'
+#                   (Attribute/Description), or 'referenced_by' (From/Property/Description, incoming edges)
 #   tooltip      -- (i) hover text; the single explanation for the group (HTML allowed, no double quotes)
 #   multi_suffix -- optional extra tooltip sentence appended only when the page shows more than one group
 PROPERTY_STRUCTURE_GROUPS = [
@@ -71,6 +72,19 @@ PROPERTY_STRUCTURE_GROUPS = [
         "tooltip": (
             "The controlled schema of per-individual facts an instance may carry. These do "
             "<strong>not</strong> define the type; their values are on the <em>individual</em>, not the class."
+        ),
+    },
+    {
+        "data_key": "referenced_by",
+        "label": "Referenced By",
+        "colour": "info",
+        "badge": "rdfs:range on this class or ancestor",
+        "kind": "referenced_by",
+        "tooltip": (
+            "Incoming edges: object properties declared on OTHER classes whose <strong>range</strong> is "
+            "this class or an ancestor, so they point AT instances of this class. <em>From</em> is the class "
+            "that declares the property (its <code>rdfs:domain</code>). This is the in-degree a domain-only "
+            "view would hide, e.g. a Principle is referenced by Role, Obligation and Action."
         ),
     },
 ]
