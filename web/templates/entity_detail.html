@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "macros/entity_display.html" import render_iri_target %}
-{% from "macros/component_sections.html" import property_structure, definition_card, relationships_block, class_hierarchy_card, mappings_card, source_evidence_card, children_card, used_in_cases_card, ttl_card %}
+{% from "macros/component_sections.html" import property_structure, definition_card, defined_as_card, relationships_block, class_hierarchy_card, mappings_card, source_evidence_card, children_card, used_in_cases_card, ttl_card %}
 
 {% block title %}{{ entity.label or fragment }} - {{ ontology.name }} - OntServe{% endblock %}
 
@@ -217,6 +217,9 @@
 
                 <!-- Definition (data-driven; see macros/component_sections.html) -->
                 {{ definition_card(entity, prop_groups) }}
+
+                <!-- Defined as (owl:equivalentClass expression for defined classes) -->
+                {{ defined_as_card(equivalent_class) }}
 
                 <!-- Mappings & provenance (data-driven; see macros/component_sections.html) -->
                 {{ mappings_card(semantic_links) }}

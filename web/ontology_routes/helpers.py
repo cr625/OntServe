@@ -567,6 +567,63 @@ def _entity_disjoint_classes(entity, ontology):
         return []
 
 
+def _entity_equivalent_class(entity, ontology):
+    """For a DEFINED class (owl:equivalentClass with an owl:intersectionOf), the human-readable
+    definition: the ordered conjuncts -- named classes and property restrictions (onProperty +
+    some/only filler). Parsed from the current version content because the intersection/restriction
+    nodes are anonymous blank nodes (not stored as entity triples). Returns {'conjuncts': [...]} or
+    None. Mirrors _entity_disjoint_classes."""
+    try:
+        from rdflib.collection import Collection
+        v = db.session.execute(
+            select(OntologyVersion).where(
+                OntologyVersion.ontology_id == ontology.id, OntologyVersion.is_current.is_(True)
+            )).scalar_one_or_none()
+        if not (v and v.content):
+            return None
+        g = rdflib.Graph()
+        g.parse(data=v.content, format='turtle')
+        OWL = rdflib.OWL
+        subj = rdflib.URIRef(entity.uri)
+
+        def _term(node):
+            """A linkable term dict for a URI (class or property), else a bare label."""
+            if not isinstance(node, rdflib.URIRef):
+                return {"label": str(node)}
+            uri = str(node)
+            frag = _uri_fragment(uri)
+            row = db.session.execute(
+                select(OntologyEntity.label, Ontology.name)
+                .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
+                .where(OntologyEntity.uri == uri).limit(1)).first()
+            return {"uri": uri, "fragment": frag,
+                    "label": (row[0] if row and row[0] else _humanize_property_key(frag)),
+                    "ontology": row[1] if row else None}
+
+        for eq in g.objects(subj, OWL.equivalentClass):
+            inter = next(g.objects(eq, OWL.intersectionOf), None)
+            if inter is None:
+                continue
+            conjuncts = []
+            for m in Collection(g, inter):
+                if isinstance(m, rdflib.URIRef):
+                    t = _term(m); t["kind"] = "class"; conjuncts.append(t)
+                    continue
+                prop = next(g.objects(m, OWL.onProperty), None)
+                some = next(g.objects(m, OWL.someValuesFrom), None)
+                allv = next(g.objects(m, OWL.allValuesFrom), None)
+                quant, filler = ("some", some) if some is not None else ("only", allv)
+                if prop is None or filler is None:
+                    continue
+                conjuncts.append({"kind": "restriction", "quantifier": quant,
+                                  "property": _term(prop), "filler": _term(filler)})
+            if conjuncts:
+                return {"conjuncts": conjuncts}
+        return None
+    except Exception:
+        return None
+
+
 def class_property_schema(entity):
     """For a CLASS entity, the property schema applicable to its instances:
     object/datatype properties whose rdfs:domain is this class or an ancestor, plus -- for

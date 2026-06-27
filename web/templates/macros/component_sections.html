@@ -130,6 +130,36 @@
 {% endmacro %}
 
 
+{# Defined-as card: the owl:equivalentClass definition of a DEFINED class, rendered as a
+   human-readable class expression (named conjuncts joined by "and", property restrictions as
+   "(property some/only filler)"). The axiom is an anonymous blank node, so it is parsed from the
+   source graph by _entity_equivalent_class -- the flat per-entity property table cannot show it. #}
+{% macro defined_as_card(equivalent_class) %}
+{% if equivalent_class and equivalent_class.conjuncts %}
+<div class="card mb-3">
+    <div class="card-header"><h6 class="mb-0">Defined as</h6></div>
+    <div class="card-body">
+        <div class="small text-muted mb-2">A defined class (<code>owl:equivalentClass</code>): the reasoner classifies any individual matching this expression into it.</div>
+        <div style="font-family:'Monaco','Menlo','Ubuntu Mono',monospace; font-size:.85rem; line-height:1.7;">
+            {%- for c in equivalent_class.conjuncts -%}
+                {%- if not loop.first %} <span class="text-muted">and</span> {% endif -%}
+                {%- if c.kind == 'class' -%}
+                    {%- if c.ontology and c.fragment %}<a href="{{ url_for('ontology.entity_detail', ontology_name=c.ontology, fragment=c.fragment) }}">{{ c.label }}</a>{% else %}{{ c.label }}{% endif -%}
+                {%- else -%}
+                    (
+                    {%- if c.property.ontology and c.property.fragment %}<a href="{{ url_for('ontology.entity_detail', ontology_name=c.property.ontology, fragment=c.property.fragment) }}">{{ c.property.label }}</a>{% else %}{{ c.property.label }}{% endif -%}
+                    <span class="text-muted"> {{ c.quantifier }} </span>
+                    {%- if c.filler.ontology and c.filler.fragment %}<a href="{{ url_for('ontology.entity_detail', ontology_name=c.filler.ontology, fragment=c.filler.fragment) }}">{{ c.filler.label }}</a>{% else %}{{ c.filler.label }}{% endif -%}
+                    )
+                {%- endif -%}
+            {%- endfor -%}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endmacro %}
+
+
 {# Relationships block: asserted object-property edges (IRI-valued triples), then the logical
    disjointness row. disjointWith is skipped in the edge list because the Disjoint-with row folds in
    owl:AllDisjointClasses membership and shows the complete set. Rendered inside the Properties card. #}
