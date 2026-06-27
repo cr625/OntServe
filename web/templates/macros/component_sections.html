@@ -20,12 +20,9 @@
         <h6 class="mb-0"><i class="bi bi-diagram-3"></i> Property Structure</h6>
     </div>
     <div class="card-body">
-        {% if multi %}
-        <p class="small text-muted mb-3">The property schemas that apply to instances of this class, each a <strong>schema</strong> on the class rather than values on one particular individual. The same property can appear in more than one schema.</p>
-        {% else %}
-        <p class="small text-muted mb-3">Object and data properties whose <code>rdfs:domain</code> is this class or an ancestor. These are edges/attributes on instances; their <em>values</em> are on the individual, not the class.</p>
-        {% endif %}
-
+        {# The per-group (i) tooltips below are the single source of explanation for this section
+           (harmonized across all nine component pages); no separate intro paragraph, to avoid clutter
+           and the duplication it caused on single-group pages. #}
         {# 1. Relations & data properties -- formal OWL object/data properties (rdfs:domain) #}
         {% if class_schema.domain_props %}
         {% set ns.n = ns.n + 1 %}
