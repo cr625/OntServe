@@ -37,7 +37,7 @@ is placed in a ``title="..."`` attribute).
 PROPERTY_STRUCTURE_GROUPS = [
     {
         "data_key": "domain_props",
-        "label": "Relations & data properties",
+        "label": "Object and Data Properties",
         "colour": "success",
         "badge": "rdfs:domain on this class or ancestor",
         "kind": "relations",
@@ -52,7 +52,7 @@ PROPERTY_STRUCTURE_GROUPS = [
     },
     {
         "data_key": "definitional",
-        "label": "Definitional attributes",
+        "label": "Definitional Attributes",
         "colour": "primary",
         "badge": "SHACL definitional shape",
         "kind": "attributes",
@@ -63,7 +63,7 @@ PROPERTY_STRUCTURE_GROUPS = [
     },
     {
         "data_key": "bearer",
-        "label": "Bearer attributes",
+        "label": "Bearer Attributes",
         "colour": "secondary",
         "badge": "SHACL property shape",
         "badge2": "individual data",
