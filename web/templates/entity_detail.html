@@ -373,7 +373,7 @@
                     </a>
                     <a href="/resolve/embedding?uri={{ entity.uri | urlencode }}" class="btn btn-sm btn-outline-secondary me-1 mb-1"
                        title="Download the entity's vector embedding as CSV"
-                       onclick="event.preventDefault(); fetch(this.href).then(r=>{if(!r.ok)return r.json().then(d=>{throw new Error(d.error||('HTTP '+r.status))}); return r.blob()}).then(b=>{const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='{{ ((entity.label or fragment) | replace(' ', '_')) }}_embedding.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u)}).catch(e=>alert('Could not load embedding: '+e.message))">
+                       onclick="event.preventDefault(); fetch(this.href).then(r=>{if(!r.ok)return r.json().then(d=>{throw new Error(d.error||('HTTP '+r.status))}); return r.blob()}).then(b=>{const u=window.URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='{{ ((entity.label or fragment) | replace(' ', '_')) }}_embedding.csv'; document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(u)}).catch(e=>alert('Could not load embedding: '+e.message))">
                         <i class="bi bi-grid-3x3"></i> Embedding
                     </a>
                 </div>
