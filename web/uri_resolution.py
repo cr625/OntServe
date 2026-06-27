@@ -58,17 +58,25 @@ def resolve_uri():
             ontology = entity.ontology
 
             if 'application/json' in accept_header:
+                props = entity.properties or {}
                 return jsonify({
                     'uri': entity.uri,
                     'label': entity.label,
                     'type': entity.entity_type,
-                    'definition': entity.comment,
+                    # Prefer the formal skos:definition (captured into properties) over the
+                    # shorter rdfs:comment gloss, matching the entity page's Definition card.
+                    'definition': props.get('definition') or entity.comment,
+                    'comment': entity.comment,
                     'ontology': ontology.name,
                     'ontology_base_uri': ontology.base_uri,
-                    'properties': entity.properties or {}
+                    'properties': props
                 })
 
-            ttl_content = generate_entity_ttl(entity, ontology)
+            # Render the entity's ACTUAL source triples (skos:definition, IAO annotations,
+            # restrictions, skos crosswalks), the same faithful TTL the entity page shows --
+            # not the thin label/comment/parent projection from the structured columns.
+            from web.ontology_routes.helpers import _generate_entity_ttl_display
+            ttl_content = _generate_entity_ttl_display(entity, ontology)
         else:
             # Fallback: check concepts table
             concept = db.session.execute(
@@ -116,6 +124,77 @@ def resolve_uri():
             'error': 'Internal server error',
             'message': str(e)
         }), 500
+
+
+@uri_bp.route('/resolve/embedding', methods=['GET', 'OPTIONS'])
+def resolve_embedding():
+    """Return an entity's vector embedding as CSV (dimension,value), for the Formats card / API.
+
+    Usage:
+        /resolve/embedding?uri=http://proethica.org/ontology/core#Role
+
+    Returns text/csv as a download (one row per dimension) when the entity has an embedding,
+    404 if the entity is unknown or has no embedding yet (run tools/populate_entity_embeddings.py
+    for its ontology). A single entity's vector is small (384 float32 ~= a few KB), so CSV is
+    used directly; a bulk/zip export is a future concern once we move embeddings around.
+    """
+    if request.method == 'OPTIONS':
+        response = current_app.response_class(status=200)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Accept, Content-Type'
+        return response
+
+    uri = request.args.get('uri')
+    if not uri:
+        return jsonify({
+            'error': 'Missing required parameter: uri',
+            'usage': '/resolve/embedding?uri=http://proethica.org/ontology/core#Role'
+        }), 400
+
+    try:
+        entity = db.session.execute(
+            select(OntologyEntity).where(OntologyEntity.uri == uri)
+        ).scalar_one_or_none()
+        if not entity:
+            return jsonify({'error': 'Entity not found', 'uri': uri}), 404
+
+        emb = entity.embedding
+        if emb is None:
+            return jsonify({
+                'error': 'No embedding for this entity',
+                'uri': uri,
+                'hint': 'Run tools/populate_entity_embeddings.py for its ontology'
+            }), 404
+
+        # pgvector returns a numpy array; normalize to a list of floats (string fallback for safety).
+        if hasattr(emb, 'tolist'):
+            values = emb.tolist()
+        elif isinstance(emb, str):
+            values = [float(x) for x in emb.strip('[]').split(',') if x.strip()]
+        else:
+            values = list(emb)
+
+        import io
+        import csv
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(['dimension', 'value'])
+        for i, v in enumerate(values):
+            writer.writerow([i, float(v)])
+
+        fragment = uri.rsplit('#', 1)[-1].rsplit('/', 1)[-1]
+        filename = f"{entity.ontology.name}__{fragment}.embedding.csv"
+        response = current_app.response_class(
+            response=buf.getvalue(), status=200, mimetype='text/csv')
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response.headers['X-Embedding-Dimensions'] = str(len(values))
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    except Exception as e:
+        current_app.logger.error(f"Error returning embedding for {uri}: {e}")
+        return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
 
 
 @uri_bp.route('/ontology/<path:ontology_path>/<entity_name>')
