@@ -854,33 +854,72 @@ proeth:conflictsWith a owl:ObjectProperty ;
 
 # Based on Kong et al. (2020) empirical analysis and Dennis et al. (2016) role-based filtering
 
+# The four Kong (2020) relational archetypes are DEFINED classes (owl:equivalentClass): the reasoner
+# classifies a role into its relational archetype from the role-to-role relationship edge it bears
+# (provider/peer/employer/public-duty), rather than from a hand-maintained annotation. The defining
+# filler is proeth-core:Role (NOT Agent: Role owl:disjointWith Agent, so an Agent filler would make the
+# class vacuous). The rdfs:subClassOf :RelationalRole is asserted, not entailed (RelationalRole is a
+# primitive head). Occupational counterparties stay primitive (the client is :ClientRole, etc.).
+
 :ProviderClientRole rdf:type owl:Class ;
+    owl:equivalentClass [ rdf:type owl:Class ; owl:intersectionOf (
+        proeth-core:Role
+        [ rdf:type owl:Restriction ; owl:onProperty proeth-core:hasClient ; owl:someValuesFrom proeth-core:Role ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
     rdfs:label "Provider-Client Role" ;
     skos:definition "Professional role defining relationships between service providers and their clients, creating duties of competent service delivery, confidentiality, and client welfare per Kong et al. (2020) identity role analysis." ;
-    rdfs:comment "Service delivery relationship with duties of competence and care" ;
+    rdfs:comment "Service delivery relationship with duties of competence and care. Defined class: a Role that hasClient some Role (the provider side)." ;
+    skos:scopeNote "Provider side: a Role bearing proeth-core:hasClient toward another Role. The client counterparty is the occupational :ClientRole (a :ParticipantRole). Asymmetric by design."@en ;
     dcterms:references <https://doi.org/10.1007/s10676-020-09524-4> . # Kong et al. 2020
 
 :ProfessionalPeerRole rdf:type owl:Class ;
+    owl:equivalentClass [ rdf:type owl:Class ; owl:intersectionOf (
+        proeth-core:Role
+        [ rdf:type owl:Restriction ; owl:onProperty proeth-core:professionalPeerOf ; owl:someValuesFrom proeth-core:Role ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
     rdfs:label "Professional Peer Role" ;
     skos:definition "Professional role defining relationships between practitioners within the same professional domain, creating obligations for peer review, professional development, knowledge sharing, and standard maintenance per Kong et al. (2020)." ;
-    rdfs:comment "Collegial relationship with mentoring and review obligations" ;
+    rdfs:comment "Collegial relationship with mentoring and review obligations. Defined class: a Role that professionalPeerOf some Role (symmetric; both peers classify)." ;
+    skos:scopeNote "A Role bearing proeth-core:professionalPeerOf (symmetric; subsumes peer review and mentoring) toward another Role."@en ;
     dcterms:references <https://doi.org/10.1007/s10676-020-09524-4> . # Kong et al. 2020
 
 :EmployerRelationshipRole rdf:type owl:Class ;
+    owl:equivalentClass [ rdf:type owl:Class ; owl:intersectionOf (
+        proeth-core:Role
+        [ rdf:type owl:Restriction ; owl:onProperty proeth-core:employedBy ; owl:someValuesFrom proeth-core:Role ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
     rdfs:label "Employer Relationship Role" ;
     skos:definition "Professional role defining relationships between professionals and their employing organizations, creating duties of loyalty, competent performance, and honest reporting while maintaining professional independence per Wendel (2024) moral complexity framework." ;
-    rdfs:comment "Organizational relationship balancing loyalty and independence" ;
+    rdfs:comment "Organizational relationship balancing loyalty and independence. Defined class: a Role that employedBy some Role (the employee/professional side)." ;
+    skos:scopeNote "Employee/professional side: a Role bearing proeth-core:employedBy toward another Role. The employer counterparty is the occupational :EmployerRole (a :ParticipantRole)."@en ;
     dcterms:references <https://doi.org/10.1093/oso/9780198863335.001.0001> . # Wendel 2024
 
 :PublicResponsibilityRole rdf:type owl:Class ;
+    owl:equivalentClass [ rdf:type owl:Class ; owl:intersectionOf (
+        proeth-core:Role
+        [ rdf:type owl:Restriction ; owl:onProperty :owesDutyToward ; owl:someValuesFrom :PublicInterest ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
     rdfs:label "Public Responsibility Role" ;
     skos:definition "Professional role defining obligations to the broader public and society, creating duties of public welfare protection that can override client or employer interests per Thornton et al. (2017) collective morality framework." ;
-    rdfs:comment "Societal obligation that can override other professional duties" ;
+    rdfs:comment "Societal obligation that can override other professional duties. Defined class (monadic): a Role that owesDutyToward some PublicInterest." ;
+    skos:scopeNote "A Role bearing :owesDutyToward toward the general public (:PublicInterest). Monadic: the counterparty is a party class, not a role-to-role pairing."@en ;
     dcterms:references <https://doi.org/10.1080/10508422.2017.1318069> . # Thornton et al. 2017
+
+# Public-duty primitives for the PublicResponsibilityRole defined class. PublicInterest is the general
+# public as a collective party (subClassOf proeth-core:Agent, matching the actor-edge convention:
+# obligatedParty/constrainedEntity/affects all range Agent). owesDutyToward is the defining edge.
+:PublicInterest rdf:type owl:Class ;
+    rdf:type :EntityType ;
+    rdfs:subClassOf proeth-core:Agent ;
+    rdfs:label "Public Interest (General Public)"@en ;
+    skos:altLabel "general public"@en, "the public"@en ;
+    rdfs:comment "The general public as the collective party toward which public-protection duties are owed (the defining counterparty of :PublicResponsibilityRole). The occupational role borne by this party is :PublicRole."@en .
+
+:owesDutyToward rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range :PublicInterest ;
+    rdfs:label "owes duty toward"@en ;
+    rdfs:comment "A professional role owes a protective duty toward the general public. Defining edge of :PublicResponsibilityRole."@en .
 
 # Ends / Goals of roles
 :End rdf:type owl:Class ;
@@ -1171,6 +1210,23 @@ proeth:conflictsWith a owl:ObjectProperty ;
     owl:inverseOf :reportsTo ;
     rdfs:label "receives report from"@en ;
     rdfs:comment "Role receives reports from another role"@en .
+
+# DEPRECATED 2026-06-27: these eleven role-to-role relational properties duplicate the canonical core
+# relatedTo family (proeth-core:hasClient/professionalPeerOf/employedBy/reviewsWorkOf/workReviewedBy),
+# which is what the extraction pipeline actually emits. They are unused by the corpus. Deprecated (not
+# deleted) for reversibility; rdfs:seeAlso points to the core canonical. The relational defined classes
+# and the dual-leaf restrictions are defined over the core family, not these.
+:retainedBy         owl:deprecated true ; rdfs:seeAlso proeth-core:hasClient .
+:retains            owl:deprecated true ; rdfs:seeAlso proeth-core:hasClient .
+:employedBy         owl:deprecated true ; rdfs:seeAlso proeth-core:employedBy .
+:employs            owl:deprecated true ; rdfs:seeAlso proeth-core:employedBy .
+:supervises         owl:deprecated true ; rdfs:seeAlso proeth-core:relatedTo .
+:supervisedBy       owl:deprecated true ; rdfs:seeAlso proeth-core:relatedTo .
+:mentors            owl:deprecated true ; rdfs:seeAlso proeth-core:professionalPeerOf .
+:mentoredBy         owl:deprecated true ; rdfs:seeAlso proeth-core:professionalPeerOf .
+:collaboratesWith   owl:deprecated true ; rdfs:seeAlso proeth-core:professionalPeerOf .
+:reportsTo          owl:deprecated true ; rdfs:seeAlso proeth-core:relatedTo .
+:receivesReportFrom owl:deprecated true ; rdfs:seeAlso proeth-core:relatedTo .
 
 #################################################################
 #    Provision-Concept Relationships
@@ -1973,21 +2029,27 @@ proeth:requiresCapability a owl:ObjectProperty ;
     :archetypeAxis "occupational" ; :specializationAxis "function" ;
     skos:altLabel "design engineer"@en, "cooperating design engineer"@en, "original design engineer"@en, "dam design engineer"@en, "dock foundation design engineer"@en, "stormwater design engineer"@en ;
     rdfs:comment "An engineer responsible for producing a design (plans, calculations, specifications) for a project. Project and discipline are case context, not separate role kinds."@en .
+# The three formerly dual-archetype leaves keep their occupational primitive parent (:EngineerRole) and
+# their occupational tag; their RELATIONAL archetype is now INFERRED by the reasoner from a property
+# restriction (no longer a hand-maintained :archetypeAxis "relational" annotation). ResponsibleCharge is
+# reclassified as purely occupational (responsible charge is a mode of practice, not a duty-relationship).
 :ResponsibleChargeEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Responsible Charge Engineer Role"@en ;
-    :archetypeAxis "relational" ;
+    :archetypeAxis "occupational" ;
     skos:altLabel "responsible charge engineer"@en, "reviewing charge engineer"@en ;
-    rdfs:comment "An engineer in responsible charge of work, exercising direct control and personal supervision over its production."@en .
+    rdfs:comment "An engineer in responsible charge of work, exercising direct control and personal supervision over its production. An occupational mode of practice, not a duty-relationship archetype."@en .
 :ForensicExpertWitnessEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty proeth-core:hasClient ; owl:someValuesFrom proeth-core:Role ] ;
     rdfs:label "Forensic Expert Witness Engineer Role"@en ;
-    :archetypeAxis "relational" ;
+    :archetypeAxis "occupational" ;
     skos:altLabel "forensic expert witness engineer"@en, "forensic engineer"@en ;
-    rdfs:comment "An engineer retained to provide forensic analysis and expert testimony in a dispute or litigation."@en .
+    rdfs:comment "An engineer retained to provide forensic analysis and expert testimony in a dispute or litigation. Inferred :ProviderClientRole via proeth-core:hasClient (the retained provider side)."@en .
 :MentorEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
+    rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty proeth-core:professionalPeerOf ; owl:someValuesFrom proeth-core:Role ] ;
     rdfs:label "Mentor Engineer Role"@en ;
-    :archetypeAxis "relational" ;
+    :archetypeAxis "occupational" ;
     skos:altLabel "mentor engineer"@en, "retired mentor engineer"@en ;
-    rdfs:comment "An experienced engineer who mentors another. Availability such as retired status is a State, not a role kind."@en .
+    rdfs:comment "An experienced engineer who mentors another. Inferred :ProfessionalPeerRole via proeth-core:professionalPeerOf. Availability such as retired status is a State, not a role kind."@en .
 :MunicipalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Municipal Engineer Role"@en ;
     :archetypeAxis "occupational" ;
