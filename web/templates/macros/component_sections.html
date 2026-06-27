@@ -6,34 +6,29 @@
    section renders exactly the parts its RDF/SHACL backing supports, through one code path, and new
    per-component backing (e.g. a future PrincipleDefinitionShape) appears with no template change. #}
 
-{# Property Structure: the property schemas that apply to instances of a class.
-   Group 1 (relations & data properties) is rdfs:domain-derived; groups 2/3 come from descriptive
-   SHACL shapes (*DefinitionShape -> definitional, *PropertyShape -> bearer). Numbering appears only
-   when more than one group is present, so the framing always matches what the page actually shows. #}
+{# Property Structure: the property schemas that apply to instances of a class. The groups and their
+   chrome (label / badge / tooltip / colour / layout) come from the component-page rulebook
+   (web/ontology_routes/component_page_rulebook.py); class_property_schema merges each group's data rows
+   in, and this macro renders them generically. Numbering shows only when more than one group is present. #}
 {% macro property_structure(class_schema, ontology) %}
-{% if class_schema %}
-{% set group_count = (1 if class_schema.domain_props else 0) + (1 if class_schema.definitional else 0) + (1 if class_schema.bearer else 0) %}
-{% set multi = group_count > 1 %}
-{% set ns = namespace(n=0) %}
+{% if class_schema and class_schema.groups %}
+{% set multi = class_schema.groups|length > 1 %}
 <div class="card mb-3">
     <div class="card-header">
         <h6 class="mb-0"><i class="bi bi-diagram-3"></i> Property Structure</h6>
     </div>
     <div class="card-body">
-        {# The per-group (i) tooltips below are the single source of explanation for this section
-           (harmonized across all nine component pages); no separate intro paragraph, to avoid clutter
-           and the duplication it caused on single-group pages. #}
-        {# 1. Relations & data properties -- formal OWL object/data properties (rdfs:domain) #}
-        {% if class_schema.domain_props %}
-        {% set ns.n = ns.n + 1 %}
-        <div class="mb-3 ps-3 border-start border-3 border-success">
-            <div class="fw-bold text-success pb-1 mb-2 border-bottom">{% if multi %}{{ ns.n }} &middot; {% endif %}Relations &amp; data properties
-                <span class="badge rounded-pill bg-light text-muted border fw-normal">rdfs:domain on this class or ancestor</span>
-                <i class="bi bi-info-circle text-success ms-1" style="cursor: help;" tabindex="0" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="desc-tip" title="Object and data properties whose <code>rdfs:domain</code> is this class or an ancestor. On an instance, an object property is a graph <strong>edge</strong> to another entity (its <em>Range</em>) and a data property is a literal value.{% if multi %} Unlike the schemas below, these are relations in the graph, not declared attribute fields.{% endif %}"></i></div>
+        {% for g in class_schema.groups %}
+        <div class="{{ 'mb-1' if loop.last else 'mb-3' }} ps-3 border-start border-3 border-{{ g.colour }}">
+            <div class="fw-bold text-{{ g.colour }} pb-1 mb-2 border-bottom">{% if multi %}{{ loop.index }} &middot; {% endif %}{{ g.label }}
+                <span class="badge rounded-pill bg-light text-muted border fw-normal">{{ g.badge }}</span>
+                {% if g.badge2 %}<span class="badge rounded-pill bg-light text-muted border fw-normal">{{ g.badge2 }}</span>{% endif %}
+                <i class="bi bi-info-circle text-{{ g.colour }} ms-1" style="cursor: help;" tabindex="0" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="desc-tip" title="{{ g.tooltip|safe }}{% if multi and g.multi_suffix %}{{ g.multi_suffix|safe }}{% endif %}"></i></div>
+            {% if g.kind == 'relations' %}
             <table class="table table-sm align-middle mb-0">
                 <thead><tr class="small text-muted"><th style="width:28%">Property</th><th style="width:22%">Range</th><th>Description</th></tr></thead>
                 <tbody>
-                {% for p in class_schema.domain_props %}
+                {% for p in g.rows %}
                 <tr>
                     <td><a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=p.name) }}">{{ p.name }}</a>{% if not p.on_self %} <span class="badge bg-light text-muted border" title="rdfs:domain is an ancestor class">inherited</span>{% endif %}</td>
                     <td>{% if p.range_name %}<span class="badge bg-success">{{ p.range_name }}</span>{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
@@ -42,45 +37,18 @@
                 {% endfor %}
                 </tbody>
             </table>
-        </div>
-        {% endif %}
-
-        {# 2. Definitional attributes -- literature-grounded class fields (SHACL *DefinitionShape) #}
-        {% if class_schema.definitional %}
-        {% set ns.n = ns.n + 1 %}
-        <div class="mb-3 ps-3 border-start border-3 border-primary">
-            <div class="fw-bold text-primary pb-1 mb-2 border-bottom">{% if multi %}{{ ns.n }} &middot; {% endif %}Definitional attributes
-                <span class="badge rounded-pill bg-light text-muted border fw-normal">SHACL definitional shape</span>
-                <i class="bi bi-info-circle text-primary ms-1" style="cursor: help;" tabindex="0" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="desc-tip" title="The literature-grounded fields that individuate this class as a <strong>type</strong>. A controlled schema (the same fields for every instance of the type), filled in on the class."></i></div>
+            {% else %}
             <table class="table table-sm align-middle mb-0">
                 <thead><tr class="small text-muted"><th style="width:28%">Attribute</th><th>Description</th></tr></thead>
                 <tbody>
-                {% for a in class_schema.definitional %}
+                {% for a in g.rows %}
                 <tr><td>{{ a.name }}</td><td class="small text-muted">{{ a.description }}</td></tr>
                 {% endfor %}
                 </tbody>
             </table>
+            {% endif %}
         </div>
-        {% endif %}
-
-        {# 3. Bearer attributes -- per-individual data, non-definitional (SHACL *PropertyShape) #}
-        {% if class_schema.bearer %}
-        {% set ns.n = ns.n + 1 %}
-        <div class="mb-1 ps-3 border-start border-3 border-secondary">
-            <div class="fw-bold text-secondary pb-1 mb-2 border-bottom">{% if multi %}{{ ns.n }} &middot; {% endif %}Bearer attributes
-                <span class="badge rounded-pill bg-light text-muted border fw-normal">SHACL property shape</span>
-                <span class="badge rounded-pill bg-light text-muted border fw-normal">individual data</span>
-                <i class="bi bi-info-circle text-secondary ms-1" style="cursor: help;" tabindex="0" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="desc-tip" title="The controlled schema of per-individual facts an instance may carry. These do <strong>not</strong> define the type; their values are on the <em>individual</em>, not the class."></i></div>
-            <table class="table table-sm align-middle mb-0">
-                <thead><tr class="small text-muted"><th style="width:28%">Attribute</th><th>Description</th></tr></thead>
-                <tbody>
-                {% for a in class_schema.bearer %}
-                <tr><td>{{ a.name }}</td><td class="small text-muted">{{ a.description }}</td></tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
+        {% endfor %}
     </div>
 </div>
 {% endif %}

@@ -10,6 +10,7 @@ import rdflib
 from web.models import db, Ontology, OntologyEntity, OntologyVersion
 from web.ontology_stats import build_stats_context
 from web.entity_extraction import extract_entities_from_content
+from web.ontology_routes.component_page_rulebook import property_structure_groups
 
 
 import re as _re
@@ -615,10 +616,15 @@ def class_property_schema(entity):
     # per-component shape (e.g. a PrincipleDefinitionShape) renders through the same path with no change.
     definitional, bearer = _class_shape_schemas(anc_list)
 
-    if not (domain_props or bearer or definitional):
+    # Merge the data rows with the view chrome from the component-page rulebook (the single source of
+    # the group labels/badges/tooltips, harmonized across all nine component pages). The macro renders
+    # the returned groups generically.
+    groups = property_structure_groups(
+        {"domain_props": domain_props, "definitional": definitional, "bearer": bearer}
+    )
+    if not groups:
         return None
-    return {"domain_props": domain_props,
-            "definitional": definitional, "bearer": bearer}
+    return {"groups": groups}
 
 
 def _generate_entity_ttl_display(entity, ontology):
