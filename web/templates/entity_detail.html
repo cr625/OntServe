@@ -336,6 +336,7 @@
                         {% if prop_groups.relationships %}
                         <div class="entity-relationships">
                             <div class="relationships-label">Relationships</div>
+                            <div class="small text-muted mb-2">Asserted object-property edges to other entities. Logical class axioms such as <code>owl:disjointWith</code> are shown separately below.</div>
                             {% for key, iris in prop_groups.relationships %}
                             {# disjointWith is shown completely in the "Disjoint with" row below (it also
                                folds in owl:AllDisjointClasses membership), so skip the partial one here. #}
