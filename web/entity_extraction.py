@@ -174,6 +174,38 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         captured_uris.add(str(prop))
         entity_counts['property'] += 1
 
+    # --- Pass 3b: OWL annotation properties ---
+    # The definitional-field annotations (distinguishingFeatures, professionalScope, typicalQualifications,
+    # associatedVirtues) and the D-tuple metadata (dtupleComponent, componentOf) are owl:AnnotationProperty.
+    # Capture them as 'property' entities like object/datatype properties so a SHACL sh:path that targets one
+    # resolves to a page (otherwise the Definitional Attributes column renders it as plain <code>, not a link).
+    # MUST stay in sync with tools/refresh_entity_extraction.py, which has the same pass; the startup sync uses
+    # THIS extractor, so omitting it here silently reverts the tool's capture on every web restart.
+    for prop in g.subjects(RDF.type, OWL.AnnotationProperty):
+        uri_str = str(prop)
+        if not uri_str.startswith('http') or uri_str in captured_uris:
+            continue
+        label = next(g.objects(prop, RDFS.label), None)
+        comment = next(g.objects(prop, RDFS.comment), None)
+        domain = next(g.objects(prop, RDFS.domain), None)
+        range_val = next(g.objects(prop, RDFS.range), None)
+        label_str = str(label) if label else None
+        comment_str = str(comment) if comment else None
+        entity = OntologyEntity(
+            ontology_id=ontology.id,
+            entity_type='property',
+            uri=uri_str,
+            label=label_str,
+            comment=comment_str,
+            domain=str(domain) if domain else None,
+            range=str(range_val) if range_val else None,
+            content_hash=OntologyEntity.compute_content_hash(uri_str, label_str, comment_str),
+            updated_at=now
+        )
+        db.session.add(entity)
+        captured_uris.add(uri_str)
+        entity_counts['property'] += 1
+
     # --- Pass 4: Named individuals (with full property collection) ---
     skip_predicates = {RDF.type, RDFS.label, RDFS.comment, SKOS.definition}
     for indiv in g.subjects(RDF.type, OWL.NamedIndividual):

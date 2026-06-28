@@ -302,6 +302,16 @@ class OntologySyncService:
             if entity:
                 entities.append(entity)
 
+        # Extract annotation properties (the definitional-field annotations distinguishingFeatures,
+        # professionalScope, ...; D-tuple metadata). Captured as 'property' so a SHACL sh:path that targets
+        # one resolves to a page (else the Definitional Attributes column renders it as plain <code>, not a
+        # link). MUST match web/entity_extraction.py and tools/refresh_entity_extraction.py; THIS extractor
+        # runs on the hash-gated startup sync, so omitting it here reverts the others on any re-extract.
+        for s in graph.subjects(RDF.type, OWL.AnnotationProperty):
+            entity = self._create_entity_from_subject(graph, s, 'property', ontology.id)
+            if entity:
+                entities.append(entity)
+
         # Extract named individuals. A NamedIndividual that is also a skos:Concept
         # is a borrowed vocabulary term, not a case individual; type it 'concept'
         # so the UI does not mislabel it "Individual".
