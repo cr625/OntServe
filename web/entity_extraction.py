@@ -38,6 +38,7 @@ _IAO_DEFINITION = rdflib.URIRef('http://purl.obolibrary.org/obo/IAO_0000115')
 # (the relatedTo family's subject is sometimes the bearer Agent, not the Role facet, and Agent is disjoint
 # with Role -- so rdfs:domain Role would make those cases inconsistent).
 _SCHEMA_DOMAIN_INCLUDES = rdflib.URIRef('http://schema.org/domainIncludes')
+_SCHEMA_RANGE_INCLUDES = rdflib.URIRef('http://schema.org/rangeIncludes')
 PROETHICA_NS = 'http://proethica.org/ontology/'
 PROETHICA_INTERMEDIATE_NS = 'http://proethica.org/ontology/intermediate#'
 PROETHICA_CORE_NS = 'http://proethica.org/ontology/core#'
@@ -183,7 +184,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         label = _label(g, prop)
         comment = next(g.objects(prop, RDFS.comment), None)
         domain = next(g.objects(prop, RDFS.domain), None) or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
-        range_val = next(g.objects(prop, RDFS.range), None)
+        range_val = next(g.objects(prop, RDFS.range), None) or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
         label_str = str(label) if label else None
         comment_str = str(comment) if comment else None
 
@@ -208,7 +209,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         label = _label(g, prop)
         comment = next(g.objects(prop, RDFS.comment), None)
         domain = next(g.objects(prop, RDFS.domain), None) or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
-        range_val = next(g.objects(prop, RDFS.range), None)
+        range_val = next(g.objects(prop, RDFS.range), None) or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
         label_str = str(label) if label else None
         comment_str = str(comment) if comment else None
 
@@ -242,7 +243,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         label = _label(g, prop)
         comment = next(g.objects(prop, RDFS.comment), None)
         domain = next(g.objects(prop, RDFS.domain), None) or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
-        range_val = next(g.objects(prop, RDFS.range), None)
+        range_val = next(g.objects(prop, RDFS.range), None) or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
         label_str = str(label) if label else None
         comment_str = str(comment) if comment else None
         entity = OntologyEntity(
