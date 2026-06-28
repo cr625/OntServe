@@ -676,6 +676,8 @@ def class_property_schema(entity):
         name = _local(p.uri)
         if not name or name in seen:
             continue
+        if (p.properties or {}).get('deprecated'):
+            continue  # owl:deprecated property (e.g. the retired role-to-role duplicates); hide from the page
         seen.add(name)
         rng = p.range
         rng_uri = (rng[0] if isinstance(rng, list) and rng else rng) if rng else None
@@ -701,6 +703,8 @@ def class_property_schema(entity):
         name = _local(p.uri)
         if not name or name in seen_r:
             continue
+        if (p.properties or {}).get('deprecated'):
+            continue  # owl:deprecated property; hide from Referenced-By (mirrors the domain_props filter)
         seen_r.add(name)
         dom = p.domain
         dom_uri = (dom[0] if isinstance(dom, list) and dom else dom) if dom else None
