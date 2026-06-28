@@ -94,6 +94,30 @@ proeth-core:Event a owl:Class ;
     rdfs:comment "A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
 
+# Event origin axis (E3/E4, ratified): three mutually-disjoint origin subclasses grounding the Action/Event
+# split (Berreby et al. 2017 exogenous-vs-automatic; Sarmiento responsibility attribution). The topical Event
+# taxonomy in intermediate is retired together with the Step-3 serializer change (coupled task ONT-4 delete).
+proeth-core:AgentCausedEvent a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Agent-Caused Event"@en ;
+    rdfs:comment "An event occurring as a downstream consequence of an agent's action."@en ;
+    skos:definition "An event occurring as a downstream consequence of an agent's action."@en .
+
+proeth-core:ExogenousEvent a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Exogenous Event"@en ;
+    rdfs:comment "An event with no proximate agent cause, originating outside the agents in the case."@en ;
+    skos:definition "An event with no proximate agent cause, originating outside the agents in the case."@en .
+
+proeth-core:AutomaticEvent a owl:Class ;
+    rdfs:subClassOf proeth-core:Event ;
+    rdfs:label "Automatic Event"@en ;
+    rdfs:comment "An event following automatically from a system or process operating under set rules."@en ;
+    skos:definition "An event following automatically from a system or process operating under set rules."@en .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( proeth-core:AgentCausedEvent proeth-core:ExogenousEvent proeth-core:AutomaticEvent ) .
+
 # Ca - Capability: Professional capabilities as dispositions
 proeth-core:Capability a owl:Class ;
     rdfs:subClassOf bfo:0000016 ;  # BFO:disposition
