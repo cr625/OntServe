@@ -9,6 +9,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix schema: <http://schema.org/> .
 @prefix time: <http://www.w3.org/2006/time#> .
 
 # Ontology Declaration
@@ -615,26 +616,31 @@ proeth-core:relatedTo a owl:ObjectProperty ;
 
 proeth-core:hasClient a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
+    schema:domainIncludes proeth-core:Role ;
     rdfs:label "has client"@en ;
     skos:definition "Relates a provider role-bearer to the client for whom it performs professional service."@en .
 
 proeth-core:professionalPeerOf a owl:ObjectProperty, owl:SymmetricProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
+    schema:domainIncludes proeth-core:Role ;
     rdfs:label "professional peer of"@en ;
     skos:definition "Relates two role-bearers in a collegial professional-peer relationship, for example mutual review or mentoring. Symmetric."@en .
 
 proeth-core:employedBy a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
+    schema:domainIncludes proeth-core:Role ;
     rdfs:label "employed by"@en ;
     skos:definition "Relates a role-bearer to the employer it works for."@en .
 
 proeth-core:reviewsWorkOf a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
+    schema:domainIncludes proeth-core:Role ;
     rdfs:label "reviews work of"@en ;
     skos:definition "Relates a reviewing role-bearer to the role-bearer whose work it reviews."@en .
 
 proeth-core:workReviewedBy a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
+    schema:domainIncludes proeth-core:Role ;
     rdfs:label "work reviewed by"@en ;
     skos:definition "Relates a role-bearer to another role-bearer who reviews its work."@en .
 
