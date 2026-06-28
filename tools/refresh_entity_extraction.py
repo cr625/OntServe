@@ -303,6 +303,35 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
             db.session.add(entity)
             prop_count += 1
 
+        # Annotation properties (the definitional-field annotations distinguishingFeatures, professionalScope,
+        # typicalQualifications, associatedVirtues; plus dtupleComponent/componentOf framework metadata).
+        # Captured as 'property' entities like object/datatype properties so a SHACL sh:path that targets one
+        # resolves to a page; otherwise the Definitional Attributes table renders it as plain text, not a link
+        # (the inconsistency where roleCategory linked but distinguishingFeatures did not).
+        for prop_uri in g.subjects(RDF.type, OWL.AnnotationProperty):
+            uri_str = str(prop_uri)
+            if not uri_str.startswith('http'):
+                continue
+            label = next(g.objects(prop_uri, RDFS.label), None)
+            comment = next(g.objects(prop_uri, RDFS.comment), None)
+            domain = next(g.objects(prop_uri, RDFS.domain), None)
+            range_ = next(g.objects(prop_uri, RDFS.range), None)
+            label_str = str(label) if label else None
+            comment_str = str(comment) if comment else None
+            entity = OntologyEntity(
+                ontology_id=ontology.id,
+                entity_type='property',
+                uri=uri_str,
+                label=label_str,
+                comment=comment_str,
+                domain=str(domain) if domain else None,
+                range=str(range_) if range_ else None,
+                content_hash=_compute_content_hash(uri_str, label_str, comment_str),
+                updated_at=datetime.now(timezone.utc)
+            )
+            db.session.add(entity)
+            prop_count += 1
+
         logger.info(f"Extracted {prop_count} properties")
         entities_added += prop_count
 
