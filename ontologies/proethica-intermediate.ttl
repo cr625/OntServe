@@ -1128,241 +1128,129 @@ proeth:conflictsWith a owl:ObjectProperty ;
 #################################################################
 
 # =================================================================
-# STATE ARCHETYPES (deontic-function axis) -- added 2026-05-30
+# STATE ARCHETYPES (content axis, revised 2026-06-28, spec B1)
 # =================================================================
-# A state's KIND is grounded by its deontic function within the role-based
-# structure: a state matters because of what it does to a role-derived obligation.
-# This keeps states role-relative (the framework's premise) rather than abstracting
-# them into a content taxonomy, and requires no virtue-ethics commitment. The nine
-# archetypes are the recurring deontic functions a state performs on an obligation:
-# activating it, constraining the action it governs, putting it in conflict/defeat,
-# conditioning it on capacity or on knowledge, scoping it to a relationship, or
-# bounding it in time. Each is realized by the proeth-core state edges
-# (activatesObligation, activatesConstraint, defeasibleUnder, activatedByEvent /
-# terminatedByEvent), so the category axis is the static shadow of those edges.
+# A state's KIND is a CONTENT classification: what condition holds in the
+# situation, not the deontic relation the edge layer encodes. The earlier
+# "deontic-function archetype" framing is retired because it invited the
+# reading that a state's kind is the activatesObligation relation it bears.
+# It is not. A RiskState is a condition of hazard exposure in the world; it is
+# not recoverable from activatesObligation and is not a static shadow of any
+# edge. The kind is grounded by content. The deontic relevance of that content
+# (a risk condition bears on safety obligations; an epistemic condition bears
+# on disclosure duties) is the reason the axis is kept, but the archetype is
+# defined by what the state IS, while the edge layer (activatesObligation,
+# activatesConstraint, defeasibleUnder, activatedByEvent / terminatedByEvent,
+# initiates / terminates, affects) separately records what the state DOES.
 #
-# Grounding: Berreby et al. (2017) Event-Calculus fluents that trigger and terminate
-# obligations; Almpani et al. (2023) context-based scenarios that set dynamic
-# obligation priorities; Sarmiento et al. (2023) causal chains that initiate states;
-# Stenseke (2024) obligation-presupposes-capacity; Govindarajulu & Bringsjord (2017)
-# obligation's dependence on knowledge state. NOT a Jones (1991) typology: Jones moral
-# intensity SCORES a situation's salience (a state attribute, e.g. urgency_level); it
-# does not classify state kinds. The archetypes are intentionally non-disjoint -- a
-# single state often performs several deontic functions at once (a risk that also
-# creates a conflict).
+# Closed set of nine content archetypes, each rdfs:subClassOf proeth-core:State:
+# EpistemicState, RiskState, CompetenceState, EmergencyState,
+# ConflictOfInterestState, RegulatoryState, TemporalState, ResourceState,
+# DisclosureState. EpistemicState is the typed home for the responsibility
+# epistemic condition, the agent's knowledge state, which is the Aristotelian
+# and Sarmiento knowledge condition for responsibility; it is retained as a
+# typed kind once agent_knowledge is dropped at the Action pass.
+#
+# Compound discovered-class leaves chain through their archetype
+# (ToolRelianceState subClassOf RiskState; CompetenceGapState subClassOf
+# CompetenceState), so every State individual reaches proeth-core:State through
+# exactly one archetype. The reuse-first machinery controls proliferation of
+# the leaf layer; the closed nine are fixed here.
+#
+# persistenceType is a class-level datatype on each archetype recording the
+# Berreby et al. (2017) Event-Calculus fluent character (inertial fluents
+# persist until terminated; non_inertial fluents hold momentarily). urgencyLevel
+# stays individual-level (Jones 1991 salience is a per-occurrence attribute, not
+# a subkind). The archetypes are intentionally non-disjoint: one condition can
+# fall under several content kinds at once (a risk that also creates a conflict
+# of interest).
+#
+# Grounding: Berreby et al. (2017) Event-Calculus fluents; Almpani et al. (2023)
+# context-based dynamic obligation priorities; Sarmiento et al. (2023) causal
+# chains initiating states; Stenseke (2024) obligation-presupposes-capacity;
+# Govindarajulu & Bringsjord (2017) obligation's dependence on the knowledge
+# state.
 # =================================================================
+
+:EpistemicState a owl:Class ;
+    rdfs:subClassOf proeth-core:State ;
+    rdfs:label "Epistemic State"@en ;
+    skos:definition "A condition of what an agent knows, believes, or is uncertain of with respect to facts material to a decision. As a content kind it captures the agent's knowledge state, the Aristotelian and Sarmiento epistemic condition for responsibility: an agent is answerable for conduct in proportion to what the agent knew or should have known. Its deontic relevance is that knowledge conditions the obligations governing informed decision and decision-under-uncertainty."@en ;
+    rdfs:comment "Knowledge-and-belief condition of an agent; the typed home of the responsibility epistemic condition."@en ;
+    proeth:persistenceType "inertial" ;
+    dcterms:references <https://doi.org/10.1609/aimag.v38i2.2743> . # Govindarajulu & Bringsjord 2017
 
 :RiskState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Risk State"@en ;
-    skos:definition "A condition of potential harm to public welfare, safety, or a protected interest. Its deontic function is to ACTIVATE the protective obligations a role exists to discharge, and to license defeat of competing obligations such as confidentiality when the harm is grave, per Berreby et al. (2017) and the dynamic priority tiers of Almpani et al. (2023)."@en ;
-    rdfs:comment "Obligation-activating condition of potential harm (realized by activatesObligation / defeasibleUnder)."@en ;
-    skos:scopeNote "Deontic-function archetype; case-specific risk states subclass this. The salience of the risk (magnitude, probability, immediacy) is a state ATTRIBUTE (Jones 1991), not a subkind."@en ;
+    skos:definition "A condition of hazard exposure: potential harm to public welfare, safety, or a protected interest. As a content kind it is the situation of exposure itself, independent of which obligation it activates. Its deontic relevance is that a hazard condition bears on the protective obligations a role exists to discharge and can license defeat of competing duties such as confidentiality when the harm is grave (Berreby et al. 2017; Almpani et al. 2023)."@en ;
+    rdfs:comment "Condition of hazard exposure or potential harm to a protected interest."@en ;
+    proeth:persistenceType "inertial" ;
     dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> , # Berreby et al. 2017
                        <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
-
-:EmergencyState a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Emergency State"@en ;
-    skos:definition "An acute, time-critical condition demanding immediate response. Its deontic function is to activate emergency-response obligations and to override or suspend constraints that normally bound action, per the emergency-priority determination of Almpani et al. (2023)."@en ;
-    rdfs:comment "Obligation-activating, constraint-overriding acute condition."@en ;
-    skos:scopeNote "Deontic-function archetype; distinguished from RiskState by acuteness that licenses overriding ordinary constraints."@en ;
-    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
-
-:ConflictState a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Conflict State"@en ;
-    skos:definition "A condition under which two or more role-derived obligations compete and cannot all be fully satisfied. Its deontic function is to render obligations defeasible against one another: it is the licensing context of the defeasibility relation, where an Obligation is defeasibleUnder a Conflict State."@en ;
-    rdfs:comment "Obligation-competing context (realized by defeasibleUnder; the prima-facie-duty conflict situation)."@en ;
-    skos:scopeNote "Deontic-function archetype; case-specific conflict states (ConflictOfInterest, CompetingDuties) subclass this. Grounds the competesWith / prevailsOver / defeasibleUnder edge family."@en .
 
 :CompetenceState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Competence State"@en ;
-    skos:definition "A condition bearing on whether a role-bearer has the capacity -- expertise, qualification, means -- to fulfil a duty. Its deontic function is to condition an obligation on capacity: obligation presupposes capacity, so a competence shortfall renders the duty defeasible or shifts it (for example to refer or disclose), per Stenseke (2024)."@en ;
-    rdfs:comment "Capacity-conditioning condition (ought-implies-can)."@en ;
-    skos:scopeNote "Deontic-function archetype; case-specific competence states (OutsideCompetence) subclass this."@en ;
+    skos:definition "A condition bearing on whether a role-bearer has the capacity, expertise, qualification, or means to carry out a duty. As a content kind it describes the standing of the agent's competence for the work at hand. Its deontic relevance is that obligation presupposes capacity, so a competence shortfall renders an attached duty defeasible or shifts it, for example to refer or disclose (Stenseke 2024)."@en ;
+    rdfs:comment "Condition of an agent's competence or capacity for the work at hand."@en ;
+    proeth:persistenceType "inertial" ;
     dcterms:references <https://doi.org/10.1007/s10676-024-09775-5> . # Stenseke 2024
 
-:RelationshipState a owl:Class ;
+:EmergencyState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Relationship State"@en ;
-    skos:definition "A condition defining which professional relationship holds among the parties (provider-client, professional-peer, employer-employee, public trust). Its deontic function is to SCOPE which relational obligations apply, since duties are relative to the role-relationship in force."@en ;
-    rdfs:comment "Obligation-scoping condition (which role-relation, hence which relational duties, are active)."@en ;
-    skos:scopeNote "Deontic-function archetype; pairs with the relational role archetypes (ProviderClientRole, ProfessionalPeerRole, ...). The relationship in force selects the applicable obligations."@en .
+    rdfs:label "Emergency State"@en ;
+    skos:definition "An acute, time-critical condition demanding immediate response. As a content kind it is distinguished from RiskState by acuteness. Its deontic relevance is that it can activate emergency-response obligations and license suspension of constraints that normally bound action (Almpani et al. 2023)."@en ;
+    rdfs:comment "Acute, time-critical condition demanding immediate response."@en ;
+    proeth:persistenceType "non_inertial" ;
+    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
 
-:InformationState a owl:Class ;
+:ConflictOfInterestState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Information State"@en ;
-    skos:definition "An epistemic condition: what is known, disclosed, uncertain, or concealed. Its deontic function is to condition obligations on the agent's knowledge state, governing disclosure, notification, informed-consent, and decision-under-uncertainty duties, per Govindarajulu & Bringsjord (2017) on the dependence of obligation on intention and knowledge."@en ;
-    rdfs:comment "Epistemic condition conditioning disclosure / informed obligations."@en ;
-    skos:scopeNote "Deontic-function archetype; covers states of disclosure, notification, concealment, and uncertainty."@en ;
-    dcterms:references <https://doi.org/10.1609/aimag.v38i2.2743> . # Govindarajulu & Bringsjord 2017
+    rdfs:label "Conflict Of Interest State"@en ;
+    skos:definition "A condition in which an agent holds competing interests, loyalties, or role-derived duties that cannot all be fully served and that bias or constrain the exercise of professional judgment. As a content kind it is the standing tension among interests, covering both conflict of interest and competing duties. Its deontic relevance is that it renders the affected obligations defeasible against one another and grounds the competesWith, prevailsOver, and defeasibleUnder edge family."@en ;
+    rdfs:comment "Condition of competing interests, loyalties, or duties biasing professional judgment."@en ;
+    proeth:persistenceType "inertial" .
 
 :RegulatoryState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Regulatory State"@en ;
-    skos:definition "A condition in which a code provision, standard, statute, or contractual requirement is in force for the situation. Its deontic function is to ACTIVATE a constraint or compliance obligation on the available actions (the State-to-Constraint linkage)."@en ;
-    rdfs:comment "Constraint-activating condition (realized by activatesConstraint)."@en ;
-    skos:scopeNote "Deontic-function archetype; the state under which a regulatory constraint becomes binding for the case."@en .
+    skos:definition "A condition in which a code provision, standard, statute, permit, or contractual requirement is in force for the situation, including states of compliance and of violation. As a content kind it is the regulatory standing of the situation. Its deontic relevance is that it activates a constraint or compliance obligation on the available actions."@en ;
+    rdfs:comment "Condition defined by an in-force regulatory, statutory, or contractual requirement."@en ;
+    proeth:persistenceType "inertial" .
 
 :TemporalState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Temporal State"@en ;
-    skos:definition "A condition defined by phase or timing (pre/post-termination, before/after notification, a deadline window). Its deontic function is to bound when a time-relative obligation holds: the state is the Event-Calculus fluent whose initiation and termination start and end the obligation, per Berreby et al. (2017)."@en ;
-    rdfs:comment "Obligation-bounding condition (Event-Calculus fluent; realized by activatedByEvent / terminatedByEvent)."@en ;
-    skos:scopeNote "Deontic-function archetype; the persistence of the fluent (inertial vs non-inertial) is an orthogonal ATTRIBUTE, not a subkind."@en ;
+    skos:definition "A condition defined by phase or timing: a pre- or post-termination phase, a before- or after-notification window, a deadline window. As a content kind it is the temporal standing of the situation. Its deontic relevance is that it bounds when a time-relative obligation holds, as the Event-Calculus fluent whose initiation and termination start and end the duty (Berreby et al. 2017)."@en ;
+    rdfs:comment "Condition defined by phase or timing (a deadline window, a post-termination phase)."@en ;
+    proeth:persistenceType "inertial" ;
     dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> . # Berreby et al. 2017
 
-:ResourceAvailabilityState a owl:Class ;
+:ResourceState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Resource Availability State"@en ;
-    skos:definition "A condition of availability or scarcity of the means to act (time, budget, personnel, safeguards, access to information). Its deontic function is to condition the FEASIBILITY of obligations and to set dynamic priorities among them when means are constrained, per Almpani et al. (2023)."@en ;
-    rdfs:comment "Feasibility-conditioning condition of resource availability or scarcity."@en ;
-    skos:scopeNote "Deontic-function archetype; distinct from the Resource (Rs) component, which is a knowledge artifact. This is the situational availability of the means to act."@en ;
+    rdfs:label "Resource State"@en ;
+    skos:definition "A condition of availability or scarcity of the means to act: time, budget, personnel, safeguards, or access to information. As a content kind it is the standing of the means available, distinct from the Resource (Rs) component, which is a knowledge artifact. Its deontic relevance is that it conditions the feasibility of obligations and sets dynamic priorities among them when means are constrained (Almpani et al. 2023)."@en ;
+    rdfs:comment "Condition of availability or scarcity of the means to act."@en ;
+    proeth:persistenceType "inertial" ;
     dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
 
-# =================================================================
-# Case-specific state leaves (grouped below by the same deontic categories;
-# subclass the archetypes above as the corpus is re-extracted).
-# =================================================================
-
-# Conflict States - Context where competing interests or obligations arise
-
-:ConflictOfInterest a owl:Class ;
+:DisclosureState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Conflict of Interest State" ;
-    skos:definition "Environmental state where a professional has personal interests that could influence their professional judgment or decision-making, requiring disclosure and management according to Dennis et al. (2016) context-aware ethical reasoning framework." ;
-    rdfs:comment "Professional situation where personal and professional interests compete" ;
-    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+    rdfs:label "Disclosure State"@en ;
+    skos:definition "A condition of what information has been disclosed, withheld, concealed, or selectively presented among the parties, including states of confidentiality and of omission. As a content kind it is the standing of information flow between agents, distinct from EpistemicState, which is what a single agent knows. Its deontic relevance is that it activates disclosure, notification, and confidentiality obligations."@en ;
+    rdfs:comment "Condition of information disclosed, withheld, or concealed among parties."@en ;
+    proeth:persistenceType "inertial" .
 
-:CompetingDuties a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Competing Duties State" ;
-    skos:definition "Context where multiple professional obligations conflict and cannot all be fully satisfied simultaneously, requiring prioritization based on Rao et al. (2023) context-dependent moral evaluation." ;
-    rdfs:comment "State requiring ethical prioritization between conflicting obligations" ;
-    dcterms:references <https://doi.org/10.48550/arXiv.2302.00997> . # Rao et al. 2023
-
-proeth:ConfirmedRiskWithoutAdequateSafeguardsState a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Confirmed Risk Without Adequate Safeguards State"@en ;
-    rdfs:comment "State in which a professional has confirmed the existence of a concrete public-safety or environmental risk and adequate safeguards are known to be absent. Typical activator for post-termination reporting obligations and for defeating faithful-agent confidentiality (NSPE BER Case 72 pattern)."@en .
-
-# Risk States - Environmental conditions involving potential harm
-
-:PublicSafetyAtRisk a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Public Safety at Risk" ;
-    skos:definition "Environmental condition where actions or conditions pose potential harm to public health, safety, or welfare, elevating safety obligations per Berreby et al. (2017) Event Calculus state representation." ;
-    rdfs:comment "Critical state triggering heightened safety obligations" ;
-    dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> . # Berreby et al. 2017
-
-:EnvironmentalHazard a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Environmental Hazard Present" ;
-    skos:definition "State where environmental conditions pose risks requiring professional intervention or mitigation according to Almpani et al. (2023) dynamic priority determination framework." ;
-    rdfs:comment "Environmental risk state requiring assessment and action" ;
-    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
-
-# Competence States - Professional capability boundaries
-
-:OutsideCompetence a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Outside Area of Competence" ;
-    skos:definition "State where professional lacks the expertise, training, or qualification to perform requested services, limiting available actions per competence-based ethical constraints." ;
-    rdfs:comment "Competence boundary preventing service provision" .
-
-:QualifiedToPerform a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Qualified to Perform" ;
-    skos:definition "Positive competence state where professional has demonstrated expertise and authorization to perform specific services within defined scope of practice." ;
-    rdfs:comment "Competence state enabling professional action" .
-
-# Relationship States - Professional relationship contexts
-
-:ClientRelationship a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Client Relationship Established" ;
-    skos:definition "Relational state where formal professional-client relationship exists with associated fiduciary duties, confidentiality requirements, and professional boundaries." ;
-    rdfs:comment "Active professional relationship with associated obligations" .
-
-:EmploymentTerminated a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Employment Terminated" ;
-    skos:definition "Post-employment state where professional relationship has ended but residual obligations for confidentiality and non-competition may persist." ;
-    rdfs:comment "Post-employment state with continuing obligations" .
-
-# Information States - Data and knowledge contexts
-
-:ConfidentialInformation a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Confidential Information Held" ;
-    skos:definition "Information state where professional possesses data subject to confidentiality obligations, restricting disclosure per professional ethics requirements." ;
-    rdfs:comment "State triggering information protection obligations" .
-
-:PublicInformation a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Public Information Available" ;
-    skos:definition "Open information state where relevant data is publicly accessible without confidentiality restrictions, enabling unrestricted professional use." ;
-    rdfs:comment "State permitting open information use" .
-
-# Emergency States - Critical temporal conditions
-
-:EmergencySituation a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Emergency Situation" ;
-    skos:definition "Critical temporal state requiring immediate response that may override normal procedures, represented as non-inertial fluent per Berreby et al. (2017) Event Calculus formalism." ;
-    rdfs:comment "Urgent state overriding normal protocols" ;
-    dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> . # Berreby et al. 2017
-
-:CrisisConditions a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Crisis Conditions" ;
-    skos:definition "Extended emergency state of systemic disruption requiring coordinated professional response with adapted obligations and priorities." ;
-    rdfs:comment "Sustained emergency requiring coordinated response" .
-
-# Regulatory States - Legal and compliance contexts
-
-:RegulatoryCompliance a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Regulatory Compliance State" ;
-    skos:definition "State where specific regulatory requirements are in effect, constraining professional actions and decisions per jurisdictional requirements." ;
-    rdfs:comment "Legal compliance context constraining actions" .
-
-:NonCompliant a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Non-Compliant State" ;
-    skos:definition "Problematic state where applicable standards or regulations are not being met, requiring immediate corrective action." ;
-    rdfs:comment "State requiring compliance remediation" .
-
-# Temporal States - Time-dependent conditions
-
-:DeadlineApproaching a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Deadline Approaching" ;
-    skos:definition "Temporal state where time constraints intensify, potentially affecting quality-safety tradeoffs per Sarmiento et al. (2023) causal reasoning framework." ;
-    rdfs:comment "Time pressure state affecting decision priorities" ;
-    dcterms:references <https://doi.org/10.1609/aaai.v37i5.25774> . # Sarmiento et al. 2023
-
-:ExtendedTimeframe a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Extended Timeframe Available" ;
-    skos:definition "Temporal state where sufficient time exists for thorough analysis and stakeholder consultation, enabling comprehensive ethical deliberation." ;
-    rdfs:comment "State enabling thorough deliberation" .
-
-# Resource States - Availability and constraint contexts
-
-:ResourceConstrained a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Resource Constrained" ;
-    skos:definition "State where limited resources (budget, personnel, materials) constrain available options and require allocation decisions." ;
-    rdfs:comment "Resource limitation affecting available actions" .
-
-:ResourceAvailable a owl:Class ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Resources Available" ;
-    skos:definition "State where sufficient resources exist to implement optimal solutions without significant constraints." ;
-    rdfs:comment "Resource sufficiency enabling full options" .
+# Action-scoped competence-gap leaf. Minted only at the commit edge-materialization
+# stage (decision D2'), not by a pipeline pass. Chained through CompetenceState so it
+# reaches proeth-core:State through its archetype.
+:CompetenceGapState a owl:Class ;
+    rdfs:subClassOf :CompetenceState ;
+    rdfs:label "Competence Gap State"@en ;
+    skos:definition "A condition in which an agent lacks, has insufficient, or has not exercised the competence required for the work at hand, undercutting the obligations that attach to it. Agent-level and action-scoped gap individuals are minted at the commit edge-materialization stage (decision D2'); an action-scoped gap is linked to the specific Action and licenses defeasibleUnder on the undercut obligation."@en ;
+    rdfs:comment "Action-scoped competence-gap leaf minted at commit (D2'); subClassOf CompetenceState."@en ;
+    proeth:persistenceType "inertial" .
 
 #################################################################
 #    Professional Resource Types (Chapter 2.2.3 - McLaren 2003)
@@ -2200,7 +2088,12 @@ proeth:terminatedBy a owl:DatatypeProperty ;
 proeth:urgencyLevel a owl:DatatypeProperty ;
     rdfs:label "urgency level"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on State/Event: urgency judgment."@en .
+    rdfs:comment "Intended individual-level on State/Event: per-occurrence urgency judgment (Jones 1991 salience), not a subkind."@en .
+
+proeth:persistenceType a owl:DatatypeProperty ;
+    rdfs:label "persistence type"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended class-level on a State archetype: the Berreby et al. (2017) Event-Calculus fluent character, inertial (persists until terminated) or non_inertial (holds momentarily)."@en .
 
 proeth:principleTransformation a owl:DatatypeProperty ;
     rdfs:label "principle transformation"@en ;
