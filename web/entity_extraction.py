@@ -38,14 +38,28 @@ PROETHICA_INTERMEDIATE_NS = 'http://proethica.org/ontology/intermediate#'
 PROETHICA_CORE_NS = 'http://proethica.org/ontology/core#'
 
 
+def _first(g, subject, predicate):
+    """Deterministic single value among the (unordered) RDF objects of a predicate: an @en literal if
+    present, else the lexicographically first. next() over multiple values is non-deterministic, which makes
+    the content_hash unstable and breaks embedding preservation (which is keyed on (uri, content_hash))."""
+    vals = list(g.objects(subject, predicate))
+    if not vals:
+        return None
+    en = [v for v in vals if getattr(v, 'language', None) == 'en']
+    return str(sorted(en or vals, key=str)[0])
+
+
+def _label(g, subject):
+    return _first(g, subject, RDFS.label)
+
+
 def _comment_or_definition(g, subject):
-    """rdfs:comment if present, else iao:0000115 (OBO textual definition), else skos:definition.
-    OWL classes carry the formal definition on iao:0000115 and SKOS concepts on skos:definition, so a
-    class/concept lacking rdfs:comment still gets a description (and the rich definition shows) on the page."""
-    val = (next(g.objects(subject, RDFS.comment), None)
-           or next(g.objects(subject, _IAO_DEFINITION), None)
-           or next(g.objects(subject, SKOS.definition), None))
-    return str(val) if val else None
+    """rdfs:comment if present, else iao:0000115 (OBO textual definition), else skos:definition; each picked
+    deterministically (see _first). OWL classes carry the formal definition on iao:0000115 and SKOS concepts
+    on skos:definition, so a class/concept lacking rdfs:comment still gets a description on the page."""
+    return (_first(g, subject, RDFS.comment)
+            or _first(g, subject, _IAO_DEFINITION)
+            or _first(g, subject, SKOS.definition))
 
 
 def _pick_best_parent(g, class_uri):
@@ -134,7 +148,10 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
 
     # --- Pass 1: Standard OWL classes ---
     for cls in g.subjects(RDF.type, OWL.Class):
-        label = next(g.objects(cls, RDFS.label), None)
+        if isinstance(cls, rdflib.BNode) or not str(cls).startswith('http'):
+            continue  # anonymous class expression (owl:intersectionOf / owl:Restriction), not a named class;
+                      # its BNode id is random per parse, which would make the URI + content_hash unstable
+        label = _label(g, cls)
         label_str = str(label) if label else None
         comment_str = _comment_or_definition(g, cls)
 
@@ -158,7 +175,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
 
     # --- Pass 2: OWL object properties ---
     for prop in g.subjects(RDF.type, OWL.ObjectProperty):
-        label = next(g.objects(prop, RDFS.label), None)
+        label = _label(g, prop)
         comment = next(g.objects(prop, RDFS.comment), None)
         domain = next(g.objects(prop, RDFS.domain), None)
         range_val = next(g.objects(prop, RDFS.range), None)
@@ -182,7 +199,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
 
     # --- Pass 3: OWL datatype properties ---
     for prop in g.subjects(RDF.type, OWL.DatatypeProperty):
-        label = next(g.objects(prop, RDFS.label), None)
+        label = _label(g, prop)
         comment = next(g.objects(prop, RDFS.comment), None)
         domain = next(g.objects(prop, RDFS.domain), None)
         range_val = next(g.objects(prop, RDFS.range), None)
@@ -215,7 +232,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         uri_str = str(prop)
         if not uri_str.startswith('http') or uri_str in captured_uris:
             continue
-        label = next(g.objects(prop, RDFS.label), None)
+        label = _label(g, prop)
         comment = next(g.objects(prop, RDFS.comment), None)
         domain = next(g.objects(prop, RDFS.domain), None)
         range_val = next(g.objects(prop, RDFS.range), None)
@@ -243,7 +260,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         if uri_str in captured_uris:
             continue
 
-        label = next(g.objects(indiv, RDFS.label), None)
+        label = _label(g, indiv)
         label_str = str(label) if label else None
         comment_str = _comment_or_definition(g, indiv)
 
@@ -290,7 +307,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         if uri_str in captured_uris:
             continue
 
-        label = next(g.objects(scheme, RDFS.label), None)
+        label = _label(g, scheme)
         label_str = str(label) if label else None
         comment_str = _comment_or_definition(g, scheme)
         properties = _collect_properties(g, scheme, scheme_skip_predicates)
@@ -324,7 +341,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         if types and all(t in _OWL_STRUCTURAL_TYPES for t in types):
             continue
 
-        label = next(g.objects(subj, RDFS.label), None)
+        label = _label(g, subj)
         label_str = str(label) if label else None
         comment_str = _comment_or_definition(g, subj)
 
