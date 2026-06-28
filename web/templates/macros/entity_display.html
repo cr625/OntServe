@@ -37,7 +37,11 @@
    (falls back to a code span when no ontology context is available). #}
 {% macro render_iri_target(iri, ontology_name) %}
 {%- set frag = iri.split('#')[-1].split('/')[-1] -%}
-{%- set frag_label = frag.replace('_', ' ') | split_pascal -%}
+{# DISPLAY STANDARD (uniform across the entity pages): the fragment's first letter encodes the kind, per
+   the ontology naming convention. PascalCase (uppercase first = a class or individual) is split into Title
+   Case words ("CivilEngineerRole" -> "Civil Engineer Role"); camelCase (lowercase first = a property) is
+   shown bare ("retainedBy", "distinguishingFeatures"). So a given IRI renders identically everywhere. #}
+{%- set frag_label = (frag.replace('_', ' ') | split_pascal) if (frag and frag[0]|upper == frag[0] and frag[0]|lower != frag[0]) else frag -%}
 {%- if ontology_name -%}
 <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=frag) }}" class="rel-target-link" title="{{ iri }}">{{ frag_label }}</a>
 {%- else -%}
