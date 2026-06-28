@@ -673,25 +673,9 @@ proeth:ReportingObligation a owl:Class ;
     rdfs:label "Reporting Obligation"@en ;
     rdfs:comment "Duty to report violations or unsafe conditions to appropriate authorities"@en .
 
-proeth:MandatoryObligation a owl:Class ;
-    rdfs:subClassOf proeth-core:Obligation ;
-    rdfs:label "Mandatory Obligation"@en ;
-    rdfs:comment "Obligations that MUST be fulfilled (deontic force: mandatory)"@en .
-
-proeth:DefeasibleObligation a owl:Class ;
-    rdfs:subClassOf proeth-core:Obligation ;
-    rdfs:label "Defeasible Obligation"@en ;
-    rdfs:comment "Obligations that admit justified exceptions under specified conditions (Ganascia 2007)"@en .
-
-proeth:ConditionalObligation a owl:Class ;
-    rdfs:subClassOf proeth-core:Obligation ;
-    rdfs:label "Conditional Obligation"@en ;
-    rdfs:comment "Obligations that apply only when specific conditions are met"@en .
-
-proeth:PrimaFacieObligation a owl:Class ;
-    rdfs:subClassOf proeth-core:Obligation ;
-    rdfs:label "Prima Facie Obligation"@en ;
-    rdfs:comment "Obligations that hold at first appearance but may be overridden by stronger duties (Anderson & Anderson)"@en .
+# The modality obligation subclasses (Mandatory/Defeasible/Conditional/PrimaFacie) were retired 2026-06-28
+# (ratified O spec): prima-facie status is the defeasibility edge family (competesWith/prevailsOver/
+# defeasibleUnder), hard absolutes are Constraints; the enforcement_level commit axis is removed with them.
 
 proeth:LegalObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
