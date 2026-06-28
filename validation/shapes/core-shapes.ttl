@@ -17,7 +17,7 @@
 # top of this file (see config/domains/<domain>.yaml shapes_files).
 
 pcsh: a owl:Ontology ;
-    rdfs:label "ProEthica core conformance shapes" ;
+    rdfs:label "ProEthica core conformance shapes"@en ;
     sh:declare [ sh:prefix "core" ; sh:namespace "http://proethica.org/ontology/core#"^^xsd:anyURI ] ;
     sh:declare [ sh:prefix "owl"  ; sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ] ;
     sh:declare [ sh:prefix "rdf"  ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] .
@@ -28,7 +28,7 @@ pcsh: a owl:Ontology ;
 pcsh:DisjointCoreCategoryShape
     a sh:NodeShape ;
     sh:targetClass owl:NamedIndividual ;
-    rdfs:label "Single core category per individual" ;
+    rdfs:label "Single core category per individual"@en ;
     sh:sparql [
         a sh:SPARQLConstraint ;
         sh:message "Individual reaches two disjoint core categories ({?c1} and {?c2}); violates the nine-way AllDisjointClasses. Re-type to one category or drop the conflicting property/type." ;
@@ -56,7 +56,7 @@ pcsh:DisjointCoreCategoryShape
 pcsh:NoOwlNothingShape
     a sh:NodeShape ;
     sh:targetClass owl:NamedIndividual ;
-    rdfs:label "No individual typed owl:Nothing" ;
+    rdfs:label "No individual typed owl:Nothing"@en ;
     sh:sparql [
         a sh:SPARQLConstraint ;
         sh:message "Individual is inferred to be owl:Nothing (an unsatisfiable / hard clash)." ;
@@ -79,8 +79,8 @@ pcsh:NoOwlNothingShape
 pcsh:RoleDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Role ;
-    rdfs:label "Role definition schema (universal, type-level, descriptive)" ;
-    rdfs:comment "What ANY role TYPE is individuated by, universal across professional and participant roles: its distinguishing features and its audience-relationship category. Professional-specific definitional attrs are on ProfessionalRoleDefinitionShape; bearer data on ProfessionalRolePropertyShape." ;
+    rdfs:label "Role definition schema (universal, type-level, descriptive)"@en ;
+    rdfs:comment "What ANY role TYPE is individuated by, universal across professional and participant roles: its distinguishing features and its audience-relationship category. Professional-specific definitional attrs are on ProfessionalRoleDefinitionShape; bearer data on ProfessionalRolePropertyShape."@en ;
     sh:property [ sh:path core:distinguishingFeatures ; sh:name "distinguishing features" ; sh:description "What sets this role type apart from related roles (its distinctive ends/practices)." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:roleCategory ;         sh:name "role category" ;           sh:description "The role's audience-relationship category (the four Kong 2020 categories plus participant/stakeholder): provider_client, professional_peer, employer_relationship, public_responsibility, participant, stakeholder." ; sh:order 2 ] .
 
@@ -92,8 +92,8 @@ pcsh:RoleDefinitionShape
 pcsh:ProfessionalRoleDefinitionShape
     a sh:NodeShape ;
     sh:targetClass proeth:ProfessionalRole ;
-    rdfs:label "Professional-role definition schema (type-level, descriptive)" ;
-    rdfs:comment "Professional-role-specific definitional attributes, layered on the universal RoleDefinitionShape. A participant/stakeholder role (e.g. an affected citizen) carries none of these." ;
+    rdfs:label "Professional-role definition schema (type-level, descriptive)"@en ;
+    rdfs:comment "Professional-role-specific definitional attributes, layered on the universal RoleDefinitionShape. A participant/stakeholder role (e.g. an affected citizen) carries none of these."@en ;
     sh:property [ sh:path core:professionalScope ;     sh:name "professional scope" ;      sh:description "Areas of responsibility and authority of the role type (Oakley & Cocking 2001)." ; sh:order 1 ] ;
     sh:property [ sh:path core:typicalQualifications ; sh:name "typical qualifications" ;  sh:description "Generic credentials the role TYPE requires (a descriptor of the type, not an individual's license)." ; sh:order 2 ] ;
     sh:property [ sh:path core:associatedVirtues ;     sh:name "associated virtues" ;      sh:description "Virtues/dispositions characteristic of the professional role type (Kong 2020 identity virtues; Oakley & Cocking 2001)." ; sh:order 3 ] ;
@@ -119,8 +119,8 @@ pcsh:ProfessionalRoleDefinitionShape
 pcsh:ProfessionalRolePropertyShape
     a sh:NodeShape ;
     sh:targetClass proeth:ProfessionalRole ;
-    rdfs:label "Professional-role-bearer attributes (individual data, non-definitional)" ;
-    rdfs:comment "Per-occupant data a PROFESSIONAL role-bearing INDIVIDUAL may have (license, specialty, employer, technical background). Descriptive only; these do NOT define the role type (cf. Davis 1991: license is not role-defining). Retargeted 2026-06-26 from core:Role to proeth:ProfessionalRole: a participant/stakeholder role (an affected citizen) has none of these; the universal role schema is RoleDefinitionShape. Values are asserted on the individual. Tightened 2026-06-25: dropped roleNature/roleClass (extraction provenance, not bearer data; reclassify to PROV-O) and jurisdiction/registrationStatus/roleInOrganization (weak controlled-vocab; captured via otherAttribute overflow when actually present)." ;
+    rdfs:label "Professional-role-bearer attributes (individual data, non-definitional)"@en ;
+    rdfs:comment "Per-occupant data a PROFESSIONAL role-bearing INDIVIDUAL may have (license, specialty, employer, technical background). Descriptive only; these do NOT define the role type (cf. Davis 1991: license is not role-defining). Retargeted 2026-06-26 from core:Role to proeth:ProfessionalRole: a participant/stakeholder role (an affected citizen) has none of these; the universal role schema is RoleDefinitionShape. Values are asserted on the individual. Tightened 2026-06-25: dropped roleNature/roleClass (extraction provenance, not bearer data; reclassify to PROV-O) and jurisdiction/registrationStatus/roleInOrganization (weak controlled-vocab; captured via otherAttribute overflow when actually present)."@en ;
     sh:property [ sh:path proeth:hasLicense ;          sh:name "license" ;              sh:description "Professional license / licensure." ;                      sh:order 1 ] ;
     sh:property [ sh:path proeth:hasSpecialty ;        sh:name "specialty" ;            sh:description "Area of specialisation." ;                                sh:order 2 ] ;
     sh:property [ sh:path proeth:experienceLevel ;     sh:name "experience level" ;     sh:description "Professional experience." ;                               sh:order 3 ] ;

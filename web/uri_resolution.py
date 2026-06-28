@@ -63,9 +63,10 @@ def resolve_uri():
                     'uri': entity.uri,
                     'label': entity.label,
                     'type': entity.entity_type,
-                    # Prefer the formal skos:definition (captured into properties) over the
+                    # Prefer the formal definition (iao:0000115 on classes per OBO convention;
+                    # skos:definition on SKOS concepts/legacy), captured into properties, over the
                     # shorter rdfs:comment gloss, matching the entity page's Definition card.
-                    'definition': props.get('definition') or entity.comment,
+                    'definition': props.get('IAO_0000115') or props.get('definition') or entity.comment,
                     'comment': entity.comment,
                     'ontology': ontology.name,
                     'ontology_base_uri': ontology.base_uri,

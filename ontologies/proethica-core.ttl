@@ -33,13 +33,13 @@
 proeth-core:Role a owl:Class ;
     rdfs:subClassOf bfo:0000023 ;  # BFO:role (a realizable entity realized in processes of professional practice)
     rdfs:label "Role"@en ;
-    rdfs:comment "The professional position a party occupies in a case; the R component of D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:definition "A BFO realizable role borne by an agent that generates the professional obligations the agent is held to and selects which principles apply; individuated by what it generates and how it relates, not by occupant data (the obligations it carries, its relationship and audience categories, and its associated virtues). The R component of D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:scopeNote "Obligation-generation is axiomatized as Role subClassOf (hasObligation some Obligation). Relationship categories and virtues are definitional properties of the role TYPE; per-occupant facts such as license, specialty, or employer attach to the role individual, not the class (cf. Davis 1991: most US engineers are unlicensed yet remain role-bound, so license is not role-defining)."@en ;
-    iao:0000119 "Dennis, Fisher, Slavkovik, Webster (2016). Formal verification of ethical choices in autonomous systems." ,
-                "Oakley, Cocking (2001). Virtue Ethics and Professional Roles." ,
-                "Kong et al. (2020). Analysis of professional codes: audience-oriented identity roles and identity virtues." ;
-    iao:0000116 "Extraction framing: a role is an obligation-generating entity, not a job title. It is an ethical filter that transforms general duties into role-specific obligations (Dennis 2016), a locus of identity formation through the profession's distinctive ends and virtues (Oakley and Cocking 2001), and a structure of professional relationships and their duties grouped into four audience-relationship categories (Kong 2020)."@en .
+    rdfs:comment "A professional position with associated duties, responsibilities, and decision-making authority; the R component of D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    iao:0000115 "A realizable role (BFO) borne by an agent in virtue of a professional position, which determines (filters) the principles and obligations that apply to the agent according to that professional identity. Its obligations emerge teleologically from the distinctive good the profession serves; the role is individuated by the principles and obligations it determines and the audience relationships it establishes, not by the occupant's attributes."@en ;
+    iao:0000116 "Operationalises the teleological account of professional roles (Oakley and Cocking 2001): obligations emerge from the profession's distinctive good. Carries Kong et al.'s (2020) identity virtues and audience-relationship categories, and admits Doernberg and Truog's (2023) multiple role-spheres within a single profession."@en ;
+    skos:scopeNote "Obligation-generation is axiomatised as Role subClassOf (hasObligation some Obligation). Relationship categories and virtues are definitional of the role TYPE; per-occupant facts (license, specialty, employer) attach to the role INDIVIDUAL, not the class (cf. Davis 1991: most US engineers are unlicensed yet remain role-bound, so license is not role-defining)."@en ;
+    iao:0000119 "Oakley and Cocking (2001). Virtue Ethics and Professional Roles." ,
+                "Kong et al. (2020). Analysis of professional codes: audience-oriented identity roles and identity virtues." ,
+                "Doernberg and Truog (2023). Spheres of morality: distinct ethical role-contexts within a single profession." .
 
 # P - Principle: Ethical principles as directive information entities
 proeth-core:Principle a owl:Class ;

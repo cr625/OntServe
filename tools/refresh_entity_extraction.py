@@ -188,16 +188,17 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
         entities_added = 0
         
         # Predicates captured elsewhere (dedicated columns / provenance); every other
-        # predicate on a class becomes a structured property below. skos:definition is
-        # NOT skipped: it is the formal definition and is collected into properties as
-        # 'definition' so the entity page can show it as the primary definition text
-        # (the entity 'comment' column holds the shorter rdfs:comment gloss). It is still
-        # read separately below as a comment fallback for classes lacking rdfs:comment.
+        # predicate on a class becomes a structured property below. The formal definition
+        # (iao:0000115, OBO convention; skos:definition for legacy data) is NOT skipped: it is
+        # captured into properties (as 'IAO_0000115'/'definition') so the entity page shows it as
+        # the primary definition text (the 'comment' column holds the shorter rdfs:comment gloss).
+        # It is still read separately below as a comment fallback for classes lacking rdfs:comment.
         class_standard_predicates = {
             RDF.type, RDFS.label, RDFS.comment, RDFS.subClassOf,
             rdflib.URIRef('http://www.w3.org/ns/prov#generatedAtTime'),
             rdflib.URIRef('http://www.w3.org/ns/prov#wasGeneratedBy'),
         }
+        _IAO_DEFINITION = rdflib.URIRef('http://purl.obolibrary.org/obo/IAO_0000115')
 
         # Extract classes
         for class_uri in g.subjects(RDF.type, OWL.Class):
@@ -208,7 +209,8 @@ def refresh_ontology_entities(ontology_name: str = "proethica-intermediate"):
 
             label = next(g.objects(class_uri, RDFS.label), None)
             comment = next(g.objects(class_uri, RDFS.comment), None)
-            definition = next(g.objects(class_uri, SKOS.definition), None)
+            definition = (next(g.objects(class_uri, _IAO_DEFINITION), None)
+                          or next(g.objects(class_uri, SKOS.definition), None))
             # Get rdfs:subClassOf for hierarchy traversal. Prefer a proethica
             # parent (keeps the category CTEs terminating at the proethica
             # boundary); fall back to the named BFO/IAO superclass so a core
