@@ -70,35 +70,38 @@ pcsh:NoOwlNothingShape
 
 # RoleDefinitionShape: the UNIVERSAL definitional schema of any role TYPE (the R component's
 # class-level attributes that every role has, professional or not). Trimmed 2026-06-26: the
-# professional-role-specific definitional attrs (scope, qualifications, virtues, generated obligations,
-# adhered principles) moved to ProfessionalRoleDefinitionShape, and the bearer data moved to
-# ProfessionalRolePropertyShape, because a participant/stakeholder role (e.g. an affected citizen) has
-# none of those. Descriptive only (sh:path/sh:name/sh:description/sh:order); no validation. Values are
-# carried by the role CLASS. The extraction schema for a role is the UNION of the shapes along its class
-# chain (hybrid: ontology owns the definition).
+# professional-role-specific definitional attrs (scope, qualifications, virtues) moved to
+# ProfessionalRoleDefinitionShape, and the bearer data moved to ProfessionalRolePropertyShape, because a
+# participant role (e.g. an affected citizen) has none of those. Retargeted 2026-06-28 (R-spec migration):
+# the second universal field is role_kind (the occupational professional/participant backstop), not the
+# retired proeth:roleCategory literal; the relational role_category vocabulary now rides its own dedicated
+# prompt slot (the four Kong categories), and the relational archetype is materialized edge-primary at
+# commit (decision R1), so neither role_category nor role_kind is stored as a literal. Descriptive only
+# (sh:path/sh:name/sh:description/sh:order); no validation. The extraction schema for a role is the UNION of
+# the shapes along its class chain (hybrid: ontology owns the definition).
 pcsh:RoleDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Role ;
     rdfs:label "Role definition schema (universal, type-level, descriptive)"@en ;
-    rdfs:comment "What ANY role TYPE is individuated by, universal across professional and participant roles: its distinguishing features and its audience-relationship category. Professional-specific definitional attrs are on ProfessionalRoleDefinitionShape; bearer data on ProfessionalRolePropertyShape."@en ;
+    rdfs:comment "What ANY role TYPE is individuated by, universal across professional and participant roles: its distinguishing features and its occupational kind (the professional/participant backstop). The relational audience-relationship category (role_category) rides its own prompt slot; professional-specific definitional attrs are on ProfessionalRoleDefinitionShape; bearer data on ProfessionalRolePropertyShape."@en ;
     sh:property [ sh:path core:distinguishingFeatures ; sh:name "distinguishing features" ; sh:description "What sets this role type apart from related roles (its distinctive ends/practices)." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:roleCategory ;         sh:name "role category" ;           sh:description "The role's audience-relationship category (the four Kong 2020 categories plus participant/stakeholder): provider_client, professional_peer, employer_relationship, public_responsibility, participant, stakeholder." ; sh:order 2 ] .
+    sh:property [ sh:path proeth:roleKind ;             sh:name "role kind" ;               sh:description "The occupational backstop, an enum {professional, participant}, which drives the ProfessionalRole/ParticipantRole typing when the occupational resolver matches no head. Omitted when the case text does not state the judgment (three-state-capable through absence). A routing input, not stored as a literal." ; sh:order 2 ] .
 
 # ProfessionalRoleDefinitionShape: the PROFESSIONAL-role-specific definitional attrs (type-level), on top
 # of the universal RoleDefinitionShape. These individuate a professional role (Engineer, Architect, ...),
-# not a participant/stakeholder role: professional scope, the qualifications the type requires, the virtues
-# of the profession, and the R->P->O the type carries (the obligations it generates + the principles it
-# adheres to). Targets proeth:ProfessionalRole so participant/stakeholder roles do not offer them.
+# not a participant role: professional scope, the qualifications the type requires, and the virtues of the
+# profession. Targets proeth:ProfessionalRole so participant roles do not offer them. Trimmed 2026-06-28
+# (R-spec migration): the generated-obligations / adhered-principles fields were dropped from the extraction
+# contract because the R->P->O hasObligation/adheresToPrinciple edges are produced by the dedicated R->P->O
+# pass, not asked of the roles prompt (the cross-component lists are routing inputs, not stored on the role).
 pcsh:ProfessionalRoleDefinitionShape
     a sh:NodeShape ;
     sh:targetClass proeth:ProfessionalRole ;
     rdfs:label "Professional-role definition schema (type-level, descriptive)"@en ;
-    rdfs:comment "Professional-role-specific definitional attributes, layered on the universal RoleDefinitionShape. A participant/stakeholder role (e.g. an affected citizen) carries none of these."@en ;
+    rdfs:comment "Professional-role-specific definitional attributes, layered on the universal RoleDefinitionShape. A participant role (e.g. an affected citizen) carries none of these. The R->P->O hasObligation/adheresToPrinciple edges are materialized by the dedicated R->P->O pass, not asked of the roles prompt."@en ;
     sh:property [ sh:path core:professionalScope ;     sh:name "professional scope" ;      sh:description "Areas of responsibility and authority of the role type (Oakley & Cocking 2001)." ; sh:order 1 ] ;
     sh:property [ sh:path core:typicalQualifications ; sh:name "typical qualifications" ;  sh:description "Generic credentials the role TYPE requires (a descriptor of the type, not an individual's license)." ; sh:order 2 ] ;
-    sh:property [ sh:path core:associatedVirtues ;     sh:name "associated virtues" ;      sh:description "Virtues/dispositions characteristic of the professional role type (Kong 2020 identity virtues; Oakley & Cocking 2001)." ; sh:order 3 ] ;
-    sh:property [ sh:path core:hasObligation ;         sh:name "generated obligations" ;   sh:description "The obligations the role generates, via the R->P->O hasObligation edges (obligation-generation; Dennis 2016). Range: Obligation." ; sh:order 4 ] ;
-    sh:property [ sh:path core:adheresToPrinciple ;    sh:name "adhered principles" ;      sh:description "The principles the role serves/adheres to, via the R->P->O adheresToPrinciple edges (the P side of the triple; sibling of generated obligations). Range: Principle." ; sh:order 5 ] .
+    sh:property [ sh:path core:associatedVirtues ;     sh:name "associated virtues" ;      sh:description "Virtues/dispositions characteristic of the professional role type (Kong 2020 identity virtues; Oakley & Cocking 2001)." ; sh:order 3 ] .
 
 # RolePropertyShape: the controlled property SCHEMA for professional roles -- a
 # machine-visible declaration of which attributes a well-formed role-bearing individual
