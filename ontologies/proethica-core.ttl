@@ -18,7 +18,8 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.7.2"^^xsd:string ;
+    owl:versionInfo "2.8.0"^^xsd:string ;
+    skos:changeNote "v2.8.0: Promoted five D-tuple-level edges from the intermediate namespace into core so each relation family is single-namespace: derivedFromPrinciple (Obligation to Principle), violatesObligation (Action to Obligation), guidedByPrinciple (Action to Principle), and raisesObligation (Action to Obligation), joining fulfillsObligation, realizesCapability, initiates, and terminates, which were already core. requiresCapability is promoted to core and re-domained from the former intermediate Role to Capability form to Obligation to Capability, encoding the deontic principle that an obligation presupposes the capacity to discharge it (Stenseke 2024); the intermediate Role-domain requiresCapability is deprecated. The superseded intermediate properties are marked owl:deprecated with rdfs:seeAlso pointing at the core equivalent, and the deprecated intermediate fulfillsObligation equivalentProperty bridge is deleted. The nine-way AllDisjointClasses backbone and the Event origin subclasses (AgentCausedEvent, ExogenousEvent, AutomaticEvent), both added earlier in the 2.x series, are unchanged."@en ;
     owl:imports <http://proethica.org/ontology/foundation> ;
     owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
     owl:imports <http://purl.obolibrary.org/obo/iao.owl> ;
@@ -672,6 +673,55 @@ proeth-core:workReviewedBy a owl:ObjectProperty ;
     schema:rangeIncludes proeth-core:Role ;
     rdfs:label "work reviewed by"@en ;
     skos:definition "Relates a role-bearer to another role-bearer who reviews its work."@en .
+
+###############################################################
+# D-tuple-level edges promoted to core (v2.8.0)
+# Five relation families moved from the intermediate namespace so each family is
+# single-namespace, joining fulfillsObligation / realizesCapability / initiates /
+# terminates, which were already core. Each subject and object is among the nine
+# disjoint D-tuple categories (Obligation, Principle, Action, Capability), so the
+# domain/range clauses are checked by the reasoner against the disjointness backbone.
+###############################################################
+
+proeth-core:derivedFromPrinciple a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Obligation ;
+    rdfs:range proeth-core:Principle ;
+    rdfs:label "derived from principle"@en ;
+    rdfs:comment "Relates an obligation to the principle or principles it operationalizes. The obligation gives concrete directive force to the more abstract value the principle expresses (Hallamaa and Kalliokoski 2022)."@en ;
+    skos:definition "Relates an Obligation to the Principle it operationalizes."@en ;
+    skos:changeNote "v2.8.0: Promoted from proeth:derivedFromPrinciple (intermediate) to core; semantics unchanged."@en .
+
+proeth-core:violatesObligation a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "violates obligation"@en ;
+    rdfs:comment "Relates an action to an obligation it breaches. The action fails to realize the directive content of the obligation, the negative counterpart of fulfillsObligation."@en ;
+    skos:definition "Relates an Action to an Obligation it violates."@en ;
+    skos:changeNote "v2.8.0: Promoted from proeth:violatesObligation (intermediate) to core; semantics unchanged."@en .
+
+proeth-core:guidedByPrinciple a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Principle ;
+    rdfs:label "guided by principle"@en ;
+    rdfs:comment "Relates an action to a principle that directs it. The principle supplies the value the action is taken to serve."@en ;
+    skos:definition "Relates an Action to a Principle that guides it."@en ;
+    skos:changeNote "v2.8.0: Promoted from proeth:guidedByPrinciple (intermediate) to core; semantics unchanged."@en .
+
+proeth-core:raisesObligation a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "raises obligation"@en ;
+    rdfs:comment "Relates an action to an obligation it puts at stake without itself resolving it. The fulfillment or breach occurs at a downstream action in the same chain. This third predicate distinguishes an upstream choice that engages an obligation from the downstream action that satisfies or breaches it; without it the same obligation appears as both fulfilled and violated across adjacent steps."@en ;
+    skos:definition "Relates an Action to an Obligation it puts in force or at stake, resolved at a downstream action."@en ;
+    skos:changeNote "v2.8.0: Promoted from proeth:raisesObligation (intermediate) to core; semantics unchanged."@en .
+
+proeth-core:requiresCapability a owl:ObjectProperty ;
+    rdfs:domain proeth-core:Obligation ;
+    rdfs:range proeth-core:Capability ;
+    rdfs:label "requires capability"@en ;
+    rdfs:comment "Relates an obligation to a capability its discharge presupposes. An obligation can be discharged only by an agent that possesses the capability the obligation requires, so an agent that lacks the required capability renders the obligation defeasible (Stenseke 2024). Re-domained in v2.8.0 from the former intermediate Role to Capability form to this obligation-presupposes-capacity reading."@en ;
+    skos:definition "Relates an Obligation to a Capability its discharge presupposes."@en ;
+    skos:changeNote "v2.8.0: Promoted to core and re-domained from Role to Capability (intermediate) to Obligation to Capability. The intermediate Role-domain proeth:requiresCapability is deprecated separately."@en .
 
 ###############################################################
 # Formal Specification Completeness Constraints
