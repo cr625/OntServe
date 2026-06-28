@@ -340,10 +340,8 @@
     rdfs:label "Action Type"@en ;
     rdfs:comment "Meta-class for specific action types recognized by the ProEthica system"@en .
 
-:CapabilityType rdf:type owl:Class ;
-    rdfs:subClassOf :EntityType ;
-    rdfs:label "Capability Type"@en ;
-    rdfs:comment "Meta-class for specific capability types recognized by the ProEthica system"@en .
+# :CapabilityType meta-class retired 2026-06-28 (ratified Ca spec): it had no members; the
+# capability kind taxonomy is the canonical reuse list below, each subClassOf proeth-core:Capability.
 
 #################################################################
 # Action Categories from Chapter 2.2.6 Literature
@@ -898,13 +896,13 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:label "End/Goal"@en ;
     rdfs:comment "A characteristic end or goal toward which a role is directed (e.g., in engineering: protecting public safety, serving the public welfare, providing competent service)."@en .
 
-# Standards and regulatory frameworks
-:Standard rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    rdfs:subClassOf proeth-core:Resource ;
-    rdfs:label "Standard"@en ;
-    rdfs:comment "A documented agreement containing technical specifications or criteria for professional practice"@en .
-
+# Resource kinds: the closed SIX source kinds (ratified Rs spec). EthicalCode is the formal
+# ethical-code document (rdfs:subClassOf proeth-core:Guideline, itself rdfs:subClassOf
+# proeth-core:Resource since v2.7.3); the other five (ProfessionalCode, TechnicalStandard,
+# CasePrecedent, LegalResource, ReferenceMaterial) are declared in the Professional Resource
+# Types block below, each rdfs:subClassOf proeth-core:Resource. :Standard retired 2026-06-28:
+# a generic standard folds into :TechnicalStandard; the disposable corpus re-mints any survivor
+# at re-extraction.
 :EthicalCode rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Guideline ;
@@ -912,12 +910,8 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:comment "A formal document that codifies ethical principles and professional conduct requirements for a profession. As a document (IAO:0000310 via Guideline), it contains principles, obligations, and constraints -- it is not itself a principle."@en ;
     skos:changeNote "v2.4.2: Changed rdfs:subClassOf from proeth-core:Principle to proeth-core:Guideline. An ethical code is a document that contains principles, obligations, and constraints. Classifying it as a Principle conflated the container with its contents."@en .
 
-# Specialized capability types
-:TechnicalCapability rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Technical Capability"@en ;
-    rdfs:comment "A specialized technical skill or competency in a professional domain"@en .
+# :TechnicalCapability retired 2026-06-28: superseded by the canonical Capability kinds
+# (ratified Ca spec); a technical competence is one of the named competence kinds below.
 
 # Problem and issue types
 :EthicalIssue rdf:type owl:Class ;
@@ -926,12 +920,8 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:label "Ethical Issue"@en ;
     rdfs:comment "A problematic situation involving ethical considerations or conflicts"@en .
 
-# Measurement and assessment types
-:Measurement rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    rdfs:subClassOf proeth-core:Resource ;
-    rdfs:label "Measurement"@en ;
-    rdfs:comment "A quantitative or qualitative assessment or evaluation"@en .
+# :Measurement retired 2026-06-28: not one of the closed six Resource kinds (ratified Rs spec);
+# a measurement or assessment artifact is captured by the State layer, not a Resource subclass.
 
 #################################################################
 #    Normative refinements (subclasses, non-breaking)            
@@ -955,12 +945,8 @@ proeth:conflictsWith a owl:ObjectProperty ;
 # definition); the duplicate declaration that stood here (subClassOf proeth-core:Event)
 # was removed 2026-05-30.
 
-# Explainability / rationale
-:Justification rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    rdfs:subClassOf proeth-core:Resource ;
-    rdfs:label "Justification"@en ;
-    rdfs:comment "A rationale, argument, or evidence artifact supporting a decision or interpretation in an ethical case."@en .
+# :Justification retired 2026-06-28: not one of the closed six Resource kinds (ratified Rs spec);
+# a rationale or argument is captured by the normative components and their PROV-O derivations.
 
 #################################################################
 #    Annotation properties                                        
@@ -1260,9 +1246,16 @@ proeth:conflictsWith a owl:ObjectProperty ;
 # Based on McLaren (2003) extensional principles approach
 
 # Resource-type attributions corrected 2026-05-30 (verified against the reference
-# corpus): McLaren grounds the precedent/interpretation types; professional codes are
-# Frankel/Davis; the remaining four are practical (house) extensions, not attributable
+# corpus): McLaren grounds the precedent type; professional codes are
+# Frankel/Davis; the remaining house extensions are practical, not attributable
 # to a cited ethics-reasoning source. See each class's skos:scopeNote.
+#
+# Closed-six reconciliation 2026-06-28 (ratified Rs spec): the Resource component is exactly
+# six source kinds -- EthicalCode, ProfessionalCode, TechnicalStandard, CasePrecedent,
+# LegalResource, ReferenceMaterial. :ExpertInterpretation and :DecisionTool are retired below
+# (an expert or board interpretation is captured by the normative components and their PROV-O
+# derivations; a decision tool folds to :ReferenceMaterial). The topical field is the
+# first-class proeth:topic datatype property (decision B2), not the otherAttribute overflow.
 
 :ProfessionalCode rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
@@ -1279,13 +1272,9 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:scopeNote "Attribution: McLaren (Ashley & McLaren 1995; McLaren 2003, SIROCCO). This is McLaren's core contribution to the Resource component." ;
     dcterms:references <https://doi.org/10.1016/S0004-3702(03)00135-8> .
 
-:ExpertInterpretation rdf:type owl:Class ;
-    rdfs:subClassOf proeth-core:Resource ;
-    rdfs:label "Expert Interpretation" ;
-    skos:definition "Authoritative explanations bridging principles to specific contexts, providing nuanced understanding of how principles apply in complex situations. Per McLaren (2003), the review board's explanations of how and why codes apply operationalize the abstract principles." ;
-    rdfs:comment "Professional consensus on principle application in edge cases" ;
-    skos:scopeNote "Attribution: McLaren (2003) -- the expert/board explanation that links codes to facts." ;
-    dcterms:references <https://doi.org/10.1016/S0004-3702(03)00135-8> .
+# :ExpertInterpretation retired 2026-06-28: not one of the closed six Resource kinds; an
+# expert or board interpretation is recorded by the normative components and their PROV-O
+# derivations, not as a Resource subclass.
 
 :TechnicalStandard rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
@@ -1301,12 +1290,8 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:comment "Legal framework constraining professional practice" ;
     skos:scopeNote "House extension with roots in legal case-based reasoning (Bench-Capon & Sartor 2003); treating legal materials as an ethics resource reflects the society-profession nexus (Frankel 1989)." .
 
-:DecisionTool rdf:type owl:Class ;
-    rdfs:subClassOf proeth-core:Resource ;
-    rdfs:label "Decision Tool" ;
-    skos:definition "Frameworks, methodologies, and assessment tools for ethical analysis that provide structured approaches to ethical decision-making in professional contexts." ;
-    rdfs:comment "Structured approaches for ethical analysis" ;
-    skos:scopeNote "House extension: decision-support and ethics-workup schemas formalized as a distinct resource type. Not directly attributable to a cited source." .
+# :DecisionTool retired 2026-06-28: not one of the closed six Resource kinds; a decision-support
+# or ethics-workup schema folds to :ReferenceMaterial.
 
 :ReferenceMaterial rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
@@ -1317,7 +1302,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
 
 # Specific instances of professional codes (examples)
 :NSPECodeOfEthics rdf:type owl:NamedIndividual ;
-    rdf:type :ProfessionalCode ;
+    rdf:type :EthicalCode ;  # retyped 2026-06-28 (ratified Rs spec): the NSPE Code is a formal ethical-code document
     rdfs:label "NSPE Code of Ethics" ;
     skos:definition "The National Society of Professional Engineers' Code of Ethics establishing fundamental canons, rules of practice, and professional obligations for engineers." ;
     rdfs:comment "Primary ethical framework for professional engineers in the United States" .
@@ -1364,18 +1349,11 @@ proeth:ProceduralConstraint a owl:Class ;
     rdfs:comment "Requirements for following specific processes or protocols (Furbach et al. 2014)"@en ;
     dcterms:references <https://doi.org/10.1007/s13218-014-0309-0> . # Furbach et al. 2014
 
-# Defeasibility Type Constraints
-proeth:DefeasibleConstraint a owl:Class ;
-    rdfs:subClassOf proeth-core:Constraint ;
-    rdfs:label "Defeasible Constraint"@en ;
-    rdfs:comment "Constraints that admit justified exceptions under specified conditions (Ganascia 2007)"@en ;
-    dcterms:references <https://doi.org/10.1007/s11023-007-9079-x> . # Ganascia 2007
-
-proeth:InviolableConstraint a owl:Class ;
-    rdfs:subClassOf proeth-core:Constraint ;
-    rdfs:label "Inviolable Constraint"@en ;
-    rdfs:comment "Absolute constraints that cannot be overridden under any circumstances (Dennis et al. 2016)"@en ;
-    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+# proeth:DefeasibleConstraint and proeth:InviolableConstraint retired 2026-06-28 (ratified Cs
+# spec): defeasibility versus inviolability is carried by the obligation-layer defeasibility edge
+# family (competesWith / prevailsOver / defeasibleUnder), so these two were a dead shadow. The
+# Constraint component is the closed ELEVEN boundary types: Legal, Regulatory, Resource,
+# Competence, Jurisdictional, Procedural, Ethical, Safety, Confidentiality, Temporal, Priority.
 
 # Ethical Boundary Type Constraints
 proeth:EthicalConstraint a owl:Class ;
@@ -1429,106 +1407,151 @@ proeth:conflictsWithObligation a owl:ObjectProperty ;
     rdfs:comment "Indicates when a constraint creates tension with an obligation"@en .
 
 #################################################################
-# Capability Categories from Chapter 2.2.8 Literature
-# Based on Tolmeijer et al. (2021), Berreby et al. (2017), Anderson & Anderson (2018)
+# Capability kinds (ratified Ca spec): the canonical reusable competence kinds
+# promoted from the capability reference sheet. Each is a tool- and actor-neutral
+# COMPETENCE KIND, rdfs:subClassOf proeth-core:Capability, carrying skos:altLabel folds
+# for the compound case labels it absorbs and a class-level proeth:tolmeijerRequirement
+# naming the primary ethical-competence requirement it realizes (decision E5, descriptive
+# only). The subject a competence operates on, who possesses it, and whether it is realized
+# are individual-level context (possessedBy / realizesCapability edges), not class identity;
+# a lacked or unexercised competence is a CompetenceGapState, not a Capability.
+#
+# The four proeth:tolmeijerRequirement values follow the Chapter 2.2.8 analysis of the
+# Tolmeijer et al. (2021) survey of machine-ethics implementations: norm competence,
+# situational awareness, learning and adaptation, and explanation and justification.
 #################################################################
 
-# Norm Management Capabilities
-proeth:NormCompetence a owl:Class ;
-    rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Norm Competence"@en ;
-    rdfs:comment "Ability to store ethical rules, recognize when they apply, understand conflicts, and resolve contradictions (Tolmeijer et al. 2021)"@en ;
-    dcterms:references <https://doi.org/10.1007/s11948-020-00230-4> . # Tolmeijer et al. 2021
+proeth:tolmeijerRequirement a owl:AnnotationProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "Tolmeijer requirement"@en ;
+    rdfs:comment "Class-level descriptive annotation naming which of the four ethical-competence requirements a Capability kind primarily realizes (norm competence, situational awareness, learning and adaptation, explanation and justification), after the Chapter 2.2.8 analysis of the Tolmeijer et al. (2021) survey of machine-ethics implementations. Descriptive only (decision E5): it adds no typing axiom and no per-individual field."@en ;
+    dcterms:references <https://doi.org/10.1145/3419633> . # Tolmeijer et al. 2021, Implementations in Machine Ethics: A Survey
 
-proeth:ConflictResolution a owl:Class ;
+proeth:RiskAssessmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Conflict Resolution"@en ;
-    rdfs:comment "Capability to manage and resolve conflicts between diverse and potentially conflicting normative requirements (Dennis et al. 2016)"@en ;
-    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+    rdfs:label "Risk Assessment Capability"@en ;
+    skos:definition "The competence to identify, characterize, and weigh risks bearing on a professional decision."@en ;
+    skos:altLabel "Concern Threshold Assessment Capability"@en, "Environmental Risk Assessment Capability"@en, "Schedule Pressure Resistance Capability"@en ;
+    proeth:tolmeijerRequirement "situational awareness" .
 
-# Awareness and Perception Capabilities
-proeth:SituationalAwareness a owl:Class ;
+proeth:AdequacyAssessmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Situational Awareness"@en ;
-    rdfs:comment "Ability to perceive and interpret environmental factors affecting ethical evaluation (Almpani et al. 2023, Tolmeijer et al. 2021)"@en ;
-    dcterms:references <https://doi.org/10.1007/s11948-020-00230-4> . # Tolmeijer et al. 2021
+    rdfs:label "Adequacy Assessment Capability"@en ;
+    skos:definition "The competence to judge whether a document, analysis, review, or process meets the standard required."@en ;
+    skos:altLabel "Bid Document Adequacy Assessment Capability"@en, "Constructability Assessment Capability"@en, "Federal Review Adequacy Capability"@en, "Analytical Framework Completeness Capability"@en, "Partial Analysis Avoidance Capability"@en, "Options Completeness Disclosure Capability"@en, "Client Consent Waiver Assessment Capability"@en ;
+    proeth:tolmeijerRequirement "norm competence" .
 
-proeth:EthicalPerception a owl:Class ;
+proeth:NormativeFrameworkAssessmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Ethical Perception"@en ;
-    rdfs:comment "Capability to recognize ethically salient features and dynamically assess environment (Anderson et al. 2006, Berreby et al. 2017)"@en ;
-    dcterms:references <https://doi.org/10.1109/MIS.2006.98> . # Anderson et al. 2006
+    rdfs:label "Normative Framework Assessment Capability"@en ;
+    skos:definition "The competence to identify and apply the governing canon, code, standard, or precedent to a situation."@en ;
+    skos:altLabel "Applicable Canon Identification Capability"@en, "Regulatory Compliance Verification Capability"@en, "Regulatory Standards Awareness Capability"@en, "Technology Neutral Standards Application Capability"@en, "Peer Review Norm Recognition Capability"@en, "Antitrust and Procurement Law Contextual Awareness Capability"@en ;
+    proeth:tolmeijerRequirement "norm competence" .
 
-# Learning and Adaptation Capabilities
-proeth:EthicalLearning a owl:Class ;
+proeth:PrecedentReasoningCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Ethical Learning"@en ;
-    rdfs:comment "Ability to adapt to new cases, changing standards, and novel situations while maintaining consistency (Anderson & Anderson 2018)"@en ;
-    dcterms:references <https://doi.org/10.1007/s10676-017-9430-8> . # Anderson & Anderson 2018
+    rdfs:label "Precedent Reasoning Capability"@en ;
+    skos:definition "The competence to retrieve, distinguish, and reason analogically from prior cases and precedents."@en ;
+    skos:altLabel "Precedent-Based Ethical Reasoning Capability"@en, "Precedent Distinction Capability"@en, "Precedent Analogical Distinction Capability"@en, "Ethics Code Evolution Capability"@en ;
+    proeth:tolmeijerRequirement "learning and adaptation" .
 
-proeth:PrincipleRefinement a owl:Class ;
+proeth:SituationRecognitionCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Principle Refinement"@en ;
-    rdfs:comment "Capability to evolve principles as inconsistencies are resolved and new cases are added (GenEth system, Anderson & Anderson 2018)"@en ;
-    dcterms:references <https://doi.org/10.1007/s10676-017-9430-8> . # Anderson & Anderson 2018
+    rdfs:label "Situation Recognition Capability"@en ;
+    skos:definition "The competence to perceive that an ethically salient condition such as a conflict, violation, harm, override, or boundary is present in a situation."@en ;
+    skos:altLabel "Client Disservice Recognition Capability"@en, "Client Override Recognition Capability"@en, "Dual Role Conflict Recognition Capability"@en, "Single Client Dual Capacity Recognition Capability"@en, "Environmental Violation Recognition Capability"@en, "Referral Alternative Recognition Capability"@en, "Whistleblower Right Recognition Capability"@en ;
+    proeth:tolmeijerRequirement "situational awareness" .
 
-# Reasoning and Deliberation Capabilities
-proeth:EthicalReasoning a owl:Class ;
+proeth:ScopeBoundaryRecognitionCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Ethical Reasoning"@en ;
-    rdfs:comment "Capability to process ethical information, deliberate on choices, and exercise moral judgment (Wallach & Allen 2009, Belle 2023)"@en ;
-    dcterms:references <https://doi.org/10.1093/acprof:oso/9780195374049.001.0001> . # Wallach & Allen 2009
+    rdfs:label "Scope Boundary Recognition Capability"@en ;
+    skos:definition "The competence to recognize the limits of one's role, discipline, scope of practice, or authority."@en ;
+    skos:altLabel "Discipline Boundary Recognition Capability"@en, "Non-Engineering Scope Maintenance Capability"@en, "Scope Limitation Consistency Capability"@en, "Technology Role Boundary Capability"@en, "Credential Title Scope Awareness Capability"@en, "Faithful Agent Boundary Capability"@en ;
+    proeth:tolmeijerRequirement "situational awareness" .
 
-proeth:CausalReasoning a owl:Class ;
+proeth:DisclosureCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Causal Reasoning"@en ;
-    rdfs:comment "Ability to trace complex causal chains and establish responsibility relationships (Sarmiento et al. 2023, Wright's NESS test)"@en ;
-    dcterms:references <https://doi.org/10.1007/s10458-023-09609-6> . # Sarmiento et al. 2023
+    rdfs:label "Disclosure Capability"@en ;
+    skos:definition "The competence to communicate material facts, risks, limitations, or affiliations to the parties entitled to them. The subject of the disclosure is context, not a distinct capability."@en ;
+    skos:altLabel "AI Tool Disclosure Capability"@en, "Expertise Calibrated Disclosure Capability"@en, "Incomplete Submission Disclosure Capability"@en, "Informed Bid Disclosure Capability"@en, "Pre-Engagement Scope Disclosure Capability"@en, "Equipment Failure Disclosure Capability"@en, "Proactive Risk Disclosure Capability"@en, "Peer Review Notification Capability"@en, "Regulatory Authority Reporting Capability"@en, "Funding Constraint Communication Capability"@en ;
+    proeth:tolmeijerRequirement "explanation and justification" .
 
-proeth:TemporalReasoning a owl:Class ;
+proeth:ObjectivityMaintenanceCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Temporal Reasoning"@en ;
-    rdfs:comment "Capability to reason about temporal dynamics and event sequences in ethical evaluation (Govindarajulu & Bringsjord 2017)"@en ;
-    dcterms:references <https://doi.org/10.1007/s11023-015-9367-9> . # Govindarajulu & Bringsjord 2017
+    rdfs:label "Objectivity Maintenance Capability"@en ;
+    skos:definition "The competence to maintain independent, unbiased professional judgment under pressure, advocacy, solicitation, or cost-rationalization influence."@en ;
+    skos:altLabel "Advisory Independence Maintenance Capability"@en, "Adversarial Objectivity Maintenance Capability"@en, "Advocacy Bias Resistance Capability"@en, "Cost Rationalization Bias Avoidance Capability"@en, "Free Services Solicitation Resistance Capability"@en, "Commercial Solicitation Critical Evaluation Capability"@en, "Heightened Self-Review Diligence Capability"@en ;
+    proeth:tolmeijerRequirement "norm competence" .
 
-# Communication and Explanation Capabilities
-proeth:ExplanationGeneration a owl:Class ;
+proeth:JudgmentNonSubstitutionCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Explanation Generation"@en ;
-    rdfs:comment "Ability to provide clear explanations and justifications for ethical decisions (Langley 2019, Tolmeijer et al. 2021)"@en ;
-    dcterms:references <https://doi.org/10.1007/s11948-020-00230-4> . # Tolmeijer et al. 2021
+    rdfs:label "Judgment Non-Substitution Capability"@en ;
+    skos:definition "The competence to retain personal professional judgment rather than substituting a tool's, delegate's, or third party's output for it."@en ;
+    skos:altLabel "AI Substitution Avoidance Capability"@en, "AI Output Critical Review Capability"@en, "Delegated Work Review Capability"@en ;
+    proeth:tolmeijerRequirement "norm competence" .
 
-proeth:JustificationCapability a owl:Class ;
+proeth:CompetenceSelfAssessmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Justification Capability"@en ;
-    rdfs:comment "Capability to trace reasoning paths connecting decisions to authoritative sources (McLaren 2003, Anderson & Anderson 2018)"@en ;
-    dcterms:references <https://doi.org/10.1023/B:AIRE.0000009444.71972.2e> . # McLaren 2003
+    rdfs:label "Competence Self-Assessment Capability"@en ;
+    skos:definition "The competence to honestly appraise and verify one's own qualifications before undertaking work."@en ;
+    skos:altLabel "Self-Competence Honest Assessment Capability"@en, "Independent Competence Verification Capability"@en, "Competence Self-Certification Resistance Capability"@en, "Technology Proficiency Assessment Capability"@en, "AI Tool Proficiency Assessment Capability"@en ;
+    proeth:tolmeijerRequirement "situational awareness" .
 
-proeth:ResponsibilityDocumentation a owl:Class ;
+proeth:ConfidentialityJudgmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Responsibility Documentation"@en ;
-    rdfs:comment "Capability to maintain detailed logs of actions and reasoning for accountability (Arkin 2008, Kroll 2020)"@en ;
-    dcterms:references <https://doi.org/10.1109/MIS.2008.100> . # Arkin 2008
+    rdfs:label "Confidentiality Judgment Capability"@en ;
+    skos:definition "The competence to determine the boundaries of confidentiality and when an overriding duty such as public safety licenses disclosure."@en ;
+    skos:altLabel "Confidentiality Override Judgment Capability"@en, "Confidentiality Structure Assessment Capability"@en, "Client Data Confidentiality Boundary Capability"@en, "Confidential Data Upload Consent Capability"@en, "Covert Instruction Refusal Capability"@en ;
+    proeth:tolmeijerRequirement "norm competence" .
 
-# Domain-Specific Capabilities
-proeth:DomainExpertise a owl:Class ;
+proeth:RepresentationAccuracyCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Domain Expertise"@en ;
-    rdfs:comment "Professional domain-specific knowledge and competencies (Hallamaa & Kalliokoski 2022, Doernberg & Truog 2023)"@en ;
-    dcterms:references <https://doi.org/10.1007/s00146-021-01230-z> . # Hallamaa & Kalliokoski 2022
+    rdfs:label "Representation Accuracy Capability"@en ;
+    skos:definition "The competence to represent one's credentials, licensure, and qualifications accurately and without deception."@en ;
+    skos:altLabel "Credential Representation Accuracy Capability"@en, "Jurisdictional Licensure Verification Capability"@en, "Deceptive Justification Avoidance Capability"@en, "Omission Rationale Articulation Capability"@en, "Report Language Precision Capability"@en ;
+    proeth:tolmeijerRequirement "explanation and justification" .
 
-proeth:ProfessionalCompetence a owl:Class ;
+proeth:ProfessionalAccountabilityCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Professional Competence"@en ;
-    rdfs:comment "Technical competencies specific to professional roles and activities (Kong et al. 2020, Stenseke 2024)"@en ;
-    dcterms:references <https://doi.org/10.1007/s10676-024-09775-5> . # Stenseke 2024
+    rdfs:label "Professional Accountability Capability"@en ;
+    skos:definition "The competence to accept responsibility for one's work and cooperate in error correction, peer review, and oversight."@en ;
+    skos:altLabel "Professional Accountability Acceptance Capability"@en, "Error Accountability Cooperation Capability"@en, "Peer Review Cooperation Capability"@en, "Public Safety Cooperation Motivation Capability"@en, "Corrective Action Monitoring Capability"@en, "Post-Engagement Observation Duty Capability"@en, "Remediation Advisory Capability"@en, "Peer Competence Reporting Capability"@en ;
+    proeth:tolmeijerRequirement "explanation and justification" .
 
-# Retrieval and Application Capabilities
-proeth:PrecedentRetrieval a owl:Class ;
+proeth:SupervisoryControlCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
-    rdfs:label "Precedent Retrieval"@en ;
-    rdfs:comment "Capability to identify relevant precedents and apply case-based reasoning (McLaren 2003, SIROCCO system)"@en ;
-    dcterms:references <https://doi.org/10.1023/B:AIRE.0000009444.71972.2e> . # McLaren 2003
+    rdfs:label "Supervisory Control Capability"@en ;
+    skos:definition "The competence to exercise responsible-charge control, direct supervision, and sealing authority over work product."@en ;
+    skos:altLabel "Supervisory Control Verification Capability"@en, "Document Sealing Competence Capability"@en, "Geotechnical Test Supervision Capability"@en ;
+    proeth:tolmeijerRequirement "norm competence" .
+
+proeth:FactGatheringDiligenceCapability a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Fact Gathering Diligence Capability"@en ;
+    skos:definition "The competence to gather, consult, and weigh the witnesses, records, and evidence needed to reach a sound professional conclusion."@en ;
+    skos:altLabel "Witness and Record Consultation Capability"@en ;
+    proeth:tolmeijerRequirement "situational awareness" .
+
+proeth:WorkRefusalJudgmentCapability a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Work Refusal Judgment Capability"@en ;
+    skos:definition "The competence to determine when professional duty requires declining or ceasing a task."@en ;
+    skos:altLabel "Client Confrontation Capability"@en ;
+    proeth:tolmeijerRequirement "norm competence" .
+
+proeth:AIAttributionCapability a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "AI Attribution Capability"@en ;
+    skos:definition "The competence to attribute AI-tool contribution in work product and representations."@en ;
+    proeth:tolmeijerRequirement "explanation and justification" .
+
+proeth:ThresholdDistinctionCapability a owl:Class ;
+    rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Threshold Distinction Capability"@en ;
+    skos:definition "The competence to discriminate the threshold at which a concern, consent, or scope condition changes the required professional response."@en ;
+    skos:altLabel "Retainer Scope Delineation Capability"@en ;
+    proeth:tolmeijerRequirement "situational awareness" .
+
 
 # Capability properties for relationships
 proeth:hasCapabilityLevel a owl:DatatypeProperty ;  # was owl:ObjectProperty, corrected: range is xsd:string
@@ -2111,6 +2134,11 @@ proeth:documentTitle a owl:DatatypeProperty ;
     rdfs:label "document title"@en ;
     rdfs:range xsd:string ;
     rdfs:comment "Intended on Resource: the resource/document title."@en .
+
+proeth:topic a owl:DatatypeProperty ;
+    rdfs:label "topic"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Resource: the subject the resource addresses. A first-class Resource field (decision B2), declared distinct from the otherAttribute overflow string because topic is a known, near-always-present field rather than the uncontrolled tail."@en .
 
 proeth:usedInContext a owl:DatatypeProperty ;
     rdfs:label "used in context"@en ;
