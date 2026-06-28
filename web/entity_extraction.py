@@ -32,14 +32,41 @@ _OWL_STRUCTURAL_TYPES = frozenset([
 ])
 
 
+_IAO_DEFINITION = rdflib.URIRef('http://purl.obolibrary.org/obo/IAO_0000115')
+PROETHICA_NS = 'http://proethica.org/ontology/'
+PROETHICA_INTERMEDIATE_NS = 'http://proethica.org/ontology/intermediate#'
+PROETHICA_CORE_NS = 'http://proethica.org/ontology/core#'
+
+
 def _comment_or_definition(g, subject):
-    """rdfs:comment if present, else skos:definition. SKOS vocabularies carry the
-    human description on skos:definition, so the entity page would otherwise show
-    no description for borrowed crosswalk terms."""
-    val = next(g.objects(subject, RDFS.comment), None)
-    if val is None:
-        val = next(g.objects(subject, SKOS.definition), None)
+    """rdfs:comment if present, else iao:0000115 (OBO textual definition), else skos:definition.
+    OWL classes carry the formal definition on iao:0000115 and SKOS concepts on skos:definition, so a
+    class/concept lacking rdfs:comment still gets a description (and the rich definition shows) on the page."""
+    val = (next(g.objects(subject, RDFS.comment), None)
+           or next(g.objects(subject, _IAO_DEFINITION), None)
+           or next(g.objects(subject, SKOS.definition), None))
     return str(val) if val else None
+
+
+def _pick_best_parent(g, class_uri):
+    """Best rdfs:subClassOf parent: proethica intermediate > core > other proethica > any named (BFO/IAO/OBO)
+    superclass. Proethica-first keeps the category-walk CTEs terminating at the proethica boundary; the named
+    fallback lets a core class (whose only named parent is BFO) root in the BFO tree for the Class Hierarchy.
+    Blank-node restrictions are excluded. Returns a URI string or None."""
+    all_parents = [str(p) for p in g.objects(class_uri, RDFS.subClassOf)]
+    if not all_parents:
+        return None
+    intermediate = [p for p in all_parents if p.startswith(PROETHICA_INTERMEDIATE_NS)]
+    core = [p for p in all_parents if p.startswith(PROETHICA_CORE_NS)]
+    other = [p for p in all_parents if p.startswith(PROETHICA_NS) and p not in intermediate and p not in core]
+    if intermediate:
+        return intermediate[0]
+    if core:
+        return core[0]
+    if other:
+        return other[0]
+    named = [p for p in all_parents if p.startswith('http')]
+    return named[0] if named else None
 
 
 def extract_entities_from_content(ontology, content, format_hint='turtle'):
@@ -86,14 +113,18 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         else:
             raise parse_error
 
-    # Clear existing entities for this ontology
+    # Clear existing entities for this ontology, capturing their embeddings first so an entity whose
+    # (uri, content_hash) is unchanged keeps its vector across the re-extract (no embedding blanking on
+    # reload -- the prior bug where only tools/refresh preserved embeddings and the web/sync paths did not).
     stmt = select(OntologyEntity).where(OntologyEntity.ontology_id == ontology.id)
     entities_to_clear = db.session.execute(stmt).scalars().all()
+    prev_emb = {e.uri: (e.content_hash, e.embedding) for e in entities_to_clear}
     for entity in entities_to_clear:
         db.session.delete(entity)
 
     entity_counts = {'class': 0, 'property': 0, 'individual': 0}
     captured_uris = set()
+    new_entities = []
 
     now = datetime.now(timezone.utc)
 
@@ -104,7 +135,6 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
     # --- Pass 1: Standard OWL classes ---
     for cls in g.subjects(RDF.type, OWL.Class):
         label = next(g.objects(cls, RDFS.label), None)
-        subclass_of = list(g.objects(cls, RDFS.subClassOf))
         label_str = str(label) if label else None
         comment_str = _comment_or_definition(g, cls)
 
@@ -117,12 +147,12 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             uri=str(cls),
             label=label_str,
             comment=comment_str,
-            parent_uri=str(subclass_of[0]) if subclass_of else None,
+            parent_uri=_pick_best_parent(g, cls),
             properties=properties if properties else None,
             content_hash=OntologyEntity.compute_content_hash(str(cls), label_str, comment_str),
             updated_at=now
         )
-        db.session.add(entity)
+        new_entities.append(entity)
         captured_uris.add(str(cls))
         entity_counts['class'] += 1
 
@@ -146,7 +176,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             content_hash=OntologyEntity.compute_content_hash(str(prop), label_str, comment_str),
             updated_at=now
         )
-        db.session.add(entity)
+        new_entities.append(entity)
         captured_uris.add(str(prop))
         entity_counts['property'] += 1
 
@@ -170,7 +200,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             content_hash=OntologyEntity.compute_content_hash(str(prop), label_str, comment_str),
             updated_at=now
         )
-        db.session.add(entity)
+        new_entities.append(entity)
         captured_uris.add(str(prop))
         entity_counts['property'] += 1
 
@@ -202,7 +232,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             content_hash=OntologyEntity.compute_content_hash(uri_str, label_str, comment_str),
             updated_at=now
         )
-        db.session.add(entity)
+        new_entities.append(entity)
         captured_uris.add(uri_str)
         entity_counts['property'] += 1
 
@@ -245,7 +275,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             content_hash=OntologyEntity.compute_content_hash(uri_str, label_str, comment_str),
             updated_at=now
         )
-        db.session.add(entity)
+        new_entities.append(entity)
         captured_uris.add(uri_str)
         entity_counts[entity_type] = entity_counts.get(entity_type, 0) + 1
 
@@ -275,7 +305,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             content_hash=OntologyEntity.compute_content_hash(uri_str, label_str, comment_str),
             updated_at=now
         )
-        db.session.add(entity)
+        new_entities.append(entity)
         captured_uris.add(uri_str)
         entity_counts['scheme'] = entity_counts.get('scheme', 0) + 1
 
@@ -320,9 +350,16 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             content_hash=OntologyEntity.compute_content_hash(uri_str, label_str, comment_str),
             updated_at=now
         )
-        db.session.add(entity)
+        new_entities.append(entity)
         captured_uris.add(uri_str)
         entity_counts['individual'] += 1
+
+    # Restore embeddings for entities whose (uri, content_hash) is unchanged, then persist all.
+    for e in new_entities:
+        prev = prev_emb.get(e.uri)
+        if prev is not None and prev[0] == e.content_hash and prev[1] is not None:
+            e.embedding = prev[1]
+        db.session.add(e)
 
     return entity_counts
 
