@@ -154,7 +154,7 @@
     {% endif %}
 
     <!-- Entity Header -->
-    {% set cc = entity.properties.conceptCategory if (entity.properties and entity.properties is mapping) else none %}
+    {% set cc = materialized_category(entity) %}
     {% set cm = concept_meta(cc) if cc else none %}
     {% set comp = concept_meta(fragment) if entity.entity_type == 'class' else none %}
     <div class="entity-header type-{{ entity.entity_type }} mb-4"{% if cm %} style="border-color: {{ cm.color }};"{% endif %}>

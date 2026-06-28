@@ -11,11 +11,11 @@ This audit loads core + intermediate + extended before resolving, so the count
 reflects reality.
 
 It further splits the orphans into:
-  - REAL D-tuple orphans: the class's individuals carry a conceptCategory that
-    IS one of the nine, but the class does not chain to that core category.
+  - REAL D-tuple orphans: the class's individuals carry a materialized direct type
+    that IS one of the nine, but the class does not chain to that core category.
     These threaten the nine-way disjointness guarantee and are the actionable kind.
-  - non-D-tuple classes: no nine-category conceptCategory (analysis/synthesis or
-    temporal-structural artifacts such as DecisionPoint, EthicalQuestion,
+  - non-D-tuple classes: no nine-category materialized direct type (analysis/synthesis
+    or temporal-structural artifacts such as DecisionPoint, EthicalQuestion,
     EthicalConclusion, CausalChain, TemporalRelation). Outside the disjoint set
     by design; reported separately, not a defect.
 
@@ -29,7 +29,6 @@ from rdflib import Graph, Namespace, RDF, RDFS, OWL, URIRef
 
 ONT = Path(__file__).resolve().parent.parent / "ontologies"
 CORE_NS = Namespace("http://proethica.org/ontology/core#")
-CONCEPT_CATEGORY = URIRef("http://proethica.org/ontology/intermediate#conceptCategory")
 NINE = ["Role", "Principle", "Obligation", "State", "Resource",
         "Action", "Event", "Capability", "Constraint"]
 CORE_TARGETS = {CORE_NS[c] for c in NINE} | {CORE_NS["Agent"]}
@@ -73,7 +72,11 @@ def audit_case(imports_graph, case_path):
 
     real, nond = set(), set()  # orphan class local-names
     for ind in g.subjects(RDF.type, OWL.NamedIndividual):
-        cats = {str(c) for c in g.objects(ind, CONCEPT_CATEGORY)}
+        # The nine-category names claimed by the individual via its materialized
+        # direct rdf:type proeth-core:<Category> (CMT-1), replacing the retired
+        # conceptCategory literal.
+        cats = {_ln(t) for t in g.objects(ind, RDF.type)
+                if str(t).startswith(str(CORE_NS)) and _ln(t) in NINE}
         for cls in g.objects(ind, RDF.type):
             if cls == OWL.NamedIndividual or "#" not in str(cls):
                 continue

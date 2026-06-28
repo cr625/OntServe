@@ -5,7 +5,7 @@
    9-concept type (the concept_meta chip + left accent), labelled as instances
    of their class (clickable), and never repeat the class in the body. #}
 {% macro render_entity_card(entity, color=none, ontology_name=none) %}
-{% set cc = entity.properties.conceptCategory if (entity.properties and entity.properties is mapping) else none %}
+{% set cc = materialized_category(entity) %}
 {% set cm = concept_meta(cc) if cc else none %}
 {% set accent = (cm.color if cm else color) or '#6c757d' %}
 <div class="entity-card individual-card" style="--entity-color: {{ accent }};">

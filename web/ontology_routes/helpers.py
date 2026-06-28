@@ -132,7 +132,6 @@ _DEFINITION_LAYER_GROUP = {
 
 # Human-readable labels for property keys
 _PROPERTY_LABELS = {
-    'conceptCategory': 'Concept Category',
     'roleclass': 'Role Class',
     'rolecategory': 'Role Category',
     'importance': 'Importance',
@@ -205,10 +204,10 @@ def _categorize_entity_properties(entity):
         return groups
 
     for key, value in entity.properties.items():
-        # Skip internal keys, the redundant conceptCategory (shown as the concept
-        # chip in the header instead), and the <concept>class key (shown as the
-        # "instance of" link instead).
-        if key in _SKIP_KEYS or key.lower() == 'conceptcategory' or key.lower().endswith('class'):
+        # Skip internal keys, the rdf_types list (the materialized direct type is
+        # shown as the concept chip in the header instead), and the <concept>class
+        # key (shown as the "instance of" link instead).
+        if key in _SKIP_KEYS or key.lower() == 'rdf_types' or key.lower().endswith('class'):
             continue
 
         # skos:scopeNote is an inherited / contextual definition (e.g. the matched

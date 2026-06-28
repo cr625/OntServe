@@ -32,7 +32,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Any
 
-from rdflib import Graph, URIRef, Literal, RDF, RDFS, OWL
+from rdflib import Graph, URIRef, RDF, RDFS, OWL
 
 ONTSERVE_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ONTSERVE_ROOT))
@@ -43,9 +43,7 @@ from conformance import validate_conformance_content  # noqa: E402
 from pellet_validate import CORE_TTL, INTERMEDIATE_TTL  # noqa: E402
 
 CORE = "http://proethica.org/ontology/core#"
-INT = "http://proethica.org/ontology/intermediate#"
 EXTENDED_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-intermediate-extended.ttl"
-CONCEPT_CATEGORY = URIRef(INT + "conceptCategory")
 CORE9 = ["Role", "Principle", "Obligation", "State", "Resource",
          "Action", "Event", "Capability", "Constraint"]
 CORE9_URIS = {URIRef(CORE + c) for c in CORE9}
@@ -169,21 +167,21 @@ def _repair_disjoint_core(case_g: Graph, focus_node: str, ctx: OntologyContext) 
     if not changed:
         return False  # the only conflicting signal was the property itself; nothing to strip
 
+    # Assert the kept category as the materialized direct rdf:type proeth-core:<keep>
+    # (CMT-1). This direct type is now the sole category signal; the retired
+    # conceptCategory literal is no longer written.
     case_g.add((ind, RDF.type, URIRef(CORE + keep)))
-    # reconcile the conceptCategory literal to the kept category (it cannot lie now).
-    for old in list(case_g.objects(ind, CONCEPT_CATEGORY)):
-        case_g.remove((ind, CONCEPT_CATEGORY, old))
-    case_g.add((ind, CONCEPT_CATEGORY, Literal(keep)))
     return True
 
 
 def retype_individual_to_category(case_g: Graph, ind: URIRef, keep: str,
                                   ctx: OntologyContext) -> bool:
     """Re-type an individual to a SINGLE core category `keep`: strip every rdf:type whose
-    resolved core category conflicts with keep, assert core:keep, and reconcile the
-    conceptCategory literal. Shared applier for the LLM tier (model-chosen category); the
-    deterministic Tier-0 `_repair_disjoint_core` has its own property-domain authority rule
-    and stripping guard. Returns True if the graph changed. `keep` must be one of CORE9."""
+    resolved core category conflicts with keep and assert the materialized direct
+    rdf:type proeth-core:<keep> (CMT-1). Shared applier for the LLM tier (model-chosen
+    category); the deterministic Tier-0 `_repair_disjoint_core` has its own
+    property-domain authority rule and stripping guard. Returns True if the graph
+    changed. `keep` must be one of CORE9."""
     if keep not in CORE9:
         return False
     type_cats = _individual_type_cats(case_g, ind, ctx)
@@ -196,12 +194,6 @@ def retype_individual_to_category(case_g: Graph, ind: URIRef, keep: str,
     if (ind, RDF.type, keep_uri) not in case_g:
         case_g.add((ind, RDF.type, keep_uri))
         changed = True
-    for old in list(case_g.objects(ind, CONCEPT_CATEGORY)):
-        if str(old) != keep:
-            case_g.remove((ind, CONCEPT_CATEGORY, old))
-            changed = True
-    if (ind, CONCEPT_CATEGORY, Literal(keep)) not in case_g:
-        case_g.add((ind, CONCEPT_CATEGORY, Literal(keep)))
     return changed
 
 

@@ -4,7 +4,7 @@ Diagnose the 18 Pellet-inconsistent dev case ontologies (Phase 1.7).
 
 For each case it answers three questions:
   A. Reproduce: is it inconsistent under the CURRENT validator context
-     (core + intermediate only, conceptCategory subclass fallback)?
+     (core + intermediate only, materialized-direct-type subclass fallback)?
   B. Context fix: does loading proethica-intermediate-extended.ttl (the 219
      discovered classes the validator currently omits) make it consistent?
   C. Deterministic clash: independent of any reasoner, which named individuals
@@ -12,8 +12,8 @@ For each case it answers three questions:
      Also: which object-property edges point at an endpoint whose resolved
      core category contradicts the property's declared range?
 
-Pure-rdflib analysis (C) is deterministic; the conceptCategory fallback in
-pellet_validate is NOT (it reads the first instance's literal in set order).
+Pure-rdflib analysis (C) is deterministic; the materialized-direct-type fallback in
+pellet_validate is NOT (it reads the first matching instance's type in set order).
 
 Usage:
   python validation/diagnose_drift.py 7 9 12 ...          # specific cases
@@ -214,7 +214,7 @@ def diagnose(case_num: int):
     name = f"proethica-case-{case_num}"
     content = _fetch_case_content_from_db(name)
 
-    # A: current validator behavior (core+intermediate + conceptCategory fallback)
+    # A: current validator behavior (core+intermediate + materialized-direct-type fallback)
     gA = _base_graph(with_extended=False)
     gA.parse(data=content, format="turtle")
     _strip_external_imports(gA)

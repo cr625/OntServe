@@ -284,6 +284,13 @@ def create_app(config_name=None):
     from web.case_display import concept_type_meta
     app.jinja_env.globals['concept_meta'] = concept_type_meta
 
+    # The individual's materialized direct core category (one of the nine D-tuple
+    # categories), read from its rdf:type proeth-core:<Category> assertion (CMT-1).
+    # Templates use it for the nine-concept badge/chip now that the conceptCategory
+    # property is retired.
+    from web.case_display import materialized_category
+    app.jinja_env.globals['materialized_category'] = materialized_category
+
     # Single source of truth for the front-end Bootstrap version, referenced by
     # base.html and the two standalone editor pages (editor/edit.html,
     # editor/visualize.html). Bumping the version here updates every page; see

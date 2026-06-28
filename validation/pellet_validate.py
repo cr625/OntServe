@@ -39,8 +39,8 @@ INTERMEDIATE_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-intermediate.ttl"
 # case's drift into every other case's validation (measured 2026-06-01: it dropped the corpus
 # from 119/119 to 117/119 and carries a SafetyObligation self-loop). The per-case
 # _add_missing_subclass_declarations patch reconstructs each case's own subClassOf-core from
-# its individuals' conceptCategory, which is local and drift-free. A normalized (D15) lean
-# case validates correctly under that patch with no extended load. See ontology-architecture.md.
+# its individuals' materialized direct type, which is local and drift-free. A normalized (D15)
+# lean case validates correctly under that patch with no extended load. See ontology-architecture.md.
 
 log = logging.getLogger(__name__)
 
@@ -95,14 +95,17 @@ CATEGORY_TO_CORE = {
     "Capability": URIRef("http://proethica.org/ontology/core#Capability"),
     "Constraint": URIRef("http://proethica.org/ontology/core#Constraint"),
 }
-CONCEPT_CATEGORY = URIRef("http://proethica.org/ontology/intermediate#conceptCategory")
 RDFS_SUBCLASSOF = URIRef("http://www.w3.org/2000/01/rdf-schema#subClassOf")
+# Inverse of CATEGORY_TO_CORE: a materialized direct core class -> its category
+# name. The category an individual belongs to is read from its materialized direct
+# rdf:type proeth-core:<Category> (CMT-1), not the retired conceptCategory literal.
+CORE_TO_CATEGORY = {v: k for k, v in CATEGORY_TO_CORE.items()}
 
 
 def _add_missing_subclass_declarations(g: Graph) -> int:
     """For each LLM-generated class used as rdf:type but not declared with
-    rdfs:subClassOf, derive the parent core class from the conceptCategory
-    field of its instances and add the missing declaration.
+    rdfs:subClassOf, derive the parent core class from the individual's materialized
+    direct rdf:type proeth-core:<Category> (CMT-1) and add the missing declaration.
 
     Returns the number of subClassOf triples added.
 
@@ -116,26 +119,25 @@ def _add_missing_subclass_declarations(g: Graph) -> int:
     corpus cases such as case-72 bake subClassOf-core into the TTL and need none).
     The patch supplies case-class -> core; the foundation stub supplies core ->
     BFO, so together the reconstructed chain reaches BFO and the alignment is
-    fully resolved. The non-self-contained modern case TTL is the long-standing
-    "subclass emission from conceptCategory" open item (proethica/CLAUDE.md); it
-    affects Section C and is tracked separately, not here.
+    fully resolved. The retired conceptCategory literal is no longer read; the
+    materialized direct type carries the same category one hop away.
     """
     added = 0
-    # Collect all (class_uri -> conceptCategory) from individual instances
+    # Collect (class_uri -> category) from the materialized direct type of instances
     class_categories = {}
     for ind in g.subjects(RDF.type, OWL.NamedIndividual):
-        for _, _, cls in g.triples((ind, RDF.type, None)):
-            if cls == OWL.NamedIndividual:
+        types = list(g.objects(ind, RDF.type))
+        direct = next((CORE_TO_CATEGORY[t] for t in types if t in CORE_TO_CATEGORY), None)
+        if not direct:
+            continue
+        for cls in types:
+            if cls == OWL.NamedIndividual or cls in CORE_TO_CATEGORY:
                 continue
             # Check if class already has a subClassOf declaration
             existing = list(g.objects(cls, RDFS_SUBCLASSOF))
             if existing:
                 continue
-            if cls not in class_categories:
-                # Read the conceptCategory from this individual
-                cats = list(g.objects(ind, CONCEPT_CATEGORY))
-                if cats:
-                    class_categories[cls] = str(cats[0])
+            class_categories.setdefault(cls, direct)
 
     for cls_uri, cat in class_categories.items():
         core_parent = CATEGORY_TO_CORE.get(cat)
@@ -170,9 +172,10 @@ def _build_merged_graph(case_content: str) -> Graph:
         # validated against a reconstructed graph, not the stored artifact -- WARN so
         # it is visible rather than silently reconstructed.
         log.warning(
-            "pellet_validate patched %d missing subClassOf-core declarations from "
-            "conceptCategory -- this case TTL is NOT self-contained (validated against a "
-            "reconstructed graph, not the persisted one). Re-commit/backfill to fix.", n
+            "pellet_validate patched %d missing subClassOf-core declarations from the "
+            "materialized direct type -- this case TTL is NOT self-contained (validated "
+            "against a reconstructed graph, not the persisted one). Re-commit/backfill "
+            "to fix.", n
         )
 
     return g

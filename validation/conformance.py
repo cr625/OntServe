@@ -8,7 +8,7 @@ and is the rules-as-data, domain-portable layer. It is also the foundation of th
 Phase-D validate-repair loop's `validate_concept` step.
 
 Mechanism: build the same merged graph pellet_validate uses (core + intermediate + case,
-with the conceptCategory subClassOf fallback and external owl:imports stripped), then run
+with the materialized-direct-type subClassOf fallback and external owl:imports stripped), then run
 pyshacl with inference='owlrl' so the OWL-RL closure (subClassOf* transitivity + rdfs:domain
 inference + disjointness) is materialized before the shapes run. The core shapes
 (validation/shapes/core-shapes.ttl) then flag any individual reaching two disjoint core

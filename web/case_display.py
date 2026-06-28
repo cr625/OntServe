@@ -149,6 +149,38 @@ def get_entity_type_name(entity) -> Optional[str]:
     return uri
 
 
+_CORE_NS = "http://proethica.org/ontology/core#"
+_NINE_CORE_CATEGORIES = {'Role', 'Principle', 'Obligation', 'State', 'Resource',
+                         'Action', 'Event', 'Capability', 'Constraint'}
+
+
+def materialized_category(entity) -> Optional[str]:
+    """Return the individual's materialized direct core category (one of the nine
+    D-tuple categories) from its rdf:type proeth-core:<Category> assertion (CMT-1),
+    or None.
+
+    ProEthica's commit asserts this direct type on every committed individual; the
+    entity extractor preserves all rdf:type URIs in ``properties['rdf_types']`` (and
+    one of them in ``parent_uri``). This replaces the retired conceptCategory
+    property as the category signal for the nine-concept colour coding."""
+    candidates = []
+    props = getattr(entity, 'properties', None)
+    if isinstance(props, dict):
+        rdf_types = props.get('rdf_types')
+        if isinstance(rdf_types, (list, tuple)):
+            candidates.extend(rdf_types)
+    parent = getattr(entity, 'parent_uri', None)
+    if parent:
+        candidates.append(parent)
+    for t in candidates:
+        ts = str(t)
+        if ts.startswith(_CORE_NS):
+            local = ts.rsplit('#', 1)[-1]
+            if local in _NINE_CORE_CATEGORIES:
+                return local
+    return None
+
+
 # Cache for ontology hierarchy mapping (type_name -> root concept)
 _hierarchy_cache = None
 
@@ -396,13 +428,14 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
             stats['by_type'][entity_type] = stats['by_type'].get(entity_type, 0) + 1
 
         # Find matching section.
-        # Priority: conceptCategory property (set at commit time) > exact type match > hierarchy walk
+        # Priority: materialized direct type (set at commit time) > exact type match > hierarchy walk
         matched = False
         matched_type = None
 
-        # Check conceptCategory property first (reliable, set by ProEthica at commit)
-        props = getattr(entity, 'properties', None) or {}
-        concept_cat = props.get('conceptCategory')
+        # Check the materialized direct rdf:type proeth-core:<Category> first
+        # (reliable, asserted by ProEthica at commit; CMT-1 replaces the retired
+        # conceptCategory property).
+        concept_cat = materialized_category(entity)
         if concept_cat and concept_cat in type_to_section:
             matched_type = concept_cat
         elif entity_type:

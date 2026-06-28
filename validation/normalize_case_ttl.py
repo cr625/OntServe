@@ -14,8 +14,8 @@ intermediate / extended) alongside the `owl:imports` it already declares. On cas
 
 Validation note (2026-06-01): the LEAN form is Pellet-consistent under the per-case
 `pellet_validate._add_missing_subclass_declarations` patch with NO extended load (the patch
-reconstructs each case's own subClassOf-core from its individuals' conceptCategory, locally and
-drift-free). The harness must NOT load the extended store wholesale -- it is cross-case and
+reconstructs each case's own subClassOf-core from its individuals' materialized direct type,
+locally and drift-free). The harness must NOT load the extended store wholesale -- it is cross-case and
 drifted (measured: 119/119 -> 117/119, plus a SafetyObligation self-loop). See
 `.claude/plans/ontology-architecture.md` Group A.
 

@@ -3,10 +3,11 @@
 
 For a case whose discovered classes were committed without an rdfs:subClassOf chain to
 core (so the nine-way disjointness cannot fire on them), emit the missing
-`rdfs:subClassOf proeth-core:<Category>` from the conceptCategory carried by the class's
-individuals. Guarded: emits ONLY when every individual of the class agrees on a single one
-of the nine categories (conceptCategory can lie / disagree -- in that case the class is left
-for manual review rather than mis-anchored). Orphans are detected against the merged
+`rdfs:subClassOf proeth-core:<Category>` from the materialized direct type carried by the
+class's individuals. Guarded: emits ONLY when every individual of the class agrees on a
+single one of the nine categories (the materialized direct type can disagree -- in that
+case the class is left for manual review rather than mis-anchored). Orphans are detected
+against the merged
 core+intermediate+extended closure (a class already chained via an imported declaration is
 left alone); the new triples are written to the CASE TTL only.
 
@@ -21,7 +22,6 @@ from rdflib import Graph, Namespace, RDF, RDFS, OWL, URIRef
 
 ONT = Path(__file__).resolve().parent.parent / "ontologies"
 CORE = Namespace("http://proethica.org/ontology/core#")
-CONCEPT_CATEGORY = URIRef("http://proethica.org/ontology/intermediate#conceptCategory")
 NINE = ["Role", "Principle", "Obligation", "State", "Resource",
         "Action", "Event", "Capability", "Constraint"]
 CATEGORY_TO_CORE = {c: CORE[c] for c in NINE}
@@ -73,10 +73,13 @@ def main():
     for t in case:
         merged.add(t)
 
-    # class -> set of conceptCategory strings claimed by its individuals
+    # class -> set of category names claimed by its individuals, read from each
+    # individual's materialized direct rdf:type proeth-core:<Category> (CMT-1),
+    # replacing the retired conceptCategory literal.
     cls_cats = defaultdict(set)
     for ind in case.subjects(RDF.type, OWL.NamedIndividual):
-        cats = {str(c) for c in case.objects(ind, CONCEPT_CATEGORY)}
+        cats = {_ln(t) for t in case.objects(ind, RDF.type)
+                if str(t).startswith(str(CORE)) and _ln(t) in NINE}
         for cls in case.objects(ind, RDF.type):
             if cls == OWL.NamedIndividual or "#" not in str(cls):
                 continue

@@ -9,9 +9,10 @@ functions. The FastMCP tool wrappers in `mcp_server.py` call these via
 Why Pellet/`pellet_validate` rather than `OwlreadyImporter`: a case ontology's
 disjointness axioms live in `proethica-core`, not the case file. `pellet_validate`
 merges core + intermediate + case, strips `owl:imports`, and back-fills
-`subClassOf` from `conceptCategory` before reasoning, so consistency results are
-trustworthy. `OwlreadyImporter.import_from_file` reasons over a single TTL and
-would miss the cross-ontology axioms.
+`subClassOf` from each individual's materialized direct rdf:type proeth-core:<Category>
+before reasoning, so consistency results are trustworthy.
+`OwlreadyImporter.import_from_file` reasons over a single TTL and would miss the
+cross-ontology axioms.
 
 `reason_ontology` / `check_consistency` reuse `validate_case` unchanged. The
 detail tools (`get_inferred_hierarchy`, `get_inconsistent_classes`) need the
