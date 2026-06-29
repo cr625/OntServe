@@ -63,6 +63,9 @@ proeth-core:Obligation a owl:Class ;
     rdfs:label "Obligation"@en ;
     rdfs:comment "A directive information entity expressing required actions or behaviors in professional contexts. Obligations prescribe conduct and, when concretized by an agent, guide compliant behavior. This is the O component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A directive information entity expressing required actions or behaviors in professional contexts. This is the O component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:scopeNote "The obligation TYPE is defined by the duty it specifies and the Principle and source provision it derives from (the R->P->O chain), not by who bears it in a given case or whether it was met; the obligated party, compliance status, and per-occasion circumstances attach to the case individual and edges, not to the class."@en ;
+    iao:0000119 "Dennis et al. (2016). Formal verification of ethical choices: an abstract principle made substantive through complete specification." ,
+                "Donohue (2017). Deontic entities in BFO-aligned ontologies (ICBO): obligations as directive information entities." ;
     skos:changeNote "v2.3.0: Refined from IAO:information content entity to IAO:directive information entity per Donohue (ICBO 2017) analysis of deontic entities in BFO-aligned ontologies."@en .
 
 # S - State: Professional states as specifically dependent continuants
@@ -133,6 +136,10 @@ proeth-core:Constraint a owl:Class ;
     rdfs:label "Constraint"@en ;
     rdfs:comment "A directive information entity expressing limitations or restrictions on professional actions or decisions. Constraints prescribe boundaries on permissible conduct. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A directive information entity expressing limitations or restrictions on professional actions or decisions. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:scopeNote "The constraint TYPE is defined by the prohibition or boundary it states and its source provision, not by who it binds in a given case or how a defeasible exception is resolved; the constrained party, per-occasion applicability, and any exception narrative attach to the case individual and edges, not to the class."@en ;
+    iao:0000119 "Arkin (2008). Governing lethal behavior: constraints as negative behavioral limits (the Ethical Governor)." ,
+                "Ganascia (2007). Modelling ethical rules: constraints as default rules tolerating justified exceptions." ,
+                "Dennis et al. (2016). Prohibited actions specified under temporal and contextual conditions." ;
     skos:changeNote "v2.3.0: Refined from IAO:information content entity to IAO:directive information entity. Constraints define the permissible space of action through negative behavioral limits (Arkin 2008) and prohibitions specifying what must not be done (Ganascia 2007). Their specification of prohibited actions under temporal and contextual conditions (Dennis et al. 2016) constitutes directive content."@en .
 
 ###############################################################
