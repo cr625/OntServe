@@ -74,6 +74,9 @@ proeth-core:State a owl:Class ;
     rdfs:label "State"@en ;
     rdfs:comment "A specifically dependent continuant representing conditions that affect ethical decisions and professional conduct. States span the quality-disposition boundary: some are monadic qualities of individual bearers (competence gaps, financial pressures) while others are relational or situational conditions (conflicts of interest, stakeholder divisions). This is the S component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A specifically dependent continuant representing conditions that affect ethical decisions and professional conduct. This is the S component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:scopeNote "The state TYPE is defined by the condition it represents and its persistence type, an inertial fluent that holds until terminated or a non-inertial fluent true at a single time point (Event Calculus), not by whose condition it is, when it holds, or which obligations it activates in a given case; the bearer, the OWL-Time temporal anchor, and the obligation-activation edges attach to the case individual, not to the class."@en ;
+    iao:0000119 "Berreby et al. (2017). Event Calculus: inertial versus non-inertial fluents." ,
+                "Jones (1991). Moral intensity: situational characteristics that affect ethical salience." ;
     skos:changeNote "v2.3.0: Changed from BFO:quality to BFO:specifically dependent continuant. ProEthica States include relational and situational conditions that do not fit the strict BFO definition of quality (which requires inherence in a single bearer). SDC is the common parent of quality and realizable entity."@en .
 
 # Rs - Resource: Professional knowledge sources as information content entities
@@ -82,6 +85,9 @@ proeth-core:Resource a owl:Class ;
     rdfs:label "Resource"@en ;
     rdfs:comment "An information content entity that serves as a professional knowledge source for ethical decision-making. Resources include codes of ethics, case precedents, technical standards, and expert interpretations -- all generically dependent continuants with descriptive content about professional practice. This is the Rs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "An information content entity that serves as a professional knowledge source for ethical decision-making. This is the Rs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:scopeNote "The resource TYPE (class) is a bare category of professional knowledge, a kind of law, regulation, standard, or code, while a specific, named or numbered, separately citable document or data artifact present in the case (a code provision, a precedent case, a dataset) is an INDIVIDUAL; the relying actor and the citing authority attach to the individual and its edges (availableTo, citedByAgent), not to the class."@en ;
+    iao:0000119 "McLaren (2003). Professional ethical knowledge resides in accumulated precedents." ,
+                "Davis (1991) and Frankel (1989). Professional codes as layered knowledge resources." ;
     skos:changeNote "v2.3.0: Changed from BFO:independent continuant to IAO:information content entity. All extracted resources (codes, precedents, standards, interpretations) are generically dependent continuants, not independent continuants. Resources are descriptive ICEs (they describe existing professional knowledge) as distinct from the prescriptive ICEs (P, O, Cs) that direct conduct."@en .
 
 # A - Action: Professional actions as processes
@@ -134,6 +140,9 @@ proeth-core:Capability a owl:Class ;
     rdfs:label "Capability"@en ;
     rdfs:comment "A disposition that inheres in a professional agent and is realized through professional activities. Capabilities represent skills, competencies, and abilities that exist as potentials and are realized when the agent performs corresponding actions. This is the Ca component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A disposition that inheres in a professional agent and is realized through professional activities. This is the Ca component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:scopeNote "The capability TYPE is defined by the competence it is, a BFO disposition realized through professional activity, not by who possesses it in a given case or the specific obligations it enables there; the bearer and the requiredForObligation edges (obligation presupposes capacity) attach to the case individual, not to the class."@en ;
+    iao:0000119 "Tolmeijer et al. (2021). Capability dimensions: norm competence, situational awareness, learning, explanation." ,
+                "Epstein and Hundert (2002). Professional competence as the judicious use of knowledge and skill in practice." ;
     skos:changeNote "v2.3.0: Reverted from BFO:realizable entity to BFO:disposition. Extracted capabilities (technical skills, ethical reasoning abilities, communication competencies) are dispositions -- they inhere in individual bearers and are realized through professional processes. Disposition is the more precise subclass of realizable entity."@en .
 
 # Cs - Constraint: Professional constraints as directive information entities
