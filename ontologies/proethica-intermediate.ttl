@@ -58,8 +58,8 @@
     iao:0000115 "A universal moral foundation that serves as the highest-level abstraction in professional ethics, requiring extensive interpretation through concrete cases (BFO: generically dependent continuant)"@en ;
     skos:definition "According to McLaren (2003), fundamental principles like public welfare and respect for persons cannot be applied through formal deduction alone but require extensional definition through landmark ethics cases and professional code applications. These principles function as constitutional-like foundations (Taddeo et al. 2024) that mediate moral ideals into professional practice (Hallamaa & Kalliokoski 2022)."@en ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
-                   <https://doi.org/10.1007/s00146-024-01870-x> , # Taddeo et al. 2024
-                   <https://doi.org/10.1080/08989621.2022.2054267> ; # Hallamaa & Kalliokoski 2022
+                   <https://doi.org/10.1007/s00146-023-01635-y> , # Taddeo et al. 2024
+                   <https://doi.org/10.3389/fcomp.2022.776837> ; # Hallamaa & Kalliokoski 2022
     rdfs:comment "Examples: Public Welfare Paramount, Respect for Persons, Justice, Beneficence. These require extensive interpretation and balancing in specific contexts."@en .
 
 :ProfessionalVirtuePrinciple rdf:type owl:Class ;
@@ -68,8 +68,8 @@
     rdfs:label "Professional Virtue Principle"@en ;
     iao:0000115 "A character-based principle defining professional excellence and ethical sensitivities specific to professional identity (BFO: generically dependent continuant)"@en ;
     skos:definition "Professional virtue principles guide professional identity formation and ethical sensitivities (Oakley & Cocking 2001). These principles are learned through expert examples (Anderson & Anderson 2018) and exemplified through model professional behavior cases, creating role-generated moral demands that shape professional character."@en ;
-    dcterms:source <https://doi.org/10.1017/CBO9780511489471> , # Oakley & Cocking 2001
-                   <https://doi.org/10.1007/s10994-018-5753-x> ; # Anderson & Anderson 2018
+    dcterms:source <https://doi.org/10.1017/CBO9780511487118> , # Oakley & Cocking 2001
+                   <https://doi.org/10.1515/pjbr-2018-0024> ; # Anderson & Anderson 2018
     rdfs:comment "Examples: Integrity, Competence, Honesty, Professional Courage, Accountability. These shape professional character and decision-making."@en .
 
 :RelationalPrinciple rdf:type owl:Class ;
@@ -79,7 +79,7 @@
     iao:0000115 "A principle governing professional relationships and establishing frameworks for trust and stakeholder interactions (BFO: generically dependent continuant)"@en ;
     skos:definition "Relational principles establish frameworks for managing professional relationships and stakeholder trust. Following McLaren's extensional approach, these principles gain meaning through precedents from client-professional disputes and resolutions, defining how professionals navigate competing interests and maintain trustworthy relationships."@en ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
-                   <https://doi.org/10.1080/10508422.2016.1155099> ; # Dennis et al. 2016
+                   <https://doi.org/10.1016/j.robot.2015.11.012> ; # Dennis et al. 2016
     rdfs:comment "Examples: Confidentiality, Loyalty, Fairness, Transparency, Respect for Autonomy. These govern interpersonal professional dynamics."@en .
 
 :DomainSpecificPrinciple rdf:type owl:Class ;
@@ -88,7 +88,7 @@
     rdfs:label "Domain-Specific Principle"@en ;
     iao:0000115 "A principle particular to professional domain contexts that bridges general ethics to specific technical practices (BFO: generically dependent continuant)"@en ;
     skos:definition "Domain-specific principles bridge general ethical guidance to particular professional contexts. As identified by Prem (2023), these principles face inherent challenges in operationalization but remain essential for contextual guidance. They are grounded through industry-specific cases and technical standards applications."@en ;
-    dcterms:source <https://doi.org/10.1007/s00146-023-01687-0> , # Prem 2023
+    dcterms:source <https://doi.org/10.1007/s43681-023-00258-9> , # Prem 2023
                    <https://doi.org/10.1007/s10676-021-09586-y> ; # Segun 2021
     rdfs:comment "Examples: Environmental Stewardship (engineering), Patient Autonomy (medicine), Academic Freedom (education). These address domain-specific ethical challenges."@en .
 
@@ -123,7 +123,7 @@
     iao:0000115 "The professional virtue principle requiring maintenance and application of professional knowledge and skill within areas of competence (BFO: generically dependent continuant)"@en ;
     skos:definition "The competence principle requires professionals to perform services only in areas of their competence and to maintain professional knowledge through continuous learning. This principle generates obligations for professional development and honest self-assessment of capabilities."@en ;
     dcterms:source "NSPE Code of Ethics II.2" ,
-                   <https://doi.org/10.1017/CBO9780511489471> ; # Oakley & Cocking 2001
+                   <https://doi.org/10.1017/CBO9780511487118> ; # Oakley & Cocking 2001
     proeth:nspeReference "Rule of Practice II.2" ;
     rdfs:comment "Balances professional autonomy with recognition of limitations and need for collaboration."@en .
 
@@ -145,7 +145,7 @@
     iao:0000115 "The relational principle requiring openness and disclosure in professional communications and decision-making (BFO: generically dependent continuant)"@en ;
     skos:definition "Transparency requires professionals to be open about conflicts of interest, limitations, and decision-making processes. This principle supports accountability and enables informed consent from stakeholders."@en ;
     dcterms:source "NSPE Code of Ethics II.3.a" ,
-                   <https://doi.org/10.1080/10508422.2016.1155099> ; # Dennis et al. 2016
+                   <https://doi.org/10.1016/j.robot.2015.11.012> ; # Dennis et al. 2016
     proeth:nspeReference "Rule of Practice II.3.a (composite disclosure value; also II.4.a / III.1.a)" ;
     rdfs:comment "Essential for maintaining trust and enabling stakeholder participation in professional decisions."@en .
 
@@ -156,7 +156,7 @@
     iao:0000115 "The domain-specific principle in engineering requiring consideration of environmental impact and sustainability (BFO: generically dependent continuant)"@en ;
     skos:definition "Environmental stewardship in engineering requires balancing technical solutions with environmental protection and sustainable development. This principle has evolved through cases addressing pollution, resource depletion, and climate change impacts."@en ;
     dcterms:source "NSPE Code of Ethics III.2.d" ,
-                   <https://doi.org/10.1007/s00146-023-01687-0> ; # Prem 2023
+                   <https://doi.org/10.1007/s43681-023-00258-9> ; # Prem 2023
     proeth:nspeReference "Professional Obligation III.2.d" ;
     rdfs:comment "Bridges engineering practice with broader environmental and societal responsibilities."@en .
 
@@ -370,7 +370,7 @@ proeth:MaintenanceAction a owl:Class ;
     rdfs:label "Maintenance Action"@en ;
     skos:definition "Professional actions involving maintaining, upholding, preserving, and protecting professional standards and values per Oakley & Cocking (2001) role requirements and Kong et al. (2020) integrity principles."@en ;
     rdfs:comment "Actions focused on maintaining standards and protecting values"@en ;
-    dcterms:references <https://doi.org/10.1017/CBO9780511489471> , # Oakley & Cocking 2001
+    dcterms:references <https://doi.org/10.1017/CBO9780511487118> , # Oakley & Cocking 2001
                       <https://doi.org/10.1007/s10676-020-09538-y> . # Kong et al. 2020
 
 proeth:PerformanceAction a owl:Class ;
@@ -1314,7 +1314,7 @@ proeth:RegulatoryConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Regulatory Constraint"@en ;
     rdfs:comment "Constraints from regulatory bodies and professional standards organizations (Taddeo et al. 2024)"@en ;
-    dcterms:references <https://doi.org/10.1007/s00146-024-01870-x> . # Taddeo et al. 2024
+    dcterms:references <https://doi.org/10.1007/s00146-023-01635-y> . # Taddeo et al. 2024
 
 proeth:ResourceConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
@@ -1326,7 +1326,7 @@ proeth:CompetenceConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Competence Constraint"@en ;
     rdfs:comment "Boundaries defined by agent capabilities and technical limitations (Hallamaa & Kalliokoski 2022)"@en ;
-    dcterms:references <https://doi.org/10.1080/08989621.2022.2054267> . # Hallamaa & Kalliokoski 2022
+    dcterms:references <https://doi.org/10.3389/fcomp.2022.776837> . # Hallamaa & Kalliokoski 2022
 
 proeth:JurisdictionalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
@@ -1605,8 +1605,7 @@ proeth:requiresCapability a owl:ObjectProperty ;
     rdfs:subClassOf proeth-core:Event ;
     rdfs:label "Decision Point"@en ;
     iao:0000115 "A point in an ethics case where a professional actor must make a choice between ethically significant alternatives, representing a critical juncture in the case narrative."@en ;
-    skos:definition "Decision points mark critical junctures in ethics cases where actors face choices between alternatives with ethical implications. Per Hobbs & Moore (2005) scenario-directed decision analysis, these points structure the ethical problem space and enable systematic analysis of options, constraints, and outcomes."@en ;
-    dcterms:source <https://doi.org/10.1111/j.1539-6924.2005.00634.x> ; # Hobbs & Moore 2005
+    skos:definition "Decision points mark critical junctures in ethics cases where actors face choices between alternatives with ethical implications."@en ;
     rdfs:comment "Extracted during Step 4 analysis. Each decision point includes options, involved roles, applicable provisions, and the board's resolution. DEPRECATED: use proeth-cases:DecisionPoint."@en ;
     skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:DecisionPoint. Added owl:equivalentClass to bridge existing references. 845 case instances reference proeth-cases:DecisionPoint."@en .
 
