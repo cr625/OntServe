@@ -89,14 +89,20 @@ proeth-core:Action a owl:Class ;
     rdfs:subClassOf bfo:0000015 ;  # BFO:process
     rdfs:label "Action"@en ;
     rdfs:comment "A process directed toward achieving specific goals in professional contexts. This is the A component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:definition "A process directed toward achieving specific goals in professional contexts. This is the A component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+    skos:definition "A process directed toward achieving specific goals in professional contexts. This is the A component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:scopeNote "The action TYPE is defined by the kind of volitional intervention it is (a BFO process the agent performs), not by who performs it, when, or the specific States (fluents) it initiates in a given case; the actor, the OWL-Time temporal anchor (time:hasTime) and the reified Allen interval relations, and the proeth:initiates edges to States attach to the case individual, not to the class."@en ;
+    iao:0000119 "Sarmiento et al. (2023). Volitional actions separated from agentless events for causal-responsibility attribution." ,
+                "Berreby et al. (2017). Event Calculus: agent-initiated actions initiate and terminate fluents." .
 
 # E - Event: Professional events as processes  
 proeth-core:Event a owl:Class ;
     rdfs:subClassOf bfo:0000015 ;  # BFO:process
     rdfs:label "Event"@en ;
     rdfs:comment "A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    skos:definition "A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en .
+    skos:definition "A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    skos:scopeNote "The event TYPE is defined by the kind of non-volitional occurrence it is and its origin (agent-caused, exogenous, or automatic), not by when it happens or the specific States (fluents) it initiates or terminates in a given case; the OWL-Time temporal anchor (time:hasTime) and the reified Allen interval relations, and the proeth:initiates / proeth:terminates edges to States attach to the case individual, not to the class."@en ;
+    iao:0000119 "Berreby et al. (2017). Event Calculus: automatic events occur when their precondition fluents hold and modify fluents to drive state transitions." ,
+                "Kowalski and Sergot (1986). The Event Calculus: a logical formalism for events and change over time." .
 
 # Event origin axis (E3/E4, ratified): three mutually-disjoint origin subclasses grounding the Action/Event
 # split (Berreby et al. 2017 exogenous-vs-automatic; Sarmiento responsibility attribution). The topical Event
