@@ -111,7 +111,7 @@
     rdfs:label "Integrity Principle"@en ;
     iao:0000115 "The professional virtue principle of maintaining honesty, truthfulness, and ethical consistency in professional practice (BFO: generically dependent continuant)"@en ;
     skos:definition "Professional integrity requires contextual interpretation through cases (Kong et al. 2020) and manifests differently across professional contexts. It encompasses honesty in professional communications, truthfulness in representations, and consistency between professional values and actions."@en ;
-    dcterms:source <https://doi.org/10.1007/s10676-020-09538-y> , # Kong et al. 2020
+    dcterms:source <https://doi.org/10.1558/jalpp.39771> , # Kong et al. 2020
                    "NSPE Code of Ethics III.1" ;
     proeth:nspeReference "Professional Obligation III.1" ;
     rdfs:comment "Central to professional identity formation and trust maintenance in professional relationships."@en .
@@ -371,7 +371,7 @@ proeth:MaintenanceAction a owl:Class ;
     skos:definition "Professional actions involving maintaining, upholding, preserving, and protecting professional standards and values per Oakley & Cocking (2001) role requirements and Kong et al. (2020) integrity principles."@en ;
     rdfs:comment "Actions focused on maintaining standards and protecting values"@en ;
     dcterms:references <https://doi.org/10.1017/CBO9780511487118> , # Oakley & Cocking 2001
-                      <https://doi.org/10.1007/s10676-020-09538-y> . # Kong et al. 2020
+                      <https://doi.org/10.1558/jalpp.39771> . # Kong et al. 2020
 
 proeth:PerformanceAction a owl:Class ;
     rdfs:subClassOf proeth-core:Action ;
