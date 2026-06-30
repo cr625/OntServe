@@ -1376,7 +1376,7 @@ proeth:PriorityConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Priority Constraint"@en ;
     rdfs:comment "Constraints establishing precedence when multiple requirements conflict (Scheutz & Malle 2014)"@en ;
-    dcterms:references <https://doi.org/10.1075/is.15.2.05sch> . # Scheutz & Malle 2014
+    dcterms:references <https://doi.org/10.1109/ETHICS.2014.6893446> . # Scheutz & Malle 2014
 
 # Constraint properties for relationships
 proeth:hasConstraintType a owl:DatatypeProperty ;  # was owl:ObjectProperty, corrected: range is xsd:string
