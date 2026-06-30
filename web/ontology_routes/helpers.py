@@ -686,18 +686,40 @@ def class_property_schema(entity):
     def _local(u):
         return u.rsplit("#", 1)[-1].rsplit("/", 1)[-1] if isinstance(u, str) else None
 
-    domain_props, seen = [], set()
+    # When two properties share a local name (e.g. an intermediate-defined involvesRole with domain
+    # DecisionPoint and a case-defined one with domain Case), the property tables can show only one row.
+    # Rank by ontology so the DEFINITIONAL declaration wins over a case-ontology duplicate, with the URI as
+    # a deterministic final tiebreak -- otherwise the displayed row depends on DB row order and flips on every
+    # re-extraction, and a core/intermediate entity page can surface a case-specific edge.
+    ont_name_by_id = dict(db.session.execute(select(Ontology.id, Ontology.name)).all())
+
+    def _ref_rank(p):
+        ont = ont_name_by_id.get(p.ontology_id, "") or ""
+        return (1 if ont.startswith("proethica-case") else 0, ont, p.uri)
+
+    def _pick_best(p, name, best):
+        """Keep the best-ranked property per local name; True if p is the (new) winner."""
+        rank = _ref_rank(p)
+        cur = best.get(name)
+        if cur is None or rank < cur[0]:
+            best[name] = (rank, p)
+            return True
+        return False
+
+    domain_best = {}
     for p in prop_rows:
         dom = p.domain
         dom_uris = dom if isinstance(dom, list) else [dom]
         if not any(isinstance(d, str) and d in ancestor_set for d in dom_uris):
             continue
         name = _local(p.uri)
-        if not name or name in seen:
-            continue
-        if (p.properties or {}).get('deprecated'):
+        if not name or (p.properties or {}).get('deprecated'):
             continue  # owl:deprecated property (e.g. the retired role-to-role duplicates); hide from the page
-        seen.add(name)
+        _pick_best(p, name, domain_best)
+    domain_props = []
+    for name, (_, p) in domain_best.items():
+        dom = p.domain
+        dom_uris = dom if isinstance(dom, list) else [dom]
         rng = p.range
         rng_uri = (rng[0] if isinstance(rng, list) and rng else rng) if rng else None
         domain_props.append({
@@ -713,18 +735,20 @@ def class_property_schema(entity):
     # Incoming: properties whose rdfs:range is this class or a (non-universal) ancestor -- the edges that
     # point AT instances of this class (its in-degree). Mirrors domain_props but keyed on range, and
     # records the source class (the property's rdfs:domain) as "from".
-    referenced_by, seen_r = [], set()
+    referenced_best = {}
     for p in prop_rows:
         rng = p.range
         rng_uris = rng if isinstance(rng, list) else [rng]
         if not any(isinstance(r, str) and r in ancestor_set for r in rng_uris):
             continue
         name = _local(p.uri)
-        if not name or name in seen_r:
-            continue
-        if (p.properties or {}).get('deprecated'):
+        if not name or (p.properties or {}).get('deprecated'):
             continue  # owl:deprecated property; hide from Referenced-By (mirrors the domain_props filter)
-        seen_r.add(name)
+        _pick_best(p, name, referenced_best)
+    referenced_by = []
+    for name, (_, p) in referenced_best.items():
+        rng = p.range
+        rng_uris = rng if isinstance(rng, list) else [rng]
         dom = p.domain
         dom_uri = (dom[0] if isinstance(dom, list) and dom else dom) if dom else None
         referenced_by.append({
