@@ -1,0 +1,58 @@
+@prefix : <http://proethica.org/ontology/iao#> .
+@prefix bfo: <http://purl.obolibrary.org/obo/BFO_> .
+@prefix iao: <http://purl.obolibrary.org/obo/IAO_> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+#################################################################
+# IAO (Information Artifact Ontology) -- canonical local source
+#
+# The Information Artifact Ontology terms that proethica-core aligns its
+# information-entity components to: Principle, Obligation, and Constraint as
+# directive information entities (IAO_0000033); Resource as an information
+# content entity (IAO_0000030). Declared locally so the OntServe class
+# hierarchy attributes these IRIs to their authoritative IAO home, mirroring
+# how BFO terms attribute to the local bfo ontology. Definitions are verbatim
+# from IAO (iao-2020.owl); the generically dependent continuant parent
+# (BFO_0000031) resolves to the bfo ontology.
+#
+# This is the VIEW's canonical IAO source. It is NOT loaded by the Pellet
+# reasoner (which uses the proethica-foundation stub for the merged BFO/IAO
+# superclass chain); the two are independent by design.
+#################################################################
+
+<http://purl.obolibrary.org/obo/iao.owl> a owl:Ontology ;
+    rdfs:label "Information Artifact Ontology (proethica subset)"@en ;
+    dc:creator "ProEthica AI"@en ;
+    dc:date "2026-06-30"^^xsd:date ;
+    owl:versionInfo "1.0.0"^^xsd:string ;
+    rdfs:comment "The IAO information-entity terms proethica-core references, declared locally as their canonical browseable home. Verbatim IAO definitions; holds only the cited terms. Not loaded by the reasoner."@en .
+
+iao:0000030 a owl:Class ;
+    rdfs:subClassOf bfo:0000031 ;
+    rdfs:label "information content entity"@en ;
+    skos:definition "A generically dependent continuant that is about some thing."@en ;
+    rdfs:isDefinedBy obo:iao.owl .
+
+iao:0000033 a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;
+    rdfs:label "directive information entity"@en ;
+    skos:definition "An information content entity whose concretizations indicate to their bearer how to realize them in a process."@en ;
+    rdfs:isDefinedBy obo:iao.owl .
+
+iao:0000310 a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;
+    rdfs:label "document"@en ;
+    skos:definition "A collection of information content entities intended to be understood together as a whole."@en ;
+    rdfs:isDefinedBy obo:iao.owl .
+
+iao:0000314 a owl:Class ;
+    rdfs:subClassOf iao:0000030 ;
+    rdfs:label "document part"@en ;
+    skos:definition "An information content entity that is part of a document."@en ;
+    rdfs:isDefinedBy obo:iao.owl .

@@ -446,6 +446,19 @@ def _is_bfo_uri(uri):
     return '/obo/BFO_' in uri or _uri_fragment(uri).startswith('BFO_')
 
 
+def _canonical_upper_ontology(uri):
+    """The canonical home ontology for an upper-level IRI (BFO -> 'bfo', IAO -> 'iao'),
+    or None for non-upper IRIs. Upper terms are copied into several stores (the canonical
+    bfo/iao ontologies and the proethica-foundation reasoner stub); the hierarchy attributes
+    them to their canonical source, not whichever store physically holds the row."""
+    frag = _uri_fragment(uri)
+    if '/obo/BFO_' in uri or frag.startswith('BFO_'):
+        return 'bfo'
+    if '/obo/IAO_' in uri or frag.startswith('IAO_'):
+        return 'iao'
+    return None
+
+
 def _hierarchy_node(uri, is_current=False):
     """Resolve a class URI to a display node for the Class Hierarchy tree."""
     frag = _uri_fragment(uri)
@@ -454,14 +467,16 @@ def _hierarchy_node(uri, is_current=False):
         return {'uri': uri, 'label': 'Thing', 'ontology': None, 'fragment': frag,
                 'is_bfo': False, 'purl': None, 'is_current': False, 'linkable': False}
     is_bfo = _is_bfo_uri(uri)
-    # The same upper-level IRI is copied into several ontologies (bfo, RO, IAO, the
-    # proethica-foundation stub). Resolve to the home ontology: BFO classes to the canonical
-    # `bfo`, otherwise prefer any base ontology over the stub.
+    canon = _canonical_upper_ontology(uri)
+    # The same upper-level IRI is copied into several stores (the canonical bfo/iao
+    # ontologies plus the proethica-foundation reasoner stub). Resolve to the home ontology:
+    # an upper class (BFO/IAO) to its canonical source, otherwise prefer any base ontology
+    # over the stub.
     q = (select(OntologyEntity.label, Ontology.name)
          .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
          .where(OntologyEntity.uri == uri))
-    if is_bfo:
-        q = q.order_by((Ontology.name == 'bfo').desc(), Ontology.is_base.desc(), Ontology.name)
+    if canon:
+        q = q.order_by((Ontology.name == canon).desc(), Ontology.is_base.desc(), Ontology.name)
     else:
         q = q.order_by(Ontology.is_base.desc(), Ontology.name)
     row = db.session.execute(q.limit(1)).first()
