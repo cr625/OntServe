@@ -385,7 +385,7 @@ proeth:EvaluationAction a owl:Class ;
     rdfs:label "Evaluation Action"@en ;
     skos:definition "Professional actions involving evaluating, assessing, analyzing, reviewing, and examining professional work, conditions, or decisions per Berreby et al. (2017) assessment processes and Tolmeijer et al. (2021) situational awareness."@en ;
     rdfs:comment "Actions involving assessment and analysis of professional situations"@en ;
-    dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> , # Berreby et al. 2017
+    dcterms:references <https://doi.org/10.65109/hhri9090> , # Berreby et al. 2017
                       <https://doi.org/10.1145/3419633> . # Tolmeijer et al. 2021
 
 proeth:CollaborationAction a owl:Class ;
@@ -444,7 +444,7 @@ proeth:CrisisEvent a owl:Class ;
     rdfs:label "Crisis Event"@en ;
     skos:definition "Events involving failures, accidents, emergencies, crises, and disasters that require immediate professional response and may override normal procedures per Berreby et al. (2017) automatic event modeling."@en ;
     rdfs:comment "Emergency situations requiring immediate professional response"@en ;
-    dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> . # Berreby et al. 2017
+    dcterms:references <https://doi.org/10.65109/hhri9090> . # Berreby et al. 2017
 
 proeth:ComplianceEvent a owl:Class ;
     rdfs:subClassOf proeth-core:Event ;
@@ -1163,7 +1163,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:definition "A condition of hazard exposure: potential harm to public welfare, safety, or a protected interest. As a content kind it is the situation of exposure itself, independent of which obligation it activates. Its deontic relevance is that a hazard condition bears on the protective obligations a role exists to discharge and can license defeat of competing duties such as confidentiality when the harm is grave (Berreby et al. 2017; Almpani et al. 2023)."@en ;
     rdfs:comment "Condition of hazard exposure or potential harm to a protected interest."@en ;
     proeth:persistenceType "inertial" ;
-    dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> , # Berreby et al. 2017
+    dcterms:references <https://doi.org/10.65109/hhri9090> , # Berreby et al. 2017
                        <https://doi.org/10.2478/sh-2022-0015> . # Almpani et al. 2023
 
 :CompetenceState a owl:Class ;
@@ -1202,7 +1202,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:definition "A condition defined by phase or timing: a pre- or post-termination phase, a before- or after-notification window, a deadline window. As a content kind it is the temporal standing of the situation. Its deontic relevance is that it bounds when a time-relative obligation holds, as the Event-Calculus fluent whose initiation and termination start and end the duty (Berreby et al. 2017)."@en ;
     rdfs:comment "Condition defined by phase or timing (a deadline window, a post-termination phase)."@en ;
     proeth:persistenceType "inertial" ;
-    dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> . # Berreby et al. 2017
+    dcterms:references <https://doi.org/10.65109/hhri9090> . # Berreby et al. 2017
 
 :ResourceState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
