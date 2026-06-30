@@ -58,7 +58,7 @@
     iao:0000115 "A universal moral foundation that serves as the highest-level abstraction in professional ethics, requiring extensive interpretation through concrete cases (BFO: generically dependent continuant)"@en ;
     skos:definition "According to McLaren (2003), fundamental principles like public welfare and respect for persons cannot be applied through formal deduction alone but require extensional definition through landmark ethics cases and professional code applications. These principles function as constitutional-like foundations (Taddeo et al. 2024) that mediate moral ideals into professional practice (Hallamaa & Kalliokoski 2022)."@en ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
-                   <https://doi.org/10.1007/s00146-023-01635-y> , # Taddeo et al. 2024
+                   <https://doi.org/10.1007/s13347-024-00710-6> , # Taddeo et al. 2024
                    <https://doi.org/10.3389/fcomp.2022.776837> ; # Hallamaa & Kalliokoski 2022
     rdfs:comment "Examples: Public Welfare Paramount, Respect for Persons, Justice, Beneficence. These require extensive interpretation and balancing in specific contexts."@en .
 
@@ -1314,7 +1314,7 @@ proeth:RegulatoryConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Regulatory Constraint"@en ;
     rdfs:comment "Constraints from regulatory bodies and professional standards organizations (Taddeo et al. 2024)"@en ;
-    dcterms:references <https://doi.org/10.1007/s00146-023-01635-y> . # Taddeo et al. 2024
+    dcterms:references <https://doi.org/10.1007/s13347-024-00710-6> . # Taddeo et al. 2024
 
 proeth:ResourceConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
