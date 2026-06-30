@@ -47,7 +47,7 @@
 
 bfo:0000001 a owl:Class ;
     rdfs:label "entity"@en ;
-    skos:definition "Anything that exists, has existed, or will exist (BFO 2020 Reference gloss; the local BFO file carries no IAO_0000115 definition for this term)."@en ;
+    skos:definition "An entity is anything that exists or has existed or will exist. (axiom label in BFO2 Reference: [001-001])"@en ;
     rdfs:isDefinedBy obo:bfo.owl .
 
 bfo:0000002 a owl:Class ;
@@ -83,7 +83,7 @@ bfo:0000031 a owl:Class ;
 bfo:0000017 a owl:Class ;
     rdfs:subClassOf bfo:0000020 ;
     rdfs:label "realizable entity"@en ;
-    skos:definition "A specifically dependent continuant that inheres in continuant entities and is not exhibited in full at every time in which it inheres in an entity or group of entities. The exhibition or actualization of a realizable entity is a particular manifestation, functioning or process that occurs under certain circumstances."@en ;
+    skos:definition "To say that b is a realizable entity is to say that b is a specifically dependent continuant that inheres in some independent continuant which is not a spatial region and is of a type instances of which are realized in processes of a correlated type. (axiom label in BFO2 Reference: [058-002])"@en ;
     rdfs:isDefinedBy obo:bfo.owl .
 
 bfo:0000023 a owl:Class ;
@@ -95,7 +95,7 @@ bfo:0000023 a owl:Class ;
 bfo:0000016 a owl:Class ;
     rdfs:subClassOf bfo:0000017 ;
     rdfs:label "disposition"@en ;
-    skos:definition "A realizable entity whose realization occurs when its bearer is in some special physical circumstances, and this realization occurs in virtue of the bearer's physical make-up (BFO 2020 Reference gloss; the local BFO file carries no IAO_0000115 definition for this term)."@en ;
+    skos:definition "b is a disposition means: b is a realizable entity & b’s bearer is some material entity & b is such that if it ceases to exist, then its bearer is physically changed, & b’s realization occurs when and because this bearer is in some special physical circumstances, & this realization occurs in virtue of the bearer’s physical make-up. (axiom label in BFO2 Reference: [062-002])"@en ;
     rdfs:isDefinedBy obo:bfo.owl .
 
 bfo:0000015 a owl:Class ;
@@ -163,7 +163,7 @@ ro:0000087 a owl:ObjectProperty ;
 ro:0000081 a owl:ObjectProperty ;
     owl:inverseOf ro:0000087 ;
     rdfs:label "role of"@en ;
-    skos:definition "A relation between a role and its bearer. Inverse of has role."@en ;
+    skos:definition "a relation between a role and an independent continuant (the bearer), in which the role specifically depends on the bearer for its existence"@en ;
     rdfs:isDefinedBy obo:ro.owl .
 
 ro:0000056 a owl:ObjectProperty ;
@@ -179,5 +179,5 @@ ro:0000057 a owl:ObjectProperty ;
 
 ro:0002411 a owl:ObjectProperty ;
     rdfs:label "causally upstream of"@en ;
-    skos:definition "p is causally upstream of q iff p is causally related to q, the start of p precedes the start of q, and the end of p precedes the end of q."@en ;
+    skos:definition "p is causally upstream of q iff p is causally related to q, the end of p precedes the end of q, and p is not an occurrent part of q."@en ;
     rdfs:isDefinedBy obo:ro.owl .
