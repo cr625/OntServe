@@ -1172,7 +1172,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:definition "A condition bearing on whether a role-bearer has the capacity, expertise, qualification, or means to carry out a duty. As a content kind it describes the standing of the agent's competence for the work at hand. Its deontic relevance is that obligation presupposes capacity, so a competence shortfall renders an attached duty defeasible or shifts it, for example to refer or disclose (Stenseke 2024)."@en ;
     rdfs:comment "Condition of an agent's competence or capacity for the work at hand."@en ;
     proeth:persistenceType "inertial" ;
-    dcterms:references <https://doi.org/10.1007/s10676-024-09775-5> . # Stenseke 2024
+    dcterms:references <https://doi.org/10.1007/s10462-024-10732-3> . # Stenseke 2024
 
 :EmergencyState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
