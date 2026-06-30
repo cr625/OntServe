@@ -493,7 +493,7 @@ proeth:ChangeEvent a owl:Class ;
     rdfs:label "Change Event"@en ;
     skos:definition "Events involving changes, modifications, alterations, updates, or revisions to systems, procedures, or requirements that affect professional practice per Almpani et al. (2023) dynamic priority adjustment."@en ;
     rdfs:comment "Events involving changes affecting professional practice requirements"@en ;
-    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
+    dcterms:references <https://doi.org/10.2478/sh-2022-0015> . # Almpani et al. 2023
 
 # Specific Event Instances
 :Violation rdf:type owl:Class ;
@@ -1164,7 +1164,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:comment "Condition of hazard exposure or potential harm to a protected interest."@en ;
     proeth:persistenceType "inertial" ;
     dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> , # Berreby et al. 2017
-                       <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
+                       <https://doi.org/10.2478/sh-2022-0015> . # Almpani et al. 2023
 
 :CompetenceState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
@@ -1180,7 +1180,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:definition "An acute, time-critical condition demanding immediate response. As a content kind it is distinguished from RiskState by acuteness. Its deontic relevance is that it can activate emergency-response obligations and license suspension of constraints that normally bound action (Almpani et al. 2023)."@en ;
     rdfs:comment "Acute, time-critical condition demanding immediate response."@en ;
     proeth:persistenceType "non_inertial" ;
-    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
+    dcterms:references <https://doi.org/10.2478/sh-2022-0015> . # Almpani et al. 2023
 
 :ConflictOfInterestState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
@@ -1210,7 +1210,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:definition "A condition of availability or scarcity of the means to act: time, budget, personnel, safeguards, or access to information. As a content kind it is the standing of the means available, distinct from the Resource (Rs) component, which is a knowledge artifact. Its deontic relevance is that it conditions the feasibility of obligations and sets dynamic priorities among them when means are constrained (Almpani et al. 2023)."@en ;
     rdfs:comment "Condition of availability or scarcity of the means to act."@en ;
     proeth:persistenceType "inertial" ;
-    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_31> . # Almpani et al. 2023
+    dcterms:references <https://doi.org/10.2478/sh-2022-0015> . # Almpani et al. 2023
 
 :DisclosureState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
