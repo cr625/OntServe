@@ -485,7 +485,12 @@ def class_hierarchy(entity, child_cap=25):
         .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
         .where(OntologyEntity.parent_uri == entity.uri,
                OntologyEntity.entity_type == 'class',
-               ~Ontology.name.like('proethica-case-%'))
+               ~Ontology.name.like('proethica-case-%'),
+               # Hide owl:deprecated subclasses (the retired Decision Point / Ethical Question bridge
+               # stubs etc.) from the tree. They stay in the graph for the equivalentClass bridge but
+               # should not clutter the Class Hierarchy -- mirrors the deprecated filters in the
+               # domain-props + Referenced-By sections below (op('->>') JSON access per line 521).
+               OntologyEntity.properties.op('->>')('deprecated').is_distinct_from('true'))
         .order_by(Ontology.name, OntologyEntity.label).limit(child_cap + 1)
     ).all()
 
