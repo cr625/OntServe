@@ -89,7 +89,7 @@
     iao:0000115 "A principle particular to professional domain contexts that bridges general ethics to specific technical practices (BFO: generically dependent continuant)"@en ;
     skos:definition "Domain-specific principles bridge general ethical guidance to particular professional contexts. As identified by Prem (2023), these principles face inherent challenges in operationalization but remain essential for contextual guidance. They are grounded through industry-specific cases and technical standards applications."@en ;
     dcterms:source <https://doi.org/10.1007/s43681-023-00258-9> , # Prem 2023
-                   <https://doi.org/10.1007/s10676-021-09586-y> ; # Segun 2021
+                   <https://doi.org/10.1007/s10676-020-09570-y> ; # Segun 2021
     rdfs:comment "Examples: Environmental Stewardship (engineering), Patient Autonomy (medicine), Academic Freedom (education). These address domain-specific ethical challenges."@en .
 
 # Specific Principle Instances commonly found in Professional Codes
@@ -354,7 +354,7 @@ proeth:CommunicationAction a owl:Class ;
     rdfs:label "Communication Action"@en ;
     skos:definition "Professional actions involving disclosure, informing, notifying stakeholders, and communicating relevant information per Tolmeijer et al. (2021) explanation requirements and McLaren (2003) transparency obligations."@en ;
     rdfs:comment "Actions involving disclosure, informing, and transparent communication"@en ;
-    dcterms:references <https://doi.org/10.1007/s11948-020-00230-4> , # Tolmeijer et al. 2021
+    dcterms:references <https://doi.org/10.1145/3419633> , # Tolmeijer et al. 2021
                       <https://doi.org/10.1016/S0004-3702(03)00135-8> . # McLaren 2003
 
 proeth:PreventionAction a owl:Class ;
@@ -362,8 +362,8 @@ proeth:PreventionAction a owl:Class ;
     rdfs:label "Prevention Action"@en ;
     skos:definition "Professional actions aimed at avoiding, preventing, minimizing, or eliminating risks and harms per Anderson & Anderson (2018) harm prevention principles and Arkin (2008) safety obligations."@en ;
     rdfs:comment "Actions focused on avoiding and minimizing potential harms"@en ;
-    dcterms:references <https://doi.org/10.1007/s10676-017-9430-8> , # Anderson & Anderson 2018
-                      <https://doi.org/10.1109/MIS.2008.100> . # Arkin 2008
+    dcterms:references <https://doi.org/10.1515/pjbr-2018-0024> , # Anderson & Anderson 2018
+                      <https://doi.org/10.1145/1349822.1349839> . # Arkin 2008
 
 proeth:MaintenanceAction a owl:Class ;
     rdfs:subClassOf proeth-core:Action ;
@@ -386,14 +386,14 @@ proeth:EvaluationAction a owl:Class ;
     skos:definition "Professional actions involving evaluating, assessing, analyzing, reviewing, and examining professional work, conditions, or decisions per Berreby et al. (2017) assessment processes and Tolmeijer et al. (2021) situational awareness."@en ;
     rdfs:comment "Actions involving assessment and analysis of professional situations"@en ;
     dcterms:references <https://doi.org/10.1016/j.artint.2017.12.003> , # Berreby et al. 2017
-                      <https://doi.org/10.1007/s11948-020-00230-4> . # Tolmeijer et al. 2021
+                      <https://doi.org/10.1145/3419633> . # Tolmeijer et al. 2021
 
 proeth:CollaborationAction a owl:Class ;
     rdfs:subClassOf proeth-core:Action ;
     rdfs:label "Collaboration Action"@en ;
     skos:definition "Professional actions involving consulting, collaborating, coordinating, and cooperating with colleagues, clients, and stakeholders per Dennis et al. (2016) multi-agent frameworks and professional peer obligations."@en ;
     rdfs:comment "Actions involving professional cooperation and coordination"@en ;
-    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+    dcterms:references <https://doi.org/10.1016/j.robot.2015.11.012> . # Dennis et al. 2016
 
 proeth:CreationAction a owl:Class ;
     rdfs:subClassOf proeth-core:Action ;
@@ -407,7 +407,7 @@ proeth:MonitoringAction a owl:Class ;
     rdfs:label "Monitoring Action"@en ;
     skos:definition "Professional actions involving monitoring, supervising, overseeing, managing, and controlling professional processes per Arkin (2008) responsibility documentation and oversight requirements."@en ;
     rdfs:comment "Actions involving supervision and oversight of professional processes"@en ;
-    dcterms:references <https://doi.org/10.1109/MIS.2008.100> . # Arkin 2008
+    dcterms:references <https://doi.org/10.1145/1349822.1349839> . # Arkin 2008
 
 # Specific Action Types
 :Decision rdf:type owl:Class ;
@@ -417,7 +417,7 @@ proeth:MonitoringAction a owl:Class ;
     rdfs:label "Decision"@en ;
     skos:definition "A volitional choice made by an agent in response to an ethical situation, requiring deliberation between alternatives per Hooker & Kim (2018) reasoning-based action theory."@en ;
     rdfs:comment "Professional choice made after ethical deliberation between alternatives"@en ;
-    dcterms:references <https://doi.org/10.1007/s11948-018-0030-6> . # Hooker & Kim 2018
+    dcterms:references <https://doi.org/10.1145/3278721.3278753> . # Hooker & Kim 2018
 
 proeth:DisclosureAction a owl:Class ;
     rdfs:subClassOf proeth:CommunicationAction ;
@@ -451,7 +451,7 @@ proeth:ComplianceEvent a owl:Class ;
     rdfs:label "Compliance Event"@en ;
     skos:definition "Events involving violations, breaches, non-compliance, misconduct, or errors that trigger regulatory or professional review processes per Dennis et al. (2016) ethical policy frameworks."@en ;
     rdfs:comment "Events involving breaches of professional or regulatory standards"@en ;
-    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+    dcterms:references <https://doi.org/10.1016/j.robot.2015.11.012> . # Dennis et al. 2016
 
 proeth:ConflictEvent a owl:Class ;
     rdfs:subClassOf proeth-core:Event ;
@@ -465,21 +465,21 @@ proeth:ProjectEvent a owl:Class ;
     rdfs:label "Project Event"@en ;
     skos:definition "Events involving deadlines, milestones, completions, deliveries, and launches that affect project timelines and professional obligations per Sarmiento et al. (2023) temporal reasoning."@en ;
     rdfs:comment "Time-based project events affecting professional obligations"@en ;
-    dcterms:references <https://doi.org/10.1007/s10458-023-09609-6> . # Sarmiento et al. 2023
+    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_15> . # Sarmiento et al. 2023
 
 proeth:SafetyEvent a owl:Class ;
     rdfs:subClassOf proeth-core:Event ;
     rdfs:label "Safety Event"@en ;
     skos:definition "Events involving injuries, harm, damage, losses, threats, or risks that trigger safety obligations and public welfare protections per Anderson & Anderson (2018) harm-based ethical evaluation."@en ;
     rdfs:comment "Events involving harm or risk requiring safety response"@en ;
-    dcterms:references <https://doi.org/10.1007/s10676-017-9430-8> . # Anderson & Anderson 2018
+    dcterms:references <https://doi.org/10.1515/pjbr-2018-0024> . # Anderson & Anderson 2018
 
 proeth:EvaluationEvent a owl:Class ;
     rdfs:subClassOf proeth-core:Event ;
     rdfs:label "Evaluation Event"@en ;
     skos:definition "Events involving inspections, audits, reviews, assessments, and evaluations that trigger professional scrutiny and accountability requirements per Arkin (2008) responsibility documentation."@en ;
     rdfs:comment "Formal review events triggering professional accountability"@en ;
-    dcterms:references <https://doi.org/10.1109/MIS.2008.100> . # Arkin 2008
+    dcterms:references <https://doi.org/10.1145/1349822.1349839> . # Arkin 2008
 
 proeth:DiscoveryEvent a owl:Class ;
     rdfs:subClassOf proeth-core:Event ;
@@ -533,7 +533,7 @@ proeth:causedByAction a owl:ObjectProperty ;
     rdfs:range proeth-core:Action ;
     rdfs:label "caused by action"@en ;
     rdfs:comment "Links event to actions that caused it (Wright's NESS test)"@en ;
-    dcterms:references <https://doi.org/10.1007/s10458-023-09609-6> . # Sarmiento et al. 2023
+    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_15> . # Sarmiento et al. 2023
 
 proeth:altersPriority a owl:ObjectProperty ;
     rdfs:domain proeth-core:Event ;
@@ -825,7 +825,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:definition "Professional role defining relationships between service providers and their clients, creating duties of competent service delivery, confidentiality, and client welfare per Kong et al. (2020) identity role analysis." ;
     rdfs:comment "Service delivery relationship with duties of competence and care. Defined class: a Role that hasClient some Role (the provider side)." ;
     skos:scopeNote "Provider side: a Role bearing proeth-core:hasClient toward another Role. The client counterparty is the occupational :ClientRole (a :ParticipantRole). Asymmetric by design."@en ;
-    dcterms:references <https://doi.org/10.1007/s10676-020-09524-4> . # Kong et al. 2020
+    dcterms:references <https://doi.org/10.1558/jalpp.39771> . # Kong et al. 2020
 
 :ProfessionalPeerRole rdf:type owl:Class ;
     owl:equivalentClass [ rdf:type owl:Class ; owl:intersectionOf (
@@ -836,7 +836,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:definition "Professional role defining relationships between practitioners within the same professional domain, creating obligations for peer review, professional development, knowledge sharing, and standard maintenance per Kong et al. (2020)." ;
     rdfs:comment "Collegial relationship with mentoring and review obligations. Defined class: a Role that professionalPeerOf some Role (symmetric; both peers classify)." ;
     skos:scopeNote "A Role bearing proeth-core:professionalPeerOf (symmetric; subsumes peer review and mentoring) toward another Role."@en ;
-    dcterms:references <https://doi.org/10.1007/s10676-020-09524-4> . # Kong et al. 2020
+    dcterms:references <https://doi.org/10.1558/jalpp.39771> . # Kong et al. 2020
 
 :EmployerRelationshipRole rdf:type owl:Class ;
     owl:equivalentClass [ rdf:type owl:Class ; owl:intersectionOf (
@@ -847,7 +847,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:definition "Professional role defining relationships between professionals and their employing organizations, creating duties of loyalty, competent performance, and honest reporting while maintaining professional independence per Wendel (2024) moral complexity framework." ;
     rdfs:comment "Organizational relationship balancing loyalty and independence. Defined class: a Role that employedBy some Role (the employee/professional side)." ;
     skos:scopeNote "Employee/professional side: a Role bearing proeth-core:employedBy toward another Role. The employer counterparty is the occupational :EmployerRole (a :ParticipantRole)."@en ;
-    dcterms:references <https://doi.org/10.1093/oso/9780198863335.001.0001> . # Wendel 2024
+    dcterms:references <https://doi.org/10.1093/oso/9780197673423.003.0006> . # Wendel 2024
 
 :PublicResponsibilityRole rdf:type owl:Class ;
     owl:equivalentClass [ rdf:type owl:Class ; owl:intersectionOf (
@@ -858,7 +858,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:definition "Professional role defining obligations to the broader public and society, creating duties of public welfare protection that can override client or employer interests per Thornton et al. (2017) collective morality framework." ;
     rdfs:comment "Societal obligation that can override other professional duties. Defined class (monadic): a Role that owesDutyToward some PublicInterest." ;
     skos:scopeNote "A Role bearing :owesDutyToward toward the general public (:PublicInterest). Monadic: the counterparty is a party class, not a role-to-role pairing."@en ;
-    dcterms:references <https://doi.org/10.1080/10508422.2017.1318069> . # Thornton et al. 2017
+    dcterms:references <https://doi.org/10.1109/TITS.2016.2609339> . # Thornton et al. 2017
 
 # Public-duty primitives for the PublicResponsibilityRole defined class. PublicInterest is the general
 # public as a collective party (subClassOf proeth-core:Agent, matching the actor-edge convention:
@@ -1155,7 +1155,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:definition "A condition of what an agent knows, believes, or is uncertain of with respect to facts material to a decision. As a content kind it captures the agent's knowledge state, the Aristotelian and Sarmiento epistemic condition for responsibility: an agent is answerable for conduct in proportion to what the agent knew or should have known. Its deontic relevance is that knowledge conditions the obligations governing informed decision and decision-under-uncertainty."@en ;
     rdfs:comment "Knowledge-and-belief condition of an agent; the typed home of the responsibility epistemic condition."@en ;
     proeth:persistenceType "inertial" ;
-    dcterms:references <https://doi.org/10.1609/aimag.v38i2.2743> . # Govindarajulu & Bringsjord 2017
+    dcterms:references <https://doi.org/10.24963/ijcai.2017/658> . # Govindarajulu & Bringsjord 2017
 
 :RiskState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
@@ -1308,7 +1308,7 @@ proeth:LegalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Legal Constraint"@en ;
     rdfs:comment "Constraints arising from legal requirements and statutes that establish inviolable boundaries (Kroll 2020, Stenseke 2024)"@en ;
-    dcterms:references <https://doi.org/10.1007/s00146-020-00965-5> . # Kroll 2020
+    dcterms:references <https://doi.org/10.1093/oxfordhb/9780190067397.013.10> . # Kroll 2020
 
 proeth:RegulatoryConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
@@ -1320,7 +1320,7 @@ proeth:ResourceConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Resource Constraint"@en ;
     rdfs:comment "Limitations on available time, budget, materials, or human resources (Ganascia 2007)"@en ;
-    dcterms:references <https://doi.org/10.1007/s11023-007-9079-x> . # Ganascia 2007
+    dcterms:references <https://doi.org/10.1007/s10676-006-9134-y> . # Ganascia 2007
 
 proeth:CompetenceConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
@@ -1332,13 +1332,13 @@ proeth:JurisdictionalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Jurisdictional Constraint"@en ;
     rdfs:comment "Boundaries of authority and geographical or organizational scope (Dennis et al. 2016)"@en ;
-    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+    dcterms:references <https://doi.org/10.1016/j.robot.2015.11.012> . # Dennis et al. 2016
 
 proeth:ProceduralConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Procedural Constraint"@en ;
     rdfs:comment "Requirements for following specific processes or protocols (Furbach et al. 2014)"@en ;
-    dcterms:references <https://doi.org/10.1007/s13218-014-0309-0> . # Furbach et al. 2014
+    dcterms:references <https://doi.org/10.1007/978-3-319-13365-2_6> . # Furbach et al. 2014
 
 # proeth:DefeasibleConstraint and proeth:InviolableConstraint retired 2026-06-28 (ratified Cs
 # spec): defeasibility versus inviolability is carried by the obligation-layer defeasibility edge
@@ -1351,26 +1351,26 @@ proeth:EthicalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Ethical Constraint"@en ;
     rdfs:comment "Professional ethical boundaries beyond legal requirements (Benzmüller et al. 2020)"@en ;
-    dcterms:references <https://doi.org/10.1007/s10817-018-9507-z> . # Benzmüller et al. 2020
+    dcterms:references <https://doi.org/10.1016/j.artint.2020.103348> . # Benzmüller et al. 2020
 
 proeth:SafetyConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Safety Constraint"@en ;
     rdfs:comment "Constraints ensuring safety requirements are met (Arkin 2008)"@en ;
-    dcterms:references <https://doi.org/10.1109/MIS.2008.100> . # Arkin 2008
+    dcterms:references <https://doi.org/10.1145/1349822.1349839> . # Arkin 2008
 
 proeth:ConfidentialityConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Confidentiality Constraint"@en ;
     rdfs:comment "Boundaries on information disclosure and privacy (Dennis et al. 2016)"@en ;
-    dcterms:references <https://doi.org/10.1007/s10458-015-9308-2> . # Dennis et al. 2016
+    dcterms:references <https://doi.org/10.1016/j.robot.2015.11.012> . # Dennis et al. 2016
 
 # Temporal and Priority Type Constraints
 proeth:TemporalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Temporal Constraint"@en ;
     rdfs:comment "Time-based limitations and deadlines (Govindarajulu & Bringsjord 2017)"@en ;
-    dcterms:references <https://doi.org/10.1609/aimag.v38i2.2743> . # Govindarajulu & Bringsjord 2017
+    dcterms:references <https://doi.org/10.24963/ijcai.2017/658> . # Govindarajulu & Bringsjord 2017
 
 proeth:PriorityConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
