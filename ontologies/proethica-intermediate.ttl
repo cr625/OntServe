@@ -1418,6 +1418,11 @@ proeth:tolmeijerRequirement a owl:AnnotationProperty ;
     rdfs:comment "Class-level descriptive annotation naming which of the four ethical-competence requirements a Capability kind primarily realizes (norm competence, situational awareness, learning and adaptation, explanation and justification), after the Chapter 2.2.8 analysis of the Tolmeijer et al. (2021) survey of machine-ethics implementations. Descriptive only (decision E5): it adds no typing axiom and no per-individual field."@en ;
     dcterms:references <https://doi.org/10.1145/3419633> . # Tolmeijer et al. 2021, Implementations in Machine Ethics: A Survey
 
+proeth:roleKind a owl:AnnotationProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "role kind"@en ;
+    rdfs:comment "Occupational backstop for role typing: an enum {professional, participant} that drives the ProfessionalRole vs ParticipantRole classification when the occupational resolver matches no head. A routing input to extraction, not a stored case literal; declared so the RoleDefinitionShape sh:path resolves to a browseable term."@en .
+
 proeth:RiskAssessmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Risk Assessment Capability"@en ;

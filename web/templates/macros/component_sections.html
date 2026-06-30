@@ -55,7 +55,7 @@
                 <thead><tr class="small text-muted"><th style="width:24%">Attribute</th><th style="width:26%">Property (<code>sh:path</code>)</th><th>Description</th></tr></thead>
                 <tbody>
                 {% for a in g.rows %}
-                <tr><td>{{ a.name }}</td><td>{{ render_iri_target(a.uri, a.path_ontology) }}</td><td class="small text-muted">{{ a.description }}</td></tr>
+                <tr><td>{{ a.name }}</td><td>{{ render_iri_target(a.uri, a.path_ontology, code_style=true) }}</td><td class="small text-muted">{{ a.description }}</td></tr>
                 {% endfor %}
                 </tbody>
             </table>
