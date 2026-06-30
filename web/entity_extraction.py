@@ -182,11 +182,13 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
     # --- Pass 2: OWL object properties ---
     for prop in g.subjects(RDF.type, OWL.ObjectProperty):
         label = _label(g, prop)
-        comment = next(g.objects(prop, RDFS.comment), None)
         domain = next(g.objects(prop, RDFS.domain), None) or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
         range_val = next(g.objects(prop, RDFS.range), None) or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
         label_str = str(label) if label else None
-        comment_str = str(comment) if comment else None
+        # rdfs:comment, else the OBO/SKOS textual definition -- mirrors the class branch (_comment_or_definition)
+        # so a property documented only with skos:definition (e.g. the relatedTo relationship vocab) still shows
+        # a description on the entity page instead of a blank Description cell.
+        comment_str = _comment_or_definition(g, prop)
 
         entity = OntologyEntity(
             ontology_id=ontology.id,
@@ -207,11 +209,13 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
     # --- Pass 3: OWL datatype properties ---
     for prop in g.subjects(RDF.type, OWL.DatatypeProperty):
         label = _label(g, prop)
-        comment = next(g.objects(prop, RDFS.comment), None)
         domain = next(g.objects(prop, RDFS.domain), None) or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
         range_val = next(g.objects(prop, RDFS.range), None) or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
         label_str = str(label) if label else None
-        comment_str = str(comment) if comment else None
+        # rdfs:comment, else the OBO/SKOS textual definition -- mirrors the class branch (_comment_or_definition)
+        # so a property documented only with skos:definition (e.g. the relatedTo relationship vocab) still shows
+        # a description on the entity page instead of a blank Description cell.
+        comment_str = _comment_or_definition(g, prop)
 
         entity = OntologyEntity(
             ontology_id=ontology.id,
@@ -241,11 +245,13 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         if not uri_str.startswith('http') or uri_str in captured_uris:
             continue
         label = _label(g, prop)
-        comment = next(g.objects(prop, RDFS.comment), None)
         domain = next(g.objects(prop, RDFS.domain), None) or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
         range_val = next(g.objects(prop, RDFS.range), None) or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
         label_str = str(label) if label else None
-        comment_str = str(comment) if comment else None
+        # rdfs:comment, else the OBO/SKOS textual definition -- mirrors the class branch (_comment_or_definition)
+        # so a property documented only with skos:definition (e.g. the relatedTo relationship vocab) still shows
+        # a description on the entity page instead of a blank Description cell.
+        comment_str = _comment_or_definition(g, prop)
         entity = OntologyEntity(
             ontology_id=ontology.id,
             entity_type='property',
