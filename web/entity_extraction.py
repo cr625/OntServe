@@ -68,6 +68,29 @@ def _comment_or_definition(g, subject):
             or _first(g, subject, SKOS.definition))
 
 
+def _class_expr_uris(g, node):
+    """Resolve an rdfs:domain / rdfs:range object to NAMED class URIs. A URIRef -> [uri]; an anonymous
+    owl:unionOf class (e.g. a domain of (Action or Event)) -> its named members; any other anonymous
+    expression (a restriction or intersection) -> [] (no nameable class). Keeps a blank-node id from being
+    stored as if it were a class URI, which otherwise rendered as 'n0de...' in the entity view's From column."""
+    if node is None:
+        return []
+    if isinstance(node, rdflib.URIRef):
+        return [str(node)]
+    from rdflib.collection import Collection
+    union = next(g.objects(node, OWL.unionOf), None)
+    if union is not None:
+        return [str(m) for m in Collection(g, union) if isinstance(m, rdflib.URIRef)]
+    return []
+
+
+def _domain_range_value(uris):
+    """A single class URI stays a string (the common case, unchanged); a union stays a list; nothing -> None."""
+    if not uris:
+        return None
+    return uris[0] if len(uris) == 1 else uris
+
+
 def _pick_best_parent(g, class_uri):
     """Best rdfs:subClassOf parent: proethica intermediate > core > other proethica > any named (BFO/IAO/OBO)
     superclass. Proethica-first keeps the category-walk CTEs terminating at the proethica boundary; the named
@@ -197,8 +220,8 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             uri=str(prop),
             label=label_str,
             comment=comment_str,
-            domain=str(domain) if domain else None,
-            range=str(range_val) if range_val else None,
+            domain=_domain_range_value(_class_expr_uris(g, domain)),
+            range=_domain_range_value(_class_expr_uris(g, range_val)),
             content_hash=OntologyEntity.compute_content_hash(str(prop), label_str, comment_str),
             updated_at=now
         )
@@ -224,8 +247,8 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             uri=str(prop),
             label=label_str,
             comment=comment_str,
-            domain=str(domain) if domain else None,
-            range=str(range_val) if range_val else None,
+            domain=_domain_range_value(_class_expr_uris(g, domain)),
+            range=_domain_range_value(_class_expr_uris(g, range_val)),
             content_hash=OntologyEntity.compute_content_hash(str(prop), label_str, comment_str),
             updated_at=now
         )
@@ -259,8 +282,8 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             uri=uri_str,
             label=label_str,
             comment=comment_str,
-            domain=str(domain) if domain else None,
-            range=str(range_val) if range_val else None,
+            domain=_domain_range_value(_class_expr_uris(g, domain)),
+            range=_domain_range_value(_class_expr_uris(g, range_val)),
             content_hash=OntologyEntity.compute_content_hash(uri_str, label_str, comment_str),
             updated_at=now
         )

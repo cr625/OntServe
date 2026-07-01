@@ -110,11 +110,13 @@ def generate_entity_ttl(entity, ontology):
     if entity.parent_uri:
         lines.append(f'    rdfs:subClassOf <{entity.parent_uri}> ;')
 
-    # Add domain and range for properties
+    # Add domain and range for properties (a union is stored as a list of member URIs)
     if entity.domain:
-        lines.append(f'    rdfs:domain <{entity.domain}> ;')
+        doms = entity.domain if isinstance(entity.domain, list) else [entity.domain]
+        lines.append('    rdfs:domain ' + ', '.join(f'<{d}>' for d in doms) + ' ;')
     if entity.range:
-        lines.append(f'    rdfs:range <{entity.range}> ;')
+        rngs = entity.range if isinstance(entity.range, list) else [entity.range]
+        lines.append('    rdfs:range ' + ', '.join(f'<{r}>' for r in rngs) + ' ;')
 
     # Remove trailing semicolon from last line and add period
     if lines and lines[-1].endswith(' ;'):

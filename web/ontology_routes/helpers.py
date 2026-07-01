@@ -749,16 +749,20 @@ def class_property_schema(entity):
     for name, (_, p) in referenced_best.items():
         rng = p.range
         rng_uris = rng if isinstance(rng, list) else [rng]
+        on_self = any(isinstance(r, str) and r == entity.uri for r in rng_uris)
         dom = p.domain
-        dom_uri = (dom[0] if isinstance(dom, list) and dom else dom) if dom else None
-        referenced_by.append({
-            "name": name,
-            "uri": p.uri,
-            "comment": (p.comment or ""),
-            "from_name": _local(dom_uri),
-            "from_uri": dom_uri if isinstance(dom_uri, str) else None,
-            "on_self": any(isinstance(r, str) and r == entity.uri for r in rng_uris),
-        })
+        # A union domain (e.g. initiates: (Action or Event)) is stored as a list; emit one From row per
+        # named member so each renders as a proper class, not the anonymous-union blank-node id.
+        dom_uris = dom if isinstance(dom, list) else ([dom] if dom else [None])
+        for dom_uri in dom_uris:
+            referenced_by.append({
+                "name": name,
+                "uri": p.uri,
+                "comment": (p.comment or ""),
+                "from_name": _local(dom_uri),
+                "from_uri": dom_uri if isinstance(dom_uri, str) else None,
+                "on_self": on_self,
+            })
     referenced_by.sort(key=lambda x: (not x["on_self"], (x["from_name"] or "").lower(), x["name"].lower()))
 
     # Resolve the actual ontology of each referenced-by source class and property so the macro links
