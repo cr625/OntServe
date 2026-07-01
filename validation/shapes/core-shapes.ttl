@@ -228,14 +228,25 @@ pcsh:StatePropertyShape
 pcsh:ResourceDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Resource ;
-    rdfs:label "Resource definition schema (descriptive, field contract)"@en ;
-    rdfs:comment "What a resource is described by for extraction: its source kind, its document title and topic, and the agents who use or cite it. Descriptive only (no validation result); source_kind drives the six-kind subClassOf typing and is not stored as a literal."@en ;
+    rdfs:label "Resource definition schema (type-level, descriptive, field contract)"@en ;
+    rdfs:comment "What individuates a resource TYPE: its source kind (the category of professional knowledge, which drives the six-kind subClassOf typing) and the class-level governedByCode restriction for code resources. The specific document title, its topic, and the relying/citing agents are per-individual context and live on ResourcePropertyShape, mirroring the R/P/O/S Definition/Property split and the resource scopeNote (the TYPE is a bare category; a specific named or numbered document is an INDIVIDUAL, and 'topic, who-used, and which-document are context, not class identity'). Descriptive only (no validation result); source_kind is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:sourceKind ;     sh:name "source kind" ;      sh:description "The controlled source kind, which drives the six-kind typing: ethical_code, professional_code, technical_standard, case_precedent, legal_resource, reference_material. EthicalCode is typed subClassOf Guideline subClassOf Resource; the other five subClassOf Resource. A routing input, not stored as a literal." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:documentTitle ;  sh:name "document title" ;   sh:description "The title of the source document." ; sh:order 2 ] ;
-    sh:property [ sh:path proeth:topic ;          sh:name "topic" ;            sh:description "The subject the resource addresses, carried on the first-class proeth:topic datatype property (decision B2), not the otherAttribute overflow." ; sh:order 3 ] ;
-    sh:property [ sh:path core:availableTo ;      sh:name "available to" ;     sh:description "The case actor who relied on the resource (the Facts-section signal), via the availableTo edge. Range: Agent." ; sh:order 4 ] ;
-    sh:property [ sh:path core:citedByAgent ;     sh:name "cited by agent" ;   sh:description "The agent who cited the resource as authority (the Discussion-section signal), via the citedByAgent edge, resolved to the shared NSPE Board/NSPE Agent when the text names it. Range: Agent." ; sh:order 5 ] ;
-    sh:property [ sh:path proeth:governedByCode ; sh:name "governed by code" ; sh:description "For a code resource, the incoming governedByCode relation from ProfessionalRole (a TBox restriction, range EthicalCode); relevant only to EthicalCode resources." ; sh:order 6 ] .
+    sh:property [ sh:path proeth:governedByCode ; sh:name "governed by code" ; sh:description "For a code resource, the incoming governedByCode relation from ProfessionalRole (a TBox restriction, range EthicalCode); relevant only to EthicalCode resources." ; sh:order 2 ] .
+
+# ResourcePropertyShape: the per-case fields a given resource INDIVIDUAL carries (the Rs-side analogue of the
+# other components' PropertyShapes). documentTitle names the specific document (which the scopeNote makes an
+# INDIVIDUAL); topic, availableTo, and citedByAgent are the per-case context the DefinitionShape's own comment
+# calls "context, not class identity". Targets core:Resource. Read by {{ resource_schema }} as the per-case
+# section and rendered as the Resource entity page's Bearer Attributes. Descriptive only (no sh:minCount/sh:datatype).
+pcsh:ResourcePropertyShape
+    a sh:NodeShape ;
+    sh:targetClass core:Resource ;
+    rdfs:label "Resource per-case schema (individual data, non-definitional)"@en ;
+    rdfs:comment "What a given resource INDIVIDUAL is described by in a specific case: the specific document it is (its title), the subject it addresses, and the agents who relied on or cited it. These do NOT individuate the resource TYPE (that is ResourceDefinitionShape, keyed on source kind); their values are per-case, asserted on the individual. Descriptive only."@en ;
+    sh:property [ sh:path proeth:documentTitle ;  sh:name "document title" ;   sh:description "The title of the specific source document (the separately-citable INDIVIDUAL the scopeNote names)." ; sh:order 1 ] ;
+    sh:property [ sh:path proeth:topic ;          sh:name "topic" ;            sh:description "The subject the resource addresses, carried on the first-class proeth:topic datatype property (decision B2), not the otherAttribute overflow; context, not class identity." ; sh:order 2 ] ;
+    sh:property [ sh:path core:availableTo ;      sh:name "available to" ;     sh:description "The case actor who relied on the resource (the Facts-section signal), via the availableTo edge. Range: Agent." ; sh:order 3 ] ;
+    sh:property [ sh:path core:citedByAgent ;     sh:name "cited by agent" ;   sh:description "The agent who cited the resource as authority (the Discussion-section signal), via the citedByAgent edge, resolved to the shared NSPE Board/NSPE Agent when the text names it. Range: Agent." ; sh:order 4 ] .
 
 # CapabilityDefinitionShape: the definitional field contract of any capability TYPE/individual (the Ca
 # component), read by the {{ capability_schema }} prompt block. Descriptive only (no validation result).
