@@ -131,24 +131,36 @@ pcsh:ProfessionalRolePropertyShape
     sh:property [ sh:path proeth:technicalBackground ; sh:name "technical background" ; sh:description "Technical background." ;                                  sh:order 5 ] ;
     sh:property [ sh:path proeth:otherAttribute ;      sh:name "other attribute" ;      sh:description "Overflow 'key: value' literal for a case-specific attribute outside the controlled set." ; sh:order 6 ] .
 
-# ObligationDefinitionShape: the definitional field contract of any obligation TYPE/individual (the O
-# component), read by the {{ obligation_schema }} prompt block. Closes the one gap where the O prompt could
-# drift from the ontology (every sibling component carries a shape; A1 in the implementation plan). Descriptive
-# only -- each sh:property carries sh:path + sh:name + sh:description (no sh:minCount/sh:datatype), so it
-# produces no validation result and cannot change conformance. obligation_type drives the subClassOf
-# core:Obligation typing (a routing input, not stored as a literal; Donohue 2017 directive information entity);
-# obligated_party and derived_from_principle resolve to edges; the rest are per-individual literals.
+# ObligationDefinitionShape / ObligationPropertyShape: the O-component field contract, read by the
+# {{ obligation_schema }} prompt block and rendered on the Obligation entity page. Split on the Role/Principle
+# template: DefinitionShape = what individuates the obligation TYPE (its NSPE category), PropertyShape = the
+# per-case fields a given obligation individual carries. Descriptive only -- each sh:property carries sh:path +
+# sh:name + sh:description (no sh:minCount/sh:datatype), so no validation result and no conformance change.
+# obligation_type drives the subClassOf core:Obligation typing (a routing input, not stored as a literal;
+# Donohue 2017 directive information entity); obligated_party and derived_from_principle resolve to edges; the
+# rest are per-individual literals.
 pcsh:ObligationDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Obligation ;
-    rdfs:label "Obligation definition schema (descriptive, field contract)"@en ;
-    rdfs:comment "What an obligation is described by for extraction: its controlled NSPE type, the concrete duty statement, the principle it derives from, the obligated party, and its temporal scope and compliance status. Descriptive only (no validation result); obligation_type drives the subClassOf core:Obligation typing and is not stored as a literal."@en ;
-    sh:property [ sh:path proeth:obligationType ;      sh:name "obligation type" ;        sh:description "The controlled NSPE obligation category, which drives the subClassOf core:Obligation typing: disclosure, safety, competence, confidentiality, reporting, collegial, legal, ethical." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:obligationStatement ; sh:name "obligation statement" ;   sh:description "The concrete duty the obligation states (the operative 'shall' clause)." ; sh:order 2 ] ;
-    sh:property [ sh:path core:derivedFromPrinciple ;  sh:name "derived from principle" ; sh:description "The principle the obligation derives from, via the O->P derivedFromPrinciple edge (the P side of R->P->O). Range: Principle." ; sh:order 3 ] ;
-    sh:property [ sh:path core:obligatedParty ;        sh:name "obligated party" ;        sh:description "The agent who bears the obligation, via the obligatedParty edge. Range: Agent." ; sh:order 4 ] ;
-    sh:property [ sh:path proeth:temporalScope ;       sh:name "temporal scope" ;         sh:description "When the obligation is in force (the period or condition of applicability)." ; sh:order 5 ] ;
-    sh:property [ sh:path proeth:complianceStatus ;    sh:name "compliance status" ;      sh:description "Whether the obligation was met in the case: met, unmet, partial, or unclear." ; sh:order 6 ] .
+    rdfs:label "Obligation definition schema (type-level, descriptive, field contract)"@en ;
+    rdfs:comment "What individuates an obligation TYPE: its controlled NSPE category, which drives the subClassOf core:Obligation typing. The concrete duty statement, the derivedFromPrinciple/obligatedParty edges, and the temporal-scope/compliance-status literals are per-individual and now live on ObligationPropertyShape, mirroring the Role/Principle Definition/Property split. Descriptive only (no validation result); obligation_type is a routing input, not stored as a literal."@en ;
+    sh:property [ sh:path proeth:obligationType ;      sh:name "obligation type" ;        sh:description "The controlled NSPE obligation category, which drives the subClassOf core:Obligation typing: disclosure, safety, competence, confidentiality, reporting, collegial, legal, ethical." ; sh:order 1 ] .
+
+# ObligationPropertyShape: the per-case fields a given obligation INDIVIDUAL carries (the O-side analogue of
+# ProfessionalRolePropertyShape / PrinciplePropertyShape). The concrete duty statement, temporal scope and
+# compliance status are per-individual literals; derivedFromPrinciple (O->P) and obligatedParty (O->Agent)
+# resolve to edges. Read by the {{ obligation_schema }} prompt as the per-case section and rendered as the
+# Obligation entity page's Bearer Attributes. Descriptive only (no sh:minCount/sh:datatype).
+pcsh:ObligationPropertyShape
+    a sh:NodeShape ;
+    sh:targetClass core:Obligation ;
+    rdfs:label "Obligation per-case schema (individual data, non-definitional)"@en ;
+    rdfs:comment "What a given obligation INDIVIDUAL is described by in a specific case: the concrete duty it states, the principle it derives from and the party who bears it (both edges), and its temporal scope and compliance status. These do NOT individuate the obligation TYPE (that is ObligationDefinitionShape); their values are per-case, asserted on the individual. Descriptive only."@en ;
+    sh:property [ sh:path proeth:obligationStatement ; sh:name "obligation statement" ;   sh:description "The concrete duty the obligation states (the operative 'shall' clause)." ; sh:order 1 ] ;
+    sh:property [ sh:path core:derivedFromPrinciple ;  sh:name "derived from principle" ; sh:description "The principle the obligation derives from, via the O->P derivedFromPrinciple edge (the P side of R->P->O). Range: Principle." ; sh:order 2 ] ;
+    sh:property [ sh:path core:obligatedParty ;        sh:name "obligated party" ;        sh:description "The agent who bears the obligation, via the obligatedParty edge. Range: Agent." ; sh:order 3 ] ;
+    sh:property [ sh:path proeth:temporalScope ;       sh:name "temporal scope" ;         sh:description "When the obligation is in force (the period or condition of applicability)." ; sh:order 4 ] ;
+    sh:property [ sh:path proeth:complianceStatus ;    sh:name "compliance status" ;      sh:description "Whether the obligation was met in the case: met, unmet, partial, or unclear." ; sh:order 5 ] .
 
 
 # PrincipleDefinitionShape: the definitional field contract of any principle TYPE/individual (the P
