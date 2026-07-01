@@ -205,9 +205,12 @@ def _categorize_entity_properties(entity):
 
     for key, value in entity.properties.items():
         # Skip internal keys, the rdf_types list (the materialized direct type is
-        # shown as the concept chip in the header instead), and the <concept>class
-        # key (shown as the "instance of" link instead).
-        if key in _SKIP_KEYS or key.lower() == 'rdf_types' or key.lower().endswith('class'):
+        # shown as the concept chip in the header instead), the <concept>class
+        # key (shown as the "instance of" link instead), and the retired
+        # conceptCategory literal (VIEW-1 / VER-1: no longer written, but legacy
+        # committed entities still carry it; the concept chip conveys the category).
+        if (key in _SKIP_KEYS or key.lower() == 'rdf_types'
+                or key.lower() == 'conceptcategory' or key.lower().endswith('class')):
             continue
 
         # skos:scopeNote is an inherited / contextual definition (e.g. the matched
