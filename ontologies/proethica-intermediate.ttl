@@ -897,8 +897,9 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Guideline ;
     rdfs:label "Ethical Code"@en ;
-    rdfs:comment "A formal document that codifies ethical principles and professional conduct requirements for a profession. As a document (IAO:0000310 via Guideline), it contains principles, obligations, and constraints -- it is not itself a principle."@en ;
-    skos:changeNote "v2.4.2: Changed rdfs:subClassOf from proeth-core:Principle to proeth-core:Guideline. An ethical code is a document that contains principles, obligations, and constraints. Classifying it as a Principle conflated the container with its contents."@en .
+    rdfs:comment "A formal document that codifies ethical principles and professional conduct requirements for a profession (e.g. the NSPE, IEEE, or ACM code of ethics). As a document (IAO:0000310 via Guideline) it contains principles, obligations, and constraints, and is itself a professional-knowledge Resource; it is not itself a principle. As an ethics knowledge resource it is grounded in Frankel (1989), who frames a code as an enabling document distilling collective professional experience, and Davis (1991), who frames it as a convention among professionals."@en ;
+    skos:scopeNote "Attribution: Frankel (1989) 'Professional Codes: Why, How, and with What Impact?' and Davis (1991) 'Thinking Like an Engineer'. McLaren (2003) USES codes as extensional inputs but does not originate this resource type."@en ;
+    skos:changeNote "v2.4.2: Changed rdfs:subClassOf from proeth-core:Principle to proeth-core:Guideline. An ethical code is a document that contains principles, obligations, and constraints. Classifying it as a Principle conflated the container with its contents. 2026-07-01: absorbed :ProfessionalCode (now owl:equivalentClass, deprecated); the two denoted the same code-of-ethics document; the Frankel/Davis grounding moved here."@en .
 
 # :TechnicalCapability retired 2026-06-28: superseded by the canonical Capability kinds
 # (ratified Ca spec); a technical competence is one of the named competence kinds below.
@@ -1252,11 +1253,11 @@ proeth:conflictsWith a owl:ObjectProperty ;
 # first-class proeth:topic datatype property (decision B2), not the otherAttribute overflow.
 
 :ProfessionalCode rdf:type owl:Class ;
+    owl:equivalentClass :EthicalCode ;
+    owl:deprecated true ;
     rdfs:subClassOf proeth-core:Resource ;
-    rdfs:label "Professional Code" ;
-    skos:definition "Formal codified professional ethics standards (e.g., NSPE Code, IEEE Code) that establish professional identity, create accountability, and provide deliberation frameworks beyond mere rules. As an ethics knowledge resource the code is grounded in Frankel (1989), who frames it as an enabling document and a distillation of collective professional experience, and Davis (1991), who frames it as a convention among professionals." ;
-    rdfs:comment "Distillations of collective experience that guide and justify actions" ;
-    skos:scopeNote "Attribution: Frankel (1989) 'Professional Codes: Why, How, and with What Impact?' and Davis (1991) 'Thinking Like an Engineer'. McLaren (2003) USES codes as extensional inputs but does not originate this resource type (the prior blanket McLaren citation was corrected)." .
+    rdfs:label "Professional Code (deprecated: merged into Ethical Code)" ;
+    skos:changeNote "2026-07-01: MERGED into :EthicalCode (owl:equivalentClass; owl:deprecated). 'Professional code' and 'ethical code' denoted the same thing, a profession's code of ethics as a document, both citing the NSPE Code as the example. EthicalCode is the survivor: it sits under proeth-core:Guideline (the IAO document container) and is load-bearing (the range of governedByCode and other properties). The Frankel (1989) and Davis (1991) codes-as-conventions grounding moved to EthicalCode. New extraction emits EthicalCode; existing ProfessionalCode individuals classify as EthicalCode via the equivalence." .
 
 :CasePrecedent rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
