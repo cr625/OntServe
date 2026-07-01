@@ -346,6 +346,8 @@
 #################################################################
 # Action Categories from Chapter 2.2.6 Literature
 # Based on professional decisions and volitional interventions
+# RETIRED (ONT-4, 2026-07-01): all owl:deprecated; Action is bare (no subtype).
+# See the ONT-4 deprecation block after the Event categories below.
 #################################################################
 
 # Communication Actions - Professional disclosure and information sharing
@@ -434,8 +436,11 @@ proeth:CompetenceAction a owl:Class ;
     dcterms:references "NSPE Code of Ethics II.2" .
 
 #################################################################
-# Event Categories from Chapter 2.2.7 Literature  
+# Event Categories from Chapter 2.2.7 Literature
 # Based on temporal occurrences that trigger ethical consideration
+# RETIRED (ONT-4, 2026-07-01): all owl:deprecated; an Event is typed only to one of
+# the three core ORIGIN subclasses (AgentCausedEvent/ExogenousEvent/AutomaticEvent).
+# See the ONT-4 deprecation block after this section.
 #################################################################
 
 # Crisis Events - Failures and emergency situations
@@ -520,6 +525,44 @@ proeth:SafetyIncident a owl:Class ;
     rdfs:label "Safety Incident"@en ;
     skos:definition "Event involving actual or potential harm triggering safety reporting obligations and corrective measures per public welfare protection requirements."@en ;
     rdfs:comment "Incident triggering safety obligations and reporting requirements"@en .
+
+#################################################################
+# ONT-4 (2026-07-01): TOPICAL Action/Event taxonomies RETIRED (deprecated).
+# The Action categories (Communication/Prevention/Maintenance/... above) and the
+# Event categories (Crisis/Compliance/Conflict/... above) are superseded and
+# corpus-unused (0 case references). Under the ratified design an Event is typed
+# only to one of the three disjoint ORIGIN subclasses (proeth-core:AgentCausedEvent
+# / ExogenousEvent / AutomaticEvent), driven by the emitted eventType
+# (outcome/exogenous/automatic); Action is BARE (no subtype) per the extraction
+# spec. The core comment previously CLAIMED this taxonomy was already deleted
+# (coupled task ONT-4); it was not. Marked owl:deprecated rather than hard-deleted
+# so the change is reversible and the Class Hierarchy view hides them; the dead
+# CATEGORY_TO_ONTOLOGY_IRI['actions']/['events'] maps in ProEthica are removed in
+# the same arc and the commit bridge repointed to the origin subclasses.
+#################################################################
+proeth:CommunicationAction  owl:deprecated true .
+proeth:PreventionAction     owl:deprecated true .
+proeth:MaintenanceAction    owl:deprecated true .
+proeth:PerformanceAction    owl:deprecated true .
+proeth:EvaluationAction     owl:deprecated true .
+proeth:CollaborationAction  owl:deprecated true .
+proeth:CreationAction       owl:deprecated true .
+proeth:MonitoringAction     owl:deprecated true .
+proeth:Decision             owl:deprecated true .
+proeth:DisclosureAction     owl:deprecated true .
+proeth:CompetenceAction     owl:deprecated true .
+proeth:CrisisEvent          owl:deprecated true .
+proeth:ComplianceEvent      owl:deprecated true .
+proeth:ConflictEvent        owl:deprecated true .
+proeth:ProjectEvent         owl:deprecated true .
+proeth:SafetyEvent          owl:deprecated true .
+proeth:EvaluationEvent      owl:deprecated true .
+proeth:DiscoveryEvent       owl:deprecated true .
+proeth:ChangeEvent          owl:deprecated true .
+proeth:EmergencyEvent       owl:deprecated true .
+proeth:DeadlineEvent        owl:deprecated true .
+proeth:SafetyIncident       owl:deprecated true .
+proeth:Violation            owl:deprecated true .
 
 # Event properties for temporal relationships
 proeth:triggersObligation a owl:ObjectProperty ;

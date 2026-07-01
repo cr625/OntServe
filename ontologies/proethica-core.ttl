@@ -117,8 +117,10 @@ proeth-core:Event a owl:Class ;
                 "Kowalski and Sergot (1986). A logic-based calculus of events. New Generation Computing." .
 
 # Event origin axis (E3/E4, ratified): three mutually-disjoint origin subclasses grounding the Action/Event
-# split (Berreby et al. 2017 exogenous-vs-automatic; Sarmiento responsibility attribution). The topical Event
-# taxonomy in intermediate is retired together with the Step-3 serializer change (coupled task ONT-4 delete).
+# split (Berreby et al. 2017 exogenous-vs-automatic; Sarmiento responsibility attribution). ONT-4 (2026-07-01):
+# the topical Action/Event taxonomies in intermediate are now owl:deprecated (an earlier version of this comment
+# wrongly claimed they were already deleted), and the ProEthica commit bridge maps the emitted eventType
+# (outcome/exogenous/automatic) to these three origin subclasses; Action is bare (no subtype) per the spec.
 proeth-core:AgentCausedEvent a owl:Class ;
     rdfs:subClassOf proeth-core:Event ;
     rdfs:label "Agent-Caused Event"@en ;
