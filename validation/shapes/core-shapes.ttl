@@ -255,12 +255,24 @@ pcsh:ResourcePropertyShape
 pcsh:CapabilityDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Capability ;
-    rdfs:label "Capability definition schema (descriptive, field contract)"@en ;
-    rdfs:comment "What a capability is described by for extraction: its canonical competence kind, the Tolmeijer requirement the kind realizes, the agent who possesses it, and the obligations that presuppose it. Descriptive only (no validation result); capability_kind drives the subClassOf typing and is not stored as a literal."@en ;
+    rdfs:label "Capability definition schema (type-level, descriptive, field contract)"@en ;
+    rdfs:comment "What individuates a capability TYPE: its canonical competence kind (drives the subClassOf typing) and the Tolmeijer requirement the kind realizes (a class-level annotation). The possessor and the incoming requiresCapability edge are per-case and live on CapabilityPropertyShape, mirroring the R/P/O/S/Rs Definition/Property split and the capability scopeNote (the type is 'the competence it is'; the bearer and the requiredForObligation edges attach to the case individual). Descriptive only (no validation result); capability_kind is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:capabilityKind ;       sh:name "capability kind" ;        sh:description "The canonical, tool/actor-neutral competence kind, which drives the subClassOf typing to one of the named capability classes (each subClassOf core:Capability with skos:altLabel synonyms). A routing input, not stored as a literal." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:tolmeijerRequirement ; sh:name "Tolmeijer requirement" ;  sh:description "Class-level descriptive annotation naming which of the four Tolmeijer (2021) ethical-competence requirements the kind primarily realizes; descriptive only, with no per-individual field and no second typing axiom." ; sh:order 2 ] ;
-    sh:property [ sh:path core:possessedBy ;            sh:name "possessed by" ;           sh:description "The agent who possesses or exercises the capability, via the possessedBy edge. Range: Agent." ; sh:order 3 ] ;
-    sh:property [ sh:path core:requiresCapability ;     sh:name "required by obligation" ; sh:description "The incoming Obligation->Capability requiresCapability edge: each obligation that presupposes this capacity (re-domained to Obligation->Capability and promoted to core). Domain: Obligation." ; sh:order 4 ] .
+    sh:property [ sh:path proeth:tolmeijerRequirement ; sh:name "Tolmeijer requirement" ;  sh:description "Class-level descriptive annotation naming which of the four Tolmeijer (2021) ethical-competence requirements the kind primarily realizes; descriptive only, with no per-individual field and no second typing axiom." ; sh:order 2 ] .
+
+# CapabilityPropertyShape: the per-case fields a given capability INDIVIDUAL carries (the Ca-side analogue of
+# the other components' PropertyShapes). possessedBy resolves to the bearer edge (the agent who possesses or
+# exercises the competence in this case); requiresCapability is the incoming Obligation->Capability edge (each
+# obligation that presupposes this capacity, per obligation-presupposes-capacity). The scopeNote assigns both
+# the bearer and the requiredForObligation edges to the case individual, not the class. Targets core:Capability.
+# Read by {{ capability_schema }} as the per-case section and rendered as the entity page's Bearer Attributes.
+pcsh:CapabilityPropertyShape
+    a sh:NodeShape ;
+    sh:targetClass core:Capability ;
+    rdfs:label "Capability per-case schema (individual data, non-definitional)"@en ;
+    rdfs:comment "What a given capability INDIVIDUAL is described by in a specific case: the agent who possesses or exercises it, and the obligations that presuppose it. These do NOT individuate the capability TYPE (that is CapabilityDefinitionShape, keyed on capability kind); their values are per-case, asserted on the individual. Descriptive only."@en ;
+    sh:property [ sh:path core:possessedBy ;            sh:name "possessed by" ;           sh:description "The agent who possesses or exercises the capability, via the possessedBy edge. Range: Agent." ; sh:order 1 ] ;
+    sh:property [ sh:path core:requiresCapability ;     sh:name "required by obligation" ; sh:description "The incoming Obligation->Capability requiresCapability edge: each obligation that presupposes this capacity (re-domained to Obligation->Capability and promoted to core). Domain: Obligation." ; sh:order 2 ] .
 
 # ConstraintDefinitionShape: the definitional field contract of any constraint TYPE/individual (the Cs
 # component), read by the {{ constraint_schema }} prompt block. Descriptive only (no validation result). A
