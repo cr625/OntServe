@@ -160,16 +160,27 @@ pcsh:ObligationDefinitionShape
 pcsh:PrincipleDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Principle ;
-    rdfs:label "Principle definition schema (descriptive, field contract)"@en ;
-    rdfs:comment "What a principle is described by for extraction: its canonical kind, the five per-case narrative literals the defeasibility pipeline consumes, the agent that invokes it, and the extensional cases that ground it. Descriptive only (no validation result); principle_category drives the four-kind subClassOf typing and the canonical leaf becomes the rdf:type, neither stored as a literal."@en ;
+    rdfs:label "Principle definition schema (type-level, descriptive, field contract)"@en ;
+    rdfs:comment "What individuates a principle TYPE: its canonical kind (drives the four-kind subClassOf typing; the canonical leaf becomes the rdf:type) and the extensional cases that ground it (McLaren). The five per-case narrative literals and the invokedBy edge are per-individual and now live on PrinciplePropertyShape, mirroring the RoleDefinitionShape/ProfessionalRolePropertyShape split so the {{ principle_schema }} prompt separates the type judgment from what the case supplies. Descriptive only (no validation result); principle_category is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:principleCategory ;  sh:name "principle kind" ;      sh:description "The controlled principle kind, which drives the four-kind subClassOf typing: FundamentalEthicalPrinciple, ProfessionalVirtuePrinciple, RelationalPrinciple, DomainSpecificPrinciple. The canonical leaf label becomes the rdf:type; the category is a routing input, not stored as a literal." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:interpretation ;     sh:name "interpretation" ;      sh:description "Per-case reading of what the principle requires in this situation (a defeasibility-pipeline source field)." ; sh:order 2 ] ;
-    sh:property [ sh:path proeth:concreteExpression ; sh:name "concrete expression" ; sh:description "How the principle is concretely expressed in the case (a defeasibility-pipeline source field)." ; sh:order 3 ] ;
-    sh:property [ sh:path proeth:appliedTo ;          sh:name "applied to" ;          sh:description "What the principle is applied to in the case (the situation or party it bears on)." ; sh:order 4 ] ;
-    sh:property [ sh:path proeth:balancingWith ;      sh:name "balancing with" ;      sh:description "The competing principle or value the principle is balanced against (a defeasibility-pipeline source field)." ; sh:order 5 ] ;
-    sh:property [ sh:path proeth:tensionResolution ;  sh:name "tension resolution" ;  sh:description "How the case resolves the tension involving this principle (a defeasibility-pipeline source field)." ; sh:order 6 ] ;
-    sh:property [ sh:path core:invokedBy ;            sh:name "invoked by" ;          sh:description "The agent who invokes the principle, via the P->Agent invokedBy edge (resolved to the case Agent or the shared NSPE Board/NSPE Agent). Range: Agent." ; sh:order 7 ] ;
-    sh:property [ sh:path proeth:extensionalCases ;   sh:name "extensional cases" ;   sh:description "Class-level prior cases that instantiate the principle (McLaren extensional grounding); an optional class-mint field." ; sh:order 8 ] .
+    sh:property [ sh:path proeth:extensionalCases ;   sh:name "extensional cases" ;   sh:description "Class-level prior cases that instantiate the principle (McLaren extensional grounding); an optional class-mint field." ; sh:order 2 ] .
+
+# PrinciplePropertyShape: the per-case fields a principle INDIVIDUAL carries in a given case -- the P-side
+# analogue of ProfessionalRolePropertyShape. The five narrative literals are the defeasibility-pipeline source
+# fields; invokedBy resolves to the P->Agent edge. Read by the {{ principle_schema }} prompt as the per-case
+# section and rendered as the Principle entity page's Bearer Attributes. Descriptive only (no sh:minCount/
+# sh:datatype), so it produces no validation result; values are asserted on the individual, not the class.
+pcsh:PrinciplePropertyShape
+    a sh:NodeShape ;
+    sh:targetClass core:Principle ;
+    rdfs:label "Principle per-case schema (individual data, non-definitional)"@en ;
+    rdfs:comment "What a principle INDIVIDUAL is described by in a specific case: the five narrative literals the defeasibility pipeline consumes and the agent that invokes it. These do NOT individuate the principle TYPE (that is PrincipleDefinitionShape); their values are per-case, asserted on the individual. Descriptive only."@en ;
+    sh:property [ sh:path proeth:interpretation ;     sh:name "interpretation" ;      sh:description "Per-case reading of what the principle requires in this situation (a defeasibility-pipeline source field)." ; sh:order 1 ] ;
+    sh:property [ sh:path proeth:concreteExpression ; sh:name "concrete expression" ; sh:description "How the principle is concretely expressed in the case (a defeasibility-pipeline source field)." ; sh:order 2 ] ;
+    sh:property [ sh:path proeth:appliedTo ;          sh:name "applied to" ;          sh:description "What the principle is applied to in the case (the situation or party it bears on)." ; sh:order 3 ] ;
+    sh:property [ sh:path proeth:balancingWith ;      sh:name "balancing with" ;      sh:description "The competing principle or value the principle is balanced against (a defeasibility-pipeline source field)." ; sh:order 4 ] ;
+    sh:property [ sh:path proeth:tensionResolution ;  sh:name "tension resolution" ;  sh:description "How the case resolves the tension involving this principle (a defeasibility-pipeline source field)." ; sh:order 5 ] ;
+    sh:property [ sh:path core:invokedBy ;            sh:name "invoked by" ;          sh:description "The agent who invokes the principle, via the P->Agent invokedBy edge (resolved to the case Agent or the shared NSPE Board/NSPE Agent). Range: Agent." ; sh:order 6 ] .
 
 # StateDefinitionShape: the definitional field contract of any state TYPE/individual (the S component), read
 # by the {{ state_schema }} prompt block. Descriptive only (no validation result). The archetype is one of
