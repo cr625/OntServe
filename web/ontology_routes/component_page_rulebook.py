@@ -86,10 +86,11 @@ PROPERTY_STRUCTURE_GROUPS = [
         "badge": "rdfs:range on this class or ancestor",
         "kind": "referenced_by",
         "tooltip": (
-            "Incoming edges: object properties declared on OTHER classes whose <strong>range</strong> is "
-            "this class or an ancestor, so they point AT instances of this class. <em>From</em> is the class "
-            "that declares the property (its <code>rdfs:domain</code>). This is the in-degree a domain-only "
-            "view would hide, e.g. a Principle is referenced by Role, Obligation and Action."
+            "Incoming edges: object properties whose <strong>range</strong> is this class or an ancestor, "
+            "so they point AT instances of this class. <em>From</em> is the class that declares the property "
+            "(its <code>rdfs:domain</code>); that is usually another class, but can be this class itself. "
+            "This is the in-degree a domain-only view would hide, e.g. a Principle is referenced by Role, "
+            "Obligation and Action."
         ),
     },
 ]
