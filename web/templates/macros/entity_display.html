@@ -46,7 +46,7 @@
    the whole column reads as one pink family with the declared terms clickable. #}
 {%- set frag_label = (frag.replace('_', ' ') | split_pascal) if (frag and frag[0]|upper == frag[0] and frag[0]|lower != frag[0]) else frag -%}
 {%- if ontology_name -%}
-<a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=frag) }}" class="rel-target-link" title="{{ iri }}">{% if code_style %}<code>{{ frag_label }}</code>{% else %}{{ frag_label }}{% endif %}</a>
+<a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=frag) }}" class="rel-target-link{% if code_style %} sh-path-link{% endif %}" title="{{ iri }}">{% if code_style %}<code>{{ frag_label }}</code>{% else %}{{ frag_label }}{% endif %}</a>
 {%- else -%}
 <code title="{{ iri }}">{{ frag_label }}</code>
 {%- endif -%}
