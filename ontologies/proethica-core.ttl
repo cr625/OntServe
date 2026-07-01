@@ -40,8 +40,8 @@ proeth-core:Role a owl:Class ;
     iao:0000116 "Operationalises the teleological account of professional roles (Oakley and Cocking 2001): obligations emerge from the profession's distinctive good. Carries Kong et al.'s (2020) identity virtues and identity-role categories, and admits Doernberg and Truog's (2023) multiple role-spheres within a single profession."@en ;
     skos:scopeNote "Obligation-generation is axiomatised as Role subClassOf (hasObligation some Obligation). Relationship categories and virtues are definitional of the role TYPE; per-occupant facts (license, specialty, employer) attach to the role INDIVIDUAL, not the class (cf. Davis 1991: most US engineers are unlicensed yet remain role-bound, so license is not role-defining)."@en ;
     iao:0000119 "Oakley and Cocking (2001). Virtue Ethics and Professional Roles." ,
-                "Kong et al. (2020). Analysis of professional codes: audience-oriented identity roles and identity virtues." ,
-                "Doernberg and Truog (2023). Spheres of morality: distinct ethical role-contexts within a single profession." .
+                "Kong et al. (2020). Corpus-based empirical approach to professionalism: Identifying interactional roles and dispositions in professional codes of ethics." ,
+                "Doernberg and Truog (2023). Spheres of Morality: The Ethical Codes of the Medical Profession. The American Journal of Bioethics 23(12)." .
 
 # P - Principle: Ethical principles as directive information entities
 proeth-core:Principle a owl:Class ;
@@ -64,8 +64,8 @@ proeth-core:Obligation a owl:Class ;
     rdfs:comment "A directive information entity expressing required actions or behaviors in professional contexts. Obligations prescribe conduct and, when concretized by an agent, guide compliant behavior. This is the O component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A directive information entity expressing required actions or behaviors in professional contexts. This is the O component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:scopeNote "The obligation TYPE is defined by the duty it specifies and the Principle and source provision it derives from (the R->P->O chain), not by who bears it in a given case or whether it was met; the obligated party, compliance status, and per-occasion circumstances attach to the case individual and edges, not to the class."@en ;
-    iao:0000119 "Dennis et al. (2016). Formal verification of ethical choices: an abstract principle made substantive through complete specification." ,
-                "Donohue (2017). Deontic entities in BFO-aligned ontologies (ICBO): obligations as directive information entities." ;
+    iao:0000119 "Dennis et al. (2016). Formal verification of ethical choices in autonomous systems. Robotics and Autonomous Systems 77." ,
+                "Donohue (2017). Toward a BFO-Based Deontic Ontology. SoLe-BD 2017 (ICBO 2017)." ;
     skos:changeNote "v2.3.0: Refined from IAO:information content entity to IAO:directive information entity per Donohue (ICBO 2017) analysis of deontic entities in BFO-aligned ontologies."@en .
 
 # S - State: Professional states as specifically dependent continuants
@@ -75,8 +75,8 @@ proeth-core:State a owl:Class ;
     rdfs:comment "A specifically dependent continuant representing conditions that affect ethical decisions and professional conduct. States span the quality-disposition boundary: some are monadic qualities of individual bearers (competence gaps, financial pressures) while others are relational or situational conditions (conflicts of interest, stakeholder divisions). This is the S component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A specifically dependent continuant representing conditions that affect ethical decisions and professional conduct. This is the S component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:scopeNote "The state TYPE is defined by the condition it represents and its persistence type, an inertial fluent that holds until terminated or a non-inertial fluent true at a single time point (Event Calculus), not by whose condition it is, when it holds, or which obligations it activates in a given case; the bearer, the OWL-Time temporal anchor, and the obligation-activation edges attach to the case individual, not to the class."@en ;
-    iao:0000119 "Berreby et al. (2017). Event Calculus: inertial versus non-inertial fluents." ,
-                "Jones (1991). Moral intensity: situational characteristics that affect ethical salience." ;
+    iao:0000119 "Berreby et al. (2017). A declarative modular framework for representing and applying ethical principles. AAMAS 2017." ,
+                "Jones (1991). Ethical Decision Making by Individuals in Organizations: An Issue-Contingent Model." ;
     skos:changeNote "v2.3.0: Changed from BFO:quality to BFO:specifically dependent continuant. ProEthica States include relational and situational conditions that do not fit the strict BFO definition of quality (which requires inherence in a single bearer). SDC is the common parent of quality and realizable entity."@en .
 
 # Rs - Resource: Professional knowledge sources as information content entities
@@ -86,8 +86,8 @@ proeth-core:Resource a owl:Class ;
     rdfs:comment "An information content entity that serves as a professional knowledge source for ethical decision-making. Resources include codes of ethics, case precedents, technical standards, and expert interpretations -- all generically dependent continuants with descriptive content about professional practice. This is the Rs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "An information content entity that serves as a professional knowledge source for ethical decision-making. This is the Rs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:scopeNote "The resource TYPE (class) is a bare category of professional knowledge, a kind of law, regulation, standard, or code, while a specific, named or numbered, separately citable document or data artifact present in the case (a code provision, a precedent case, a dataset) is an INDIVIDUAL; the relying actor and the citing authority attach to the individual and its edges (availableTo, citedByAgent), not to the class."@en ;
-    iao:0000119 "McLaren (2003). Professional ethical knowledge resides in accumulated precedents." ,
-                "Davis (1991) and Frankel (1989). Professional codes as layered knowledge resources." ;
+    iao:0000119 "McLaren (2003). Extensionally defining principles and cases in ethics: an AI model. Artificial Intelligence 150." ,
+                "Davis (1991) and Frankel (1989). Thinking Like an Engineer: The Place of a Code of Ethics in the Practice of a Profession; Professional Codes: Why, How, and with What Impact?" ;
     skos:changeNote "v2.3.0: Changed from BFO:independent continuant to IAO:information content entity. All extracted resources (codes, precedents, standards, interpretations) are generically dependent continuants, not independent continuants. Resources are descriptive ICEs (they describe existing professional knowledge) as distinct from the prescriptive ICEs (P, O, Cs) that direct conduct."@en .
 
 # A - Action: Professional actions as processes
@@ -97,8 +97,8 @@ proeth-core:Action a owl:Class ;
     rdfs:comment "A process directed toward achieving specific goals in professional contexts. This is the A component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A process directed toward achieving specific goals in professional contexts. This is the A component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:scopeNote "The action TYPE is defined by the kind of volitional intervention it is (a BFO process the agent performs), not by who performs it, when, or the specific States (fluents) it initiates in a given case; the actor, the OWL-Time temporal anchor (time:hasTime) and the reified Allen interval relations, and the proeth:initiates edges to States attach to the case individual, not to the class."@en ;
-    iao:0000119 "Sarmiento et al. (2023). Volitional actions separated from agentless events for causal-responsibility attribution." ,
-                "Berreby et al. (2017). Event Calculus: agent-initiated actions initiate and terminate fluents." .
+    iao:0000119 "Sarmiento et al. (2023). Action languages based actual causality in decision making contexts. PRIMA 2022." ,
+                "Berreby et al. (2017). A declarative modular framework for representing and applying ethical principles. AAMAS 2017." .
 
 # E - Event: Professional events as processes  
 proeth-core:Event a owl:Class ;
@@ -107,8 +107,8 @@ proeth-core:Event a owl:Class ;
     rdfs:comment "A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A process that occurs in professional contexts, which may or may not involve intentional agency. This is the E component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:scopeNote "The event TYPE is defined by the kind of non-volitional occurrence it is and its origin (agent-caused, exogenous, or automatic), not by when it happens or the specific States (fluents) it initiates or terminates in a given case; the OWL-Time temporal anchor (time:hasTime) and the reified Allen interval relations, and the proeth:initiates / proeth:terminates edges to States attach to the case individual, not to the class."@en ;
-    iao:0000119 "Berreby et al. (2017). Event Calculus: automatic events occur when their precondition fluents hold and modify fluents to drive state transitions." ,
-                "Kowalski and Sergot (1986). The Event Calculus: a logical formalism for events and change over time." .
+    iao:0000119 "Berreby et al. (2017). A declarative modular framework for representing and applying ethical principles. AAMAS 2017." ,
+                "Kowalski and Sergot (1986). A logic-based calculus of events. New Generation Computing." .
 
 # Event origin axis (E3/E4, ratified): three mutually-disjoint origin subclasses grounding the Action/Event
 # split (Berreby et al. 2017 exogenous-vs-automatic; Sarmiento responsibility attribution). The topical Event
@@ -141,8 +141,8 @@ proeth-core:Capability a owl:Class ;
     rdfs:comment "A disposition that inheres in a professional agent and is realized through professional activities. Capabilities represent skills, competencies, and abilities that exist as potentials and are realized when the agent performs corresponding actions. This is the Ca component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A disposition that inheres in a professional agent and is realized through professional activities. This is the Ca component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:scopeNote "The capability TYPE is defined by the competence it is, a BFO disposition realized through professional activity, not by who possesses it in a given case or the specific obligations it enables there; the bearer and the requiredForObligation edges (obligation presupposes capacity) attach to the case individual, not to the class."@en ;
-    iao:0000119 "Tolmeijer et al. (2021). Capability dimensions: norm competence, situational awareness, learning, explanation." ,
-                "Epstein and Hundert (2002). Professional competence as the judicious use of knowledge and skill in practice." ;
+    iao:0000119 "Tolmeijer et al. (2021). Implementations in Machine Ethics: A Survey. ACM Computing Surveys 53(6)." ,
+                "Epstein and Hundert (2002). Defining and Assessing Professional Competence. JAMA 287." ;
     skos:changeNote "v2.3.0: Reverted from BFO:realizable entity to BFO:disposition. Extracted capabilities (technical skills, ethical reasoning abilities, communication competencies) are dispositions -- they inhere in individual bearers and are realized through professional processes. Disposition is the more precise subclass of realizable entity."@en .
 
 # Cs - Constraint: Professional constraints as directive information entities
@@ -152,8 +152,8 @@ proeth-core:Constraint a owl:Class ;
     rdfs:comment "A directive information entity expressing limitations or restrictions on professional actions or decisions. Constraints prescribe boundaries on permissible conduct. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:definition "A directive information entity expressing limitations or restrictions on professional actions or decisions. This is the Cs component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     skos:scopeNote "The constraint TYPE is defined by the prohibition or boundary it states and its source provision, not by who it binds in a given case or how a defeasible exception is resolved; the constrained party, per-occasion applicability, and any exception narrative attach to the case individual and edges, not to the class."@en ;
-    iao:0000119 "Arkin (2008). Governing lethal behavior: constraints as negative behavioral limits (the Ethical Governor)." ,
-                "Ganascia (2007). Modelling ethical rules: constraints as default rules tolerating justified exceptions." ,
+    iao:0000119 "Arkin (2008). Governing lethal behavior: embedding ethics in a hybrid deliberative/reactive robot architecture. Proceedings of the 3rd ACM/IEEE International Conference on Human-Robot Interaction." ,
+                "Ganascia (2007). Modelling ethical rules of lying with Answer Set Programming. Ethics and Information Technology 9." ,
                 "Dennis et al. (2016). Prohibited actions specified under temporal and contextual conditions." ;
     skos:changeNote "v2.3.0: Refined from IAO:information content entity to IAO:directive information entity. Constraints define the permissible space of action through negative behavioral limits (Arkin 2008) and prohibitions specifying what must not be done (Ganascia 2007). Their specification of prohibited actions under temporal and contextual conditions (Dennis et al. 2016) constitutes directive content."@en .
 
