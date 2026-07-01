@@ -287,19 +287,41 @@ canonical:
       decline/push back on improper client direction. If it reads more as a communication act,
       route to DisclosureCapability instead. Confirm at full-set curation.
 
-  # --- AI attribution (transparency about AI authorship) ---
+  # --- tool attribution (crediting a tool's or software's contribution) ---
+
+  - iri: ToolAttributionCapability
+    label: Tool Attribution Capability
+    definition: >-
+      The competence to attribute the contribution of a professional tool or software to a work
+      product and give due credit for its role (e.g. CAD, analysis, or simulation software). The
+      genus of tool-attribution competencies; AI attribution is a distinguished kind.
+    alt_labels:
+      - Software Attribution Capability
+      - Tool Contribution Attribution Capability
+      - CAD Attribution Capability
+    status: canonical
+    curate: >-
+      Added 2026-07-01 (user decision) as the genus of tool-attribution competencies. Distinct from
+      DisclosureCapability: attribution credits a tool's contribution (NSPE 'give credit'), not
+      disclosing material facts or risks. AIAttributionCapability is its distinguished subclass (ontology).
 
   - iri: AIAttributionCapability
     label: AI Attribution Capability
     definition: >-
-      The competence to attribute AI-tool contribution in work product and representations.
+      The competence to attribute AI-tool contribution in a work product and its representations. A
+      distinct kind of tool attribution because generative AI can author substantive content, so its
+      unattributed use misrepresents professional authorship and provenance in ways a conventional
+      tool such as CAD does not.
+    alt_labels:
+      - AI Contribution Attribution Capability
+      - AI Tool Attribution Capability
     status: canonical
     source_cases: [7]
     cross_component_family: AI Tool Disclosure
     curate: >-
-      OPEN CALL: candidate alt_label of DisclosureCapability (attribution is a disclosure act). Kept
-      distinct for now because AI authorship attribution is an emerging, named term of art in the
-      corpus; the lead may fold it into DisclosureCapability at reconciliation.
+      RESOLVED 2026-07-01 (user): kept distinct from DisclosureCapability and re-parented under the
+      new ToolAttributionCapability genus (in the ontology). AI attribution differs from other tool
+      attributions (CAD, etc.) because generative AI authors substantive content.
 
   # --- analytical-distinction (threshold discrimination) ---
 

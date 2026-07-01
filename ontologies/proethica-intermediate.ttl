@@ -1539,10 +1539,18 @@ proeth:WorkRefusalJudgmentCapability a owl:Class ;
     skos:altLabel "Client Confrontation Capability"@en ;
     proeth:tolmeijerRequirement "norm competence" .
 
-proeth:AIAttributionCapability a owl:Class ;
+proeth:ToolAttributionCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
+    rdfs:label "Tool Attribution Capability"@en ;
+    skos:definition "The competence to attribute the contribution of a professional tool or software to a work product and give due credit for its role (e.g. CAD, analysis, or simulation software). The genus of tool-attribution competencies; AI attribution is a distinguished kind because generative AI can author substantive content."@en ;
+    skos:altLabel "Software Attribution Capability"@en, "Tool Contribution Attribution Capability"@en, "CAD Attribution Capability"@en ;
+    proeth:tolmeijerRequirement "explanation and justification" .
+
+proeth:AIAttributionCapability a owl:Class ;
+    rdfs:subClassOf proeth:ToolAttributionCapability ;
     rdfs:label "AI Attribution Capability"@en ;
-    skos:definition "The competence to attribute AI-tool contribution in work product and representations."@en ;
+    skos:definition "The competence to attribute AI-tool contribution in a work product and its representations. A distinct kind of tool attribution because generative AI can author substantive content, so its unattributed use misrepresents professional authorship and provenance in ways a conventional tool such as CAD does not."@en ;
+    skos:altLabel "AI Contribution Attribution Capability"@en, "AI Tool Attribution Capability"@en ;
     proeth:tolmeijerRequirement "explanation and justification" .
 
 proeth:ThresholdDistinctionCapability a owl:Class ;
