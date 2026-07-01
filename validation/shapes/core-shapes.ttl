@@ -274,21 +274,35 @@ pcsh:CapabilityPropertyShape
     sh:property [ sh:path core:possessedBy ;            sh:name "possessed by" ;           sh:description "The agent who possesses or exercises the capability, via the possessedBy edge. Range: Agent." ; sh:order 1 ] ;
     sh:property [ sh:path core:requiresCapability ;     sh:name "required by obligation" ; sh:description "The incoming Obligation->Capability requiresCapability edge: each obligation that presupposes this capacity (re-domained to Obligation->Capability and promoted to core). Domain: Obligation." ; sh:order 2 ] .
 
-# ConstraintDefinitionShape: the definitional field contract of any constraint TYPE/individual (the Cs
-# component), read by the {{ constraint_schema }} prompt block. Descriptive only (no validation result). A
+# ConstraintDefinitionShape / ConstraintPropertyShape: the Cs-component field contract, read by the
+# {{ constraint_schema }} prompt block and mirroring the R/P/O/S/Rs/Ca Definition/Property split. A
 # constraint is a PROHIBITION or boundary, not a positive duty; a 'was required to' statement is an
-# Obligation and is redirected to the O pass. severity is retained for constraints as a genuine attribute.
+# Obligation and is redirected to the O pass. DefinitionShape = what individuates the constraint TYPE (the
+# boundary it states and its source provision, per the core scopeNote); PropertyShape = the per-case
+# severity, applicability, and the constrained party/action a given constraint INDIVIDUAL carries.
 pcsh:ConstraintDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Constraint ;
-    rdfs:label "Constraint definition schema (descriptive, field contract)"@en ;
-    rdfs:comment "What a constraint is described by for extraction: its boundary type, its severity and applicability, the agent it limits, the action it bounds, and its source provision. A constraint is a prohibition or boundary, distinct from the positive duty an obligation states. Descriptive only (no validation result); boundary_type drives the subClassOf typing and is not stored as a literal."@en ;
-    sh:property [ sh:path proeth:boundaryType ;           sh:name "boundary type" ;           sh:description "The controlled boundary type, which drives the subClassOf typing into one of the eleven closed boundary-type classes: LegalConstraint, RegulatoryConstraint, ResourceConstraint, CompetenceConstraint, JurisdictionalConstraint, ProceduralConstraint, EthicalConstraint, SafetyConstraint, ConfidentialityConstraint, TemporalConstraint, PriorityConstraint. A routing input, not stored as a literal." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:severity ;               sh:name "severity" ;                sh:description "The severity of the constraint (critical, high, medium, low); a genuine attribute retained for constraints (Dennis severity ordering)." ; sh:order 2 ] ;
-    sh:property [ sh:path proeth:applicabilityCondition ; sh:name "applicability condition" ; sh:description "The temporal and contextual circumstances under which the constraint applies (the Dennis complete-specification condition)." ; sh:order 3 ] ;
-    sh:property [ sh:path core:constrainedEntity ;        sh:name "constrained entity" ;      sh:description "The agent whose conduct the constraint limits, via the outgoing constrainedEntity edge. Range: Agent." ; sh:order 4 ] ;
-    sh:property [ sh:path core:constrainedBy ;            sh:name "constrained by" ;          sh:description "The incoming Action->Constraint constrainedBy edge: each action limited by this constraint, resolved by the Action pass. Domain: Action." ; sh:order 5 ] ;
-    sh:property [ sh:path core:establishedBy ;            sh:name "established by" ;          sh:description "The source provision that establishes the constraint, via the establishedBy edge when the source resolves. Range: CodeProvision." ; sh:order 6 ] .
+    rdfs:label "Constraint definition schema (type-level, descriptive, field contract)"@en ;
+    rdfs:comment "What individuates a constraint TYPE: the boundary it states (boundary_type, which drives the subClassOf typing into one of the eleven closed boundary-type classes) and the source provision that establishes it. The per-case severity and applicability, the agent it limits, and the action it bounds are per-individual and live on ConstraintPropertyShape, mirroring the R/P/O/S/Rs/Ca Definition/Property split and the constraint scopeNote (the TYPE is the prohibition plus its source provision; the constrained party, per-occasion applicability, and any exception attach to the case individual). Descriptive only (no validation result); boundary_type is a routing input, not stored as a literal."@en ;
+    sh:property [ sh:path proeth:boundaryType ; sh:name "boundary type" ; sh:description "The controlled boundary type, which drives the subClassOf typing into one of the eleven closed boundary-type classes: LegalConstraint, RegulatoryConstraint, ResourceConstraint, CompetenceConstraint, JurisdictionalConstraint, ProceduralConstraint, EthicalConstraint, SafetyConstraint, ConfidentialityConstraint, TemporalConstraint, PriorityConstraint. The prohibition/boundary content that individuates the type. A routing input, not stored as a literal." ; sh:order 1 ] ;
+    sh:property [ sh:path core:establishedBy ; sh:name "established by" ; sh:description "The source CodeProvision that establishes the constraint, via the establishedBy edge. The second type-individuating coordinate: per the scopeNote a constraint TYPE is the boundary it states plus its source provision. Range: CodeProvision." ; sh:order 2 ] .
+
+# ConstraintPropertyShape: the per-case fields a given constraint INDIVIDUAL carries (the Cs-side analogue of
+# the other components' PropertyShapes). severity is the per-occasion Dennis severity assessment;
+# applicabilityCondition is the per-case temporal/contextual window under which the prohibition applies;
+# constrainedEntity is the particular Agent bound; constrainedBy is the incoming Action->Constraint edge
+# resolved by the Action pass. The scopeNote assigns all four to the case individual, not the class. Targets
+# core:Constraint. Read by {{ constraint_schema }} as the per-case section and rendered as Bearer Attributes.
+pcsh:ConstraintPropertyShape
+    a sh:NodeShape ;
+    sh:targetClass core:Constraint ;
+    rdfs:label "Constraint per-case schema (individual data, non-definitional)"@en ;
+    rdfs:comment "What a given constraint INDIVIDUAL is described by in a specific case: its per-occasion severity and applicability window, the agent whose conduct it limits, and the action it bounds. These do NOT individuate the constraint TYPE (that is ConstraintDefinitionShape, keyed on the boundary it states and its source provision); their values are per-case, asserted on the individual. Descriptive only."@en ;
+    sh:property [ sh:path proeth:severity ; sh:name "severity" ; sh:description "The severity of the constraint in this case (critical, high, medium, low); a per-occasion assessment (Dennis severity ordering) that can differ across cases sharing the same boundary." ; sh:order 1 ] ;
+    sh:property [ sh:path proeth:applicabilityCondition ; sh:name "applicability condition" ; sh:description "The temporal and contextual circumstances under which the prohibition applies in this case (the Dennis complete-specification condition)." ; sh:order 2 ] ;
+    sh:property [ sh:path core:constrainedEntity ; sh:name "constrained entity" ; sh:description "The agent whose conduct the constraint limits, via the outgoing constrainedEntity edge. Range: Agent." ; sh:order 3 ] ;
+    sh:property [ sh:path core:constrainedBy ; sh:name "constrained by" ; sh:description "The incoming Action->Constraint constrainedBy edge: each action limited by this constraint, resolved by the Action pass. Domain: Action." ; sh:order 4 ] .
 
 # EventDefinitionShape: the LIGHT field contract of any event TYPE/individual (the E component). Descriptive
 # only (no validation result). event_origin drives the three-way origin subClassOf typing into the mutually

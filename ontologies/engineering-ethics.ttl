@@ -69,12 +69,11 @@ proethica:engineering_standards a owl:Ontology ;
         "The systematic review of engineering designs against applicable standards and regulations" .
 
 <http://proethica.org/ontology/engineering_standards#CybersecurityRequirements> a owl:Class ;
-    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:subClassOf proeth-core:Obligation ;  # retyped from Constraint 2026-07-01: a positive compliance duty ('must implement'), not a prohibition/boundary; matches the sibling EnsureAccessibility
     rdfs:label "Cybersecurity Standards Compliance" ;
     ns1:appliesToDomain "computer_engineering",
         "software_engineering",
         "systems_engineering" ;
-    ns1:hasType "technical_legal" ;
     rdfs:comment "Mandatory security measures for connected and critical systems" ;
     skos:definition "Mandatory security measures for connected and critical systems",
         "Technical and legal requirements to implement appropriate cybersecurity controls and protections" .
@@ -187,23 +186,21 @@ proethica:engineering_standards a owl:Ontology ;
 # QualityEngineerRole moved to proethica-intermediate (role-home consolidation, 2026-06-26).
 
 <http://proethica.org/ontology/engineering_standards#RegulatoryCompliance> a owl:Class ;
-    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:subClassOf proeth-core:Obligation ;  # retyped from Constraint 2026-07-01: a positive compliance duty ('must comply'), not a prohibition; matches the sibling EnsureAccessibility
     rdfs:label "Regulatory Standards Compliance" ;
     ns1:appliesToDomain "all_engineering" ;
-    ns1:hasType "legal" ;
-    rdfs:comment "Binding legal constraint with potential civil and criminal liability" ;
-    skos:definition "Binding legal constraint with potential civil and criminal liability",
+    rdfs:comment "Binding legal obligation with potential civil and criminal liability for non-compliance" ;
+    skos:definition "Binding legal obligation with potential civil and criminal liability for non-compliance",
         "Legal requirement to comply with applicable technical standards as mandated by regulatory authorities" .
 
 # SafetyEngineerRole moved to proethica-intermediate (role-home consolidation, 2026-06-26).
 
 <http://proethica.org/ontology/engineering_standards#SafetyIntegrityLevels> a owl:Class ;
-    rdfs:subClassOf proeth-core:Constraint ;
+    rdfs:subClassOf proeth-core:Obligation ;  # retyped from Constraint 2026-07-01: a positive duty to achieve a specified SIL/ASIL, not a prohibition; matches the sibling EnsureAccessibility
     rdfs:label "Safety Integrity Level Requirements" ;
     ns1:appliesToDomain "automotive_engineering",
         "electrical_engineering",
         "industrial_automation" ;
-    ns1:hasType "technical" ;
     rdfs:comment "Quantitative safety requirements with verification obligations" ;
     skos:definition "Quantitative safety requirements with verification obligations",
         "Technical requirement to achieve specified Safety Integrity Levels (SIL/ASIL) based on risk assessment" .
