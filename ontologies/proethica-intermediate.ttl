@@ -854,11 +854,14 @@ proeth:conflictsWith a owl:ObjectProperty ;
         proeth-core:Role
         [ rdf:type owl:Restriction ; owl:onProperty :owesDutyToward ; owl:someValuesFrom :PublicInterest ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
+    rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty proeth-core:adheresToPrinciple ; owl:someValuesFrom :PublicWelfarePrinciple ] ;
     rdfs:label "Public Responsibility Role" ;
-    skos:definition "Professional role defining obligations to the broader public and society, creating duties of public welfare protection that can override client or employer interests per Thornton et al. (2017) collective morality framework." ;
-    rdfs:comment "Societal obligation that can override other professional duties. Defined class (monadic): a Role that owesDutyToward some PublicInterest." ;
+    skos:definition "Professional role defining obligations to the broader public and society, creating duties of public welfare protection that can override client or employer interests, grounded in NSPE Fundamental Canon 1 (hold paramount the public safety, health, and welfare) and framed by Thornton et al. (2017) collective morality." ;
+    rdfs:comment "Societal obligation that can override other professional duties. Defined class (monadic): a Role that owesDutyToward some PublicInterest. Adheres to :PublicWelfarePrinciple, the principle carrying the NSPE Canon 1 grounding." ;
     skos:scopeNote "A Role bearing :owesDutyToward toward the general public (:PublicInterest). Monadic: the counterparty is a party class, not a role-to-role pairing."@en ;
-    dcterms:references <https://doi.org/10.1109/TITS.2016.2609339> . # Thornton et al. 2017
+    dcterms:source "NSPE Code of Ethics Fundamental Canon 1" ;
+    proeth:nspeReference "Fundamental Canon 1" ;
+    dcterms:references <https://doi.org/10.1109/TITS.2016.2609339> . # Thornton et al. 2017 (collective-morality framing)
 
 # Public-duty primitives for the PublicResponsibilityRole defined class. PublicInterest is the general
 # public as a collective party (subClassOf proeth-core:Agent, matching the actor-edge convention:
@@ -871,10 +874,10 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:comment "The general public as the collective party toward which public-protection duties are owed (the defining counterparty of :PublicResponsibilityRole). The occupational role borne by this party is :PublicRole."@en .
 
 :owesDutyToward rdf:type owl:ObjectProperty ;
-    rdfs:domain proeth-core:Role ;
+    rdfs:domain :ProfessionalRole ;
     rdfs:range :PublicInterest ;
     rdfs:label "owes duty toward"@en ;
-    rdfs:comment "A professional role owes a protective duty toward the general public. Defining edge of :PublicResponsibilityRole."@en .
+    rdfs:comment "A professional role owes a protective duty toward the general public. Defining edge of :PublicResponsibilityRole; operationalises NSPE Fundamental Canon 1 (hold paramount the public safety, health, and welfare). Domain is :ProfessionalRole rather than the universal core:Role, because the paramount public duty is a professional-code obligation borne by professional roles, not by every role."@en .
 
 # Ends / Goals of roles
 :End rdf:type owl:Class ;
