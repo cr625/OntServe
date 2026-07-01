@@ -202,12 +202,24 @@ pcsh:PrinciplePropertyShape
 pcsh:StateDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:State ;
-    rdfs:label "State definition schema (descriptive, field contract)"@en ;
-    rdfs:comment "What a state is described by for extraction: its content archetype, its urgency and persistence, and the obligation it activates. The archetype is a content classification of the condition in the world, not the deontic relation the edge layer records; descriptive only (no validation result), and state_category drives the archetype subClassOf typing rather than being stored as a literal."@en ;
+    rdfs:label "State definition schema (type-level, descriptive, field contract)"@en ;
+    rdfs:comment "What individuates a state TYPE: its content archetype (drives the archetype subClassOf typing) and its persistence type (inertial vs non-inertial fluent, a class-level datatype). Its per-case urgency and the activatesObligation edge are per-individual and live on StatePropertyShape, mirroring the Role/Principle/Obligation Definition/Property split and the state scopeNote (which names the condition and its persistence type as type-defining). Descriptive only (no validation result); state_category is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:stateCategory ;     sh:name "state archetype" ;      sh:description "The content archetype, which drives the archetype subClassOf typing: EpistemicState, RiskState, CompetenceState, EmergencyState, ConflictOfInterestState, RegulatoryState, TemporalState, ResourceState, DisclosureState. A classification of the state content, explicitly NOT the activatesObligation relation. A routing input, not stored as a literal." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:urgencyLevel ;      sh:name "urgency level" ;        sh:description "The salience or acuteness of the state (Jones salience)." ; sh:order 2 ] ;
-    sh:property [ sh:path proeth:persistenceType ;   sh:name "persistence type" ;     sh:description "Whether the state is an inertial or non-inertial fluent (Berreby); a class-level datatype." ; sh:order 3 ] ;
-    sh:property [ sh:path core:activatesObligation ; sh:name "activates obligation" ; sh:description "The obligation the state makes applicable, via the outgoing S->O activatesObligation edge; the incoming counterpart is defeasibleUnder (O->S), recording the obligation the state defeats. Range: Obligation." ; sh:order 4 ] .
+    sh:property [ sh:path proeth:persistenceType ;   sh:name "persistence type" ;     sh:description "Whether the state is an inertial fluent (holds until an event terminates it) or a non-inertial fluent (true at a single time point), per Berreby's Event Calculus; a class-level datatype, a property of the fluent predicate itself." ; sh:order 2 ] .
+
+# StatePropertyShape: the per-case fields a state INDIVIDUAL carries in a given case (the S-side analogue of
+# ProfessionalRolePropertyShape / PrinciplePropertyShape / ObligationPropertyShape). urgencyLevel is a per-
+# individual literal (Jones salience); activatesObligation resolves to the outgoing S->O edge. Targets
+# core:State, NOT a narrower archetype: unlike Role (whose bearer data is professional-only), every state
+# archetype carries urgency and can activate obligations. Read by the {{ state_schema }} prompt as the per-case
+# section and rendered as the State entity page's Bearer Attributes. Descriptive only (no sh:minCount/sh:datatype).
+pcsh:StatePropertyShape
+    a sh:NodeShape ;
+    sh:targetClass core:State ;
+    rdfs:label "State per-case schema (individual data, non-definitional)"@en ;
+    rdfs:comment "What a given state INDIVIDUAL is described by in a specific case: its urgency (per-case salience) and the obligation it activates (an edge). These do NOT individuate the state TYPE (that is StateDefinitionShape); their values are per-case, asserted on the individual. Descriptive only."@en ;
+    sh:property [ sh:path proeth:urgencyLevel ;      sh:name "urgency level" ;        sh:description "The salience or acuteness of the state in this case (Jones moral-intensity salience: imminence, magnitude, proximity)." ; sh:order 1 ] ;
+    sh:property [ sh:path core:activatesObligation ; sh:name "activates obligation" ; sh:description "The obligation the state makes applicable, via the outgoing S->O activatesObligation edge; the incoming counterpart is defeasibleUnder (O->S), recording the obligation the state defeats. Range: Obligation." ; sh:order 2 ] .
 
 # ResourceDefinitionShape: the definitional field contract of any resource TYPE/individual (the Rs
 # component), read by the {{ resource_schema }} prompt block. Descriptive only (no validation result).
