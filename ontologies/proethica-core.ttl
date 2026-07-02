@@ -18,7 +18,8 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.9.0"^^xsd:string ;
+    owl:versionInfo "2.10.0"^^xsd:string ;
+    skos:changeNote "v2.10.0: Role universalized to cover participant roles (Stage 4 of the nine-component definition audit). The iao:0000115, rdfs:comment, iao:0000116, and skos:scopeNote of Role now state the universal genus (a role borne by an agent in virtue of a position or standing in professional practice) with obligation-generation attributed to ProfessionalRole; the core-level Role subClassOf (hasObligation some Obligation) restriction is REMOVED (the identical restriction on proeth:ProfessionalRole in the intermediate layer carries the axiom), so participant roles (Client, Owner, affected public) no longer inherit an obligation-existence commitment their own definitions deny. One logical axiom removed; monotonic weakening, corpus-gated with Pellet."@en ;
     skos:changeNote "v2.9.0: Annotation-only pass on the nine component classes adding extraction boundary and tie-break sentences to iao:0000116 (Principle and Obligation prohibition contrast, Obligation firmness and compliance redirect, Constraint negative-form single-home rule, Event and AutomaticEvent origin tie-break, State stative-label and per-condition granularity, Action omission license, Principle per-value granularity), softening the Principle and Obligation provision-individuation claims in iao:0000115 and skos:scopeNote (provision anchoring is carried by the curated nspeReference annotations and the commit-time citesProvision edges, not by type individuation), and trimming the State iao:0000115 by moving the quality-versus-SDC typing rationale into its skos:changeNote; no logical axioms changed."@en ;
     skos:changeNote "v2.8.0: Promoted five D-tuple-level edges from the intermediate namespace into core so each relation family is single-namespace: derivedFromPrinciple (Obligation to Principle), violatesObligation (Action to Obligation), guidedByPrinciple (Action to Principle), and raisesObligation (Action to Obligation), joining fulfillsObligation, realizesCapability, initiates, and terminates, which were already core. requiresCapability is promoted to core and re-domained from the former intermediate Role to Capability form to Obligation to Capability, encoding the deontic principle that an obligation presupposes the capacity to discharge it (Stenseke 2024); the intermediate Role-domain requiresCapability is deprecated. The superseded intermediate properties are marked owl:deprecated with rdfs:seeAlso pointing at the core equivalent, and the deprecated intermediate fulfillsObligation equivalentProperty bridge is deleted. The nine-way AllDisjointClasses backbone and the Event origin subclasses (AgentCausedEvent, ExogenousEvent, AutomaticEvent), both added earlier in the 2.x series, are unchanged."@en ;
     owl:imports <http://proethica.org/ontology/foundation> ;
@@ -36,10 +37,11 @@
 proeth-core:Role a owl:Class ;
     rdfs:subClassOf bfo:0000023 ;  # BFO:role (a realizable entity realized in processes of professional practice)
     rdfs:label "Role"@en ;
-    rdfs:comment "A professional position with associated duties, responsibilities, and decision-making authority; the R component of D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    iao:0000115 "A realizable role (BFO) borne by an agent in virtue of a professional position, which determines (filters) the principles and obligations that apply to the agent according to that professional identity. Its obligations emerge teleologically from the distinctive good the profession serves. The role is individuated by the principles and obligations it determines and the audience relationships it establishes, not by the occupant's attributes."@en ;
-    iao:0000116 "Operationalises the teleological account of professional roles (Oakley and Cocking 2001): obligations emerge from the profession's distinctive good. Carries Kong et al.'s (2020) identity virtues and identity-role categories, and admits Doernberg and Truog's (2023) multiple role-spheres within a single profession."@en ;
-    skos:scopeNote "Obligation-generation is axiomatised as Role subClassOf (hasObligation some Obligation). Relationship categories and virtues are definitional of the role TYPE; per-occupant facts (license, specialty, employer) attach to the role INDIVIDUAL, not the class (cf. Davis 1991: most US engineers are unlicensed yet remain role-bound, so license is not role-defining)."@en ;
+    rdfs:comment "A position or standing borne by an agent in professional practice, with the duties, responsibilities, or stakes that standing carries; the R component of D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    iao:0000115 "A realizable role (BFO) borne by an agent in virtue of a position or standing in professional practice, which determines (filters) the principles and obligations that apply to the agent in that standing. A professional role additionally generates obligations teleologically from the distinctive good the profession serves; a participant role (a client, an owner, an affected member of the public) carries standing in the case without profession-generated duties. The role is individuated by the principles and obligations it determines and the audience relationships it establishes, not by the occupant's attributes. This is the R component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
+    iao:0000116 "Operationalises the teleological account of professional roles (Oakley and Cocking 2001): a professional role's obligations emerge from the profession's distinctive good, which is what distinguishes it from a participant role. Carries Kong et al.'s (2020) identity virtues and identity-role categories, and admits Doernberg and Truog's (2023) multiple role-spheres within a single profession."@en ;
+    skos:scopeNote "Obligation-generation is axiomatised on ProfessionalRole (proeth:ProfessionalRole subClassOf (hasObligation some Obligation)), not on Role itself; a participant role carries no obligation-existence commitment. Relationship categories and virtues are definitional of the role TYPE; per-occupant facts (license, specialty, employer) attach to the role INDIVIDUAL, not the class (cf. Davis 1991: most US engineers are unlicensed yet remain role-bound, so license is not role-defining)."@en ;
+    skos:changeNote "v2.10.0: universalized to cover participant roles; the professional-only genus contradicted the roles prompt's own professional-versus-participant classification and the committed participant individuals (Client W). Obligation-generation moved to the ProfessionalRole axiom in the intermediate layer."@en ;
     iao:0000119 "Oakley and Cocking (2001). Virtue Ethics and Professional Roles." ,
                 "Kong et al. (2020). Corpus-based empirical approach to professionalism: Identifying interactional roles and dispositions in professional codes of ethics." ,
                 "Doernberg and Truog (2023). Spheres of Morality: The Ethical Codes of the Medical Profession. The American Journal of Bioethics 23(12)." .
@@ -762,14 +764,12 @@ proeth-core:requiresCapability a owl:ObjectProperty ;
 # Formal Specification Completeness Constraints
 ###############################################################
 
-# Ensure every role has at least one obligation
-# Using owl:someValuesFrom (OBO/BFO standard existential pattern) rather than
-# owl:minCardinality which is unqualified and does not specify the filler type.
-proeth-core:Role rdfs:subClassOf [
-    a owl:Restriction ;
-    owl:onProperty proeth-core:hasObligation ;
-    owl:someValuesFrom proeth-core:Obligation
-] .
+# Obligation-existence is a PROFESSIONAL-role commitment, not a universal Role one:
+# proeth:ProfessionalRole in the intermediate layer carries
+#   subClassOf [ owl:onProperty hasObligation ; owl:someValuesFrom Obligation ]
+# (plus governedByCode some EthicalCode). The former core-level restriction on Role
+# was removed in v2.10.0 so participant roles (Client, Owner, affected public) do not
+# inherit an obligation-existence commitment their own definitions deny.
 
 # Ensure every action is performed by at least one agent
 # Uses named inverse property isPerformedBy (OWL DL compliant, no anonymous inverseOf in restriction).
