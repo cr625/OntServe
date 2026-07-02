@@ -129,15 +129,25 @@ pcsh:ProfessionalRoleDefinitionShape
 # this shape carries the class association safely. Turn any attribute into a real
 # closed-world constraint later by adding sh:minCount / sh:datatype / sh:in here (the
 # controlled-property-vocabulary work item) -- the values are still asserted on the individual.
+#
+# Retargeted 2026-07-02 (shapes reconciliation): sh:path now names the predicates the ProEthica
+# commit serializer actually emits for the named bearer fields (the generic camelCase proeth:*
+# loop over RoleIndividual license/specialty/employer): proeth:license / proeth:specialty /
+# proeth:employer, previously proeth:hasLicense / proeth:hasSpecialty / proeth:hasEmployer.
+# Both fresh-slate case-7 reference runs carry only the camelCase field forms; the has* datatype
+# properties remain declared in proethica-intermediate.ttl and reachable via the serializer's
+# overflow-bag synonym map (_ATTRIBUTE_VOCAB), so legacy data (e.g. case-103 proeth:hasLicense)
+# still parses. sh:name/sh:description/sh:order unchanged: the {{ role_schema }} prompt text and
+# the entity-page grouping wording render from sh:name, not sh:path.
 pcsh:ProfessionalRolePropertyShape
     a sh:NodeShape ;
     sh:targetClass proeth:ProfessionalRole ;
     rdfs:label "Professional-role-bearer attributes (individual data, non-definitional)"@en ;
     rdfs:comment "Per-occupant data a PROFESSIONAL role-bearing INDIVIDUAL may have (license, specialty, employer, technical background). Descriptive only; these do NOT define the role type (cf. Davis 1991: license is not role-defining). Retargeted 2026-06-26 from core:Role to proeth:ProfessionalRole: a participant/stakeholder role (an affected citizen) has none of these; the universal role schema is RoleDefinitionShape. Values are asserted on the individual. Tightened 2026-06-25: dropped roleNature/roleClass (extraction provenance, not bearer data; reclassify to PROV-O) and jurisdiction/registrationStatus/roleInOrganization (weak controlled-vocab; captured via otherAttribute overflow when actually present)."@en ;
-    sh:property [ sh:path proeth:hasLicense ;          sh:name "license" ;              sh:description "Professional license / licensure." ;                      sh:order 1 ] ;
-    sh:property [ sh:path proeth:hasSpecialty ;        sh:name "specialty" ;            sh:description "Area of specialisation." ;                                sh:order 2 ] ;
+    sh:property [ sh:path proeth:license ;             sh:name "license" ;              sh:description "Professional license / licensure." ;                      sh:order 1 ] ;
+    sh:property [ sh:path proeth:specialty ;           sh:name "specialty" ;            sh:description "Area of specialisation." ;                                sh:order 2 ] ;
     sh:property [ sh:path proeth:experienceLevel ;     sh:name "experience level" ;     sh:description "Professional experience." ;                               sh:order 3 ] ;
-    sh:property [ sh:path proeth:hasEmployer ;         sh:name "employer" ;             sh:description "Employer / affiliation." ;                                sh:order 4 ] ;
+    sh:property [ sh:path proeth:employer ;            sh:name "employer" ;             sh:description "Employer / affiliation." ;                                sh:order 4 ] ;
     sh:property [ sh:path proeth:technicalBackground ; sh:name "technical background" ; sh:description "Technical background." ;                                  sh:order 5 ] ;
     sh:property [ sh:path proeth:otherAttribute ;      sh:name "other attribute" ;      sh:description "Overflow 'key: value' literal for a case-specific attribute outside the controlled set." ; sh:order 6 ] .
 
