@@ -627,6 +627,15 @@ class ConceptManager:
                 SELECT DISTINCT id, uri, label, description,
                        entity_type, parent_uri, created_at, ontology_name, properties
                 FROM hierarchy
+                -- Serving-side deprecation filter (same predicate as the web Class
+                -- Hierarchy hide, web/ontology_routes/helpers.py): owl:deprecated
+                -- classes stay in ontology_entities and remain resolvable via the
+                -- point lookups (get_entity_by_uri / get_entities_by_uris /
+                -- get_entity_by_label), but are excluded from category inventories.
+                -- Applied to the final SELECT, not the recursion, so traversal
+                -- through a deprecated intermediate class still reaches any
+                -- non-deprecated descendants.
+                WHERE properties->>'deprecated' IS DISTINCT FROM 'true'
                 ORDER BY label
             """
 

@@ -59,13 +59,24 @@ def _label(g, subject):
     return _first(g, subject, RDFS.label)
 
 
-def _comment_or_definition(g, subject):
+def _comment_or_definition(g, subject, prefer_iao_definition=False):
     """rdfs:comment if present, else iao:0000115 (OBO textual definition), else skos:definition; each picked
     deterministically (see _first). OWL classes carry the formal definition on iao:0000115 and SKOS concepts
-    on skos:definition, so a class/concept lacking rdfs:comment still gets a description on the page."""
-    return (_first(g, subject, RDFS.comment)
-            or _first(g, subject, _IAO_DEFINITION)
-            or _first(g, subject, SKOS.definition))
+    on skos:definition, so a class/concept lacking rdfs:comment still gets a description on the page.
+
+    prefer_iao_definition=True flips the precedence to iao:0000115 first: the class pass uses it so that the
+    stored comment (the MCP 'definition'/'description' serving field) carries the formal iao:0000115 definition
+    when one exists, matching uri_resolution.py and the entity page Definition card, which already prefer 115.
+    Properties/individuals/schemes keep rdfs:comment-first (their documentation is on rdfs:comment)."""
+    if prefer_iao_definition:
+        order = (_IAO_DEFINITION, RDFS.comment, SKOS.definition)
+    else:
+        order = (RDFS.comment, _IAO_DEFINITION, SKOS.definition)
+    for predicate in order:
+        value = _first(g, subject, predicate)
+        if value is not None:
+            return value
+    return None
 
 
 def _class_expr_uris(g, node):
@@ -182,7 +193,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
                       # its BNode id is random per parse, which would make the URI + content_hash unstable
         label = _label(g, cls)
         label_str = str(label) if label else None
-        comment_str = _comment_or_definition(g, cls)
+        comment_str = _comment_or_definition(g, cls, prefer_iao_definition=True)
 
         # Collect additional properties (e.g., discoveredInCase, importance)
         properties = _collect_properties(g, cls, class_skip_predicates)
