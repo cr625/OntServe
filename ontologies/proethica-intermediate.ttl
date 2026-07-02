@@ -211,15 +211,18 @@
     rdfs:comment "The value that a professional reviews work in sufficient depth to take responsibility for its correctness before relying on or adopting it."@en .
 
 :SelfCertificationProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
-    rdfs:label "Self-Certification Prohibition Principle"@en ;
+    rdfs:label "Independent Review Principle"@en ;
+    skos:altLabel "self-certification prohibition principle"@en ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
-    rdfs:comment "The value that a professional does not certify or approve their own work in a capacity meant to provide independent oversight."@en .
+    rdfs:comment "The value that a professional does not certify or approve their own work in a capacity meant to provide independent oversight."@en ;
+    skos:changeNote "2026-07-02: relabeled from Self-Certification Prohibition Principle to the positive value the comment states; the prohibition statement itself homes as a core:Constraint per the v2.9.0 boundary sentence. URI unchanged; old label retained as altLabel."@en .
 
 :ToolSubstitutionProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
-    rdfs:label "Tool Substitution Prohibition Principle"@en ;
+    rdfs:label "Professional Judgment Primacy Principle"@en ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
-    skos:altLabel "technology replacement prohibition principle"@en ;
-    rdfs:comment "The value that a tool or technology does not substitute for the professional judgment and competence the work requires."@en .
+    skos:altLabel "technology replacement prohibition principle"@en, "tool substitution prohibition principle"@en ;
+    rdfs:comment "The value that a tool or technology does not substitute for the professional judgment and competence the work requires."@en ;
+    skos:changeNote "2026-07-02: relabeled from Tool Substitution Prohibition Principle to the positive value the comment states; the prohibition statement itself homes as a core:Constraint per the v2.9.0 boundary sentence. URI unchanged; old label retained as altLabel."@en .
 
 :ProfessionalAccountabilityPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Professional Accountability Principle"@en ;
@@ -254,11 +257,12 @@
     rdfs:comment "The value that a professional practices only within the jurisdictions and license scope for which the professional is authorized."@en .
 
 :SelectiveReportingProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
-    rdfs:label "Selective Reporting Prohibition Principle"@en ;
+    rdfs:label "Complete Reporting Principle"@en ;
     proeth:nspeReference "Rule of Practice II.3.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.a" ;
-    skos:altLabel "technical completeness principle"@en, "client disservice by incompleteness principle"@en, "expert fact gathering diligence principle"@en ;
-    rdfs:comment "The value that a professional reports findings completely and does not omit material facts that qualify or contradict a favored conclusion."@en .
+    skos:altLabel "technical completeness principle"@en, "client disservice by incompleteness principle"@en, "expert fact gathering diligence principle"@en, "selective reporting prohibition principle"@en ;
+    rdfs:comment "The value that a professional reports findings completely and does not omit material facts that qualify or contradict a favored conclusion."@en ;
+    skos:changeNote "2026-07-02: relabeled from Selective Reporting Prohibition Principle to the positive value the comment states; the prohibition statement itself homes as a core:Constraint per the v2.9.0 boundary sentence. URI unchanged; old label retained as altLabel."@en .
 
 # U.S. Supreme Court decision recording the revision (rescission) of an NSPE provision.
 :NSPEvUnitedStates1978 rdf:type owl:NamedIndividual ;
@@ -268,6 +272,8 @@
 
 :FreeServicesProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
     rdfs:label "Free Services Prohibition Principle"@en ;
+    owl:deprecated true ;
+    skos:changeNote "2026-07-02: deprecated as a live extraction reuse target; the underlying provision was rescinded by NSPE v. United States (1978), so a current case does not instantiate it. The class, its rescission metadata, and :NSPEvUnitedStates1978 remain as the McLaren Principle Revision exemplar."@en ;
     proeth:revisionStatus "rescinded" ;
     proeth:rescindedBy :NSPEvUnitedStates1978 ;
     proeth:rescindedDate "1978" ;
