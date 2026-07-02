@@ -22,6 +22,16 @@ pcsh: a owl:Ontology ;
     sh:declare [ sh:prefix "owl"  ; sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ] ;
     sh:declare [ sh:prefix "rdf"  ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] .
 
+# Generic informational-field marker for the {{ <comp>_schema }} prompt wire. A sh:property
+# annotated pcsh:informationalOnly true is a field the COMMIT stage assigns (a TBox restriction
+# or resolver-produced edge), not a field the extraction LLM fills: _component_schema_block
+# (ProEthica prompt_variable_resolver) renders it with "(assigned at commit; do not output)"
+# instead of as a fillable field. The sh:description stays neutral because it dual-renders on
+# the OntServe entity page. Descriptive only; no validation effect.
+pcsh:informationalOnly a owl:AnnotationProperty ;
+    rdfs:label "informational only (assigned at commit)"@en ;
+    rdfs:comment "Marks a descriptive SHACL property as informational in the extraction field contract: the value is assigned at commit (TBox restriction or resolver edge), so the prompt renders it as non-fillable context rather than a requested output field."@en .
+
 # RULE 1: no individual may resolve to two distinct disjoint core categories.
 # This is the structural projection of the nine-way owl:AllDisjointClasses. After the
 # OWL-RL closure, an offending individual carries rdf:type for two core classes directly.
@@ -144,7 +154,7 @@ pcsh:ObligationDefinitionShape
     sh:targetClass core:Obligation ;
     rdfs:label "Obligation definition schema (type-level, descriptive, field contract)"@en ;
     rdfs:comment "What individuates an obligation TYPE: its controlled NSPE category, which drives the subClassOf core:Obligation typing. The concrete duty statement, the derivedFromPrinciple/obligatedParty edges, and the temporal-scope/compliance-status literals are per-individual and now live on ObligationPropertyShape, mirroring the Role/Principle Definition/Property split. Descriptive only (no validation result); obligation_type is a routing input, not stored as a literal."@en ;
-    sh:property [ sh:path proeth:obligationType ;      sh:name "obligation type" ;        sh:description "The controlled NSPE obligation category, which drives the subClassOf core:Obligation typing: disclosure, safety, competence, confidentiality, reporting, collegial, legal, ethical." ; sh:order 1 ] .
+    sh:property [ sh:path proeth:obligationType ;      sh:name "obligation type" ;        sh:description "The controlled NSPE obligation category, which drives the subClassOf core:Obligation typing: disclosure, safety, competence, confidentiality, reporting, collegial, attribution, legal, ethical." ; sh:order 1 ] .
 
 # ObligationPropertyShape: the per-case fields a given obligation INDIVIDUAL carries (the O-side analogue of
 # ProfessionalRolePropertyShape / PrinciplePropertyShape). The concrete duty statement, temporal scope and
@@ -190,7 +200,7 @@ pcsh:PrinciplePropertyShape
     sh:property [ sh:path proeth:interpretation ;     sh:name "interpretation" ;      sh:description "Per-case reading of what the principle requires in this situation (a defeasibility-pipeline source field)." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:concreteExpression ; sh:name "concrete expression" ; sh:description "How the principle is concretely expressed in the case (a defeasibility-pipeline source field)." ; sh:order 2 ] ;
     sh:property [ sh:path proeth:appliedTo ;          sh:name "applied to" ;          sh:description "What the principle is applied to in the case (the situation or party it bears on)." ; sh:order 3 ] ;
-    sh:property [ sh:path proeth:balancingWith ;      sh:name "balancing with" ;      sh:description "The competing principle or value the principle is balanced against (a defeasibility-pipeline source field)." ; sh:order 4 ] ;
+    sh:property [ sh:path proeth:balancingWith ;      sh:name "balancing with" ;      sh:description "The competing principle or value this principle is balanced against in the case, recorded as a literal; extraction records the tension but asserts no defeat or precedence, and the defeasibility edges are materialized by a separate pass from this field." ; sh:order 4 ] ;
     sh:property [ sh:path proeth:tensionResolution ;  sh:name "tension resolution" ;  sh:description "How the case resolves the tension involving this principle (a defeasibility-pipeline source field)." ; sh:order 5 ] ;
     sh:property [ sh:path core:invokedBy ;            sh:name "invoked by" ;          sh:description "The agent who invokes the principle, via the P->Agent invokedBy edge (resolved to the case Agent or the shared NSPE Board/NSPE Agent). Range: Agent." ; sh:order 6 ] .
 
@@ -229,9 +239,9 @@ pcsh:ResourceDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Resource ;
     rdfs:label "Resource definition schema (type-level, descriptive, field contract)"@en ;
-    rdfs:comment "What individuates a resource TYPE: its source kind (the category of professional knowledge, which drives the six-kind subClassOf typing) and the class-level governedByCode restriction for code resources. The specific document title, its topic, and the relying/citing agents are per-individual context and live on ResourcePropertyShape, mirroring the R/P/O/S Definition/Property split and the resource scopeNote (the TYPE is a bare category; a specific named or numbered document is an INDIVIDUAL, and 'topic, who-used, and which-document are context, not class identity'). Descriptive only (no validation result); source_kind is a routing input, not stored as a literal."@en ;
+    rdfs:comment "What individuates a resource TYPE: its source kind (the category of professional knowledge, which drives the five-kind subClassOf typing) and the class-level governedByCode restriction for code resources. The specific document title, its topic, and the relying/citing agents are per-individual context and live on ResourcePropertyShape, mirroring the R/P/O/S Definition/Property split and the resource scopeNote (the TYPE is a bare category; a specific named or numbered document is an INDIVIDUAL, and 'topic, who-used, and which-document are context, not class identity'). Descriptive only (no validation result); source_kind is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:sourceKind ;     sh:name "source kind" ;      sh:description "The controlled source kind, which drives the five-kind typing: ethical_code, technical_standard, case_precedent, legal_resource, reference_material (professional_code was merged into ethical_code 2026-07-01). EthicalCode is typed subClassOf Guideline subClassOf Resource; the other four subClassOf Resource. A routing input, not stored as a literal." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:governedByCode ; sh:name "governed by code" ; sh:description "For a code resource, the incoming governedByCode relation from ProfessionalRole (a TBox restriction, range EthicalCode); relevant only to EthicalCode resources." ; sh:order 2 ] .
+    sh:property [ sh:path proeth:governedByCode ; sh:name "governed by code" ; sh:description "For a code resource, the incoming governedByCode relation from ProfessionalRole (a TBox restriction, range EthicalCode); relevant only to EthicalCode resources." ; pcsh:informationalOnly true ; sh:order 2 ] .
 
 # ResourcePropertyShape: the per-case fields a given resource INDIVIDUAL carries (the Rs-side analogue of the
 # other components' PropertyShapes). documentTitle names the specific document (which the scopeNote makes an

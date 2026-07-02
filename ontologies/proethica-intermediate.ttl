@@ -97,6 +97,7 @@
     rdf:type :EntityType ;
     rdfs:subClassOf :FundamentalEthicalPrinciple ;
     rdfs:label "Public Welfare Principle"@en ;
+    skos:altLabel "public safety principle"@en ;
     iao:0000115 "The fundamental principle that public safety, health, and welfare must be held paramount in professional practice (BFO: generically dependent continuant)"@en ;
     skos:definition "The public welfare principle, as articulated in NSPE Fundamental Canon 1, requires professionals to hold paramount the safety, health, and welfare of the public. This principle exemplifies McLaren's challenge of operationalizing abstract guidance - 'hold paramount' gains meaning only through NSPE case applications and precedents like the Challenger disaster."@en ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
@@ -742,6 +743,14 @@ proeth:CollegialObligation a owl:Class ;
     rdfs:label "Collegial Obligation"@en ;
     rdfs:comment "Duties toward professional peers including respect, fairness, and credit for work"@en .
 
+proeth:AttributionObligation a owl:Class ;
+    rdfs:subClassOf proeth-core:Obligation ;
+    rdfs:label "Attribution Obligation"@en ;
+    rdfs:comment "Duty to give credit for engineering work to those to whom credit is due and to recognize the proprietary interests of others, including appropriate citation of documents of technical authority and credit for tool-assisted or AI-assisted content (NSPE III.9)"@en ;
+    skos:altLabel "attribution and credit obligation"@en, "credit obligation"@en ;
+    proeth:nspeReference "Professional Obligation III.9" ;
+    skos:changeNote "Added 2026-07-02 (definition-prompt audit Stage 2): canonical home for the NSPE III.9 credit duty, which previously forked between DisclosureObligation and an LLM-minted extended-store near-duplicate because the obligationType enum lacked 'attribution'. Supersedes the extended-store discovery of the same IRI; the obligationType routing value 'attribution' commits here."@en .
+
 # NSPE Code-specific obligation subclasses used by NSPE BER case ontologies
 # (e.g. Case 72, Public Welfare, Knowledge of Information Damaging to Client's Interest).
 
@@ -936,13 +945,13 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:label "End/Goal"@en ;
     rdfs:comment "A characteristic end or goal toward which a role is directed (e.g., in engineering: protecting public safety, serving the public welfare, providing competent service)."@en .
 
-# Resource kinds: the closed SIX source kinds (ratified Rs spec). EthicalCode is the formal
-# ethical-code document (rdfs:subClassOf proeth-core:Guideline, itself rdfs:subClassOf
-# proeth-core:Resource since v2.7.3); the other five (ProfessionalCode, TechnicalStandard,
-# CasePrecedent, LegalResource, ReferenceMaterial) are declared in the Professional Resource
-# Types block below, each rdfs:subClassOf proeth-core:Resource. :Standard retired 2026-06-28:
-# a generic standard folds into :TechnicalStandard; the disposable corpus re-mints any survivor
-# at re-extraction.
+# Resource kinds: the closed FIVE source kinds (ratified Rs spec; ProfessionalCode merged into
+# EthicalCode 2026-07-01). EthicalCode is the formal ethical-code document (rdfs:subClassOf
+# proeth-core:Guideline, itself rdfs:subClassOf proeth-core:Resource since v2.7.3); the other
+# four (TechnicalStandard, CasePrecedent, LegalResource, ReferenceMaterial) are declared in the
+# Professional Resource Types block below, each rdfs:subClassOf proeth-core:Resource. :Standard
+# retired 2026-06-28: a generic standard folds into :TechnicalStandard; the disposable corpus
+# re-mints any survivor at re-extraction.
 :EthicalCode rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Guideline ;
@@ -1254,6 +1263,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
 :RegulatoryState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Regulatory State"@en ;
+    skos:altLabel "evolving standards state"@en ;
     skos:definition "A condition in which a code provision, standard, statute, permit, or contractual requirement is in force for the situation, including states of compliance and of violation. As a content kind it is the regulatory standing of the situation. Its deontic relevance is that it activates a constraint or compliance obligation on the available actions."@en ;
     rdfs:comment "Condition defined by an in-force regulatory, statutory, or contractual requirement."@en ;
     proeth:persistenceType "inertial" .
@@ -1303,9 +1313,9 @@ proeth:conflictsWith a owl:ObjectProperty ;
 # Frankel/Davis; the remaining house extensions are practical, not attributable
 # to a cited ethics-reasoning source. See each class's skos:scopeNote.
 #
-# Closed-six reconciliation 2026-06-28 (ratified Rs spec): the Resource component is exactly
-# six source kinds -- EthicalCode, ProfessionalCode, TechnicalStandard, CasePrecedent,
-# LegalResource, ReferenceMaterial. :ExpertInterpretation and :DecisionTool are retired below
+# Closed-kind reconciliation 2026-06-28 (ratified Rs spec), reduced to FIVE source kinds on
+# 2026-07-01 (ProfessionalCode merged into EthicalCode) -- EthicalCode, TechnicalStandard,
+# CasePrecedent, LegalResource, ReferenceMaterial. :ExpertInterpretation and :DecisionTool are retired below
 # (an expert or board interpretation is captured by the normative components and their PROV-O
 # derivations; a decision tool folds to :ReferenceMaterial). The topical field is the
 # first-class proeth:topic datatype property (decision B2), not the otherAttribute overflow.
