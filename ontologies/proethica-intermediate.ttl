@@ -962,18 +962,26 @@ proeth:conflictsWith a owl:ObjectProperty ;
 #    Normative refinements (subclasses, non-breaking)            
 #################################################################
 
-# Modalities (kept as subclasses to avoid new primaries)
+# Modalities: DEPRECATED 2026-07-01 (deontic-modality cleanup, zero corpus usage as rdf:type).
+# subClassOf axioms retained (deprecate-and-hide, never retype); prohibitions are homed as
+# core:Constraint and permissions are not extracted as a component.
 :Permission rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Permission"@en ;
-    rdfs:comment "A normative allowance indicating that an action or state is permitted under certain conditions."@en .
+    rdfs:comment "A normative allowance indicating that an action or state is permitted under certain conditions."@en ;
+    owl:deprecated true ;
+    rdfs:seeAlso proeth-core:Obligation ;
+    skos:changeNote "Deprecated 2026-07-01: permissions are not extracted as a component of D=(R,P,O,S,Rs,A,E,Ca,Cs); zero corpus usage as rdf:type. The subClassOf axiom is retained for compatibility."@en .
 
 :Prohibition rdf:type owl:Class ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Prohibition"@en ;
-    rdfs:comment "A normative restriction indicating that an action or state is disallowed."@en .
+    rdfs:comment "A normative restriction indicating that an action or state is disallowed."@en ;
+    owl:deprecated true ;
+    rdfs:seeAlso proeth-core:Constraint ;
+    skos:changeNote "Deprecated 2026-07-01: a prohibition or boundary statement is homed as core:Constraint, not as an Obligation subclass; zero corpus usage as rdf:type. The subClassOf axiom is retained for compatibility."@en .
 
 # Compliance tracking
 # :Violation is declared once above (subClassOf :ComplianceEvent, with a fuller
@@ -1385,7 +1393,7 @@ proeth:JurisdictionalConstraint a owl:Class ;
 proeth:ProceduralConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Procedural Constraint"@en ;
-    rdfs:comment "Requirements for following specific processes or protocols (Furbach et al. 2014)"@en ;
+    rdfs:comment "Forbids carrying out professional work outside a mandated process or protocol; an act that skips or bypasses a required procedural step (a review, approval, or notification) falls outside the permissible action space (Furbach et al. 2014)."@en ;
     dcterms:references <https://doi.org/10.1007/978-3-319-13365-2_6> . # Furbach et al. 2014
 
 # proeth:DefeasibleConstraint and proeth:InviolableConstraint retired 2026-06-28 (ratified Cs
@@ -1404,7 +1412,7 @@ proeth:EthicalConstraint a owl:Class ;
 proeth:SafetyConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Safety Constraint"@en ;
-    rdfs:comment "Constraints ensuring safety requirements are met (Arkin 2008)"@en ;
+    rdfs:comment "Forbids actions that would breach applicable safety requirements, bounding the permissible action space to conduct that keeps those requirements satisfied (Arkin 2008)."@en ;
     dcterms:references <https://doi.org/10.1145/1349822.1349839> . # Arkin 2008
 
 proeth:ConfidentialityConstraint a owl:Class ;
