@@ -860,7 +860,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Role ;
     rdfs:label "Relational Role"@en ;
-    rdfs:comment "Head of the relational archetype axis: the duty-relationship a role establishes. Orthogonal to the occupational axis, so a relational archetype composes with any occupational archetype without crossing the ProfessionalRole/ParticipantRole disjointness. Does not self-tag :archetypeAxis -- it IS the structural head of the axis; the annotation marks only leaves whose archetype diverges from their structural parent (e.g. a relational Mentor/Forensic engagement under the occupational EngineerRole)."@en .
+    rdfs:comment "Head of the relational archetype axis: the duty-relationship a role establishes. Orthogonal to the occupational axis, so a relational archetype composes with any occupational archetype without crossing the ProfessionalRole/ParticipantRole disjointness. Exception: :PublicResponsibilityRole, whose defining :owesDutyToward edge has rdfs:domain :ProfessionalRole, is professional-side by entailment and (since 2026-07-02) by an explicit rdfs:subClassOf :ProfessionalRole, so it composes only with professional-side occupational archetypes. Does not self-tag :archetypeAxis -- it IS the structural head of the axis; the annotation marks only leaves whose archetype diverges from their structural parent (e.g. a relational Mentor/Forensic engagement under the occupational EngineerRole)."@en .
 
 #################################################################
 # Professional Role Categories from Chapter 2.2.1 Literature
@@ -874,6 +874,11 @@ proeth:conflictsWith a owl:ObjectProperty ;
 # filler is proeth-core:Role (NOT Agent: Role owl:disjointWith Agent, so an Agent filler would make the
 # class vacuous). The rdfs:subClassOf :RelationalRole is asserted, not entailed (RelationalRole is a
 # primitive head). Occupational counterparties stay primitive (the client is :ClientRole, etc.).
+# Occupational-axis explicitness: only :PublicResponsibilityRole carries an occupational parent
+# (rdfs:subClassOf :ProfessionalRole, 2026-07-02) because only its defining property has an
+# rdfs:domain on the occupational axis; hasClient/professionalPeerOf/employedBy declare
+# schema:domainIncludes proeth-core:Role (annotation-only, no OWL entailment), so the other three
+# archetypes are provably axis-neutral and stay unparented by design.
 
 :ProviderClientRole rdf:type owl:Class ;
     owl:equivalentClass [ rdf:type owl:Class ; owl:intersectionOf (
@@ -913,6 +918,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
         proeth-core:Role
         [ rdf:type owl:Restriction ; owl:onProperty :owesDutyToward ; owl:someValuesFrom :PublicInterest ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
+    rdfs:subClassOf :ProfessionalRole ;
     rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty proeth-core:adheresToPrinciple ; owl:someValuesFrom :PublicWelfarePrinciple ] ;
     rdfs:label "Public Responsibility Role" ;
     skos:definition "Professional role defining obligations to the broader public and society, creating duties of public welfare protection that can override client or employer interests, grounded in NSPE Fundamental Canon 1 (hold paramount the public safety, health, and welfare) and framed by Thornton et al. (2017) collective morality." ;
@@ -920,6 +926,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
     skos:scopeNote "A Role bearing :owesDutyToward toward the general public (:PublicInterest). Monadic: the counterparty is a party class, not a role-to-role pairing."@en ;
     dcterms:source "NSPE Code of Ethics Fundamental Canon 1" ;
     proeth:nspeReference "Fundamental Canon 1" ;
+    skos:changeNote "2026-07-02: added the explicit rdfs:subClassOf :ProfessionalRole (the case-4 run-20 lesson). The class was already professional-only by ENTAILMENT -- the owl:equivalentClass restriction on :owesDutyToward plus that property's rdfs:domain :ProfessionalRole entail ProfessionalRole for every instance -- but not by an asserted rdfs:subClassOf edge, so chain-based commit guards (which walk asserted subClassOf only) could not see its professional side. A case-4 role individual was committed typed both :PublicRole (a :ParticipantRole descendant) and :PublicResponsibilityRole, which Pellet rejects under the ProfessionalRole/ParticipantRole disjointness. The assertion adds no new entailment; it is semantically honest (this is the engineer-side duty-toward-the-public role, not the public's own role, which is :PublicRole) and makes the professional side visible to subclass-closure guards."@en ;
     dcterms:references <https://doi.org/10.1109/TITS.2016.2609339> . # Thornton et al. 2017 (collective-morality framing)
 
 # Public-duty primitives for the PublicResponsibilityRole defined class. PublicInterest is the general
