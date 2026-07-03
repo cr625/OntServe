@@ -146,7 +146,7 @@ checks a reviewer can run without pulling the repo:
 |---|---|
 | 134 ontologies (§4) | Homepage ontology listing with source/type facets |
 | Three professional codes of ethics (§4) | [ASCE](https://ontserve.ontorealm.net/ontology/ASCE%20Code%20of%20Ethics), [ASME](https://ontserve.ontorealm.net/ontology/ASME%20Code%20of%20Ethics), [IEEE](https://ontserve.ontorealm.net/ontology/IEEE%20Code%20of%20Ethics) |
-| Foundation ontologies (§4) | [BFO](https://ontserve.ontorealm.net/ontology/bfo), [IAO](https://ontserve.ontorealm.net/ontology/Information%20Artifact%20Ontology%202020), [Relations Ontology 2015](https://ontserve.ontorealm.net/ontology/Relations%20Ontology%202015) |
+| Foundation ontologies (§4) | [BFO](https://ontserve.ontorealm.net/ontology/bfo), [IAO](https://ontserve.ontorealm.net/ontology/iao), [Relations Ontology 2015](https://ontserve.ontorealm.net/ontology/Relations%20Ontology%202015) |
 | Core ontology and nine disjoint component classes (§3, §4) | [`proethica-core`](https://ontserve.ontorealm.net/ontology/proethica-core) |
 | Intermediate ontology with nine-component framework (§4) | [`proethica-intermediate`](https://ontserve.ontorealm.net/ontology/proethica-intermediate) |
 | Domain ontology for engineering ethics (§4) | [`engineering-ethics`](https://ontserve.ontorealm.net/ontology/engineering-ethics) |

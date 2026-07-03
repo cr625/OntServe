@@ -51,6 +51,12 @@
                     {% endif %}
                     {% endif %}
                     {% endif %}
+                    {% if ontology.meta_data and ontology.meta_data.get('stub') %}
+                    <span class="badge bg-warning text-dark border border-dark ms-1"
+                          title="A curated selection of terms, not the full upstream ontology">
+                        <i class="bi bi-scissors"></i> Subset
+                    </span>
+                    {% endif %}
                 </h1>
                 {% if ontology.meta_data and ontology.meta_data.original_name and ontology.meta_data.original_name !=
                 ontology.name %}

@@ -9,56 +9,51 @@
             <i class="bi bi-diagram-3"></i> Ontology Repository
         </h1>
 
-        <!-- Filter buttons -->
+        <!-- Filter buttons. Each group's links carry the OTHER group's active
+             filter, so switching source never silently clears the type filter
+             (and vice versa). url_for drops None-valued params. -->
+        {% set source_filters = [
+            ('proethica', 'ProEthica', 'primary', 'bi-cpu'),
+            ('external', 'External', 'info', 'bi-cloud-download'),
+            ('manual', 'Manual', 'secondary', 'bi-pencil'),
+        ] %}
+        {% set type_filters = [
+            ('upper', 'Upper', 'danger', 'bi-diagram-3'),
+            ('core', 'Core', 'warning', 'bi-star'),
+            ('base', 'Base', 'dark', 'bi-box'),
+            ('domain', 'Domain', 'success', 'bi-globe'),
+            ('case', 'Cases', 'primary', 'bi-folder'),
+            ('extracted', 'Extracted', 'secondary', 'bi-funnel'),
+        ] %}
         <div class="mb-4">
             <div class="btn-group me-3" role="group" aria-label="Source filter">
                 <span class="text-muted me-2 align-self-center">Source:</span>
-                <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary btn-sm {% if not current_source %}active{% endif %}">
+                <a href="{{ url_for('main.index', type=current_type) }}"
+                   class="btn btn-outline-secondary btn-sm {% if not current_source %}active{% endif %}">
                     All
                 </a>
-                <a href="{{ url_for('main.index', source='proethica') }}" class="btn btn-outline-primary btn-sm {% if current_source == 'proethica' %}active{% endif %}">
-                    <i class="bi bi-cpu"></i> ProEthica
-                    {% if source_counts and source_counts.get('proethica') %}
-                    <span class="badge bg-primary">{{ source_counts.get('proethica', 0) }}</span>
-                    {% endif %}
+                {% for key, label, color, icon in source_filters %}
+                <a href="{{ url_for('main.index', source=key, type=current_type) }}"
+                   class="btn btn-outline-{{ color }} btn-sm {% if current_source == key %}active{% endif %}">
+                    <i class="bi {{ icon }}"></i> {{ label }}
+                    <span class="badge bg-{{ color }}{% if color in ('warning', 'light') %} text-dark{% endif %}">{{ source_counts.get(key, 0) if source_counts else 0 }}</span>
                 </a>
-                <a href="{{ url_for('main.index', source='external') }}" class="btn btn-outline-info btn-sm {% if current_source == 'external' %}active{% endif %}">
-                    <i class="bi bi-cloud-download"></i> External
-                    {% if source_counts and source_counts.get('external') %}
-                    <span class="badge bg-info">{{ source_counts.get('external', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('main.index', source='manual') }}" class="btn btn-outline-secondary btn-sm {% if current_source == 'manual' %}active{% endif %}">
-                    <i class="bi bi-pencil"></i> Manual
-                    {% if source_counts and source_counts.get('manual') %}
-                    <span class="badge bg-secondary">{{ source_counts.get('manual', 0) }}</span>
-                    {% endif %}
-                </a>
+                {% endfor %}
             </div>
 
             <div class="btn-group" role="group" aria-label="Type filter">
                 <span class="text-muted me-2 align-self-center">Type:</span>
-                <a href="{{ url_for('main.index', source=current_source) if current_source else url_for('main.index') }}" class="btn btn-outline-secondary btn-sm {% if not current_type %}active{% endif %}">
+                <a href="{{ url_for('main.index', source=current_source) }}"
+                   class="btn btn-outline-secondary btn-sm {% if not current_type %}active{% endif %}">
                     All
                 </a>
-                <a href="{{ url_for('main.index', source=current_source, type='upper') if current_source else url_for('main.index', type='upper') }}" class="btn btn-outline-danger btn-sm {% if current_type == 'upper' %}active{% endif %}">
-                    <i class="bi bi-diagram-3"></i> Upper
-                    {% if type_counts and type_counts.get('upper') %}
-                    <span class="badge bg-danger">{{ type_counts.get('upper', 0) }}</span>
-                    {% endif %}
+                {% for key, label, color, icon in type_filters %}
+                <a href="{{ url_for('main.index', source=current_source, type=key) }}"
+                   class="btn btn-outline-{{ color }} btn-sm {% if current_type == key %}active{% endif %}">
+                    <i class="bi {{ icon }}"></i> {{ label }}
+                    <span class="badge bg-{{ color }}{% if color in ('warning', 'light') %} text-dark{% endif %}">{{ type_counts.get(key, 0) if type_counts else 0 }}</span>
                 </a>
-                <a href="{{ url_for('main.index', source=current_source, type='case') if current_source else url_for('main.index', type='case') }}" class="btn btn-outline-success btn-sm {% if current_type == 'case' %}active{% endif %}">
-                    <i class="bi bi-folder"></i> Cases
-                    {% if type_counts and type_counts.get('case') %}
-                    <span class="badge bg-success">{{ type_counts.get('case', 0) }}</span>
-                    {% endif %}
-                </a>
-                <a href="{{ url_for('main.index', source=current_source, type='core') if current_source else url_for('main.index', type='core') }}" class="btn btn-outline-warning btn-sm {% if current_type == 'core' %}active{% endif %}">
-                    <i class="bi bi-star"></i> Core
-                </a>
-                <a href="{{ url_for('main.index', source=current_source, type='base') if current_source else url_for('main.index', type='base') }}" class="btn btn-outline-dark btn-sm {% if current_type == 'base' %}active{% endif %}">
-                    <i class="bi bi-box"></i> Base
-                </a>
+                {% endfor %}
             </div>
         </div>
 
@@ -149,8 +144,10 @@
                             <span class="badge bg-success">ProEthica</span>
                             {% elif ontology.source_system == 'external' %}
                             <span class="badge bg-info">External</span>
-                            {% else %}
+                            {% elif ontology.source_system == 'manual' %}
                             <span class="badge bg-secondary">Manual</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ ontology.source_system }}</span>
                             {% endif %}
                         </td>
                         <td>
@@ -164,8 +161,16 @@
                             <span class="badge bg-secondary">Extracted</span>
                             {% elif ontology.ontology_type == 'domain' %}
                             <span class="badge bg-dark">Domain</span>
-                            {% else %}
+                            {% elif ontology.ontology_type == 'base' %}
                             <span class="badge bg-light text-dark">Base</span>
+                            {% else %}
+                            <span class="badge bg-light text-dark">{{ ontology.ontology_type }}</span>
+                            {% endif %}
+                            {% if ontology.meta_data and ontology.meta_data.get('stub') %}
+                            <span class="badge bg-warning text-dark border border-dark"
+                                  title="A curated selection of terms, not the full upstream ontology">
+                                <i class="bi bi-scissors"></i> Subset
+                            </span>
                             {% endif %}
                         </td>
                         <td>{{ ontology.description[:80] if ontology.description else '-' }}
@@ -178,13 +183,14 @@
             </table>
         </div>
 
-        <!-- Pagination -->
+        <!-- Pagination (links preserve the active source/type filters) -->
         {% if pagination and pagination.pages > 1 %}
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 {% if pagination.has_prev %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('main.index', page=pagination.prev_num) }}">Previous</a>
+                    <a class="page-link"
+                       href="{{ url_for('main.index', page=pagination.prev_num, source=current_source, type=current_type) }}">Previous</a>
                 </li>
                 {% endif %}
 
@@ -192,7 +198,8 @@
                 {% if page_num %}
                 {% if page_num != pagination.page %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('main.index', page=page_num) }}">{{ page_num }}</a>
+                    <a class="page-link"
+                       href="{{ url_for('main.index', page=page_num, source=current_source, type=current_type) }}">{{ page_num }}</a>
                 </li>
                 {% else %}
                 <li class="page-item active">
@@ -208,16 +215,29 @@
 
                 {% if pagination.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('main.index', page=pagination.next_num) }}">Next</a>
+                    <a class="page-link"
+                       href="{{ url_for('main.index', page=pagination.next_num, source=current_source, type=current_type) }}">Next</a>
                 </li>
                 {% endif %}
             </ul>
         </nav>
         {% endif %}
 
+        {% elif total_count %}
+        <!-- Ontologies exist but none match the active filter (or the page is out of range) -->
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">No matching ontologies</h4>
+            <p>None of the {{ total_count }} ontologies match the current filter.</p>
+            <hr>
+            <p class="mb-0">
+                <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-x-circle"></i> Clear filters
+                </a>
+            </p>
+        </div>
         {% else %}
         <div class="alert alert-info" role="alert">
-            <h4 class="alert-heading">No ontologies yet!</h4>
+            <h4 class="alert-heading">No ontologies yet</h4>
             <p>Get started by importing your first ontology.</p>
             <hr>
             <p class="mb-0">

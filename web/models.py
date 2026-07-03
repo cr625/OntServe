@@ -56,8 +56,8 @@ class Ontology(db.Model):
     
     # Parent-child relationship for derived ontologies
     parent_ontology_id = db.Column(db.Integer, db.ForeignKey('ontologies.id'), nullable=True)
-    ontology_type = db.Column(db.String(20), default='base')  # 'base', 'case', 'core', 'domain', 'extracted'
-    source_system = db.Column(db.String(50), default='manual')  # 'proethica', 'external', 'manual'
+    ontology_type = db.Column(db.String(20), default='base')  # 'upper', 'core', 'base', 'domain', 'case', 'extracted', 'derived'
+    source_system = db.Column(db.String(50), default='manual')  # 'proethica' (pipeline output), 'external' (external vocabulary), 'manual' (hand-authored)
     
     # JSON metadata field for flexible storage
     meta_data = db.Column('metadata', db.JSON, default={})  # Map to 'metadata' column in DB

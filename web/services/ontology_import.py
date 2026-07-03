@@ -286,6 +286,10 @@ def _persist_import(result, req, source, content, format_hint) -> ImportResult:
         name=uri_safe_name,
         base_uri=result['metadata'].get('namespace', default_base_uri),
         description=req.description or result['metadata'].get('description', ''),
+        # A URL import is an externally published vocabulary; an upload is
+        # hand-supplied. Without this, every import lands on the column
+        # defaults ('base'/'manual') regardless of origin.
+        source_system='external' if req.source_type == 'url' else 'manual',
         meta_data={
             **result['metadata'],
             'original_name': ontology_name,

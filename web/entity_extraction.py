@@ -79,6 +79,29 @@ def _comment_or_definition(g, subject, prefer_iao_definition=False):
     return None
 
 
+_PROPERTY_SIGNAL_PREDICATES = (
+    OWL.inverseOf, RDFS.domain, RDFS.range, RDFS.subPropertyOf,
+    OWL.equivalentProperty, OWL.propertyChainAxiom, OWL.propertyDisjointWith,
+)
+
+
+def _is_untyped_property(g, subj):
+    """True if an otherwise-untyped labeled resource carries a property-only predicate, so the
+    catch-all should classify it 'property' rather than fall through to 'individual'. Every
+    predicate checked is property-specific in OWL -- owl:inverseOf, rdfs:domain, rdfs:range,
+    rdfs:subPropertyOf, owl:equivalentProperty, owl:propertyChainAxiom, owl:propertyDisjointWith --
+    so a resource bearing any of them (as subject, or as the object of owl:inverseOf) is a property
+    and no individual is a false positive. Covers the PROV-O inverse relations (hadDerivation,
+    wasUsedBy, ...), which W3C declares via owl:inverseOf with no rdf:type, and which otherwise
+    land in the individual bucket."""
+    for pred in _PROPERTY_SIGNAL_PREDICATES:
+        if next(g.objects(subj, pred), None) is not None:
+            return True
+    if next(g.subjects(OWL.inverseOf, subj), None) is not None:
+        return True
+    return False
+
+
 def _class_expr_uris(g, node):
     """Resolve an rdfs:domain / rdfs:range object to NAMED class URIs. A URIRef -> [uri]; an anonymous
     owl:unionOf class (e.g. a domain of (Action or Event)) -> its named members; any other anonymous
@@ -398,8 +421,20 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         domain_types = [str(t) for t in types if t not in _OWL_STRUCTURAL_TYPES]
         parent_uri = domain_types[0] if domain_types else None
 
-        # Domain-typed -> individual; untyped -> individual (bare resource with label)
-        entity_type = 'individual'
+        # An untyped labeled resource that carries a property-only predicate (owl:inverseOf,
+        # rdfs:domain/range, rdfs:subPropertyOf, ...) is a property, not the individual fallback --
+        # e.g. the PROV-O-inverses relations, which W3C declares with owl:inverseOf and no rdf:type.
+        # The guard requires NO rdf:type at all, so a domain-typed case individual is never touched.
+        if not domain_types and _is_untyped_property(g, subj):
+            entity_type = 'property'
+            parent_uri = None
+            domain_col = _domain_range_value(_class_expr_uris(g, next(g.objects(subj, RDFS.domain), None)))
+            range_col = _domain_range_value(_class_expr_uris(g, next(g.objects(subj, RDFS.range), None)))
+        else:
+            # Domain-typed -> individual; untyped bare resource with label -> individual
+            entity_type = 'individual'
+            domain_col = None
+            range_col = None
 
         properties = _collect_properties(g, subj, skip_predicates)
         if len(domain_types) > 1:
@@ -412,13 +447,15 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             label=label_str,
             comment=comment_str,
             parent_uri=parent_uri,
+            domain=domain_col,
+            range=range_col,
             properties=properties if properties else None,
             content_hash=OntologyEntity.compute_content_hash(uri_str, label_str, comment_str),
             updated_at=now
         )
         new_entities.append(entity)
         captured_uris.add(uri_str)
-        entity_counts['individual'] += 1
+        entity_counts[entity_type] = entity_counts.get(entity_type, 0) + 1
 
     # Restore embeddings for entities whose (uri, content_hash) is unchanged, then persist all.
     for e in new_entities:

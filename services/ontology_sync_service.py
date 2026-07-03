@@ -7,6 +7,7 @@ Uses hash-based change detection to only re-extract when files change.
 
 import hashlib
 import logging
+import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timezone
@@ -140,6 +141,21 @@ class OntologySyncService:
             logger.warning(f"Could not read owl:Ontology metadata from {ttl_path.name}: {e}")
         return out
 
+    @staticmethod
+    def _infer_type_and_source(ontology_name: str) -> Tuple[str, str]:
+        """Infer (ontology_type, source_system) for a newly auto-created ontology
+        record. The sync path is the live registrar for ProEthica case commits
+        (ontserve_commit_service._sync_ontology_to_db relies on the auto-create),
+        so per-case ontologies must not fall through to the column defaults
+        'base'/'manual' -- that renders them unreachable via the Type=case filter
+        and mislabels them as hand-authored. Mirrors
+        scripts/active/register_case_ontologies.py."""
+        if re.fullmatch(r'proethica-case-\d+', ontology_name):
+            return 'case', 'proethica'
+        if ontology_name.startswith('proethica-'):
+            return 'base', 'proethica'
+        return 'base', 'manual'
+
     def _sync_single_ontology(self, ttl_path: Path, force: bool = False) -> Dict:
         """
         Sync a single TTL file.
@@ -175,11 +191,14 @@ class OntologySyncService:
                 meta_data['source'] = ometa['source']
             if ometa.get('version'):
                 meta_data['version'] = ometa['version']
+            inferred_type, inferred_source = self._infer_type_and_source(ontology_name)
             ontology = Ontology(
                 name=ontology_name,
                 base_uri=f"http://proethica.org/ontology/{ontology_name}#",
                 description=ometa.get('description') or f"Auto-imported from {ttl_path.name}",
                 is_editable=True,
+                ontology_type=inferred_type,
+                source_system=inferred_source,
                 meta_data=meta_data
             )
             self.db_session.add(ontology)

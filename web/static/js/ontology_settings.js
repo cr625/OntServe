@@ -11,8 +11,10 @@
             base_uri: formData.get('base_uri'),
             description: formData.get('description'),
             ontology_type: formData.get('ontology_type'),
+            source_system: formData.get('source_system'),
             is_editable: formData.has('is_editable'),
-            is_base: formData.has('is_base')
+            is_base: formData.has('is_base'),
+            is_stub: formData.has('is_stub')
         };
 
         // Show loading state

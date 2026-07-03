@@ -63,7 +63,7 @@ EXPECTED_ONTOLOGIES: List[tuple[str, str]] = [
     ("engineering-ethics", "engineering-ethics"),
     # Foundation ontologies the paper names as external imports
     ("BFO", "bfo"),
-    ("IAO", "Information Artifact Ontology 2020"),
+    ("IAO", "iao"),
     ("Relations Ontology", "Relations Ontology 2015"),
     # Three professional codes of ethics (paper §4 count of 11 externals)
     ("ASCE Code of Ethics", "ASCE Code of Ethics"),

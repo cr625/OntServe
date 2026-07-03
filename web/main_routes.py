@@ -63,23 +63,27 @@ def index():
             ont._prefetched_class_count = c.get('class', 0)
             ont._prefetched_triple_count = c.get('class', 0) + c.get('property', 0) + c.get('individual', 0)
 
-    # Get counts for filter badges
-    source_counts = db.session.execute(
+    # Get counts for filter badges (unfiltered totals per category)
+    source_counts = dict(db.session.execute(
         select(Ontology.source_system, func.count(Ontology.id))
         .group_by(Ontology.source_system)
-    ).all()
-    type_counts = db.session.execute(
+    ).all())
+    type_counts = dict(db.session.execute(
         select(Ontology.ontology_type, func.count(Ontology.id))
         .group_by(Ontology.ontology_type)
-    ).all()
+    ).all())
+    # Unfiltered repository total: lets the template distinguish "no ontologies
+    # exist" (onboarding) from "no ontologies match this filter" (zero results)
+    total_count = sum(source_counts.values())
 
     return render_template('index.html',
                          ontologies=ontologies,
                          pagination=pagination,
                          current_source=source_system,
                          current_type=ontology_type,
-                         source_counts=dict(source_counts),
-                         type_counts=dict(type_counts))
+                         source_counts=source_counts,
+                         type_counts=type_counts,
+                         total_count=total_count)
 
 
 @main_bp.route('/health')

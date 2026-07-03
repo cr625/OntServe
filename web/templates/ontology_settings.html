@@ -60,24 +60,41 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="ontologyType" class="form-label">Type</label>
                                         <select class="form-select" id="ontologyType" name="ontology_type">
-                                            <option value="base" {{ 'selected' if ontology.ontology_type=='base' else ''
-                                                }}>Base</option>
+                                            <option value="upper" {{ 'selected' if ontology.ontology_type=='upper'
+                                                else '' }}>Upper</option>
                                             <option value="core" {{ 'selected' if ontology.ontology_type=='core' else ''
                                                 }}>Core</option>
+                                            <option value="base" {{ 'selected' if ontology.ontology_type=='base' else ''
+                                                }}>Base</option>
                                             <option value="domain" {{ 'selected' if ontology.ontology_type=='domain'
                                                 else '' }}>Domain</option>
-                                            <option value="application" {{ 'selected' if
-                                                ontology.ontology_type=='application' else '' }}>Application</option>
+                                            <option value="case" {{ 'selected' if ontology.ontology_type=='case'
+                                                else '' }}>Case</option>
+                                            <option value="extracted" {{ 'selected' if
+                                                ontology.ontology_type=='extracted' else '' }}>Extracted</option>
                                             <option value="derived" {{ 'selected' if ontology.ontology_type=='derived'
                                                 else '' }}>Derived</option>
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="sourceSystem" class="form-label">Source</label>
+                                        <select class="form-select" id="sourceSystem" name="source_system">
+                                            <option value="proethica" {{ 'selected' if
+                                                ontology.source_system=='proethica' else '' }}>ProEthica</option>
+                                            <option value="external" {{ 'selected' if
+                                                ontology.source_system=='external' else '' }}>External</option>
+                                            <option value="manual" {{ 'selected' if ontology.source_system=='manual'
+                                                else '' }}>Manual</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
                                     <div class="mb-3">
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" id="isEditable"
@@ -92,6 +109,14 @@
                                             <label class="form-check-label" for="isBase">
                                                 Base Ontology
                                             </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="isStub" name="is_stub"
+                                                {{ 'checked' if ontology.meta_data and ontology.meta_data.get('stub') else '' }}>
+                                            <label class="form-check-label" for="isStub">
+                                                Subset
+                                            </label>
+                                            <div class="form-text">A curated selection of terms, not the full upstream ontology.</div>
                                         </div>
                                     </div>
                                 </div>

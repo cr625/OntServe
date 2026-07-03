@@ -96,6 +96,28 @@ case1:Canon1 a proeth:Principle ;
     rdfs:comment "Safety first" .
 """
 
+# An untyped inverse property (as W3C prov-o-inverses declares them: owl:inverseOf,
+# no rdf:type) plus a bare labeled resource, so the catch-all must classify the first
+# as 'property' and the second as 'individual'.
+SAMPLE_UNTYPED_PROPERTY_TTL = """
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix test: <http://test.org/ontology#> .
+
+test:used a owl:ObjectProperty ;
+    rdfs:label "used" .
+
+test:wasUsedBy rdfs:label "wasUsedBy" ;
+    owl:inverseOf test:used .
+
+test:hasThing rdfs:label "has thing" ;
+    rdfs:domain test:Widget ;
+    rdfs:range test:Thing .
+
+test:BareResource rdfs:label "Bare Resource" ;
+    rdfs:comment "A labeled resource with no property-defining predicate" .
+"""
+
 
 @pytest.mark.unit
 class TestClassExtraction:
@@ -298,6 +320,45 @@ class TestMixedExtraction:
 
         total = OntologyEntity.query.filter_by(ontology_id=ontology.id).count()
         assert total == 4  # 1 class + 1 property + 2 individuals
+
+
+@pytest.mark.unit
+class TestUntypedPropertyExtraction:
+    """The catch-all must classify an untyped resource that carries a property-only
+    predicate (owl:inverseOf, rdfs:domain/range, ...) as 'property', not 'individual'.
+    Covers the PROV-O inverse relations, which W3C declares with no rdf:type."""
+
+    def test_untyped_inverse_and_domain_props_are_properties(self, app, db_session, helpers):
+        from web.entity_extraction import extract_entities_from_content
+
+        ontology = helpers.create_test_ontology(db_session, name='test-untyped-prop')
+        counts = extract_entities_from_content(ontology, SAMPLE_UNTYPED_PROPERTY_TTL)
+        db_session.commit()
+
+        # test:used (typed) + test:wasUsedBy (owl:inverseOf) + test:hasThing (rdfs:domain/range)
+        assert counts['property'] == 3
+        # only test:BareResource, which has no property-defining predicate
+        assert counts.get('individual', 0) == 1
+
+    def test_untyped_inverse_prop_typed_property_not_individual(self, app, db_session, helpers):
+        from web.entity_extraction import extract_entities_from_content
+        from web.models import OntologyEntity
+
+        ontology = helpers.create_test_ontology(db_session, name='test-untyped-inverse')
+        extract_entities_from_content(ontology, SAMPLE_UNTYPED_PROPERTY_TTL)
+        db_session.commit()
+
+        was_used_by = OntologyEntity.query.filter_by(
+            ontology_id=ontology.id, label='wasUsedBy'
+        ).first()
+        assert was_used_by is not None
+        assert was_used_by.entity_type == 'property'
+
+        bare = OntologyEntity.query.filter_by(
+            ontology_id=ontology.id, label='Bare Resource'
+        ).first()
+        assert bare is not None
+        assert bare.entity_type == 'individual'
 
     def test_clears_existing_before_extract(self, app, db_session, helpers):
         from web.entity_extraction import extract_entities_from_content

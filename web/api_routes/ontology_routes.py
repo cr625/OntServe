@@ -91,16 +91,19 @@ def register_ontology(bp):
             ontology.base_uri = data.get('base_uri', ontology.base_uri)
             ontology.description = data.get('description', ontology.description)
             ontology.ontology_type = data.get('ontology_type', ontology.ontology_type)
+            ontology.source_system = data.get('source_system', ontology.source_system)
             ontology.is_editable = data.get('is_editable', ontology.is_editable)
             ontology.is_base = data.get('is_base', ontology.is_base)
             ontology.updated_at = datetime.now(timezone.utc)
 
-            if not ontology.meta_data:
-                ontology.meta_data = {}
-            ontology.meta_data.update({
-                'last_metadata_update': datetime.now(timezone.utc).isoformat(),
-                'updated_by': current_user.username
-            })
+            # Reassign the whole dict (db.JSON is not mutation-tracked, so an
+            # in-place .update() would not persist).
+            md = dict(ontology.meta_data or {})
+            if 'is_stub' in data:
+                md['stub'] = bool(data.get('is_stub'))
+            md['last_metadata_update'] = datetime.now(timezone.utc).isoformat()
+            md['updated_by'] = current_user.username
+            ontology.meta_data = md
 
             db.session.commit()
 
