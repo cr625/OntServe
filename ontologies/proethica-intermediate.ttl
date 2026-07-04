@@ -1713,26 +1713,26 @@ proeth:requiresCapability a owl:ObjectProperty ;
 # Decision Option - An alternative available at a decision point
 :DecisionOption rdf:type owl:Class ;
     rdf:type :EntityType ;
-    owl:equivalentClass proeth-cases:DecisionOption ;
     owl:deprecated true ;
     rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
     rdfs:label "Decision Option"@en ;
     iao:0000115 "A possible course of action available at a decision point, representing one alternative the actor could choose."@en ;
     skos:definition "Decision options represent the discrete alternatives available to actors at decision points. Per scenario-directed analysis frameworks, clearly articulating options enables structured evaluation of consequences and ethical implications for each path."@en ;
     rdfs:comment "Each decision point has multiple options; one is typically marked as the board's chosen resolution. DEPRECATED: use proeth-cases:DecisionOption."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:DecisionOption. Added owl:equivalentClass to bridge existing references."@en .
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:DecisionOption. Added owl:equivalentClass to bridge existing references."@en ;
+    skos:changeNote "2026-07-04: the equivalentClass bridge was removed together with its target (proeth-cases:DecisionOption was deleted in the cases-ontology v3.0.0 slim; zero instances corpus-wide). The stub remains only as a deprecation marker."@en .
 
 # Ethical Argument - A pro or con argument for a decision option
 :EthicalArgument rdf:type owl:Class ;
     rdf:type :EntityType ;
-    owl:equivalentClass proeth-cases:Argument ;
     owl:deprecated true ;
     rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
     rdfs:label "Ethical Argument"@en ;
     iao:0000115 "An argument supporting or opposing a decision option, based on ethical principles, code provisions, and precedent cases."@en ;
     skos:definition "Ethical arguments represent the pro/con reasoning for decision options. Per the IAAI 'Pros and Cons in Ethical Decisions' paper, evaluative AI presents balanced arguments citing code provisions and precedents so practitioners can make informed decisions."@en ;
     rdfs:comment "Generated during Step 4 Part F. Each argument includes a claim, premises, provision citations, and strength assessment. DEPRECATED: use proeth-cases:Argument."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:Argument. Added owl:equivalentClass to bridge existing references."@en .
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:Argument. Added owl:equivalentClass to bridge existing references."@en ;
+    skos:changeNote "2026-07-04: the equivalentClass bridge was removed together with its target (proeth-cases:Argument was deleted in the cases-ontology v3.0.0 slim; zero instances corpus-wide). The stub remains only as a deprecation marker."@en .
 
 # Properties for case analysis entities
 :hasQuestion rdf:type owl:ObjectProperty ;
@@ -2470,3 +2470,79 @@ proeth:otherAttribute a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:comment "Closed-vocabulary overflow for a genuinely case-specific role attribute not in the controlled set. Carries the original key and value as a 'key: value' literal, so the data is preserved while the datatype-predicate space stays finite and fully declared."@en .
 
+###############################################################
+# Analysis-layer datatype properties (declared 2026-07-04)
+#
+# The commit bridge has always written these intermediate-namespace literals
+# on the Step-4 analysis individuals (typed proeth-cases:EthicalQuestion /
+# EthicalConclusion / DecisionPoint), but they were never declared: the old
+# proethica-cases 2.0.0 file declared same-named properties in the CASES
+# namespace, which no data ever used. Declared here, domainless (the bearer
+# classes live in the cases ontology, which imports this one), to keep the
+# emitted datatype-predicate vocabulary closed and self-describing.
+###############################################################
+
+proeth:questionText a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "question text"@en ;
+    rdfs:comment "The verbatim text of an ethical question. Borne by proeth-cases:EthicalQuestion individuals."@en .
+
+proeth:questionType a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "question type"@en ;
+    rdfs:comment "The kind of ethical question (board-explicit or derived). Borne by proeth-cases:EthicalQuestion individuals."@en .
+
+proeth:questionNumber a owl:DatatypeProperty ;
+    rdfs:range xsd:integer ;
+    rdfs:label "question number"@en ;
+    rdfs:comment "Sequential position of the question within the case. Borne by proeth-cases:EthicalQuestion individuals."@en .
+
+proeth:emergence a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "emergence"@en ;
+    rdfs:comment "Inline emergence rationale for a question; the full rationale is the linked proeth-cases:QuestionEmergence individual."@en .
+
+proeth:conclusionText a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "conclusion text"@en ;
+    rdfs:comment "The verbatim text of an ethical conclusion. Borne by proeth-cases:EthicalConclusion individuals."@en .
+
+proeth:conclusionType a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "conclusion type"@en ;
+    rdfs:comment "The kind of conclusion (board-explicit finding or interpretive refinement). Borne by proeth-cases:EthicalConclusion individuals."@en .
+
+proeth:conclusionNumber a owl:DatatypeProperty ;
+    rdfs:range xsd:integer ;
+    rdfs:label "conclusion number"@en ;
+    rdfs:comment "Sequential position of the conclusion within the case; values of 100 and above mark synthetic interpretive refinements. Borne by proeth-cases:EthicalConclusion individuals."@en .
+
+proeth:extractionReasoning a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "extraction reasoning"@en ;
+    rdfs:comment "The extractor's stated reasoning for a conclusion record. Borne by proeth-cases:EthicalConclusion individuals."@en .
+
+proeth:decisionPointId a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "decision point id"@en ;
+    rdfs:comment "Short identifier of a decision point (e.g. DP1). Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:decisionQuestion a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "decision question"@en ;
+    rdfs:comment "The choice the actor faces at the decision point, phrased as a question. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:focus a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "focus"@en ;
+    rdfs:comment "The full description of what a decision point concerns. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:context a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "context"@en ;
+    rdfs:comment "Narrative context in which a decision point arises. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:roleLabel a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "role label"@en ;
+    rdfs:comment "Label of the role facing the decision point. Borne by proeth-cases:DecisionPoint individuals."@en .
