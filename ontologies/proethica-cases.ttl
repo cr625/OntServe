@@ -43,12 +43,13 @@ proeth-cases:EthicalConclusion a owl:Class ;
 
 # Decision Point: Critical juncture requiring ethical choice
 proeth-cases:DecisionPoint a owl:Class ;
-    rdfs:subClassOf proeth-core:Event ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
     rdfs:label "Decision Point"@en ;
     rdfs:comment "A point in an ethics case where a professional actor must make a choice between ethically significant alternatives."@en ;
     skos:definition "Decision points mark critical junctures in ethics cases where actors face choices between alternatives with ethical implications. Per Hobbs and Moore (2005) scenario-directed decision analysis, these points structure the ethical problem space and enable systematic analysis of options, constraints, and outcomes."@en ;
     dcterms:source <https://doi.org/10.1111/j.1539-6924.2005.00634.x> ;
-    skos:changeNote "v2.4.2: Added to cases namespace. 845 case instances reference proeth-cases:DecisionPoint but the class was previously only defined in intermediate namespace (intermediate#DecisionPoint)."@en .
+    skos:changeNote "v2.4.2: Added to cases namespace. 845 case instances reference proeth-cases:DecisionPoint but the class was previously only defined in intermediate namespace (intermediate#DecisionPoint)."@en ;
+    skos:changeNote "v3.0.1 (2026-07-04): re-anchored from proeth-core:Event to IAO information content entity. The committed individuals are composed Step-4 analysis records (identifier, decision question, options, role) with no temporal participation, and the audited core Event definition (v2.10) restricts Event to NON-volitional occurrences, which a choice juncture is definitionally not. The juncture's temporal reality is carried by the Step-3 Action/Event timeline; the DecisionPoint record is the analytic artifact marking it, uniform with the rest of the analysis layer."@en .
 
 # Supporting analysis artifacts (added v3.0.0). Each is an information content
 # entity ABOUT the case analysis, deliberately outside the nine disjoint core

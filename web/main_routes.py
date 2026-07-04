@@ -119,14 +119,19 @@ def search():
             )
             results['ontologies'] = db.session.execute(stmt).scalars().all()
 
-        # Search entities
+        # Search entities. Deprecated entities are excluded: they are retained
+        # in the graphs only as machine-readable markers (owl:deprecated
+        # bridge/stub classes), and surfacing them beside their live successors
+        # presents duplicate vocabulary (e.g. the intermediate DecisionPoint
+        # stub next to the live proeth-cases:DecisionPoint).
         if search_type in ['all', 'entities']:
             stmt = select(OntologyEntity).where(
                 or_(
                     OntologyEntity.label.ilike(f'%{query}%'),
                     OntologyEntity.comment.ilike(f'%{query}%'),
                     OntologyEntity.uri.ilike(f'%{query}%')
-                )
+                ),
+                OntologyEntity.properties.op('->>')('deprecated').is_distinct_from('true')
             ).limit(50)
             results['entities'] = db.session.execute(stmt).scalars().all()
 

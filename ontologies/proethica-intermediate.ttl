@@ -1703,12 +1703,12 @@ proeth:requiresCapability a owl:ObjectProperty ;
     rdf:type :EntityType ;
     owl:equivalentClass proeth-cases:DecisionPoint ;
     owl:deprecated true ;
-    rdfs:subClassOf proeth-core:Event ;
     rdfs:label "Decision Point"@en ;
     iao:0000115 "A point in an ethics case where a professional actor must make a choice between ethically significant alternatives, representing a critical juncture in the case narrative."@en ;
     skos:definition "Decision points mark critical junctures in ethics cases where actors face choices between alternatives with ethical implications."@en ;
     rdfs:comment "Extracted during Step 4 analysis. Each decision point includes options, involved roles, applicable provisions, and the board's resolution. DEPRECATED: use proeth-cases:DecisionPoint."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:DecisionPoint. Added owl:equivalentClass to bridge existing references. 845 case instances reference proeth-cases:DecisionPoint."@en .
+    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:DecisionPoint. Added owl:equivalentClass to bridge existing references. 845 case instances reference proeth-cases:DecisionPoint."@en ;
+    skos:changeNote "2026-07-04: the stub's own subClassOf proeth-core:Event was removed together with the cases-class re-anchoring to IAO information content entity (see proeth-cases:DecisionPoint v3.0.1); keeping it here would have re-entailed the contradicted Event typing through the equivalentClass bridge."@en .
 
 # Decision Option - An alternative available at a decision point
 :DecisionOption rdf:type owl:Class ;
