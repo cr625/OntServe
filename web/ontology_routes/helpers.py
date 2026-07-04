@@ -496,12 +496,40 @@ def class_hierarchy(entity, child_cap=25):
     """Build the BFO-rooted ancestry chain (owl:Thing first, this class last) plus this
     class's direct structural subclasses (core + intermediate layers, not per-case ABoxes),
     for the Class Hierarchy display. Reuses the cross-ontology _class_ancestor_uris walk."""
-    anc_uris = _class_ancestor_uris(entity)          # [entity.uri, parent, ..., owl:Thing]
-    chain = [_hierarchy_node(u, is_current=(u == entity.uri)) for u in reversed(anc_uris)]
-    # For an individual, the final hop is rdf:type (instance-of), not
-    # rdfs:subClassOf; the display must not draw it with the subclass arrow.
-    if getattr(entity, 'entity_type', None) == 'individual' and chain:
-        chain[-1]['is_individual'] = True
+    if getattr(entity, 'entity_type', None) == 'individual':
+        # The Class Hierarchy shows classes only. An individual's chain routes
+        # through its MOST SPECIFIC rdf:type (parent_uri holds the materialized
+        # core type, which would skip e.g. DesignEngineerRole), and the
+        # individual itself hangs off the chain as an element-of (instance)
+        # line, never as a subclass hop.
+        from types import SimpleNamespace
+        props = entity.properties
+        if isinstance(props, str):
+            import json as _json
+            try:
+                props = _json.loads(props)
+            except Exception:
+                props = {}
+        cand = list((props or {}).get('rdf_types') or [])
+        if entity.parent_uri and entity.parent_uri not in cand:
+            cand.append(entity.parent_uri)
+        cand = [c for c in cand if isinstance(c, str) and c.startswith('http')]
+        anc_map = {c: _class_ancestor_uris(SimpleNamespace(uri=c)) for c in cand}
+        # A candidate that is a proper ancestor of another candidate is less
+        # specific; drop it. Among the survivors take the deepest chain.
+        proper_ancestors = set()
+        for ancs in anc_map.values():
+            proper_ancestors.update(ancs[1:])
+        specific = [c for c in cand if c not in proper_ancestors] or cand
+        specific.sort(key=lambda c: (-len(anc_map.get(c, [])), c))
+        anc_uris = anc_map.get(specific[0], []) if specific else []
+        chain = [_hierarchy_node(u) for u in reversed(anc_uris)]
+        node = _hierarchy_node(entity.uri, is_current=True)
+        node['is_individual'] = True
+        chain.append(node)
+    else:
+        anc_uris = _class_ancestor_uris(entity)      # [entity.uri, parent, ..., owl:Thing]
+        chain = [_hierarchy_node(u, is_current=(u == entity.uri)) for u in reversed(anc_uris)]
     rows = db.session.execute(
         select(OntologyEntity.uri, OntologyEntity.label, Ontology.name, OntologyEntity.properties)
         .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
