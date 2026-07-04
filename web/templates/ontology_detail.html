@@ -304,7 +304,7 @@
         comment ends here #}
         {% endif %}
 
-        {% set axiom_count = stats.axioms.subclass|length + stats.axioms.property_constraints|length + stats.axioms.equivalent|length + stats.axioms.disjoint|length %}
+        {% set axiom_count = stats.axioms.subclass|length + stats.axioms.property_constraints|length + stats.axioms.equivalent|length + stats.axioms.disjoint|length + stats.axioms.all_disjoint|length %}
         {% set has_schema = (stats.class_count + stats.property_count) > 0 %}
         {% set default_tab = 'schema' if has_schema else ('individuals' if stats.individual_count > 0 else 'schema') %}
 
@@ -371,7 +371,7 @@
                 <button class="nav-link" id="axioms-tab" data-bs-toggle="tab" data-bs-target="#axioms"
                     type="button" title="Logical axioms: subsumption hierarchy and property constraints">
                     <i class="bi bi-arrow-left-right"></i> Axioms
-                    <span class="badge bg-secondary ms-1">{{ stats.axioms.subclass|length + stats.axioms.property_constraints|length }}</span>
+                    <span class="badge bg-secondary ms-1">{{ axiom_count }}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -410,7 +410,33 @@
                             <div class="card-body p-0">
                                 <div class="entity-list" style="max-height: 500px; overflow-y: auto;">
                                     {% if stats.from_ttl and stats.ttl_classes %}
-                                    {% for cls in stats.ttl_classes %}
+                                    {# Group the D-tuple framework components (dtupleComponent marker)
+                                       ahead of supporting classes, in the canonical component order #}
+                                    {% set dtuple_order = ['R', 'P', 'O', 'S', 'Rs', 'A', 'E', 'Ca', 'Cs'] %}
+                                    {% set framework_sorted = [] %}
+                                    {% for key in dtuple_order %}{% for cls in stats.ttl_classes %}{% if cls.dtuple == key %}{% set _ = framework_sorted.append(cls) %}{% endif %}{% endfor %}{% endfor %}
+                                    {% set supporting = stats.ttl_classes | rejectattr('dtuple') | list %}
+                                    {% if framework_sorted %}
+                                    <div class="list-group-item bg-light border-0">
+                                        <small class="text-muted fw-bold">Framework Components ({{ framework_sorted|length }})</small>
+                                    </div>
+                                    {% endif %}
+                                    {% for cls in framework_sorted %}
+                                    <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=cls.uri|extract_name) }}"
+                                       class="list-group-item list-group-item-action border-0 border-bottom">
+                                        <strong>{{ cls.label }}</strong> <span class="badge bg-secondary">{{ cls.dtuple }}</span>
+                                        {% if cls.comment %}
+                                        <p class="text-muted small mb-1 mt-1">{{ cls.comment[:150] }}{% if cls.comment|length > 150 %}...{% endif %}</p>
+                                        {% endif %}
+                                        <code class="small text-muted">{{ cls.uri }}</code>
+                                    </a>
+                                    {% endfor %}
+                                    {% if framework_sorted and supporting %}
+                                    <div class="list-group-item bg-light border-0">
+                                        <small class="text-muted fw-bold">Supporting Classes ({{ supporting|length }})</small>
+                                    </div>
+                                    {% endif %}
+                                    {% for cls in supporting %}
                                     <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=cls.uri|extract_name) }}"
                                        class="list-group-item list-group-item-action border-0 border-bottom">
                                         <strong>{{ cls.label }}</strong>
@@ -421,7 +447,33 @@
                                     </a>
                                     {% endfor %}
                                     {% elif entities.classes %}
-                                    {% for entity in entities.classes %}
+                                    {# Same framework-first grouping for the entity-rows path #}
+                                    {% set dtuple_order = ['R', 'P', 'O', 'S', 'Rs', 'A', 'E', 'Ca', 'Cs'] %}
+                                    {% set fw_rows = [] %}
+                                    {% for key in dtuple_order %}{% for entity in entities.classes %}{% if entity.properties and entity.properties.get('dtupleComponent') == key %}{% set _ = fw_rows.append(entity) %}{% endif %}{% endfor %}{% endfor %}
+                                    {% set support_rows = [] %}
+                                    {% for entity in entities.classes %}{% if entity not in fw_rows %}{% set _ = support_rows.append(entity) %}{% endif %}{% endfor %}
+                                    {% if fw_rows %}
+                                    <div class="list-group-item bg-light border-0">
+                                        <small class="text-muted fw-bold">Framework Components ({{ fw_rows|length }})</small>
+                                    </div>
+                                    {% endif %}
+                                    {% for entity in fw_rows %}
+                                    <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.uri|extract_name) }}"
+                                       class="list-group-item list-group-item-action border-0 border-bottom">
+                                        <strong>{{ entity.label or entity.uri|extract_name }}</strong> <span class="badge bg-secondary">{{ entity.properties.get('dtupleComponent') }}</span>
+                                        {% if entity.comment %}
+                                        <p class="text-muted small mb-1 mt-1">{{ entity.comment[:150] }}{% if entity.comment|length > 150 %}...{% endif %}</p>
+                                        {% endif %}
+                                        <code class="small text-muted">{{ entity.uri }}</code>
+                                    </a>
+                                    {% endfor %}
+                                    {% if fw_rows and support_rows %}
+                                    <div class="list-group-item bg-light border-0">
+                                        <small class="text-muted fw-bold">Supporting Classes ({{ support_rows|length }})</small>
+                                    </div>
+                                    {% endif %}
+                                    {% for entity in support_rows %}
                                     <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.uri|extract_name) }}"
                                        class="list-group-item list-group-item-action border-0 border-bottom">
                                         <strong>{{ entity.label or entity.uri|extract_name }}</strong>
@@ -708,7 +760,7 @@
                     </div>
 
                     <!-- Equivalent and Disjoint Classes -->
-                    {% if stats.axioms.equivalent or stats.axioms.disjoint %}
+                    {% if stats.axioms.equivalent or stats.axioms.disjoint or stats.axioms.all_disjoint %}
                     <div class="col-md-6 mb-3">
                         <div class="card h-100">
                             <div class="card-header">
@@ -727,8 +779,19 @@
                                     {% endfor %}
                                 </ul>
                                 {% endif %}
+                                {% if stats.axioms.all_disjoint %}
+                                <h6 class="small text-muted">Mutually Disjoint Sets (owl:AllDisjointClasses)</h6>
+                                <ul class="list-unstyled">
+                                    {% for ads in stats.axioms.all_disjoint %}
+                                    <li class="mb-2">
+                                        <span class="badge bg-secondary me-1">{{ ads.members|length }}-way</span>
+                                        {% for m in ads.members %}<code class="small">{{ m }}</code>{% if not loop.last %}<span class="text-muted"> | </span>{% endif %}{% endfor %}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
                                 {% if stats.axioms.disjoint %}
-                                <h6 class="small text-muted mt-3">Disjoint Classes</h6>
+                                <h6 class="small text-muted mt-3">Pairwise Disjoint Classes</h6>
                                 <ul class="list-unstyled">
                                     {% for dj in stats.axioms.disjoint %}
                                     <li class="mb-1">

@@ -58,10 +58,19 @@ def compute_stats_from_ttl(ttl_content: str) -> dict:
             continue  # anonymous class expression (owl:unionOf / owl:Restriction), not a named class
         label = g.value(s, RDFS.label)
         comment = g.value(s, RDFS.comment)
+        # D-tuple framework marker (proeth-core:dtupleComponent, matched by local
+        # name): lets the Schema tab group the nine framework components ahead of
+        # supporting classes on the core ontology page.
+        dtuple = None
+        for p_, o_ in g.predicate_objects(s):
+            if str(p_).rsplit('#', 1)[-1].rsplit('/', 1)[-1] == 'dtupleComponent':
+                dtuple = str(o_)
+                break
         classes.append({
             'uri': str(s),
             'label': str(label) if label else extract_local_name(str(s)),
-            'comment': str(comment) if comment else None
+            'comment': str(comment) if comment else None,
+            'dtuple': dtuple
         })
 
     # Also check for rdfs:Class
@@ -310,13 +319,13 @@ def compute_axioms(ttl_content: str) -> dict:
         Dict with subclass_axioms, property_axioms, etc.
     """
     if not ttl_content:
-        return {'subclass': [], 'equivalent': [], 'disjoint': [], 'property_constraints': []}
+        return {'subclass': [], 'equivalent': [], 'disjoint': [], 'all_disjoint': [], 'property_constraints': []}
 
     g = Graph()
     try:
         g.parse(data=ttl_content, format='turtle')
     except Exception:
-        return {'subclass': [], 'equivalent': [], 'disjoint': [], 'property_constraints': []}
+        return {'subclass': [], 'equivalent': [], 'disjoint': [], 'all_disjoint': [], 'property_constraints': []}
 
     # SubClassOf axioms
     subclass_axioms = []
@@ -361,6 +370,26 @@ def compute_axioms(ttl_content: str) -> dict:
             'class2_uri': str(o)
         })
 
+    # owl:AllDisjointClasses sets (bnode axiom + owl:members list). Previously
+    # invisible: the nine-way component disjointness -- the signature axiom of
+    # proethica-core -- never appeared in the Axioms tab, which extracted only
+    # pairwise owl:disjointWith.
+    all_disjoint_sets = []
+    from rdflib.collection import Collection
+    for ax in g.subjects(RDF.type, OWL.AllDisjointClasses):
+        members_node = g.value(ax, OWL.members)
+        if members_node is None:
+            continue
+        try:
+            members = [m for m in Collection(g, members_node) if not isinstance(m, BNode)]
+        except Exception:
+            continue
+        if members:
+            all_disjoint_sets.append({
+                'members': [extract_local_name(str(m)) for m in members],
+                'member_uris': [str(m) for m in members],
+            })
+
     # Property constraints (domain/range)
     property_constraints = []
     for s in g.subjects(RDF.type, OWL.ObjectProperty):
@@ -380,6 +409,7 @@ def compute_axioms(ttl_content: str) -> dict:
         'subclass': sorted(subclass_axioms, key=lambda x: x['subject']),
         'equivalent': equivalent_axioms,
         'disjoint': disjoint_axioms,
+        'all_disjoint': all_disjoint_sets,
         'property_constraints': sorted(property_constraints, key=lambda x: x['property'])
     }
 
@@ -522,7 +552,7 @@ def build_stats_context(ontology, entities: dict, relationships: dict) -> dict:
     if ontology.current_content:
         stats['axioms'] = compute_axioms(ontology.current_content)
     else:
-        stats['axioms'] = {'subclass': [], 'equivalent': [], 'disjoint': [], 'property_constraints': []}
+        stats['axioms'] = {'subclass': [], 'equivalent': [], 'disjoint': [], 'all_disjoint': [], 'property_constraints': []}
 
     # Banner config
     stats['banner'] = display_config.get('banner', {})
