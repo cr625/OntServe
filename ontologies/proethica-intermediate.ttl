@@ -456,15 +456,6 @@ proeth:owlTimeProperty a owl:DatatypeProperty ;
     rdfs:label "OWL-Time property"@en ;
     rdfs:comment "The corresponding OWL-Time property name (e.g. time:before, time:intervalMeets). See W3C OWL-Time ontology."@en .
 
-# Common Ethical Concepts
-:EthicalDilemma rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    rdfs:subClassOf proeth-core:State ; # treat dilemmas as contextual states for decision-making
-    rdfs:label "Ethical Dilemma"@en ;
-    rdfs:comment "A situation involving a difficult ethical choice between competing moral considerations that applies across all professional domains"@en ;
-    owl:deprecated true ;
-    skos:changeNote "2026-07-04: deprecated as a live extraction reuse target (pre-batch core audit). A catch-all State outside the closed nine-archetype set: every extracted State individual reaches proeth-core:State through exactly one content archetype, and this class offered an always-applicable alternative that competed with the archetypes in the prompt class list. Committed case individuals typed with it keep resolving."@en .
-
 :ProfessionalObligation rdf:type owl:Class ;
     # NOTE: bfo:BFO_0000017 (realizable entity / SDC) removed, it conflicts with proeth-core:Obligation
     # which is IAO:directive information entity (GDC). BFO GDC and SDC are mutually exclusive,
@@ -565,15 +556,6 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:label "obligated party"@en ;
     rdfs:comment "The agent label to which an obligation is attributed in a case (e.g. 'Engineer Doe'). This is a string rather than an Agent individual so that case text phrasing is preserved verbatim."@en .
-
-proeth:derivedFromPrinciple a owl:ObjectProperty ;
-    owl:deprecated true ;
-    rdfs:seeAlso proeth-core:derivedFromPrinciple ;
-    rdfs:domain proeth-core:Obligation ;
-    rdfs:range proeth-core:Principle ;
-    rdfs:label "derived from principle"@en ;
-    rdfs:comment "Links obligation to the principle(s) it operationalizes (Hallamaa & Kalliokoski 2022). DEPRECATED in v2.8.0: use proeth-core:derivedFromPrinciple."@en ;
-    skos:changeNote "v2.8.0: Deprecated; the edge is promoted to core. Writers and readers emit proeth-core:derivedFromPrinciple; see rdfs:seeAlso."@en .
 
 
 
@@ -776,36 +758,9 @@ proeth:derivedFromPrinciple a owl:ObjectProperty ;
     rdfs:comment "Relates a process to a resource it uses"@en ;
     skos:changeNote "v2.4.2: Fixed range from :Resource (undefined in intermediate namespace) to proeth-core:Resource."@en .
 
-:guidedByPrinciple rdf:type owl:ObjectProperty ;
-    owl:deprecated true ;
-    rdfs:seeAlso proeth-core:guidedByPrinciple ;
-    rdfs:domain proeth-core:Action ;
-    rdfs:range proeth-core:Principle ;
-    rdfs:label "guided by principle"@en ;
-    rdfs:comment "Relates an action to a principle that guides it. DEPRECATED in v2.8.0: use proeth-core:guidedByPrinciple."@en ;
-    skos:changeNote "v2.8.0: Deprecated; the edge is promoted to core. Writers and readers emit proeth-core:guidedByPrinciple; see rdfs:seeAlso."@en .
-
 # v2.8.0: the deprecated intermediate :fulfillsObligation equivalentProperty bridge
 # was deleted. proeth-core:fulfillsObligation is the single canonical property; no
 # intermediate alias remains.
-
-:violatesObligation rdf:type owl:ObjectProperty ;
-    owl:deprecated true ;
-    rdfs:seeAlso proeth-core:violatesObligation ;
-    rdfs:domain proeth-core:Action ;
-    rdfs:range proeth-core:Obligation ;
-    rdfs:label "violates obligation"@en ;
-    rdfs:comment "Relates an action to an obligation it violates. DEPRECATED in v2.8.0: use proeth-core:violatesObligation."@en ;
-    skos:changeNote "v2.8.0: Deprecated; the edge is promoted to core. Writers and readers emit proeth-core:violatesObligation; see rdfs:seeAlso."@en .
-
-:raisesObligation rdf:type owl:ObjectProperty ;
-    owl:deprecated true ;
-    rdfs:seeAlso proeth-core:raisesObligation ;
-    rdfs:domain proeth-core:Action ;
-    rdfs:range proeth-core:Obligation ;
-    rdfs:label "raises obligation"@en ;
-    rdfs:comment "Relates an action to an obligation it puts at stake but does not itself resolve. The fulfillment or violation occurs at a downstream action in the same chain. Distinguishes upstream choices that engage an obligation from the downstream actions that satisfy or breach it; without this third predicate, the same obligation appears as both fulfilled and violated across adjacent steps. DEPRECATED in v2.8.0: use proeth-core:raisesObligation."@en ;
-    skos:changeNote "v2.8.0: Deprecated; the edge is promoted to core. Writers and readers emit proeth-core:raisesObligation; see rdfs:seeAlso."@en .
 
 :hasAgentRole rdf:type owl:ObjectProperty ;
     rdfs:domain proeth-core:Action ;
@@ -997,13 +952,6 @@ proeth:derivedFromPrinciple a owl:ObjectProperty ;
 # (an expert or board interpretation is captured by the normative components and their PROV-O
 # derivations; a decision tool folds to :ReferenceMaterial). The topical field is the
 # first-class proeth:topic datatype property (decision B2), not the otherAttribute overflow.
-
-:ProfessionalCode rdf:type owl:Class ;
-    owl:equivalentClass :EthicalCode ;
-    owl:deprecated true ;
-    rdfs:subClassOf proeth-core:Resource ;
-    rdfs:label "Professional Code (deprecated: merged into Ethical Code)" ;
-    skos:changeNote "2026-07-01: MERGED into :EthicalCode (owl:equivalentClass; owl:deprecated). 'Professional code' and 'ethical code' denoted the same thing, a profession's code of ethics as a document, both citing the NSPE Code as the example. EthicalCode is the survivor: it sits under proeth-core:Guideline (the IAO document container) and is load-bearing (the range of governedByCode and other properties). The Frankel (1989) and Davis (1991) codes-as-conventions grounding moved to EthicalCode. New extraction emits EthicalCode; existing ProfessionalCode individuals classify as EthicalCode via the equivalence." .
 
 :CasePrecedent rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
