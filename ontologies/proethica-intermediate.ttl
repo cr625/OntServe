@@ -320,17 +320,6 @@
 
 # Constraint is imported from proethica-core, not redefined here
 
-# Legacy type references (maintained for backward compatibility)
-:Condition rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Condition"@en ;
-    rdfs:comment "Legacy term for State. Use proeth-core:State instead for new concepts."@en ;
-    owl:deprecated true .
-
-:ConditionType rdf:type owl:Class ;
-    rdfs:label "Condition Type"@en ;
-    rdfs:comment "Legacy meta-class. Use State instead."@en ;
-    owl:deprecated true .
-
 # Meta-classes for subtypes (not GuidelineConceptTypes themselves)
 :ResourceType rdf:type owl:Class ;
     rdfs:subClassOf :EntityType ;
@@ -357,91 +346,6 @@
 # See the ONT-4 deprecation block after the Event categories below.
 #################################################################
 
-# Communication Actions - Professional disclosure and information sharing
-proeth:CommunicationAction a owl:Class ;
-    rdfs:subClassOf proeth-core:Action ;
-    rdfs:label "Communication Action"@en ;
-    skos:definition "Professional actions involving disclosure, informing, notifying stakeholders, and communicating relevant information per Tolmeijer et al. (2021) explanation requirements and McLaren (2003) transparency obligations."@en ;
-    rdfs:comment "Actions involving disclosure, informing, and transparent communication"@en ;
-    dcterms:references <https://doi.org/10.1145/3419633> , # Tolmeijer et al. 2021
-                      <https://doi.org/10.1016/S0004-3702(03)00135-8> . # McLaren 2003
-
-proeth:PreventionAction a owl:Class ;
-    rdfs:subClassOf proeth-core:Action ;
-    rdfs:label "Prevention Action"@en ;
-    skos:definition "Professional actions aimed at avoiding, preventing, minimizing, or eliminating risks and harms per Anderson & Anderson (2018) harm prevention principles and Arkin (2008) safety obligations."@en ;
-    rdfs:comment "Actions focused on avoiding and minimizing potential harms"@en ;
-    dcterms:references <https://doi.org/10.1515/pjbr-2018-0024> , # Anderson & Anderson 2018
-                      <https://doi.org/10.1145/1349822.1349839> . # Arkin 2008
-
-proeth:MaintenanceAction a owl:Class ;
-    rdfs:subClassOf proeth-core:Action ;
-    rdfs:label "Maintenance Action"@en ;
-    skos:definition "Professional actions involving maintaining, upholding, preserving, and protecting professional standards and values per Oakley & Cocking (2001) role requirements and Kong et al. (2020) integrity principles."@en ;
-    rdfs:comment "Actions focused on maintaining standards and protecting values"@en ;
-    dcterms:references <https://doi.org/10.1017/CBO9780511487118> , # Oakley & Cocking 2001
-                      <https://doi.org/10.1558/jalpp.39771> . # Kong et al. 2020
-
-proeth:PerformanceAction a owl:Class ;
-    rdfs:subClassOf proeth-core:Action ;
-    rdfs:label "Performance Action"@en ;
-    skos:definition "Professional actions involving performing, executing, conducting, and implementing professional services within areas of competence per professional obligation frameworks (NSPE II.2)."@en ;
-    rdfs:comment "Actions involving execution of professional services and duties"@en ;
-    dcterms:references "NSPE Code of Ethics II.2" .
-
-proeth:EvaluationAction a owl:Class ;
-    rdfs:subClassOf proeth-core:Action ;
-    rdfs:label "Evaluation Action"@en ;
-    skos:definition "Professional actions involving evaluating, assessing, analyzing, reviewing, and examining professional work, conditions, or decisions per Berreby et al. (2017) assessment processes and Tolmeijer et al. (2021) situational awareness."@en ;
-    rdfs:comment "Actions involving assessment and analysis of professional situations"@en ;
-    dcterms:references <https://doi.org/10.65109/hhri9090> , # Berreby et al. 2017
-                      <https://doi.org/10.1145/3419633> . # Tolmeijer et al. 2021
-
-proeth:CollaborationAction a owl:Class ;
-    rdfs:subClassOf proeth-core:Action ;
-    rdfs:label "Collaboration Action"@en ;
-    skos:definition "Professional actions involving consulting, collaborating, coordinating, and cooperating with colleagues, clients, and stakeholders per Dennis et al. (2016) multi-agent frameworks and professional peer obligations."@en ;
-    rdfs:comment "Actions involving professional cooperation and coordination"@en ;
-    dcterms:references <https://doi.org/10.1016/j.robot.2015.11.012> . # Dennis et al. 2016
-
-proeth:CreationAction a owl:Class ;
-    rdfs:subClassOf proeth-core:Action ;
-    rdfs:label "Creation Action"@en ;
-    skos:definition "Professional actions involving designing, developing, creating, building, and constructing professional solutions per technical competence requirements and innovation obligations."@en ;
-    rdfs:comment "Actions involving design and development of professional solutions"@en ;
-    dcterms:references "NSPE Code of Ethics Professional Obligations" .
-
-proeth:MonitoringAction a owl:Class ;
-    rdfs:subClassOf proeth-core:Action ;
-    rdfs:label "Monitoring Action"@en ;
-    skos:definition "Professional actions involving monitoring, supervising, overseeing, managing, and controlling professional processes per Arkin (2008) responsibility documentation and oversight requirements."@en ;
-    rdfs:comment "Actions involving supervision and oversight of professional processes"@en ;
-    dcterms:references <https://doi.org/10.1145/1349822.1349839> . # Arkin 2008
-
-# Specific Action Types
-:Decision rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    rdf:type :ActionType ;
-    rdfs:subClassOf proeth:EvaluationAction ;
-    rdfs:label "Decision"@en ;
-    skos:definition "A volitional choice made by an agent in response to an ethical situation, requiring deliberation between alternatives per Hooker & Kim (2018) reasoning-based action theory."@en ;
-    rdfs:comment "Professional choice made after ethical deliberation between alternatives"@en ;
-    dcterms:references <https://doi.org/10.1145/3278721.3278753> . # Hooker & Kim 2018
-
-proeth:DisclosureAction a owl:Class ;
-    rdfs:subClassOf proeth:CommunicationAction ;
-    rdfs:label "Disclosure Action"@en ;
-    skos:definition "Professional action of revealing conflicts, limitations, or risks to stakeholders per NSPE requirements and transparency principles."@en ;
-    rdfs:comment "Action of revealing relevant conflicts or limitations"@en ;
-    dcterms:references "NSPE Code of Ethics II.4" .
-
-proeth:CompetenceAction a owl:Class ;
-    rdfs:subClassOf proeth:PerformanceAction ;
-    rdfs:label "Competence Action"@en ;
-    skos:definition "Professional action performed within demonstrated areas of competence per NSPE competence requirements and professional boundaries."@en ;
-    rdfs:comment "Action performed within established professional competence"@en ;
-    dcterms:references "NSPE Code of Ethics II.2" .
-
 #################################################################
 # Event Categories from Chapter 2.2.7 Literature
 # Based on temporal occurrences that trigger ethical consideration
@@ -449,127 +353,6 @@ proeth:CompetenceAction a owl:Class ;
 # the three core ORIGIN subclasses (AgentCausedEvent/ExogenousEvent/AutomaticEvent).
 # See the ONT-4 deprecation block after this section.
 #################################################################
-
-# Crisis Events - Failures and emergency situations
-proeth:CrisisEvent a owl:Class ;
-    rdfs:subClassOf proeth-core:Event ;
-    rdfs:label "Crisis Event"@en ;
-    skos:definition "Events involving failures, accidents, emergencies, crises, and disasters that require immediate professional response and may override normal procedures per Berreby et al. (2017) automatic event modeling."@en ;
-    rdfs:comment "Emergency situations requiring immediate professional response"@en ;
-    dcterms:references <https://doi.org/10.65109/hhri9090> . # Berreby et al. 2017
-
-proeth:ComplianceEvent a owl:Class ;
-    rdfs:subClassOf proeth-core:Event ;
-    rdfs:label "Compliance Event"@en ;
-    skos:definition "Events involving violations, breaches, non-compliance, misconduct, or errors that trigger regulatory or professional review processes per Dennis et al. (2016) ethical policy frameworks."@en ;
-    rdfs:comment "Events involving breaches of professional or regulatory standards"@en ;
-    dcterms:references <https://doi.org/10.1016/j.robot.2015.11.012> . # Dennis et al. 2016
-
-proeth:ConflictEvent a owl:Class ;
-    rdfs:subClassOf proeth-core:Event ;
-    rdfs:label "Conflict Event"@en ;
-    skos:definition "Events involving conflicts, disputes, disagreements, controversies, or issues between stakeholders that require professional mediation or resolution per Rao et al. (2023) context-dependent moral evaluation."@en ;
-    rdfs:comment "Events involving stakeholder conflicts requiring resolution"@en ;
-    dcterms:references <https://doi.org/10.48550/arXiv.2302.00997> . # Rao et al. 2023
-
-proeth:ProjectEvent a owl:Class ;
-    rdfs:subClassOf proeth-core:Event ;
-    rdfs:label "Project Event"@en ;
-    skos:definition "Events involving deadlines, milestones, completions, deliveries, and launches that affect project timelines and professional obligations per Sarmiento et al. (2023) temporal reasoning."@en ;
-    rdfs:comment "Time-based project events affecting professional obligations"@en ;
-    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_15> . # Sarmiento et al. 2023
-
-proeth:SafetyEvent a owl:Class ;
-    rdfs:subClassOf proeth-core:Event ;
-    rdfs:label "Safety Event"@en ;
-    skos:definition "Events involving injuries, harm, damage, losses, threats, or risks that trigger safety obligations and public welfare protections per Anderson & Anderson (2018) harm-based ethical evaluation."@en ;
-    rdfs:comment "Events involving harm or risk requiring safety response"@en ;
-    dcterms:references <https://doi.org/10.1515/pjbr-2018-0024> . # Anderson & Anderson 2018
-
-proeth:EvaluationEvent a owl:Class ;
-    rdfs:subClassOf proeth-core:Event ;
-    rdfs:label "Evaluation Event"@en ;
-    skos:definition "Events involving inspections, audits, reviews, assessments, and evaluations that trigger professional scrutiny and accountability requirements per Arkin (2008) responsibility documentation."@en ;
-    rdfs:comment "Formal review events triggering professional accountability"@en ;
-    dcterms:references <https://doi.org/10.1145/1349822.1349839> . # Arkin 2008
-
-proeth:DiscoveryEvent a owl:Class ;
-    rdfs:subClassOf proeth-core:Event ;
-    rdfs:label "Discovery Event"@en ;
-    skos:definition "Events involving discoveries, findings, identifications, detections, or reports of new information that may affect professional obligations per Zhang et al. (2023) moral event classification."@en ;
-    rdfs:comment "Events revealing new information affecting professional responsibilities"@en ;
-    dcterms:references <https://doi.org/10.18653/v1/2023.findings-emnlp.95> . # Zhang et al. 2023
-
-proeth:ChangeEvent a owl:Class ;
-    rdfs:subClassOf proeth-core:Event ;
-    rdfs:label "Change Event"@en ;
-    skos:definition "Events involving changes, modifications, alterations, updates, or revisions to systems, procedures, or requirements that affect professional practice per Almpani et al. (2023) dynamic priority adjustment."@en ;
-    rdfs:comment "Events involving changes affecting professional practice requirements"@en ;
-    dcterms:references <https://doi.org/10.2478/sh-2022-0015> . # Almpani et al. 2023
-
-# Specific Event Instances
-:Violation rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    rdfs:subClassOf proeth:ComplianceEvent ;
-    rdfs:label "Violation"@en ;
-    skos:definition "An event indicating that an obligation, prohibition, or standard has been breached, requiring corrective action and potentially triggering disciplinary procedures."@en ;
-    rdfs:comment "Breach of professional standard requiring corrective response"@en .
-
-proeth:EmergencyEvent a owl:Class ;
-    rdfs:subClassOf proeth:CrisisEvent ;
-    rdfs:label "Emergency Event"@en ;
-    skos:definition "Critical event requiring immediate response that may override normal professional procedures and activate emergency protocols."@en ;
-    rdfs:comment "Critical event overriding normal professional procedures"@en .
-
-proeth:DeadlineEvent a owl:Class ;
-    rdfs:subClassOf proeth:ProjectEvent ;
-    rdfs:label "Deadline Event"@en ;
-    skos:definition "Temporal event marking project deadline or milestone that affects professional priorities and resource allocation decisions."@en ;
-    rdfs:comment "Time constraint event affecting professional priorities"@en .
-
-proeth:SafetyIncident a owl:Class ;
-    rdfs:subClassOf proeth:SafetyEvent ;
-    rdfs:label "Safety Incident"@en ;
-    skos:definition "Event involving actual or potential harm triggering safety reporting obligations and corrective measures per public welfare protection requirements."@en ;
-    rdfs:comment "Incident triggering safety obligations and reporting requirements"@en .
-
-#################################################################
-# ONT-4 (2026-07-01): TOPICAL Action/Event taxonomies RETIRED (deprecated).
-# The Action categories (Communication/Prevention/Maintenance/... above) and the
-# Event categories (Crisis/Compliance/Conflict/... above) are superseded and
-# corpus-unused (0 case references). Under the ratified design an Event is typed
-# only to one of the three disjoint ORIGIN subclasses (proeth-core:AgentCausedEvent
-# / ExogenousEvent / AutomaticEvent), driven by the emitted eventType
-# (outcome/exogenous/automatic); Action is BARE (no subtype) per the extraction
-# spec. The core comment previously CLAIMED this taxonomy was already deleted
-# (coupled task ONT-4); it was not. Marked owl:deprecated rather than hard-deleted
-# so the change is reversible and the Class Hierarchy view hides them; the dead
-# CATEGORY_TO_ONTOLOGY_IRI['actions']/['events'] maps in ProEthica are removed in
-# the same arc and the commit bridge repointed to the origin subclasses.
-#################################################################
-proeth:CommunicationAction  owl:deprecated true .
-proeth:PreventionAction     owl:deprecated true .
-proeth:MaintenanceAction    owl:deprecated true .
-proeth:PerformanceAction    owl:deprecated true .
-proeth:EvaluationAction     owl:deprecated true .
-proeth:CollaborationAction  owl:deprecated true .
-proeth:CreationAction       owl:deprecated true .
-proeth:MonitoringAction     owl:deprecated true .
-proeth:Decision             owl:deprecated true .
-proeth:DisclosureAction     owl:deprecated true .
-proeth:CompetenceAction     owl:deprecated true .
-proeth:CrisisEvent          owl:deprecated true .
-proeth:ComplianceEvent      owl:deprecated true .
-proeth:ConflictEvent        owl:deprecated true .
-proeth:ProjectEvent         owl:deprecated true .
-proeth:SafetyEvent          owl:deprecated true .
-proeth:EvaluationEvent      owl:deprecated true .
-proeth:DiscoveryEvent       owl:deprecated true .
-proeth:ChangeEvent          owl:deprecated true .
-proeth:EmergencyEvent       owl:deprecated true .
-proeth:DeadlineEvent        owl:deprecated true .
-proeth:SafetyIncident       owl:deprecated true .
-proeth:Violation            owl:deprecated true .
 
 # Event properties for temporal relationships
 proeth:triggersObligation a owl:ObjectProperty ;
@@ -682,13 +465,6 @@ proeth:owlTimeProperty a owl:DatatypeProperty ;
     owl:deprecated true ;
     skos:changeNote "2026-07-04: deprecated as a live extraction reuse target (pre-batch core audit). A catch-all State outside the closed nine-archetype set: every extracted State individual reaches proeth-core:State through exactly one content archetype, and this class offered an always-applicable alternative that competed with the archetypes in the prompt class list. Committed case individuals typed with it keep resolving."@en .
 
-:EthicalPrinciple rdf:type owl:Class ;
-    rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant
-    rdfs:label "Ethical Principle"@en ;
-    rdfs:comment "Legacy synonym for Principle. Use :Principle for new concepts."@en ;
-    owl:deprecated true ;
-    rdfs:seeAlso :Principle .
-
 :ProfessionalObligation rdf:type owl:Class ;
     # NOTE: bfo:BFO_0000017 (realizable entity / SDC) removed, it conflicts with proeth-core:Obligation
     # which is IAO:directive information entity (GDC). BFO GDC and SDC are mutually exclusive,
@@ -798,14 +574,6 @@ proeth:derivedFromPrinciple a owl:ObjectProperty ;
     rdfs:label "derived from principle"@en ;
     rdfs:comment "Links obligation to the principle(s) it operationalizes (Hallamaa & Kalliokoski 2022). DEPRECATED in v2.8.0: use proeth-core:derivedFromPrinciple."@en ;
     skos:changeNote "v2.8.0: Deprecated; the edge is promoted to core. Writers and readers emit proeth-core:derivedFromPrinciple; see rdfs:seeAlso."@en .
-
-proeth:conflictsWith a owl:ObjectProperty ;
-    rdfs:domain proeth-core:Obligation ;
-    rdfs:range proeth-core:Obligation ;
-    rdfs:label "conflicts with"@en ;
-    rdfs:comment "Indicates potential conflicts between obligations requiring resolution"@en ;
-    owl:deprecated true ;
-    skos:changeNote "2026-07-04: deprecated (pre-batch core audit). Unmarked duplicate of proeth-core:competesWith, which is the declared owl:SymmetricProperty the defeasibility machinery and the corpus edges use. Use competesWith."@en .
 
 
 
@@ -975,15 +743,6 @@ proeth:conflictsWith a owl:ObjectProperty ;
 # :TechnicalCapability retired 2026-06-28: superseded by the canonical Capability kinds
 # (ratified Ca spec); a technical competence is one of the named competence kinds below.
 
-# Problem and issue types
-:EthicalIssue rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    rdfs:subClassOf proeth-core:State ;
-    rdfs:label "Ethical Issue"@en ;
-    rdfs:comment "A problematic situation involving ethical considerations or conflicts"@en ;
-    owl:deprecated true ;
-    skos:changeNote "2026-07-04: deprecated as a live extraction reuse target (pre-batch core audit). Catch-all State outside the closed nine-archetype set; see :EthicalDilemma."@en .
-
 # :Measurement retired 2026-06-28: not one of the closed six Resource kinds (ratified Rs spec);
 # a measurement or assessment artifact is captured by the State layer, not a Resource subclass.
 
@@ -991,31 +750,7 @@ proeth:conflictsWith a owl:ObjectProperty ;
 #    Normative refinements (subclasses, non-breaking)            
 #################################################################
 
-# Modalities: DEPRECATED 2026-07-01 (deontic-modality cleanup, zero corpus usage as rdf:type).
-# subClassOf axioms retained (deprecate-and-hide, never retype); prohibitions are homed as
-# core:Constraint and permissions are not extracted as a component.
-:Permission rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    rdfs:subClassOf proeth-core:Obligation ;
-    rdfs:label "Permission"@en ;
-    rdfs:comment "A normative allowance indicating that an action or state is permitted under certain conditions."@en ;
-    owl:deprecated true ;
-    rdfs:seeAlso proeth-core:Obligation ;
-    skos:changeNote "Deprecated 2026-07-01: permissions are not extracted as a component of D=(R,P,O,S,Rs,A,E,Ca,Cs); zero corpus usage as rdf:type. The subClassOf axiom is retained for compatibility."@en .
-
-:Prohibition rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    rdfs:subClassOf proeth-core:Obligation ;
-    rdfs:label "Prohibition"@en ;
-    rdfs:comment "A normative restriction indicating that an action or state is disallowed."@en ;
-    owl:deprecated true ;
-    rdfs:seeAlso proeth-core:Constraint ;
-    skos:changeNote "Deprecated 2026-07-01: a prohibition or boundary statement is homed as core:Constraint, not as an Obligation subclass; zero corpus usage as rdf:type. The subClassOf axiom is retained for compatibility."@en .
-
 # Compliance tracking
-# :Violation is declared once above (subClassOf :ComplianceEvent, with a fuller
-# definition); the duplicate declaration that stood here (subClassOf proeth-core:Event)
-# was removed 2026-05-30.
 
 # :Justification retired 2026-06-28: not one of the closed six Resource kinds (ratified Rs spec);
 # a rationale or argument is captured by the normative components and their PROV-O derivations.
@@ -1034,55 +769,12 @@ proeth:conflictsWith a owl:ObjectProperty ;
 #    Object Properties                                           
 #################################################################
 
-:hasRole rdf:type owl:ObjectProperty ;
-    owl:equivalentProperty proeth-core:hasRole ;
-    owl:deprecated true ;
-    rdfs:domain bfo:BFO_0000004 ; # independent continuant
-    rdfs:range proeth-core:Role ;
-    rdfs:label "has role"@en ;
-    rdfs:comment "Relates an entity to a role it bears. DEPRECATED: use proeth-core:hasRole."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:hasRole. Added owl:equivalentProperty to bridge existing references."@en .
-
-:hasCondition rdf:type owl:ObjectProperty ;
-    rdfs:domain bfo:BFO_0000015 ; # process
-    rdfs:range proeth-core:State ;
-    rdfs:label "has condition"@en ;
-    rdfs:comment "Relates a process to a state that affects it"@en ;
-    owl:deprecated true .
-
-:hasState rdf:type owl:ObjectProperty ;
-    owl:equivalentProperty proeth-core:hasState ;
-    owl:deprecated true ;
-    rdfs:domain bfo:BFO_0000015 ; # process
-    rdfs:range proeth-core:State ;
-    rdfs:label "has state"@en ;
-    rdfs:comment "Relates a process to a state that affects it. DEPRECATED: use proeth-core:hasState."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:hasState. Added owl:equivalentProperty to bridge existing references."@en .
-
 :hasResource rdf:type owl:ObjectProperty ;
     rdfs:domain bfo:BFO_0000015 ; # process
     rdfs:range proeth-core:Resource ;
     rdfs:label "has resource"@en ;
     rdfs:comment "Relates a process to a resource it uses"@en ;
     skos:changeNote "v2.4.2: Fixed range from :Resource (undefined in intermediate namespace) to proeth-core:Resource."@en .
-
-:performsAction rdf:type owl:ObjectProperty ;
-    owl:equivalentProperty proeth-core:performsAction ;
-    owl:deprecated true ;
-    rdfs:domain bfo:BFO_0000040 ; # material entity
-    rdfs:range proeth-core:Action ;
-    rdfs:label "performs action"@en ;
-    rdfs:comment "Relates an agent to an action they perform. DEPRECATED: use proeth-core:performsAction."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:performsAction. Added owl:equivalentProperty to bridge existing references."@en .
-
-:hasCapability rdf:type owl:ObjectProperty ;
-    owl:equivalentProperty proeth-core:hasCapability ;
-    owl:deprecated true ;
-    rdfs:domain bfo:BFO_0000040 ; # material entity
-    rdfs:range proeth-core:Capability ;
-    rdfs:label "has capability"@en ;
-    rdfs:comment "Relates an entity to a capability it possesses. DEPRECATED: use proeth-core:hasCapability."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:hasCapability. Added owl:equivalentProperty to bridge existing references."@en .
 
 :guidedByPrinciple rdf:type owl:ObjectProperty ;
     owl:deprecated true ;
@@ -1115,39 +807,11 @@ proeth:conflictsWith a owl:ObjectProperty ;
     rdfs:comment "Relates an action to an obligation it puts at stake but does not itself resolve. The fulfillment or violation occurs at a downstream action in the same chain. Distinguishes upstream choices that engage an obligation from the downstream actions that satisfy or breach it; without this third predicate, the same obligation appears as both fulfilled and violated across adjacent steps. DEPRECATED in v2.8.0: use proeth-core:raisesObligation."@en ;
     skos:changeNote "v2.8.0: Deprecated; the edge is promoted to core. Writers and readers emit proeth-core:raisesObligation; see rdfs:seeAlso."@en .
 
-:constrainedBy rdf:type owl:ObjectProperty ;
-    owl:equivalentProperty proeth-core:constrainedBy ;
-    owl:deprecated true ;
-    rdfs:domain proeth-core:Action ;
-    rdfs:range proeth-core:Constraint ;
-    rdfs:label "constrained by"@en ;
-    rdfs:comment "Relates an action to a constraint that limits or shapes it. DEPRECATED: use proeth-core:constrainedBy."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:constrainedBy. Added owl:equivalentProperty to bridge existing references."@en .
-
 :hasAgentRole rdf:type owl:ObjectProperty ;
     rdfs:domain proeth-core:Action ;
     rdfs:range proeth-core:Role ;
     rdfs:label "has agent role"@en ;
     rdfs:comment "Relates an action to the role of the agent performing it"@en .
-
-# Properties connecting roles to obligations and principles
-:hasObligation rdf:type owl:ObjectProperty ;
-    owl:equivalentProperty proeth-core:hasObligation ;
-    owl:deprecated true ;
-    rdfs:domain proeth-core:Role ;
-    rdfs:range proeth-core:Obligation ;
-    rdfs:label "has obligation"@en ;
-    rdfs:comment "Relates a role to the professional obligations borne by entities bearing that role. DEPRECATED: use proeth-core:hasObligation."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:hasObligation. Added owl:equivalentProperty to bridge existing references."@en .
-
-:adheresToPrinciple rdf:type owl:ObjectProperty ;
-    owl:equivalentProperty proeth-core:adheresToPrinciple ;
-    owl:deprecated true ;
-    rdfs:domain proeth-core:Role ;
-    rdfs:range proeth-core:Principle ;
-    rdfs:label "adheres to principle"@en ;
-    rdfs:comment "Relates a role to ethical principles that normatively govern that role. DEPRECATED: use proeth-core:adheresToPrinciple."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-core:adheresToPrinciple. Added owl:equivalentProperty to bridge existing references."@en .
 
 :pursuesEnd rdf:type owl:ObjectProperty ;
     rdfs:domain proeth-core:Role ;
@@ -1464,15 +1128,6 @@ proeth:PriorityConstraint a owl:Class ;
     rdfs:comment "Constraints establishing precedence when multiple requirements conflict (Scheutz & Malle 2014)"@en ;
     dcterms:references <https://doi.org/10.1109/ETHICS.2014.6893446> . # Scheutz & Malle 2014
 
-# Constraint properties for relationships
-proeth:hasConstraintType a owl:DatatypeProperty ;  # was owl:ObjectProperty, corrected: range is xsd:string
-    rdfs:range xsd:string ;
-    rdfs:label "has constraint type"@en ;
-    rdfs:comment "Specifies the type of constraint (legal, regulatory, resource, etc.)"@en ;
-    owl:deprecated true ;
-    skos:changeNote "v2.x: Changed from owl:ObjectProperty to owl:DatatypeProperty. A property relating to a string literal must be a DatatypeProperty."@en ;
-    skos:changeNote "2026-07-04: deprecated (pre-batch core audit). The constraint kind is carried by the subclass (RegulatoryConstraint, ResourceConstraint, ...), the single mechanism the core Constraint editor note prescribes; a parallel free-string type literal invites vocabulary drift."@en .
-
 proeth:constrainsAction a owl:ObjectProperty ;
     rdfs:domain proeth-core:Constraint ;
     rdfs:range proeth-core:Action ;
@@ -1657,169 +1312,6 @@ proeth:enablesAction a owl:ObjectProperty ;
     rdfs:range proeth-core:Action ;
     rdfs:label "enables action"@en ;
     rdfs:comment "Relates a capability to the actions it enables"@en .
-
-proeth:requiresCapability a owl:ObjectProperty ;
-    owl:deprecated true ;
-    rdfs:seeAlso proeth-core:requiresCapability ;
-    rdfs:domain proeth-core:Role ;
-    rdfs:range proeth-core:Capability ;
-    rdfs:label "requires capability"@en ;
-    rdfs:comment "Specifies capabilities required for a professional role. DEPRECATED in v2.8.0: the requiresCapability edge is promoted to core and RE-DOMAINED to Obligation to Capability (the obligation-presupposes-capacity reading). This Role-domain form is superseded and not re-emitted; see proeth-core:requiresCapability."@en ;
-    skos:changeNote "v2.8.0: Deprecated and superseded by proeth-core:requiresCapability (Obligation to Capability). The domain change from Role to Obligation is a re-domain, not a like-for-like move, so this is deprecated separately from the four like-for-like promotions."@en .
-
-#################################################################
-#    Case Analysis Entities (Step 4 Enhanced Analysis)
-#    For Questions, Conclusions, and Decision Points
-#################################################################
-
-# Ethical Question - Questions posed to the Board for ethical review
-:EthicalQuestion rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    owl:equivalentClass proeth-cases:EthicalQuestion ;
-    owl:deprecated true ;
-    rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
-    rdfs:label "Ethical Question"@en ;
-    iao:0000115 "A question about ethical conduct posed for Board of Ethical Review consideration, representing a specific inquiry about professional ethics requiring formal determination."@en ;
-    skos:definition "Questions submitted to ethics review boards articulate specific ethical uncertainties requiring authoritative interpretation. Per McLaren (2003), these questions provide the extensional grounding for principle application, with each Board determination adding to the precedential knowledge base."@en ;
-    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> ; # McLaren 2003
-    rdfs:comment "Extracted from case 'Questions' sections. Each question frames a specific ethical issue for Board determination. DEPRECATED: use proeth-cases:EthicalQuestion."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:EthicalQuestion. Added owl:equivalentClass to bridge existing references. Case data uses the proeth-cases: version."@en .
-
-# Board Conclusion - The Board's formal determination on an ethical question
-:BoardConclusion rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    owl:equivalentClass proeth-cases:EthicalConclusion ;
-    owl:deprecated true ;
-    rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
-    rdfs:label "Board Conclusion"@en ;
-    iao:0000115 "The Board of Ethical Review's formal determination on an ethical question, representing authoritative professional judgment with precedential value."@en ;
-    skos:definition "Board conclusions represent the culmination of ethical deliberation, providing precedential guidance for future cases. Per McLaren (2003), these determinations give concrete meaning to abstract principles through their application to specific factual contexts."@en ;
-    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> ; # McLaren 2003
-    rdfs:comment "Extracted from case 'Conclusions' sections. Each conclusion answers a specific ethical question and establishes precedent. DEPRECATED: use proeth-cases:EthicalConclusion."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:EthicalConclusion. Added owl:equivalentClass to bridge existing references."@en .
-
-# Decision Point - A point in the case where an ethical choice must be made
-:DecisionPoint rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    owl:equivalentClass proeth-cases:DecisionPoint ;
-    owl:deprecated true ;
-    rdfs:label "Decision Point"@en ;
-    iao:0000115 "A point in an ethics case where a professional actor must make a choice between ethically significant alternatives, representing a critical juncture in the case narrative."@en ;
-    skos:definition "Decision points mark critical junctures in ethics cases where actors face choices between alternatives with ethical implications."@en ;
-    rdfs:comment "Extracted during Step 4 analysis. Each decision point includes options, involved roles, applicable provisions, and the board's resolution. DEPRECATED: use proeth-cases:DecisionPoint."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:DecisionPoint. Added owl:equivalentClass to bridge existing references. 845 case instances reference proeth-cases:DecisionPoint."@en ;
-    skos:changeNote "2026-07-04: the stub's own subClassOf proeth-core:Event was removed together with the cases-class re-anchoring to IAO information content entity (see proeth-cases:DecisionPoint v3.0.1); keeping it here would have re-entailed the contradicted Event typing through the equivalentClass bridge."@en .
-
-# Decision Option - An alternative available at a decision point
-:DecisionOption rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    owl:deprecated true ;
-    rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
-    rdfs:label "Decision Option"@en ;
-    iao:0000115 "A possible course of action available at a decision point, representing one alternative the actor could choose."@en ;
-    skos:definition "Decision options represent the discrete alternatives available to actors at decision points. Per scenario-directed analysis frameworks, clearly articulating options enables structured evaluation of consequences and ethical implications for each path."@en ;
-    rdfs:comment "Each decision point has multiple options; one is typically marked as the board's chosen resolution. DEPRECATED: use proeth-cases:DecisionOption."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:DecisionOption. Added owl:equivalentClass to bridge existing references."@en ;
-    skos:changeNote "2026-07-04: the equivalentClass bridge was removed together with its target (proeth-cases:DecisionOption was deleted in the cases-ontology v3.0.0 slim; zero instances corpus-wide). The stub remains only as a deprecation marker."@en .
-
-# Ethical Argument - A pro or con argument for a decision option
-:EthicalArgument rdf:type owl:Class ;
-    rdf:type :EntityType ;
-    owl:deprecated true ;
-    rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant (information content)
-    rdfs:label "Ethical Argument"@en ;
-    iao:0000115 "An argument supporting or opposing a decision option, based on ethical principles, code provisions, and precedent cases."@en ;
-    skos:definition "Ethical arguments represent the pro/con reasoning for decision options. Per the IAAI 'Pros and Cons in Ethical Decisions' paper, evaluative AI presents balanced arguments citing code provisions and precedents so practitioners can make informed decisions."@en ;
-    rdfs:comment "Generated during Step 4 Part F. Each argument includes a claim, premises, provision citations, and strength assessment. DEPRECATED: use proeth-cases:Argument."@en ;
-    skos:changeNote "v2.4.2: Deprecated in favor of proeth-cases:Argument. Added owl:equivalentClass to bridge existing references."@en ;
-    skos:changeNote "2026-07-04: the equivalentClass bridge was removed together with its target (proeth-cases:Argument was deleted in the cases-ontology v3.0.0 slim; zero instances corpus-wide). The stub remains only as a deprecation marker."@en .
-
-# Properties for case analysis entities
-:hasQuestion rdf:type owl:ObjectProperty ;
-    rdfs:domain bfo:BFO_0000001 ; # entity (case)
-    rdfs:range :EthicalQuestion ;
-    rdfs:label "has question"@en ;
-    rdfs:comment "Relates a case to the ethical questions it poses for Board review"@en .
-
-:hasConclusion rdf:type owl:ObjectProperty ;
-    rdfs:domain bfo:BFO_0000001 ; # entity (case)
-    rdfs:range :BoardConclusion ;
-    rdfs:label "has conclusion"@en ;
-    rdfs:comment "Relates a case to the Board's conclusions"@en .
-
-:hasDecisionPoint rdf:type owl:ObjectProperty ;
-    rdfs:domain bfo:BFO_0000001 ; # entity (case)
-    rdfs:range :DecisionPoint ;
-    rdfs:label "has decision point"@en ;
-    rdfs:comment "Relates a case to a decision point identified within it"@en .
-
-:hasOption rdf:type owl:ObjectProperty ;
-    rdfs:domain :DecisionPoint ;
-    rdfs:range :DecisionOption ;
-    rdfs:label "has option"@en ;
-    rdfs:comment "Relates a decision point to its available options"@en .
-
-:answersQuestion rdf:type owl:ObjectProperty ;
-    rdfs:domain :BoardConclusion ;
-    rdfs:range :EthicalQuestion ;
-    rdfs:label "answers question"@en ;
-    rdfs:comment "Relates a Board conclusion to the question it answers"@en .
-
-:involvesRole rdf:type owl:ObjectProperty ;
-    rdfs:domain :DecisionPoint ;
-    rdfs:range proeth-core:Role ;
-    rdfs:label "involves role"@en ;
-    rdfs:comment "Relates a decision point to the professional roles involved in it"@en .
-
-:appliesProvision rdf:type owl:ObjectProperty ;
-    rdfs:domain :DecisionPoint ;
-    rdfs:range :EthicalCode ;
-    rdfs:label "applies provision"@en ;
-    rdfs:comment "Relates a decision point to the ethical code provisions applicable to it"@en .
-
-:isBoardChoice rdf:type owl:DatatypeProperty ;
-    rdfs:domain :DecisionOption ;
-    rdfs:range xsd:boolean ;
-    rdfs:label "is board choice"@en ;
-    rdfs:comment "Indicates whether this option was the Board's chosen resolution"@en .
-
-:hasArgument rdf:type owl:ObjectProperty ;
-    rdfs:domain :DecisionOption ;
-    rdfs:range :EthicalArgument ;
-    rdfs:label "has argument"@en ;
-    rdfs:comment "Relates a decision option to an argument for or against it"@en .
-
-:argumentFor rdf:type owl:ObjectProperty ;
-    rdfs:domain :EthicalArgument ;
-    rdfs:range :DecisionOption ;
-    rdfs:label "argument for"@en ;
-    rdfs:comment "Indicates this is a PRO argument supporting the decision option"@en ;
-    skos:changeNote "v2.4.2: Removed rdfs:subPropertyOf :hasArgument. The parent property has domain DecisionOption and range EthicalArgument, but argumentFor has the inverse direction (EthicalArgument to DecisionOption). A subproperty cannot invert its parent's domain/range."@en .
-
-:argumentAgainst rdf:type owl:ObjectProperty ;
-    rdfs:domain :EthicalArgument ;
-    rdfs:range :DecisionOption ;
-    rdfs:label "argument against"@en ;
-    rdfs:comment "Indicates this is a CON argument opposing the decision option"@en ;
-    skos:changeNote "v2.4.2: Removed rdfs:subPropertyOf :hasArgument. Same domain/range inversion issue as argumentFor."@en .
-
-:citesProvision rdf:type owl:ObjectProperty ;
-    rdfs:domain :EthicalArgument ;
-    rdfs:range :EthicalCode ;
-    rdfs:label "cites provision"@en ;
-    rdfs:comment "Relates an argument to the code provision it cites as support"@en .
-
-:argumentType rdf:type owl:DatatypeProperty ;
-    rdfs:domain :EthicalArgument ;
-    rdfs:range xsd:string ;
-    rdfs:label "argument type"@en ;
-    rdfs:comment "The type of argument: 'pro' or 'con'"@en .
-
-:argumentStrength rdf:type owl:DatatypeProperty ;
-    rdfs:domain :EthicalArgument ;
-    rdfs:range xsd:string ;
-    rdfs:label "argument strength"@en ;
-    rdfs:comment "The assessed strength of the argument: 'weak', 'moderate', or 'strong'"@en .
 
 #################################################################
 #    SPARQL Query Support
@@ -2054,18 +1546,6 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
     rdfs:label "Employer Role"@en ;
     :archetypeAxis :OccupationalArchetype ;
     rdfs:comment "The employing organization as a participant. The duty relationship is carried separately by :EmployerRelationshipRole. No IFC equivalent."@en .
-
-#################################################################
-#    Deprecated legacy classes (audit 2026-06-01, F4)
-#    Superseded by proeth-cases:* or by :Principle; retained with a
-#    machine-readable owl:deprecated marker rather than deleted so any
-#    historical reference still resolves. The extractor must not emit them.
-#################################################################
-:EthicalArgument  owl:deprecated true .   # superseded by proeth-cases:Argument
-:BoardConclusion  owl:deprecated true .   # superseded by proeth-cases:EthicalConclusion
-:DecisionOption   owl:deprecated true .   # superseded by proeth-cases:DecisionOption
-:EthicalQuestion  owl:deprecated true .   # superseded by proeth-cases:EthicalQuestion
-:EthicalPrinciple owl:deprecated true .   # legacy synonym for :Principle
 
 
 #################################################################
