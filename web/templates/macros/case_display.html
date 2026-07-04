@@ -8,10 +8,14 @@
 {% set cc = materialized_category(entity) %}
 {% set cm = concept_meta(cc) if cc else none %}
 {% set accent = (cm.color if cm else color) or '#6c757d' %}
+{% set is_class = entity.entity_type == 'class' %}
 <div class="entity-card individual-card" style="--entity-color: {{ accent }};">
     <div class="individual-head">
         {% if cm %}
-        <span class="concept-chip" style="background: {{ cm.color }};" title="{{ cm.name }} (individual)">{{ cm.abbrev }}</span>
+        <span class="concept-chip" style="background: {{ cm.color }};" title="{{ cm.name }} ({{ 'class' if is_class else 'individual' }})">{{ cm.abbrev }}</span>
+        {% endif %}
+        {% if is_class %}
+        <span class="badge bg-light text-dark border" style="font-size:.65rem;" title="A class this case's individuals are typed with, redeclared in the case ontology; not a case individual">class</span>
         {% endif %}
         <span class="entity-label">
             {% if ontology_name %}
@@ -28,7 +32,7 @@
     {% if entity.parent_uri %}
     {% set raw_type = entity.parent_uri.split('#')[-1].split('/')[-1] %}
     <div class="instance-of">
-        <span class="instance-of-label">instance of</span>
+        <span class="instance-of-label">{{ 'subclass of' if is_class else 'instance of' }}</span>
         <i class="bi bi-chevron-right"></i>
         {% if ontology_name %}
         <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=raw_type) }}"
