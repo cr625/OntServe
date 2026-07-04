@@ -18,6 +18,7 @@ startup sync silently reverts DB-only edge materialization.
 
     python tools/sync_ontology_to_db.py proethica-case-8
     python tools/sync_ontology_to_db.py proethica-case-8 --force
+    python tools/sync_ontology_to_db.py proethica-case-8 --summary "retyped X to Y"
 """
 from __future__ import annotations
 
@@ -52,6 +53,10 @@ def main() -> int:
     ap.add_argument("ontology_name", help="e.g. proethica-case-8")
     ap.add_argument("--force", action="store_true",
                     help="re-import even if the file hash is unchanged")
+    ap.add_argument("--summary", default=None,
+                    help="change summary recorded on the new ontology_versions row "
+                         "(the DB history is the audit trail for gitignored case TTLs); "
+                         "defaults to the generic auto-sync message")
     args = ap.parse_args()
 
     ontologies_dir = ROOT / "ontologies"
@@ -63,7 +68,8 @@ def main() -> int:
     app = make_app()
     with app.app_context():
         service = OntologySyncService(db.session, ontologies_dir)
-        result = service._sync_single_ontology(ttl_path, force=args.force)
+        result = service._sync_single_ontology(ttl_path, force=args.force,
+                                               change_summary=args.summary)
     print(result)
     return 0
 

@@ -156,13 +156,18 @@ class OntologySyncService:
             return 'base', 'proethica'
         return 'base', 'manual'
 
-    def _sync_single_ontology(self, ttl_path: Path, force: bool = False) -> Dict:
+    def _sync_single_ontology(self, ttl_path: Path, force: bool = False,
+                              change_summary: str = None) -> Dict:
         """
         Sync a single TTL file.
 
         Args:
             ttl_path: Path to the TTL file
             force: Force re-extraction even if hash matches
+            change_summary: Recorded on the new ontology_versions row so the DB
+                history carries its own why (the case TTLs are gitignored, so
+                this row IS their audit trail). Defaults to the generic
+                auto-sync message used by the startup importer.
 
         Returns:
             Dict with sync result details
@@ -255,7 +260,7 @@ class OntologySyncService:
             version_number=new_version_number,
             content=ttl_content,
             content_hash=file_hash,
-            change_summary=f"Auto-synced from {ttl_path.name}",
+            change_summary=change_summary or f"Auto-synced from {ttl_path.name}",
             created_by='ontology_sync_service',
             is_current=True,
             is_draft=False,
