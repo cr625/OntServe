@@ -201,8 +201,8 @@
         <ul class="list-unstyled mb-0" style="font-family: var(--bs-font-monospace); font-size:.85rem; line-height:1.6;">
             {% for node in hierarchy.chain %}
             <li style="padding-left: {{ loop.index0 * 1.5 }}rem;">
-                {% if not loop.first %}<span class="text-muted">&#8627; </span>{% endif %}
-                {% if node.is_current %}<strong class="text-danger">{{ node.label }}</strong>
+                {% if not loop.first %}<span class="text-muted" {% if node.is_individual %}title="instance of (rdf:type), not a subclass"{% endif %}>{% if node.is_individual %}&#8712;&nbsp;{% else %}&#8627; {% endif %}</span>{% endif %}
+                {% if node.is_current %}<strong class="text-danger">{{ node.label }}</strong>{% if node.is_individual %} <span class="badge bg-secondary" style="font-size:.65rem;" title="A named individual: an instance of the class above, not a subclass">individual</span>{% endif %}
                 {% elif node.linkable %}<a href="{{ url_for('ontology.entity_detail', ontology_name=node.ontology, fragment=node.fragment) }}">{{ node.label }}</a>
                 {% else %}{{ node.label }}{% endif %}
                 {% if node.ontology and not node.is_current %}<span class="text-muted small">({{ node.ontology }})</span>{% endif %}

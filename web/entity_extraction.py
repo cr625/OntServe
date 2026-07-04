@@ -59,6 +59,20 @@ def _label(g, subject):
     return _first(g, subject, RDFS.label)
 
 
+def _fragment_label(uri):
+    """Display fallback when a resource carries no rdfs:label: the URI fragment
+    with underscores split and CamelCase spaced (DesignEngineerRole ->
+    'Design Engineer Role'). Lean per-case class redeclarations carry no labels
+    by design; without this they render as raw camel-case fragments next to the
+    spaced labels of individuals."""
+    import re as _re
+    frag = str(uri).rsplit('#', 1)[-1].rsplit('/', 1)[-1]
+    frag = frag.replace('_', ' ')
+    frag = _re.sub(r'(?<=[a-z0-9])(?=[A-Z])', ' ', frag)
+    frag = _re.sub(r'(?<=[A-Z])(?=[A-Z][a-z])', ' ', frag)
+    return frag.strip()
+
+
 def _comment_or_definition(g, subject, prefer_iao_definition=False):
     """rdfs:comment if present, else iao:0000115 (OBO textual definition), else skos:definition; each picked
     deterministically (see _first). OWL classes carry the formal definition on iao:0000115 and SKOS concepts
@@ -215,7 +229,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             continue  # anonymous class expression (owl:intersectionOf / owl:Restriction), not a named class;
                       # its BNode id is random per parse, which would make the URI + content_hash unstable
         label = _label(g, cls)
-        label_str = str(label) if label else None
+        label_str = str(label) if label else _fragment_label(cls)
         comment_str = _comment_or_definition(g, cls, prefer_iao_definition=True)
 
         # Collect additional properties (e.g., discoveredInCase, importance)

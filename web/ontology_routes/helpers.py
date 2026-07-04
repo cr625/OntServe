@@ -498,6 +498,10 @@ def class_hierarchy(entity, child_cap=25):
     for the Class Hierarchy display. Reuses the cross-ontology _class_ancestor_uris walk."""
     anc_uris = _class_ancestor_uris(entity)          # [entity.uri, parent, ..., owl:Thing]
     chain = [_hierarchy_node(u, is_current=(u == entity.uri)) for u in reversed(anc_uris)]
+    # For an individual, the final hop is rdf:type (instance-of), not
+    # rdfs:subClassOf; the display must not draw it with the subclass arrow.
+    if getattr(entity, 'entity_type', None) == 'individual' and chain:
+        chain[-1]['is_individual'] = True
     rows = db.session.execute(
         select(OntologyEntity.uri, OntologyEntity.label, Ontology.name, OntologyEntity.properties)
         .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
