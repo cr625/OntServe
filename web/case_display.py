@@ -420,12 +420,27 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
     # Build list of all known concept types for flexible matching
     all_concept_types = list(type_to_section.keys())
 
+    support_section = section_entities.get('support')
+
     for entity in entities:
         entity_type = get_entity_type_name(entity)
 
         # Track stats
         if entity_type:
             stats['by_type'][entity_type] = stats['by_type'].get(entity_type, 0) + 1
+
+        # Machine-facing plumbing goes to the collapsed support section, not the
+        # reader-facing buckets: PROV-O edge-provenance derivations, OWL-Time
+        # instants/intervals, and property declarations. Without this they
+        # dominated the Other catch-all (200+ nodes on a fresh case) and buried
+        # its genuine content.
+        if support_section is not None:
+            parent = str(getattr(entity, 'parent_uri', '') or '')
+            if (getattr(entity, 'entity_type', None) == 'property'
+                    or parent.startswith('http://www.w3.org/ns/prov#')
+                    or parent.startswith('http://www.w3.org/2006/time#')):
+                support_section['entities'].append(entity)
+                continue
 
         # Find matching section.
         # Priority: materialized direct type (set at commit time) > exact type match > hierarchy walk

@@ -147,6 +147,14 @@ default:
       collapsed: true
       max_preview: 50
 
+    - id: support
+      title: Provenance and Support Nodes
+      description: Edge provenance (PROV-O derivations), OWL-Time instants and intervals, and property declarations behind the case graph
+      entity_types: []  # Routed by code (prov/time namespaces + property rows), not by type matching
+      icon: bi-gear
+      collapsed: true
+      max_preview: 20
+
 # Domain-specific overrides
 domains:
   # Engineering ethics (ProEthica default domain)
