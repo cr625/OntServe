@@ -317,8 +317,32 @@ def create_app(config_name=None):
     return app
 
 
+def _maybe_listen_debugpy():
+    """Opt-in debugger endpoint: set DEBUGPY_PORT (e.g. 5679) and a debugpy
+    socket opens for VS Code's 'Attach: OntServe' configuration. Attach AFTER
+    the app is warm, so breakpoints never fire during startup or page-assembly
+    churn; explicit debugpy.breakpoint() markers are no-ops until a client
+    attaches. Under the Werkzeug reloader only the serving CHILD listens; each
+    reload restarts the child, so re-attach after an edit. Set
+    DEBUGPY_NO_RELOADER=1 when running with the reloader disabled."""
+    port = os.environ.get('DEBUGPY_PORT')
+    if not port:
+        return
+    serving_process = (os.environ.get('WERKZEUG_RUN_MAIN') == 'true'
+                       or os.environ.get('DEBUGPY_NO_RELOADER') == '1')
+    if not serving_process:
+        return
+    try:
+        import debugpy
+        debugpy.listen(('127.0.0.1', int(port)))
+        print(f"debugpy listening on 127.0.0.1:{port} -- attach from VS Code any time")
+    except Exception as e:  # never let the debug convenience break a start
+        print(f"debugpy listen skipped: {e}")
+
+
 if __name__ == '__main__':
     app = create_app()
+    _maybe_listen_debugpy()
 
     # Create database tables if they don't exist
     with app.app_context():
