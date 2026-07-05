@@ -554,22 +554,51 @@
                                     {% endfor %}
                                     {% endif %}
                                     {% elif entities.properties %}
+                                    {# Grouped by OWL property kind (properties JSON 'kind', written by the
+                                       canonical extractor). Rows from ontologies not yet re-extracted have no
+                                       kind and fall into the trailing ungrouped section. #}
+                                    {% for kind, heading, note in [
+                                        ('object', 'Object Properties', none),
+                                        ('datatype', 'Datatype Properties', none),
+                                        ('annotation', 'Annotation Properties',
+                                         'Annotation properties carry no domain or range by design (OWL reasoners do not apply them).'),
+                                        (none, 'Other Properties', none),
+                                    ] %}
+                                    {% set group = [] %}
                                     {% for entity in entities.properties %}
+                                        {% if (entity.properties or {}).get('kind') == kind %}
+                                            {% set _ = group.append(entity) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if group %}
+                                    <div class="list-group-item bg-light border-0">
+                                        <small class="text-muted fw-bold">{{ heading }} ({{ group|length }})</small>
+                                        {% if note %}
+                                        <br><small class="text-muted fst-italic">{{ note }}</small>
+                                        {% endif %}
+                                    </div>
+                                    {% for entity in group %}
+                                    {% set meta = entity.properties or {} %}
                                     <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.uri|extract_name) }}"
                                        class="list-group-item list-group-item-action border-0 border-bottom">
                                         <strong>{{ entity.label or entity.uri|extract_name }}</strong>
+                                        {% for characteristic in meta.get('characteristics', []) %}
+                                        <span class="badge bg-secondary ms-1">{{ characteristic }}</span>
+                                        {% endfor %}
                                         {% if entity.domain or entity.range %}
                                         <div class="mt-1">
                                             {% if entity.domain %}
-                                            <span class="badge bg-info me-1">Domain: {{ entity.domain|extract_name }}</span>
+                                            <span class="badge bg-info me-1">Domain{{ ' (soft)' if meta.get('soft_typing') }}: {{ entity.domain|extract_name }}</span>
                                             {% endif %}
                                             {% if entity.range %}
-                                            <span class="badge bg-success">Range: {{ entity.range|extract_name }}</span>
+                                            <span class="badge bg-success">Range{{ ' (soft)' if meta.get('soft_typing') }}: {{ entity.range|extract_name }}</span>
                                             {% endif %}
                                         </div>
                                         {% endif %}
                                         <code class="small text-muted">{{ entity.uri }}</code>
                                     </a>
+                                    {% endfor %}
+                                    {% endif %}
                                     {% endfor %}
                                     {% else %}
                                     <div class="text-muted text-center py-4">

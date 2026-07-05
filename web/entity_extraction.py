@@ -39,6 +39,41 @@ _IAO_DEFINITION = rdflib.URIRef('http://purl.obolibrary.org/obo/IAO_0000115')
 # with Role -- so rdfs:domain Role would make those cases inconsistent).
 _SCHEMA_DOMAIN_INCLUDES = rdflib.URIRef('http://schema.org/domainIncludes')
 _SCHEMA_RANGE_INCLUDES = rdflib.URIRef('http://schema.org/rangeIncludes')
+
+# OWL property characteristics, captured into the properties JSON so the ontology
+# detail view can badge them (Symmetric on professionalPeerOf, Asymmetric +
+# Irreflexive on prevailsOver, ...). Kept as display names, not URIs.
+_OWL_PROPERTY_CHARACTERISTICS = (
+    (OWL.FunctionalProperty, 'Functional'),
+    (OWL.InverseFunctionalProperty, 'InverseFunctional'),
+    (OWL.SymmetricProperty, 'Symmetric'),
+    (OWL.AsymmetricProperty, 'Asymmetric'),
+    (OWL.TransitiveProperty, 'Transitive'),
+    (OWL.ReflexiveProperty, 'Reflexive'),
+    (OWL.IrreflexiveProperty, 'Irreflexive'),
+)
+
+
+def _property_metadata(g, prop, kind, soft_typing=False):
+    """The properties-JSON dict for a property row.
+
+    kind ('object' | 'datatype' | 'annotation') lets the detail view group the
+    flat entity_type='property' rows; characteristics carries the OWL property
+    characteristics; soft_typing marks a domain/range that came from the
+    schema:domainIncludes/rangeIncludes hints rather than rdfs:domain/range
+    (a non-logical "applies to" the view must not present as a hard OWL
+    constraint); deprecated keeps its existing shape (the ProEthica commit
+    matcher filters on properties->>'deprecated')."""
+    meta = {'kind': kind}
+    characteristics = [name for t, name in _OWL_PROPERTY_CHARACTERISTICS
+                       if (prop, RDF.type, t) in g]
+    if characteristics:
+        meta['characteristics'] = characteristics
+    if soft_typing:
+        meta['soft_typing'] = True
+    if (prop, OWL.deprecated, rdflib.Literal(True)) in g:
+        meta['deprecated'] = True
+    return meta
 PROETHICA_NS = 'http://proethica.org/ontology/'
 PROETHICA_INTERMEDIATE_NS = 'http://proethica.org/ontology/intermediate#'
 PROETHICA_CORE_NS = 'http://proethica.org/ontology/core#'
@@ -253,8 +288,12 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
     # --- Pass 2: OWL object properties ---
     for prop in g.subjects(RDF.type, OWL.ObjectProperty):
         label = _label(g, prop)
-        domain = next(g.objects(prop, RDFS.domain), None) or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
-        range_val = next(g.objects(prop, RDFS.range), None) or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
+        hard_domain = next(g.objects(prop, RDFS.domain), None)
+        hard_range = next(g.objects(prop, RDFS.range), None)
+        domain = hard_domain or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
+        range_val = hard_range or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
+        soft = (hard_domain is None and domain is not None) \
+            or (hard_range is None and range_val is not None)
         label_str = str(label) if label else None
         # rdfs:comment, else the OBO/SKOS textual definition -- mirrors the class branch (_comment_or_definition)
         # so a property documented only with skos:definition (e.g. the relatedTo relationship vocab) still shows
@@ -264,7 +303,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         entity = OntologyEntity(
             ontology_id=ontology.id,
             entity_type='property',
-            properties={'deprecated': True} if (prop, OWL.deprecated, rdflib.Literal(True)) in g else None,
+            properties=_property_metadata(g, prop, 'object', soft_typing=soft),
             uri=str(prop),
             label=label_str,
             comment=comment_str,
@@ -280,8 +319,12 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
     # --- Pass 3: OWL datatype properties ---
     for prop in g.subjects(RDF.type, OWL.DatatypeProperty):
         label = _label(g, prop)
-        domain = next(g.objects(prop, RDFS.domain), None) or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
-        range_val = next(g.objects(prop, RDFS.range), None) or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
+        hard_domain = next(g.objects(prop, RDFS.domain), None)
+        hard_range = next(g.objects(prop, RDFS.range), None)
+        domain = hard_domain or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
+        range_val = hard_range or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
+        soft = (hard_domain is None and domain is not None) \
+            or (hard_range is None and range_val is not None)
         label_str = str(label) if label else None
         # rdfs:comment, else the OBO/SKOS textual definition -- mirrors the class branch (_comment_or_definition)
         # so a property documented only with skos:definition (e.g. the relatedTo relationship vocab) still shows
@@ -291,7 +334,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         entity = OntologyEntity(
             ontology_id=ontology.id,
             entity_type='property',
-            properties={'deprecated': True} if (prop, OWL.deprecated, rdflib.Literal(True)) in g else None,
+            properties=_property_metadata(g, prop, 'datatype', soft_typing=soft),
             uri=str(prop),
             label=label_str,
             comment=comment_str,
@@ -316,8 +359,12 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         if not uri_str.startswith('http') or uri_str in captured_uris:
             continue
         label = _label(g, prop)
-        domain = next(g.objects(prop, RDFS.domain), None) or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
-        range_val = next(g.objects(prop, RDFS.range), None) or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
+        hard_domain = next(g.objects(prop, RDFS.domain), None)
+        hard_range = next(g.objects(prop, RDFS.range), None)
+        domain = hard_domain or next(g.objects(prop, _SCHEMA_DOMAIN_INCLUDES), None)
+        range_val = hard_range or next(g.objects(prop, _SCHEMA_RANGE_INCLUDES), None)
+        soft = (hard_domain is None and domain is not None) \
+            or (hard_range is None and range_val is not None)
         label_str = str(label) if label else None
         # rdfs:comment, else the OBO/SKOS textual definition -- mirrors the class branch (_comment_or_definition)
         # so a property documented only with skos:definition (e.g. the relatedTo relationship vocab) still shows
@@ -326,7 +373,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         entity = OntologyEntity(
             ontology_id=ontology.id,
             entity_type='property',
-            properties={'deprecated': True} if (prop, OWL.deprecated, rdflib.Literal(True)) in g else None,
+            properties=_property_metadata(g, prop, 'annotation', soft_typing=soft),
             uri=uri_str,
             label=label_str,
             comment=comment_str,
@@ -451,6 +498,11 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             range_col = None
 
         properties = _collect_properties(g, subj, skip_predicates)
+        if entity_type == 'property':
+            # Inverse-declared relations with no rdf:type (e.g. the PROV-O
+            # inverses) are object properties; give them the same kind marker
+            # the typed passes write so the detail view groups them.
+            properties.update(_property_metadata(g, subj, 'object'))
         if len(domain_types) > 1:
             properties['rdf_types'] = domain_types
 

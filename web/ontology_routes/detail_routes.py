@@ -236,7 +236,11 @@ def register_detail_routes(bp):
 
         # Standard ontology view - group entities by type
         classes = [e for e in all_entities if e.entity_type == 'class']
-        properties = [e for e in all_entities if e.entity_type == 'property']
+        # Label-sorted so the template's per-kind grouping lists alphabetically
+        # rather than in DB insertion (extractor-pass) order.
+        properties = sorted(
+            (e for e in all_entities if e.entity_type == 'property'),
+            key=lambda e: (e.label or e.uri or '').lower())
         # SKOS concepts (borrowed vocabulary terms) are listed alongside individuals so
         # they stay browsable; the entity page labels them "Concept", not "Individual".
         individuals = [e for e in all_entities if e.entity_type in ('individual', 'concept')]
