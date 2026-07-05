@@ -38,16 +38,17 @@ _HDR = f"""
 
 def test_flags_cross_category_via_chain_and_property_domain():
     # Ind1 is typed to a class that chains to Principle, AND carries
-    # derivedFromPrinciple (an OBJECT property, rdfs:domain core:Obligation in the
-    # real intermediate). OWL-RL infers both Principle and Obligation -> the
-    # disjoint-core-category shape must flag it.
+    # derivedFromPrinciple (an OBJECT property, rdfs:domain core:Obligation --
+    # promoted intermediate -> core in v2.8.0; the deprecated intermediate twin
+    # was deleted 2026-07-04, 3e66802). OWL-RL infers both Principle and
+    # Obligation -> the disjoint-core-category shape must flag it.
     # (The fixture formerly used the DATATYPE property obligatedparty; its domain
     # was removed by ee0fab8 under the leak-safe datatype-property convention, so
     # the property-domain channel now exists only for curated object properties.)
     content = _HDR + """
     case:FooObligation a owl:Class ; rdfs:subClassOf core:Principle .
     case:Ind1 a owl:NamedIndividual ; a case:FooObligation ;
-        int:derivedFromPrinciple case:P1 .
+        core:derivedFromPrinciple case:P1 .
     """
     r = validate_conformance_content("synthetic-cross-category", content)
     assert r.error is None, r.error

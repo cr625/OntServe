@@ -35,15 +35,17 @@ _HDR = f"""
 
 def test_loop_repairs_cross_category_with_tier0():
     # Ind1: type chains to Principle, but derivedFromPrinciple (OBJECT property,
-    # domain core:Obligation) is present. Tier-0 defers to the property domain ->
-    # strips the Principle-chained type, re-types core:Obligation.
+    # domain core:Obligation; promoted intermediate -> core in v2.8.0, the
+    # deprecated intermediate twin deleted 2026-07-04, 3e66802) is present.
+    # Tier-0 defers to the property domain -> strips the Principle-chained type,
+    # re-types core:Obligation.
     # (Formerly used the datatype property obligatedparty; its domain was removed
     # by ee0fab8 -- datatype properties are domain-free by convention, so the
     # Tier-0 property-domain authority now keys on object properties only.)
     content = _HDR + """
     case:FooObligation a owl:Class ; rdfs:subClassOf core:Principle .
     case:Ind1 a owl:NamedIndividual ; a case:FooObligation ;
-        int:derivedFromPrinciple case:P1 .
+        core:derivedFromPrinciple case:P1 .
     """
     r = repair_loop(content, max_rounds=3)
     assert r.conforms is True, (r.reason, r.rounds)
