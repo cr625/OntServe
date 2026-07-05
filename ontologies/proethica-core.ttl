@@ -18,7 +18,8 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.10.2"^^xsd:string ;
+    owl:versionInfo "2.10.3"^^xsd:string ;
+    skos:changeNote "v2.10.3: The five typed actor-relation subproperties (hasClient, professionalPeerOf, employedBy, reviewsWorkOf, workReviewedBy) gain rdfs:domain and rdfs:range proeth-core:Role, replacing the schema:domainIncludes soft hints. The hints existed because legacy cases attached these edges to Agent endpoints, which the Agent/Role disjointness would have made inconsistent under hard domains; the 2026-07-05 twelve-case regeneration removed the last such endpoints and a corpus-wide verification query returned zero non-Role endpoints, so the axioms are now sound. reviewsWorkOf gains the owl:inverseOf workReviewedBy axiom its comment had claimed. relatedTo deliberately stays domain-less as the unvetted-relationship fallback."@en ;
     skos:changeNote "v2.10.2: Representation-only consolidation of the pairwise disjointness block. The eleven Agent separations, previously spread over six mixed-direction owl:disjointWith statements, are now one Agent-subject statement, and CodeProvision keeps its own statement against Resource. The unordered disjoint-pair set is verified identical before and after (12 pairs); no logical axioms changed. Agent is deliberately not folded into the nine-way owl:AllDisjointClasses, which expresses the D-tuple mutual-exclusion claim itself; see the comment at the disjointness block."@en ;
     skos:changeNote "v2.10.1: Stylistic pass on the nine component-class iao:0000116 editor notes. Prose semicolon chains split into separate sentences (semicolons separating citations inside parentheses retained), inanimate possessives moved to the of form, spelling normalized to American English. The wording of the calibrated extraction boundary and tie-break sentences is unchanged. No logical axioms changed."@en ;
     skos:changeNote "v2.10.0: Role universalized to cover participant roles (Stage 4 of the nine-component definition audit). The iao:0000115, rdfs:comment, iao:0000116, and skos:scopeNote of Role now state the universal genus (a role borne by an agent in virtue of a position or standing in professional practice) with obligation-generation attributed to ProfessionalRole; the core-level Role subClassOf (hasObligation some Obligation) restriction is REMOVED (the identical restriction on proeth:ProfessionalRole in the intermediate layer carries the axiom), so participant roles (Client, Owner, affected public) no longer inherit an obligation-existence commitment their own definitions deny. One logical axiom removed; monotonic weakening, corpus-gated with Pellet."@en ;
@@ -678,52 +679,58 @@ proeth-core:citesAuthority a owl:ObjectProperty ;
 # RO and BFO provide no social relations such as client, peer, or employer, because
 # in BFO such relationships are realized through the roles agents bear. The relational
 # role archetypes (ProviderClientRole, ProfessionalPeerRole, and so on) carry the
-# relationship TYPE; these properties carry the specific counterparty. Declared
-# domain-only (no rdfs:domain or rdfs:range) so a target that is not a role-bearer
-# cannot force a disjointness clash. relatedTo is the controlled fallback for
-# relationship types not mapped to a more specific relation.
+# relationship TYPE; these properties carry the specific counterparty. The five typed
+# subproperties carry rdfs:domain/range proeth-core:Role (added v2.10.3 after the
+# 2026-07-05 regeneration verified every endpoint corpus-wide is a Role facet; the
+# former schema:domainIncludes soft hints, needed while legacy cases attached these
+# edges to Agent endpoints against the Agent/Role disjointness, are retired).
+# relatedTo alone stays domain-less: it is the commit-time fallback for relationship
+# types outside the controlled vocabulary, so it must not inject Role typing onto
+# unvetted endpoints, and a domain on the parent would reach every subproperty edge
+# via the subPropertyOf entailment anyway.
 
 proeth-core:relatedTo a owl:ObjectProperty ;
-    rdfs:comment "The neutral parent of the actor-relation family. Deliberately without domain or range: it exists so unmapped relationships have a declared home rather than an invented predicate."@en ;
+    rdfs:comment "The neutral parent of the actor-relation family. Deliberately without domain or range: it exists so unmapped relationships have a declared home rather than an invented predicate, and it is the commit-time fallback for relation types outside the controlled vocabulary, so it must not inject Role typing onto unvetted endpoints. The typed subproperties (hasClient, employedBy, professionalPeerOf, reviewsWorkOf, workReviewedBy) carry the Role/Role domain and range axioms."@en ;
     rdfs:label "related to"@en ;
     skos:definition "A professional or social relationship between two role-bearing agents whose specific type is not mapped to a more specific actor relation."@en .
 
 proeth-core:hasClient a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
-    schema:domainIncludes proeth-core:Role ;
-    schema:rangeIncludes proeth-core:Role ;
-    rdfs:comment "Emitted at commit from the extraction relationships field; the edge attaches at the Agent level, so typing is soft (schema:domainIncludes) rather than rdfs:domain, which would entail Role on Agent endpoints against the Role/Agent disjointness. Bearing this edge assigns the provider side the ProviderClientRole archetype."@en ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    rdfs:comment "Emitted at commit from the extraction relationships field; the edge attaches at the ROLE-FACET level (the source and target are role facets, and the bearer Agent is reached via hasRole). Bearing this edge assigns the provider side the ProviderClientRole archetype (R1, edge-primary)."@en ;
     rdfs:label "has client"@en ;
     skos:definition "Relates a provider role-bearer to the client for whom it performs professional service."@en .
 
 proeth-core:professionalPeerOf a owl:ObjectProperty, owl:SymmetricProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
-    schema:domainIncludes proeth-core:Role ;
-    schema:rangeIncludes proeth-core:Role ;
-    rdfs:comment "Symmetric collegial relation. Soft typing (schema:domainIncludes) for the same Agent-level reason as hasClient; bearing it assigns the ProfessionalPeerRole archetype."@en ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    rdfs:comment "Symmetric collegial relation between role facets; bearing it assigns the ProfessionalPeerRole archetype (R1, edge-primary)."@en ;
     rdfs:label "professional peer of"@en ;
     skos:definition "Relates two role-bearers in a collegial professional-peer relationship, for example mutual review or mentoring. Symmetric."@en .
 
 proeth-core:employedBy a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
-    schema:domainIncludes proeth-core:Role ;
-    schema:rangeIncludes proeth-core:Role ;
-    rdfs:comment "Employment relation from the employee side. Soft typing (schema:domainIncludes) for the same Agent-level reason as hasClient; bearing it assigns the employee side the EmployerRelationshipRole archetype."@en ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    rdfs:comment "Employment relation from the employee side, between role facets; bearing it assigns the employee side the EmployerRelationshipRole archetype (R1, edge-primary)."@en ;
     rdfs:label "employed by"@en ;
     skos:definition "Relates a role-bearer to the employer it works for."@en .
 
 proeth-core:reviewsWorkOf a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
-    schema:domainIncludes proeth-core:Role ;
-    schema:rangeIncludes proeth-core:Role ;
-    rdfs:comment "Directed review relation from the reviewer side; inverse of workReviewedBy."@en ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
+    owl:inverseOf proeth-core:workReviewedBy ;
+    rdfs:comment "Directed review relation from the reviewer side; inverse of workReviewedBy (axiom added v2.10.3; the comments had claimed inversehood without it)."@en ;
     rdfs:label "reviews work of"@en ;
     skos:definition "Relates a reviewing role-bearer to the role-bearer whose work it reviews."@en .
 
 proeth-core:workReviewedBy a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
-    schema:domainIncludes proeth-core:Role ;
-    schema:rangeIncludes proeth-core:Role ;
+    rdfs:domain proeth-core:Role ;
+    rdfs:range proeth-core:Role ;
     rdfs:comment "Directed review relation from the reviewed side; inverse of reviewsWorkOf."@en ;
     rdfs:label "work reviewed by"@en ;
     skos:definition "Relates a role-bearer to another role-bearer who reviews its work."@en .

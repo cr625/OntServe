@@ -640,10 +640,11 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 # class vacuous). The rdfs:subClassOf :RelationalRole is asserted, not entailed (RelationalRole is a
 # primitive head). Occupational counterparties stay primitive (the client is :ClientRole, etc.).
 # Occupational-axis explicitness: only :PublicResponsibilityRole carries an occupational parent
-# (rdfs:subClassOf :ProfessionalRole, 2026-07-02) because only its defining property has an
-# rdfs:domain on the occupational axis; hasClient/professionalPeerOf/employedBy declare
-# schema:domainIncludes proeth-core:Role (annotation-only, no OWL entailment), so the other three
-# archetypes are provably axis-neutral and stay unparented by design.
+# (rdfs:subClassOf :ProfessionalRole, 2026-07-02) because only its defining property has a domain
+# on the occupational axis; hasClient/professionalPeerOf/employedBy carry rdfs:domain
+# proeth-core:Role (hardened from schema:domainIncludes in core v2.10.3), and proeth-core:Role sits
+# ABOVE both axes, so the other three archetypes remain provably axis-neutral and stay unparented
+# by design (only a ProfessionalRole-level domain would break neutrality).
 
 :ProviderClientRole rdf:type owl:Class ;
     owl:equivalentClass [ rdf:type owl:Class ; owl:intersectionOf (
@@ -1899,16 +1900,12 @@ proeth:terminatesText a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:comment "Literal shadow of the terminates fluent edge (Action/Event)."@en .
 
-# Participant 'who' literal shadows. These are the intermediate# literal
-# (proeth:invokedBy ...), DISTINCT from the core# object-property edge
-# (proeth-core:invokedBy <Agent>) the participant applier materialises -- different
-# IRIs, so no punning. rpo_edges / defeasibility_pipeline read these literals off the
-# committed graph as string context, so they keep the bare name (NOT redirected to a
-# Text sibling, which would blind those readers).
-proeth:invokedBy a owl:DatatypeProperty ;
-    rdfs:label "invoked by (literal)"@en ;
-    rdfs:range xsd:string ;
-    rdfs:comment "Intended on Principle: literal naming who invokes it; mirrored by the proeth-core:invokedBy edge."@en .
+# Participant 'who' literal shadows: the intermediate# literal, DISTINCT from the
+# core# object-property edge the participant applier materialises (different IRIs,
+# so no punning). The former proeth:invokedBy literal twin was deleted 2026-07-05:
+# the commit never wrote it (the CMT-3 routing skip) and rpo_edges now reads the
+# proeth-core:invokedBy edges directly, so the declaration described a triple that
+# never existed.
 
 proeth:obligatedParty a owl:DatatypeProperty ;
     rdfs:label "obligated party (literal)"@en ;
