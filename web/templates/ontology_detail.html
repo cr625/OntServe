@@ -6,8 +6,9 @@
 {% block extra_css %}
 <style>
     .entity-list {
-        max-height: 400px;
-        overflow-y: auto;
+        /* Full list displays; the page scrolls. The tab badges promise a count
+           and the pane delivers all of it (previously a 400px inner scrollbox
+           showed ~7 items against a badge of 58). */
     }
 
     .ttl-content {
@@ -415,7 +416,7 @@
                                 <span class="badge bg-primary">{{ stats.class_count }}</span>
                             </div>
                             <div class="card-body p-0">
-                                <div class="entity-list" style="max-height: 500px; overflow-y: auto;">
+                                <div class="entity-list">
                                     {% if stats.from_ttl and stats.ttl_classes %}
                                     {# Group the D-tuple framework components (dtupleComponent marker)
                                        ahead of supporting classes, in the canonical component order #}
@@ -514,7 +515,7 @@
                                 <span class="badge bg-success">{{ stats.property_count }}</span>
                             </div>
                             <div class="card-body p-0">
-                                <div class="entity-list" style="max-height: 500px; overflow-y: auto;">
+                                <div class="entity-list">
                                     {% if stats.from_ttl %}
                                     <!-- Object Properties -->
                                     {% if stats.ttl_object_properties %}

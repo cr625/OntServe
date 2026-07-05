@@ -530,7 +530,9 @@ proeth-core:containsProvision a owl:ObjectProperty ;
 
 # For case analysis to cite provisions
 proeth-core:citesProvision a owl:ObjectProperty ;
+    rdfs:domain iao:0000030 ;  # IAO:information content entity -- the citing analysis element (conclusion, question, decision record)
     rdfs:range proeth-core:CodeProvision ;
+    skos:changeNote "2026-07-04: rdfs:domain iao:0000030 added (previously rangeless-domain). The citing subjects are analysis records (information content entities); the cases-layer classes that bear the edge (EthicalConclusion et al.) are ICE subclasses, and core cannot reference the cases namespace without inverting the import layering."@en ;
     rdfs:label "cites provision"@en ;
     rdfs:comment "Relates an ethical analysis or decision to the code provisions it references."@en ;
     skos:definition "Links an analysis element to the CodeProvision(s) that justify or support it."@en ;

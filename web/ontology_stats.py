@@ -335,10 +335,13 @@ def compute_axioms(ttl_content: str) -> dict:
         # class equivalentTo/subClassOf an owl:unionOf) must be caught by type.
         if isinstance(s, BNode) or isinstance(o, BNode):
             continue
+        obj_local = extract_local_name(str(o))
         subclass_axioms.append({
             'subject': extract_local_name(str(s)),
             'subject_uri': str(s),
-            'object': extract_local_name(str(o)),
+            # Humanize upper-ontology IDs (BFO_0000015 -> 'BFO process') so the
+            # Subsumption table reads as ontology, not opaque identifiers.
+            'object': _GROUNDING_LABELS.get(obj_local, obj_local),
             'object_uri': str(o)
         })
 
