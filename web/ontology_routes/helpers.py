@@ -57,6 +57,24 @@ def _entity_semantic_links(entity, ontology):
                 continue
             seen.add((rel_label, tgt))
             frag = tgt.rsplit('#', 1)[-1].rsplit('/', 1)[-1]
+            # A case-ontology declaration IRI (the dcterms:source citation on
+            # case-discovered classes) resolves to the internal case page, not
+            # an external link -- there is no entity row for an ontology IRI.
+            case_m = _re.match(r'^https?://proethica\.org/ontology/case/(\d+)$', tgt)
+            if case_m:
+                case_name = f'proethica-case-{case_m.group(1)}'
+                case_ont = db.session.execute(
+                    select(Ontology).where(Ontology.name == case_name)).scalar_one_or_none()
+                if case_ont is not None:
+                    meta = case_ont.meta_data if isinstance(case_ont.meta_data, dict) else {}
+                    links.append({
+                        'relation': rel_label,
+                        'label': f"Case {case_m.group(1)}: {meta.get('display_name') or case_name}",
+                        'url': url_for('ontology.ontology_detail_or_uri_resolution',
+                                       ontology_name=case_name),
+                        'external': False, 'note': case_name,
+                    })
+                    continue
             ent = db.session.execute(
                 select(OntologyEntity).where(OntologyEntity.uri == tgt)
             ).scalar_one_or_none()
