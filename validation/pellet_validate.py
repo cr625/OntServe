@@ -34,6 +34,13 @@ sys.path.insert(0, str(WEB_DIR))
 FOUNDATION_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-foundation.ttl"
 CORE_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-core.ttl"
 INTERMEDIATE_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-intermediate.ttl"
+# proethica-cases added to the merge 2026-07-04 (user decision): the analysis-layer
+# classes (EthicalQuestion, EthicalConclusion, DecisionPoint, QuestionEmergence, ...)
+# type hundreds of individuals per case; without this they passed validation by
+# invisibility. Safe post the DecisionPoint re-anchoring (all eight classes are IAO
+# information content entities; the former ICE-vs-occurrent trap is defused) and post
+# the v3.0.0 slim (8 classes, no properties, no LangExtract residue).
+CASES_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-cases.ttl"
 # NOTE: the discovered-class store (proethica-intermediate-extended.ttl) is deliberately
 # NOT loaded here. It is cross-case and append-only, so loading it wholesale imports every
 # case's drift into every other case's validation (measured 2026-06-01: it dropped the corpus
@@ -157,6 +164,7 @@ def _build_merged_graph(case_content: str) -> Graph:
     g.parse(str(FOUNDATION_TTL), format="turtle")
     g.parse(str(CORE_TTL), format="turtle")
     g.parse(str(INTERMEDIATE_TTL), format="turtle")
+    g.parse(str(CASES_TTL), format="turtle")
     g.parse(data=case_content, format="turtle")
 
     # Remove ALL owl:imports triples — we've merged everything we need locally.
