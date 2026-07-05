@@ -656,6 +656,58 @@ def _entity_disjoint_classes(entity, ontology):
         return []
 
 
+def _entity_case_provenance(entity):
+    """Case citations for a case-discovered class: the cases recorded by the
+    commit-time proeth-prov:discoveredInCase / firstDiscoveredInCase markers,
+    resolved to linked case ontologies with their display titles.
+
+    A discovered class in the extended store is grounded EXTENSIONALLY by the
+    case(s) it was found in (McLaren); the raw numbers sat in the collapsed
+    provenance panel, which reads as unexplained rather than as the class's
+    citation. Returns [{num, title, url, first}] ordered first-discovery
+    first. Empty for curated classes (no markers)."""
+    props = entity.properties if isinstance(entity.properties, dict) else {}
+    if not props:
+        return []
+
+    def _nums(value):
+        values = value if isinstance(value, list) else [value]
+        out = []
+        for v in values:
+            try:
+                out.append(int(str(v)))
+            except (TypeError, ValueError):
+                continue
+        return out
+
+    first = None
+    numbers = []
+    for key, value in props.items():
+        if key.lower() == 'firstdiscoveredincase':
+            got = _nums(value)
+            first = got[0] if got else None
+        elif key.lower() == 'discoveredincase':
+            numbers.extend(_nums(value))
+    ordered = []
+    for n in ([first] if first is not None else []) + numbers:
+        if n is not None and n not in ordered:
+            ordered.append(n)
+    out = []
+    for n in ordered:
+        name = f'proethica-case-{n}'
+        ont = db.session.execute(
+            select(Ontology).where(Ontology.name == name)).scalar_one_or_none()
+        if ont is None:
+            continue
+        meta = ont.meta_data if isinstance(ont.meta_data, dict) else {}
+        title = meta.get('display_name') or name
+        out.append({
+            'num': n, 'title': title, 'first': (n == first),
+            'url': url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=name),
+        })
+    return out
+
+
 def _entity_incoming_edges(entity, ontology):
     """Object-property edges POINTING AT this entity in the current ontology
     version: [(predicate_localname, [{uri, fragment, label}])]. The commit

@@ -24,6 +24,7 @@ from web.ontology_routes.helpers import (
     _entity_disjoint_classes,
     _entity_equivalent_class,
     _entity_incoming_edges,
+    _entity_case_provenance,
 )
 
 
@@ -351,6 +352,9 @@ def register_detail_routes(bp):
         # is reserved for the case-individual pages that need it).
         incoming_edges = (_entity_incoming_edges(entity, ontology)
                           if entity.entity_type in ('individual', 'concept') else [])
+        # Case citations for case-discovered classes (extended store): the
+        # discoveredInCase markers resolved to linked, titled case ontologies.
+        case_provenance = _entity_case_provenance(entity)
 
         return render_template('entity_detail.html',
                              ontology=ontology,
@@ -361,6 +365,7 @@ def register_detail_routes(bp):
                              disjoint_classes=disjoint_classes,
                              equivalent_class=equivalent_class,
                              incoming_edges=incoming_edges,
+                             case_provenance=case_provenance,
                              ttl_content=ttl_content,
                              prop_groups=prop_groups,
                              semantic_links=semantic_links,

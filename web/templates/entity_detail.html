@@ -222,6 +222,30 @@
                 <!-- Definition (data-driven; see macros/component_sections.html) -->
                 {{ definition_card(entity, prop_groups) }}
 
+                {# Case citation for a case-discovered class: the extensional
+                   grounding (McLaren) -- which case(s) this class was found in,
+                   linked and titled, styled like a definition source. Curated
+                   classes carry literature citations instead (dcterms:source /
+                   IAO_0000119 in the Definition card); a discovered class's
+                   source IS the case. #}
+                {% if case_provenance %}
+                <div class="card mb-3">
+                    <div class="card-header"><h6 class="mb-0">Case Provenance</h6></div>
+                    <div class="card-body">
+                        <div class="text-uppercase text-muted mb-1" style="font-size:0.7em; letter-spacing:0.04em;">Discovered in</div>
+                        <ul class="small mb-0 ps-3">
+                            {% for c in case_provenance %}
+                            <li>
+                                <a href="{{ c.url }}">Case {{ c.num }}: {{ c.title }}</a>
+                                {% if c.first and case_provenance|length > 1 %}<span class="badge bg-light text-dark border ms-1">first</span>{% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="small text-muted mt-2">This class was discovered during extraction of the case(s) above; the supporting verbatim quotes are in Source Evidence.</div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Defined as (owl:equivalentClass expression for defined classes) -->
                 {{ defined_as_card(equivalent_class) }}
 
