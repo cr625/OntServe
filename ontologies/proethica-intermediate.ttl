@@ -2087,3 +2087,23 @@ proeth:roleLabel a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:label "role label"@en ;
     rdfs:comment "Label of the role facing the decision point. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:option a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "option"@en ;
+    rdfs:comment "One alternative available at a decision point, prefixed with its ordinal (e.g. '1. ...') so the sequence survives as a repeated single predicate. Borne by proeth-cases:DecisionPoint individuals. Replaces the unbounded option1/option2/... family (2026-07-04)."@en .
+
+proeth:citedProvision a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "cited provision"@en ;
+    rdfs:comment "A code provision designation cited by an analysis record. Repeated per provision. Replaces the unbounded citedProvision1/... family on conclusions (2026-07-04); the enrichment path already used the singular form."@en .
+
+proeth:answersQuestion a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "answers question"@en ;
+    rdfs:comment "The number of an ethical question a conclusion answers. Repeated per question. Replaces the unbounded answersQuestion1/... family (2026-07-04)."@en .
+
+proeth:causalStep a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "causal step"@en ;
+    rdfs:comment "One step of a causal chain, prefixed with its ordinal so the sequence survives as a repeated single predicate. Replaces the unbounded causalStep1/... family (2026-07-04)."@en .
