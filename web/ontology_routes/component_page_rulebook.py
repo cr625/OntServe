@@ -60,9 +60,10 @@ PROPERTY_STRUCTURE_GROUPS = [
         "tooltip": (
             "The literature-grounded fields that individuate this class as a <strong>type</strong>. "
             "A controlled schema (the same fields for every instance of the type), filled in on the class. "
-            "Declared by the SHACL definition shape(s) targeting this class in "
-            "<code>validation/shapes/core-shapes.ttl</code>; the shape is included in the TTL below, and "
-            "each row's <em>Property</em> column links the underlying <code>sh:path</code>."
+            "Declared by the SHACL definition shape(s) targeting this class, browsable in the "
+            "<a href=\"/ontology/proethica-shapes\">proethica-shapes</a> ontology "
+            "(source: <code>validation/shapes/core-shapes.ttl</code>); the shape is included in the TTL "
+            "below, and each row's <em>Property</em> column links the underlying <code>sh:path</code>."
         ),
     },
     {
@@ -75,8 +76,9 @@ PROPERTY_STRUCTURE_GROUPS = [
         "tooltip": (
             "The controlled schema of per-individual facts an instance may carry. These do "
             "<strong>not</strong> define the type; their values are on the <em>individual</em>, not the class. "
-            "Declared by the SHACL property shape targeting this class in "
-            "<code>validation/shapes/core-shapes.ttl</code> (included in the TTL below)."
+            "Declared by the SHACL property shape targeting this class, browsable in the "
+            "<a href=\"/ontology/proethica-shapes\">proethica-shapes</a> ontology "
+            "(source: <code>validation/shapes/core-shapes.ttl</code>; included in the TTL below)."
         ),
     },
     {

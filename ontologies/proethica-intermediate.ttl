@@ -1984,6 +1984,62 @@ proeth:otherAttribute a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:comment "Closed-vocabulary overflow for a genuinely case-specific role attribute not in the controlled set. Carries the original key and value as a 'key: value' literal, so the data is preserved while the datatype-predicate space stays finite and fully declared."@en .
 
+# --- Schema routing inputs (declared 2026-07-05) ---
+# The per-component SHACL definition shapes (core-shapes.ttl) reference these
+# as sh:path, and the prompts request them, but they had no declarations, so
+# their names could not resolve to entity pages (nine-component clickability
+# sweep). Each is a ROUTING INPUT: consumed at commit to drive the
+# subClassOf/rdf:type typing and deliberately NOT stored as a literal on
+# fresh-architecture entities. Declared so the schema vocabulary is fully
+# resolvable; string-ranged for the legacy rows that do carry values.
+
+proeth:principleCategory a owl:DatatypeProperty ;
+    rdfs:label "principle category"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Routing input: the controlled principle kind driving the four-kind subClassOf typing (FundamentalEthicalPrinciple, ProfessionalVirtuePrinciple, RelationalPrinciple, DomainSpecificPrinciple). Consumed at commit; not stored as a literal."@en .
+
+proeth:obligationType a owl:DatatypeProperty ;
+    rdfs:label "obligation type"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Routing input: the controlled NSPE obligation category driving the subClassOf core:Obligation typing (disclosure, safety, competence, confidentiality, reporting, collegial, ...). Consumed at commit; not stored as a literal."@en .
+
+proeth:stateCategory a owl:DatatypeProperty ;
+    rdfs:label "state category"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Routing input: the content archetype driving the archetype subClassOf typing (EpistemicState, RiskState, CompetenceState, EmergencyState, ConflictOfInterestState, RegulatoryApplicabilityState, ...). Consumed at commit; not stored as a literal."@en .
+
+proeth:sourceKind a owl:DatatypeProperty ;
+    rdfs:label "source kind"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Routing input: the controlled source kind driving the five-kind Resource typing (ethical_code, technical_standard, case_precedent, legal_resource, reference_material). Consumed at commit; not stored as a literal."@en .
+
+proeth:capabilityKind a owl:DatatypeProperty ;
+    rdfs:label "capability kind"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Routing input: the canonical, tool/actor-neutral competence kind driving the subClassOf typing to a named capability class. Consumed at commit; not stored as a literal."@en .
+
+proeth:boundaryType a owl:DatatypeProperty ;
+    rdfs:label "boundary type"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Routing input: the controlled constraint boundary type driving the subClassOf typing into the ten closed boundary-type classes (LegalConstraint, RegulatoryConstraint, ...). Consumed at commit; not stored as a literal."@en .
+
+proeth:eventOrigin a owl:DatatypeProperty ;
+    rdfs:label "event origin"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Routing input: the event origin driving the three-way subClassOf typing into the mutually disjoint origin subclasses (outcome to AgentCausedEvent, exogenous to ExogenousEvent, automatic to AutomaticEvent; Berreby/Sarmiento). Consumed at commit; not stored as a literal."@en .
+
+# --- Class-mint content fields referenced by the definition shapes ---
+
+proeth:extensionalCases a owl:DatatypeProperty ;
+    rdfs:label "extensional cases"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Class-level prior cases that instantiate a principle (McLaren extensional grounding); an optional class-mint field on principle classes."@en .
+
+proeth:applicabilityCondition a owl:DatatypeProperty ;
+    rdfs:label "applicability condition"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "The temporal and contextual circumstances under which a constraint or prohibition applies in a case (the Dennis complete-specification condition). Borne by constraint individuals."@en .
+
 ###############################################################
 # Analysis-layer datatype properties (declared 2026-07-04)
 #
