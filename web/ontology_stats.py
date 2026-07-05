@@ -359,19 +359,25 @@ def compute_axioms(ttl_content: str) -> dict:
             'class2_uri': str(o)
         })
 
-    # DisjointWith axioms
-    disjoint_axioms = []
+    # DisjointWith axioms, grouped by subject: a class disjoint from many others
+    # (e.g. Agent vs the nine components + CodeProvision + Guideline) renders as
+    # ONE row listing its partners rather than N scattered pair rows.
+    disjoint_by_subject = {}
     for s, p, o in g.triples((None, OWL.disjointWith, None)):
         # str(BNode) is the bare id (no '_:'), so an anonymous endpoint (e.g. a
         # class equivalentTo/subClassOf an owl:unionOf) must be caught by type.
         if isinstance(s, BNode) or isinstance(o, BNode):
             continue
-        disjoint_axioms.append({
-            'class1': extract_local_name(str(s)),
-            'class1_uri': str(s),
-            'class2': extract_local_name(str(o)),
-            'class2_uri': str(o)
-        })
+        disjoint_by_subject.setdefault(str(s), set()).add(str(o))
+    disjoint_axioms = [
+        {
+            'class1': extract_local_name(subject),
+            'class1_uri': subject,
+            'partners': sorted(extract_local_name(u) for u in objects),
+            'partner_uris': sorted(objects),
+        }
+        for subject, objects in sorted(disjoint_by_subject.items())
+    ]
 
     # owl:AllDisjointClasses sets (bnode axiom + owl:members list). Previously
     # invisible: the nine-way component disjointness -- the signature axiom of

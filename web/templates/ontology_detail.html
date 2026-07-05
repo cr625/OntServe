@@ -840,10 +840,10 @@
                                 <h6 class="small text-muted mt-3">Pairwise Disjoint Classes</h6>
                                 <ul class="list-unstyled">
                                     {% for dj in stats.axioms.disjoint %}
-                                    <li class="mb-1">
+                                    <li class="mb-2">
                                         <code class="small">{{ dj.class1 }}</code>
                                         <span class="text-muted mx-1">owl:disjointWith</span>
-                                        <code class="small">{{ dj.class2 }}</code>
+                                        {% for partner in dj.partners %}<code class="small">{{ partner }}</code>{% if not loop.last %}<span class="text-muted"> | </span>{% endif %}{% endfor %}
                                     </li>
                                     {% endfor %}
                                 </ul>

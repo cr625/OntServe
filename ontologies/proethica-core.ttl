@@ -18,7 +18,8 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.10.1"^^xsd:string ;
+    owl:versionInfo "2.10.2"^^xsd:string ;
+    skos:changeNote "v2.10.2: Representation-only consolidation of the pairwise disjointness block. The eleven Agent separations, previously spread over six mixed-direction owl:disjointWith statements, are now one Agent-subject statement, and CodeProvision keeps its own statement against Resource. The unordered disjoint-pair set is verified identical before and after (12 pairs); no logical axioms changed. Agent is deliberately not folded into the nine-way owl:AllDisjointClasses, which expresses the D-tuple mutual-exclusion claim itself; see the comment at the disjointness block."@en ;
     skos:changeNote "v2.10.1: Stylistic pass on the nine component-class iao:0000116 editor notes. Prose semicolon chains split into separate sentences (semicolons separating citations inside parentheses retained), inanimate possessives moved to the of form, spelling normalized to American English. The wording of the calibrated extraction boundary and tie-break sentences is unchanged. No logical axioms changed."@en ;
     skos:changeNote "v2.10.0: Role universalized to cover participant roles (Stage 4 of the nine-component definition audit). The iao:0000115, rdfs:comment, iao:0000116, and skos:scopeNote of Role now state the universal genus (a role borne by an agent in virtue of a position or standing in professional practice) with obligation-generation attributed to ProfessionalRole; the core-level Role subClassOf (hasObligation some Obligation) restriction is REMOVED (the identical restriction on proeth:ProfessionalRole in the intermediate layer carries the axiom), so participant roles (Client, Owner, affected public) no longer inherit an obligation-existence commitment their own definitions deny. One logical axiom removed; monotonic weakening, corpus-gated with Pellet."@en ;
     skos:changeNote "v2.9.0: Annotation-only pass on the nine component classes adding extraction boundary and tie-break sentences to iao:0000116 (Principle and Obligation prohibition contrast, Obligation firmness and compliance redirect, Constraint negative-form single-home rule, Event and AutomaticEvent origin tie-break, State stative-label and per-condition granularity, Action omission license, Principle per-value granularity), softening the Principle and Obligation provision-individuation claims in iao:0000115 and skos:scopeNote (provision anchoring is carried by the curated nspeReference annotations and the commit-time citesProvision edges, not by type individuation), and trimming the State iao:0000115 by moving the quality-versus-SDC typing rationale into its skos:changeNote; no logical axioms changed."@en ;
@@ -799,33 +800,35 @@ proeth-core:Action rdfs:subClassOf [
 # Enhanced Disjointness Axioms for Ontology Engineering Quality
 ###############################################################
 
-# CRITICAL BFO-Based Disjointness: Continuants vs Occurrents
-# Agent (material entity/continuant) is disjoint from processes (occurrents)
-proeth-core:Agent owl:disjointWith proeth-core:Action, proeth-core:Event .
-
 # Pairwise disjointness within the nine D-tuple components is NOT asserted here:
 # it is entailed by the nine-way owl:AllDisjointClasses below, and the pairwise
 # duplicates (Role-Capability, P/O/Cs-Resource, Action/Event/State-Resource/Role/
 # Capability) were removed 2026-07-04 as redundant. Pairwise axioms remain ONLY
 # for classes OUTSIDE the nine (Agent, CodeProvision, Guideline), whose
 # separations the nine-way set does not cover.
+#
+# Agent is NOT folded into the nine-way set (which would entail the same pairs):
+# the nine-way set is the D-tuple mutual-exclusion claim itself, and Agent is a
+# participant bearer outside the framework, so its separations are kept as this
+# ordinary one-subject disjointWith statement. Rationale per pair: material
+# entity vs occurrents (Action, Event); vs realizable/dependent entities (Role,
+# Capability, State); vs information content entities (Principle, Obligation,
+# Constraint, Resource, CodeProvision, Guideline). Asserted explicitly because
+# the validation harness strips owl:imports, so the BFO separations are not
+# loaded (v2.7.1 note); consolidated from six mixed-direction statements into
+# one Agent-subject statement in v2.10.2 (semantics unchanged; owl:disjointWith
+# is symmetric).
+proeth-core:Agent owl:disjointWith proeth-core:Role, proeth-core:Principle,
+    proeth-core:Obligation, proeth-core:State, proeth-core:Resource,
+    proeth-core:Action, proeth-core:Event, proeth-core:Capability,
+    proeth-core:Constraint, proeth-core:CodeProvision, proeth-core:Guideline .
 
-# Directive ICEs outside the nine are disjoint from Agent and from descriptive ICEs (Rs)
-proeth-core:CodeProvision owl:disjointWith proeth-core:Agent, proeth-core:Resource .
-proeth-core:Guideline owl:disjointWith proeth-core:Agent .  # NOT disjoint with Resource: a guideline document is a kind of Resource (v2.7.3)
-
-# Directive nine-members vs Agent (a non-member; the nine-way set does not cover it)
-proeth-core:Principle owl:disjointWith proeth-core:Agent .
-proeth-core:Obligation owl:disjointWith proeth-core:Agent .
-proeth-core:Constraint owl:disjointWith proeth-core:Agent .
-proeth-core:State owl:disjointWith proeth-core:Agent .
-
-# Agent (material entity) cannot also be a Role, Capability, or Resource (v2.7.1).
-# Asserted explicitly because the validation harness strips owl:imports, so the BFO
-# separation (material entity vs role / disposition / information content entity) is not
-# loaded. Agent is already disjoint with Action, Event, State, Principle, Obligation,
-# and Constraint above.
-proeth-core:Agent owl:disjointWith proeth-core:Role, proeth-core:Capability, proeth-core:Resource .
+# The directive STATEMENT class vs the descriptive knowledge-source class (see the
+# CodeProvision iao:0000116 boundary note). Guideline is deliberately NOT disjoint
+# with Resource: a guideline document is a kind of Resource (v2.7.3), which is also
+# why no AllDisjointClasses set can absorb these two -- a set containing both
+# Guideline and Resource would make Guideline unsatisfiable.
+proeth-core:CodeProvision owl:disjointWith proeth-core:Resource .
 
 # Core formal specification components remain disjoint
 [] a owl:AllDisjointClasses ;
