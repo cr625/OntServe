@@ -308,14 +308,6 @@
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.2.e" ;
     rdfs:comment "The value that a professional keeps current with and applies evolving technical and ethical standards of practice."@en .
 
-:MentorDependencyTransitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
-    rdfs:label "Mentor Dependency Transition Principle"@en ;
-    owl:deprecated true ;
-    skos:changeNote "2026-07-04: deprecated as a live extraction reuse target (pre-batch audit closeout). A narrow case-derived scenario compound, not a reusable professional value; zero instances in the fresh-architecture corpus. Falls out entirely at the corpus rebuild if still unreferenced."@en ;
-    iao:0000115 "The value that an engineer develops independent competence and does not remain indefinitely dependent on a mentor for professional judgment."@en ;
-    proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
-    rdfs:comment "The value that an engineer develops independent competence and does not remain indefinitely dependent on a mentor for professional judgment."@en .
-
 
 # Obligation is imported from proethica-core, not redefined here
 
@@ -558,14 +550,6 @@ proeth:FaithfulAgentObligation a owl:Class ;
     iao:0000115 "Duty of an engineer to act as a faithful agent or trustee of an employer or client (NSPE Code of Ethics, Section 1 / §II.4). Defeasible under states that confirm public-safety risk."@en ;
     rdfs:comment "Duty of an engineer to act as a faithful agent or trustee of an employer or client (NSPE Code of Ethics, Section 1 / §II.4). Defeasible under states that confirm public-safety risk."@en .
 
-proeth:PostTermEnvRiskReportingObligation a owl:Class ;
-    rdfs:subClassOf proeth:ReportingObligation ;
-    rdfs:label "Post-Termination Environmental Risk Reporting Obligation"@en ;
-    owl:deprecated true ;
-    skos:changeNote "2026-07-04: deprecated as a live extraction reuse target (pre-batch audit closeout). The class name compounds temporal circumstance, domain, and addressee; the content belongs to ReportingObligation with the circumstances on the case individual. Zero instances in the fresh-architecture corpus."@en ;
-    iao:0000115 "Duty of an engineer to report environmental risks to a pollution-control authority after termination of the client relationship when the risk rises to a public-safety concern (NSPE Code §I.1, §II.1.a, §II.1.c). Derived from the paramount public-welfare principle."@en ;
-    rdfs:comment "Duty of an engineer to report environmental risks to a pollution-control authority after termination of the client relationship when the risk rises to a public-safety concern (NSPE Code §I.1, §II.1.a, §II.1.c). Derived from the paramount public-welfare principle."@en .
-
 # Obligation properties for temporal and contextual aspects
 proeth:hasEnforcementLevel a owl:DatatypeProperty ;  # was owl:ObjectProperty, corrected: range is xsd:string
     rdfs:range xsd:string ;
@@ -625,15 +609,6 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     skos:altLabel "Stakeholder"@en, "Stakeholder Role"@en ;
     iao:0000115 "A role of an involved party or stakeholder that does not itself establish professional obligations (e.g., Client, The Public, Community Member)."@en ;
     rdfs:comment "A role of an involved party or stakeholder that does not itself establish professional obligations (e.g., Client, The Public, Community Member)."@en .
-
-# Alias for clarity when classifying roles extracted from text
-:StakeholderRole rdf:type owl:Class ;
-    rdfs:subClassOf :ParticipantRole ;
-    rdfs:label "Stakeholder Role"@en ;
-    owl:deprecated true ;
-    skos:changeNote "2026-07-04: deprecated as a live extraction reuse target (pre-batch audit closeout). A near-alias of its own parent ParticipantRole whose examples are its siblings; two interchangeable labels degraded the reuse-first class list. The class itself remains (deliberately untagged on the archetype axis; see the occupational-resolver semantics), and ParticipantRole carries skos:altLabel Stakeholder so the term still matches."@en ;
-    iao:0000115 "A participant role borne by stakeholders such as Clients, Employers, and the Public. Typically not the bearer of professional obligations, but may be linked to principles in explicit statements."@en ;
-    rdfs:comment "A participant role borne by stakeholders such as Clients, Employers, and the Public. Typically not the bearer of professional obligations, but may be linked to principles in explicit statements."@en .
 
 # Keep ProfessionalRole and ParticipantRole disjoint to avoid mixing semantics
 :ProfessionalRole owl:disjointWith :ParticipantRole .
@@ -1135,15 +1110,6 @@ proeth:TemporalConstraint a owl:Class ;
     rdfs:comment "Time-based limitations and deadlines (Govindarajulu & Bringsjord 2017)"@en ;
     dcterms:references <https://doi.org/10.24963/ijcai.2017/658> . # Govindarajulu & Bringsjord 2017
 
-proeth:PriorityConstraint a owl:Class ;
-    rdfs:subClassOf proeth-core:Constraint ;
-    rdfs:label "Priority Constraint"@en ;
-    owl:deprecated true ;
-    skos:changeNote "2026-07-04: deprecated as a live extraction reuse target (pre-batch audit closeout). Precedence between competing requirements is carried by the obligation-layer defeasibility properties (competesWith / prevailsOver / defeasibleUnder), per the core Constraint editor note; a constraint class for it duplicated that mechanism. Zero instances in the fresh-architecture corpus."@en ;
-    iao:0000115 "Constraints establishing precedence when multiple requirements conflict (Scheutz & Malle 2014)"@en ;
-    rdfs:comment "Constraints establishing precedence when multiple requirements conflict (Scheutz & Malle 2014)"@en ;
-    dcterms:references <https://doi.org/10.1109/ETHICS.2014.6893446> . # Scheutz & Malle 2014
-
 proeth:constrainsAction a owl:ObjectProperty ;
     rdfs:domain proeth-core:Constraint ;
     rdfs:range proeth-core:Action ;
@@ -1431,7 +1397,7 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 :archetypeAxis rdf:type owl:AnnotationProperty ;
     rdfs:label "archetype axis"@en ;
     rdfs:seeAlso proeth:RoleArchetypeAxisScheme ;
-    rdfs:comment "Role-archetype axis marker. The value is a concept (URI) in proeth:RoleArchetypeAxisScheme (currently :OccupationalArchetype; the relational pole is now a reasoner-inferred defined class, not an annotation). skos:notation carries the short code. NOTE (presence-flag semantics, post relational retirement): the axis is now single-valued, so the VALUE :OccupationalArchetype no longer discriminates -- it is the PRESENCE vs absence of the marker that is load-bearing. Presence is the selector the occupational resolver queries, g.subjects(:archetypeAxis, :OccupationalArchetype), to enrol a class (by its rdfs:label + skos:altLabel) in data-driven placement; a class without the marker (the ProfessionalRole/ParticipantRole backbone heads, StakeholderRole, the relational defined classes) is deliberately not a placement target. 'Occupational' means occupational/POSITIONAL kind (the who-the-bearer-is axis), which is why participant heads (Client/Owner/Public/...) carry it too: they are positional kinds, not occupations in the labor sense. Do NOT remove it from the participant heads to 'clean up' the label -- that un-indexes them from the resolver."@en .
+    rdfs:comment "Role-archetype axis marker. The value is a concept (URI) in proeth:RoleArchetypeAxisScheme (currently :OccupationalArchetype; the relational pole is now a reasoner-inferred defined class, not an annotation). skos:notation carries the short code. NOTE (presence-flag semantics, post relational retirement): the axis is now single-valued, so the VALUE :OccupationalArchetype no longer discriminates -- it is the PRESENCE vs absence of the marker that is load-bearing. Presence is the selector the occupational resolver queries, g.subjects(:archetypeAxis, :OccupationalArchetype), to enrol a class (by its rdfs:label + skos:altLabel) in data-driven placement; a class without the marker (the ProfessionalRole/ParticipantRole backbone heads, the relational defined classes) is deliberately not a placement target. 'Occupational' means occupational/POSITIONAL kind (the who-the-bearer-is axis), which is why participant heads (Client/Owner/Public/...) carry it too: they are positional kinds, not occupations in the labor sense. Do NOT remove it from the participant heads to 'clean up' the label -- that un-indexes them from the resolver."@en .
 
 # specializationAxis applies to occupational role leaves under an archetype head (e.g. EngineerRole):
 # "discipline" = a branch of the profession (CivilEngineerRole, crosswalked to an IFC discipline role);

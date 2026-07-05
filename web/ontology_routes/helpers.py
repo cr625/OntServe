@@ -416,7 +416,7 @@ def _shape_target_map():
 def _class_shape_schemas(ancestor_list):
     """The SHACL property schema for a class = the UNION of the descriptive shapes whose targetClass is in the
     class chain (general -> specific): a base Role gets RoleDefinitionShape; a ProfessionalRole also gets
-    ProfessionalRoleDefinitionShape + ProfessionalRolePropertyShape; a StakeholderRole only the universal
+    ProfessionalRoleDefinitionShape + ProfessionalRolePropertyShape; a ParticipantRole only the universal
     one. *DefinitionShape -> definitional (type-level), *PropertyShape -> bearer (individual). Returns
     (definitional, bearer)."""
     targets = _shape_target_map()
