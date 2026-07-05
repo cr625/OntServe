@@ -461,11 +461,16 @@ def compute_dtuple_framework(ttl_content: str) -> list:
     except Exception:
         return []
     out = []
+    _IAO_DEF = Namespace('http://purl.obolibrary.org/obo/IAO_')['0000115']
     for subj in g.subjects(_CORE_NS.dtupleComponent, None):
         letter = next(g.objects(subj, _CORE_NS.dtupleComponent), None)
         frag = str(subj).rsplit('#', 1)[-1].rsplit('/', 1)[-1]
         label = next(g.objects(subj, RDFS.label), None)
-        definition = (next(g.objects(subj, _SKOS_NS.definition), None)
+        # Same precedence as the entity extractor's serving field (iao:0000115
+        # first), so the framework cards and the Classes tab show the SAME
+        # canonical definition text rather than two different annotations.
+        definition = (next(g.objects(subj, _IAO_DEF), None)
+                      or next(g.objects(subj, _SKOS_NS.definition), None)
                       or next(g.objects(subj, RDFS.comment), None))
         grounding_frag = grounding_label = None
         for parent in g.objects(subj, RDFS.subClassOf):

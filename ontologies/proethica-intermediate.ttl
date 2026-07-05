@@ -29,14 +29,11 @@
 #################################################################
 
 # Declare key types needed by the OntologyMCPServer for entity extraction
-:EntityType rdf:type owl:Class ;
-    rdfs:label "Entity Type"@en ;
-    rdfs:comment "Meta-class for entity types recognized by the ProEthica system"@en .
-
 # New supertype for guideline concept extraction
 :GuidelineConceptType rdf:type owl:Class ;
     rdfs:subClassOf :EntityType ;
     rdfs:label "Guideline Concept Type"@en ;
+    iao:0000115 "A type of entity specifically extracted from ethical guidelines and standards. These are the eight core categories used for concept extraction from guideline documents."@en ;
     rdfs:comment "A type of entity specifically extracted from ethical guidelines and standards. These are the eight core categories used for concept extraction from guideline documents."@en .
 
 # The 8 Guideline Concept Types
@@ -52,7 +49,6 @@
 
 # Core Principle Categories from Chapter 2.2.2 Analysis
 :FundamentalEthicalPrinciple rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
     rdfs:label "Fundamental Ethical Principle"@en ;
     iao:0000115 "A universal moral foundation that serves as the highest-level abstraction in professional ethics, requiring extensive interpretation through concrete cases (BFO: generically dependent continuant)"@en ;
@@ -63,7 +59,6 @@
     rdfs:comment "Examples: Public Welfare Paramount, Respect for Persons, Justice, Beneficence. These require extensive interpretation and balancing in specific contexts."@en .
 
 :ProfessionalVirtuePrinciple rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
     rdfs:label "Professional Virtue Principle"@en ;
     iao:0000115 "A character-based principle defining professional excellence and ethical sensitivities specific to professional identity (BFO: generically dependent continuant)"@en ;
@@ -73,7 +68,6 @@
     rdfs:comment "Examples: Integrity, Competence, Honesty, Professional Courage, Accountability. These shape professional character and decision-making."@en .
 
 :RelationalPrinciple rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
     rdfs:label "Relational Principle"@en ;
     iao:0000115 "A principle governing professional relationships and establishing frameworks for trust and stakeholder interactions (BFO: generically dependent continuant)"@en ;
@@ -83,7 +77,6 @@
     rdfs:comment "Examples: Confidentiality, Loyalty, Fairness, Transparency, Respect for Autonomy. These govern interpersonal professional dynamics."@en .
 
 :DomainSpecificPrinciple rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Principle ;
     rdfs:label "Domain-Specific Principle"@en ;
     iao:0000115 "A principle particular to professional domain contexts that bridges general ethics to specific technical practices (BFO: generically dependent continuant)"@en ;
@@ -94,7 +87,6 @@
 
 # Specific Principle Instances commonly found in Professional Codes
 :PublicWelfarePrinciple rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf :FundamentalEthicalPrinciple ;
     rdfs:label "Public Welfare Principle"@en ;
     skos:altLabel "public safety principle"@en ;
@@ -107,7 +99,6 @@
     rdfs:comment "Requires contextual interpretation to balance against client confidentiality and employer loyalty when public safety is at risk."@en .
 
 :IntegrityPrinciple rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Integrity Principle"@en ;
     iao:0000115 "The professional virtue principle of maintaining honesty, truthfulness, and ethical consistency in professional practice (BFO: generically dependent continuant)"@en ;
@@ -118,7 +109,6 @@
     rdfs:comment "Central to professional identity formation and trust maintenance in professional relationships."@en .
 
 :CompetencePrinciple rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Competence Principle"@en ;
     iao:0000115 "The professional virtue principle requiring maintenance and application of professional knowledge and skill within areas of competence (BFO: generically dependent continuant)"@en ;
@@ -129,7 +119,6 @@
     rdfs:comment "Balances professional autonomy with recognition of limitations and need for collaboration."@en .
 
 :ConfidentialityPrinciple rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf :RelationalPrinciple ;
     rdfs:label "Confidentiality Principle"@en ;
     iao:0000115 "The relational principle protecting client information and maintaining trust in professional relationships (BFO: generically dependent continuant)"@en ;
@@ -140,7 +129,6 @@
     rdfs:comment "Must be balanced against public safety obligations and legal disclosure requirements."@en .
 
 :TransparencyPrinciple rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf :RelationalPrinciple ;
     rdfs:label "Transparency Principle"@en ;
     iao:0000115 "The relational principle requiring openness and disclosure in professional communications and decision-making (BFO: generically dependent continuant)"@en ;
@@ -148,10 +136,10 @@
     dcterms:source "NSPE Code of Ethics II.3.a" ,
                    <https://doi.org/10.1016/j.robot.2015.11.012> ; # Dennis et al. 2016
     proeth:nspeReference "Rule of Practice II.3.a (composite disclosure value; also II.4.a / III.1.a)" ;
+    iao:0000116 "II.3.a triplet boundary: Transparency is the RELATIONAL pole of the shared provision, the openness owed to affected parties about conflicts, limitations, and decision processes. The judgment-quality pole is ObjectivityPrinciple; the content-completeness pole is the Complete Reporting principle."@en ;
     rdfs:comment "Essential for maintaining trust and enabling stakeholder participation in professional decisions."@en .
 
 :EnvironmentalStewardshipPrinciple rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Environmental Stewardship Principle"@en ;
     iao:0000115 "The domain-specific principle in engineering requiring consideration of environmental impact and sustainability (BFO: generically dependent continuant)"@en ;
@@ -165,6 +153,7 @@
 # (parented to their kind; specializationAxis = kind; per-principle NSPE-canon grounding still TODO).
 :PeerReviewCooperationPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Peer Review Cooperation Principle"@en ;
+    iao:0000115 "The value that an engineer cooperates with the peer review of another's work; the confidentiality of the reviewed material is a State context, not part of the value."@en ;
     proeth:nspeReference "Professional Obligation III.7.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.7.a" ;
     skos:altLabel "confidential peer review cooperation principle"@en, "peer review notification principle"@en ;
@@ -172,6 +161,7 @@
 
 :LoyaltyPrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
     rdfs:label "Loyalty Principle"@en ;
+    iao:0000115 "The value that a professional acts as a faithful agent or trustee for the client or employer in professional matters."@en ;
     proeth:nspeReference "Rule of Practice II.4" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.4" ;
     skos:altLabel "faithful agent loyalty principle"@en, "loyalty"@en ;
@@ -179,13 +169,16 @@
 
 :ObjectivityPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Objectivity Principle"@en ;
+    iao:0000115 "The value that professional judgments and opinions are issued objectively and truthfully, free from bias or undue influence."@en ;
     proeth:nspeReference "Rule of Practice II.3.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.a" ;
     skos:altLabel "adversarial context objectivity principle"@en, "adversarial engagement objectivity principle"@en, "dual role objectivity principle"@en, "report language fairness principle"@en ;
+    iao:0000116 "II.3.a triplet boundary: Objectivity is the JUDGMENT-QUALITY pole of the shared provision, opinions issued unbiased and truthful. The openness-to-parties pole is TransparencyPrinciple; the no-material-omissions pole is the Complete Reporting principle."@en ;
     rdfs:comment "The value that professional judgments and opinions are issued objectively and truthfully, free from bias or undue influence."@en .
 
 :HonestyPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Honesty Principle"@en ;
+    iao:0000115 "The value that a professional is truthful and avoids deception or misrepresentation in professional dealings."@en ;
     proeth:nspeReference "Fundamental Canon 5" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Fundamental Canon 5" ;
     skos:altLabel "fact-based opinion principle"@en, "scope of engagement honesty principle"@en, "deceptive submission prohibition principle"@en, "credential misrepresentation prohibition principle"@en ;
@@ -193,6 +186,7 @@
 
 :ConflictOfInterestDisclosurePrinciple rdf:type owl:Class ; rdfs:subClassOf :RelationalPrinciple ;
     rdfs:label "Conflict of Interest Disclosure Principle"@en ;
+    iao:0000115 "The value that a professional discloses, and where required avoids, conflicts of interest affecting professional judgment."@en ;
     proeth:nspeReference "Rule of Practice II.4.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.4.a" ;
     skos:altLabel "advisory self-interest disclosure principle"@en, "divided loyalty prohibition principle"@en, "client consent conflict waiver principle"@en ;
@@ -200,6 +194,7 @@
 
 :ResponsibleChargePrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Responsible Charge Principle"@en ;
+    iao:0000115 "The value that an engineer in responsible charge exercises actual direct control and personal supervision over the work for which responsibility is taken."@en ;
     proeth:nspeReference "Rule of Practice II.2.b" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.2.b" ;
     skos:altLabel "responsible charge active engagement principle"@en, "supervisory control adequacy principle"@en, "professional sealing responsibility principle"@en ;
@@ -207,12 +202,14 @@
 
 :ReviewAdequacyPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Review Adequacy Principle"@en ;
+    iao:0000115 "The value that a professional reviews work in sufficient depth to take responsibility for its correctness before relying on or adopting it."@en ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     skos:altLabel "ai review adequacy principle"@en, "detailed review adequacy principle"@en ;
     rdfs:comment "The value that a professional reviews work in sufficient depth to take responsibility for its correctness before relying on or adopting it."@en .
 
 :SelfCertificationProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Independent Review Principle"@en ;
+    iao:0000115 "The value that a professional does not certify or approve their own work in a capacity meant to provide independent oversight."@en ;
     skos:altLabel "self-certification prohibition principle"@en ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value that a professional does not certify or approve their own work in a capacity meant to provide independent oversight."@en ;
@@ -220,6 +217,7 @@
 
 :ToolSubstitutionProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Professional Judgment Primacy Principle"@en ;
+    iao:0000115 "The value that a tool or technology does not substitute for the professional judgment and competence the work requires."@en ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     skos:altLabel "technology replacement prohibition principle"@en, "tool substitution prohibition principle"@en ;
     rdfs:comment "The value that a tool or technology does not substitute for the professional judgment and competence the work requires."@en ;
@@ -227,6 +225,7 @@
 
 :ProfessionalAccountabilityPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Professional Accountability Principle"@en ;
+    iao:0000115 "The value that a professional takes personal responsibility for, and acknowledges error in, work performed under their authority."@en ;
     proeth:nspeReference "Professional Obligation III.8" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.8" ;
     skos:altLabel "error acknowledgment principle"@en, "professional accountability"@en ;
@@ -234,6 +233,7 @@
 
 :CorrectiveActionMonitoringPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Corrective Action Monitoring Principle"@en ;
+    iao:0000115 "The value that a professional monitors a hazardous or deficient condition through to the completion of corrective action."@en ;
     proeth:nspeReference "Rule of Practice II.1.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.1.a" ;
     skos:altLabel "post-engagement observation duty principle"@en ;
@@ -241,17 +241,20 @@
 
 :ExpertiseCalibratedDisclosurePrinciple rdf:type owl:Class ; rdfs:subClassOf :FundamentalEthicalPrinciple ;
     rdfs:label "Expertise-Calibrated Disclosure Principle"@en ;
+    iao:0000115 "The value that the scope and certainty of professional statements is calibrated to the professional's actual expertise in the matter."@en ;
     proeth:nspeReference "Rule of Practice II.3.b" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.b" ;
     rdfs:comment "The value that the scope and certainty of professional statements is calibrated to the professional's actual expertise in the matter."@en .
 
 :NonEngineeringExpertServicesPrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Non-Engineering Expert Services Principle"@en ;
+    iao:0000115 "The value governing an engineer who provides expert services outside engineering, that such services not trade on engineering authority they do not warrant."@en ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value governing an engineer who provides expert services outside engineering, that such services not trade on engineering authority they do not warrant."@en .
 
 :JurisdictionalLicensureCompliancePrinciple rdf:type owl:Class ; rdfs:subClassOf :DomainSpecificPrinciple ;
     rdfs:label "Jurisdictional Licensure Compliance Principle"@en ;
+    iao:0000115 "The value that a professional practices only within the jurisdictions and license scope for which the professional is authorized."@en ;
     proeth:nspeReference "Professional Obligation III.8.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.8.a" ;
     skos:altLabel "engineering title invocation principle"@en ;
@@ -259,9 +262,11 @@
 
 :SelectiveReportingProhibitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Complete Reporting Principle"@en ;
+    iao:0000115 "The value that a professional reports findings completely and does not omit material facts that qualify or contradict a favored conclusion."@en ;
     proeth:nspeReference "Rule of Practice II.3.a" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.a" ;
     skos:altLabel "technical completeness principle"@en, "client disservice by incompleteness principle"@en, "expert fact gathering diligence principle"@en, "selective reporting prohibition principle"@en ;
+    iao:0000116 "II.3.a triplet boundary: Complete Reporting is the CONTENT-COMPLETENESS pole of the shared provision, no material facts omitted that qualify or contradict a favored conclusion. The judgment-quality pole is ObjectivityPrinciple; the openness-to-parties pole is TransparencyPrinciple."@en ;
     rdfs:comment "The value that a professional reports findings completely and does not omit material facts that qualify or contradict a favored conclusion."@en ;
     skos:changeNote "2026-07-02: relabeled from Selective Reporting Prohibition Principle to the positive value the comment states; the prohibition statement itself homes as a core:Constraint per the v2.9.0 boundary sentence. URI unchanged; old label retained as altLabel."@en .
 
@@ -284,11 +289,13 @@
 
 :SchedulePressureResistancePrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Schedule Pressure Resistance Principle"@en ;
+    iao:0000115 "The value that a professional does not compromise technical or ethical standards in response to schedule or commercial pressure."@en ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value that a professional does not compromise technical or ethical standards in response to schedule or commercial pressure."@en .
 
 :WhistleblowerPersonalConsciencePrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Whistleblower Personal Conscience Principle"@en ;
+    iao:0000115 "The value that a professional may act on personal conscience to disclose conduct that endangers the public, beyond the minimum the rules compel."@en ;
     proeth:nspeReference "Rule of Practice II.1.f" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.1.f" ;
     proeth:groundingStatus "Partially derived: the reporting duty grounds to NSPE II.1.f / II.1.a; the personal-conscience surplus beyond what the rules compel is extensional/derived." ;
@@ -296,12 +303,16 @@
 
 :EvolvingStandardsResponsivenessPrinciple rdf:type owl:Class ; rdfs:subClassOf :FundamentalEthicalPrinciple ;
     rdfs:label "Evolving Standards Responsiveness Principle"@en ;
+    iao:0000115 "The value that a professional keeps current with and applies evolving technical and ethical standards of practice."@en ;
     proeth:nspeReference "Professional Obligation III.2.e" ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.2.e" ;
     rdfs:comment "The value that a professional keeps current with and applies evolving technical and ethical standards of practice."@en .
 
 :MentorDependencyTransitionPrinciple rdf:type owl:Class ; rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Mentor Dependency Transition Principle"@en ;
+    owl:deprecated true ;
+    skos:changeNote "2026-07-04: deprecated as a live extraction reuse target (pre-batch audit closeout). A narrow case-derived scenario compound, not a reusable professional value; zero instances in the fresh-architecture corpus. Falls out entirely at the corpus rebuild if still unreferenced."@en ;
+    iao:0000115 "The value that an engineer develops independent competence and does not remain indefinitely dependent on a mentor for professional judgment."@en ;
     proeth:groundingStatus "ProEthica-derived: no NSPE code provision; ground extensionally (McLaren) by the BER or AI-era cases that instantiate it." ;
     rdfs:comment "The value that an engineer develops independent competence and does not remain indefinitely dependent on a mentor for professional judgment."@en .
 
@@ -324,16 +335,19 @@
 :ResourceType rdf:type owl:Class ;
     rdfs:subClassOf :EntityType ;
     rdfs:label "Resource Type"@en ;
+    iao:0000115 "Meta-class for specific resource types recognized by the ProEthica system"@en ;
     rdfs:comment "Meta-class for specific resource types recognized by the ProEthica system"@en .
 
 :EventType rdf:type owl:Class ;
     rdfs:subClassOf :EntityType ;
     rdfs:label "Event Type"@en ;
+    iao:0000115 "Meta-class for specific event types recognized by the ProEthica system"@en ;
     rdfs:comment "Meta-class for specific event types recognized by the ProEthica system"@en .
 
 :ActionType rdf:type owl:Class ;
     rdfs:subClassOf :EntityType ;
     rdfs:label "Action Type"@en ;
+    iao:0000115 "Meta-class for specific action types recognized by the ProEthica system"@en ;
     rdfs:comment "Meta-class for specific action types recognized by the ProEthica system"@en .
 
 # :CapabilityType meta-class retired 2026-06-28 (ratified Ca spec): it had no members; the
@@ -380,6 +394,7 @@ proeth:altersPriority a owl:ObjectProperty ;
 # domain/range guard (rpo_edges._CAUSAL_EDGE_RANGE) rather than by a blank-node owl:unionOf.
 proeth:CausalChain a owl:Class ;
     rdfs:label "Causal Chain"@en ;
+    iao:0000115 "A cause-to-effect linkage in the case timeline carrying a NESS responsibility analysis (Sarmiento et al. 2023). Not one of the nine disjoint D-tuple categories."@en ;
     rdfs:comment "A cause-to-effect linkage in the case timeline carrying a NESS responsibility analysis (Sarmiento et al. 2023). Not one of the nine disjoint D-tuple categories."@en .
 
 proeth:analyzesAction a owl:ObjectProperty ;
@@ -424,6 +439,7 @@ proeth:temporalSequence a owl:DatatypeProperty ;
 
 proeth:TemporalRelation a owl:Class ;
     rdfs:label "Temporal Relation"@en ;
+    iao:0000115 "A reified Allen interval algebra relation between two temporal entities (actions or events). Stores both the ProEthica relation name and the corresponding OWL-Time property URI."@en ;
     rdfs:comment "A reified Allen interval algebra relation between two temporal entities (actions or events). Stores both the ProEthica relation name and the corresponding OWL-Time property URI."@en .
 
 proeth:hasTemporalRelation a owl:ObjectProperty ;
@@ -462,7 +478,8 @@ proeth:owlTimeProperty a owl:DatatypeProperty ;
     # so having both superclasses would make this class unsatisfiable in a reasoning context.
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Professional Obligation"@en ;
-    rdfs:comment "A duty or responsibility arising from professional role or standards. As a directive information entity (IAO:0000033 via proeth-core:Obligation), it is a generically dependent continuant, not a realizable entity."@en ;
+    iao:0000115 "The umbrella for duties that arise specifically from bearing a professional role or from professional standards, and the parent of role-derived duty kinds such as FaithfulAgentObligation. Distinguished from its parent proeth-core:Obligation, which covers any professional-ethics obligation regardless of how it arises. As a directive information entity (IAO:0000033 via proeth-core:Obligation), it is a generically dependent continuant, not a realizable entity."@en ;
+    rdfs:comment "Umbrella for role-derived professional duties; parent of FaithfulAgentObligation and kin. As a directive information entity it is a generically dependent continuant, not a realizable entity."@en ;
     skos:changeNote "v2.x: Removed rdfs:subClassOf bfo:BFO_0000017 (realizable entity/SDC). Obligations are directive information entities (GDC), and SDC+GDC dual-inheritance is inconsistent in BFO."@en .
 
 # Obligation Categories from Chapter 2 Literature
@@ -471,26 +488,31 @@ proeth:owlTimeProperty a owl:DatatypeProperty ;
 proeth:DisclosureObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Disclosure Obligation"@en ;
+    iao:0000115 "Requirement to inform stakeholders about conflicts, limitations, or risks (NSPE II.3.a)"@en ;
     rdfs:comment "Requirement to inform stakeholders about conflicts, limitations, or risks (NSPE II.3.a)"@en .
 
 proeth:SafetyObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Safety Obligation"@en ;
+    iao:0000115 "Duty to hold paramount the safety, health, and welfare of the public (NSPE I.1)"@en ;
     rdfs:comment "Duty to hold paramount the safety, health, and welfare of the public (NSPE I.1)"@en .
 
 proeth:CompetenceObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Competence Obligation"@en ;
+    iao:0000115 "Requirement to perform services only in areas of competence (NSPE II.2)"@en ;
     rdfs:comment "Requirement to perform services only in areas of competence (NSPE II.2)"@en .
 
 proeth:ConfidentialityObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Confidentiality Obligation"@en ;
+    iao:0000115 "Duty to protect confidential information of clients or employers (NSPE III.4)"@en ;
     rdfs:comment "Duty to protect confidential information of clients or employers (NSPE III.4)"@en .
 
 proeth:ReportingObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Reporting Obligation"@en ;
+    iao:0000115 "Duty to report violations or unsafe conditions to appropriate authorities"@en ;
     rdfs:comment "Duty to report violations or unsafe conditions to appropriate authorities"@en .
 
 # The modality obligation subclasses (Mandatory/Defeasible/Conditional/PrimaFacie) were retired 2026-06-28
@@ -500,21 +522,27 @@ proeth:ReportingObligation a owl:Class ;
 proeth:LegalObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Legal Obligation"@en ;
-    rdfs:comment "Obligations arising from legal requirements and regulations"@en .
+    iao:0000115 "An obligation individuated by its SOURCE of bindingness: it binds because a law or regulation requires it. Contrast EthicalObligation (bindingness from the ethical code or an ethical principle). The source axis is orthogonal to the topic axis of the sibling classes (safety, disclosure, confidentiality, ...): an obligation may bear one type from each axis."@en ;
+    rdfs:comment "Source-axis obligation kind: bound by law or regulation."@en ;
+    skos:changeNote "2026-07-04: definition rewritten to state the source-vs-topic axis explicitly (pre-batch audit)."@en .
 
 proeth:EthicalObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Ethical Obligation"@en ;
-    rdfs:comment "Obligations arising from ethical principles beyond legal requirements"@en .
+    iao:0000115 "An obligation individuated by its SOURCE of bindingness: it binds because the profession's ethical code or an ethical principle requires it, independently of legal enactment. Contrast LegalObligation (bindingness from law or regulation). The source axis is orthogonal to the topic axis of the sibling classes (safety, disclosure, confidentiality, ...): an obligation may bear one type from each axis."@en ;
+    rdfs:comment "Source-axis obligation kind: bound by the ethical code or an ethical principle rather than by legal enactment (e.g. a duty to honor the spirit of the code)."@en ;
+    skos:changeNote "2026-07-04: definition rewritten to state the source-vs-topic axis explicitly (pre-batch audit: the two classification axes among Obligation subclasses were undocumented)."@en .
 
 proeth:CollegialObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Collegial Obligation"@en ;
+    iao:0000115 "Duties toward professional peers including respect, fairness, and credit for work"@en ;
     rdfs:comment "Duties toward professional peers including respect, fairness, and credit for work"@en .
 
 proeth:AttributionObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Attribution Obligation"@en ;
+    iao:0000115 "Duty to give credit for engineering work to those to whom credit is due and to recognize the proprietary interests of others, including appropriate citation of documents of technical authority and credit for tool-assisted or AI-assisted content (NSPE III.9)"@en ;
     rdfs:comment "Duty to give credit for engineering work to those to whom credit is due and to recognize the proprietary interests of others, including appropriate citation of documents of technical authority and credit for tool-assisted or AI-assisted content (NSPE III.9)"@en ;
     skos:altLabel "attribution and credit obligation"@en, "credit obligation"@en ;
     proeth:nspeReference "Professional Obligation III.9" ;
@@ -527,11 +555,15 @@ proeth:FaithfulAgentObligation a owl:Class ;
     rdfs:subClassOf proeth:ProfessionalObligation ;
     skos:changeNote "2026-07-04: re-parented from ConfidentialityObligation to ProfessionalObligation (pre-batch core audit). Faithful agency (NSPE I.4 / II.4) is an agency-and-loyalty duty, not a confidentiality duty (II.1.c); the old placement entailed that every faithful-agent duty is a confidentiality duty."@en ;
     rdfs:label "Faithful Agent Obligation"@en ;
+    iao:0000115 "Duty of an engineer to act as a faithful agent or trustee of an employer or client (NSPE Code of Ethics, Section 1 / §II.4). Defeasible under states that confirm public-safety risk."@en ;
     rdfs:comment "Duty of an engineer to act as a faithful agent or trustee of an employer or client (NSPE Code of Ethics, Section 1 / §II.4). Defeasible under states that confirm public-safety risk."@en .
 
 proeth:PostTermEnvRiskReportingObligation a owl:Class ;
     rdfs:subClassOf proeth:ReportingObligation ;
     rdfs:label "Post-Termination Environmental Risk Reporting Obligation"@en ;
+    owl:deprecated true ;
+    skos:changeNote "2026-07-04: deprecated as a live extraction reuse target (pre-batch audit closeout). The class name compounds temporal circumstance, domain, and addressee; the content belongs to ReportingObligation with the circumstances on the case individual. Zero instances in the fresh-architecture corpus."@en ;
+    iao:0000115 "Duty of an engineer to report environmental risks to a pollution-control authority after termination of the client relationship when the risk rises to a public-safety concern (NSPE Code §I.1, §II.1.a, §II.1.c). Derived from the paramount public-welfare principle."@en ;
     rdfs:comment "Duty of an engineer to report environmental risks to a pollution-control authority after termination of the client relationship when the risk rises to a public-safety concern (NSPE Code §I.1, §II.1.a, §II.1.c). Derived from the paramount public-welfare principle."@en .
 
 # Obligation properties for temporal and contextual aspects
@@ -561,8 +593,8 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 
 # Engineering-specific role types
 :EngineerRole rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:label "Engineer Role"@en ;
+    iao:0000115 "A professional role involving engineering practice and responsibilities. Occupational archetype head for all engineer specializations and extracted engineer-role leaves."@en ;
     rdfs:comment "A professional role involving engineering practice and responsibilities. Occupational archetype head for all engineer specializations and extracted engineer-role leaves."@en ;
     skos:closeMatch ifcrole:Engineer ;
     :archetypeAxis :OccupationalArchetype ;
@@ -571,9 +603,9 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 
 # Role specializations for classification of roles mentioned in guidelines and cases
 :ProfessionalRole rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Role ;
     rdfs:label "Professional Role"@en ;
+    iao:0000115 "A role within a profession that entails recognized ends/goals of practice (e.g., safeguarding public safety, delivering competent technical solutions) and a coherent set of obligations codified in standards and codes (e.g., NSPE). Often associated with licensure or formal accountability. Examples: Professional Engineer, Project Manager, Public Official."@en ;
         rdfs:comment "A role within a profession that entails recognized ends/goals of practice (e.g., safeguarding public safety, delivering competent technical solutions) and a coherent set of obligations codified in standards and codes (e.g., NSPE). Often associated with licensure or formal accountability. Examples: Professional Engineer, Project Manager, Public Official."@en ;
         # Professional roles characteristically bear obligations and are governed by codes
         # v2.4.2: Fixed namespace references -- :Obligation and :hasObligation resolved to
@@ -588,16 +620,19 @@ proeth:obligatedparty a owl:DatatypeProperty ;
                                      ] .
 
 :ParticipantRole rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Role ;
     rdfs:label "Participant Role"@en ;
+    skos:altLabel "Stakeholder"@en, "Stakeholder Role"@en ;
+    iao:0000115 "A role of an involved party or stakeholder that does not itself establish professional obligations (e.g., Client, The Public, Community Member)."@en ;
     rdfs:comment "A role of an involved party or stakeholder that does not itself establish professional obligations (e.g., Client, The Public, Community Member)."@en .
 
 # Alias for clarity when classifying roles extracted from text
 :StakeholderRole rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Stakeholder Role"@en ;
+    owl:deprecated true ;
+    skos:changeNote "2026-07-04: deprecated as a live extraction reuse target (pre-batch audit closeout). A near-alias of its own parent ParticipantRole whose examples are its siblings; two interchangeable labels degraded the reuse-first class list. The class itself remains (deliberately untagged on the archetype axis; see the occupational-resolver semantics), and ParticipantRole carries skos:altLabel Stakeholder so the term still matches."@en ;
+    iao:0000115 "A participant role borne by stakeholders such as Clients, Employers, and the Public. Typically not the bearer of professional obligations, but may be linked to principles in explicit statements."@en ;
     rdfs:comment "A participant role borne by stakeholders such as Clients, Employers, and the Public. Typically not the bearer of professional obligations, but may be linked to principles in explicit statements."@en .
 
 # Keep ProfessionalRole and ParticipantRole disjoint to avoid mixing semantics
@@ -612,9 +647,9 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 # otherwise composing it with a Participant-side occupational archetype (e.g.
 # ClientRole) would be unsatisfiable.
 :RelationalRole rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Role ;
     rdfs:label "Relational Role"@en ;
+    iao:0000115 "Head of the relational archetype axis: the duty-relationship a role establishes. Orthogonal to the occupational axis, so a relational archetype composes with any occupational archetype without crossing the ProfessionalRole/ParticipantRole disjointness. Exception: :PublicResponsibilityRole, whose defining :owesDutyToward edge has rdfs:domain :ProfessionalRole, is professional-side by entailment and (since 2026-07-02) by an explicit rdfs:subClassOf :ProfessionalRole, so it composes only with professional-side occupational archetypes. Does not self-tag :archetypeAxis -- it IS the structural head of the axis; the annotation marks only leaves whose archetype diverges from their structural parent (e.g. a relational Mentor/Forensic engagement under the occupational EngineerRole)."@en ;
     rdfs:comment "Head of the relational archetype axis: the duty-relationship a role establishes. Orthogonal to the occupational axis, so a relational archetype composes with any occupational archetype without crossing the ProfessionalRole/ParticipantRole disjointness. Exception: :PublicResponsibilityRole, whose defining :owesDutyToward edge has rdfs:domain :ProfessionalRole, is professional-side by entailment and (since 2026-07-02) by an explicit rdfs:subClassOf :ProfessionalRole, so it composes only with professional-side occupational archetypes. Does not self-tag :archetypeAxis -- it IS the structural head of the axis; the annotation marks only leaves whose archetype diverges from their structural parent (e.g. a relational Mentor/Forensic engagement under the occupational EngineerRole)."@en .
 
 #################################################################
@@ -641,6 +676,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
         [ rdf:type owl:Restriction ; owl:onProperty proeth-core:hasClient ; owl:someValuesFrom proeth-core:Role ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
     rdfs:label "Provider-Client Role" ;
+    iao:0000115 "Professional role defining relationships between service providers and their clients, creating duties of competent service delivery, confidentiality, and client welfare per Kong et al. (2020) identity role analysis."@en ;
     skos:definition "Professional role defining relationships between service providers and their clients, creating duties of competent service delivery, confidentiality, and client welfare per Kong et al. (2020) identity role analysis." ;
     rdfs:comment "Service delivery relationship with duties of competence and care. Defined class: a Role that hasClient some Role (the provider side)." ;
     skos:scopeNote "Provider side: a Role bearing proeth-core:hasClient toward another Role. The client counterparty is the occupational :ClientRole (a :ParticipantRole). Asymmetric by design."@en ;
@@ -652,6 +688,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
         [ rdf:type owl:Restriction ; owl:onProperty proeth-core:professionalPeerOf ; owl:someValuesFrom proeth-core:Role ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
     rdfs:label "Professional Peer Role" ;
+    iao:0000115 "Professional role defining relationships between practitioners within the same professional domain, creating obligations for peer review, professional development, knowledge sharing, and standard maintenance per Kong et al. (2020)."@en ;
     skos:definition "Professional role defining relationships between practitioners within the same professional domain, creating obligations for peer review, professional development, knowledge sharing, and standard maintenance per Kong et al. (2020)." ;
     rdfs:comment "Collegial relationship with mentoring and review obligations. Defined class: a Role that professionalPeerOf some Role (symmetric; both peers classify)." ;
     skos:scopeNote "A Role bearing proeth-core:professionalPeerOf (symmetric; subsumes peer review and mentoring) toward another Role."@en ;
@@ -663,6 +700,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
         [ rdf:type owl:Restriction ; owl:onProperty proeth-core:employedBy ; owl:someValuesFrom proeth-core:Role ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
     rdfs:label "Employer Relationship Role" ;
+    iao:0000115 "Professional role defining relationships between professionals and their employing organizations, creating duties of loyalty, competent performance, and honest reporting while maintaining professional independence per Wendel (2024) moral complexity framework."@en ;
     skos:definition "Professional role defining relationships between professionals and their employing organizations, creating duties of loyalty, competent performance, and honest reporting while maintaining professional independence per Wendel (2024) moral complexity framework." ;
     rdfs:comment "Organizational relationship balancing loyalty and independence. Defined class: a Role that employedBy some Role (the employee/professional side)." ;
     skos:scopeNote "Employee/professional side: a Role bearing proeth-core:employedBy toward another Role. The employer counterparty is the occupational :EmployerRole (a :ParticipantRole)."@en ;
@@ -676,6 +714,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     rdfs:subClassOf :ProfessionalRole ;
     rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty proeth-core:adheresToPrinciple ; owl:someValuesFrom :PublicWelfarePrinciple ] ;
     rdfs:label "Public Responsibility Role" ;
+    iao:0000115 "Professional role defining obligations to the broader public and society, creating duties of public welfare protection that can override client or employer interests, grounded in NSPE Fundamental Canon 1 (hold paramount the public safety, health, and welfare) and framed by Thornton et al. (2017) collective morality."@en ;
     skos:definition "Professional role defining obligations to the broader public and society, creating duties of public welfare protection that can override client or employer interests, grounded in NSPE Fundamental Canon 1 (hold paramount the public safety, health, and welfare) and framed by Thornton et al. (2017) collective morality." ;
     rdfs:comment "Societal obligation that can override other professional duties. Defined class (monadic): a Role that owesDutyToward some PublicInterest. Adheres to :PublicWelfarePrinciple, the principle carrying the NSPE Canon 1 grounding." ;
     skos:scopeNote "A Role bearing :owesDutyToward toward the general public (:PublicInterest). Monadic: the counterparty is a party class, not a role-to-role pairing."@en ;
@@ -688,9 +727,9 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 # public as a collective party (subClassOf proeth-core:Agent, matching the actor-edge convention:
 # obligatedParty/constrainedEntity/affects all range Agent). owesDutyToward is the defining edge.
 :PublicInterest rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Agent ;
     rdfs:label "Public Interest (General Public)"@en ;
+    iao:0000115 "The general public as the collective party toward which public-protection duties are owed (the defining counterparty of :PublicResponsibilityRole). The occupational role borne by this party is :PublicRole."@en ;
     skos:altLabel "general public"@en, "the public"@en ;
     rdfs:comment "The general public as the collective party toward which public-protection duties are owed (the defining counterparty of :PublicResponsibilityRole). The occupational role borne by this party is :PublicRole."@en .
 
@@ -702,9 +741,9 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 
 # Ends / Goals of roles
 :End rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant
     rdfs:label "End/Goal"@en ;
+    iao:0000115 "A characteristic end or goal toward which a role is directed (e.g., in engineering: protecting public safety, serving the public welfare, providing competent service)."@en ;
     rdfs:comment "A characteristic end or goal toward which a role is directed (e.g., in engineering: protecting public safety, serving the public welfare, providing competent service)."@en .
 
 # Resource kinds: the closed FIVE source kinds (ratified Rs spec; ProfessionalCode merged into
@@ -715,9 +754,9 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 # retired 2026-06-28: a generic standard folds into :TechnicalStandard; the disposable corpus
 # re-mints any survivor at re-extraction.
 :EthicalCode rdf:type owl:Class ;
-    rdf:type :EntityType ;
     rdfs:subClassOf proeth-core:Guideline ;
     rdfs:label "Ethical Code"@en ;
+    iao:0000115 "A formal document that codifies ethical principles and professional conduct requirements for a profession (e.g. the NSPE, IEEE, or ACM code of ethics). As a document (IAO:0000310 via Guideline) it contains principles, obligations, and constraints, and is itself a professional-knowledge Resource; it is not itself a principle. As an ethics knowledge resource it is grounded in Frankel (1989), who frames a code as an enabling document distilling collective professional experience, and Davis (1991), who frames it as a convention among professionals."@en ;
     rdfs:comment "A formal document that codifies ethical principles and professional conduct requirements for a profession (e.g. the NSPE, IEEE, or ACM code of ethics). As a document (IAO:0000310 via Guideline) it contains principles, obligations, and constraints, and is itself a professional-knowledge Resource; it is not itself a principle. As an ethics knowledge resource it is grounded in Frankel (1989), who frames a code as an enabling document distilling collective professional experience, and Davis (1991), who frames it as a convention among professionals."@en ;
     skos:scopeNote "Attribution: Frankel (1989) 'Professional Codes: Why, How, and with What Impact?' and Davis (1991) 'Thinking Like an Engineer'. McLaren (2003) USES codes as extensional inputs but does not originate this resource type."@en ;
     skos:changeNote "v2.4.2: Changed rdfs:subClassOf from proeth-core:Principle to proeth-core:Guideline. An ethical code is a document that contains principles, obligations, and constraints. Classifying it as a Principle conflated the container with its contents. 2026-07-01: absorbed :ProfessionalCode (now owl:equivalentClass, deprecated); the two denoted the same code-of-ethics document; the Frankel/Davis grounding moved here."@en .
@@ -789,7 +828,9 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 # Used to trace how specific code sections ground principles, obligations, and constraints
 
 :establishes rdf:type owl:ObjectProperty ;
-    rdfs:domain proeth-core:Resource ;
+    rdfs:domain [ rdf:type owl:Class ;
+                  owl:unionOf ( proeth-core:Resource proeth-core:CodeProvision ) ] ;
+    skos:changeNote "2026-07-04: domain widened to include CodeProvision (an information content entity, not a Resource); the property comment always described provisions as subjects, so the old Resource-only domain would have retyped provision subjects into Resource against the ICE placement."@en ;
     rdfs:range [ rdf:type owl:Class ;
                  owl:unionOf ( proeth-core:Principle proeth-core:Obligation proeth-core:Constraint ) ] ;
     rdfs:label "establishes"@en ;
@@ -856,6 +897,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :EpistemicState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Epistemic State"@en ;
+    iao:0000115 "A condition of what an agent knows, believes, or is uncertain of with respect to facts material to a decision. As a content kind it captures the agent's knowledge state, the Aristotelian and Sarmiento epistemic condition for responsibility: an agent is answerable for conduct in proportion to what the agent knew or should have known. Its deontic relevance is that knowledge conditions the obligations governing informed decision and decision-under-uncertainty."@en ;
     skos:definition "A condition of what an agent knows, believes, or is uncertain of with respect to facts material to a decision. As a content kind it captures the agent's knowledge state, the Aristotelian and Sarmiento epistemic condition for responsibility: an agent is answerable for conduct in proportion to what the agent knew or should have known. Its deontic relevance is that knowledge conditions the obligations governing informed decision and decision-under-uncertainty."@en ;
     rdfs:comment "Knowledge-and-belief condition of an agent; the typed home of the responsibility epistemic condition."@en ;
     proeth:persistenceType "inertial" ;
@@ -864,6 +906,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :RiskState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Risk State"@en ;
+    iao:0000115 "A condition of hazard exposure: potential harm to public welfare, safety, or a protected interest. As a content kind it is the situation of exposure itself, independent of which obligation it activates. Its deontic relevance is that a hazard condition bears on the protective obligations a role exists to discharge and can license defeat of competing duties such as confidentiality when the harm is grave (Berreby et al. 2017; Almpani et al. 2023)."@en ;
     skos:definition "A condition of hazard exposure: potential harm to public welfare, safety, or a protected interest. As a content kind it is the situation of exposure itself, independent of which obligation it activates. Its deontic relevance is that a hazard condition bears on the protective obligations a role exists to discharge and can license defeat of competing duties such as confidentiality when the harm is grave (Berreby et al. 2017; Almpani et al. 2023)."@en ;
     rdfs:comment "Condition of hazard exposure or potential harm to a protected interest."@en ;
     proeth:persistenceType "inertial" ;
@@ -873,6 +916,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :CompetenceState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Competence State"@en ;
+    iao:0000115 "A condition bearing on whether a role-bearer has the capacity, expertise, qualification, or means to carry out a duty. As a content kind it describes the standing of the agent's competence for the work at hand. Its deontic relevance is that obligation presupposes capacity, so a competence shortfall renders an attached duty defeasible or shifts it, for example to refer or disclose (Stenseke 2024)."@en ;
     skos:definition "A condition bearing on whether a role-bearer has the capacity, expertise, qualification, or means to carry out a duty. As a content kind it describes the standing of the agent's competence for the work at hand. Its deontic relevance is that obligation presupposes capacity, so a competence shortfall renders an attached duty defeasible or shifts it, for example to refer or disclose (Stenseke 2024)."@en ;
     rdfs:comment "Condition of an agent's competence or capacity for the work at hand."@en ;
     proeth:persistenceType "inertial" ;
@@ -881,6 +925,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :EmergencyState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Emergency State"@en ;
+    iao:0000115 "An acute, time-critical condition demanding immediate response. As a content kind it is distinguished from RiskState by acuteness. Its deontic relevance is that it can activate emergency-response obligations and license suspension of constraints that normally bound action (Almpani et al. 2023)."@en ;
     skos:definition "An acute, time-critical condition demanding immediate response. As a content kind it is distinguished from RiskState by acuteness. Its deontic relevance is that it can activate emergency-response obligations and license suspension of constraints that normally bound action (Almpani et al. 2023)."@en ;
     rdfs:comment "Acute, time-critical condition demanding immediate response."@en ;
     proeth:persistenceType "non_inertial" ;
@@ -889,6 +934,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :ConflictOfInterestState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Conflict Of Interest State"@en ;
+    iao:0000115 "A condition in which an agent holds competing interests, loyalties, or role-derived duties that cannot all be fully served and that bias or constrain the exercise of professional judgment. As a content kind it is the standing tension among interests, covering both conflict of interest and competing duties. Its deontic relevance is that it renders the affected obligations defeasible against one another and grounds the competesWith, prevailsOver, and defeasibleUnder edge family."@en ;
     skos:definition "A condition in which an agent holds competing interests, loyalties, or role-derived duties that cannot all be fully served and that bias or constrain the exercise of professional judgment. As a content kind it is the standing tension among interests, covering both conflict of interest and competing duties. Its deontic relevance is that it renders the affected obligations defeasible against one another and grounds the competesWith, prevailsOver, and defeasibleUnder edge family."@en ;
     rdfs:comment "Condition of competing interests, loyalties, or duties biasing professional judgment."@en ;
     proeth:persistenceType "inertial" .
@@ -896,6 +942,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :RegulatoryState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Regulatory State"@en ;
+    iao:0000115 "A condition in which a code provision, standard, statute, permit, or contractual requirement is in force for the situation, including states of compliance and of violation. As a content kind it is the regulatory standing of the situation. Its deontic relevance is that it activates a constraint or compliance obligation on the available actions."@en ;
     skos:altLabel "evolving standards state"@en ;
     skos:definition "A condition in which a code provision, standard, statute, permit, or contractual requirement is in force for the situation, including states of compliance and of violation. As a content kind it is the regulatory standing of the situation. Its deontic relevance is that it activates a constraint or compliance obligation on the available actions."@en ;
     rdfs:comment "Condition defined by an in-force regulatory, statutory, or contractual requirement."@en ;
@@ -904,6 +951,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :TemporalState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Temporal State"@en ;
+    iao:0000115 "A condition defined by phase or timing: a pre- or post-termination phase, a before- or after-notification window, a deadline window. As a content kind it is the temporal standing of the situation. Its deontic relevance is that it bounds when a time-relative obligation holds, as the Event-Calculus fluent whose initiation and termination start and end the duty (Berreby et al. 2017)."@en ;
     skos:definition "A condition defined by phase or timing: a pre- or post-termination phase, a before- or after-notification window, a deadline window. As a content kind it is the temporal standing of the situation. Its deontic relevance is that it bounds when a time-relative obligation holds, as the Event-Calculus fluent whose initiation and termination start and end the duty (Berreby et al. 2017)."@en ;
     rdfs:comment "Condition defined by phase or timing (a deadline window, a post-termination phase)."@en ;
     proeth:persistenceType "inertial" ;
@@ -912,6 +960,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :ResourceState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Resource State"@en ;
+    iao:0000115 "A condition of availability or scarcity of the means to act: time, budget, personnel, safeguards, or access to information. As a content kind it is the standing of the means available, distinct from the Resource (Rs) component, which is a knowledge artifact. Its deontic relevance is that it conditions the feasibility of obligations and sets dynamic priorities among them when means are constrained (Almpani et al. 2023)."@en ;
     skos:definition "A condition of availability or scarcity of the means to act: time, budget, personnel, safeguards, or access to information. As a content kind it is the standing of the means available, distinct from the Resource (Rs) component, which is a knowledge artifact. Its deontic relevance is that it conditions the feasibility of obligations and sets dynamic priorities among them when means are constrained (Almpani et al. 2023)."@en ;
     rdfs:comment "Condition of availability or scarcity of the means to act."@en ;
     proeth:persistenceType "inertial" ;
@@ -920,6 +969,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :DisclosureState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Disclosure State"@en ;
+    iao:0000115 "A condition of what information has been disclosed, withheld, concealed, or selectively presented among the parties, including states of confidentiality and of omission. As a content kind it is the standing of information flow between agents, distinct from EpistemicState, which is what a single agent knows. Its deontic relevance is that it activates disclosure, notification, and confidentiality obligations."@en ;
     skos:definition "A condition of what information has been disclosed, withheld, concealed, or selectively presented among the parties, including states of confidentiality and of omission. As a content kind it is the standing of information flow between agents, distinct from EpistemicState, which is what a single agent knows. Its deontic relevance is that it activates disclosure, notification, and confidentiality obligations."@en ;
     rdfs:comment "Condition of information disclosed, withheld, or concealed among parties."@en ;
     proeth:persistenceType "inertial" .
@@ -930,6 +980,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :CompetenceGapState a owl:Class ;
     rdfs:subClassOf :CompetenceState ;
     rdfs:label "Competence Gap State"@en ;
+    iao:0000115 "A condition in which an agent lacks, has insufficient, or has not exercised the competence required for the work at hand, undercutting the obligations that attach to it. Agent-level and action-scoped gap individuals are minted at the commit edge-materialization stage (decision D2'); an action-scoped gap is linked to the specific Action and licenses defeasibleUnder on the undercut obligation."@en ;
     skos:definition "A condition in which an agent lacks, has insufficient, or has not exercised the competence required for the work at hand, undercutting the obligations that attach to it. Agent-level and action-scoped gap individuals are minted at the commit edge-materialization stage (decision D2'); an action-scoped gap is linked to the specific Action and licenses defeasibleUnder on the undercut obligation."@en ;
     rdfs:comment "Action-scoped competence-gap leaf minted at commit (D2'); subClassOf CompetenceState."@en ;
     proeth:persistenceType "inertial" .
@@ -956,6 +1007,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :CasePrecedent rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     rdfs:label "Case Precedent" ;
+    iao:0000115 "Documented cases from ethics review boards providing precedential knowledge and analogical reasoning patterns for similar situations, grounding abstract principles in professional reality per McLaren (2003): citing past cases provides the extensional definition of the principles."@en ;
     skos:definition "Documented cases from ethics review boards providing precedential knowledge and analogical reasoning patterns for similar situations, grounding abstract principles in professional reality per McLaren (2003): citing past cases provides the extensional definition of the principles." ;
     rdfs:comment "Concrete instances that exemplify principle application" ;
     skos:scopeNote "Attribution: McLaren (Ashley & McLaren 1995; McLaren 2003, SIROCCO). This is McLaren's core contribution to the Resource component." ;
@@ -968,6 +1020,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :TechnicalStandard rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     rdfs:label "Technical Standard" ;
+    iao:0000115 "Industry standards and specifications defining acceptable practice (e.g., ISO, IEEE, ASME standards) that embody collective professional agreement on technical acceptability and minimum competence benchmarks."@en ;
     skos:definition "Industry standards and specifications defining acceptable practice (e.g., ISO, IEEE, ASME standards) that embody collective professional agreement on technical acceptability and minimum competence benchmarks." ;
     rdfs:comment "Collective professional agreement on technical acceptability" ;
     skos:scopeNote "House extension (engineering domain): technical standards treated as an ethics knowledge resource. Not directly attributable to a cited ethics-reasoning source (the prior McLaren citation was removed)." .
@@ -975,6 +1028,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :LegalResource rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     rdfs:label "Legal Resource" ;
+    iao:0000115 "Laws, regulations, and statutes governing professional practice that establish legal boundaries and compliance requirements for professional activities."@en ;
     skos:definition "Laws, regulations, and statutes governing professional practice that establish legal boundaries and compliance requirements for professional activities." ;
     rdfs:comment "Legal framework constraining professional practice" ;
     skos:scopeNote "House extension with roots in legal case-based reasoning (Bench-Capon & Sartor 2003); treating legal materials as an ethics resource reflects the society-profession nexus (Frankel 1989)." .
@@ -985,6 +1039,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :ReferenceMaterial rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
     rdfs:label "Reference Material" ;
+    iao:0000115 "Handbooks, manuals, guides, and other documentation supporting professional practice with technical and procedural knowledge."@en ;
     skos:definition "Handbooks, manuals, guides, and other documentation supporting professional practice with technical and procedural knowledge." ;
     rdfs:comment "Supporting documentation for professional practice" ;
     skos:scopeNote "House extension grounded structurally in the Information Artifact Ontology: documents and manuals as Information Content Entities (iao:0000030, the parent of proeth-core:Resource). Not from a cited ethics source." .
@@ -1005,36 +1060,42 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 proeth:LegalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Legal Constraint"@en ;
+    iao:0000115 "Constraints arising from legal requirements and statutes that establish inviolable boundaries (Kroll 2020, Stenseke 2024)"@en ;
     rdfs:comment "Constraints arising from legal requirements and statutes that establish inviolable boundaries (Kroll 2020, Stenseke 2024)"@en ;
     dcterms:references <https://doi.org/10.1093/oxfordhb/9780190067397.013.10> . # Kroll 2020
 
 proeth:RegulatoryConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Regulatory Constraint"@en ;
+    iao:0000115 "Constraints from regulatory bodies and professional standards organizations (Taddeo et al. 2024)"@en ;
     rdfs:comment "Constraints from regulatory bodies and professional standards organizations (Taddeo et al. 2024)"@en ;
     dcterms:references <https://doi.org/10.1007/s13347-024-00710-6> . # Taddeo et al. 2024
 
 proeth:ResourceConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Resource Constraint"@en ;
-    rdfs:comment "Limitations on available time, budget, materials, or human resources (Ganascia 2007)"@en ;
+    iao:0000115 "A boundary statement limiting the permissible action space by reference to available time, budget, materials, or personnel: it states what may not be undertaken given the resource situation, rather than describing the resources themselves (Ganascia 2007)."@en ;
+    rdfs:comment "A boundary statement limiting permissible action by reference to available time, budget, materials, or personnel (Ganascia 2007). States the limit, not the resources."@en ;
     dcterms:references <https://doi.org/10.1007/s10676-006-9134-y> . # Ganascia 2007
 
 proeth:CompetenceConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Competence Constraint"@en ;
-    rdfs:comment "Boundaries defined by agent capabilities and technical limitations (Hallamaa & Kalliokoski 2022)"@en ;
+    iao:0000115 "A boundary statement limiting the permissible action space by reference to the agent's competence or technical limitations: it states what may not be undertaken beyond demonstrated capability, rather than describing the capability itself (Hallamaa & Kalliokoski 2022)."@en ;
+    rdfs:comment "A boundary statement limiting permissible action by reference to competence or technical limits (Hallamaa & Kalliokoski 2022). States the limit, not the capability."@en ;
     dcterms:references <https://doi.org/10.3389/fcomp.2022.776837> . # Hallamaa & Kalliokoski 2022
 
 proeth:JurisdictionalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Jurisdictional Constraint"@en ;
+    iao:0000115 "Boundaries of authority and geographical or organizational scope (Dennis et al. 2016)"@en ;
     rdfs:comment "Boundaries of authority and geographical or organizational scope (Dennis et al. 2016)"@en ;
     dcterms:references <https://doi.org/10.1016/j.robot.2015.11.012> . # Dennis et al. 2016
 
 proeth:ProceduralConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Procedural Constraint"@en ;
+    iao:0000115 "Forbids carrying out professional work outside a mandated process or protocol; an act that skips or bypasses a required procedural step (a review, approval, or notification) falls outside the permissible action space (Furbach et al. 2014)."@en ;
     rdfs:comment "Forbids carrying out professional work outside a mandated process or protocol; an act that skips or bypasses a required procedural step (a review, approval, or notification) falls outside the permissible action space (Furbach et al. 2014)."@en ;
     dcterms:references <https://doi.org/10.1007/978-3-319-13365-2_6> . # Furbach et al. 2014
 
@@ -1048,18 +1109,21 @@ proeth:ProceduralConstraint a owl:Class ;
 proeth:EthicalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Ethical Constraint"@en ;
+    iao:0000115 "Professional ethical boundaries beyond legal requirements (Benzmüller et al. 2020)"@en ;
     rdfs:comment "Professional ethical boundaries beyond legal requirements (Benzmüller et al. 2020)"@en ;
     dcterms:references <https://doi.org/10.1016/j.artint.2020.103348> . # Benzmüller et al. 2020
 
 proeth:SafetyConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Safety Constraint"@en ;
+    iao:0000115 "Forbids actions that would breach applicable safety requirements, bounding the permissible action space to conduct that keeps those requirements satisfied (Arkin 2008)."@en ;
     rdfs:comment "Forbids actions that would breach applicable safety requirements, bounding the permissible action space to conduct that keeps those requirements satisfied (Arkin 2008)."@en ;
     dcterms:references <https://doi.org/10.1145/1349822.1349839> . # Arkin 2008
 
 proeth:ConfidentialityConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Confidentiality Constraint"@en ;
+    iao:0000115 "Boundaries on information disclosure and privacy (Dennis et al. 2016)"@en ;
     rdfs:comment "Boundaries on information disclosure and privacy (Dennis et al. 2016)"@en ;
     dcterms:references <https://doi.org/10.1016/j.robot.2015.11.012> . # Dennis et al. 2016
 
@@ -1067,12 +1131,16 @@ proeth:ConfidentialityConstraint a owl:Class ;
 proeth:TemporalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Temporal Constraint"@en ;
+    iao:0000115 "Time-based limitations and deadlines (Govindarajulu & Bringsjord 2017)"@en ;
     rdfs:comment "Time-based limitations and deadlines (Govindarajulu & Bringsjord 2017)"@en ;
     dcterms:references <https://doi.org/10.24963/ijcai.2017/658> . # Govindarajulu & Bringsjord 2017
 
 proeth:PriorityConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Priority Constraint"@en ;
+    owl:deprecated true ;
+    skos:changeNote "2026-07-04: deprecated as a live extraction reuse target (pre-batch audit closeout). Precedence between competing requirements is carried by the obligation-layer defeasibility properties (competesWith / prevailsOver / defeasibleUnder), per the core Constraint editor note; a constraint class for it duplicated that mechanism. Zero instances in the fresh-architecture corpus."@en ;
+    iao:0000115 "Constraints establishing precedence when multiple requirements conflict (Scheutz & Malle 2014)"@en ;
     rdfs:comment "Constraints establishing precedence when multiple requirements conflict (Scheutz & Malle 2014)"@en ;
     dcterms:references <https://doi.org/10.1109/ETHICS.2014.6893446> . # Scheutz & Malle 2014
 
@@ -1117,13 +1185,15 @@ proeth:roleKind a owl:AnnotationProperty ;
 proeth:RiskAssessmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Risk Assessment Capability"@en ;
+    iao:0000115 "The competence to identify, characterize, and weigh risks bearing on a professional decision."@en ;
     skos:definition "The competence to identify, characterize, and weigh risks bearing on a professional decision."@en ;
-    skos:altLabel "Concern Threshold Assessment Capability"@en, "Environmental Risk Assessment Capability"@en, "Schedule Pressure Resistance Capability"@en ;
+    skos:altLabel "Environmental Risk Assessment Capability"@en, "Schedule Pressure Resistance Capability"@en ;
     proeth:tolmeijerRequirement "situational awareness" .
 
 proeth:AdequacyAssessmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Adequacy Assessment Capability"@en ;
+    iao:0000115 "The competence to judge whether a document, analysis, review, or process meets the standard required."@en ;
     skos:definition "The competence to judge whether a document, analysis, review, or process meets the standard required."@en ;
     skos:altLabel "Bid Document Adequacy Assessment Capability"@en, "Constructability Assessment Capability"@en, "Federal Review Adequacy Capability"@en, "Analytical Framework Completeness Capability"@en, "Partial Analysis Avoidance Capability"@en, "Options Completeness Disclosure Capability"@en, "Client Consent Waiver Assessment Capability"@en ;
     proeth:tolmeijerRequirement "norm competence" .
@@ -1131,6 +1201,7 @@ proeth:AdequacyAssessmentCapability a owl:Class ;
 proeth:NormativeFrameworkAssessmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Normative Framework Assessment Capability"@en ;
+    iao:0000115 "The competence to identify and apply the governing canon, code, standard, or precedent to a situation."@en ;
     skos:definition "The competence to identify and apply the governing canon, code, standard, or precedent to a situation."@en ;
     skos:altLabel "Applicable Canon Identification Capability"@en, "Regulatory Compliance Verification Capability"@en, "Regulatory Standards Awareness Capability"@en, "Technology Neutral Standards Application Capability"@en, "Peer Review Norm Recognition Capability"@en, "Antitrust and Procurement Law Contextual Awareness Capability"@en ;
     proeth:tolmeijerRequirement "norm competence" .
@@ -1138,6 +1209,7 @@ proeth:NormativeFrameworkAssessmentCapability a owl:Class ;
 proeth:PrecedentReasoningCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Precedent Reasoning Capability"@en ;
+    iao:0000115 "The competence to retrieve, distinguish, and reason analogically from prior cases and precedents."@en ;
     skos:definition "The competence to retrieve, distinguish, and reason analogically from prior cases and precedents."@en ;
     skos:altLabel "Precedent-Based Ethical Reasoning Capability"@en, "Precedent Distinction Capability"@en, "Precedent Analogical Distinction Capability"@en, "Ethics Code Evolution Capability"@en ;
     proeth:tolmeijerRequirement "learning and adaptation" .
@@ -1145,6 +1217,7 @@ proeth:PrecedentReasoningCapability a owl:Class ;
 proeth:SituationRecognitionCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Situation Recognition Capability"@en ;
+    iao:0000115 "The competence to perceive that an ethically salient condition such as a conflict, violation, harm, override, or boundary is present in a situation."@en ;
     skos:definition "The competence to perceive that an ethically salient condition such as a conflict, violation, harm, override, or boundary is present in a situation."@en ;
     skos:altLabel "Client Disservice Recognition Capability"@en, "Client Override Recognition Capability"@en, "Dual Role Conflict Recognition Capability"@en, "Single Client Dual Capacity Recognition Capability"@en, "Environmental Violation Recognition Capability"@en, "Referral Alternative Recognition Capability"@en, "Whistleblower Right Recognition Capability"@en ;
     proeth:tolmeijerRequirement "situational awareness" .
@@ -1152,6 +1225,7 @@ proeth:SituationRecognitionCapability a owl:Class ;
 proeth:ScopeBoundaryRecognitionCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Scope Boundary Recognition Capability"@en ;
+    iao:0000115 "The competence to recognize the limits of one's role, discipline, scope of practice, or authority."@en ;
     skos:definition "The competence to recognize the limits of one's role, discipline, scope of practice, or authority."@en ;
     skos:altLabel "Discipline Boundary Recognition Capability"@en, "Non-Engineering Scope Maintenance Capability"@en, "Scope Limitation Consistency Capability"@en, "Technology Role Boundary Capability"@en, "Credential Title Scope Awareness Capability"@en, "Faithful Agent Boundary Capability"@en ;
     proeth:tolmeijerRequirement "situational awareness" .
@@ -1159,6 +1233,7 @@ proeth:ScopeBoundaryRecognitionCapability a owl:Class ;
 proeth:DisclosureCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Disclosure Capability"@en ;
+    iao:0000115 "The competence to communicate material facts, risks, limitations, or affiliations to the parties entitled to them. The subject of the disclosure is context, not a distinct capability."@en ;
     skos:definition "The competence to communicate material facts, risks, limitations, or affiliations to the parties entitled to them. The subject of the disclosure is context, not a distinct capability."@en ;
     skos:altLabel "AI Tool Disclosure Capability"@en, "Expertise Calibrated Disclosure Capability"@en, "Incomplete Submission Disclosure Capability"@en, "Informed Bid Disclosure Capability"@en, "Pre-Engagement Scope Disclosure Capability"@en, "Equipment Failure Disclosure Capability"@en, "Proactive Risk Disclosure Capability"@en, "Peer Review Notification Capability"@en, "Regulatory Authority Reporting Capability"@en, "Funding Constraint Communication Capability"@en ;
     proeth:tolmeijerRequirement "explanation and justification" .
@@ -1166,6 +1241,7 @@ proeth:DisclosureCapability a owl:Class ;
 proeth:ObjectivityMaintenanceCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Objectivity Maintenance Capability"@en ;
+    iao:0000115 "The competence to maintain independent, unbiased professional judgment under pressure, advocacy, solicitation, or cost-rationalization influence."@en ;
     skos:definition "The competence to maintain independent, unbiased professional judgment under pressure, advocacy, solicitation, or cost-rationalization influence."@en ;
     skos:altLabel "Advisory Independence Maintenance Capability"@en, "Adversarial Objectivity Maintenance Capability"@en, "Advocacy Bias Resistance Capability"@en, "Cost Rationalization Bias Avoidance Capability"@en, "Free Services Solicitation Resistance Capability"@en, "Commercial Solicitation Critical Evaluation Capability"@en, "Heightened Self-Review Diligence Capability"@en ;
     proeth:tolmeijerRequirement "norm competence" .
@@ -1173,6 +1249,7 @@ proeth:ObjectivityMaintenanceCapability a owl:Class ;
 proeth:JudgmentNonSubstitutionCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Judgment Non-Substitution Capability"@en ;
+    iao:0000115 "The competence to retain personal professional judgment rather than substituting a tool's, delegate's, or third party's output for it."@en ;
     skos:definition "The competence to retain personal professional judgment rather than substituting a tool's, delegate's, or third party's output for it."@en ;
     skos:altLabel "AI Substitution Avoidance Capability"@en, "AI Output Critical Review Capability"@en, "Delegated Work Review Capability"@en ;
     proeth:tolmeijerRequirement "norm competence" .
@@ -1180,6 +1257,7 @@ proeth:JudgmentNonSubstitutionCapability a owl:Class ;
 proeth:CompetenceSelfAssessmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Competence Self-Assessment Capability"@en ;
+    iao:0000115 "The competence to honestly appraise and verify one's own qualifications before undertaking work."@en ;
     skos:definition "The competence to honestly appraise and verify one's own qualifications before undertaking work."@en ;
     skos:altLabel "Self-Competence Honest Assessment Capability"@en, "Independent Competence Verification Capability"@en, "Competence Self-Certification Resistance Capability"@en, "Technology Proficiency Assessment Capability"@en, "AI Tool Proficiency Assessment Capability"@en ;
     proeth:tolmeijerRequirement "situational awareness" .
@@ -1187,6 +1265,7 @@ proeth:CompetenceSelfAssessmentCapability a owl:Class ;
 proeth:ConfidentialityJudgmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Confidentiality Judgment Capability"@en ;
+    iao:0000115 "The competence to determine the boundaries of confidentiality and when an overriding duty such as public safety licenses disclosure."@en ;
     skos:definition "The competence to determine the boundaries of confidentiality and when an overriding duty such as public safety licenses disclosure."@en ;
     skos:altLabel "Confidentiality Override Judgment Capability"@en, "Confidentiality Structure Assessment Capability"@en, "Client Data Confidentiality Boundary Capability"@en, "Confidential Data Upload Consent Capability"@en, "Covert Instruction Refusal Capability"@en ;
     proeth:tolmeijerRequirement "norm competence" .
@@ -1194,6 +1273,7 @@ proeth:ConfidentialityJudgmentCapability a owl:Class ;
 proeth:RepresentationAccuracyCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Representation Accuracy Capability"@en ;
+    iao:0000115 "The competence to represent one's credentials, licensure, and qualifications accurately and without deception."@en ;
     skos:definition "The competence to represent one's credentials, licensure, and qualifications accurately and without deception."@en ;
     skos:altLabel "Credential Representation Accuracy Capability"@en, "Jurisdictional Licensure Verification Capability"@en, "Deceptive Justification Avoidance Capability"@en, "Omission Rationale Articulation Capability"@en, "Report Language Precision Capability"@en ;
     proeth:tolmeijerRequirement "explanation and justification" .
@@ -1201,6 +1281,7 @@ proeth:RepresentationAccuracyCapability a owl:Class ;
 proeth:ProfessionalAccountabilityCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Professional Accountability Capability"@en ;
+    iao:0000115 "The competence to accept responsibility for one's work and cooperate in error correction, peer review, and oversight."@en ;
     skos:definition "The competence to accept responsibility for one's work and cooperate in error correction, peer review, and oversight."@en ;
     skos:altLabel "Professional Accountability Acceptance Capability"@en, "Error Accountability Cooperation Capability"@en, "Peer Review Cooperation Capability"@en, "Public Safety Cooperation Motivation Capability"@en, "Corrective Action Monitoring Capability"@en, "Post-Engagement Observation Duty Capability"@en, "Remediation Advisory Capability"@en, "Peer Competence Reporting Capability"@en ;
     proeth:tolmeijerRequirement "explanation and justification" .
@@ -1208,6 +1289,7 @@ proeth:ProfessionalAccountabilityCapability a owl:Class ;
 proeth:SupervisoryControlCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Supervisory Control Capability"@en ;
+    iao:0000115 "The competence to exercise responsible-charge control, direct supervision, and sealing authority over work product."@en ;
     skos:definition "The competence to exercise responsible-charge control, direct supervision, and sealing authority over work product."@en ;
     skos:altLabel "Supervisory Control Verification Capability"@en, "Document Sealing Competence Capability"@en, "Geotechnical Test Supervision Capability"@en ;
     proeth:tolmeijerRequirement "norm competence" .
@@ -1215,6 +1297,7 @@ proeth:SupervisoryControlCapability a owl:Class ;
 proeth:FactGatheringDiligenceCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Fact Gathering Diligence Capability"@en ;
+    iao:0000115 "The competence to gather, consult, and weigh the witnesses, records, and evidence needed to reach a sound professional conclusion."@en ;
     skos:definition "The competence to gather, consult, and weigh the witnesses, records, and evidence needed to reach a sound professional conclusion."@en ;
     skos:altLabel "Witness and Record Consultation Capability"@en ;
     proeth:tolmeijerRequirement "situational awareness" .
@@ -1222,6 +1305,7 @@ proeth:FactGatheringDiligenceCapability a owl:Class ;
 proeth:WorkRefusalJudgmentCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Work Refusal Judgment Capability"@en ;
+    iao:0000115 "The competence to determine when professional duty requires declining or ceasing a task."@en ;
     skos:definition "The competence to determine when professional duty requires declining or ceasing a task."@en ;
     skos:altLabel "Client Confrontation Capability"@en ;
     proeth:tolmeijerRequirement "norm competence" .
@@ -1229,6 +1313,7 @@ proeth:WorkRefusalJudgmentCapability a owl:Class ;
 proeth:ToolAttributionCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Tool Attribution Capability"@en ;
+    iao:0000115 "The competence to attribute the contribution of a professional tool or software to a work product and give due credit for its role (e.g. CAD, analysis, or simulation software). The genus of tool-attribution competencies; AI attribution is a distinguished kind because generative AI can author substantive content."@en ;
     skos:definition "The competence to attribute the contribution of a professional tool or software to a work product and give due credit for its role (e.g. CAD, analysis, or simulation software). The genus of tool-attribution competencies; AI attribution is a distinguished kind because generative AI can author substantive content."@en ;
     skos:altLabel "Software Attribution Capability"@en, "Tool Contribution Attribution Capability"@en, "CAD Attribution Capability"@en ;
     proeth:tolmeijerRequirement "explanation and justification" .
@@ -1236,6 +1321,7 @@ proeth:ToolAttributionCapability a owl:Class ;
 proeth:AIAttributionCapability a owl:Class ;
     rdfs:subClassOf proeth:ToolAttributionCapability ;
     rdfs:label "AI Attribution Capability"@en ;
+    iao:0000115 "The competence to attribute AI-tool contribution in a work product and its representations. A distinct kind of tool attribution because generative AI can author substantive content, so its unattributed use misrepresents professional authorship and provenance in ways a conventional tool such as CAD does not."@en ;
     skos:definition "The competence to attribute AI-tool contribution in a work product and its representations. A distinct kind of tool attribution because generative AI can author substantive content, so its unattributed use misrepresents professional authorship and provenance in ways a conventional tool such as CAD does not."@en ;
     skos:altLabel "AI Contribution Attribution Capability"@en, "AI Tool Attribution Capability"@en ;
     proeth:tolmeijerRequirement "explanation and justification" .
@@ -1243,6 +1329,7 @@ proeth:AIAttributionCapability a owl:Class ;
 proeth:ThresholdDistinctionCapability a owl:Class ;
     rdfs:subClassOf proeth-core:Capability ;
     rdfs:label "Threshold Distinction Capability"@en ;
+    iao:0000115 "The competence to discriminate the threshold at which a concern, consent, or scope condition changes the required professional response."@en ;
     skos:definition "The competence to discriminate the threshold at which a concern, consent, or scope condition changes the required professional response."@en ;
     skos:altLabel "Retainer Scope Delineation Capability"@en ;
     proeth:tolmeijerRequirement "situational awareness" .
@@ -1357,21 +1444,25 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 # Engineer specializations (under :EngineerRole, itself under :ProfessionalRole)
 :CivilEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Civil Engineer Role"@en ; skos:exactMatch ifcrole:CivilEngineer ;
+    iao:0000115 "Engineer specializing in infrastructure and the built environment."@en ;
     :archetypeAxis :OccupationalArchetype ;
     :specializationAxis :DisciplineSpecialization ;
     rdfs:comment "Engineer specializing in infrastructure and the built environment."@en .
 :StructuralEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Structural Engineer Role"@en ; skos:exactMatch ifcrole:StructuralEngineer ;
+    iao:0000115 "Engineer specializing in load-bearing structure and structural integrity."@en ;
     :archetypeAxis :OccupationalArchetype ;
     :specializationAxis :DisciplineSpecialization ;
     rdfs:comment "Engineer specializing in load-bearing structure and structural integrity."@en .
 :MechanicalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Mechanical Engineer Role"@en ; skos:exactMatch ifcrole:MechanicalEngineer ;
+    iao:0000115 "Engineer specializing in mechanical systems."@en ;
     :archetypeAxis :OccupationalArchetype ;
     :specializationAxis :DisciplineSpecialization ;
     rdfs:comment "Engineer specializing in mechanical systems."@en .
 :ElectricalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Electrical Engineer Role"@en ; skos:exactMatch ifcrole:ElectricalEngineer ;
+    iao:0000115 "Engineer specializing in electrical systems and power."@en ;
     :archetypeAxis :OccupationalArchetype ;
     :specializationAxis :DisciplineSpecialization ;
     rdfs:comment "Engineer specializing in electrical systems and power."@en .
@@ -1382,16 +1473,19 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 # relational/sector/participant and stay unaxed. alt_labels carried over as skos:altLabel.
 :EnvironmentalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Environmental Engineer Role"@en ;
+    iao:0000115 "A licensed engineer whose practice area is environmental engineering (site assessment, contamination, wetlands, permitting)."@en ;
     :archetypeAxis :OccupationalArchetype ; :specializationAxis :DisciplineSpecialization ;
     skos:altLabel "environmental engineer"@en, "environmental site engineer"@en, "wetland delineation engineer"@en ;
     rdfs:comment "A licensed engineer whose practice area is environmental engineering (site assessment, contamination, wetlands, permitting)."@en .
 :GeotechnicalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Geotechnical Engineer Role"@en ;
+    iao:0000115 "An engineer whose practice area is geotechnical engineering (soils, foundations, site observation)."@en ;
     :archetypeAxis :OccupationalArchetype ; :specializationAxis :DisciplineSpecialization ;
     skos:altLabel "geotechnical engineer"@en, "geotechnical observation consultant"@en ;
     rdfs:comment "An engineer whose practice area is geotechnical engineering (soils, foundations, site observation)."@en .
 :DesignEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Design Engineer Role"@en ;
+    iao:0000115 "An engineer responsible for producing a design (plans, calculations, specifications) for a project. Project and discipline are case context, not separate role kinds."@en ;
     :archetypeAxis :OccupationalArchetype ; :specializationAxis :FunctionSpecialization ;
     skos:altLabel "design engineer"@en, "cooperating design engineer"@en, "original design engineer"@en, "dam design engineer"@en, "dock foundation design engineer"@en, "stormwater design engineer"@en ;
     rdfs:comment "An engineer responsible for producing a design (plans, calculations, specifications) for a project. Project and discipline are case context, not separate role kinds."@en .
@@ -1401,33 +1495,39 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 # reclassified as purely occupational (responsible charge is a mode of practice, not a duty-relationship).
 :ResponsibleChargeEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Responsible Charge Engineer Role"@en ;
+    iao:0000115 "An engineer in responsible charge of work, exercising direct control and personal supervision over its production. An occupational mode of practice, not a duty-relationship archetype."@en ;
     :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "responsible charge engineer"@en, "reviewing charge engineer"@en ;
     rdfs:comment "An engineer in responsible charge of work, exercising direct control and personal supervision over its production. An occupational mode of practice, not a duty-relationship archetype."@en .
 :ForensicExpertWitnessEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty proeth-core:hasClient ; owl:someValuesFrom proeth-core:Role ] ;
     rdfs:label "Forensic Expert Witness Engineer Role"@en ;
+    iao:0000115 "An engineer retained to provide forensic analysis and expert testimony in a dispute or litigation. Inferred :ProviderClientRole via proeth-core:hasClient (the retained provider side)."@en ;
     :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "forensic expert witness engineer"@en, "forensic engineer"@en ;
     rdfs:comment "An engineer retained to provide forensic analysis and expert testimony in a dispute or litigation. Inferred :ProviderClientRole via proeth-core:hasClient (the retained provider side)."@en .
 :MentorEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:subClassOf [ rdf:type owl:Restriction ; owl:onProperty proeth-core:professionalPeerOf ; owl:someValuesFrom proeth-core:Role ] ;
     rdfs:label "Mentor Engineer Role"@en ;
+    iao:0000115 "An experienced engineer who mentors another. Inferred :ProfessionalPeerRole via proeth-core:professionalPeerOf. Availability such as retired status is a State, not a role kind."@en ;
     :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "mentor engineer"@en, "retired mentor engineer"@en ;
     rdfs:comment "An experienced engineer who mentors another. Inferred :ProfessionalPeerRole via proeth-core:professionalPeerOf. Availability such as retired status is a State, not a role kind."@en .
 :MunicipalEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Municipal Engineer Role"@en ;
+    iao:0000115 "An engineer engaged by a municipality to advise on and approve public engineering works. An employer-sector idiom, not a discipline or function specialization."@en ;
     :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "municipal engineer"@en ;
     rdfs:comment "An engineer engaged by a municipality to advise on and approve public engineering works. An employer-sector idiom, not a discipline or function specialization."@en .
 :ConsultantEngineerRole rdf:type owl:Class ; rdfs:subClassOf :ConsultantRole ;
     rdfs:label "Consultant Engineer Role"@en ;
+    iao:0000115 "An engineer engaged in a consulting or advisory capacity to a client. A relational specialization under ConsultantRole, not a discipline or function."@en ;
     :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "consultant engineer"@en ;
     rdfs:comment "An engineer engaged in a consulting or advisory capacity to a client. A relational specialization under ConsultantRole, not a discipline or function."@en .
 :NonEngineerExpertWitnessRole rdf:type owl:Class ; rdfs:subClassOf :ProviderClientRole ;
     rdfs:label "Non-Engineer Expert Witness Role"@en ;
+    iao:0000115 "An expert witness who is not an engineer, kept distinct from ForensicExpertWitnessEngineerRole because the engineer-versus-non-engineer distinction carries different professional obligations."@en ;
     :archetypeAxis :OccupationalArchetype ;
     skos:altLabel "non-engineer expert witness"@en, "non-engineering expert witness"@en ;
     rdfs:comment "An expert witness who is not an engineer, kept distinct from ForensicExpertWitnessEngineerRole because the engineer-versus-non-engineer distinction carries different professional obligations."@en .
@@ -1437,16 +1537,19 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 # (engineering-ethics-internal detail); appliesToDomain folded into the comment.
 :QualityEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Quality Engineer Role"@en ;
+    iao:0000115 "Engineer responsible for implementing quality management systems and ensuring compliance with quality standards. Applies across engineering disciplines."@en ;
     :archetypeAxis :OccupationalArchetype ; :specializationAxis :FunctionSpecialization ;
     skos:altLabel "quality engineer"@en ;
     rdfs:comment "Engineer responsible for implementing quality management systems and ensuring compliance with quality standards. Applies across engineering disciplines."@en .
 :SafetyEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Safety Engineer Role"@en ;
+    iao:0000115 "Engineer specializing in system safety analysis and compliance with safety-critical standards. Applies across engineering disciplines."@en ;
     :archetypeAxis :OccupationalArchetype ; :specializationAxis :FunctionSpecialization ;
     skos:altLabel "safety engineer"@en ;
     rdfs:comment "Engineer specializing in system safety analysis and compliance with safety-critical standards. Applies across engineering disciplines."@en .
 :StandardsEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
     rdfs:label "Standards Engineer Role"@en ;
+    iao:0000115 "Engineer responsible for ensuring compliance with applicable technical standards and regulations. Applies across engineering disciplines."@en ;
     :archetypeAxis :OccupationalArchetype ; :specializationAxis :FunctionSpecialization ;
     skos:altLabel "standards engineer"@en ;
     rdfs:comment "Engineer responsible for ensuring compliance with applicable technical standards and regulations. Applies across engineering disciplines."@en .
@@ -1454,44 +1557,54 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 # Obligation-bearing occupational heads (under :ProfessionalRole)
 :ProjectManagerRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
     rdfs:label "Project Manager Role"@en ; skos:exactMatch ifcrole:ProjectManager ;
+    iao:0000115 "Party responsible for planning, coordinating, and delivering a project."@en ;
     :archetypeAxis :OccupationalArchetype ; skos:altLabel "project manager"@en, "construction manager"@en, "program manager"@en ;
     rdfs:comment "Party responsible for planning, coordinating, and delivering a project."@en .
 :ArchitectRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
     rdfs:label "Architect Role"@en ; skos:exactMatch ifcrole:Architect ;
+    iao:0000115 "Professional responsible for building design and construction oversight."@en ;
     :archetypeAxis :OccupationalArchetype ;
     rdfs:comment "Professional responsible for building design and construction oversight."@en .
 :ConsultantRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
     rdfs:label "Consultant Role"@en ; skos:exactMatch ifcrole:Consultant ;
+    iao:0000115 "Professional engaged for expert advice on a specific aspect of a project. Engineering consultants are classified under EngineerRole. This head covers non-engineering advisory roles."@en ;
     :archetypeAxis :OccupationalArchetype ;
     rdfs:comment "Professional engaged for expert advice on a specific aspect of a project. Engineering consultants are classified under EngineerRole. This head covers non-engineering advisory roles."@en .
 :RegulatoryAuthorityRole rdf:type owl:Class ; rdfs:subClassOf :ProfessionalRole ;
     rdfs:label "Regulatory Authority Role"@en ;
-    :archetypeAxis :OccupationalArchetype ; skos:altLabel "regulator"@en, "regulatory"@en, "authority"@en, "inspector"@en, "government"@en, "board of ethical"@en, "public official"@en, "public agency"@en ;
+    iao:0000115 "Code-enforcement officials, inspectors, boards, and government agencies acting in an oversight capacity. No IFC equivalent (IFC has no regulator role)."@en ;
+    :archetypeAxis :OccupationalArchetype ; skos:altLabel "regulator"@en, "inspector"@en, "board of ethical"@en, "public official"@en, "public agency"@en ;
     rdfs:comment "Code-enforcement officials, inspectors, boards, and government agencies acting in an oversight capacity. No IFC equivalent (IFC has no regulator role)."@en .
 
 # Non-obligation-bearing occupational heads (under :ParticipantRole, so no obligation restriction)
 :ClientRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Client Role"@en ; skos:exactMatch ifcrole:Client ;
+    iao:0000115 "Party that commissions the project work. This is the occupational archetype. The duty relationship is carried separately by :ProviderClientRole."@en ;
     :archetypeAxis :OccupationalArchetype ;
     rdfs:comment "Party that commissions the project work. This is the occupational archetype. The duty relationship is carried separately by :ProviderClientRole."@en .
 :OwnerRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Owner Role"@en ; skos:exactMatch ifcrole:Owner ; skos:closeMatch ifcrole:BuildingOwner ;
+    iao:0000115 "Party that owns the asset, project, or building."@en ;
     :archetypeAxis :OccupationalArchetype ;
     rdfs:comment "Party that owns the asset, project, or building."@en .
 :PublicRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Public Role"@en ;
+    iao:0000115 "The public, community members, and affected stakeholders. No IFC equivalent, since IFC has no public or society role. The professional duty side is :PublicResponsibilityRole."@en ;
     :archetypeAxis :OccupationalArchetype ; skos:altLabel "public"@en, "community"@en, "citizen"@en, "resident"@en, "neighbor"@en, "society"@en, "affected party"@en ;
     rdfs:comment "The public, community members, and affected stakeholders. No IFC equivalent, since IFC has no public or society role. The professional duty side is :PublicResponsibilityRole."@en .
 :ContractorRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Contractor Role"@en ; skos:exactMatch ifcrole:Contractor ; skos:closeMatch ifcrole:Subcontractor ;
+    iao:0000115 "Party contracted to carry out construction work."@en ;
     :archetypeAxis :OccupationalArchetype ; skos:altLabel "contractor"@en, "subcontractor"@en ;
     rdfs:comment "Party contracted to carry out construction work."@en .
 :SupplierRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Supplier Role"@en ; skos:exactMatch ifcrole:Supplier ; skos:closeMatch ifcrole:Manufacturer ;
+    iao:0000115 "Party that supplies materials, products, or equipment."@en ;
     :archetypeAxis :OccupationalArchetype ; skos:altLabel "supplier"@en, "manufacturer"@en, "vendor"@en, "reseller"@en ;
     rdfs:comment "Party that supplies materials, products, or equipment."@en .
 :EmployerRole rdf:type owl:Class ; rdfs:subClassOf :ParticipantRole ;
     rdfs:label "Employer Role"@en ;
+    iao:0000115 "The employing organization as a participant. The duty relationship is carried separately by :EmployerRelationshipRole. No IFC equivalent."@en ;
     :archetypeAxis :OccupationalArchetype ;
     rdfs:comment "The employing organization as a participant. The duty relationship is carried separately by :EmployerRelationshipRole. No IFC equivalent."@en .
 
