@@ -60,10 +60,12 @@ def _most_specific_type(g, type_uris):
     The previous rule took the first type in rdflib iteration order, which is
     nondeterministic and often surfaced the generic layer ('instance of Role')
     on multi-typed case individuals. Drops any candidate that is a transitive
-    superclass (within this graph) of another candidate, prefers a non-core
-    class over the generic proeth-core layer, and tie-breaks alphabetically so
-    re-imports are stable. Mirrors the deepest-chain selection the entity-page
-    hierarchy applies (web/ontology_routes/helpers.py), graph-locally."""
+    superclass (within this graph) of another candidate, then prefers:
+    non-core over the generic proeth-core layer, occupational over the
+    relational archetypes (edge-derived secondary classifications, see
+    _RELATIONAL_ARCHETYPE_URIS), alphabetical as the stable final tiebreak.
+    Mirrors the deepest-chain selection the entity-page hierarchy applies
+    (web/ontology_routes/helpers.py), graph-locally."""
     candidates = [u for u in type_uris if u]
     if not candidates:
         return None
@@ -75,7 +77,10 @@ def _most_specific_type(g, type_uris):
             if ancestor_str != u and ancestor_str in refs:
                 supers.add(ancestor_str)
     remaining = [u for u in candidates if u not in supers] or candidates
-    remaining.sort(key=lambda u: (u.startswith(PROETHICA_CORE_NS), u))
+    remaining.sort(key=lambda u: (
+        u.startswith(PROETHICA_CORE_NS),
+        u in _RELATIONAL_ARCHETYPE_URIS,
+        u))
     return remaining[0]
 
 
@@ -102,6 +107,20 @@ def _property_metadata(g, prop, kind, soft_typing=False):
 PROETHICA_NS = 'http://proethica.org/ontology/'
 PROETHICA_INTERMEDIATE_NS = 'http://proethica.org/ontology/intermediate#'
 PROETHICA_CORE_NS = 'http://proethica.org/ontology/core#'
+
+# The four Kong (2020) relational archetype classes. R1 (extraction
+# architecture spec): relational typing is EDGE-PRIMARY -- these defined
+# classes (Role and employedBy some Role, ...) are materialized from the actor
+# edges a role facet bears, as a SECONDARY classification beside the
+# occupational type. The card's "instance of" should therefore headline the
+# occupational class; the archetypes stay visible as the edges themselves and
+# in the full type list. Closed, spec-ratified set. Referenced by
+# _most_specific_type (defined above; resolved at call time).
+_RELATIONAL_ARCHETYPE_URIS = frozenset(
+    f'{PROETHICA_INTERMEDIATE_NS}{name}' for name in (
+        'ProviderClientRole', 'ProfessionalPeerRole',
+        'EmployerRelationshipRole', 'PublicResponsibilityRole',
+    ))
 
 
 def _first(g, subject, predicate):
