@@ -1927,13 +1927,20 @@ proeth:constrainedEntity a owl:DatatypeProperty ;
 
 
 # --- Controlled professional attributes (Role attributes dict, Part B) ---
-proeth:hasLicense a owl:DatatypeProperty ;
-    rdfs:label "has license"@en ;
+# Spellings are canonical with the SHACL ProfessionalRolePropertyShape paths
+# (core-shapes.ttl) and the named-field commit emission: license, specialty,
+# employer. The former hasLicense/hasSpecialty/hasEmployer twins (the
+# attribute-bag mapping targets) were consolidated onto these 2026-07-05:
+# zero corpus references existed, and the split meant the same datum reached
+# a different predicate depending on extraction placement (named field vs
+# attributes bag; correspondence audit M4).
+proeth:license a owl:DatatypeProperty ;
+    rdfs:label "license"@en ;
     rdfs:range xsd:string ;
     rdfs:comment "Controlled Role attribute: professional license/licensure (maps license, licensure, licenseStatus)."@en .
 
-proeth:hasSpecialty a owl:DatatypeProperty ;
-    rdfs:label "has specialty"@en ;
+proeth:specialty a owl:DatatypeProperty ;
+    rdfs:label "specialty"@en ;
     rdfs:range xsd:string ;
     rdfs:comment "Controlled Role attribute: area of specialisation (maps specialty, specialization)."@en .
 
@@ -1942,8 +1949,8 @@ proeth:experienceLevel a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:comment "Controlled Role attribute: professional experience (maps experience, yearsOfExperience)."@en .
 
-proeth:hasEmployer a owl:DatatypeProperty ;
-    rdfs:label "has employer"@en ;
+proeth:employer a owl:DatatypeProperty ;
+    rdfs:label "employer"@en ;
     rdfs:range xsd:string ;
     rdfs:comment "Controlled Role attribute: employer/affiliation (maps employer, employedBy)."@en .
 
