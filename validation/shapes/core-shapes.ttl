@@ -35,6 +35,22 @@ pcsh:informationalOnly a owl:AnnotationProperty ;
     rdfs:label "informational only (assigned at commit)"@en ;
     rdfs:comment "Marks a descriptive SHACL property as informational in the extraction field contract: the value is assigned at commit (TBox restriction or resolver edge), so the prompt renders it as non-fillable context rather than a requested output field."@en .
 
+# CaseAnnotationShape: the shared per-case annotation fields EVERY committed individual carries,
+# regardless of component: extraction confidence, the verbatim supporting quotes, the source
+# snippet, and the involvement/context gloss. Declared once here (rather than nine times) so the
+# fields are schema-advertised instead of displayed-but-undeclared (correspondence audit T7).
+# Descriptive only; no validation effect.
+pcsh:CaseAnnotationShape
+    a sh:NodeShape ;
+    sh:targetClass core:Role, core:Principle, core:Obligation, core:State, core:Resource,
+        core:Action, core:Event, core:Capability, core:Constraint ;
+    rdfs:label "Shared per-case annotation schema (all nine components)"@en ;
+    rdfs:comment "The cross-component annotation fields asserted on every committed case individual: proeth:confidence (extraction confidence, decimal), proeth:textReferences (verbatim supporting quotes), proeth-prov sourceText (the source snippet, on the provenance layer), and the involvement gloss (proeth:caseInvolvement on role individuals, proeth:caseContext on capability and constraint individuals). Values are per-individual; the fields do not individuate any type."@en ;
+    sh:property [ sh:path proeth:confidence ; sh:name "confidence" ; sh:description "Extraction confidence for this individual (0 to 1)." ; sh:order 1 ] ;
+    sh:property [ sh:path proeth:textReferences ; sh:name "text references" ; sh:description "Verbatim case quotes supporting this individual." ; sh:order 2 ] ;
+    sh:property [ sh:path proeth:caseInvolvement ; sh:name "case involvement" ; sh:description "How this individual figures in the case narrative (role individuals; the same text is routed into rdfs:comment)." ; sh:order 3 ] ;
+    sh:property [ sh:path proeth:caseContext ; sh:name "case context" ; sh:description "Grounding context in this case (capability and constraint individuals)." ; sh:order 4 ] .
+
 # RULE 1: no individual may resolve to two distinct disjoint core categories.
 # This is the structural projection of the nine-way owl:AllDisjointClasses. After the
 # OWL-RL closure, an offending individual carries rdf:type for two core classes directly.
@@ -98,7 +114,7 @@ pcsh:RoleDefinitionShape
     rdfs:label "Role definition schema (universal, type-level, descriptive)"@en ;
     rdfs:comment "What ANY role TYPE is individuated by, universal across professional and participant roles: its distinguishing features and its occupational kind (the professional/participant backstop). The relational audience-relationship category (role_category) rides its own prompt slot; professional-specific definitional attrs are on ProfessionalRoleDefinitionShape; bearer data on ProfessionalRolePropertyShape."@en ;
     sh:property [ sh:path core:distinguishingFeatures ; sh:name "distinguishing features" ; sh:description "What sets this role type apart from related roles (its distinctive ends/practices)." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:roleKind ;             sh:name "role kind" ;               sh:description "The occupational backstop, an enum {professional, participant}, which drives the ProfessionalRole/ParticipantRole typing when the occupational resolver matches no head. Omitted when the case text does not state the judgment (three-state-capable through absence). A routing input, not stored as a literal." ; sh:order 2 ] .
+    sh:property [ sh:path proeth:roleKind ;             sh:name "role kind" ;               sh:description "The occupational backstop, an enum {professional, participant}, which drives the ProfessionalRole/ParticipantRole typing when the occupational resolver matches no head. Omitted when the case text does not state the judgment (three-state-capable through absence). A routing input, not stored as a literal; for a matched existing class the axis is carried by the class chain (a descendant of ProfessionalRole or ParticipantRole), so no per-individual literal is needed." ; sh:order 2 ] .
 
 # ProfessionalRoleDefinitionShape: the PROFESSIONAL-role-specific definitional attrs (type-level), on top
 # of the universal RoleDefinitionShape. These individuate a professional role (Engineer, Architect, ...),
@@ -309,13 +325,14 @@ pcsh:ConstraintDefinitionShape
     rdfs:label "Constraint definition schema (type-level, descriptive, field contract)"@en ;
     rdfs:comment "What individuates a constraint TYPE: the boundary it states (boundary_type, which drives the subClassOf typing into one of the eleven closed boundary-type classes) and the source provision that establishes it. The per-case severity and applicability, the agent it limits, and the action it bounds are per-individual and live on ConstraintPropertyShape, mirroring the R/P/O/S/Rs/Ca Definition/Property split and the constraint scopeNote (the TYPE is the prohibition plus its source provision; the constrained party, per-occasion applicability, and any exception attach to the case individual). Descriptive only (no validation result); boundary_type is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:boundaryType ; sh:name "boundary type" ; sh:description "The controlled boundary type, which drives the subClassOf typing into one of the ten closed boundary-type classes: LegalConstraint, RegulatoryConstraint, ResourceConstraint, CompetenceConstraint, JurisdictionalConstraint, ProceduralConstraint, EthicalConstraint, SafetyConstraint, ConfidentialityConstraint, TemporalConstraint. The prohibition/boundary content that individuates the type. A routing input, not stored as a literal." ; sh:order 1 ] ;
-    sh:property [ sh:path core:establishedBy ; sh:name "established by" ; sh:description "The source CodeProvision that establishes the constraint, via the establishedBy edge. The second type-individuating coordinate: per the scopeNote a constraint TYPE is the boundary it states plus its source provision. Range: CodeProvision." ; sh:order 2 ] .
+    sh:property [ sh:path core:establishedBy ; sh:name "established by" ; sh:description "The source CodeProvision that establishes the constraint, via the establishedBy edge. The second type-individuating coordinate: per the scopeNote a constraint TYPE is the boundary it states plus its source provision. Range: CodeProvision." ; pcsh:informationalOnly true ; sh:order 2 ] .
 
 # ConstraintPropertyShape: the per-case fields a given constraint INDIVIDUAL carries (the Cs-side analogue of
 # the other components' PropertyShapes). severity is the per-occasion Dennis severity assessment;
 # applicabilityCondition is the per-case temporal/contextual window under which the prohibition applies;
-# constrainedEntity is the particular Agent bound; constrainedBy is the incoming Action->Constraint edge
-# resolved by the Action pass. The scopeNote assigns all four to the case individual, not the class. Targets
+# constrainedEntity is the particular Agent bound. (A constrainedBy row promising the incoming
+# Action->Constraint edge was removed 2026-07-05: no pass produces that edge, so the schema
+# advertised a field that never appears; the core property remains declared vocabulary.) Targets
 # core:Constraint. Read by {{ constraint_schema }} as the per-case section and rendered as Bearer Attributes.
 pcsh:ConstraintPropertyShape
     a sh:NodeShape ;
@@ -324,8 +341,7 @@ pcsh:ConstraintPropertyShape
     rdfs:comment "What a given constraint INDIVIDUAL is described by in a specific case: its per-occasion severity and applicability window, the agent whose conduct it limits, and the action it bounds. These do NOT individuate the constraint TYPE (that is ConstraintDefinitionShape, keyed on the boundary it states and its source provision); their values are per-case, asserted on the individual. Descriptive only."@en ;
     sh:property [ sh:path proeth:severity ; sh:name "severity" ; sh:description "The severity of the constraint in this case (critical, high, medium, low); a per-occasion assessment (Dennis severity ordering) that can differ across cases sharing the same boundary." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:applicabilityCondition ; sh:name "applicability condition" ; sh:description "The temporal and contextual circumstances under which the prohibition applies in this case (the Dennis complete-specification condition)." ; sh:order 2 ] ;
-    sh:property [ sh:path core:constrainedEntity ; sh:name "constrained entity" ; sh:description "The agent whose conduct the constraint limits, via the outgoing constrainedEntity edge. Range: Agent." ; sh:order 3 ] ;
-    sh:property [ sh:path core:constrainedBy ; sh:name "constrained by" ; sh:description "The incoming Action->Constraint constrainedBy edge: each action limited by this constraint, resolved by the Action pass. Domain: Action." ; sh:order 4 ] .
+    sh:property [ sh:path core:constrainedEntity ; sh:name "constrained entity" ; sh:description "The agent whose conduct the constraint limits, via the outgoing constrainedEntity edge. Range: Agent." ; sh:order 3 ] .
 
 # EventDefinitionShape: the LIGHT field contract of any event TYPE/individual (the E component). Descriptive
 # only (no validation result). event_origin drives the three-way origin subClassOf typing into the mutually
@@ -336,7 +352,7 @@ pcsh:EventDefinitionShape
     sh:targetClass core:Event ;
     rdfs:label "Event definition schema (light, descriptive, field contract)"@en ;
     rdfs:comment "The light field contract of an event: its origin, the state fluents it initiates or terminates, and its persistence. Descriptive only (no validation result); event_origin drives the three-way origin subClassOf typing and is not stored as a literal. Kept deliberately light per the specification."@en ;
-    sh:property [ sh:path proeth:eventOrigin ;     sh:name "event origin" ;     sh:description "The origin of the event, which drives the three-way subClassOf typing into the mutually disjoint origin subclasses: outcome maps to AgentCausedEvent, exogenous to ExogenousEvent, automatic to AutomaticEvent (Berreby/Sarmiento origin distinction). A routing input, not stored as a literal." ; sh:order 1 ] ;
+    sh:property [ sh:path proeth:eventType ;     sh:name "event type" ;     sh:description "The origin of the event, which drives the three-way subClassOf typing into the mutually disjoint origin subclasses: outcome maps to AgentCausedEvent, exogenous to ExogenousEvent, automatic to AutomaticEvent (Berreby/Sarmiento origin distinction). A routing input, not stored as a literal." ; sh:order 1 ] ;
     sh:property [ sh:path core:initiates ;         sh:name "initiates" ;        sh:description "The State (fluent) the event initiates, via the initiates edge (Event->State). Range: State." ; sh:order 2 ] ;
     sh:property [ sh:path core:terminates ;        sh:name "terminates" ;       sh:description "The State (fluent) the event terminates, via the terminates edge (Event->State). Range: State." ; sh:order 3 ] ;
     sh:property [ sh:path proeth:temporalMarker ; sh:name "temporal marker" ; sh:description "The event's temporal positioning in the case (when it occurs relative to the other actions and events)." ; sh:order 4 ] .

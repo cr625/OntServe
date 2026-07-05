@@ -2020,10 +2020,10 @@ proeth:boundaryType a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:comment "Routing input: the controlled constraint boundary type driving the subClassOf typing into the ten closed boundary-type classes (LegalConstraint, RegulatoryConstraint, ...). Consumed at commit; not stored as a literal."@en .
 
-proeth:eventOrigin a owl:DatatypeProperty ;
-    rdfs:label "event origin"@en ;
+proeth:eventType a owl:DatatypeProperty ;
+    rdfs:label "event type"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Routing input: the event origin driving the three-way subClassOf typing into the mutually disjoint origin subclasses (outcome to AgentCausedEvent, exogenous to ExogenousEvent, automatic to AutomaticEvent; Berreby/Sarmiento). Consumed at commit; not stored as a literal."@en .
+    rdfs:comment "Routing input: the event origin kind driving the three-way subClassOf typing into the mutually disjoint origin subclasses (outcome to AgentCausedEvent, exogenous to ExogenousEvent, automatic to AutomaticEvent; Berreby/Sarmiento). Consumed at commit; not stored as a literal. Named eventType to match the extraction schema field and the SHACL path (the former eventOrigin spelling never appeared in data)."@en .
 
 # --- Class-mint content fields referenced by the definition shapes ---
 
