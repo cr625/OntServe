@@ -355,6 +355,13 @@ def register_detail_routes(bp):
         # Case citations for case-discovered classes (extended store): the
         # discoveredInCase markers resolved to linked, titled case ontologies.
         case_provenance = _entity_case_provenance(entity)
+        # SHACL node shapes: their sh:property rows are blank nodes (the raw
+        # ids used to leak onto the page); render the parsed field contract
+        # instead via the same cached parser the class pages use.
+        shape_fields = []
+        if str(entity.parent_uri or '').endswith('shacl#NodeShape'):
+            from web.ontology_routes.helpers import _shape_attr_schema
+            shape_fields = _shape_attr_schema(fragment)
 
         return render_template('entity_detail.html',
                              ontology=ontology,
@@ -366,6 +373,7 @@ def register_detail_routes(bp):
                              equivalent_class=equivalent_class,
                              incoming_edges=incoming_edges,
                              case_provenance=case_provenance,
+                             shape_fields=shape_fields,
                              ttl_content=ttl_content,
                              prop_groups=prop_groups,
                              semantic_links=semantic_links,

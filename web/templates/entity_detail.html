@@ -247,6 +247,29 @@
                 <!-- Definition (data-driven; see macros/component_sections.html) -->
                 {{ definition_card(entity, prop_groups) }}
 
+                {# SHACL node shape: the parsed sh:property field contract,
+                   replacing the raw blank-node ids the generic property list
+                   used to show. Each row links its sh:path property page. #}
+                {% if shape_fields %}
+                <div class="card mb-3">
+                    <div class="card-header"><h6 class="mb-0">Declared Fields</h6></div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm mb-0">
+                            <thead><tr><th class="ps-3">Field</th><th>Property (sh:path)</th><th>Description</th></tr></thead>
+                            <tbody>
+                            {% for f in shape_fields %}
+                            <tr>
+                                <td class="ps-3 text-nowrap">{{ f.name }}</td>
+                                <td class="text-nowrap"><a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=f.uri.split('#')[-1]) }}"><code class="small">{{ f.uri.split('#')[-1] }}</code></a></td>
+                                <td class="small text-muted">{{ f.description }}</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+
                 {# Case citation for a case-discovered class: the extensional
                    grounding (McLaren) -- which case(s) this class was found in,
                    linked and titled, styled like a definition source. Curated

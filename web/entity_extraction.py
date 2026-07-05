@@ -583,6 +583,14 @@ def _collect_properties(g, subject, skip_predicates):
     for pred, obj in g.predicate_objects(subject):
         if pred in skip_predicates:
             continue
+        # A blank-node object (e.g. a SHACL sh:property row, an owl:unionOf
+        # expression) is meaningless once detached from its graph: str(BNode)
+        # is a bare hex id that rendered as noise on entity pages
+        # (ObligationPropertyShape showed 'n6f48f294...'). Structured views
+        # that need the nested content parse the version graph directly
+        # (_shape_attr_schema, _entity_equivalent_class).
+        if isinstance(obj, rdflib.BNode):
+            continue
         pred_str = str(pred)
         key = pred_str.rsplit('#', 1)[-1] if '#' in pred_str else pred_str.rsplit('/', 1)[-1]
         val = str(obj)
