@@ -6,6 +6,7 @@
 @prefix core: <http://proethica.org/ontology/core#> .
 @prefix proeth: <http://proethica.org/ontology/intermediate#> .
 @prefix pcsh: <http://proethica.org/shapes/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 
 # ProEthica core conformance shapes (domain-GENERAL; shared by every domain).
 # Run with pyshacl inference='owlrl' so the OWL-RL closure (subClassOf* transitivity
@@ -18,6 +19,8 @@
 
 pcsh: a owl:Ontology ;
     rdfs:label "ProEthica core conformance shapes"@en ;
+    dcterms:title "ProEthica SHACL Shapes"@en ;
+    rdfs:comment "The descriptive SHACL schema contract for the nine ProEthica core components: per-component definition shapes (type-level fields such as principleCategory or extensionalCases) and per-case property shapes (individual bearer fields such as license, specialty, employer), plus the two validation rules the conformance tool enforces. The component class pages' Property Structure sections, the extraction prompts' schema blocks, and the conformance MCP tools all derive from these shapes. SHACL node shapes are individuals, so on the ontology page the shapes appear under Individuals, not Classes. Single source: validation/shapes/core-shapes.ttl, registered in OntServe as proethica-shapes via symlink."@en ;
     sh:declare [ sh:prefix "core" ; sh:namespace "http://proethica.org/ontology/core#"^^xsd:anyURI ] ;
     sh:declare [ sh:prefix "owl"  ; sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ] ;
     sh:declare [ sh:prefix "rdf"  ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] .
