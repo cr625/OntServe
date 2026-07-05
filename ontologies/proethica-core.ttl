@@ -189,6 +189,7 @@ proeth-core:CodeProvision a owl:Class ;
     rdfs:comment "An information content entity representing a single provision, section, or rule from a professional code of ethics (e.g., NSPE Code of Ethics, NEA Code of Ethics). Provisions establish the normative foundation from which Principles, Obligations, and Constraints are derived."@en ;
     skos:definition "A discrete normative statement from a code of ethics that establishes ethical requirements for professional conduct."@en ;
     skos:example "NSPE Code II.1.c: 'Engineers shall not reveal facts, data, or information without the prior consent of the client or employer except as authorized or required by law or this Code.'"@en ;
+    iao:0000116 "Boundary with Resource (deliberate, mirrors the v2.7.3 Guideline decision from the other side): a CodeProvision is the normative STATEMENT itself, a directive information entity like Principle/Obligation/Constraint, and is therefore owl:disjointWith Resource. The citable knowledge SOURCE is its containing document, the Guideline/EthicalCode, which IS a Resource. The two are linked by partOfGuideline / containsProvision. Typing a provision as a Resource would double-count the citation (document and statement) and cross the directive/descriptive line the Resource definition draws."@en ;
     skos:scopeNote "CodeProvisions serve as the authoritative source for derived ethical concepts. When analyzing cases, provisions are cited to justify the application of principles and obligations."@en .
 
 # Guideline: Container for provisions (the full code document)
