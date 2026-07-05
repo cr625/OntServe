@@ -674,6 +674,7 @@ proeth-core:citesAuthority a owl:ObjectProperty ;
 # relationship types not mapped to a more specific relation.
 
 proeth-core:relatedTo a owl:ObjectProperty ;
+    rdfs:comment "The neutral parent of the actor-relation family. Deliberately without domain or range: it exists so unmapped relationships have a declared home rather than an invented predicate."@en ;
     rdfs:label "related to"@en ;
     skos:definition "A professional or social relationship between two role-bearing agents whose specific type is not mapped to a more specific actor relation."@en .
 
@@ -681,6 +682,7 @@ proeth-core:hasClient a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
     schema:domainIncludes proeth-core:Role ;
     schema:rangeIncludes proeth-core:Role ;
+    rdfs:comment "Emitted at commit from the extraction relationships field; the edge attaches at the Agent level, so typing is soft (schema:domainIncludes) rather than rdfs:domain, which would entail Role on Agent endpoints against the Role/Agent disjointness. Bearing this edge assigns the provider side the ProviderClientRole archetype."@en ;
     rdfs:label "has client"@en ;
     skos:definition "Relates a provider role-bearer to the client for whom it performs professional service."@en .
 
@@ -688,6 +690,7 @@ proeth-core:professionalPeerOf a owl:ObjectProperty, owl:SymmetricProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
     schema:domainIncludes proeth-core:Role ;
     schema:rangeIncludes proeth-core:Role ;
+    rdfs:comment "Symmetric collegial relation. Soft typing (schema:domainIncludes) for the same Agent-level reason as hasClient; bearing it assigns the ProfessionalPeerRole archetype."@en ;
     rdfs:label "professional peer of"@en ;
     skos:definition "Relates two role-bearers in a collegial professional-peer relationship, for example mutual review or mentoring. Symmetric."@en .
 
@@ -695,6 +698,7 @@ proeth-core:employedBy a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
     schema:domainIncludes proeth-core:Role ;
     schema:rangeIncludes proeth-core:Role ;
+    rdfs:comment "Employment relation from the employee side. Soft typing (schema:domainIncludes) for the same Agent-level reason as hasClient; bearing it assigns the employee side the EmployerRelationshipRole archetype."@en ;
     rdfs:label "employed by"@en ;
     skos:definition "Relates a role-bearer to the employer it works for."@en .
 
@@ -702,6 +706,7 @@ proeth-core:reviewsWorkOf a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
     schema:domainIncludes proeth-core:Role ;
     schema:rangeIncludes proeth-core:Role ;
+    rdfs:comment "Directed review relation from the reviewer side; inverse of workReviewedBy."@en ;
     rdfs:label "reviews work of"@en ;
     skos:definition "Relates a reviewing role-bearer to the role-bearer whose work it reviews."@en .
 
@@ -709,6 +714,7 @@ proeth-core:workReviewedBy a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
     schema:domainIncludes proeth-core:Role ;
     schema:rangeIncludes proeth-core:Role ;
+    rdfs:comment "Directed review relation from the reviewed side; inverse of reviewsWorkOf."@en ;
     rdfs:label "work reviewed by"@en ;
     skos:definition "Relates a role-bearer to another role-bearer who reviews its work."@en .
 
