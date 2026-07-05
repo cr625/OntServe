@@ -492,6 +492,21 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
         stats['by_section'][section['id']] = section_count
 
     # Filter out empty sections (except "other" which we keep if non-empty)
+    # Within every section, list case INDIVIDUALS before the bare case-local
+    # class redeclarations (entity_type='class'): interleaving them made a
+    # component section read as one undifferentiated pool (nine-component
+    # correspondence audit T13, 2026-07-05). The class cards keep their badge
+    # and now group at the tail.
+    def _individuals_first(items):
+        return sorted(items, key=lambda e: (
+            getattr(e, 'entity_type', '') == 'class',
+            (getattr(e, 'label', None) or '').lower()))
+
+    for section in result_sections:
+        section['entities'] = _individuals_first(section['entities'])
+        for subsection in section.get('subsections') or []:
+            subsection['entities'] = _individuals_first(subsection['entities'])
+
     non_empty_sections = []
     for section in result_sections:
         has_entities = len(section['entities']) > 0

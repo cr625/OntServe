@@ -23,6 +23,7 @@ from web.ontology_routes.helpers import (
     class_hierarchy,
     _entity_disjoint_classes,
     _entity_equivalent_class,
+    _entity_incoming_edges,
 )
 
 
@@ -345,6 +346,11 @@ def register_detail_routes(bp):
         hierarchy = class_hierarchy(entity)
         disjoint_classes = _entity_disjoint_classes(entity, ontology)
         equivalent_class = _entity_equivalent_class(entity, ontology)
+        # Incoming edges for INDIVIDUALS only (classes have the class-page
+        # Referenced By section; parsing the full version content per request
+        # is reserved for the case-individual pages that need it).
+        incoming_edges = (_entity_incoming_edges(entity, ontology)
+                          if entity.entity_type in ('individual', 'concept') else [])
 
         return render_template('entity_detail.html',
                              ontology=ontology,
@@ -354,6 +360,7 @@ def register_detail_routes(bp):
                              hierarchy=hierarchy,
                              disjoint_classes=disjoint_classes,
                              equivalent_class=equivalent_class,
+                             incoming_edges=incoming_edges,
                              ttl_content=ttl_content,
                              prop_groups=prop_groups,
                              semantic_links=semantic_links,

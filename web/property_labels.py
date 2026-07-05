@@ -50,7 +50,14 @@ PROPERTY_LABELS = {
     'questiontype': 'Question type',
     'questionnumber': 'Question number',
     'decisionquestion': 'Decision question',
+    'decisionpointid': 'Decision point',
     'extractionreasoning': 'Reasoning',
+    # Repeated-singular analysis predicates (replaced the numbered
+    # option1/citedProvision1/... families, 2026-07-04)
+    'option': 'Option',
+    'citedprovision': 'Cited provision',
+    'answersquestion': 'Answers question',
+    'causalstep': 'Causal step',
     # Evidence / provenance (used by the detail page groups)
     'sourcetext': 'Source text',
     'textreferences': 'Text references',
@@ -79,8 +86,11 @@ PREDICATE_NAMESPACES = {
     'competeswith': 'proeth-core',
     'prevailsover': 'proeth-core',
     'defeasibleunder': 'proeth-core',
-    'derivedfromprinciple': 'proeth',
-    'citesprovision': 'proeth',
+    # Promoted to core in v2.8.0 (the deprecated intermediate twin was deleted
+    # 2026-07-04); the committed edges are proeth-core:derivedFromPrinciple.
+    'derivedfromprinciple': 'proeth-core',
+    'citesprovision': 'proeth-core',
+    'obligatedparty': 'proeth-core',
 }
 
 

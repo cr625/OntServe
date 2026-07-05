@@ -607,7 +607,7 @@
         {% elif block.id == 'citations' %}
         {{ render_citations(citations) }}
         {% elif block.id == 'conclusions' %}
-        {{ render_conclusions(conclusions) }}
+        {{ render_conclusions(conclusions, ontology_name=ontology.name) }}
         {% endif %}
         {% endfor %}
     </div>

@@ -12,7 +12,10 @@
     'textreferences', 'sourcetext',
     'importance', 'confidence',
     'attributes', 'relationships',
-    'scopenote'
+    'scopenote',
+    'matchconfidence', 'matchreasoning', 'matchedontologylabel',
+    'matchesexisting', 'synthesisliteral',
+    'rdf_types', 'rdftypes'
 ] %}
 
 {# Format a value for display - handles URIs, lists, etc #}
@@ -62,9 +65,13 @@
 {% if props|length > 0 %}
 {% set ns = namespace(attrs=[], rels=[]) %}
 {% for key, value in props.items() %}
-    {# Hide provenance/internal keys and the <concept>class key (restates the
-       class shown as the "instance of" link). #}
-    {% if value is not none and value != '' and key|lower not in HIDDEN_PROPERTY_KEYS and not (key|lower).endswith('class') %}
+    {# Hide provenance/internal keys, the <concept>class key (restates the
+       class shown as the "instance of" link), and any literal identical to
+       the card's Definition text (the commit routes one descriptor field
+       into rdfs:comment AND keeps the field literal, e.g. caseInvolvement,
+       concreteExpression -- printing both repeats the same paragraph). #}
+    {% if value is not none and value != '' and key|lower not in HIDDEN_PROPERTY_KEYS and not (key|lower).endswith('class')
+        and value != entity.comment %}
     {% set is_iri = (value.startswith('http://') or value.startswith('https://')) if value is string
         else ((value[0] is string and (value[0].startswith('http://') or value[0].startswith('https://'))) if (value is iterable and value is not string and value|length > 0) else false) %}
     {% if is_iri %}{% set _ = ns.rels.append((key, value)) %}{% else %}{% set _ = ns.attrs.append((key, value)) %}{% endif %}

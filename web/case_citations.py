@@ -26,6 +26,10 @@ ETHICAL_CONCLUSION = CASES.EthicalConclusion
 CONCLUSION_TYPE = PROETH.conclusionType
 CONCLUSION_NUMBER = PROETH.conclusionNumber
 CONCLUSION_TEXT = PROETH.conclusionText
+ANSWERS_QUESTION = PROETH.answersQuestion
+EXTRACTION_REASONING = PROETH.extractionReasoning
+ETHICAL_QUESTION = CASES.EthicalQuestion
+QUESTION_NUMBER = PROETH.questionNumber
 CONCEPT_TYPE = {
     CORE.Principle: "Principle",
     CORE.Obligation: "Obligation",
@@ -200,11 +204,26 @@ def build_conclusions(case_ttl: Optional[str]) -> Dict[str, Any]:
     if not cidx:
         return empty
 
+    # Question number -> anchor localname, so answersQuestion values (bare
+    # number literals, e.g. "1", "101") can link to the question individuals.
+    question_anchor_by_number: Dict[str, str] = {}
+    for q in cg.subjects(RDF.type, ETHICAL_QUESTION):
+        qnum = cg.value(q, QUESTION_NUMBER)
+        if qnum is not None:
+            question_anchor_by_number[str(qnum)] = _localname(str(q))
+
     out: List[Dict[str, Any]] = []
     for iri, rec in cidx.items():
         s = URIRef(iri)
         cited = sorted({_localname(str(o)).replace("_", ".")
                         for o in cg.objects(s, CITES_PROVISION)})
-        out.append({**rec, "cited_provisions": cited})
+        answers = sorted(
+            ({"number": str(o), "anchor": question_anchor_by_number.get(str(o))}
+             for o in cg.objects(s, ANSWERS_QUESTION)),
+            key=lambda a: (len(a["number"]), a["number"]))
+        reasoning = cg.value(s, EXTRACTION_REASONING)
+        out.append({**rec, "cited_provisions": cited,
+                    "answers_questions": answers,
+                    "reasoning": str(reasoning) if reasoning else ""})
     out.sort(key=lambda c: (c["type_label"], c["number"]))
     return {"has_conclusions": True, "count": len(out), "conclusions": out}

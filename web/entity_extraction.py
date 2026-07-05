@@ -54,6 +54,31 @@ _OWL_PROPERTY_CHARACTERISTICS = (
 )
 
 
+def _most_specific_type(g, type_uris):
+    """Deterministic most-specific rdf:type for an individual's parent_uri.
+
+    The previous rule took the first type in rdflib iteration order, which is
+    nondeterministic and often surfaced the generic layer ('instance of Role')
+    on multi-typed case individuals. Drops any candidate that is a transitive
+    superclass (within this graph) of another candidate, prefers a non-core
+    class over the generic proeth-core layer, and tie-breaks alphabetically so
+    re-imports are stable. Mirrors the deepest-chain selection the entity-page
+    hierarchy applies (web/ontology_routes/helpers.py), graph-locally."""
+    candidates = [u for u in type_uris if u]
+    if not candidates:
+        return None
+    refs = {u: rdflib.URIRef(u) for u in candidates}
+    supers = set()
+    for u in candidates:
+        for ancestor in g.transitive_objects(refs[u], RDFS.subClassOf):
+            ancestor_str = str(ancestor)
+            if ancestor_str != u and ancestor_str in refs:
+                supers.add(ancestor_str)
+    remaining = [u for u in candidates if u not in supers] or candidates
+    remaining.sort(key=lambda u: (u.startswith(PROETHICA_CORE_NS), u))
+    return remaining[0]
+
+
 def _property_metadata(g, prop, kind, soft_typing=False):
     """The properties-JSON dict for a property row.
 
@@ -407,7 +432,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         is_concept = (indiv, RDF.type, SKOS.Concept) in g
         entity_type = 'concept' if is_concept else 'individual'
         non_skos_types = [t for t in types if t != str(SKOS.Concept)]
-        parent_uri = (non_skos_types or types or [None])[0]
+        parent_uri = _most_specific_type(g, non_skos_types or types)
 
         # Collect all non-standard properties into JSON
         properties = _collect_properties(g, indiv, skip_predicates)
@@ -480,7 +505,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
 
         # Determine entity_type and parent_uri from rdf:type
         domain_types = [str(t) for t in types if t not in _OWL_STRUCTURAL_TYPES]
-        parent_uri = domain_types[0] if domain_types else None
+        parent_uri = _most_specific_type(g, domain_types)
 
         # An untyped labeled resource that carries a property-only predicate (owl:inverseOf,
         # rdfs:domain/range, rdfs:subPropertyOf, ...) is a property, not the individual fallback --

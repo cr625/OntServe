@@ -110,13 +110,18 @@ _EXTRACTION_META_KEYS = frozenset({
     'firstdiscoveredat', 'firstdiscoveredincase',
     'generatedattime', 'generatedAtTime',
     'wasattributedto', 'wasGeneratedBy',
+    # Commit-time match provenance (proeth-prov). Without these entries the
+    # keys fall through to groups['core'] and render as if they were bearer
+    # attributes (nine-component correspondence audit, 2026-07-05).
+    'matchconfidence', 'matchreasoning', 'matchedontologylabel',
+    'matchedontologyclass', 'matchesexisting', 'synthesisliteral',
 })
 
 # Property keys that represent textual evidence from the case
 _EVIDENCE_KEYS = frozenset({'sourcetext', 'textreferences'})
 
 # Property keys rendered as the entity description (below Definition)
-_DESCRIPTION_KEYS = frozenset({'caseinvolvement'})
+_DESCRIPTION_KEYS = frozenset({'caseinvolvement', 'casecontext'})
 
 # Property keys to skip entirely (redundant or internal).
 # dtupleComponent: the D-tuple letter (R/P/O/...) is already shown in the page header.
@@ -211,6 +216,13 @@ def _categorize_entity_properties(entity):
         # committed entities still carry it; the concept chip conveys the category).
         if (key in _SKIP_KEYS or key.lower() == 'rdf_types'
                 or key.lower() == 'conceptcategory' or key.lower().endswith('class')):
+            continue
+
+        # Skip a literal identical to the entity's rdfs:comment: the commit
+        # routes one descriptor field (caseInvolvement, concreteExpression,
+        # obligationStatement, ...) into the comment AND keeps the field
+        # literal, and the Definition card already shows the comment.
+        if isinstance(value, str) and value == (getattr(entity, 'comment', None) or ''):
             continue
 
         # skos:scopeNote is an inherited / contextual definition (e.g. the matched
@@ -639,6 +651,52 @@ def _entity_disjoint_classes(entity, ontology):
                         "label": (row[0] if row and row[0] else frag),
                         "ontology": row[1] if row else ontology.name})
         out.sort(key=lambda d: d["label"].lower())
+        return out
+    except Exception:
+        return []
+
+
+def _entity_incoming_edges(entity, ontology):
+    """Object-property edges POINTING AT this entity in the current ontology
+    version: [(predicate_localname, [{uri, fragment, label}])]. The commit
+    writes several families one-directional (Agent hasRole facet, Obligation
+    requiresCapability, obligatedParty, isPerformedBy ...), so without this an
+    individual never shows who bears/requires/performs it (correspondence
+    audit T8, 2026-07-05). Mirrors _entity_disjoint_classes: parsed from the
+    version content because inverse edges are not stored on the entity row."""
+    try:
+        v = db.session.execute(
+            select(OntologyVersion).where(
+                OntologyVersion.ontology_id == ontology.id, OntologyVersion.is_current.is_(True)
+            )).scalar_one_or_none()
+        if not (v and v.content):
+            return []
+        g = rdflib.Graph()
+        g.parse(data=v.content, format='turtle')
+        obj = rdflib.URIRef(entity.uri)
+        skip = {str(rdflib.RDF.type), str(rdflib.OWL.disjointWith),
+                str(rdflib.RDFS.subClassOf), str(rdflib.RDFS.domain),
+                str(rdflib.RDFS.range), str(rdflib.OWL.inverseOf)}
+        by_predicate = {}
+        for s, p, _ in g.triples((None, None, obj)):
+            if not isinstance(s, rdflib.URIRef) or str(p) in skip:
+                continue
+            # Skip provenance plumbing (prov:, time:) so the section shows
+            # domain edges, not derivation nodes.
+            if str(p).startswith(('http://www.w3.org/ns/prov#', 'http://www.w3.org/2006/time#')):
+                continue
+            by_predicate.setdefault(_uri_fragment(str(p)), set()).add(str(s))
+        out = []
+        for pred, subject_uris in sorted(by_predicate.items()):
+            subjects = []
+            for uri in sorted(subject_uris):
+                frag = _uri_fragment(uri)
+                row = db.session.execute(
+                    select(OntologyEntity.label)
+                    .where(OntologyEntity.uri == uri).limit(1)).first()
+                subjects.append({"uri": uri, "fragment": frag,
+                                 "label": (row[0] if row and row[0] else frag)})
+            out.append((pred, subjects))
         return out
     except Exception:
         return []

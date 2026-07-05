@@ -135,6 +135,8 @@ default:
         - QuestionEmergence
         - CodeProvisionReference
         - PrecedentCaseReference
+        - CausalChain
+        - TemporalRelation
       icon: bi-diagram-2
       collapsed: true
       max_preview: 20

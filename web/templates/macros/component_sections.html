@@ -93,9 +93,15 @@
         {% elif entity.comment %}
         <p class="mb-0">{{ entity.comment }}</p>
         {% endif %}
+        {# Description-layer fields (caseInvolvement, caseContext). The commit
+           routes the same text into rdfs:comment for several components, so a
+           value identical to the comment or the definition is suppressed
+           rather than printed twice. #}
         {% for label, val in prop_groups.description %}
+        {% if val != entity.comment and val not in prop_groups.definition %}
         <hr class="my-2">
         <p class="mb-0">{{ val }}</p>
+        {% endif %}
         {% endfor %}
         {# skos:scopeNote, demarcated. A self-defined note is "Scope note"; a note pulled from an
            ancestor carries a leading "[source]" tag and is labelled "Inherited from <source>". #}

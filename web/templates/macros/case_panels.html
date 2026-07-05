@@ -112,7 +112,7 @@
 </div>
 {% endmacro %}
 
-{% macro render_conclusions(conclusions) %}
+{% macro render_conclusions(conclusions, ontology_name=none) %}
 <div class="card case-section mb-4" id="section-conclusions">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="bi bi-chat-left-quote me-1"></i> Conclusions</span>
@@ -147,6 +147,16 @@
             <div class="small"><i class="bi bi-link-45deg text-muted me-1"></i><strong>cites:</strong>
                 {% for code in c.cited_provisions %}<span class="badge bg-light text-dark border">{{ code }}</span> {% endfor %}
             </div>{% endif %}
+            {% if c.answers_questions %}
+            <div class="small mt-1"><i class="bi bi-question-circle text-muted me-1"></i><strong>answers:</strong>
+                {% for q in c.answers_questions %}
+                {% if q.anchor and ontology_name %}<a class="badge bg-light text-dark border text-decoration-none" href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=q.anchor) }}">Question {{ q.number }}</a>
+                {% else %}<span class="badge bg-light text-dark border">Question {{ q.number }}</span>{% endif %}
+                {% endfor %}
+            </div>{% endif %}
+            {% if c.reasoning %}
+            <div class="small text-muted fst-italic mt-1" title="Extraction reasoning">{{ c.reasoning }}</div>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
