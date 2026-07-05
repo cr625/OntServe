@@ -460,14 +460,28 @@ def _class_shape_schemas(ancestor_list):
 
 def _class_ancestor_uris(entity, cap=16):
     """Walk the (single-valued) parent_uri chain across ontologies to collect this class's
-    ancestor URIs, including itself. Cycle- and depth-guarded."""
+    ancestor URIs, including itself. Cycle- and depth-guarded.
+
+    Each hop PREFERS the definitional row: a shared class exists once in its
+    home ontology (intermediate#EngineerRole, parent ProfessionalRole) and
+    again as a bare redeclaration in every case ontology that uses it (parent
+    flattened to core#Role). An unordered LIMIT 1 could hop through a case
+    stub, silently dropping the ProfessionalRole layer -- which hid the
+    bearer-attribute SHACL schema and the four-kind principle layer on entity
+    pages (correspondence audit T9, root-caused 2026-07-05)."""
     seen, uris, cur = set(), [], entity.uri
     while cur and cur not in seen and len(uris) < cap:
         seen.add(cur)
         uris.append(cur)
-        cur = db.session.execute(
-            select(OntologyEntity.parent_uri).where(OntologyEntity.uri == cur).limit(1)
-        ).scalar_one_or_none()
+        rows = db.session.execute(
+            select(OntologyEntity.parent_uri, Ontology.name)
+            .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
+            .where(OntologyEntity.uri == cur)
+        ).all()
+        if not rows:
+            break
+        rows.sort(key=lambda r: (r[1].startswith('proethica-case-'), r[1]))
+        cur = rows[0][0]
     return uris
 
 
