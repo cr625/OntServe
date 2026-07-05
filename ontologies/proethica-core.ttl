@@ -803,23 +803,22 @@ proeth-core:Action rdfs:subClassOf [
 # Agent (material entity/continuant) is disjoint from processes (occurrents)
 proeth-core:Agent owl:disjointWith proeth-core:Action, proeth-core:Event .
 
-# Role vs Capability conceptual distinction (both realizable entities)
-# Role = social/institutional position vs Capability = skill/competence disposition
-proeth-core:Role owl:disjointWith proeth-core:Capability .
+# Pairwise disjointness within the nine D-tuple components is NOT asserted here:
+# it is entailed by the nine-way owl:AllDisjointClasses below, and the pairwise
+# duplicates (Role-Capability, P/O/Cs-Resource, Action/Event/State-Resource/Role/
+# Capability) were removed 2026-07-04 as redundant. Pairwise axioms remain ONLY
+# for classes OUTSIDE the nine (Agent, CodeProvision, Guideline), whose
+# separations the nine-way set does not cover.
 
-# Directive ICEs (P, O, Cs) are disjoint from material entities and descriptive ICEs (Rs)
-proeth-core:Principle owl:disjointWith proeth-core:Agent, proeth-core:Resource .
-proeth-core:Obligation owl:disjointWith proeth-core:Agent, proeth-core:Resource .
-proeth-core:Constraint owl:disjointWith proeth-core:Agent, proeth-core:Resource .
+# Directive ICEs outside the nine are disjoint from Agent and from descriptive ICEs (Rs)
 proeth-core:CodeProvision owl:disjointWith proeth-core:Agent, proeth-core:Resource .
 proeth-core:Guideline owl:disjointWith proeth-core:Agent .  # NOT disjoint with Resource: a guideline document is a kind of Resource (v2.7.3)
 
-# Processes (occurrents) are disjoint from continuants
-proeth-core:Action owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .
-proeth-core:Event owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .
-
-# SDC (State) is disjoint from material entities, ICEs, and other SDC subtypes
-proeth-core:State owl:disjointWith proeth-core:Agent, proeth-core:Resource, proeth-core:Role, proeth-core:Capability .
+# Directive nine-members vs Agent (a non-member; the nine-way set does not cover it)
+proeth-core:Principle owl:disjointWith proeth-core:Agent .
+proeth-core:Obligation owl:disjointWith proeth-core:Agent .
+proeth-core:Constraint owl:disjointWith proeth-core:Agent .
+proeth-core:State owl:disjointWith proeth-core:Agent .
 
 # Agent (material entity) cannot also be a Role, Capability, or Resource (v2.7.1).
 # Asserted explicitly because the validation harness strips owl:imports, so the BFO
