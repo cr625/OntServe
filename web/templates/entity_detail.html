@@ -219,6 +219,31 @@
                 <!-- Class Hierarchy (data-driven; see macros/component_sections.html) -->
                 {{ class_hierarchy_card(hierarchy, ontology) }}
 
+                {# The hierarchy card walks ONE chain (the headlined type). A
+                   multi-typed individual's other classifications -- e.g. the
+                   Kong relational archetypes materialized from actor edges --
+                   would otherwise be invisible here. #}
+                {% set _all_types = entity.properties.get('rdf_types') if (entity.properties is mapping) else none %}
+                {% if entity.entity_type in ('individual', 'concept') and _all_types %}
+                {% set _others = [] %}
+                {% for t in _all_types %}
+                {% if t != entity.parent_uri and 'ontology/core#' not in t %}{% set _ = _others.append(t) %}{% endif %}
+                {% endfor %}
+                {% if _others %}
+                <div class="card mb-3">
+                    <div class="card-body py-2">
+                        <span class="text-uppercase text-muted me-2" style="font-size:0.7em; letter-spacing:0.04em;">Also classified as</span>
+                        {% for t in _others %}
+                        {% set t_frag = t.split('#')[-1].split('/')[-1] %}
+                        <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=t_frag) }}"
+                           class="badge bg-light text-secondary border text-decoration-none me-1"
+                           title="{{ t }}">{{ t_frag | split_pascal }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+
                 <!-- Definition (data-driven; see macros/component_sections.html) -->
                 {{ definition_card(entity, prop_groups) }}
 

@@ -40,6 +40,26 @@
         {% else %}
         <span class="instance-of-link">{{ raw_type | split_pascal }}</span>
         {% endif %}
+        {# Secondary classifications: the individual's other non-core rdf:types
+           (e.g. the Kong relational archetypes materialized from actor edges,
+           R1 edge-primary). One facet, several orthogonal classifications --
+           shown as chips so they are not lost behind the headlined
+           (occupational) type. core:* and the headlined type are omitted. #}
+        {% set all_types = entity.properties.get('rdf_types') if (entity.properties is mapping) else none %}
+        {% if all_types %}
+        {% for t in all_types %}
+        {% set t_frag = t.split('#')[-1].split('/')[-1] %}
+        {% if t != entity.parent_uri and 'ontology/core#' not in t %}
+        {% if ontology_name %}
+        <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=t_frag) }}"
+           class="badge bg-light text-secondary border text-decoration-none ms-1"
+           title="Also classified as ({{ t }})">{{ t_frag | split_pascal }}</a>
+        {% else %}
+        <span class="badge bg-light text-secondary border ms-1">{{ t_frag | split_pascal }}</span>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+        {% endif %}
     </div>
     {% endif %}
 
