@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-06 (ninth pass, P subtree citation fidelity): content-level verify-or-drop over every scholarly source in the Principle subtree, the dimension the closed DOI audit did not cover. Dropped as decorative, with per-class change notes recording each check: Dennis et al. 2016 from RelationalPrinciple and TransparencyPrinciple, Oakley and Cocking 2001 from CompetencePrinciple, Prem 2023 from EnvironmentalStewardshipPrinciple; each class keeps its NSPE provision or McLaren grounding. Kept as verified: the McLaren extensional backbone (operationalization and extensional definition are his constructs, 104 and title-level occurrences), Kong et al. 2020 on IntegrityPrinciple with the clause rescoped to what the corpus study shows, Oakley and Cocking and Anderson and Anderson 2018 on ProfessionalVirtuePrinciple (the learned-through-expert-examples gloss matches GenEth), Hallamaa and Kalliokoski 2022 on FundamentalEthicalPrinciple, and the NSPE v. United States source on FreeServicesProhibitionPrinciple. FundamentalEthicalPrinciple no longer attributes unverifiable examples to McLaren and co-cites Morley et al. 2021 on the constitutional-foundations analogy. Precedent wording corrected to accumulated cases on RelationalPrinciple and PublicWelfarePrinciple. Ampersand citations normalized on ProfessionalVirtuePrinciple."@en ;
     skos:changeNote "2026-07-06 (eighth pass, P properties review): the :establishes / :establishedBy twin pair and the :hasValueLabel annotation property are deleted. The pair duplicated proeth-core:establishes / proeth-core:establishedBy with zero uses anywhere (every emitter and reader is core-namespace; the committed cases carry only proeth-core:establishedBy), and its inverse kept the legacy Resource-only range that the 2026-07-04 forward-domain widening did not touch, a latent inconsistency against CodeProvision owl:disjointWith Resource; the McLaren 2003 dcterms:source moved to proeth-core:establishes. hasValueLabel had zero uses; the value-oriented reading of a principle is carried by the minted class label and the principleCategory routing input. A tombstone comment now records the 2026-07-04 deletion of the five deprecated property stubs superseded by the core v2.8.0 promotions. The closed boundary-type count is corrected to ten (PriorityConstraint was deleted 2026-07-05). Style: the Hallamaa and Kalliokoski citations move from the ampersand to the and form, weaponising and materialises respelled, and the cases-ontology placement comment moved to a literal verb."@en ;
     skos:changeNote "2026-07-06 (seventh pass): proeth:confidence rdfs:range corrected xsd:string -> xsd:decimal (the case-56 pipeline-probe finding; see the property changeNote)."@en ;
     skos:changeNote "2026-07-06 (sixth pass, same review): RegulatoryAuthorityRole reparented from :ProfessionalRole to :ParticipantRole with a role-genus definition; all four gold instantiations (cases 5, 6, 9, 16) are report-receiving oversight boards including the NSPE Board of Ethical Review, and the former placement entailed code-governance and obligation-existence commitments that a statutory board does not bear. The ProfessionalRole scope note head list updated to the four remaining occupational heads. ResponsibleChargeEngineerRole notes the review pathway of responsible charge (the case-120 reviewing-charge idiom). The EngineerRole altLabel engineering and the ResponsibleChargeEngineerRole altLabel reviewing charge engineer were audited and deliberately kept: the substring resolver makes the former harmless and beneficial in tie-breaks, and the latter names a genuine corpus concept. Pellet-gated on cases 5, 6, 9, and 16."@en ;
@@ -60,8 +61,10 @@
     rdfs:subClassOf proeth-core:Principle ;
     rdfs:label "Fundamental Ethical Principle"@en ;
     iao:0000115 "A universal moral foundation that serves as the highest-level abstraction in professional ethics, requiring extensive interpretation through concrete cases (BFO: generically dependent continuant)"@en ;
-    skos:definition "According to McLaren (2003), fundamental principles like public welfare and respect for persons cannot be applied through formal deduction alone but require extensional definition through landmark ethics cases and professional code applications. These principles function as constitutional-like foundations (Taddeo et al. 2024) that mediate moral ideals into professional practice (Hallamaa and Kalliokoski 2022)."@en ;
+    skos:definition "According to McLaren (2003), fundamental principles are abstract and open-textured, and gain operational meaning through extensional definition in decided ethics cases and professional code applications. These principles function as constitutional-like foundations (Morley et al. 2021; Taddeo et al. 2024) that mediate moral ideals into professional practice (Hallamaa and Kalliokoski 2022)."@en ;
+    skos:changeNote "2026-07-06: the McLaren clause no longer attributes the example pair public welfare and respect for persons to the source (respect for persons does not occur in McLaren; public welfare only as a case title in his corpus list) and now uses the verified McLaren constructs, abstract and open-textured principles extensionally defined through decided cases. The constitutional-foundations clause co-cites Morley et al. 2021, the origin of the analogy, matching the citation form of the dissertation."@en ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
+                   <https://doi.org/10.1007/s11023-021-09563-w> , # Morley et al. 2021
                    <https://doi.org/10.1007/s13347-024-00710-6> , # Taddeo et al. 2024
                    <https://doi.org/10.3389/fcomp.2022.776837> ; # Hallamaa and Kalliokoski 2022
     rdfs:comment "Examples: Public Welfare Paramount, Respect for Persons, Justice, Beneficence. These require extensive interpretation and balancing in specific contexts."@en .
@@ -70,18 +73,18 @@
     rdfs:subClassOf proeth-core:Principle ;
     rdfs:label "Professional Virtue Principle"@en ;
     iao:0000115 "A character-based principle defining professional excellence and ethical sensitivities specific to professional identity (BFO: generically dependent continuant)"@en ;
-    skos:definition "Professional virtue principles guide professional identity formation and ethical sensitivities (Oakley & Cocking 2001). These principles are learned through expert examples (Anderson & Anderson 2018) and exemplified through model professional behavior cases, creating role-generated moral demands that shape professional character."@en ;
-    dcterms:source <https://doi.org/10.1017/CBO9780511487118> , # Oakley & Cocking 2001
-                   <https://doi.org/10.1515/pjbr-2018-0024> ; # Anderson & Anderson 2018
+    skos:definition "Professional virtue principles guide professional identity formation and ethical sensitivities (Oakley and Cocking 2001). These principles are learned through expert examples (Anderson and Anderson 2018) and exemplified through model professional behavior cases, creating role-generated moral demands that shape professional character."@en ;
+    dcterms:source <https://doi.org/10.1017/CBO9780511487118> , # Oakley and Cocking 2001
+                   <https://doi.org/10.1515/pjbr-2018-0024> ; # Anderson and Anderson 2018
     rdfs:comment "Examples: Integrity, Competence, Honesty, Professional Courage, Accountability. These shape professional character and decision-making."@en .
 
 :RelationalPrinciple rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Principle ;
     rdfs:label "Relational Principle"@en ;
     iao:0000115 "A principle governing professional relationships and establishing frameworks for trust and stakeholder interactions (BFO: generically dependent continuant)"@en ;
-    skos:definition "Relational principles establish frameworks for managing professional relationships and stakeholder trust. Following McLaren's extensional approach, these principles gain meaning through precedents from client-professional disputes and resolutions, defining how professionals navigate competing interests and maintain trustworthy relationships."@en ;
-    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
-                   <https://doi.org/10.1016/j.robot.2015.11.012> ; # Dennis et al. 2016
+    skos:definition "Relational principles establish frameworks for managing professional relationships and stakeholder trust. Following McLaren's extensional approach, these principles gain meaning through accumulated cases of client-professional disputes and resolutions, defining how professionals navigate competing interests and maintain trustworthy relationships."@en ;
+    skos:changeNote "2026-07-06: Dennis et al. 2016 removed from the definition sources after a verify-or-drop check against the full text: the paper concerns formal verification of ethical choices in autonomous systems and contains no treatment of professional relationships or stakeholder trust; the McLaren extensional grounding carries the class. The definition now says accumulated cases rather than precedents (McLaren denies precedential force to Board cases)."@en ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> ; # McLaren 2003
     rdfs:comment "Examples: Confidentiality, Loyalty, Fairness, Transparency, Respect for Autonomy. These govern interpersonal professional dynamics."@en .
 
 :DomainSpecificPrinciple rdf:type owl:Class ;
@@ -100,7 +103,7 @@
     rdfs:label "Public Welfare Principle"@en ;
     skos:altLabel "public safety principle"@en ;
     iao:0000115 "The fundamental principle that public safety, health, and welfare must be held paramount in professional practice (BFO: generically dependent continuant)"@en ;
-    skos:definition "The public welfare principle, as articulated in NSPE Fundamental Canon 1, requires professionals to hold paramount the safety, health, and welfare of the public. This principle exemplifies McLaren's challenge of operationalizing abstract guidance - 'hold paramount' gains meaning only through NSPE case applications and precedents like the Challenger disaster."@en ;
+    skos:definition "The public welfare principle, as articulated in NSPE Fundamental Canon 1, requires professionals to hold paramount the safety, health, and welfare of the public. This principle exemplifies the operationalization challenge McLaren (2003) describes: the 'hold paramount' standard gains meaning through accumulated NSPE Board case applications. Landmark engineering cases such as the Challenger disaster illustrate what is at stake."@en ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
                    "NSPE Code of Ethics Fundamental Canon 1" ;
     proeth:nspeReference "Fundamental Canon 1" ;
@@ -111,7 +114,7 @@
     rdfs:subClassOf :ProfessionalVirtuePrinciple ;
     rdfs:label "Integrity Principle"@en ;
     iao:0000115 "The professional virtue principle of maintaining honesty, truthfulness, and ethical consistency in professional practice (BFO: generically dependent continuant)"@en ;
-    skos:definition "Professional integrity requires contextual interpretation through cases (Kong et al. 2020) and manifests differently across professional contexts. It encompasses honesty in professional communications, truthfulness in representations, and consistency between professional values and actions."@en ;
+    skos:definition "Professional integrity is a recurring element of professionalism across professional codes (Kong et al. 2020) and manifests differently across professional contexts. It encompasses honesty in professional communications, truthfulness in representations, and consistency between professional values and actions."@en ;
     dcterms:source <https://doi.org/10.1558/jalpp.39771> , # Kong et al. 2020
                    "NSPE Code of Ethics III.1" ;
     proeth:nspeReference "Professional Obligation III.1" ;
@@ -122,8 +125,8 @@
     rdfs:label "Competence Principle"@en ;
     iao:0000115 "The professional virtue principle requiring maintenance and application of professional knowledge and skill within areas of competence (BFO: generically dependent continuant)"@en ;
     skos:definition "The competence principle requires professionals to perform services only in areas of their competence and to maintain professional knowledge through continuous learning. This principle generates obligations for professional development and honest self-assessment of capabilities."@en ;
-    dcterms:source "NSPE Code of Ethics II.2" ,
-                   <https://doi.org/10.1017/CBO9780511487118> ; # Oakley & Cocking 2001
+    skos:changeNote "2026-07-06: Oakley and Cocking 2001 removed from the definition sources after a verify-or-drop check: competence occurs in the book only inside physician anecdotes, not as a treated principle; the class content is the NSPE II.2 competence rule, which remains the source. The book stays cited on ProfessionalVirtuePrinciple, whose virtue-and-role account it grounds."@en ;
+    dcterms:source "NSPE Code of Ethics II.2" ;
     proeth:nspeReference "Rule of Practice II.2" ;
     rdfs:comment "Balances professional autonomy with recognition of limitations and need for collaboration."@en .
 
@@ -142,8 +145,8 @@
     rdfs:label "Transparency Principle"@en ;
     iao:0000115 "The relational principle requiring openness and disclosure in professional communications and decision-making (BFO: generically dependent continuant)"@en ;
     skos:definition "Transparency requires professionals to be open about conflicts of interest, limitations, and decision-making processes. This principle supports accountability and enables informed consent from stakeholders."@en ;
-    dcterms:source "NSPE Code of Ethics II.3.a" ,
-                   <https://doi.org/10.1016/j.robot.2015.11.012> ; # Dennis et al. 2016
+    skos:changeNote "2026-07-06: Dennis et al. 2016 removed from the definition sources after a verify-or-drop check: its single transparency sentence concerns the engineering of verifiable autonomous systems, not openness in professional communications; NSPE II.3.a remains the source."@en ;
+    dcterms:source "NSPE Code of Ethics II.3.a" ;
     proeth:nspeReference "Rule of Practice II.3.a (composite disclosure value; also II.4.a / III.1.a)" ;
     iao:0000116 "II.3.a triplet boundary: Transparency is the RELATIONAL pole of the shared provision, the openness owed to affected parties about conflicts, limitations, and decision processes. The judgment-quality pole is ObjectivityPrinciple; the content-completeness pole is the Complete Reporting principle."@en ;
     rdfs:comment "Essential for maintaining trust and enabling stakeholder participation in professional decisions."@en .
@@ -153,8 +156,8 @@
     rdfs:label "Environmental Stewardship Principle"@en ;
     iao:0000115 "The domain-specific principle in engineering requiring consideration of environmental impact and sustainability (BFO: generically dependent continuant)"@en ;
     skos:definition "Environmental stewardship in engineering requires balancing technical solutions with environmental protection and sustainable development. This principle has evolved through cases addressing pollution, resource depletion, and climate change impacts."@en ;
-    dcterms:source "NSPE Code of Ethics III.2.d" ,
-                   <https://doi.org/10.1007/s43681-023-00258-9> ; # Prem 2023
+    skos:changeNote "2026-07-06: Prem 2023 removed from the definition sources after a verify-or-drop check: environmental wellbeing appears in the paper only inside surveyed AI-framework principle lists, which does not ground an engineering environmental-stewardship principle; NSPE III.2.d remains the source."@en ;
+    dcterms:source "NSPE Code of Ethics III.2.d" ;
     proeth:nspeReference "Professional Obligation III.2.d" ;
     rdfs:comment "Bridges engineering practice with broader environmental and societal responsibilities."@en .
 
