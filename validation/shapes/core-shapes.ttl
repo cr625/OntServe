@@ -128,9 +128,9 @@ pcsh:ProfessionalRoleDefinitionShape
     sh:targetClass proeth:ProfessionalRole ;
     rdfs:label "Professional-role definition schema (type-level, descriptive)"@en ;
     rdfs:comment "Professional-role-specific definitional attributes, layered on the universal RoleDefinitionShape. A participant role (e.g. an affected citizen) carries none of these. The R->P->O hasObligation/adheresToPrinciple edges are materialized by the dedicated R->P->O pass, not asked of the roles prompt. The per-individual ethical-tensions field of the dissertation schema is likewise not asked of the roles prompt; obligation tensions are materialized between the obligations themselves as the defeasibility edge family (competesWith, prevailsOver, defeasibleUnder) by the dedicated defeasibility pass."@en ;
-    sh:property [ sh:path core:professionalScope ;     sh:name "professional scope" ;      sh:description "Areas of responsibility and authority of the role type (Oakley & Cocking 2001)." ; sh:order 1 ] ;
-    sh:property [ sh:path core:typicalQualifications ; sh:name "typical qualifications" ;  sh:description "Generic credentials the role TYPE requires (a descriptor of the type, not an individual's license)." ; sh:order 2 ] ;
-    sh:property [ sh:path core:associatedVirtues ;     sh:name "associated virtues" ;      sh:description "Virtues/dispositions characteristic of the professional role type (Kong 2020 identity virtues; Oakley & Cocking 2001)." ; sh:order 3 ] .
+    sh:property [ sh:path core:professionalScope ;     sh:name "professional scope" ;      sh:description "Areas of responsibility and authority of the role type (Oakley and Cocking 2001)." ; sh:order 1 ] ;
+    sh:property [ sh:path core:typicalQualifications ; sh:name "typical qualifications" ;  sh:description "Generic credentials the role type requires (a descriptor of the type, not an individual's license)." ; sh:order 2 ] ;
+    sh:property [ sh:path core:associatedVirtues ;     sh:name "associated virtues" ;      sh:description "Virtues and dispositions characteristic of the professional role type (Kong et al. 2020 identity virtues; Oakley and Cocking 2001)." ; sh:order 3 ] .
 
 # RolePropertyShape: the controlled property SCHEMA for professional roles -- a
 # machine-visible declaration of which attributes a well-formed role-bearing individual
@@ -163,11 +163,11 @@ pcsh:ProfessionalRolePropertyShape
     sh:targetClass proeth:ProfessionalRole ;
     rdfs:label "Professional-role-bearer attributes (individual data, non-definitional)"@en ;
     rdfs:comment "Per-occupant data a PROFESSIONAL role-bearing INDIVIDUAL may have (license, specialty, employer, technical background). Descriptive only; these do NOT define the role type (cf. Davis 1991: license is not role-defining). Retargeted 2026-06-26 from core:Role to proeth:ProfessionalRole: a participant/stakeholder role (an affected citizen) has none of these; the universal role schema is RoleDefinitionShape. Values are asserted on the individual. Tightened 2026-06-25: dropped roleNature/roleClass (extraction provenance, not bearer data; reclassify to PROV-O) and jurisdiction/registrationStatus/roleInOrganization (weak controlled-vocab; captured via otherAttribute overflow when actually present)."@en ;
-    sh:property [ sh:path proeth:license ;             sh:name "license" ;              sh:description "Professional license / licensure." ;                      sh:order 1 ] ;
-    sh:property [ sh:path proeth:specialty ;           sh:name "specialty" ;            sh:description "Area of specialisation." ;                                sh:order 2 ] ;
-    sh:property [ sh:path proeth:experienceLevel ;     sh:name "experience level" ;     sh:description "Professional experience." ;                               sh:order 3 ] ;
-    sh:property [ sh:path proeth:employer ;            sh:name "employer" ;             sh:description "Employer / affiliation." ;                                sh:order 4 ] ;
-    sh:property [ sh:path proeth:technicalBackground ; sh:name "technical background" ; sh:description "Technical background." ;                                  sh:order 5 ] ;
+    sh:property [ sh:path proeth:license ;             sh:name "license" ;              sh:description "Professional license or licensure status." ;              sh:order 1 ] ;
+    sh:property [ sh:path proeth:specialty ;           sh:name "specialty" ;            sh:description "Area of specialization." ;                                sh:order 2 ] ;
+    sh:property [ sh:path proeth:experienceLevel ;     sh:name "experience level" ;     sh:description "Level of professional experience (e.g., years in practice)." ; sh:order 3 ] ;
+    sh:property [ sh:path proeth:employer ;            sh:name "employer" ;             sh:description "Employer or organizational affiliation." ;                sh:order 4 ] ;
+    sh:property [ sh:path proeth:technicalBackground ; sh:name "technical background" ; sh:description "Technical training and domain background of the individual." ; sh:order 5 ] ;
     sh:property [ sh:path proeth:otherAttribute ;      sh:name "other attribute" ;      sh:description "Overflow 'key: value' literal for a case-specific attribute outside the controlled set." ; sh:order 6 ] .
 
 # ObligationDefinitionShape / ObligationPropertyShape: the O-component field contract, read by the
