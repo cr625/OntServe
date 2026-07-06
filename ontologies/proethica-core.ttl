@@ -18,7 +18,8 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.10.4"^^xsd:string ;
+    owl:versionInfo "2.10.5"^^xsd:string ;
+    skos:changeNote "v2.10.5: Property-layer annotation pass on the R component from the 2026-07-06 Property Structure source review; no logical axioms changed. The hasObligation comment is universalized (the former wording, its professional obligations, predated the v2.10.0 Role universalization and contradicted committed participant-side edges; the Role-wide domain enables the edge without committing existence). The actor-edge comments (hasClient, professionalPeerOf, employedBy) now lead with meaning and expand the R1 edge-primary decision tag in place; the reviewsWorkOf and isRoleOf version history moved to property-level change notes. adheresToPrinciple gains the R-to-P-to-O applicability clause. The Role editor note now states that four Kong identity-role categories are carried as the relational archetypes (a selection, not the full Kong inventory). Companion intermediate-layer pass in the same review: the Kong misattribution on ProfessionalPeerRole corrected, ProviderClientRole duties restated per the source, the archetype block comment documents the deliberately unoperationalized Kong categories, End and pursuesEnd gain the Oakley and Cocking grounding."@en ;
     skos:changeNote "v2.10.4: Annotation-only corrections to Role from the 2026-07-06 source-verification review of the entity-page text against the cited PDFs and the grounding dissertation. The iao:0000116 editor note no longer attributes the professional-versus-participant contrast to Oakley and Cocking 2001 (the word participant does not occur in their book; the contrast is a design construct of this ontology, introduced in v2.10.0) and now names the Doernberg and Truog 2023 concept by their own term, spheres of morality, instead of the coined compound role-spheres. The skos:scopeNote Davis 1991 parenthetical gains the verified page cite (p. 157 n. 7, the footnote stating that nearly 90 percent of US engineers practice unlicensed under the manufacturer's exemption). Style pass on the same fields: axiomatised respelled axiomatized, the rdfs:comment list reduced to duties or stakes, the class change-note possessive moved to the of form, the per-occupant example list extended with experience (the fourth individual-level attribute in the dissertation), type and individual lowercased, and the three iao:0000119 strings given uniform venue and publisher detail. No logical axioms changed."@en ;
     skos:changeNote "v2.10.3: The five typed actor-relation subproperties (hasClient, professionalPeerOf, employedBy, reviewsWorkOf, workReviewedBy) gain rdfs:domain and rdfs:range proeth-core:Role, replacing the schema:domainIncludes soft hints. The hints existed because legacy cases attached these edges to Agent endpoints, which the Agent/Role disjointness would have made inconsistent under hard domains; the 2026-07-05 twelve-case regeneration removed the last such endpoints and a corpus-wide verification query returned zero non-Role endpoints, so the axioms are now sound. reviewsWorkOf gains the owl:inverseOf workReviewedBy axiom its comment had claimed. relatedTo deliberately stays domain-less as the unvetted-relationship fallback."@en ;
     skos:changeNote "v2.10.2: Representation-only consolidation of the pairwise disjointness block. The eleven Agent separations, previously spread over six mixed-direction owl:disjointWith statements, are now one Agent-subject statement, and CodeProvision keeps its own statement against Resource. The unordered disjoint-pair set is verified identical before and after (12 pairs); no logical axioms changed. Agent is deliberately not folded into the nine-way owl:AllDisjointClasses, which expresses the D-tuple mutual-exclusion claim itself; see the comment at the disjointness block."@en ;
@@ -43,7 +44,7 @@ proeth-core:Role a owl:Class ;
     rdfs:label "Role"@en ;
     rdfs:comment "A position or standing borne by an agent in professional practice, with the duties or stakes that standing carries; the R component of D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
     iao:0000115 "A realizable role (BFO) borne by an agent in virtue of a position or standing in professional practice, which determines (filters) the principles and obligations that apply to the agent in that standing. A professional role additionally generates obligations teleologically from the distinctive good the profession serves; a participant role (a client or owner, or an affected member of the public) carries standing in the case without profession-generated duties. The role is individuated by the principles and obligations it determines and the audience relationships it establishes, not by the occupant's attributes. This is the R component of the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs)."@en ;
-    iao:0000116 "Operationalizes the teleological account of professional roles (Oakley and Cocking 2001), under which the obligations of a professional role emerge from the distinctive good of the profession. Within this ontology, that obligation-generation distinguishes a professional role from a participant role. Carries the identity virtues and identity-role categories of Kong et al. (2020), and admits the multiple spheres of morality Doernberg and Truog (2023) locate within a single profession."@en ;
+    iao:0000116 "Operationalizes the teleological account of professional roles (Oakley and Cocking 2001), under which the obligations of a professional role emerge from the distinctive good of the profession. Within this ontology, that obligation-generation distinguishes a professional role from a participant role. Carries the identity virtues of Kong et al. (2020) and four of their identity-role categories as the relational archetypes, and admits the multiple spheres of morality Doernberg and Truog (2023) locate within a single profession."@en ;
     skos:scopeNote "Obligation-generation is axiomatized on ProfessionalRole (proeth:ProfessionalRole subClassOf (hasObligation some Obligation)), not on Role itself; a participant role carries no obligation-existence commitment. Relationship categories and virtues are definitional of the role type; per-occupant facts (license, specialty, employer, experience) attach to the role individual, not the class (cf. Davis 1991, p. 157 n. 7; most US engineers are unlicensed yet remain role-bound, so license is not role-defining)."@en ;
     skos:changeNote "v2.10.0: universalized to cover participant roles; the professional-only genus contradicted the professional-versus-participant classification in the roles prompt itself and the committed participant individuals (Client W). Obligation-generation moved to the ProfessionalRole axiom in the intermediate layer."@en ;
     iao:0000119 "Oakley and Cocking (2001). Virtue Ethics and Professional Roles. Cambridge University Press." ,
@@ -264,21 +265,23 @@ proeth-core:isRoleOf a owl:ObjectProperty ;
     rdfs:domain proeth-core:Role ;
     rdfs:range proeth-core:Agent ;
     rdfs:label "is role of"@en ;
-    rdfs:comment "Relates a role to the agent that bears it. Inverse of hasRole, so the reasoner sees both directions from one asserted edge. Grounded under RO:role of (v2.7.2)."@en ;
-    skos:definition "Relates a Role to the Agent who bears it. Inverse of hasRole."@en .
+    rdfs:comment "Relates a role to the agent that bears it. Inverse of hasRole, so the reasoner sees both directions from one asserted edge. Grounded under RO:role of."@en ;
+    skos:definition "Relates a Role to the Agent who bears it. Inverse of hasRole."@en ;
+    skos:changeNote "v2.7.2: grounded rdfs:subPropertyOf ro:role_of."@en .
 
 proeth-core:hasObligation a owl:ObjectProperty ;
     rdfs:domain proeth-core:Role ;
     rdfs:range proeth-core:Obligation ;
     rdfs:label "has obligation"@en ;
-    rdfs:comment "Relates a role to its professional obligations."@en ;
-    skos:definition "Relates a role to its professional obligations."@en .
+    rdfs:comment "Relates a role to an obligation borne in that standing. The Role-wide domain enables the edge for any role without committing existence; obligation-generation is axiomatized on proeth:ProfessionalRole (subClassOf hasObligation some Obligation) in the intermediate layer, and a participant role may bear case-asserted obligations without profession-generated ones."@en ;
+    skos:definition "Relates a role to an obligation that directs conduct in that standing."@en ;
+    skos:changeNote "v2.10.5: comment universalized; the former wording (its professional obligations) predated the v2.10.0 Role universalization and contradicted committed participant-side edges (a ClientRole facet bears the edge in case 8)."@en .
 
 proeth-core:adheresToPrinciple a owl:ObjectProperty ;
     rdfs:domain proeth-core:Role ;
     rdfs:range proeth-core:Principle ;
     rdfs:label "adheres to principle"@en ;
-    rdfs:comment "Relates a role to principles that guide its conduct."@en ;
+    rdfs:comment "Relates a role to principles that guide its conduct; the role-relative applicability edge of the R-to-P-to-O chain (the role determines which principles apply to conduct in that standing)."@en ;
     skos:definition "Relates a role to principles that guide its conduct."@en ;
     skos:changeNote "v2.3.0: Removed subPropertyOf iao:0000136 (is about). The is_about relation links information content to what it represents; adheresToPrinciple links a role to the directive content that governs it, which is a different semantic relation."@en .
 
@@ -699,7 +702,7 @@ proeth-core:hasClient a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
     rdfs:domain proeth-core:Role ;
     rdfs:range proeth-core:Role ;
-    rdfs:comment "Emitted at commit from the extraction relationships field; the edge attaches at the ROLE-FACET level (the source and target are role facets, and the bearer Agent is reached via hasRole). Bearing this edge assigns the provider side the ProviderClientRole archetype (R1, edge-primary)."@en ;
+    rdfs:comment "Relates the provider-side role facet to the client-side role facet; the bearer Agent on each side is reached via hasRole. An asserted edge assigns the provider side the ProviderClientRole archetype, a defined class inferred from this edge at commit, with the extraction category field as fallback only (edge-primary, decision R1). Emitted at commit from the extraction relationships field."@en ;
     rdfs:label "has client"@en ;
     skos:definition "Relates a provider role-bearer to the client for whom it performs professional service."@en .
 
@@ -707,7 +710,7 @@ proeth-core:professionalPeerOf a owl:ObjectProperty, owl:SymmetricProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
     rdfs:domain proeth-core:Role ;
     rdfs:range proeth-core:Role ;
-    rdfs:comment "Symmetric collegial relation between role facets; bearing it assigns the ProfessionalPeerRole archetype (R1, edge-primary)."@en ;
+    rdfs:comment "Symmetric collegial relation between role facets. An asserted edge assigns each side the ProfessionalPeerRole archetype, a defined class inferred from this edge at commit (edge-primary, decision R1)."@en ;
     rdfs:label "professional peer of"@en ;
     skos:definition "Relates two role-bearers in a collegial professional-peer relationship, for example mutual review or mentoring. Symmetric."@en .
 
@@ -715,7 +718,7 @@ proeth-core:employedBy a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;
     rdfs:domain proeth-core:Role ;
     rdfs:range proeth-core:Role ;
-    rdfs:comment "Employment relation from the employee side, between role facets; bearing it assigns the employee side the EmployerRelationshipRole archetype (R1, edge-primary)."@en ;
+    rdfs:comment "Employment relation from the employee side, between role facets. An asserted edge assigns the employee side the EmployerRelationshipRole archetype, a defined class inferred from this edge at commit (edge-primary, decision R1)."@en ;
     rdfs:label "employed by"@en ;
     skos:definition "Relates a role-bearer to the employer it works for."@en .
 
@@ -724,9 +727,10 @@ proeth-core:reviewsWorkOf a owl:ObjectProperty ;
     rdfs:domain proeth-core:Role ;
     rdfs:range proeth-core:Role ;
     owl:inverseOf proeth-core:workReviewedBy ;
-    rdfs:comment "Directed review relation from the reviewer side; inverse of workReviewedBy (axiom added v2.10.3; the comments had claimed inversehood without it)."@en ;
+    rdfs:comment "Directed review relation from the reviewer side. Inverse of workReviewedBy."@en ;
     rdfs:label "reviews work of"@en ;
-    skos:definition "Relates a reviewing role-bearer to the role-bearer whose work it reviews."@en .
+    skos:definition "Relates a reviewing role-bearer to the role-bearer whose work it reviews."@en ;
+    skos:changeNote "v2.10.3: the owl:inverseOf workReviewedBy axiom asserted; earlier versions claimed the inverse in comments without it."@en .
 
 proeth-core:workReviewedBy a owl:ObjectProperty ;
     rdfs:subPropertyOf proeth-core:relatedTo ;

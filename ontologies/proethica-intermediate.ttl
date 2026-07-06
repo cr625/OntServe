@@ -22,7 +22,8 @@
     rdfs:label "ProEthica Intermediate Ontology"@en ;
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
-    dc:date "2025-05-31"^^xsd:date .
+    dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-06: Annotation pass on the R-component property layer from the Property Structure source review (companion to core v2.10.5); no logical axioms changed. The ProfessionalPeerRole definition no longer attributes peer review, professional development, knowledge sharing, and standard maintenance to Kong et al. (2020), whose actual professional-peer content is collegiality, cooperation, referral, and peer-to-peer communication; the ProviderClientRole duties are restated per the source (competence is coded under the Kong General category, not provider-to-client); the archetype block comment now documents which Kong categories are deliberately not operationalized as edges and why; EmployerRelationshipRole gains the Kong reference alongside Wendel; End and pursuesEnd gain the Oakley and Cocking grounding; spelling and punctuation normalized (operationalizes, terminal period on hasAgentRole)."@en .
 
 #################################################################
 #    Core Ethical Modeling Concepts                              
@@ -633,9 +634,16 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 
 # Based on Kong et al. (2020) empirical analysis and Dennis et al. (2016) role-based filtering
 
-# The four Kong (2020) relational archetypes are DEFINED classes (owl:equivalentClass): the reasoner
+# Four relational archetypes derived from the Kong et al. (2020) audience-category inventory (Provider
+# to client, Professional peer, Employer, Public) are DEFINED classes (owl:equivalentClass): the reasoner
 # classifies a role into its relational archetype from the role-to-role relationship edge it bears
-# (provider/peer/employer/public-duty), rather than from a hand-maintained annotation. The defining
+# (provider/peer/employer/public-duty), rather than from a hand-maintained annotation. The remaining
+# Kong categories are deliberately not operationalized as role-to-role edges: General is the Kong
+# residual no-audience code (an edge would be incoherent); Profession and Association are duties to a
+# collectivity, carried by governedByCode and the obligation layer; Colleague (2% in engineering,
+# undefined against Professional peer) folds into professionalPeerOf; the Witness/Court/Tax-authorities
+# categories are law/accountancy-specific (expert-witness engagements are occupational leaves under
+# ProviderClientRole). The defining
 # filler is proeth-core:Role (NOT Agent: Role owl:disjointWith Agent, so an Agent filler would make the
 # class vacuous). The rdfs:subClassOf :RelationalRole is asserted, not entailed (RelationalRole is a
 # primitive head). Occupational counterparties stay primitive (the client is :ClientRole, etc.).
@@ -652,8 +660,8 @@ proeth:obligatedparty a owl:DatatypeProperty ;
         [ rdf:type owl:Restriction ; owl:onProperty proeth-core:hasClient ; owl:someValuesFrom proeth-core:Role ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
     rdfs:label "Provider-Client Role" ;
-    iao:0000115 "Professional role defining relationships between service providers and their clients, creating duties of competent service delivery, confidentiality, and client welfare per Kong et al. (2020) identity role analysis."@en ;
-    skos:definition "Professional role defining relationships between service providers and their clients, creating duties of competent service delivery, confidentiality, and client welfare per Kong et al. (2020) identity role analysis." ;
+    iao:0000115 "Professional role defining relationships between service providers and their clients, creating duties of confidentiality, conflict-of-interest avoidance, and protection of client interests per the Kong et al. (2020) identity-role analysis; competent service delivery attaches through the obligation layer (Kong codes competence under the General category, not provider-to-client)."@en ;
+    skos:definition "Professional role defining relationships between service providers and their clients, creating duties of confidentiality, conflict-of-interest avoidance, and protection of client interests per the Kong et al. (2020) identity-role analysis; competent service delivery attaches through the obligation layer (Kong codes competence under the General category, not provider-to-client)." ;
     rdfs:comment "Service delivery relationship with duties of competence and care. Defined class: a Role that hasClient some Role (the provider side)." ;
     skos:scopeNote "Provider side: a Role bearing proeth-core:hasClient toward another Role. The client counterparty is the occupational :ClientRole (a :ParticipantRole). Asymmetric by design."@en ;
     dcterms:references <https://doi.org/10.1558/jalpp.39771> . # Kong et al. 2020
@@ -664,10 +672,10 @@ proeth:obligatedparty a owl:DatatypeProperty ;
         [ rdf:type owl:Restriction ; owl:onProperty proeth-core:professionalPeerOf ; owl:someValuesFrom proeth-core:Role ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
     rdfs:label "Professional Peer Role" ;
-    iao:0000115 "Professional role defining relationships between practitioners within the same professional domain, creating obligations for peer review, professional development, knowledge sharing, and standard maintenance per Kong et al. (2020)."@en ;
-    skos:definition "Professional role defining relationships between practitioners within the same professional domain, creating obligations for peer review, professional development, knowledge sharing, and standard maintenance per Kong et al. (2020)." ;
-    rdfs:comment "Collegial relationship with mentoring and review obligations. Defined class: a Role that professionalPeerOf some Role (symmetric; both peers classify)." ;
-    skos:scopeNote "A Role bearing proeth-core:professionalPeerOf (symmetric; subsumes peer review and mentoring) toward another Role."@en ;
+    iao:0000115 "Professional role defining relationships between practitioners within the same professional domain. Kong et al. (2020) identify the professional peer as a core audience category, marked by collegiality, cooperation, referral, and peer-to-peer communication; this ontology additionally covers mentoring engagements under the relation."@en ;
+    skos:definition "Professional role defining relationships between practitioners within the same professional domain. Kong et al. (2020) identify the professional peer as a core audience category, marked by collegiality, cooperation, referral, and peer-to-peer communication; this ontology additionally covers mentoring engagements under the relation." ;
+    rdfs:comment "Collegial relationship including mentoring. Defined class: a Role that professionalPeerOf some Role (symmetric; both peers classify)." ;
+    skos:scopeNote "A Role bearing proeth-core:professionalPeerOf (symmetric) toward another Role; covers collegial engagements including mentoring. The directed reviewsWorkOf relation is deliberately independent (not a subproperty); reviewers need not be peers, so a review edge alone does not classify a role here."@en ;
     dcterms:references <https://doi.org/10.1558/jalpp.39771> . # Kong et al. 2020
 
 :EmployerRelationshipRole rdf:type owl:Class ;
@@ -680,7 +688,8 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     skos:definition "Professional role defining relationships between professionals and their employing organizations, creating duties of loyalty, competent performance, and honest reporting while maintaining professional independence per Wendel (2024) moral complexity framework." ;
     rdfs:comment "Organizational relationship balancing loyalty and independence. Defined class: a Role that employedBy some Role (the employee/professional side)." ;
     skos:scopeNote "Employee/professional side: a Role bearing proeth-core:employedBy toward another Role. The employer counterparty is the occupational :EmployerRole (a :ParticipantRole)."@en ;
-    dcterms:references <https://doi.org/10.1093/oso/9780197673423.003.0006> . # Wendel 2024
+    dcterms:references <https://doi.org/10.1093/oso/9780197673423.003.0006> , # Wendel 2024 (duty content: loyalty, independence)
+        <https://doi.org/10.1558/jalpp.39771> . # Kong et al. 2020 (Employer audience category)
 
 :PublicResponsibilityRole rdf:type owl:Class ;
     owl:equivalentClass [ rdf:type owl:Class ; owl:intersectionOf (
@@ -713,14 +722,15 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     rdfs:domain :ProfessionalRole ;
     rdfs:range :PublicInterest ;
     rdfs:label "owes duty toward"@en ;
-    rdfs:comment "A professional role owes a protective duty toward the general public. Defining edge of :PublicResponsibilityRole; operationalises NSPE Fundamental Canon 1 (hold paramount the public safety, health, and welfare). Domain is :ProfessionalRole rather than the universal core:Role, because the paramount public duty is a professional-code obligation borne by professional roles, not by every role."@en .
+    rdfs:comment "A professional role owes a protective duty toward the general public. Defining edge of :PublicResponsibilityRole; operationalizes NSPE Fundamental Canon 1 (hold paramount the public safety, health, and welfare). Domain is :ProfessionalRole rather than the universal core:Role, because the paramount public duty is a professional-code obligation borne by professional roles, not by every role."@en .
 
 # Ends / Goals of roles
 :End rdf:type owl:Class ;
     rdfs:subClassOf bfo:BFO_0000031 ; # generically dependent continuant
     rdfs:label "End/Goal"@en ;
-    iao:0000115 "A characteristic end or goal toward which a role is directed (e.g., in engineering: protecting public safety, serving the public welfare, providing competent service)."@en ;
-    rdfs:comment "A characteristic end or goal toward which a role is directed (e.g., in engineering: protecting public safety, serving the public welfare, providing competent service)."@en .
+    iao:0000115 "A characteristic end of professional practice toward which a role is directed and by whose service the role is evaluated, qualifying by the key human good it serves (in engineering: protecting public safety, serving the public welfare, providing competent service)."@en ;
+    rdfs:comment "A characteristic end of professional practice toward which a role is directed and by whose service the role is evaluated, qualifying by the key human good it serves (in engineering: protecting public safety, serving the public welfare, providing competent service)."@en ;
+    iao:0000119 "Oakley and Cocking (2001). Virtue Ethics and Professional Roles. Cambridge University Press." .
 
 # Resource kinds: the closed FIVE source kinds (ratified Rs spec; ProfessionalCode merged into
 # EthicalCode 2026-07-01). EthicalCode is the formal ethical-code document (rdfs:subClassOf
@@ -781,13 +791,13 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     rdfs:domain proeth-core:Action ;
     rdfs:range proeth-core:Role ;
     rdfs:label "has agent role"@en ;
-    rdfs:comment "Relates an action to the role of the agent performing it"@en .
+    rdfs:comment "Relates an action to the role of the agent performing it."@en .
 
 :pursuesEnd rdf:type owl:ObjectProperty ;
     rdfs:domain proeth-core:Role ;
     rdfs:range :End ;
     rdfs:label "pursues end"@en ;
-    rdfs:comment "Relates a role to its characteristic ends/goals."@en .
+    rdfs:comment "Relates a role to a characteristic end of professional practice that the role serves. Operationalizes the teleological account of Oakley and Cocking (2001), under which professional roles are governed teleologically by the proper ends of the profession and role demands are determined by reference to those ends."@en .
 
 :governedByCode rdf:type owl:ObjectProperty ;
     rdfs:domain proeth-core:Role ;

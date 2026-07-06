@@ -422,9 +422,9 @@ def _shape_target_map():
         g = rdflib.Graph()
         g.parse(str(shapes), format="turtle")
         for s in g.subjects(rdflib.RDF.type, SH.NodeShape):
-            tgt = next(g.objects(s, SH.targetClass), None)
-            if tgt is not None:
-                out[str(s).rsplit("#", 1)[-1]] = str(tgt)
+            tgts = [str(t) for t in g.objects(s, SH.targetClass)]
+            if tgts:
+                out[str(s).rsplit("#", 1)[-1]] = tgts
     except Exception:
         out = {}
     cache["shapes"]["__targets__"] = out
@@ -439,8 +439,9 @@ def _class_shape_schemas(ancestor_list):
     (definitional, bearer)."""
     targets = _shape_target_map()
     by_target = {}
-    for name, tgt in targets.items():
-        by_target.setdefault(tgt, []).append(name)
+    for name, tgts in targets.items():
+        for tgt in tgts:
+            by_target.setdefault(tgt, []).append(name)
     definitional, bearer = [], []
     seen_d, seen_b = set(), set()
     for cls in reversed(ancestor_list):  # general (Role) -> specific (ProfessionalRole, ...)
@@ -1006,8 +1007,7 @@ def _class_target_shapes_graph(entity):
         for prefix, ns in sg.namespaces():
             out.bind(prefix, ns)
         for shape in sg.subjects(rdflib.RDF.type, SH.NodeShape):
-            tgt = next(sg.objects(shape, SH.targetClass), None)
-            if tgt is None or str(tgt) not in anc:
+            if not any(str(t) in anc for t in sg.objects(shape, SH.targetClass)):
                 continue
             for p, o in sg.predicate_objects(shape):
                 out.add((shape, p, o))
