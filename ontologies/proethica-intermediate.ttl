@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-06 (tenth pass, source-implies-citation backfill): every class whose dcterms source or reference tier was content-verified gains the iao:0000119 human citation companion, under the rule that a cited definition source must support the definition. The NSPE-anchored principle classes cite the Code with their curated provision designation, each definition checked against the stored provision text; FreeServicesProhibitionPrinciple cites the reporter form of NSPE v. United States. THREE classes are deliberately left without an NSPE 119 because their definitions extend beyond the anchored provision (CorrectiveActionMonitoringPrinciple beyond II.1.a notify-when-overruled, ProfessionalAccountabilityPrinciple mixing III.8 with the III.1.a acknowledge-errors duty, WhistleblowerPersonalConsciencePrinciple beyond the II.1.f mandatory report); the McLaren dcterms backbone on the canon classes likewise stays IRI-only (methodological derivation, not per-definition support). The four relational archetypes gain their Kong citation; EmployerRelationshipRole also gains Wendel after its attribution was rescoped (moral complexity framework occurs nowhere in the chapter, whose construct is role morality; the phrase likely garbled the separate 2023 Complex Loyalty paper)."@en ;
     skos:changeNote "2026-07-06 (ninth pass, P subtree citation fidelity): content-level verify-or-drop over every scholarly source in the Principle subtree, the dimension the closed DOI audit did not cover. Dropped as decorative, with per-class change notes recording each check: Dennis et al. 2016 from RelationalPrinciple and TransparencyPrinciple, Oakley and Cocking 2001 from CompetencePrinciple, Prem 2023 from EnvironmentalStewardshipPrinciple; each class keeps its NSPE provision or McLaren grounding. Kept as verified: the McLaren extensional backbone (operationalization and extensional definition are his constructs, 104 and title-level occurrences), Kong et al. 2020 on IntegrityPrinciple with the clause rescoped to what the corpus study shows, Oakley and Cocking and Anderson and Anderson 2018 on ProfessionalVirtuePrinciple (the learned-through-expert-examples gloss matches GenEth), Hallamaa and Kalliokoski 2022 on FundamentalEthicalPrinciple, and the NSPE v. United States source on FreeServicesProhibitionPrinciple. FundamentalEthicalPrinciple no longer attributes unverifiable examples to McLaren and co-cites Morley et al. 2021 on the constitutional-foundations analogy. Precedent wording corrected to accumulated cases on RelationalPrinciple and PublicWelfarePrinciple. Ampersand citations normalized on ProfessionalVirtuePrinciple."@en ;
     skos:changeNote "2026-07-06 (eighth pass, P properties review): the :establishes / :establishedBy twin pair and the :hasValueLabel annotation property are deleted. The pair duplicated proeth-core:establishes / proeth-core:establishedBy with zero uses anywhere (every emitter and reader is core-namespace; the committed cases carry only proeth-core:establishedBy), and its inverse kept the legacy Resource-only range that the 2026-07-04 forward-domain widening did not touch, a latent inconsistency against CodeProvision owl:disjointWith Resource; the McLaren 2003 dcterms:source moved to proeth-core:establishes. hasValueLabel had zero uses; the value-oriented reading of a principle is carried by the minted class label and the principleCategory routing input. A tombstone comment now records the 2026-07-04 deletion of the five deprecated property stubs superseded by the core v2.8.0 promotions. The closed boundary-type count is corrected to ten (PriorityConstraint was deleted 2026-07-05). Style: the Hallamaa and Kalliokoski citations move from the ampersand to the and form, weaponising and materialises respelled, and the cases-ontology placement comment moved to a literal verb."@en ;
     skos:changeNote "2026-07-06 (seventh pass): proeth:confidence rdfs:range corrected xsd:string -> xsd:decimal (the case-56 pipeline-probe finding; see the property changeNote)."@en ;
@@ -63,6 +64,10 @@
     iao:0000115 "A universal moral foundation that serves as the highest-level abstraction in professional ethics, requiring extensive interpretation through concrete cases (BFO: generically dependent continuant)"@en ;
     skos:definition "According to McLaren (2003), fundamental principles are abstract and open-textured, and gain operational meaning through extensional definition in decided ethics cases and professional code applications. These principles function as constitutional-like foundations (Morley et al. 2021; Taddeo et al. 2024) that mediate moral ideals into professional practice (Hallamaa and Kalliokoski 2022)."@en ;
     skos:changeNote "2026-07-06: the McLaren clause no longer attributes the example pair public welfare and respect for persons to the source (respect for persons does not occur in McLaren; public welfare only as a case title in his corpus list) and now uses the verified McLaren constructs, abstract and open-textured principles extensionally defined through decided cases. The constitutional-foundations clause co-cites Morley et al. 2021, the origin of the analogy, matching the citation form of the dissertation."@en ;
+    iao:0000119 "McLaren (2003). Extensionally defining principles and cases in ethics: An AI model. Artificial Intelligence 150(1-2): 145-181." ,
+                "Morley et al. (2021). Ethics as a Service: A Pragmatic Operationalisation of AI Ethics. Minds and Machines 31(2): 239-256 (doi:10.1007/s11023-021-09563-w)." ,
+                "Taddeo et al. (2024). From AI Ethics Principles to Practices: A Teleological Methodology to Apply AI Ethics Principles in the Defence Domain. Philosophy & Technology 37(1): 42 (doi:10.1007/s13347-024-00710-6)." ,
+                "Hallamaa and Kalliokoski (2022). AI Ethics as Applied Ethics. Frontiers in Computer Science 4: 776837 (doi:10.3389/fcomp.2022.776837)." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
                    <https://doi.org/10.1007/s11023-021-09563-w> , # Morley et al. 2021
                    <https://doi.org/10.1007/s13347-024-00710-6> , # Taddeo et al. 2024
@@ -74,6 +79,8 @@
     rdfs:label "Professional Virtue Principle"@en ;
     iao:0000115 "A character-based principle defining professional excellence and ethical sensitivities specific to professional identity (BFO: generically dependent continuant)"@en ;
     skos:definition "Professional virtue principles guide professional identity formation and ethical sensitivities (Oakley and Cocking 2001). These principles are learned through expert examples (Anderson and Anderson 2018) and exemplified through model professional behavior cases, creating role-generated moral demands that shape professional character."@en ;
+    iao:0000119 "Oakley and Cocking (2001). Virtue Ethics and Professional Roles. Cambridge University Press." ,
+                "Anderson and Anderson (2018). GenEth: a general ethical dilemma analyzer. Paladyn, Journal of Behavioral Robotics 9(1): 337-357 (doi:10.1515/pjbr-2018-0024)." ;
     dcterms:source <https://doi.org/10.1017/CBO9780511487118> , # Oakley and Cocking 2001
                    <https://doi.org/10.1515/pjbr-2018-0024> ; # Anderson and Anderson 2018
     rdfs:comment "Examples: Integrity, Competence, Honesty, Professional Courage, Accountability. These shape professional character and decision-making."@en .
@@ -84,6 +91,7 @@
     iao:0000115 "A principle governing professional relationships and establishing frameworks for trust and stakeholder interactions (BFO: generically dependent continuant)"@en ;
     skos:definition "Relational principles establish frameworks for managing professional relationships and stakeholder trust. Following McLaren's extensional approach, these principles gain meaning through accumulated cases of client-professional disputes and resolutions, defining how professionals navigate competing interests and maintain trustworthy relationships."@en ;
     skos:changeNote "2026-07-06: Dennis et al. 2016 removed from the definition sources after a verify-or-drop check against the full text: the paper concerns formal verification of ethical choices in autonomous systems and contains no treatment of professional relationships or stakeholder trust; the McLaren extensional grounding carries the class. The definition now says accumulated cases rather than precedents (McLaren denies precedential force to Board cases)."@en ;
+    iao:0000119 "McLaren (2003). Extensionally defining principles and cases in ethics: An AI model. Artificial Intelligence 150(1-2): 145-181." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> ; # McLaren 2003
     rdfs:comment "Examples: Confidentiality, Loyalty, Fairness, Transparency, Respect for Autonomy. These govern interpersonal professional dynamics."@en .
 
@@ -104,6 +112,8 @@
     skos:altLabel "public safety principle"@en ;
     iao:0000115 "The fundamental principle that public safety, health, and welfare must be held paramount in professional practice (BFO: generically dependent continuant)"@en ;
     skos:definition "The public welfare principle, as articulated in NSPE Fundamental Canon 1, requires professionals to hold paramount the safety, health, and welfare of the public. This principle exemplifies the operationalization challenge McLaren (2003) describes: the 'hold paramount' standard gains meaning through accumulated NSPE Board case applications. Landmark engineering cases such as the Challenger disaster illustrate what is at stake."@en ;
+    iao:0000119 "McLaren (2003). Extensionally defining principles and cases in ethics: An AI model. Artificial Intelligence 150(1-2): 145-181." ,
+                "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Fundamental Canon 1." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
                    "NSPE Code of Ethics Fundamental Canon 1" ;
     proeth:nspeReference "Fundamental Canon 1" ;
@@ -115,6 +125,8 @@
     rdfs:label "Integrity Principle"@en ;
     iao:0000115 "The professional virtue principle of maintaining honesty, truthfulness, and ethical consistency in professional practice (BFO: generically dependent continuant)"@en ;
     skos:definition "Professional integrity is a recurring element of professionalism across professional codes (Kong et al. 2020) and manifests differently across professional contexts. It encompasses honesty in professional communications, truthfulness in representations, and consistency between professional values and actions."@en ;
+    iao:0000119 "Kong et al. (2020). Corpus-based empirical approach to professionalism: Identifying interactional roles and dispositions in professional codes of ethics. Journal of Applied Linguistics and Professional Practice 14(1): 3-28 (doi:10.1558/jalpp.39771)." ,
+                "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Professional Obligation III.1." ;
     dcterms:source <https://doi.org/10.1558/jalpp.39771> , # Kong et al. 2020
                    "NSPE Code of Ethics III.1" ;
     proeth:nspeReference "Professional Obligation III.1" ;
@@ -126,6 +138,7 @@
     iao:0000115 "The professional virtue principle requiring maintenance and application of professional knowledge and skill within areas of competence (BFO: generically dependent continuant)"@en ;
     skos:definition "The competence principle requires professionals to perform services only in areas of their competence and to maintain professional knowledge through continuous learning. This principle generates obligations for professional development and honest self-assessment of capabilities."@en ;
     skos:changeNote "2026-07-06: Oakley and Cocking 2001 removed from the definition sources after a verify-or-drop check: competence occurs in the book only inside physician anecdotes, not as a treated principle; the class content is the NSPE II.2 competence rule, which remains the source. The book stays cited on ProfessionalVirtuePrinciple, whose virtue-and-role account it grounds."@en ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rule of Practice II.2." ;
     dcterms:source "NSPE Code of Ethics II.2" ;
     proeth:nspeReference "Rule of Practice II.2" ;
     rdfs:comment "Balances professional autonomy with recognition of limitations and need for collaboration."@en .
@@ -135,6 +148,7 @@
     rdfs:label "Confidentiality Principle"@en ;
     iao:0000115 "The relational principle protecting client information and maintaining trust in professional relationships (BFO: generically dependent continuant)"@en ;
     skos:definition "Confidentiality establishes trust frameworks in professional relationships by protecting client information from unauthorized disclosure. This principle requires balancing through precedents when it conflicts with public welfare or legal obligations."@en ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rule of Practice II.1.c." ;
     dcterms:source "NSPE Code of Ethics II.1.c" ,
                    <https://doi.org/10.1016/S0004-3702(03)00135-8> ; # McLaren 2003
     proeth:nspeReference "Rule of Practice II.1.c" ;
@@ -146,6 +160,7 @@
     iao:0000115 "The relational principle requiring openness and disclosure in professional communications and decision-making (BFO: generically dependent continuant)"@en ;
     skos:definition "Transparency requires professionals to be open about conflicts of interest, limitations, and decision-making processes. This principle supports accountability and enables informed consent from stakeholders."@en ;
     skos:changeNote "2026-07-06: Dennis et al. 2016 removed from the definition sources after a verify-or-drop check: its single transparency sentence concerns the engineering of verifiable autonomous systems, not openness in professional communications; NSPE II.3.a remains the source."@en ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rule of Practice II.3.a (composite disclosure value; also II.4.a / III.1.a)." ;
     dcterms:source "NSPE Code of Ethics II.3.a" ;
     proeth:nspeReference "Rule of Practice II.3.a (composite disclosure value; also II.4.a / III.1.a)" ;
     iao:0000116 "II.3.a triplet boundary: Transparency is the RELATIONAL pole of the shared provision, the openness owed to affected parties about conflicts, limitations, and decision processes. The judgment-quality pole is ObjectivityPrinciple; the content-completeness pole is the Complete Reporting principle."@en ;
@@ -157,6 +172,7 @@
     iao:0000115 "The domain-specific principle in engineering requiring consideration of environmental impact and sustainability (BFO: generically dependent continuant)"@en ;
     skos:definition "Environmental stewardship in engineering requires balancing technical solutions with environmental protection and sustainable development. This principle has evolved through cases addressing pollution, resource depletion, and climate change impacts."@en ;
     skos:changeNote "2026-07-06: Prem 2023 removed from the definition sources after a verify-or-drop check: environmental wellbeing appears in the paper only inside surveyed AI-framework principle lists, which does not ground an engineering environmental-stewardship principle; NSPE III.2.d remains the source."@en ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Professional Obligation III.2.d." ;
     dcterms:source "NSPE Code of Ethics III.2.d" ;
     proeth:nspeReference "Professional Obligation III.2.d" ;
     rdfs:comment "Bridges engineering practice with broader environmental and societal responsibilities."@en .
@@ -167,6 +183,7 @@
     rdfs:label "Peer Review Cooperation Principle"@en ;
     iao:0000115 "The value that an engineer cooperates with the peer review of another's work; the confidentiality of the reviewed material is a State context, not part of the value."@en ;
     proeth:nspeReference "Professional Obligation III.7.a" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Professional Obligation III.7.a." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.7.a" ;
     skos:altLabel "confidential peer review cooperation principle"@en, "peer review notification principle"@en ;
     rdfs:comment "The value that an engineer cooperates with the peer review of another's work; the confidentiality of the reviewed material is a State context, not part of the value."@en .
@@ -175,6 +192,7 @@
     rdfs:label "Loyalty Principle"@en ;
     iao:0000115 "The value that a professional acts as a faithful agent or trustee for the client or employer in professional matters."@en ;
     proeth:nspeReference "Rule of Practice II.4" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rule of Practice II.4." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.4" ;
     skos:altLabel "faithful agent loyalty principle"@en, "loyalty"@en ;
     rdfs:comment "The value that a professional acts as a faithful agent or trustee for the client or employer in professional matters."@en .
@@ -183,6 +201,7 @@
     rdfs:label "Objectivity Principle"@en ;
     iao:0000115 "The value that professional judgments and opinions are issued objectively and truthfully, free from bias or undue influence."@en ;
     proeth:nspeReference "Rule of Practice II.3.a" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rule of Practice II.3.a." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.a" ;
     skos:altLabel "adversarial context objectivity principle"@en, "adversarial engagement objectivity principle"@en, "dual role objectivity principle"@en, "report language fairness principle"@en ;
     iao:0000116 "II.3.a triplet boundary: Objectivity is the JUDGMENT-QUALITY pole of the shared provision, opinions issued unbiased and truthful. The openness-to-parties pole is TransparencyPrinciple; the no-material-omissions pole is the Complete Reporting principle."@en ;
@@ -192,6 +211,7 @@
     rdfs:label "Honesty Principle"@en ;
     iao:0000115 "The value that a professional is truthful and avoids deception or misrepresentation in professional dealings."@en ;
     proeth:nspeReference "Fundamental Canon 5" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Fundamental Canon 5." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Fundamental Canon 5" ;
     skos:altLabel "fact-based opinion principle"@en, "scope of engagement honesty principle"@en, "deceptive submission prohibition principle"@en, "credential misrepresentation prohibition principle"@en ;
     rdfs:comment "The value that a professional is truthful and avoids deception or misrepresentation in professional dealings."@en .
@@ -200,6 +220,7 @@
     rdfs:label "Conflict of Interest Disclosure Principle"@en ;
     iao:0000115 "The value that a professional discloses, and where required avoids, conflicts of interest affecting professional judgment."@en ;
     proeth:nspeReference "Rule of Practice II.4.a" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rule of Practice II.4.a." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.4.a" ;
     skos:altLabel "advisory self-interest disclosure principle"@en, "divided loyalty prohibition principle"@en, "client consent conflict waiver principle"@en ;
     rdfs:comment "The value that a professional discloses, and where required avoids, conflicts of interest affecting professional judgment."@en .
@@ -208,6 +229,7 @@
     rdfs:label "Responsible Charge Principle"@en ;
     iao:0000115 "The value that an engineer in responsible charge exercises actual direct control and personal supervision over the work for which responsibility is taken."@en ;
     proeth:nspeReference "Rule of Practice II.2.b" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rule of Practice II.2.b." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.2.b" ;
     skos:altLabel "responsible charge active engagement principle"@en, "supervisory control adequacy principle"@en, "professional sealing responsibility principle"@en ;
     rdfs:comment "The value that an engineer in responsible charge exercises actual direct control and personal supervision over the work for which responsibility is taken."@en .
@@ -255,6 +277,7 @@
     rdfs:label "Expertise-Calibrated Disclosure Principle"@en ;
     iao:0000115 "The value that the scope and certainty of professional statements is calibrated to the professional's actual expertise in the matter."@en ;
     proeth:nspeReference "Rule of Practice II.3.b" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rule of Practice II.3.b." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.b" ;
     rdfs:comment "The value that the scope and certainty of professional statements is calibrated to the professional's actual expertise in the matter."@en .
 
@@ -268,6 +291,7 @@
     rdfs:label "Jurisdictional Licensure Compliance Principle"@en ;
     iao:0000115 "The value that a professional practices only within the jurisdictions and license scope for which the professional is authorized."@en ;
     proeth:nspeReference "Professional Obligation III.8.a" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Professional Obligation III.8.a." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.8.a" ;
     skos:altLabel "engineering title invocation principle"@en ;
     rdfs:comment "The value that a professional practices only within the jurisdictions and license scope for which the professional is authorized."@en .
@@ -276,6 +300,7 @@
     rdfs:label "Complete Reporting Principle"@en ;
     iao:0000115 "The value that a professional reports findings completely and does not omit material facts that qualify or contradict a favored conclusion."@en ;
     proeth:nspeReference "Rule of Practice II.3.a" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rule of Practice II.3.a." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.3.a" ;
     skos:altLabel "technical completeness principle"@en, "client disservice by incompleteness principle"@en, "expert fact gathering diligence principle"@en, "selective reporting prohibition principle"@en ;
     iao:0000116 "II.3.a triplet boundary: Complete Reporting is the CONTENT-COMPLETENESS pole of the shared provision, no material facts omitted that qualify or contradict a favored conclusion. The judgment-quality pole is ObjectivityPrinciple; the openness-to-parties pole is TransparencyPrinciple."@en ;
@@ -296,6 +321,7 @@
     proeth:rescindedBy :NSPEvUnitedStates1978 ;
     proeth:rescindedDate "1978" ;
     proeth:groundingStatus "Rescinded NSPE basis: derived from the Code former competitive-bidding prohibition, struck down as an antitrust restraint of trade (see :NSPEvUnitedStates1978); retained as a historical/contested norm, not a current code duty. Realizes McLaren Principle Revision." ;
+    iao:0000119 "National Society of Professional Engineers v. United States, 435 U.S. 679 (1978)." ;
     dcterms:source <https://supreme.justia.com/cases/federal/us/435/679/> ;
     rdfs:comment "The value that a professional does not offer or provide services without compensation in a manner that undermines fair competition or professional independence."@en .
 
@@ -317,6 +343,7 @@
     rdfs:label "Evolving Standards Responsiveness Principle"@en ;
     iao:0000115 "The value that a professional keeps current with and applies evolving technical and ethical standards of practice."@en ;
     proeth:nspeReference "Professional Obligation III.2.e" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Professional Obligation III.2.e." ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.2.e" ;
     rdfs:comment "The value that a professional keeps current with and applies evolving technical and ethical standards of practice."@en .
 
@@ -686,6 +713,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     skos:definition "Professional role defining relationships between service providers and their clients, creating duties of confidentiality, conflict-of-interest avoidance, and protection of client interests per the Kong et al. (2020) identity-role analysis; competent service delivery attaches through the obligation layer (Kong codes competence under the General category, not provider-to-client)." ;
     rdfs:comment "Service delivery relationship with duties of competence and care. Defined class: a Role that hasClient some Role (the provider side)." ;
     skos:scopeNote "Provider side: a Role bearing proeth-core:hasClient toward another Role. The client counterparty is the occupational :ClientRole (a :ParticipantRole). Asymmetric by design."@en ;
+    iao:0000119 "Kong et al. (2020). Corpus-based empirical approach to professionalism: Identifying interactional roles and dispositions in professional codes of ethics. Journal of Applied Linguistics and Professional Practice 14(1): 3-28 (doi:10.1558/jalpp.39771)." ;
     dcterms:references <https://doi.org/10.1558/jalpp.39771> . # Kong et al. 2020
 
 :ProfessionalPeerRole rdf:type owl:Class ;
@@ -698,6 +726,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     skos:definition "Professional role defining relationships between practitioners within the same professional domain. Kong et al. (2020) identify the professional peer as a core audience category, marked by collegiality, cooperation, referral, and peer-to-peer communication; this ontology additionally covers mentoring engagements under the relation." ;
     rdfs:comment "Collegial relationship including mentoring. Defined class: a Role that professionalPeerOf some Role (symmetric; both peers classify)." ;
     skos:scopeNote "A Role bearing proeth-core:professionalPeerOf (symmetric) toward another Role; covers collegial engagements including mentoring. The directed reviewsWorkOf relation is deliberately independent (not a subproperty); reviewers need not be peers, so a review edge alone does not classify a role here."@en ;
+    iao:0000119 "Kong et al. (2020). Corpus-based empirical approach to professionalism: Identifying interactional roles and dispositions in professional codes of ethics. Journal of Applied Linguistics and Professional Practice 14(1): 3-28 (doi:10.1558/jalpp.39771)." ;
     dcterms:references <https://doi.org/10.1558/jalpp.39771> . # Kong et al. 2020
 
 :EmployerRelationshipRole rdf:type owl:Class ;
@@ -706,11 +735,13 @@ proeth:obligatedparty a owl:DatatypeProperty ;
         [ rdf:type owl:Restriction ; owl:onProperty proeth-core:employedBy ; owl:someValuesFrom proeth-core:Role ] ) ] ;
     rdfs:subClassOf :RelationalRole ;
     rdfs:label "Employer Relationship Role" ;
-    iao:0000115 "Professional role defining relationships between professionals and their employing organizations, creating duties of loyalty, competent performance, and honest reporting while maintaining professional independence per Wendel (2024) moral complexity framework."@en ;
-    skos:definition "Professional role defining relationships between professionals and their employing organizations, creating duties of loyalty, competent performance, and honest reporting while maintaining professional independence per Wendel (2024) moral complexity framework." ;
+    iao:0000115 "Professional role defining relationships between professionals and their employing organizations, creating duties of loyalty, competent performance, and honest reporting while maintaining professional independence. Wendel (2024) grounds the role-morality reading: the employment role generates duties distinct from ordinary moral expectations."@en ;
+    skos:definition "Professional role defining relationships between professionals and their employing organizations, creating duties of loyalty, competent performance, and honest reporting while maintaining professional independence. Wendel (2024) grounds the role-morality reading: the employment role generates duties distinct from ordinary moral expectations." ;
     rdfs:comment "Organizational relationship balancing loyalty and independence. Defined class: a Role that employedBy some Role (the employee/professional side)." ;
     skos:scopeNote "Employee/professional side: a Role bearing proeth-core:employedBy toward another Role. The employer counterparty is the occupational :EmployerRole (a :ParticipantRole)."@en ;
-    dcterms:references <https://doi.org/10.1093/oso/9780197673423.003.0006> , # Wendel 2024 (duty content: loyalty, independence)
+    iao:0000119 "Wendel (2024). Philosophical Perspective: The Challenge of Role Morality. In Canceling Lawyers: Case Studies of Accountability, Toleration, and Regret. Oxford University Press (doi:10.1093/oso/9780197673423.003.0006)." ,
+                "Kong et al. (2020). Corpus-based empirical approach to professionalism: Identifying interactional roles and dispositions in professional codes of ethics. Journal of Applied Linguistics and Professional Practice 14(1): 3-28 (doi:10.1558/jalpp.39771)." ;
+    dcterms:references <https://doi.org/10.1093/oso/9780197673423.003.0006> , # Wendel 2024 (role morality: role-generated duties)
         <https://doi.org/10.1558/jalpp.39771> . # Kong et al. 2020 (Employer audience category)
 
 :PublicResponsibilityRole rdf:type owl:Class ;
@@ -725,6 +756,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     skos:definition "Professional role defining obligations to the broader public and society, creating duties of public welfare protection that can override client or employer interests, grounded in NSPE Fundamental Canon 1 (hold paramount the safety, health, and welfare of the public)." ;
     rdfs:comment "Societal obligation that can override other professional duties. Defined class (monadic): a Role that owesDutyToward some PublicInterest. Adheres to :PublicWelfarePrinciple, the principle carrying the NSPE Canon 1 grounding." ;
     skos:scopeNote "A Role bearing :owesDutyToward toward the general public (:PublicInterest). Monadic; the counterparty is a party class, not a role-to-role pairing."@en ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Fundamental Canon 1." ;
     dcterms:source "NSPE Code of Ethics Fundamental Canon 1" ;
     proeth:nspeReference "Fundamental Canon 1" ;
     skos:changeNote "2026-07-02: added the explicit rdfs:subClassOf :ProfessionalRole (the case-4 run-20 lesson). The class was already professional-only by entailment (the owl:equivalentClass restriction on :owesDutyToward plus the rdfs:domain :ProfessionalRole of that property entail ProfessionalRole for every instance) but not by an asserted rdfs:subClassOf edge, so chain-based commit guards (which walk asserted subClassOf only) could not see its professional side. A case-4 role individual was committed typed both :PublicRole (a :ParticipantRole descendant) and :PublicResponsibilityRole, which Pellet rejects under the ProfessionalRole/ParticipantRole disjointness. The assertion adds no new entailment; it is semantically honest (this is the engineer-side duty-toward-the-public role, not the public's own role, which is :PublicRole) and makes the professional side visible to subclass-closure guards."@en ;
