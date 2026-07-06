@@ -11,6 +11,7 @@ Extraction passes:
    individuals like proethica:Obligation instances, and OBO-style bare resources)
 """
 
+import decimal
 from datetime import datetime, timezone
 
 import rdflib
@@ -590,6 +591,21 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
     return entity_counts
 
 
+def _json_literal_value(obj):
+    """JSON value for an RDF object term. Numeric and boolean typed literals
+    keep their native type so the properties JSON is faithful to the TTL
+    datatype (proeth:confidence is xsd:decimal since the B12 range fix; the
+    ontology-detail enrichment stats do arithmetic on it). IRIs, plain
+    strings, and non-JSON-native datatypes (dates) serialize as str."""
+    if isinstance(obj, rdflib.Literal):
+        py = obj.toPython()
+        if isinstance(py, (bool, int, float)):
+            return py
+        if isinstance(py, decimal.Decimal):
+            return float(py)
+    return str(obj)
+
+
 def _collect_properties(g, subject, skip_predicates):
     """Collect all non-standard properties on a subject into a JSON-friendly dict."""
     properties = {}
@@ -606,7 +622,7 @@ def _collect_properties(g, subject, skip_predicates):
             continue
         pred_str = str(pred)
         key = pred_str.rsplit('#', 1)[-1] if '#' in pred_str else pred_str.rsplit('/', 1)[-1]
-        val = str(obj)
+        val = _json_literal_value(obj)
         if key in properties:
             existing = properties[key]
             if isinstance(existing, list):
