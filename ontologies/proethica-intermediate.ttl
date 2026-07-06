@@ -261,7 +261,10 @@
     rdfs:label "Professional Accountability Principle"@en ;
     iao:0000115 "The value that a professional takes personal responsibility for, and acknowledges error in, work performed under their authority."@en ;
     proeth:nspeReference "Professional Obligation III.8" ;
-    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.8" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Professional Obligations III.8 and III.1.a." ;
+    skos:changeNote "2026-07-06: the definition draws on two provisions, III.8 (accept personal responsibility for professional activities) and III.1.a (acknowledge errors; both verified against the stored provision texts); the citation names both. The curated nspeReference stays III.8 as the primary anchor."@en ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Professional Obligation III.8" ,
+                   "NSPE Code of Ethics Professional Obligation III.1.a" ;
     skos:altLabel "error acknowledgment principle"@en, "professional accountability"@en ;
     rdfs:comment "The value that a professional takes personal responsibility for, and acknowledges error in, work performed under their authority."@en .
 
@@ -269,6 +272,9 @@
     rdfs:label "Corrective Action Monitoring Principle"@en ;
     iao:0000115 "The value that a professional monitors a hazardous or deficient condition through to the completion of corrective action."@en ;
     proeth:nspeReference "Rule of Practice II.1.a" ;
+    iao:0000119 "National Society of Professional Engineers, Board of Ethical Review (2004). Case 04-8, Public Welfare - Client Action Following Engineer's Services." ;
+    proeth:extensionalCases "NSPE BER Case 04-8" ;
+    skos:changeNote "2026-07-06: the monitor-to-completion clause is the Board's case-law reading, not the II.1.a text (which requires notification when overruled); grounded extensionally in BER Case 04-8, whose discussion directs the engineer to monitor the situation until sufficiently satisfied that it has been remedied (verified against the case text). The II.1.a anchor remains the provision tier."@en ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.1.a" ;
     skos:altLabel "post-engagement observation duty principle"@en ;
     rdfs:comment "The value that a professional monitors a hazardous or deficient condition through to the completion of corrective action."@en .
@@ -335,8 +341,11 @@
     rdfs:label "Whistleblower Personal Conscience Principle"@en ;
     iao:0000115 "The value that a professional may act on personal conscience to disclose conduct that endangers the public, beyond the minimum the rules compel."@en ;
     proeth:nspeReference "Rule of Practice II.1.f" ;
+    iao:0000119 "National Society of Professional Engineers, Board of Ethical Review (1999). Case 99-8, Incomplete Plans and Specifications - Engineer, Government, and Contractor Responsibilities." ;
+    proeth:extensionalCases "NSPE BER Case 99-8" , "NSPE BER Case 82-5" ;
+    skos:changeNote "2026-07-06: the beyond-the-minimum personal-conscience value is the Board's case-law doctrine, not the II.1.f text (a mandatory reporting rule); grounded extensionally in BER Case 99-8, whose discussion states that the ethical duty or right becomes a matter of personal conscience, quoting the doctrine's origin in BER Case 82-5 (verified against the case text). The II.1.f anchor remains the provision tier."@en ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , "NSPE Code of Ethics Rule of Practice II.1.f" ;
-    proeth:groundingStatus "Partially derived: the reporting duty grounds to NSPE II.1.f / II.1.a; the personal-conscience surplus beyond what the rules compel is extensional/derived." ;
+    proeth:groundingStatus "Partially derived: the reporting duty grounds to NSPE II.1.f / II.1.a; the personal-conscience surplus beyond what the rules compel is extensional, grounded in BER Cases 99-8 and 82-5 (cited 2026-07-06)." ;
     rdfs:comment "The value that a professional may act on personal conscience to disclose conduct that endangers the public, beyond the minimum the rules compel."@en .
 
 :EvolvingStandardsResponsivenessPrinciple rdf:type owl:Class ; rdfs:subClassOf :FundamentalEthicalPrinciple ;
