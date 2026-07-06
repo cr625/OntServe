@@ -22,6 +22,7 @@ from web.ontology_routes.helpers import (
     class_property_schema,
     class_hierarchy,
     _entity_disjoint_classes,
+    _entity_secondary_parents,
     _entity_equivalent_class,
     _entity_incoming_edges,
     _entity_case_provenance,
@@ -346,6 +347,7 @@ def register_detail_routes(bp):
         class_schema = class_property_schema(entity)
         hierarchy = class_hierarchy(entity)
         disjoint_classes = _entity_disjoint_classes(entity, ontology)
+        secondary_parents = _entity_secondary_parents(entity)
         equivalent_class = _entity_equivalent_class(entity, ontology)
         # Incoming edges for INDIVIDUALS only (classes have the class-page
         # Referenced By section; parsing the full version content per request
@@ -370,6 +372,7 @@ def register_detail_routes(bp):
                              children=children,
                              hierarchy=hierarchy,
                              disjoint_classes=disjoint_classes,
+                             secondary_parents=secondary_parents,
                              equivalent_class=equivalent_class,
                              incoming_edges=incoming_edges,
                              case_provenance=case_provenance,

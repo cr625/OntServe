@@ -301,7 +301,7 @@
                 {{ mappings_card(semantic_links) }}
 
                 <!-- Properties -->
-                {% set has_structural = entity.domain or entity.range or prop_groups.core or prop_groups.relationships or disjoint_classes or incoming_edges %}
+                {% set has_structural = entity.domain or entity.range or prop_groups.core or prop_groups.relationships or disjoint_classes or secondary_parents or incoming_edges %}
                 {% if has_structural %}
                 <div class="card mb-3">
                     <div class="card-header"><h6 class="mb-0">Properties</h6></div>
@@ -337,8 +337,8 @@
                         </div>
                         {% endfor %}
 
-                        <!-- Relationships + disjointness (data-driven; see macros/component_sections.html) -->
-                        {{ relationships_block(prop_groups, disjoint_classes, ontology) }}
+                        <!-- Relationships + secondary parents + disjointness (data-driven; see macros/component_sections.html) -->
+                        {{ relationships_block(prop_groups, disjoint_classes, ontology, secondary_parents) }}
 
                         {% if incoming_edges %}
                         <div class="mt-3">

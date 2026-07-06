@@ -223,7 +223,7 @@ def _pick_best_parent(g, class_uri):
     superclass. Proethica-first keeps the category-walk CTEs terminating at the proethica boundary; the named
     fallback lets a core class (whose only named parent is BFO) root in the BFO tree for the Class Hierarchy.
     Blank-node restrictions are excluded. Returns a URI string or None."""
-    all_parents = [str(p) for p in g.objects(class_uri, RDFS.subClassOf)]
+    all_parents = sorted(str(p) for p in g.objects(class_uri, RDFS.subClassOf))
     if not all_parents:
         return None
     intermediate = [p for p in all_parents if p.startswith(PROETHICA_INTERMEDIATE_NS)]
@@ -313,6 +313,19 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
 
         # Collect additional properties (e.g., discoveredInCase, importance)
         properties = _collect_properties(g, cls, class_skip_predicates)
+
+        # parent_uri is single-valued (the materialized primary via _pick_best_parent); a class with
+        # MULTIPLE asserted named superclasses (PublicResponsibilityRole under RelationalRole AND
+        # ProfessionalRole; the extraction-minted compound classes in intermediate-extended) would
+        # otherwise silently lose every non-primary parent at ingest, hiding it from subclass lists
+        # and dropping the non-primary axis from the ancestor-union schema walks. Store the full
+        # named-superclass list so display and schema consumers can union it (helpers._get_entity_children,
+        # _class_ancestor_uris_all). Single-parent classes stay lean: parent_uri already carries them.
+        named_supers = sorted(str(p) for p in g.objects(cls, RDFS.subClassOf)
+                              if isinstance(p, rdflib.URIRef))
+        if len(named_supers) > 1:
+            properties = properties or {}
+            properties['rdf_superclasses'] = named_supers
 
         entity = OntologyEntity(
             ontology_id=ontology.id,

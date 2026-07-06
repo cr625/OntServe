@@ -40,6 +40,10 @@ pcsh:informationalOnly a owl:AnnotationProperty ;
 # snippet, and the involvement/context gloss. Declared once here (rather than nine times) so the
 # fields are schema-advertised instead of displayed-but-undeclared (correspondence audit T7).
 # Descriptive only; no validation effect.
+# Rendering intent (decided 2026-07-06): the shape is advertised in the entity-page TTL block
+# (every shape targeting a chain ancestor is appended there) and is deliberately NOT rendered as
+# a Property Structure section. The fields are commit-time bookkeeping on case individuals, not
+# part of any type's extraction schema, so a schema section would misstate the field contract.
 pcsh:CaseAnnotationShape
     a sh:NodeShape ;
     sh:targetClass core:Role, core:Principle, core:Obligation, core:State, core:Resource,

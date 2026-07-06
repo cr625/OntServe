@@ -23,7 +23,10 @@
             <div class="fw-bold text-{{ g.colour }} pb-1 mb-2 border-bottom">{% if multi %}{{ loop.index }} &middot; {% endif %}{{ g.label }}
                 <span class="badge rounded-pill bg-light text-muted border fw-normal">{{ g.badge }}</span>
                 {% if g.badge2 %}<span class="badge rounded-pill bg-light text-muted border fw-normal">{{ g.badge2 }}</span>{% endif %}
-                <i class="bi bi-info-circle text-{{ g.colour }} ms-1" style="cursor: help;" tabindex="0" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="desc-tip" title="{{ g.tooltip|safe }}{% if multi and g.multi_suffix %}{{ g.multi_suffix|safe }}{% endif %}"></i></div>
+                {# The tooltip is HTML (data-bs-html="true"); it must be entity-ENCODED in the title attribute,
+                   not raw. Use |e (not |safe) so quotes in tooltip links like <a href="..."> do not close the
+                   attribute early. Bootstrap decodes it via getAttribute and renders the tags. #}
+                <i class="bi bi-info-circle text-{{ g.colour }} ms-1" style="cursor: help;" tabindex="0" data-bs-toggle="tooltip" data-bs-html="true" data-bs-custom-class="desc-tip" title="{{ g.tooltip|e }}{% if multi and g.multi_suffix %}{{ g.multi_suffix|e }}{% endif %}"></i></div>
             {% if g.kind == 'relations' %}
             <table class="table table-sm align-middle mb-0">
                 <thead><tr class="small text-muted"><th style="width:28%">Property</th><th style="width:22%">Range</th><th>Description</th></tr></thead>
@@ -169,7 +172,7 @@
 {# Relationships block: asserted object-property edges (IRI-valued triples), then the logical
    disjointness row. disjointWith is skipped in the edge list because the Disjoint-with row folds in
    owl:AllDisjointClasses membership and shows the complete set. Rendered inside the Properties card. #}
-{% macro relationships_block(prop_groups, disjoint_classes, ontology) %}
+{% macro relationships_block(prop_groups, disjoint_classes, ontology, secondary_parents=None) %}
 {% if prop_groups.relationships %}
 <div class="entity-relationships">
     <div class="relationships-label">Relationships</div>
@@ -184,6 +187,15 @@
     </div>
     {% endif %}
     {% endfor %}
+</div>
+{% endif %}
+{% if secondary_parents %}
+<div class="property-row">
+    <div class="property-key" title="Asserted rdfs:subClassOf parents beyond the primary hierarchy chain">Also subclass of</div>
+    <div class="property-value">
+        {% for p in secondary_parents %}<a href="{{ url_for('ontology.entity_detail', ontology_name=p.ontology, fragment=p.fragment) }}">{{ p.label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+        <div class="small text-muted">Additional asserted <code>rdfs:subClassOf</code> parents of a multi-parent class; the Class Hierarchy shows the primary chain.</div>
+    </div>
 </div>
 {% endif %}
 {% if disjoint_classes %}

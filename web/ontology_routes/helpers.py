@@ -328,11 +328,21 @@ def _find_entity_by_fragment(ontology, fragment):
     return db.session.execute(stmt).scalars().first()
 
 
+def _is_secondary_parent_of(uri):
+    """SQL filter: entities whose properties JSON lists `uri` in rdf_superclasses (the asserted
+    named parents beyond the single-valued materialized parent_uri; written at extraction only
+    for multi-parent classes). Text match on the serialized array; URIs contain no quotes."""
+    return OntologyEntity.properties.op('->>')('rdf_superclasses').like(f'%"{uri}"%')
+
+
 def _get_entity_children(ontology, entity):
-    """Get entities that have this entity as parent_uri."""
+    """Get entities that have this entity as an asserted parent: the materialized parent_uri OR a
+    secondary parent recorded in rdf_superclasses (multi-parent classes, e.g. PublicResponsibilityRole
+    under both RelationalRole and ProfessionalRole)."""
     stmt = select(OntologyEntity).where(
         OntologyEntity.ontology_id == ontology.id,
-        OntologyEntity.parent_uri == entity.uri
+        or_(OntologyEntity.parent_uri == entity.uri,
+            _is_secondary_parent_of(entity.uri))
     ).order_by(OntologyEntity.label)
     return db.session.execute(stmt).scalars().all()
 
@@ -486,6 +496,44 @@ def _class_ancestor_uris(entity, cap=16):
     return uris
 
 
+def _class_ancestor_uris_all(entity, cap=32):
+    """The UNION of ancestor URIs over ALL asserted named superclasses: the materialized parent_uri
+    plus the rdf_superclasses secondaries stored at extraction for multi-parent classes. BFS from
+    the class itself, cycle- and depth-guarded, with the same definitional-row preference per hop
+    as _class_ancestor_uris (case stubs sort last). Use for schema, shape, and domain-property
+    unions, where a multi-parent class must inherit from EVERY axis (PublicResponsibilityRole must
+    see the ProfessionalRole shapes and property domains, not only the RelationalRole chain). The
+    single-path _class_ancestor_uris stays for breadcrumb rendering, which needs a linear chain."""
+    seen, uris, queue = set(), [], [entity.uri]
+    while queue and len(uris) < cap:
+        cur = queue.pop(0)
+        if not cur or cur in seen:
+            continue
+        seen.add(cur)
+        uris.append(cur)
+        rows = db.session.execute(
+            select(OntologyEntity.parent_uri, Ontology.name, OntologyEntity.properties)
+            .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
+            .where(OntologyEntity.uri == cur)
+        ).all()
+        if not rows:
+            continue
+        rows.sort(key=lambda r: (r[1].startswith('proethica-case-'), r[1]))
+        parent_uri, _, props = rows[0]
+        parents = [parent_uri] if parent_uri else []
+        if isinstance(props, str):
+            import json as _json
+            try:
+                props = _json.loads(props)
+            except Exception:
+                props = {}
+        for p in (props or {}).get('rdf_superclasses') or []:
+            if p not in parents:
+                parents.append(p)
+        queue.extend(p for p in parents if p not in seen)
+    return uris
+
+
 def _uri_fragment(uri):
     return uri.split('#')[-1] if '#' in uri else uri.rstrip('/').split('/')[-1]
 
@@ -578,7 +626,8 @@ def class_hierarchy(entity, child_cap=25):
     rows = db.session.execute(
         select(OntologyEntity.uri, OntologyEntity.label, Ontology.name, OntologyEntity.properties)
         .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
-        .where(OntologyEntity.parent_uri == entity.uri,
+        .where(or_(OntologyEntity.parent_uri == entity.uri,
+                   _is_secondary_parent_of(entity.uri)),
                OntologyEntity.entity_type == 'class',
                ~Ontology.name.like('proethica-case-%'),
                # Hide owl:deprecated subclasses (the retired Decision Point / Ethical Question bridge
@@ -687,6 +736,36 @@ def _entity_disjoint_classes(entity, ontology):
         return out
     except Exception:
         return []
+
+
+def _entity_secondary_parents(entity):
+    """The asserted named superclasses of a multi-parent class beyond the materialized primary
+    parent_uri, resolved to linkable rows. Read from the rdf_superclasses properties JSON written
+    at extraction (multi-parent classes only); empty for the single-parent common case. Rendered
+    as the 'Also subclass of' row so the non-primary axis is visible on the class's own page (the
+    Class Hierarchy breadcrumb shows only the primary chain)."""
+    props = entity.properties
+    if isinstance(props, str):
+        import json as _json
+        try:
+            props = _json.loads(props)
+        except Exception:
+            props = {}
+    supers = (props or {}).get('rdf_superclasses') or []
+    out = []
+    for uri in supers:
+        if uri == entity.parent_uri:
+            continue
+        frag = _uri_fragment(uri)
+        row = db.session.execute(
+            select(OntologyEntity.label, Ontology.name)
+            .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
+            .where(OntologyEntity.uri == uri).limit(1)).first()
+        out.append({"uri": uri, "fragment": frag,
+                    "label": (row[0] if row and row[0] else frag),
+                    "ontology": row[1] if row else None})
+    out.sort(key=lambda d: d["label"].lower())
+    return out
 
 
 def _entity_case_provenance(entity):
@@ -854,7 +933,7 @@ def class_property_schema(entity):
         return None
     # Drop the universal/abstract tops: properties domained to them (extraction provenance,
     # over-broad structural predicates) apply to everything, not specifically to this class.
-    anc_list = _class_ancestor_uris(entity)
+    anc_list = _class_ancestor_uris_all(entity)
     ancestor_set = set(anc_list) - _UNIVERSAL_TOP_URIS
 
     prop_rows = db.session.execute(
@@ -1000,7 +1079,7 @@ def _class_target_shapes_graph(entity):
     try:
         from pathlib import Path
         shapes_path = Path(__file__).resolve().parents[2] / "validation" / "shapes" / "core-shapes.ttl"
-        anc = set(_class_ancestor_uris(entity))
+        anc = set(_class_ancestor_uris_all(entity))
         SH = rdflib.Namespace("http://www.w3.org/ns/shacl#")
         sg = rdflib.Graph()
         sg.parse(str(shapes_path), format="turtle")
