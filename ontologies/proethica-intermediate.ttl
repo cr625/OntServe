@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-06 (second pass, same review): governedByCode and pursuesEnd rdfs:domain narrowed from the universal proeth-core:Role to :ProfessionalRole (the owesDutyToward pattern), resolving the mismatch between the governedByCode axiom and its professional-only comment and shapes prose. Code-governance and teleological ends are professional-side relations on the verified sources (Davis 1991; Oakley and Cocking 2001); both properties are unused in the 12 gold-standard case TTLs and all emitters, so the narrowing is corpus-safe, and both correctly move from the core:Role entity page to the ProfessionalRole page. The optional ProfessionalRole subClassOf (pursuesEnd some End) restriction was considered and deferred to the Step-4 enrichment vocabulary decision."@en ;
     skos:changeNote "2026-07-06: Annotation pass on the R-component property layer from the Property Structure source review (companion to core v2.10.5); no logical axioms changed. The ProfessionalPeerRole definition no longer attributes peer review, professional development, knowledge sharing, and standard maintenance to Kong et al. (2020), whose actual professional-peer content is collegiality, cooperation, referral, and peer-to-peer communication; the ProviderClientRole duties are restated per the source (competence is coded under the Kong General category, not provider-to-client); the archetype block comment now documents which Kong categories are deliberately not operationalized as edges and why; EmployerRelationshipRole gains the Kong reference alongside Wendel; End and pursuesEnd gain the Oakley and Cocking grounding; spelling and punctuation normalized (operationalizes, terminal period on hasAgentRole)."@en .
 
 #################################################################
@@ -794,16 +795,16 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     rdfs:comment "Relates an action to the role of the agent performing it."@en .
 
 :pursuesEnd rdf:type owl:ObjectProperty ;
-    rdfs:domain proeth-core:Role ;
+    rdfs:domain :ProfessionalRole ;
     rdfs:range :End ;
     rdfs:label "pursues end"@en ;
-    rdfs:comment "Relates a role to a characteristic end of professional practice that the role serves. Operationalizes the teleological account of Oakley and Cocking (2001), under which professional roles are governed teleologically by the proper ends of the profession and role demands are determined by reference to those ends."@en .
+    rdfs:comment "Relates a professional role to a characteristic end of professional practice that the role serves. Operationalizes the teleological account of Oakley and Cocking (2001), under which professional roles are governed teleologically by the proper ends of the profession and role demands are determined by reference to those ends. Domain is :ProfessionalRole rather than the universal core:Role, because characteristic ends are the teleological differentia of professional roles; the goals of a participant are case facts, not role-defining ends."@en .
 
 :governedByCode rdf:type owl:ObjectProperty ;
-    rdfs:domain proeth-core:Role ;
+    rdfs:domain :ProfessionalRole ;
     rdfs:range :EthicalCode ;
     rdfs:label "governed by code"@en ;
-    rdfs:comment "Relates a professional role to an ethical code that formalizes its obligations and norms."@en .
+    rdfs:comment "Relates a professional role to an ethical code that states the obligations and norms of the role in codified form. The code is a convention among professionals that binds whoever claims the professional standing, independent of licensure (Davis 1991); it does not exhaust role morality, since the norms of the profession remain answerable to the proper ends of the profession (Oakley and Cocking 2001, p. 75). Domain is :ProfessionalRole rather than the universal core:Role, because code-governance is a professional-side relation; the ProfessionalRole restriction (governedByCode some EthicalCode) carries the existence commitment."@en .
 
 
 #################################################################
