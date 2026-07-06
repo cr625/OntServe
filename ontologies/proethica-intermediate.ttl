@@ -89,10 +89,9 @@
     rdfs:label "Domain-Specific Principle"@en ;
     iao:0000115 "A principle particular to professional domain contexts that bridges general ethics to specific technical practices (BFO: generically dependent continuant)"@en ;
     skos:definition "Domain-specific principles bridge general ethical guidance to particular professional contexts. As identified by Prem (2023), these principles face inherent challenges in operationalization but remain essential for contextual guidance. They are grounded through industry-specific cases and technical standards applications."@en ;
-    iao:0000119 "Prem (2023). From ethical AI frameworks to tools: a review of approaches. AI and Ethics 3(3): 699-716 (doi:10.1007/s43681-023-00258-9)." ,
-                "Segun (2021). Critically engaging the ethics of AI for a global audience. Ethics and Information Technology 23(2): 99-105 (doi:10.1007/s10676-020-09570-y)." ;
-    dcterms:source <https://doi.org/10.1007/s43681-023-00258-9> , # Prem 2023
-                   <https://doi.org/10.1007/s10676-020-09570-y> ; # Segun 2021 (editorial; context is cultural/global, not professional-domain -- fidelity check pending in the sweep)
+    iao:0000119 "Prem (2023). From ethical AI frameworks to tools: a review of approaches. AI and Ethics 3(3): 699-716 (doi:10.1007/s43681-023-00258-9)." ;
+    skos:changeNote "2026-07-06: Segun 2021 (Critically engaging the ethics of AI for a global audience, Ethics and Information Technology 23(2): 99-105) removed from the definition sources after a verify-or-drop check against the full text. The editorial argues for culturally inclusive AI ethics (Western versus non-Western value systems, epistemic injustice); its single domain occurrence means the theoretical rather than the practical, and professional contexts and operationalization occur nowhere in it, so it does not ground a class about professional domain contexts. Prem 2023 remains the sole definition source; the vocabulary of Prem (specific context, domain ethics, intended purpose) covers the class, and the definition sentence attributes only him."@en ;
+    dcterms:source <https://doi.org/10.1007/s43681-023-00258-9> ; # Prem 2023
     rdfs:comment "Examples: Environmental Stewardship (engineering), Patient Autonomy (medicine), Academic Freedom (education). These address domain-specific ethical challenges."@en .
 
 # Specific Principle Instances commonly found in Professional Codes
