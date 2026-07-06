@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-06 (eleventh pass, O subtree apparatus): the NSPE-category obligation classes gain the verified provision apparatus the principle subtree carries (nspeReference, dcterms:source, and the Publication 1102 citation), each definition checked against the stored provision or its children: AttributionObligation III.9, CompetenceObligation II.2, ConfidentialityObligation III.4, DisclosureObligation II.3.a with II.4.a (the conflicts prong), FaithfulAgentObligation Canon I.4 with II.4 (I.4 stored text verbatim; the malformed Section 1 / paragraph-sign citation corrected in the text), ReportingObligation II.1.f with II.1.a (the two prongs of the definition), SafetyObligation Canon I.1 (verbatim). CollegialObligation stays unanchored with a groundingStatus note (III.7 text not in the stored code ontology). The Ethical and Legal source-of-bindingness kind classes are design distinctions and carry no provision anchor; their caps emphasis is lowercased."@en ;
     skos:changeNote "2026-07-06 (tenth pass, source-implies-citation backfill): every class whose dcterms source or reference tier was content-verified gains the iao:0000119 human citation companion, under the rule that a cited definition source must support the definition. The NSPE-anchored principle classes cite the Code with their curated provision designation, each definition checked against the stored provision text; FreeServicesProhibitionPrinciple cites the reporter form of NSPE v. United States. THREE classes are deliberately left without an NSPE 119 because their definitions extend beyond the anchored provision (CorrectiveActionMonitoringPrinciple beyond II.1.a notify-when-overruled, ProfessionalAccountabilityPrinciple mixing III.8 with the III.1.a acknowledge-errors duty, WhistleblowerPersonalConsciencePrinciple beyond the II.1.f mandatory report); the McLaren dcterms backbone on the canon classes likewise stays IRI-only (methodological derivation, not per-definition support). The four relational archetypes gain their Kong citation; EmployerRelationshipRole also gains Wendel after its attribution was rescoped (moral complexity framework occurs nowhere in the chapter, whose construct is role morality; the phrase likely garbled the separate 2023 Complex Loyalty paper)."@en ;
     skos:changeNote "2026-07-06 (ninth pass, P subtree citation fidelity): content-level verify-or-drop over every scholarly source in the Principle subtree, the dimension the closed DOI audit did not cover. Dropped as decorative, with per-class change notes recording each check: Dennis et al. 2016 from RelationalPrinciple and TransparencyPrinciple, Oakley and Cocking 2001 from CompetencePrinciple, Prem 2023 from EnvironmentalStewardshipPrinciple; each class keeps its NSPE provision or McLaren grounding. Kept as verified: the McLaren extensional backbone (operationalization and extensional definition are his constructs, 104 and title-level occurrences), Kong et al. 2020 on IntegrityPrinciple with the clause rescoped to what the corpus study shows, Oakley and Cocking and Anderson and Anderson 2018 on ProfessionalVirtuePrinciple (the learned-through-expert-examples gloss matches GenEth), Hallamaa and Kalliokoski 2022 on FundamentalEthicalPrinciple, and the NSPE v. United States source on FreeServicesProhibitionPrinciple. FundamentalEthicalPrinciple no longer attributes unverifiable examples to McLaren and co-cites Morley et al. 2021 on the constitutional-foundations analogy. Precedent wording corrected to accumulated cases on RelationalPrinciple and PublicWelfarePrinciple. Ampersand citations normalized on ProfessionalVirtuePrinciple."@en ;
     skos:changeNote "2026-07-06 (eighth pass, P properties review): the :establishes / :establishedBy twin pair and the :hasValueLabel annotation property are deleted. The pair duplicated proeth-core:establishes / proeth-core:establishedBy with zero uses anywhere (every emitter and reader is core-namespace; the committed cases carry only proeth-core:establishedBy), and its inverse kept the legacy Resource-only range that the 2026-07-04 forward-domain widening did not touch, a latent inconsistency against CodeProvision owl:disjointWith Resource; the McLaren 2003 dcterms:source moved to proeth-core:establishes. hasValueLabel had zero uses; the value-oriented reading of a principle is carried by the minted class label and the principleCategory routing input. A tombstone comment now records the 2026-07-04 deletion of the five deprecated property stubs superseded by the core v2.8.0 promotions. The closed boundary-type count is corrected to ten (PriorityConstraint was deleted 2026-07-05). Style: the Hallamaa and Kalliokoski citations move from the ampersand to the and form, weaponising and materialises respelled, and the cases-ontology placement comment moved to a literal verb."@en ;
@@ -528,32 +529,49 @@ proeth:owlTimeProperty a owl:DatatypeProperty ;
 proeth:DisclosureObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Disclosure Obligation"@en ;
-    iao:0000115 "Requirement to inform stakeholders about conflicts, limitations, or risks (NSPE II.3.a)"@en ;
-    rdfs:comment "Requirement to inform stakeholders about conflicts, limitations, or risks (NSPE II.3.a)"@en .
+    proeth:nspeReference "Rules of Practice II.3.a and II.4.a" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rules of Practice II.3.a and II.4.a." ;
+    dcterms:source "NSPE Code of Ethics Rule of Practice II.3.a" ,
+                   "NSPE Code of Ethics Rule of Practice II.4.a" ;
+    iao:0000115 "Requirement to inform stakeholders about conflicts, limitations, or risks (NSPE II.3.a and II.4.a)"@en ;
+    rdfs:comment "Requirement to inform stakeholders about conflicts, limitations, or risks (NSPE II.3.a and II.4.a)"@en .
 
 proeth:SafetyObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Safety Obligation"@en ;
+    proeth:nspeReference "Fundamental Canon I.1" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Fundamental Canon I.1." ;
+    dcterms:source "NSPE Code of Ethics Fundamental Canon I.1" ;
     iao:0000115 "Duty to hold paramount the safety, health, and welfare of the public (NSPE I.1)"@en ;
     rdfs:comment "Duty to hold paramount the safety, health, and welfare of the public (NSPE I.1)"@en .
 
 proeth:CompetenceObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Competence Obligation"@en ;
+    proeth:nspeReference "Rule of Practice II.2" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rule of Practice II.2." ;
+    dcterms:source "NSPE Code of Ethics Rule of Practice II.2" ;
     iao:0000115 "Requirement to perform services only in areas of competence (NSPE II.2)"@en ;
     rdfs:comment "Requirement to perform services only in areas of competence (NSPE II.2)"@en .
 
 proeth:ConfidentialityObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Confidentiality Obligation"@en ;
+    proeth:nspeReference "Professional Obligation III.4" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Professional Obligation III.4." ;
+    dcterms:source "NSPE Code of Ethics Professional Obligation III.4" ;
     iao:0000115 "Duty to protect confidential information of clients or employers (NSPE III.4)"@en ;
     rdfs:comment "Duty to protect confidential information of clients or employers (NSPE III.4)"@en .
 
 proeth:ReportingObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Reporting Obligation"@en ;
-    iao:0000115 "Duty to report violations or unsafe conditions to appropriate authorities"@en ;
-    rdfs:comment "Duty to report violations or unsafe conditions to appropriate authorities"@en .
+    proeth:nspeReference "Rules of Practice II.1.f and II.1.a" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Rules of Practice II.1.f and II.1.a." ;
+    dcterms:source "NSPE Code of Ethics Rule of Practice II.1.f" ,
+                   "NSPE Code of Ethics Rule of Practice II.1.a" ;
+    iao:0000115 "Duty to report violations or unsafe conditions to appropriate authorities (NSPE II.1.f and II.1.a)"@en ;
+    rdfs:comment "Duty to report violations or unsafe conditions to appropriate authorities (NSPE II.1.f and II.1.a)"@en .
 
 # The modality obligation subclasses (Mandatory/Defeasible/Conditional/PrimaFacie) were retired 2026-06-28
 # (ratified O spec): prima-facie status is the defeasibility edge family (competesWith/prevailsOver/
@@ -562,26 +580,29 @@ proeth:ReportingObligation a owl:Class ;
 proeth:LegalObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Legal Obligation"@en ;
-    iao:0000115 "An obligation individuated by its SOURCE of bindingness: it binds because a law or regulation requires it. Contrast EthicalObligation (bindingness from the ethical code or an ethical principle). The source axis is orthogonal to the topic axis of the sibling classes (safety, disclosure, confidentiality, ...): an obligation may bear one type from each axis."@en ;
+    iao:0000115 "An obligation individuated by its source of bindingness: it binds because a law or regulation requires it. Contrast EthicalObligation (bindingness from the ethical code or an ethical principle). The source axis is orthogonal to the topic axis of the sibling classes (safety, disclosure, confidentiality, ...): an obligation may bear one type from each axis."@en ;
     rdfs:comment "Source-axis obligation kind: bound by law or regulation."@en ;
     skos:changeNote "2026-07-04: definition rewritten to state the source-vs-topic axis explicitly (pre-batch audit)."@en .
 
 proeth:EthicalObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Ethical Obligation"@en ;
-    iao:0000115 "An obligation individuated by its SOURCE of bindingness: it binds because the profession's ethical code or an ethical principle requires it, independently of legal enactment. Contrast LegalObligation (bindingness from law or regulation). The source axis is orthogonal to the topic axis of the sibling classes (safety, disclosure, confidentiality, ...): an obligation may bear one type from each axis."@en ;
+    iao:0000115 "An obligation individuated by its source of bindingness: it binds because the profession's ethical code or an ethical principle requires it, independently of legal enactment. Contrast LegalObligation (bindingness from law or regulation). The source axis is orthogonal to the topic axis of the sibling classes (safety, disclosure, confidentiality, ...): an obligation may bear one type from each axis."@en ;
     rdfs:comment "Source-axis obligation kind: bound by the ethical code or an ethical principle rather than by legal enactment (e.g. a duty to honor the spirit of the code)."@en ;
     skos:changeNote "2026-07-04: definition rewritten to state the source-vs-topic axis explicitly (pre-batch audit: the two classification axes among Obligation subclasses were undocumented)."@en .
 
 proeth:CollegialObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Collegial Obligation"@en ;
+    proeth:groundingStatus "Unanchored: the respect, fairness, and credit-for-work content spans the III.7 and III.9 provision families; a provision citation waits on verification against the provision texts, which the stored code ontology lacks for III.7." ;
     iao:0000115 "Duties toward professional peers including respect, fairness, and credit for work"@en ;
     rdfs:comment "Duties toward professional peers including respect, fairness, and credit for work"@en .
 
 proeth:AttributionObligation a owl:Class ;
     rdfs:subClassOf proeth-core:Obligation ;
     rdfs:label "Attribution Obligation"@en ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Professional Obligation III.9." ;
+    dcterms:source "NSPE Code of Ethics Professional Obligation III.9" ;
     iao:0000115 "Duty to give credit for engineering work to those to whom credit is due and to recognize the proprietary interests of others, including appropriate citation of documents of technical authority and credit for tool-assisted or AI-assisted content (NSPE III.9)"@en ;
     rdfs:comment "Duty to give credit for engineering work to those to whom credit is due and to recognize the proprietary interests of others, including appropriate citation of documents of technical authority and credit for tool-assisted or AI-assisted content (NSPE III.9)"@en ;
     skos:altLabel "attribution and credit obligation"@en, "credit obligation"@en ;
@@ -595,8 +616,12 @@ proeth:FaithfulAgentObligation a owl:Class ;
     rdfs:subClassOf proeth:ProfessionalObligation ;
     skos:changeNote "2026-07-04: re-parented from ConfidentialityObligation to ProfessionalObligation (pre-batch core audit). Faithful agency (NSPE I.4 / II.4) is an agency-and-loyalty duty, not a confidentiality duty (II.1.c); the old placement entailed that every faithful-agent duty is a confidentiality duty."@en ;
     rdfs:label "Faithful Agent Obligation"@en ;
-    iao:0000115 "Duty of an engineer to act as a faithful agent or trustee of an employer or client (NSPE Code of Ethics, Section 1 / §II.4). Defeasible under states that confirm public-safety risk."@en ;
-    rdfs:comment "Duty of an engineer to act as a faithful agent or trustee of an employer or client (NSPE Code of Ethics, Section 1 / §II.4). Defeasible under states that confirm public-safety risk."@en .
+    proeth:nspeReference "Fundamental Canon I.4" ;
+    iao:0000119 "National Society of Professional Engineers (2019). Code of Ethics for Engineers. Publication 1102, Fundamental Canon I.4 and Rule of Practice II.4." ;
+    dcterms:source "NSPE Code of Ethics Fundamental Canon I.4" ,
+                   "NSPE Code of Ethics Rule of Practice II.4" ;
+    iao:0000115 "Duty of an engineer to act as a faithful agent or trustee of an employer or client (NSPE Fundamental Canon I.4; Rule of Practice II.4). Defeasible under states that confirm public-safety risk."@en ;
+    rdfs:comment "Duty of an engineer to act as a faithful agent or trustee of an employer or client (NSPE Fundamental Canon I.4; Rule of Practice II.4). Defeasible under states that confirm public-safety risk."@en .
 
 # Obligation properties for temporal and contextual aspects
 proeth:hasEnforcementLevel a owl:DatatypeProperty ;  # was owl:ObjectProperty, corrected: range is xsd:string
