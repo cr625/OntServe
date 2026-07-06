@@ -18,6 +18,13 @@
     'rdf_types', 'rdftypes'
 ] %}
 
+{# Crosswalk predicate keys surfaced by the Mappings & provenance card
+   (helpers._SEMANTIC_LINK_PREDS). IRI-valued occurrences are suppressed from the
+   generic Relationships list below so a dcterms:source DOI renders once, in the
+   provenance card, not twice. Literal-valued 'source' (the Constraint provision
+   string) is unaffected: it takes the attribute branch. #}
+{% set CROSSWALK_KEYS = ['exactmatch', 'closematch', 'broadmatch', 'relatedmatch', 'seealso', 'source'] %}
+
 {# Format a value for display - handles URIs, lists, etc #}
 {% macro format_value(value) %}
 {%- if value is string -%}
@@ -74,7 +81,7 @@
         and value != entity.comment %}
     {% set is_iri = (value.startswith('http://') or value.startswith('https://')) if value is string
         else ((value[0] is string and (value[0].startswith('http://') or value[0].startswith('https://'))) if (value is iterable and value is not string and value|length > 0) else false) %}
-    {% if is_iri %}{% set _ = ns.rels.append((key, value)) %}{% else %}{% set _ = ns.attrs.append((key, value)) %}{% endif %}
+    {% if is_iri %}{% if key|lower not in CROSSWALK_KEYS %}{% set _ = ns.rels.append((key, value)) %}{% endif %}{% else %}{% set _ = ns.attrs.append((key, value)) %}{% endif %}
     {% endif %}
 {% endfor %}
 

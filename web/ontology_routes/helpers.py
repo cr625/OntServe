@@ -26,6 +26,13 @@ _SEMANTIC_LINK_PREDS = [
     ('http://purl.org/dc/terms/source', 'source'),
 ]
 
+# Local-name keys of the crosswalk predicates above, for suppressing duplicate
+# rendering: an IRI-valued source/seeAlso/match triple is surfaced by the
+# Mappings & provenance card and must not ALSO render as a Properties
+# relationship row (the same DOI link showed twice on principle-class pages).
+_CROSSWALK_KEYS = frozenset({'source', 'seealso', 'exactmatch', 'closematch',
+                             'broadmatch', 'relatedmatch'})
+
 
 def _entity_semantic_links(entity, ontology):
     """Crosswalk links (SKOS mappings, seeAlso, source) for an entity, resolved at render
@@ -263,8 +270,14 @@ def _categorize_entity_properties(entity):
         # IRI-valued triples are object properties (R->P->O / defeasibility
         # edges); group them as relationships, keeping the bare predicate and the
         # target IRIs so the template can link them (mirrors the card view).
+        # Crosswalk predicates are excluded: the Mappings & provenance card owns
+        # them (_entity_semantic_links), and the literal-valued proeth:source
+        # provision string on Constraint individuals is unaffected because it
+        # takes the attribute branch below.
         iris = _iri_values(value)
         if iris is not None:
+            if key.lower() in _CROSSWALK_KEYS:
+                continue
             groups['relationships'].append((key, iris))
             continue
 
