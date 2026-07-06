@@ -150,7 +150,10 @@ _DESCRIPTION_KEYS = frozenset({'caseinvolvement', 'casecontext'})
 
 # Property keys to skip entirely (redundant or internal).
 # dtupleComponent: the D-tuple letter (R/P/O/...) is already shown in the page header.
-_SKIP_KEYS = frozenset({'type', 'NamedIndividual', 'rdf_types', 'dtupleComponent'})
+# changeNote is version history: internal change rationale, kept in the TTL and the
+# DB version rows but not rendered on the public pages (2026-07-06 decision; the
+# iao:0000116 editor note, by contrast, is deliberate display and prompt content).
+_SKIP_KEYS = frozenset({'type', 'NamedIndividual', 'rdf_types', 'dtupleComponent', 'changeNote'})
 
 # Definition-layer keys -> the Definition card (kept out of the raw "core" property list).
 _DEFINITION_LAYER_GROUP = {

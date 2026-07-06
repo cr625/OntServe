@@ -918,8 +918,10 @@
                                 <td>{{ version.created_at.strftime('%Y-%m-%d %H:%M') if version.created_at else '-' }}
                                 </td>
                                 <td>{{ version.created_by or '-' }}</td>
+                                {# Change summaries are internal engineering rationale (2026-07-06
+                                   decision: change notes are not displayed publicly); editors see them. #}
                                 <td>
-                                    {% if version.change_summary %}
+                                    {% if version.change_summary and current_user.is_authenticated %}
                                     <small>{{ version.change_summary[:100] }}{% if version.change_summary|length > 100
                                         %}...{% endif %}</small>
                                     {% else %}
