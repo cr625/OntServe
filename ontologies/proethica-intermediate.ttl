@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-06 (twelfth pass, O properties review): six dead declarations deleted. The Event-side proeth:triggersObligation and proeth:altersPriority and the Constraint-side proeth:conflictsWithObligation had zero uses in committed cases, the extended store, code, and shapes; the live design carries their directions through the Event Calculus chain and the defeasibility family (tombstones name the successors). The three remaining participant literal twins, proeth:obligatedParty, proeth:possessedBy, and proeth:constrainedEntity, were deleted on the invokedBy-twin evidence (the commit never wrote them; the proeth-core object edges are the sole carriers), closing the recorded O, Ca, and Cs twin decision at once. The requiresCapabilityText comment no longer implies an Action-domain requiresCapability relation, and the constraint-retirement comment now credits the intrinsic force of a single constraint to its definition and severity attribute rather than to the edge family."@en ;
     skos:changeNote "2026-07-06 (eleventh pass, O subtree apparatus): the NSPE-category obligation classes gain the verified provision apparatus the principle subtree carries (nspeReference, dcterms:source, and the Publication 1102 citation), each definition checked against the stored provision or its children: AttributionObligation III.9, CompetenceObligation II.2, ConfidentialityObligation III.4, DisclosureObligation II.3.a with II.4.a (the conflicts prong), FaithfulAgentObligation Canon I.4 with II.4 (I.4 stored text verbatim; the malformed Section 1 / paragraph-sign citation corrected in the text), ReportingObligation II.1.f with II.1.a (the two prongs of the definition), SafetyObligation Canon I.1 (verbatim). CollegialObligation stays unanchored with a groundingStatus note (III.7 text not in the stored code ontology). The Ethical and Legal source-of-bindingness kind classes are design distinctions and carry no provision anchor; their caps emphasis is lowercased."@en ;
     skos:changeNote "2026-07-06 (tenth pass, source-implies-citation backfill): every class whose dcterms source or reference tier was content-verified gains the iao:0000119 human citation companion, under the rule that a cited definition source must support the definition. The NSPE-anchored principle classes cite the Code with their curated provision designation, each definition checked against the stored provision text; FreeServicesProhibitionPrinciple cites the reporter form of NSPE v. United States. THREE classes are deliberately left without an NSPE 119 because their definitions extend beyond the anchored provision (CorrectiveActionMonitoringPrinciple beyond II.1.a notify-when-overruled, ProfessionalAccountabilityPrinciple mixing III.8 with the III.1.a acknowledge-errors duty, WhistleblowerPersonalConsciencePrinciple beyond the II.1.f mandatory report); the McLaren dcterms backbone on the canon classes likewise stays IRI-only (methodological derivation, not per-definition support). The four relational archetypes gain their Kong citation; EmployerRelationshipRole also gains Wendel after its attribution was rescoped (moral complexity framework occurs nowhere in the chapter, whose construct is role morality; the phrase likely garbled the separate 2023 Complex Loyalty paper)."@en ;
     skos:changeNote "2026-07-06 (ninth pass, P subtree citation fidelity): content-level verify-or-drop over every scholarly source in the Principle subtree, the dimension the closed DOI audit did not cover. Dropped as decorative, with per-class change notes recording each check: Dennis et al. 2016 from RelationalPrinciple and TransparencyPrinciple, Oakley and Cocking 2001 from CompetencePrinciple, Prem 2023 from EnvironmentalStewardshipPrinciple; each class keeps its NSPE provision or McLaren grounding. Kept as verified: the McLaren extensional backbone (operationalization and extensional definition are his constructs, 104 and title-level occurrences), Kong et al. 2020 on IntegrityPrinciple with the clause rescoped to what the corpus study shows, Oakley and Cocking and Anderson and Anderson 2018 on ProfessionalVirtuePrinciple (the learned-through-expert-examples gloss matches GenEth), Hallamaa and Kalliokoski 2022 on FundamentalEthicalPrinciple, and the NSPE v. United States source on FreeServicesProhibitionPrinciple. FundamentalEthicalPrinciple no longer attributes unverifiable examples to McLaren and co-cites Morley et al. 2021 on the constitutional-foundations analogy. Precedent wording corrected to accumulated cases on RelationalPrinciple and PublicWelfarePrinciple. Ampersand citations normalized on ProfessionalVirtuePrinciple."@en ;
@@ -410,11 +411,11 @@
 #################################################################
 
 # Event properties for temporal relationships
-proeth:triggersObligation a owl:ObjectProperty ;
-    rdfs:domain proeth-core:Event ;
-    rdfs:range proeth-core:Obligation ;
-    rdfs:label "triggers obligation"@en ;
-    rdfs:comment "Relates an event to obligations it activates"@en .
+# 2026-07-06 (O properties review): proeth:triggersObligation and proeth:altersPriority
+# were deleted (zero uses in committed cases, the extended store, code, and shapes).
+# The live design routes Event-to-Obligation activation through the Event Calculus
+# chain (initiates -> State -> proeth-core:activatesObligation), and obligation
+# priority resolution through the v2.5.0 defeasibility family.
 
 proeth:causedByAction a owl:ObjectProperty ;
     rdfs:domain proeth-core:Event ;
@@ -422,12 +423,6 @@ proeth:causedByAction a owl:ObjectProperty ;
     rdfs:label "caused by action"@en ;
     rdfs:comment "Links event to actions that caused it (Wright's NESS test)"@en ;
     dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_15> . # Sarmiento et al. 2023
-
-proeth:altersPriority a owl:ObjectProperty ;
-    rdfs:domain proeth-core:Event ;
-    rdfs:range proeth-core:Obligation ;
-    rdfs:label "alters priority"@en ;
-    rdfs:comment "Indicates how events change obligation priorities"@en .
 
 # Causal-chain class + endpoint edges (Step-3 Stage-5 causal analysis; Sarmiento et al.
 # 2023 NESS). cause/effect omit rdfs:range deliberately: their endpoints are Action OR
@@ -1165,8 +1160,9 @@ proeth:ProceduralConstraint a owl:Class ;
     dcterms:references <https://doi.org/10.1007/978-3-319-13365-2_6> . # Furbach et al. 2014
 
 # proeth:DefeasibleConstraint and proeth:InviolableConstraint retired 2026-06-28 (ratified Cs
-# spec): defeasibility versus inviolability is carried by the obligation-layer defeasibility edge
-# family (competesWith / prevailsOver / defeasibleUnder), so these two were a dead shadow. The
+# spec): obligation competition is carried by the obligation-layer defeasibility edge family
+# (competesWith / prevailsOver / defeasibleUnder), and the intrinsic force of a single constraint
+# by its definition and severity attribute, so these two classes were a dead shadow of both. The
 # Constraint component is the closed ten boundary types: Legal, Regulatory, Resource,
 # Competence, Jurisdictional, Procedural, Ethical, Safety, Confidentiality, and Temporal
 # (Priority was retired 2026-07-05 with the PriorityConstraint class deletion).
@@ -1207,11 +1203,10 @@ proeth:constrainsAction a owl:ObjectProperty ;
     rdfs:label "constrains action"@en ;
     rdfs:comment "Links constraint to actions it limits or prohibits"@en .
 
-proeth:conflictsWithObligation a owl:ObjectProperty ;
-    rdfs:domain proeth-core:Constraint ;
-    rdfs:range proeth-core:Obligation ;
-    rdfs:label "conflicts with obligation"@en ;
-    rdfs:comment "Indicates when a constraint creates tension with an obligation"@en .
+# 2026-07-06 (O properties review): proeth:conflictsWithObligation was deleted (zero
+# uses anywhere; no emitter or reader). Obligation tension is carried by the
+# obligation-layer defeasibility family; no direct Constraint-to-Obligation edge
+# exists in the live design.
 
 #################################################################
 # Capability kinds (ratified Ca spec): the canonical reusable competence kinds
@@ -1978,7 +1973,7 @@ proeth:guidedByPrincipleText a owl:DatatypeProperty ;
 proeth:requiresCapabilityText a owl:DatatypeProperty ;
     rdfs:label "requires capability text"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Literal shadow of the requiresCapability relation (Action)."@en .
+    rdfs:comment "Kept literal demotion of the Action-level requiresCapability carrier field. No Action-domain edge exists (the requiresCapability relation is Obligation to Capability, v2.8.0), so the text survives as a literal only."@en .
 
 proeth:raisesObligationText a owl:DatatypeProperty ;
     rdfs:label "raises obligation text"@en ;
@@ -1995,27 +1990,15 @@ proeth:terminatesText a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:comment "Literal shadow of the terminates fluent edge (Action/Event)."@en .
 
-# Participant 'who' literal shadows: the intermediate# literal, DISTINCT from the
-# core# object-property edge the participant applier materializes (different IRIs,
-# so no punning). The former proeth:invokedBy literal twin was deleted 2026-07-05:
-# the commit never wrote it (the CMT-3 routing skip) and rpo_edges now reads the
-# proeth-core:invokedBy edges directly, so the declaration described a triple that
-# never existed.
-
-proeth:obligatedParty a owl:DatatypeProperty ;
-    rdfs:label "obligated party (literal)"@en ;
-    rdfs:range xsd:string ;
-    rdfs:comment "Intended on Obligation: literal naming who bears it; mirrored by the proeth-core:obligatedParty edge."@en .
-
-proeth:possessedBy a owl:DatatypeProperty ;
-    rdfs:label "possessed by (literal)"@en ;
-    rdfs:range xsd:string ;
-    rdfs:comment "Intended on Capability: literal naming who possesses it; mirrored by the proeth-core:possessedBy edge."@en .
-
-proeth:constrainedEntity a owl:DatatypeProperty ;
-    rdfs:label "constrained entity (literal)"@en ;
-    rdfs:range xsd:string ;
-    rdfs:comment "Intended on Constraint: literal naming who/what is constrained; mirrored by the proeth-core:constrainedEntity edge."@en .
+# Participant 'who' literal shadows: RETIRED. The former proeth:invokedBy literal
+# twin was deleted 2026-07-05: the commit never wrote it (the CMT-3 routing skip)
+# and rpo_edges reads the proeth-core:invokedBy edges directly, so the declaration
+# described a triple that never existed. 2026-07-06 (O properties review): the
+# remaining three twins, proeth:obligatedParty, proeth:possessedBy, and
+# proeth:constrainedEntity, were deleted on the same evidence (zero uses in
+# committed cases, the extended store, and all code; the proeth-core object edges
+# are the sole carriers, with 81, 101, and 45 live edges respectively). This
+# closes the recorded O/Ca/Cs twin decision in one edit.
 
 
 # --- Controlled professional attributes (Role attributes dict, Part B) ---

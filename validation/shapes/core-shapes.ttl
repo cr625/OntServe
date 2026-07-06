@@ -243,7 +243,7 @@ pcsh:PrinciplePropertyShape
 # by the {{ state_schema }} prompt block. Descriptive only (no validation result). The archetype is one of
 # the closed nine CONTENT archetypes; it is a classification of the state content, explicitly NOT the
 # activatesObligation relation (a RiskState is a condition of hazard exposure in the world, not recoverable
-# from any edge). The edge layer separately records which obligation the state activates or defeats.
+# from any edge). The edge layer separately records which obligation the state activates and under which state an obligation yields.
 pcsh:StateDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:State ;
@@ -264,7 +264,7 @@ pcsh:StatePropertyShape
     rdfs:label "State per-case schema (individual data, non-definitional)"@en ;
     rdfs:comment "What a given state INDIVIDUAL is described by in a specific case: its urgency (per-case salience) and the obligation it activates (an edge). These do NOT individuate the state TYPE (that is StateDefinitionShape); their values are per-case, asserted on the individual. Descriptive only."@en ;
     sh:property [ sh:path proeth:urgencyLevel ;      sh:name "urgency level" ;        sh:description "The salience or acuteness of the state in this case (Jones moral-intensity salience: imminence, magnitude, proximity)." ; sh:order 1 ] ;
-    sh:property [ sh:path core:activatesObligation ; sh:name "activates obligation" ; sh:description "The obligation the state makes applicable, via the outgoing S->O activatesObligation edge; the incoming counterpart is defeasibleUnder (O->S), recording the obligation the state defeats. Range: Obligation." ; sh:order 2 ] .
+    sh:property [ sh:path core:activatesObligation ; sh:name "activates obligation" ; sh:description "The obligation the state makes applicable, via the outgoing S->O activatesObligation edge; the incoming counterpart is defeasibleUnder (O->S), recording the obligation that yields when this state obtains. Range: Obligation." ; sh:order 2 ] .
 
 # ResourceDefinitionShape: the definitional field contract of any resource TYPE/individual (the Rs
 # component), read by the {{ resource_schema }} prompt block. Descriptive only (no validation result).
@@ -347,7 +347,8 @@ pcsh:ConstraintPropertyShape
     rdfs:comment "What a given constraint INDIVIDUAL is described by in a specific case: its per-occasion severity and applicability window, the agent whose conduct it limits, and the action it bounds. These do NOT individuate the constraint TYPE (that is ConstraintDefinitionShape, keyed on the boundary it states and its source provision); their values are per-case, asserted on the individual. Descriptive only."@en ;
     sh:property [ sh:path proeth:severity ; sh:name "severity" ; sh:description "The severity of the constraint in this case (critical, high, medium, low); a per-occasion assessment (Dennis severity ordering) that can differ across cases sharing the same boundary." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:applicabilityCondition ; sh:name "applicability condition" ; sh:description "The temporal and contextual circumstances under which the prohibition applies in this case (the Dennis complete-specification condition)." ; sh:order 2 ] ;
-    sh:property [ sh:path core:constrainedEntity ; sh:name "constrained entity" ; sh:description "The agent whose conduct the constraint limits, via the outgoing constrainedEntity edge. Range: Agent." ; sh:order 3 ] .
+    sh:property [ sh:path core:constrainedEntity ; sh:name "constrained entity" ; sh:description "The agent whose conduct the constraint limits, via the outgoing constrainedEntity edge. Range: Agent." ; sh:order 3 ] ;
+    sh:property [ sh:path proeth:temporalScope ; sh:name "temporal scope" ; sh:description "When the constraint applies in this case; carried on every committed constraint individual alongside applicabilityCondition (declared 2026-07-06 so the field contract matches the shipped data; the overlap with applicabilityCondition is a recorded Cs-sweep question)." ; sh:order 4 ] .
 
 # EventDefinitionShape: the LIGHT field contract of any event TYPE/individual (the E component). Descriptive
 # only (no validation result). event_origin drives the three-way origin subClassOf typing into the mutually
