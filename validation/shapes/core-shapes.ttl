@@ -147,7 +147,7 @@ pcsh:ProfessionalRoleDefinitionShape
 # INFERENCE axiom (W3C OWL 2 Primer: a domain statement "is not a constraint... but allows
 # a reasoner to infer further knowledge"), so "hasLicense rdfs:domain Role" would infer any
 # value-holder INTO Role; under the nine-way owl:AllDisjointClasses (conformance runs at
-# inference='owlrl', materialising prp-dom) a leaked attribute could then clash into an
+# inference='owlrl', materializing prp-dom) a leaked attribute could then clash into an
 # inconsistency. The role attributes are therefore deliberately domain-less ("leak-safe");
 # this shape carries the class association safely. Turn any attribute into a real
 # closed-world constraint later by adding sh:minCount / sh:datatype / sh:in here (the
@@ -180,19 +180,21 @@ pcsh:ProfessionalRolePropertyShape
 # per-case fields a given obligation individual carries. Descriptive only -- each sh:property carries sh:path +
 # sh:name + sh:description (no sh:minCount/sh:datatype), so no validation result and no conformance change.
 # obligation_type drives the subClassOf core:Obligation typing (a routing input, not stored as a literal;
-# Donohue 2017 directive information entity); obligated_party and derived_from_principle resolve to edges; the
-# rest are per-individual literals.
+# Donohue 2017 directive information entity); obligated_party resolves to the obligatedParty edge at commit; derived_from_principle
+# is stored and fed to the dedicated R->P->O pass as grounding for the derivedFromPrinciple
+# edge; the rest are per-individual literals.
 pcsh:ObligationDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Obligation ;
     rdfs:label "Obligation definition schema (type-level, descriptive, field contract)"@en ;
-    rdfs:comment "What individuates an obligation TYPE: its controlled NSPE category, which drives the subClassOf core:Obligation typing. The concrete duty statement, the derivedFromPrinciple/obligatedParty edges, and the temporal-scope/compliance-status literals are per-individual and now live on ObligationPropertyShape, mirroring the Role/Principle Definition/Property split. Descriptive only (no validation result); obligation_type is a routing input, not stored as a literal."@en ;
+    rdfs:comment "What individuates an obligation TYPE: its controlled NSPE category, which drives the subClassOf core:Obligation typing. The concrete duty statement and the temporal-scope/compliance-status literals are per-individual, as are the derivedFromPrinciple and obligatedParty edges; all are declared on ObligationPropertyShape, mirroring the Role/Principle Definition/Property split. Descriptive only (no validation result); obligation_type is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:obligationType ;      sh:name "obligation type" ;        sh:description "The controlled NSPE obligation category, which drives the subClassOf core:Obligation typing: disclosure, safety, competence, confidentiality, reporting, collegial, attribution, legal, ethical." ; sh:order 1 ] .
 
 # ObligationPropertyShape: the per-case fields a given obligation INDIVIDUAL carries (the O-side analogue of
 # ProfessionalRolePropertyShape / PrinciplePropertyShape). The concrete duty statement, temporal scope and
-# compliance status are per-individual literals; derivedFromPrinciple (O->P) and obligatedParty (O->Agent)
-# resolve to edges. Read by the {{ obligation_schema }} prompt as the per-case section and rendered as the
+# compliance status are per-individual literals; obligatedParty (O->Agent) resolves to the
+# participant edge at commit; derivedFromPrinciple (O->P) is derived by the dedicated
+# R->P->O pass, with the stored prompt field fed to it as grounding. Read by the {{ obligation_schema }} prompt as the per-case section and rendered as the
 # Obligation entity page's Bearer Attributes. Descriptive only (no sh:minCount/sh:datatype).
 pcsh:ObligationPropertyShape
     a sh:NodeShape ;
@@ -216,7 +218,7 @@ pcsh:PrincipleDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Principle ;
     rdfs:label "Principle definition schema (type-level, descriptive, field contract)"@en ;
-    rdfs:comment "What individuates a principle TYPE: its canonical kind (drives the four-kind subClassOf typing; the canonical leaf becomes the rdf:type) and the extensional cases that ground it (McLaren). The five per-case narrative literals and the invokedBy edge are per-individual and now live on PrinciplePropertyShape, mirroring the RoleDefinitionShape/ProfessionalRolePropertyShape split so the {{ principle_schema }} prompt separates the type judgment from what the case supplies. Descriptive only (no validation result); principle_category is a routing input, not stored as a literal."@en ;
+    rdfs:comment "What individuates a principle TYPE: its canonical kind (drives the four-kind subClassOf typing; the canonical leaf becomes the rdf:type) and the extensional cases that ground it (McLaren). The five per-case narrative literals and the invokedBy edge are per-individual and now declared on PrinciplePropertyShape, mirroring the RoleDefinitionShape/ProfessionalRolePropertyShape split so the {{ principle_schema }} prompt separates the type judgment from what the case supplies. Descriptive only (no validation result); principle_category is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:principleCategory ;  sh:name "principle kind" ;      sh:description "The controlled principle kind, which drives the four-kind subClassOf typing: FundamentalEthicalPrinciple, ProfessionalVirtuePrinciple, RelationalPrinciple, DomainSpecificPrinciple. The canonical leaf label becomes the rdf:type; the category is a routing input, not stored as a literal." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:extensionalCases ;   sh:name "extensional cases" ;   sh:description "Class-level prior cases that instantiate the principle (McLaren extensional grounding); an optional class-mint field." ; sh:order 2 ] .
 
@@ -235,7 +237,7 @@ pcsh:PrinciplePropertyShape
     sh:property [ sh:path proeth:appliedTo ;          sh:name "applied to" ;          sh:description "What the principle is applied to in the case (the situation or party it bears on)." ; sh:order 3 ] ;
     sh:property [ sh:path proeth:balancingWith ;      sh:name "balancing with" ;      sh:description "The competing principle or value this principle is balanced against in the case, recorded as a literal; extraction records the tension but asserts no defeat or precedence, and the defeasibility edges are materialized by a separate pass from this field." ; sh:order 4 ] ;
     sh:property [ sh:path proeth:tensionResolution ;  sh:name "tension resolution" ;  sh:description "How the case resolves the tension involving this principle (a defeasibility-pipeline source field)." ; sh:order 5 ] ;
-    sh:property [ sh:path core:invokedBy ;            sh:name "invoked by" ;          sh:description "The agent who invokes the principle, via the P->Agent invokedBy edge (resolved to the case Agent or the shared NSPE Board/NSPE Agent). Range: Agent." ; sh:order 6 ] .
+    sh:property [ sh:path core:invokedBy ;            sh:name "invoked by" ;          sh:description "The agent who invokes the principle, via the P->Agent invokedBy edge (resolved to a case Agent by embedding shortlist + LLM select; a Board-pattern invoking party resolves deterministically to the case-scoped NSPE Board of Ethical Review Agent). Range: Agent." ; sh:order 6 ] .
 
 # StateDefinitionShape: the definitional field contract of any state TYPE/individual (the S component), read
 # by the {{ state_schema }} prompt block. Descriptive only (no validation result). The archetype is one of
@@ -246,7 +248,7 @@ pcsh:StateDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:State ;
     rdfs:label "State definition schema (type-level, descriptive, field contract)"@en ;
-    rdfs:comment "What individuates a state TYPE: its content archetype (drives the archetype subClassOf typing) and its persistence type (inertial vs non-inertial fluent, a class-level datatype). Its per-case urgency and the activatesObligation edge are per-individual and live on StatePropertyShape, mirroring the Role/Principle/Obligation Definition/Property split and the state scopeNote (which names the condition and its persistence type as type-defining). Descriptive only (no validation result); state_category is a routing input, not stored as a literal."@en ;
+    rdfs:comment "What individuates a state TYPE: its content archetype (drives the archetype subClassOf typing) and its persistence type (inertial vs non-inertial fluent, a class-level datatype). Its per-case urgency and the activatesObligation edge are per-individual and declared on StatePropertyShape, mirroring the Role/Principle/Obligation Definition/Property split and the state scopeNote (which names the condition and its persistence type as type-defining). Descriptive only (no validation result); state_category is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:stateCategory ;     sh:name "state archetype" ;      sh:description "The content archetype, which drives the archetype subClassOf typing: EpistemicState, RiskState, CompetenceState, EmergencyState, ConflictOfInterestState, RegulatoryState, TemporalState, ResourceState, DisclosureState. A classification of the state content, explicitly NOT the activatesObligation relation. A routing input, not stored as a literal." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:persistenceType ;   sh:name "persistence type" ;     sh:description "Whether the state is an inertial fluent (holds until an event terminates it) or a non-inertial fluent (true at a single time point), per Berreby's Event Calculus; a class-level datatype, a property of the fluent predicate itself." ; sh:order 2 ] .
 
@@ -272,7 +274,7 @@ pcsh:ResourceDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Resource ;
     rdfs:label "Resource definition schema (type-level, descriptive, field contract)"@en ;
-    rdfs:comment "What individuates a resource TYPE: its source kind (the category of professional knowledge, which drives the five-kind subClassOf typing) and the class-level governedByCode restriction for code resources. The specific document title, its topic, and the relying/citing agents are per-individual context and live on ResourcePropertyShape, mirroring the R/P/O/S Definition/Property split and the resource scopeNote (the TYPE is a bare category; a specific named or numbered document is an INDIVIDUAL, and 'topic, who-used, and which-document are context, not class identity'). Descriptive only (no validation result); source_kind is a routing input, not stored as a literal."@en ;
+    rdfs:comment "What individuates a resource TYPE: its source kind (the category of professional knowledge, which drives the five-kind subClassOf typing) and the class-level governedByCode restriction for code resources. The specific document title, its topic, and the relying/citing agents are per-individual context declared on ResourcePropertyShape, mirroring the R/P/O/S Definition/Property split and the resource scopeNote (the TYPE is a bare category; a specific named or numbered document is an INDIVIDUAL, and 'topic, who-used, and which-document are context, not class identity'). Descriptive only (no validation result); source_kind is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:sourceKind ;     sh:name "source kind" ;      sh:description "The controlled source kind, which drives the five-kind typing: ethical_code, technical_standard, case_precedent, legal_resource, reference_material (professional_code was merged into ethical_code 2026-07-01). EthicalCode is typed subClassOf Guideline subClassOf Resource; the other four subClassOf Resource. A routing input, not stored as a literal." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:governedByCode ; sh:name "governed by code" ; sh:description "For a code resource, the incoming governedByCode relation from ProfessionalRole (a TBox restriction, range EthicalCode); relevant only to EthicalCode resources." ; pcsh:informationalOnly true ; sh:order 2 ] .
 
@@ -289,7 +291,7 @@ pcsh:ResourcePropertyShape
     sh:property [ sh:path proeth:documentTitle ;  sh:name "document title" ;   sh:description "The title of the specific source document (the separately-citable INDIVIDUAL the scopeNote names)." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:topic ;          sh:name "topic" ;            sh:description "The subject the resource addresses, carried on the first-class proeth:topic datatype property (decision B2), not the otherAttribute overflow; context, not class identity." ; sh:order 2 ] ;
     sh:property [ sh:path core:availableTo ;      sh:name "available to" ;     sh:description "The case actor who relied on the resource (the Facts-section signal), via the availableTo edge. Range: Agent." ; sh:order 3 ] ;
-    sh:property [ sh:path core:citedByAgent ;     sh:name "cited by agent" ;   sh:description "The agent who cited the resource as authority (the Discussion-section signal), via the citedByAgent edge, resolved to the shared NSPE Board/NSPE Agent when the text names it. Range: Agent." ; sh:order 4 ] .
+    sh:property [ sh:path core:citedByAgent ;     sh:name "cited by agent" ;   sh:description "The agent who cited the resource as authority (the Discussion-section signal), via the citedByAgent edge, resolved deterministically to the case-scoped NSPE Board of Ethical Review Agent when the text names the Board. Range: Agent." ; sh:order 4 ] .
 
 # CapabilityDefinitionShape: the definitional field contract of any capability TYPE/individual (the Ca
 # component), read by the {{ capability_schema }} prompt block. Descriptive only (no validation result).
@@ -299,7 +301,7 @@ pcsh:CapabilityDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Capability ;
     rdfs:label "Capability definition schema (type-level, descriptive, field contract)"@en ;
-    rdfs:comment "What individuates a capability TYPE: its canonical competence kind (drives the subClassOf typing) and the Tolmeijer requirement the kind realizes (a class-level annotation). The possessor and the incoming requiresCapability edge are per-case and live on CapabilityPropertyShape, mirroring the R/P/O/S/Rs Definition/Property split and the capability scopeNote (the type is 'the competence it is'; the bearer and the requiredForObligation edges attach to the case individual). Descriptive only (no validation result); capability_kind is a routing input, not stored as a literal."@en ;
+    rdfs:comment "What individuates a capability TYPE: its canonical competence kind (drives the subClassOf typing) and the Tolmeijer requirement the kind realizes (a class-level annotation). The possessor and the incoming requiresCapability edge are per-case and declared on CapabilityPropertyShape, mirroring the R/P/O/S/Rs Definition/Property split and the capability scopeNote (the type is 'the competence it is'; the bearer and the requiredForObligation edges attach to the case individual). Descriptive only (no validation result); capability_kind is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:capabilityKind ;       sh:name "capability kind" ;        sh:description "The canonical, tool/actor-neutral competence kind, which drives the subClassOf typing to one of the named capability classes (each subClassOf core:Capability with skos:altLabel synonyms). A routing input, not stored as a literal." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:tolmeijerRequirement ; sh:name "Tolmeijer requirement" ;  sh:description "Class-level descriptive annotation naming which of the four Tolmeijer (2021) ethical-competence requirements the kind primarily realizes; descriptive only, with no per-individual field and no second typing axiom." ; sh:order 2 ] .
 
@@ -327,9 +329,9 @@ pcsh:ConstraintDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Constraint ;
     rdfs:label "Constraint definition schema (type-level, descriptive, field contract)"@en ;
-    rdfs:comment "What individuates a constraint TYPE: the boundary it states (boundary_type, which drives the subClassOf typing into one of the eleven closed boundary-type classes) and the source provision that establishes it. The per-case severity and applicability, the agent it limits, and the action it bounds are per-individual and live on ConstraintPropertyShape, mirroring the R/P/O/S/Rs/Ca Definition/Property split and the constraint scopeNote (the TYPE is the prohibition plus its source provision; the constrained party, per-occasion applicability, and any exception attach to the case individual). Descriptive only (no validation result); boundary_type is a routing input, not stored as a literal."@en ;
+    rdfs:comment "What individuates a constraint TYPE: the boundary it states (boundary_type, which drives the subClassOf typing into one of the ten closed boundary-type classes) and the source provision that establishes it. The per-case severity and applicability, the agent it limits, and the action it bounds are per-individual and declared on ConstraintPropertyShape, mirroring the R/P/O/S/Rs/Ca Definition/Property split and the constraint scopeNote (the TYPE is the prohibition plus its source provision; the constrained party, per-occasion applicability, and any exception attach to the case individual). Descriptive only (no validation result); boundary_type is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:boundaryType ; sh:name "boundary type" ; sh:description "The controlled boundary type, which drives the subClassOf typing into one of the ten closed boundary-type classes: LegalConstraint, RegulatoryConstraint, ResourceConstraint, CompetenceConstraint, JurisdictionalConstraint, ProceduralConstraint, EthicalConstraint, SafetyConstraint, ConfidentialityConstraint, TemporalConstraint. The prohibition/boundary content that individuates the type. A routing input, not stored as a literal." ; sh:order 1 ] ;
-    sh:property [ sh:path core:establishedBy ; sh:name "established by" ; sh:description "The source CodeProvision that establishes the constraint, via the establishedBy edge. The second type-individuating coordinate: per the scopeNote a constraint TYPE is the boundary it states plus its source provision. Range: CodeProvision." ; pcsh:informationalOnly true ; sh:order 2 ] .
+    sh:property [ sh:path core:establishedBy ; sh:name "established by" ; sh:description "The source CodeProvision that establishes the constraint, via the establishedBy edge. The second type-individuating coordinate: per the scopeNote a constraint type is the boundary it states plus its source provision. Range: CodeProvision." ; pcsh:informationalOnly true ; sh:order 2 ] .
 
 # ConstraintPropertyShape: the per-case fields a given constraint INDIVIDUAL carries (the Cs-side analogue of
 # the other components' PropertyShapes). severity is the per-occasion Dennis severity assessment;

@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-06 (eighth pass, P properties review): the :establishes / :establishedBy twin pair and the :hasValueLabel annotation property are deleted. The pair duplicated proeth-core:establishes / proeth-core:establishedBy with zero uses anywhere (every emitter and reader is core-namespace; the committed cases carry only proeth-core:establishedBy), and its inverse kept the legacy Resource-only range that the 2026-07-04 forward-domain widening did not touch, a latent inconsistency against CodeProvision owl:disjointWith Resource; the McLaren 2003 dcterms:source moved to proeth-core:establishes. hasValueLabel had zero uses; the value-oriented reading of a principle is carried by the minted class label and the principleCategory routing input. A tombstone comment now records the 2026-07-04 deletion of the five deprecated property stubs superseded by the core v2.8.0 promotions. The closed boundary-type count is corrected to ten (PriorityConstraint was deleted 2026-07-05). Style: the Hallamaa and Kalliokoski citations move from the ampersand to the and form, weaponising and materialises respelled, and the cases-ontology placement comment moved to a literal verb."@en ;
     skos:changeNote "2026-07-06 (seventh pass): proeth:confidence rdfs:range corrected xsd:string -> xsd:decimal (the case-56 pipeline-probe finding; see the property changeNote)."@en ;
     skos:changeNote "2026-07-06 (sixth pass, same review): RegulatoryAuthorityRole reparented from :ProfessionalRole to :ParticipantRole with a role-genus definition; all four gold instantiations (cases 5, 6, 9, 16) are report-receiving oversight boards including the NSPE Board of Ethical Review, and the former placement entailed code-governance and obligation-existence commitments that a statutory board does not bear. The ProfessionalRole scope note head list updated to the four remaining occupational heads. ResponsibleChargeEngineerRole notes the review pathway of responsible charge (the case-120 reviewing-charge idiom). The EngineerRole altLabel engineering and the ResponsibleChargeEngineerRole altLabel reviewing charge engineer were audited and deliberately kept: the substring resolver makes the former harmless and beneficial in tie-breaks, and the latter names a genuine corpus concept. Pellet-gated on cases 5, 6, 9, and 16."@en ;
     skos:changeNote "2026-07-06 (fifth pass, same review): Role-subtree pattern sweep over the remaining occupational heads, participant heads, and engineer leaves. ONE axiom change: ConsultantEngineerRole reparented from :ConsultantRole to :EngineerRole, restoring the ConsultantRole head text (engineering consultants classify under EngineerRole) and the MunicipalEngineerRole sector-idiom precedent; Pellet-gated on the five gold cases that use it. Annotation corrections: ProjectManagerRole rewritten professional-side (the former Party idiom was the participant opener); PublicRole rewritten as the role borne by the public (the former text described the collective party, the referent of :PublicInterest); the five other participant heads gain the role-borne-by genus of the ParticipantRole anchor; EnvironmentalEngineerRole drops the licensed genus (bearer fact, Davis 1991); ResponsibleChargeEngineerRole rephrased so the responsible-charge formula no longer reads as an unsourced quotation; NonEngineerExpertWitnessRole documents its asserted ProviderClientRole parentage; the PublicResponsibilityRole and owesDutyToward Canon 1 glosses aligned to the exact NSPE wording (hold paramount the safety, health, and welfare of the public), and the locally unverifiable Thornton et al. (2017) collective-morality framing clause removed from the definition (the dcterms:references DOI kept as background); the RegulatoryAuthorityRole truncated altLabel board of ethical completed and licensure-board labels added. Style normalization across the axis-machinery comments and SKOS schemes (caps emphasis, ASCII dashes, slash pairs, British spellings, ampersand citations)."@en ;
@@ -59,10 +60,10 @@
     rdfs:subClassOf proeth-core:Principle ;
     rdfs:label "Fundamental Ethical Principle"@en ;
     iao:0000115 "A universal moral foundation that serves as the highest-level abstraction in professional ethics, requiring extensive interpretation through concrete cases (BFO: generically dependent continuant)"@en ;
-    skos:definition "According to McLaren (2003), fundamental principles like public welfare and respect for persons cannot be applied through formal deduction alone but require extensional definition through landmark ethics cases and professional code applications. These principles function as constitutional-like foundations (Taddeo et al. 2024) that mediate moral ideals into professional practice (Hallamaa & Kalliokoski 2022)."@en ;
+    skos:definition "According to McLaren (2003), fundamental principles like public welfare and respect for persons cannot be applied through formal deduction alone but require extensional definition through landmark ethics cases and professional code applications. These principles function as constitutional-like foundations (Taddeo et al. 2024) that mediate moral ideals into professional practice (Hallamaa and Kalliokoski 2022)."@en ;
     dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> , # McLaren 2003
                    <https://doi.org/10.1007/s13347-024-00710-6> , # Taddeo et al. 2024
-                   <https://doi.org/10.3389/fcomp.2022.776837> ; # Hallamaa & Kalliokoski 2022
+                   <https://doi.org/10.3389/fcomp.2022.776837> ; # Hallamaa and Kalliokoski 2022
     rdfs:comment "Examples: Public Welfare Paramount, Respect for Persons, Justice, Beneficence. These require extensive interpretation and balancing in specific contexts."@en .
 
 :ProfessionalVirtuePrinciple rdf:type owl:Class ;
@@ -783,11 +784,9 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 #    Annotation properties                                        
 #################################################################
 
-:hasValueLabel rdf:type owl:AnnotationProperty ;
-    rdfs:label "has value label"@en ;
-    rdfs:comment "Annotation for recording the value-oriented reading of a principle (e.g., 'Integrity', 'Justice')."@en ;
-    rdfs:domain proeth-core:Principle ;
-    rdfs:range xsd:string .
+# 2026-07-06: :hasValueLabel was deleted (zero uses anywhere; the value-oriented
+# reading of a principle is carried by the minted class label and the
+# proeth:principleCategory routing input, so the annotation never gained an emitter).
 
 #################################################################
 #    Object Properties                                           
@@ -803,6 +802,12 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 # v2.8.0: the deprecated intermediate :fulfillsObligation equivalentProperty bridge
 # was deleted. proeth-core:fulfillsObligation is the single canonical property; no
 # intermediate alias remains.
+
+# 2026-07-04: the five deprecated intermediate property stubs superseded by the
+# v2.8.0 core promotions (derivedFromPrinciple, guidedByPrinciple, raisesObligation,
+# and violatesObligation in the freed-term deletion; requiresCapability in the
+# 45-term deprecated sweep) were deleted once cases 103 and 121 had been retargeted
+# to the core successors. proeth-core is the single namespace for each family.
 
 :hasAgentRole rdf:type owl:ObjectProperty ;
     rdfs:domain proeth-core:Action ;
@@ -827,26 +832,13 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 #    Provision-Concept Relationships
 #################################################################
 
-# These properties link ethical code provisions to the concepts they establish
-# Used to trace how specific code sections ground principles, obligations, and constraints
-
-:establishes rdf:type owl:ObjectProperty ;
-    rdfs:domain [ rdf:type owl:Class ;
-                  owl:unionOf ( proeth-core:Resource proeth-core:CodeProvision ) ] ;
-    skos:changeNote "2026-07-04: domain widened to include CodeProvision (an information content entity, not a Resource); the property comment always described provisions as subjects, so the old Resource-only domain would have retyped provision subjects into Resource against the ICE placement."@en ;
-    rdfs:range [ rdf:type owl:Class ;
-                 owl:unionOf ( proeth-core:Principle proeth-core:Obligation proeth-core:Constraint ) ] ;
-    rdfs:label "establishes"@en ;
-    rdfs:comment "Relates a code provision to the ethical concepts (Principles, Obligations, Constraints) it establishes or reinforces. For example, NSPE Canon I.1 establishes the Public Safety Principle."@en ;
-    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00135-8> . # McLaren 2003 - extensional grounding
-
-:establishedBy rdf:type owl:ObjectProperty ;
-    owl:inverseOf :establishes ;
-    rdfs:domain [ rdf:type owl:Class ;
-                  owl:unionOf ( proeth-core:Principle proeth-core:Obligation proeth-core:Constraint ) ] ;
-    rdfs:range proeth-core:Resource ;
-    rdfs:label "established by"@en ;
-    rdfs:comment "Inverse of establishes. Relates an ethical concept to the code provision(s) that establish it. For example, Public Safety Principle is established by NSPE Canon I.1."@en .
+# 2026-07-06: the intermediate :establishes / :establishedBy twin pair was deleted.
+# The pair duplicated proeth-core:establishes / proeth-core:establishedBy with zero
+# uses in committed cases, the extended store, and all code (every emitter and
+# reader is core-namespace). The McLaren 2003 dcterms:source moved to
+# proeth-core:establishes. The inverse also kept the legacy Resource-only range the
+# 2026-07-04 forward-domain widening did not touch, a latent inconsistency against
+# CodeProvision owl:disjointWith Resource.
 
 #################################################################
 #    State Classes - Based on Chapter 2.2.4 Literature Review
@@ -1084,9 +1076,9 @@ proeth:ResourceConstraint a owl:Class ;
 proeth:CompetenceConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Competence Constraint"@en ;
-    iao:0000115 "A boundary statement limiting the permissible action space by reference to the agent's competence or technical limitations: it states what may not be undertaken beyond demonstrated capability, rather than describing the capability itself (Hallamaa & Kalliokoski 2022)."@en ;
-    rdfs:comment "A boundary statement limiting permissible action by reference to competence or technical limits (Hallamaa & Kalliokoski 2022). States the limit, not the capability."@en ;
-    dcterms:references <https://doi.org/10.3389/fcomp.2022.776837> . # Hallamaa & Kalliokoski 2022
+    iao:0000115 "A boundary statement limiting the permissible action space by reference to the agent's competence or technical limitations: it states what may not be undertaken beyond demonstrated capability, rather than describing the capability itself (Hallamaa and Kalliokoski 2022)."@en ;
+    rdfs:comment "A boundary statement limiting permissible action by reference to competence or technical limits (Hallamaa and Kalliokoski 2022). States the limit, not the capability."@en ;
+    dcterms:references <https://doi.org/10.3389/fcomp.2022.776837> . # Hallamaa and Kalliokoski 2022
 
 proeth:JurisdictionalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
@@ -1105,8 +1097,9 @@ proeth:ProceduralConstraint a owl:Class ;
 # proeth:DefeasibleConstraint and proeth:InviolableConstraint retired 2026-06-28 (ratified Cs
 # spec): defeasibility versus inviolability is carried by the obligation-layer defeasibility edge
 # family (competesWith / prevailsOver / defeasibleUnder), so these two were a dead shadow. The
-# Constraint component is the closed ELEVEN boundary types: Legal, Regulatory, Resource,
-# Competence, Jurisdictional, Procedural, Ethical, Safety, Confidentiality, Temporal, Priority.
+# Constraint component is the closed ten boundary types: Legal, Regulatory, Resource,
+# Competence, Jurisdictional, Procedural, Ethical, Safety, Confidentiality, and Temporal
+# (Priority was retired 2026-07-05 with the PriorityConstraint class deletion).
 
 # Ethical Boundary Type Constraints
 proeth:EthicalConstraint a owl:Class ;
@@ -1130,7 +1123,7 @@ proeth:ConfidentialityConstraint a owl:Class ;
     rdfs:comment "Boundaries on information disclosure and privacy (Dennis et al. 2016)"@en ;
     dcterms:references <https://doi.org/10.1016/j.robot.2015.11.012> . # Dennis et al. 2016
 
-# Temporal and Priority Type Constraints
+# Temporal Type Constraints
 proeth:TemporalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Temporal Constraint"@en ;
@@ -1612,7 +1605,7 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 # Declares the stable per-component literal fields the extraction pipeline
 # emits, so the 'grounded in a controlled ontology vocabulary' claim covers
 # datatype predicates, not only typed individuals + object-property edges.
-# No rdfs:domain (intended component noted per property) to avoid weaponising
+# No rdfs:domain (intended component noted per property) to avoid weaponizing
 # the residual cross-category field leak into a disjointness clash.
 #################################################################
 
@@ -1933,7 +1926,7 @@ proeth:terminatesText a owl:DatatypeProperty ;
     rdfs:comment "Literal shadow of the terminates fluent edge (Action/Event)."@en .
 
 # Participant 'who' literal shadows: the intermediate# literal, DISTINCT from the
-# core# object-property edge the participant applier materialises (different IRIs,
+# core# object-property edge the participant applier materializes (different IRIs,
 # so no punning). The former proeth:invokedBy literal twin was deleted 2026-07-05:
 # the commit never wrote it (the CMT-3 routing skip) and rpo_edges now reads the
 # proeth-core:invokedBy edges directly, so the declaration described a triple that
@@ -2077,7 +2070,7 @@ proeth:applicabilityCondition a owl:DatatypeProperty ;
 # EthicalConclusion / DecisionPoint), but they were never declared: the old
 # proethica-cases 2.0.0 file declared same-named properties in the CASES
 # namespace, which no data ever used. Declared here, domainless (the bearer
-# classes live in the cases ontology, which imports this one), to keep the
+# classes are declared in the cases ontology, which imports this one), to keep the
 # emitted datatype-predicate vocabulary closed and self-describing.
 ###############################################################
 
