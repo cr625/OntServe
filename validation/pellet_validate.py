@@ -41,6 +41,10 @@ INTERMEDIATE_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-intermediate.ttl"
 # information content entities; the former ICE-vs-occurrent trap is defused) and post
 # the v3.0.0 slim (8 classes, no properties, no LangExtract residue).
 CASES_TTL = ONTSERVE_ROOT / "ontologies" / "proethica-cases.ttl"
+# The NSPE Code ontology (DB id 246, exported to disk 2026-07-06 so the reasoner merge
+# can type the nspe: CodeProvision individuals the establishedBy/citesProvision edges
+# target; before this the objects were untyped in every Pellet/SHACL run).
+NSPE_TTL = ONTSERVE_ROOT / "ontologies" / "NSPE Code of Ethics.ttl"
 # NOTE: the discovered-class store (proethica-intermediate-extended.ttl) is deliberately
 # NOT loaded here. It is cross-case and append-only, so loading it wholesale imports every
 # case's drift into every other case's validation (measured 2026-06-01: it dropped the corpus
@@ -165,6 +169,7 @@ def _build_merged_graph(case_content: str) -> Graph:
     g.parse(str(CORE_TTL), format="turtle")
     g.parse(str(INTERMEDIATE_TTL), format="turtle")
     g.parse(str(CASES_TTL), format="turtle")
+    g.parse(str(NSPE_TTL), format="turtle")
     g.parse(data=case_content, format="turtle")
 
     # Remove ALL owl:imports triples — we've merged everything we need locally.
