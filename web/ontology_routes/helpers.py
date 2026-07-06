@@ -925,7 +925,8 @@ def _entity_equivalent_class(entity, ontology):
 
 def class_property_schema(entity):
     """For a CLASS entity, the property schema applicable to its instances:
-    object/datatype properties whose rdfs:domain is this class or an ancestor, plus -- for
+    object, datatype, and annotation properties whose rdfs:domain is this class or an
+    ancestor (annotation rows carry kind='annotation' and render with a marker), plus -- for
     roles (core:Role in the ancestor chain) -- the controlled role-attribute schema from the
     SHACL RolePropertyShape (those properties are deliberately domain-less / leak-safe).
     Read-only. Returns None for non-class entities or when nothing applies."""
@@ -943,48 +944,63 @@ def class_property_schema(entity):
     def _local(u):
         return u.rsplit("#", 1)[-1].rsplit("/", 1)[-1] if isinstance(u, str) else None
 
-    # When two properties share a local name (e.g. an intermediate-defined involvesRole with domain
-    # DecisionPoint and a case-defined one with domain Case), the property tables can show only one row.
-    # Rank by ontology so the DEFINITIONAL declaration wins over a case-ontology duplicate, with the URI as
-    # a deterministic final tiebreak -- otherwise the displayed row depends on DB row order and flips on every
-    # re-extraction, and a core/intermediate entity page can surface a case-specific edge.
+    # When a CASE-defined property shares a local name with a definitional one (e.g. an
+    # intermediate-defined involvesRole with domain DecisionPoint and a case-defined one with
+    # domain Case), the case row must not clobber the definitional row. Definitional homonyms
+    # across base layers, by contrast, are real schema (distinct URIs; the Range/From cells
+    # disambiguate) and all render. So: every non-case property keeps its own row; case-defined
+    # properties are deduped per local name and shown only when no definitional row exists,
+    # with a deterministic rank so the choice cannot flip on re-extraction.
     ont_name_by_id = dict(db.session.execute(select(Ontology.id, Ontology.name)).all())
+
+    def _is_case(p):
+        return (ont_name_by_id.get(p.ontology_id, "") or "").startswith("proethica-case")
 
     def _ref_rank(p):
         ont = ont_name_by_id.get(p.ontology_id, "") or ""
         return (1 if ont.startswith("proethica-case") else 0, ont, p.uri)
 
-    def _pick_best(p, name, best):
-        """Keep the best-ranked property per local name; True if p is the (new) winner."""
-        rank = _ref_rank(p)
-        cur = best.get(name)
-        if cur is None or rank < cur[0]:
-            best[name] = (rank, p)
-            return True
-        return False
+    def _select_rows(candidates):
+        """The visible rows per the dedup rule above, deterministically ordered."""
+        definitional = [p for p in candidates if not _is_case(p)]
+        names_def = {_local(p.uri) for p in definitional}
+        case_best = {}
+        for p in candidates:
+            if not _is_case(p):
+                continue
+            name = _local(p.uri)
+            if name in names_def:
+                continue
+            cur = case_best.get(name)
+            if cur is None or _ref_rank(p) < _ref_rank(cur):
+                case_best[name] = p
+        return sorted(definitional + list(case_best.values()), key=_ref_rank)
 
-    domain_best = {}
+    domain_candidates = []
     for p in prop_rows:
         dom = p.domain
         dom_uris = dom if isinstance(dom, list) else [dom]
         if not any(isinstance(d, str) and d in ancestor_set for d in dom_uris):
             continue
-        name = _local(p.uri)
-        if not name or (p.properties or {}).get('deprecated'):
+        if not _local(p.uri) or (p.properties or {}).get('deprecated'):
             continue  # owl:deprecated property (e.g. the retired role-to-role duplicates); hide from the page
-        _pick_best(p, name, domain_best)
+        domain_candidates.append(p)
     domain_props = []
-    for name, (_, p) in domain_best.items():
+    for p in _select_rows(domain_candidates):
         dom = p.domain
         dom_uris = dom if isinstance(dom, list) else [dom]
         rng = p.range
-        rng_uri = (rng[0] if isinstance(rng, list) and rng else rng) if rng else None
+        # A union range (e.g. establishes: (Principle or Obligation or Constraint)) is stored as
+        # a list; emit EVERY named member -- collapsing to the first member misstated union
+        # ranges in the Range cell (the domain-table analogue of the referenced_by union-domain
+        # fan-out below).
+        rng_uris = [r for r in (rng if isinstance(rng, list) else [rng]) if isinstance(r, str)] if rng else []
         domain_props.append({
-            "name": name,
+            "name": _local(p.uri),
             "uri": p.uri,
             "comment": (p.comment or ""),
-            "range_name": _local(rng_uri),
-            "range_uri": rng_uri if isinstance(rng_uri, str) else None,
+            "ranges": [{"uri": r, "name": _local(r)} for r in rng_uris],
+            "kind": (p.properties or {}).get("kind"),
             "on_self": any(isinstance(d, str) and d == entity.uri for d in dom_uris),
         })
     domain_props.sort(key=lambda x: (not x["on_self"], x["name"].lower()))
@@ -992,18 +1008,18 @@ def class_property_schema(entity):
     # Incoming: properties whose rdfs:range is this class or a (non-universal) ancestor -- the edges that
     # point AT instances of this class (its in-degree). Mirrors domain_props but keyed on range, and
     # records the source class (the property's rdfs:domain) as "from".
-    referenced_best = {}
+    referenced_candidates = []
     for p in prop_rows:
         rng = p.range
         rng_uris = rng if isinstance(rng, list) else [rng]
         if not any(isinstance(r, str) and r in ancestor_set for r in rng_uris):
             continue
-        name = _local(p.uri)
-        if not name or (p.properties or {}).get('deprecated'):
+        if not _local(p.uri) or (p.properties or {}).get('deprecated'):
             continue  # owl:deprecated property; hide from Referenced-By (mirrors the domain_props filter)
-        _pick_best(p, name, referenced_best)
+        referenced_candidates.append(p)
     referenced_by = []
-    for name, (_, p) in referenced_best.items():
+    for p in _select_rows(referenced_candidates):
+        name = _local(p.uri)
         rng = p.range
         rng_uris = rng if isinstance(rng, list) else [rng]
         on_self = any(isinstance(r, str) and r == entity.uri for r in rng_uris)
@@ -1024,8 +1040,9 @@ def class_property_schema(entity):
 
     # Resolve the actual ontology of each referenced-by source class and property so the macro links
     # them cross-ontology correctly (e.g. derivedFromPrinciple lives in proethica-intermediate, not core).
-    if referenced_by:
-        link_uris = {r["uri"] for r in referenced_by} | {r["from_uri"] for r in referenced_by if r["from_uri"]}
+    link_uris = {r["uri"] for r in referenced_by} | {r["from_uri"] for r in referenced_by if r["from_uri"]}
+    link_uris |= {m["uri"] for r in domain_props for m in r["ranges"]}
+    if link_uris:
         uri_to_ont = dict(db.session.execute(
             select(OntologyEntity.uri, Ontology.name)
             .join(Ontology, OntologyEntity.ontology_id == Ontology.id)
@@ -1034,6 +1051,9 @@ def class_property_schema(entity):
         for r in referenced_by:
             r["prop_ontology"] = uri_to_ont.get(r["uri"])
             r["from_ontology"] = uri_to_ont.get(r["from_uri"])
+        for r in domain_props:
+            for m in r["ranges"]:
+                m["ontology"] = uri_to_ont.get(m["uri"])
 
     # SHACL definitional/bearer schemas for ANY class a shape targets along its chain. Currently only
     # roles have such shapes, so non-role classes get empty lists; written generically so a future

@@ -43,9 +43,10 @@ PROPERTY_STRUCTURE_GROUPS = [
         "badge": "rdfs:domain on this class or ancestor",
         "kind": "relations",
         "tooltip": (
-            "Object and data properties whose <code>rdfs:domain</code> is this class or an ancestor. "
-            "On an instance, an object property is a graph <strong>edge</strong> to another entity "
-            "(its <em>Range</em>) and a data property is a literal value."
+            "Object, data, and annotation properties whose <code>rdfs:domain</code> is this class or "
+            "an ancestor. On an instance, an object property is a graph <strong>edge</strong> to another "
+            "entity (its <em>Range</em>) and a data property is a literal value; a marked annotation "
+            "property is documentation vocabulary, not an instance assertion."
         ),
         "multi_suffix": (
             " Unlike the schemas below, these are relations in the graph, not declared attribute fields."
