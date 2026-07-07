@@ -45,7 +45,19 @@ DEFAULT_FILES = [
 IAO119 = rdflib.URIRef("http://purl.obolibrary.org/obo/IAO_0000119")
 
 # DOI embedded in a citation string: "... (doi:10.1007/s43681-023-00258-9)."
-STRING_DOI_RE = re.compile(r"doi:\s*(10\.[^\s)\"']+)")
+# ')' is allowed inside the capture because Elsevier DOIs contain parenthesized
+# year segments (10.1016/S0004-3702(03)00135-8); _trim_doi strips the trailing
+# punctuation and any unbalanced close-parens from the enclosing "(doi:...)".
+STRING_DOI_RE = re.compile(r"doi:\s*(10\.[^\s\"']+)")
+
+
+def _trim_doi(doi):
+    """A captured DOI without trailing sentence punctuation or the unbalanced
+    close-paren of an enclosing '(doi:...)' wrapper."""
+    doi = doi.rstrip(".,;")
+    while doi.endswith(")") and doi.count(")") > doi.count("("):
+        doi = doi[:-1].rstrip(".,;")
+    return doi
 # Registrant-suffix shape a DOI must have.
 DOI_SHAPE_RE = re.compile(r"^10\.\d{4,9}/\S+$")
 # Citation-string year: "Author (2023)." or "Author et al. (2023)."
@@ -93,7 +105,7 @@ def structural_check(files):
                 failures.append(f"{path.name} :: {local}: malformed doi.org IRI {bad}")
             for text in data["strings"]:
                 for doi in STRING_DOI_RE.findall(text):
-                    doi = doi.rstrip(".")
+                    doi = _trim_doi(doi)
                     all_pairs.append((doi, text))
                     if doi not in data["iris"]:
                         failures.append(
