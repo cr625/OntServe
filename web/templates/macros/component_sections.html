@@ -216,7 +216,7 @@
     <div class="property-key" title="owl:disjointWith plus owl:AllDisjointClasses membership">Disjoint with</div>
     <div class="property-value">
         {% for d in disjoint_classes %}<a href="{{ url_for('ontology.entity_detail', ontology_name=d.ontology, fragment=d.fragment) }}">{{ d.label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
-        <div class="small text-muted">From <code>owl:disjointWith</code> and <code>owl:AllDisjointClasses</code> membership (the nine D-tuple components are mutually disjoint).</div>
+        <div class="small text-muted">From <code>owl:disjointWith</code> and <code>owl:AllDisjointClasses</code> membership; the listed classes are pairwise disjoint with this one.</div>
     </div>
 </div>
 {% endif %}

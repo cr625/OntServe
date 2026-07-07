@@ -186,7 +186,7 @@ concepts:
     facets:
       action: Submission
       event: SubmissionEvent
-    note: legitimately both -- the act (Action) and its completion (Event); keep both, link via triggersEvent.
+    note: legitimately both -- the act (Action) and its completion (Event); keep both, link via causedByAction (the Event names its enabling Action).
 
 # ===========================================================================
 # CONSTRAINT reconciliation (fixes the 42->~12 over-retention)

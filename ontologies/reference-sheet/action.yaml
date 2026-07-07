@@ -45,7 +45,7 @@ wiring:
   realizesCapability: { domain: Action, range: Capability, line: 198, note: "what competence the act exercises" }
   usesResource: { domain: Action, range: Resource, line: 213, note: "what knowledge-source the act consumes" }
   hasState: { domain: Action, range: State, line: 205, note: "contextual State conditioning the act (decision 1 sink)" }
-  triggersEvent: { domain: Action, range: Event, line: 220, note: "the downstream Event the act causes" }
+  triggersEvent: { domain: Action, range: Event, line: 414, note: "DEPRECATED 2026-07-07 (never emitted); the causal link is carried inversely by intermediate causedByAction (Event -> the enabling Action)" }
   constrainedBy: { domain: Action, range: Constraint, line: 229, note: "the prohibition the act is bound by" }
   initiates: { domain: [Action, Event], range: State, line: 329, note: "the State the happening begins (fluent transition)" }
   terminates: { domain: [Action, Event], range: State, line: 336, note: "the State the happening ends (fluent transition)" }
@@ -385,7 +385,7 @@ iri_rule:
     Each Action/Event individual gets a SHORT, stable local-name = its canonical type local-name +
     a minimal per-case disambiguator (a short noun phrase, or a numeric suffix when two of the same
     type occur in one case). The narrative and causal context becomes EDGES (isPerformedBy,
-    triggersEvent, initiates/terminates a State, fulfillsObligation, constrainedBy) and literals
+    causedByAction from the downstream Event, initiates/terminates a State, fulfillsObligation, constrainedBy) and literals
     (rdfs:label keeps the readable phrase; proeth:evidence keeps the source quote), NOT IRI tokens.
     Temporal ordering between two happenings is the EXISTING proeth:TemporalRelation reification
     (allenRelation + time:intervalBefore/During/After + fromEntityText/toEntityText), so NO

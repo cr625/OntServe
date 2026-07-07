@@ -19,7 +19,8 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.10.18"^^xsd:string ;
+    owl:versionInfo "2.10.19"^^xsd:string ;
+    skos:changeNote "v2.10.19: Property-layer pass on the A and E components from the 2026-07-07 joint Property Structure review (5 reviewers + adversarial verification, 66 surviving findings; the companion emitter fixes are in ProEthica). triggersEvent is marked owl:deprecated (zero uses ever, no emitter; the deprecation was already ratified in the extraction-architecture spec; proeth:causedByAction, the CausalChain family, and the Allen machinery carry its directions). The isPerformedBy completeness restriction gains its corpus scope note: precedent-case actions resolve to no case Agent by design, a correct open-world none-select. The headline companion finding this pass shipped against: the temporal_relation_edges family had silently never produced output (a key-prefix regression from the June EdgeSpec migration), so the reified Allen layer existed in no committed case; the emitter is fixed and the corpus re-run rides the recommit-sweep ledger."@en ;
     skos:changeNote "v2.10.18: A and E style layer, closing the joint text pass. Accuracy: the Event editor note names event_type as the origin routing input (the stated event_origin spelling never appeared in any schema or data) and no longer lists triggersEvent among the emitted case-individual links (zero corpus uses; its liveness is a properties-pass question), and both scope notes carry the proeth-core prefix for the fluent edges. Spelling: fulfillment. The dissertation grounding check passes: the volitional/non-volitional agency boundary is the dissertation's own A/E table, and the citation-layer restatement of volitional in Sarmiento's vocabulary is compatible evolution of the dissertation's table gloss. The three origin subclasses verified as clean uncited design language realizing the Berreby contrast."@en ;
     skos:changeNote "v2.10.17: A and E citation layer, reviewed jointly (the two classes define each other by the agency boundary and share one literature base). The Sarmiento PRIMA record is corrected to 2022 with the full locator (the prior 2023 read the arXiv extended version's date onto the conference paper); volitional is restated in his vocabulary (an action follows from a volition) and the agentless connotation is credited through him to Russell and Norvig. The Action editor note re-scopes its responsibility-attribution clause to what each source states: the imputability line is Sarmiento quoting Beebee, the NESS cause-in-fact test is Wright (1985), which Sarmiento formalizes, causality-fault-duty are Kroll's three bases of accountability, and Floridi and Sanders separate accountability from intentionality-requiring responsibility (the prior text cited all three for a claim none of them makes, and inverted Floridi and Sanders). The Event emergency claim is re-anchored to the actual referent, the Almpani, Stefaneas, and Frangos wearable-robot paper (a different work from the State-side Almpani and Stefaneas 2022), and restated in its vocabulary (emergency contingency protocols; the coined emergency-override compound is dropped). Both classes gain the verified 119 companions with the machine tier."@en ;
     skos:changeNote "v2.10.16: Property-layer pass on the Rs component from the 2026-07-07 Property Structure review. refersToDocument is marked owl:deprecated (zero committed uses, no emitter ever existed; containsProvision is the shipped provision linkage and documentTitle the document-identity carrier). The citedByAgent comment names the Discussion-section authority signal in place of the never-shipped References-section reading, and its dated range-broadening history moves to a change note. The establishes property deliberately keeps its IRI-only McLaren source per the recorded tenth-pass convention for the McLaren backbone (methodological derivation, not per-definition support)."@en ;
@@ -412,12 +413,14 @@ proeth-core:usesResource a owl:ObjectProperty ;
     skos:definition "Relates an action to resources it utilizes."@en .
 
 proeth-core:triggersEvent a owl:ObjectProperty ;
+    owl:deprecated true ;
     rdfs:subPropertyOf ro:0002411 ;  # RO:causally upstream of (RO_0002411)
     rdfs:domain proeth-core:Action ;
     rdfs:range proeth-core:Event ;
     rdfs:label "triggers event"@en ;
-    rdfs:comment "Relates an action to events it causes or initiates."@en ;
+    rdfs:comment "Relates an action to events it causes or initiates. Deprecated: no emitter or consumer ever existed and no committed case carries it; the causal Event-to-Action link is carried by proeth:causedByAction (the semantic inverse, intermediate namespace), the NESS analysis by the CausalChain family, and the ordering by the Allen/TemporalRelation machinery."@en ;
     skos:definition "Relates an action to events it causes or initiates."@en ;
+    skos:changeNote "2026-07-07 (A/E properties review): marked owl:deprecated on the hasState precedent (zero uses in all committed cases; no emitter or consumer in either repository; the deprecation was already ratified in the extraction-architecture spec). The ro:0002411 grounding note is preserved below."@en ;
     skos:changeNote "v2.4.1: Corrected RO IRI from non-existent ro:0000012 to ro:0002411 (causally upstream of). RO_0002411 is the correct IRI for 'causally upstream of' in the OBO Relations Ontology."@en .
 
 proeth-core:constrainedBy a owl:ObjectProperty ;
@@ -880,6 +883,10 @@ proeth-core:requiresCapability a owl:ObjectProperty ;
 
 # Ensure every action is performed by at least one agent
 # Uses named inverse property isPerformedBy (OWL DL compliant, no anonymous inverseOf in restriction).
+# Completeness scope: the corpus exhibits this for IN-CASE actions; a discussion-sourced
+# action performed by a precedent-case party resolves to no case Agent (no Agents are
+# minted for precedent parties), which is a correct open-world none-select, not a gap
+# to force-fill (2026-07-07 A/E properties review; a forced match would assert a wrong performer).
 proeth-core:Action rdfs:subClassOf [
     a owl:Restriction ;
     owl:onProperty proeth-core:isPerformedBy ;

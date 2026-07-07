@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-07 (nineteenth pass, A/E properties review): the temporal machinery aligned to the shipped contract. The duplicate eventType declaration is deleted (the routing-input block is the single source); causesStateChange deleted (zero uses; the E spec folded it into description); hasTemporalRelation deprecated (never emitted; fromEntity/toEntity carry the linkage). causedByAction gains its two-register definition, the Wright reference beside Sarmiento, the ExogenousEvent guard note, and a placement changeNote (stays intermediate with its causal family). analyzesAction is re-domained to proeth-cases:CausalNormativeLink, the class its sole emitter asserts (the CausalChain domain wrongly inferred every reasoning node into the NESS chain population). Thirteen emitted-but-undeclared carriers gain declarations: the three TemporalRelation fields (fromEntityText, toEntityText, evidence), the nine CausalChain analysis fields (withinAgentControl with range xsd:boolean, matching the typed committed literals), and the agents decomposition. severity drops its retired Event half; hasAgent states its dual kept-and-resolved status; the TemporalRelation definition states the shipped carrier contract in place of the stored-URI claim."@en ;
     skos:changeNote "2026-07-07 (eighteenth pass, A/E citation layer): every Sarmiento record corrected to 2022 with the settled PRIMA locator (CausalChain family, responsibleAgent, EpistemicState; the DOI was already right, the year read the arXiv extended version's date onto the conference paper). The CausalChain NESS attribution stands verified: Sarmiento's causal definition is a formalisation of Wright's NESS test, in his own words."@en ;
     skos:changeNote "2026-07-07 (seventeenth pass, Rs properties review): the Resource carrier block aligned to the shipped contract. provisionCodes and citedBy gain declarations (the one live-emitted kept literal and the one edge-resolved Discussion signal were both undeclared, rendering unlabeled); usedInContext, createdBy, and version state their dropped-from-schema status (never written by the current pipeline); sourceKind records the resource_category schema spelling it bridges to; the dead :hasResource is deleted (zero uses anywhere; proeth-core:usesResource is the surviving process-to-Resource property). Three annotation properties asserted only in engineering-ethics (derivedFromResource, appliesToDomain, hasUrgency) gain declarations as owl:AnnotationProperty, ending their unlabeled rendering. The EthicalCode change note records that the deprecated ProfessionalCode alias has since been deleted."@en ;
     skos:changeNote "2026-07-07 (sixteenth pass, Rs text pass): the Resource subtree brought to the audited component pattern, every claim verified against the PDFs. EthicalCode moves its Frankel and Davis grounding out of the definitional slots into an editor note (the two-register discipline), corrects the convention preposition to Davis's own between, gains the settled 119 citations with the machine tier, and its scope note now states the type-individual-provision boundary in place of the caps-emphasis attribution; CasePrecedent likewise moves the McLaren extensional grounding from the definition into an editor note absorbing the attribution scope note. The three uncited kinds state their standing as extensions native to this ontology in place of the House-extension shorthand; TechnicalStandard records the standards-vetting contract on its individuals and the Section 508 LegalResource boundary. The four kind-retirement comments drop the stale closed-six count (five kinds since the ProfessionalCode merge). The five kinds match the five the dissertation enumerates (codes, precedents, technical standards, regulatory documents, guidance documents)."@en ;
@@ -427,11 +428,14 @@ proeth:causedByAction a owl:ObjectProperty ;
     rdfs:domain proeth-core:Event ;
     rdfs:range proeth-core:Action ;
     rdfs:label "caused by action"@en ;
-    rdfs:comment "Links event to actions that caused it (Wright's NESS test)"@en ;
-    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_15> . # Sarmiento et al. 2022
+    skos:definition "Links an Event to the Action that caused or enabled it."@en ;
+    rdfs:comment "Links an Event to the Action that caused or enabled it: cause-in-fact per the NESS test of Wright (1985), formalized for action languages by Sarmiento et al. (2022). Resolved deterministically at commit by causal_edges.apply_event_cause_edges from the converter reference (fragment remap; no embedding or LLM); records the enabling action in the AutomaticEvent origin tie-break, and a commit guard skips the edge on ExogenousEvent subjects (no proximate agent cause by definition)."@en ;
+    skos:changeNote "2026-07-07 (A/E properties review): stays in the intermediate namespace with its causal-analysis family (CausalChain, cause, effect, responsibleAgent, analyzesAction); the v2.8.0 promotion criterion is family single-namespacing, satisfied once core:triggersEvent is deprecated."@en ;
+    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_15> , # Sarmiento et al. 2022
+                       <https://doi.org/10.2307/3480373> . # Wright 1985
 
 # Causal-chain class + endpoint edges (Step-3 Stage-5 causal analysis; Sarmiento et al.
-# 2023 NESS). cause/effect omit rdfs:range deliberately: their endpoints are Action OR
+# 2022 NESS). cause/effect omit rdfs:range deliberately: their endpoints are Action OR
 # Event, and the Action/Event union is enforced at edge materialization by the unified
 # domain/range guard (rpo_edges._CAUSAL_EDGE_RANGE) rather than by a blank-node owl:unionOf.
 proeth:CausalChain a owl:Class ;
@@ -440,10 +444,11 @@ proeth:CausalChain a owl:Class ;
     rdfs:comment "A cause-to-effect linkage in the case timeline carrying a NESS responsibility analysis (Sarmiento et al. 2022). Not one of the nine disjoint D-tuple categories."@en .
 
 proeth:analyzesAction a owl:ObjectProperty ;
-    rdfs:domain proeth:CausalChain ;
+    rdfs:domain proeth-cases:CausalNormativeLink ;
     rdfs:range proeth-core:Action ;
     rdfs:label "analyzes action"@en ;
-    rdfs:comment "Links a synthesis causal-normative-link (reasoning) node to the committed Action it analyzes, so the reasoning is grounded in the graph and the action's obligation edges are reachable from it. Domain CausalChain (the non-D-tuple reasoning node), matching its sibling causal properties cause / effect / responsibleAgent, so there is no disjointness impact on the nine D-tuple categories; range Action."@en .
+    rdfs:comment "Links a Step-4 causal-normative-link (reasoning) node to the committed Action it analyzes, so the reasoning is grounded in the graph and the obligation edges of the action are reachable from it. Domain proeth-cases:CausalNormativeLink, the class the emitter actually asserts (the earlier CausalChain domain wrongly inferred every reasoning node into the Step-3 NESS chain population); neither class is among the nine D-tuple categories, so there is no disjointness impact. Range Action."@en ;
+    skos:changeNote "2026-07-07 (A/E properties review): rdfs:domain corrected CausalChain -> proeth-cases:CausalNormativeLink to match the sole emitter (causal_edges.apply_causal_normative_link_edges) and the committed data."@en .
 
 proeth:cause a owl:ObjectProperty ;
     rdfs:domain proeth:CausalChain ;
@@ -460,7 +465,62 @@ proeth:responsibleAgent a owl:ObjectProperty ;
     rdfs:range proeth-core:Agent ;
     rdfs:label "responsible agent"@en ;
     rdfs:comment "Links a causal chain to the agent(s) bearing responsibility for it (NESS causal responsibility, Sarmiento et al. 2022)."@en ;
+    skos:changeNote "2026-07-07 (A/E properties review): the nine CausalChain analysis carriers below gain declarations (they were emitted on all 112 committed chains but undeclared)."@en ;
     dcterms:references <https://doi.org/10.1007/s10458-023-09609-6> .
+
+proeth:causeText a owl:DatatypeProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range xsd:string ;
+    rdfs:label "cause text"@en ;
+    rdfs:comment "Literal shadow of the cause edge: the extracted cause phrasing, kept verbatim alongside the resolved edge."@en .
+
+proeth:effectText a owl:DatatypeProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range xsd:string ;
+    rdfs:label "effect text"@en ;
+    rdfs:comment "Literal shadow of the effect edge: the extracted effect phrasing, kept verbatim alongside the resolved edge."@en .
+
+proeth:responsibleAgentText a owl:DatatypeProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range xsd:string ;
+    rdfs:label "responsible agent text"@en ;
+    rdfs:comment "Literal shadow of the responsibleAgent edge: the extracted party phrasing, kept verbatim alongside the resolved edge."@en .
+
+proeth:causalLanguage a owl:DatatypeProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range xsd:string ;
+    rdfs:label "causal language"@en ;
+    rdfs:comment "Intended on CausalChain: the verbatim causal wording of the case text that licenses the chain."@en .
+
+proeth:counterfactual a owl:DatatypeProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range xsd:string ;
+    rdfs:label "counterfactual"@en ;
+    rdfs:comment "Intended on CausalChain: the but-for counterfactual reading of the chain (NESS analysis input)."@en .
+
+proeth:necessaryFactors a owl:DatatypeProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range xsd:string ;
+    rdfs:label "necessary factors"@en ;
+    rdfs:comment "Intended on CausalChain: the factors necessary within the sufficient set (NESS analysis; one literal per factor)."@en .
+
+proeth:sufficientFactors a owl:DatatypeProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range xsd:string ;
+    rdfs:label "sufficient factors"@en ;
+    rdfs:comment "Intended on CausalChain: the factor set sufficient for the effect (NESS analysis; one literal per factor)."@en .
+
+proeth:responsibilityType a owl:DatatypeProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range xsd:string ;
+    rdfs:label "responsibility type"@en ;
+    rdfs:comment "Intended on CausalChain: the responsibility mode the analysis assigns (e.g. direct, contributory)."@en .
+
+proeth:withinAgentControl a owl:DatatypeProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "within agent control"@en ;
+    rdfs:comment "Intended on CausalChain: whether the causal factor lay within the control of the agent. Range xsd:boolean: the serializer preserves the native boolean, and every committed literal is typed."@en .
 
 ###############################################################
 # OWL-Time Temporal Properties (Allen Interval Algebra)
@@ -481,14 +541,16 @@ proeth:temporalSequence a owl:DatatypeProperty ;
 
 proeth:TemporalRelation a owl:Class ;
     rdfs:label "Temporal Relation"@en ;
-    iao:0000115 "A reified Allen interval algebra relation between two temporal entities (actions or events). Stores both the ProEthica relation name and the corresponding OWL-Time property URI."@en ;
+    iao:0000115 "A reified Allen interval algebra relation between two happenings (Actions or Events) of the case timeline. Carries the Allen relation name (proeth:allenRelation) and the prefixed OWL-Time property name (proeth:owlTimeProperty); the endpoint phrasings land on the fromEntityText/toEntityText literal shadows, with the declared fromEntity/toEntity object properties as the resolver target of the temporal_relation_edges family."@en ;
     rdfs:comment "A reified Allen interval algebra relation between two temporal entities (actions or events). Stores both the ProEthica relation name and the corresponding OWL-Time property URI."@en .
 
 proeth:hasTemporalRelation a owl:ObjectProperty ;
+    owl:deprecated true ;
     rdfs:domain [ a owl:Class ; owl:unionOf (proeth-core:Action proeth-core:Event) ] ;
     rdfs:range proeth:TemporalRelation ;
     rdfs:label "has temporal relation"@en ;
-    rdfs:comment "Links an action or event to a reified Allen interval relation instance."@en .
+    rdfs:comment "Links an action or event to a reified Allen interval relation instance. Deprecated: never emitted; the relation is anchored the other way, from the relation node to its happenings via fromEntity/toEntity."@en ;
+    skos:changeNote "2026-07-07 (A/E properties review): marked owl:deprecated on the hasState precedent. Zero uses in any committed case and no emitter or consumer in either repository; fromEntity/toEntity carry the live linkage."@en .
 
 proeth:fromEntity a owl:ObjectProperty ;
     rdfs:domain proeth:TemporalRelation ;
@@ -506,13 +568,31 @@ proeth:allenRelation a owl:DatatypeProperty ;
     rdfs:domain proeth:TemporalRelation ;
     rdfs:range xsd:string ;
     rdfs:label "Allen relation"@en ;
-    rdfs:comment "The Allen interval algebra relation name (before, after, meets, overlaps, during, starts, finishes, equals, and their inverses). Maps to OWL-Time properties via services/allen_owl_time_mapper.py."@en .
+    rdfs:comment "The Allen interval algebra relation name (before, after, meets, overlaps, during, starts, finishes, equals, and their inverses). Maps to OWL-Time properties via allen_owl_time_mapper.py (app/services/temporal_dynamics/utils)."@en .
 
 proeth:owlTimeProperty a owl:DatatypeProperty ;
     rdfs:domain proeth:TemporalRelation ;
     rdfs:range xsd:string ;
     rdfs:label "OWL-Time property"@en ;
     rdfs:comment "The corresponding OWL-Time property name (e.g. time:before, time:intervalMeets). See W3C OWL-Time ontology."@en .
+
+proeth:fromEntityText a owl:DatatypeProperty ;
+    rdfs:domain proeth:TemporalRelation ;
+    rdfs:range xsd:string ;
+    rdfs:label "from entity text"@en ;
+    rdfs:comment "Literal shadow of the fromEntity edge: the free-text timeline phrasing of the source happening, kept verbatim; the temporal_relation_edges family resolves it to the fromEntity object edge."@en .
+
+proeth:toEntityText a owl:DatatypeProperty ;
+    rdfs:domain proeth:TemporalRelation ;
+    rdfs:range xsd:string ;
+    rdfs:label "to entity text"@en ;
+    rdfs:comment "Literal shadow of the toEntity edge: the free-text timeline phrasing of the target happening, kept verbatim; the temporal_relation_edges family resolves it to the toEntity object edge."@en .
+
+proeth:evidence a owl:DatatypeProperty ;
+    rdfs:domain proeth:TemporalRelation ;
+    rdfs:range xsd:string ;
+    rdfs:label "evidence"@en ;
+    rdfs:comment "Intended on TemporalRelation: the verbatim case-text span supporting the asserted Allen relation."@en .
 
 :ProfessionalObligation rdf:type owl:Class ;
     # NOTE: bfo:BFO_0000017 (realizable entity / SDC) removed, it conflicts with proeth-core:Obligation
@@ -1935,7 +2015,7 @@ proeth:constraintStatement a owl:DatatypeProperty ;
 proeth:severity a owl:DatatypeProperty ;
     rdfs:label "severity"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Constraint/Event: severity judgment."@en .
+    rdfs:comment "Intended on Constraint: severity judgment. The Event half was retired with the E spec (emergency salience is carried structurally by the RiskState/EmergencyState the event initiates)."@en .
 
 proeth:source a owl:DatatypeProperty ;
     rdfs:label "source"@en ;
@@ -1952,7 +2032,12 @@ proeth:constraintClass a owl:DatatypeProperty ;
 proeth:hasAgent a owl:DatatypeProperty ;
     rdfs:label "has agent"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Action: the acting agent name."@en .
+    rdfs:comment "Intended on Action: the acting agent name. Kept verbatim on the individual and also resolved to the proeth-core:isPerformedBy Agent edge (participant edge family)."@en .
+
+proeth:agents a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "agents"@en ;
+    rdfs:comment "Intended on Action: the decomposed operand actors of a composite multi-actor agent, one 'Name (role)' literal per actor (hasAgent keeps the original composite string; agentRelation the joining relation)."@en .
 
 proeth:agentRelation a owl:DatatypeProperty ;
     rdfs:label "agent relation"@en ;
@@ -1989,15 +2074,9 @@ proeth:temporalExtent a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:comment "Intended on Action/Event: instant or interval."@en .
 
-proeth:eventType a owl:DatatypeProperty ;
-    rdfs:label "event type"@en ;
-    rdfs:range xsd:string ;
-    rdfs:comment "Intended on Event: Event-Calculus occurrence type."@en .
-
-proeth:causesStateChange a owl:DatatypeProperty ;
-    rdfs:label "causes state change"@en ;
-    rdfs:range xsd:string ;
-    rdfs:comment "Intended on Event: prose summary of the state change."@en .
+# 2026-07-07: proeth:causesStateChange was deleted (A/E properties review). Zero uses
+# in committed cases; the E spec dropped the field (folded into description), and the
+# world-change is carried by the initiates/terminates fluent layer.
 
 
 # --- Object-property literal shadows (datatype siblings of object properties) ---

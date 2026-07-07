@@ -54,7 +54,7 @@ wiring:
   terminatedByEvent: { domain: State, range: Event, line: 312, note: "the Event that ends a State (State-side inverse)" }
   initiates: { domain: [Action, Event], range: State, line: 329, note: "the State the Event begins (Event-side fluent transition; mirror of activatedByEvent)" }
   terminates: { domain: [Action, Event], range: State, line: 336, note: "the State the Event ends (Event-side fluent transition; mirror of terminatedByEvent)" }
-  triggersEvent: { domain: Action, range: Event, line: 220, note: "inbound: the upstream Action (or Event chain) that causes this Event" }
+  triggersEvent: { domain: Action, range: Event, line: 414, note: "DEPRECATED 2026-07-07 (never emitted); the upstream-Action link is carried by intermediate causedByAction (this Event -> the enabling Action)" }
   isPerformedBy: { domain: Action, range: Agent, line: 180, note: "agentive Events that are also acts use the act-side link; pure occurrences omit it" }
   # Temporal ordering between two happenings is the EXISTING proeth:TemporalRelation reification
   # (allenRelation + proeth:owlTimeProperty time:intervalBefore/During/After + fromEntityText/
@@ -264,7 +264,7 @@ iri_rule:
     Each Event individual gets a SHORT, stable local-name = its canonical Event type local-name + a
     minimal per-case disambiguator (a short noun phrase, or a numeric suffix when two of the same
     type occur in one case). The narrative and causal context becomes EDGES (activatedByEvent /
-    terminatedByEvent linking the State it begins/ends, triggersEvent for the upstream cause,
+    terminatedByEvent linking the State it begins/ends, causedByAction for the upstream enabling Action,
     initiates/terminates, isPerformedBy for agentive occurrences) and literals (rdfs:label keeps the
     readable phrase; proeth:evidence keeps the source quote), NOT IRI tokens. Temporal ordering
     between two happenings is the EXISTING proeth:TemporalRelation reification (allenRelation +
@@ -298,7 +298,7 @@ iri_rule:
             rdf_type: SubmissionEvent          # the receipt/completion of the contour study (or DesignReview act in action.yaml if narrated as the act)
             label: '"Engineers A and B study of landfill contours"'
             edges:
-              - "triggersEvent case94:Contention_PublicDispute   # the study leads to C's contention"
+              - "causedByAction case94:Study_LandfillContours   # asserted on the Event: the contention follows from the study"
             literals:
               - 'proeth:textReferences "BER Case No. 79-2"'
           - iri: case94:Contention_PublicDispute

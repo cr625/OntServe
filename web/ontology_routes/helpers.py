@@ -121,7 +121,12 @@ def _base_subclass_closure(uri):
     rows = db.session.execute(
         select(OntologyEntity.uri, OntologyEntity.parent_uri, OntologyEntity.properties)
         .join(Ontology, OntologyEntity.ontology_id == Ontology.id)
-        .where(OntologyEntity.entity_type == 'class', Ontology.is_base.is_(True))
+        # Everything except the case ABoxes: proethica-core carries is_base=false
+        # (ontology_type='core'), so an is_base filter dropped the core layer and
+        # the closure over core classes found no subclasses (A/E properties review;
+        # Event reported 10 cases instead of 15 on its first real test).
+        .where(OntologyEntity.entity_type == 'class',
+               ~Ontology.name.like('proethica-case-%'))
     ).all()
     children = {}
     for u, parent, props in rows:

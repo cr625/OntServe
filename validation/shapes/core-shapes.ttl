@@ -38,8 +38,10 @@ pcsh:informationalOnly a owl:AnnotationProperty ;
     rdfs:comment "Marks a descriptive SHACL property as informational in the extraction field contract: the value is declared in the base ontology or assigned at commit (TBox restriction or resolver edge), so the prompt renders it as non-fillable context rather than a requested output field."@en .
 
 # CaseAnnotationShape: the shared per-case annotation fields EVERY committed individual carries,
-# regardless of component: extraction confidence, the verbatim supporting quotes, the source
-# snippet, and the involvement/context gloss. Declared once here (rather than nine times) so the
+# per component: extraction confidence (all components except Action, whose Step-3 contract
+# carries no confidence field), the verbatim supporting quotes, the source snippet (the
+# Step-1/2 provenance layers; Step-3 A/E individuals ground via textReferences only), and the
+# involvement/context gloss. Declared once here (rather than nine times) so the
 # fields are schema-advertised instead of displayed-but-undeclared (correspondence audit T7).
 # Descriptive only; no validation effect.
 # Rendering intent (decided 2026-07-06): the shape is advertised in the entity-page TTL block
@@ -51,7 +53,7 @@ pcsh:CaseAnnotationShape
     sh:targetClass core:Role, core:Principle, core:Obligation, core:State, core:Resource,
         core:Action, core:Event, core:Capability, core:Constraint ;
     rdfs:label "Shared per-case annotation schema (all nine components)"@en ;
-    rdfs:comment "The cross-component annotation fields asserted on every committed case individual: proeth:confidence (extraction confidence, decimal), proeth:textReferences (verbatim supporting quotes), proeth-prov sourceText (the source snippet, on the provenance layer), and the involvement gloss (proeth:caseInvolvement on role individuals, proeth:caseContext on capability and constraint individuals). Values are per-individual; the fields do not individuate any type."@en ;
+    rdfs:comment "The cross-component annotation fields on committed case individuals: proeth:confidence (extraction confidence, decimal; all components except Action, whose Step-3 contract carries no confidence field), proeth:textReferences (verbatim supporting quotes, universal), proeth-prov sourceText (the source snippet, on the Step-1/2 provenance layers; Step-3 A/E individuals ground via textReferences only), and the involvement gloss (proeth:caseInvolvement on role individuals, proeth:caseContext on capability and constraint individuals). Values are per-individual; the fields do not individuate any type."@en ;
     sh:property [ sh:path proeth:confidence ; sh:name "confidence" ; sh:description "Extraction confidence for this individual (0 to 1)." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:textReferences ; sh:name "text references" ; sh:description "Verbatim case quotes supporting this individual." ; sh:order 2 ] ;
     sh:property [ sh:path proeth:caseInvolvement ; sh:name "case involvement" ; sh:description "How this individual figures in the case narrative (role individuals; the same text is routed into rdfs:comment)." ; sh:order 3 ] ;
@@ -377,15 +379,41 @@ pcsh:ConstraintPropertyShape
     sh:property [ sh:path proeth:temporalScope ; sh:name "temporal scope" ; sh:description "When the constraint applies in this case; carried on every committed constraint individual alongside applicabilityCondition (declared 2026-07-06 so the field contract matches the shipped data; the overlap with applicabilityCondition is a recorded Cs-sweep question)." ; sh:order 4 ] .
 
 # EventDefinitionShape: the LIGHT field contract of any event TYPE/individual (the E component). Descriptive
-# only (no validation result). event_origin drives the three-way origin subClassOf typing into the mutually
+# only (no validation result). event_type drives the three-way origin subClassOf typing into the mutually
 # disjoint origin subclasses already in core; the fluent edges record the States the event transitions. Kept
 # deliberately light per the specification.
 pcsh:EventDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Event ;
     rdfs:label "Event definition schema (light, descriptive, field contract)"@en ;
-    rdfs:comment "The light field contract of an event: its origin, the state fluents it initiates or terminates, and its temporal marker. Descriptive only (no validation result); event_origin drives the three-way origin subClassOf typing and is not stored as a literal. Kept deliberately light per the specification."@en ;
+    rdfs:comment "The light field contract of an event: its origin, the state fluents it initiates or terminates, its temporal marker and extent, and the enabling action. Descriptive only (no validation result); event_type drives the three-way origin subClassOf typing and is not stored as a literal. Kept deliberately light per the specification."@en ;
     sh:property [ sh:path proeth:eventType ;     sh:name "event type" ;     sh:description "The origin of the event, which drives the three-way subClassOf typing into the mutually disjoint origin subclasses: outcome maps to AgentCausedEvent, exogenous to ExogenousEvent, automatic to AutomaticEvent (Berreby/Sarmiento origin distinction). A routing input, not stored as a literal." ; sh:order 1 ] ;
     sh:property [ sh:path core:initiates ;         sh:name "initiates" ;        sh:description "The State (fluent) the event initiates, via the initiates edge (Event->State). Range: State." ; sh:order 2 ] ;
     sh:property [ sh:path core:terminates ;        sh:name "terminates" ;       sh:description "The State (fluent) the event terminates, via the terminates edge (Event->State). Range: State." ; sh:order 3 ] ;
-    sh:property [ sh:path proeth:temporalMarker ; sh:name "temporal marker" ; sh:description "The event's temporal positioning in the case (when it occurs relative to the other actions and events)." ; sh:order 4 ] .
+    sh:property [ sh:path proeth:temporalMarker ; sh:name "temporal marker" ; sh:description "The temporal positioning of the event in the case (when it occurs relative to the other actions and events)." ; sh:order 4 ] ;
+    sh:property [ sh:path proeth:temporalExtent ; sh:name "temporal extent" ;  sh:description "Whether the event is an instant or an interval, anchoring the OWL-Time node; temporalMarker stays the textual when." ; sh:order 5 ] ;
+    sh:property [ sh:path proeth:causedByAction ; sh:name "caused by action" ; sh:description "The enabling Action the event follows from, via the causedByAction edge (resolved deterministically at commit; recorded in the AutomaticEvent origin tie-break). Range: Action." ; sh:order 6 ] .
+
+# ActionPropertyShape: the per-case fields a given action INDIVIDUAL carries (added 2026-07-07,
+# A/E properties review, user-decided). Action deliberately has NO DefinitionShape (bare, no
+# subtype discovery, per the ratified spec and the prompt resolver's early return), but its
+# committed individuals are the richest per-individual carriers in the corpus, and the
+# StatePropertyShape/ResourcePropertyShape precedent is that per-individual reality is
+# documented on a PropertyShape. Descriptive only (no sh:minCount/sh:datatype); rendered as the
+# Action page's Bearer Attributes and NOT read by any prompt block (the actions prompt is
+# hand-built in the Step-3 extractor).
+pcsh:ActionPropertyShape
+    a sh:NodeShape ;
+    sh:targetClass core:Action ;
+    rdfs:label "Action per-case schema (individual data, non-definitional)"@en ;
+    rdfs:comment "What a given action INDIVIDUAL carries in a specific case: the acting agent (kept verbatim and resolved to the isPerformedBy edge), the intention block, the professional-context judgments, the obligation-engagement and principle literals (kept verbatim and resolved to the engagement edges), the fluent-transition literals (kept verbatim and resolved to the initiates/terminates edges), and the temporal anchors. Descriptive only."@en ;
+    sh:property [ sh:path proeth:hasAgent ;            sh:name "has agent" ;            sh:description "The acting agent name, kept verbatim and resolved to the proeth-core:isPerformedBy Agent edge (participant family; precedent-case parties correctly resolve to none)." ; sh:order 1 ] ;
+    sh:property [ sh:path proeth:hasMentalState ;      sh:name "mental state" ;         sh:description "The mental state of the agent at decision time (the intention block)." ; sh:order 2 ] ;
+    sh:property [ sh:path proeth:intendedOutcome ;     sh:name "intended outcome" ;     sh:description "What the agent intended the action to achieve." ; sh:order 3 ] ;
+    sh:property [ sh:path proeth:foreseenUnintendedEffects ; sh:name "foreseen unintended effects" ; sh:description "Effects the agent foresaw but did not intend (the double-effect input)." ; sh:order 4 ] ;
+    sh:property [ sh:path proeth:withinCompetence ;    sh:name "within competence" ;    sh:description "Whether the action lay within the competence of the agent (boolean judgment)." ; sh:order 5 ] ;
+    sh:property [ sh:path proeth:requiresCapabilityText ; sh:name "requires capability" ; sh:description "The capabilities the action calls on, kept as a literal only (no Action-domain edge; the O-to-Ca direction is carried by the requires_capability_edges family)." ; sh:order 6 ] ;
+    sh:property [ sh:path proeth:fulfillsObligationText ; sh:name "fulfills obligation" ; sh:description "The obligation the action fulfills, kept verbatim and resolved to the fulfillsObligation edge (obligation-engagement family)." ; sh:order 7 ] ;
+    sh:property [ sh:path proeth:guidedByPrincipleText ; sh:name "guided by principle" ; sh:description "The principle guiding the action, kept verbatim and resolved to the guidedByPrinciple edge." ; sh:order 8 ] ;
+    sh:property [ sh:path proeth:initiatesText ;       sh:name "initiates" ;            sh:description "The State the action brings about, kept verbatim and resolved to the initiates edge (fluent family)." ; sh:order 9 ] ;
+    sh:property [ sh:path proeth:temporalMarker ;      sh:name "temporal marker" ;      sh:description "The temporal positioning of the action in the case; temporalExtent records instant versus interval, and the OWL-Time anchor (time:hasTime) plus the sequence ordinal attach at commit." ; sh:order 10 ] .

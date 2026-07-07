@@ -55,7 +55,31 @@ _OWL_PROPERTY_CHARACTERISTICS = (
 )
 
 
-def _most_specific_type(g, type_uris):
+def _base_superclass_map():
+    """child URI -> direct parent URIs across the non-case ontologies, so
+    graph-local subsumption can see the base hierarchy the case ABox omits
+    (a case graph types an event core:Event + core:ExogenousEvent without the
+    subClassOf axiom; without this map the alphabetical tiebreak picked
+    core:Event for every ExogenousEvent, emptying its used-in-cases page)."""
+    from web.models import Ontology
+    rows = db.session.execute(
+        select(OntologyEntity.uri, OntologyEntity.parent_uri, OntologyEntity.properties)
+        .join(Ontology, OntologyEntity.ontology_id == Ontology.id)
+        .where(OntologyEntity.entity_type == 'class',
+               ~Ontology.name.like('proethica-case-%'))
+    ).all()
+    parents = {}
+    for u, p, props in rows:
+        s = parents.setdefault(u, set())
+        if p:
+            s.add(p)
+        extra = (props or {}).get('rdf_superclasses') if isinstance(props, dict) else None
+        if isinstance(extra, list):
+            s.update(str(x) for x in extra)
+    return parents
+
+
+def _most_specific_type(g, type_uris, base_parents=None):
     """Deterministic most-specific rdf:type for an individual's parent_uri.
 
     The previous rule took the first type in rdflib iteration order, which is
@@ -77,6 +101,18 @@ def _most_specific_type(g, type_uris):
             ancestor_str = str(ancestor)
             if ancestor_str != u and ancestor_str in refs:
                 supers.add(ancestor_str)
+    if base_parents:
+        for u in candidates:
+            seen, frontier = set(), [u]
+            while frontier:
+                nxt = []
+                for x in frontier:
+                    for p in base_parents.get(x, ()):
+                        if p not in seen:
+                            seen.add(p)
+                            nxt.append(p)
+                frontier = nxt
+            supers.update(a for a in seen if a != u and a in refs)
     remaining = [u for u in candidates if u not in supers] or candidates
     remaining.sort(key=lambda u: (
         u.startswith(PROETHICA_CORE_NS),
@@ -296,6 +332,9 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
     entity_counts = {'class': 0, 'property': 0, 'individual': 0}
     captured_uris = set()
     new_entities = []
+    # Base-layer hierarchy for most-specific-type subsumption (built once per run;
+    # empty during a cold first sync, which degrades to the graph-local rule).
+    base_parents = _base_superclass_map()
 
     now = datetime.now(timezone.utc)
 
@@ -475,7 +514,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         is_concept = (indiv, RDF.type, SKOS.Concept) in g
         entity_type = 'concept' if is_concept else 'individual'
         non_skos_types = [t for t in types if t != str(SKOS.Concept)]
-        parent_uri = _most_specific_type(g, non_skos_types or types)
+        parent_uri = _most_specific_type(g, non_skos_types or types, base_parents)
 
         # Collect all non-standard properties into JSON
         properties = _collect_properties(g, indiv, skip_predicates)
@@ -548,7 +587,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
 
         # Determine entity_type and parent_uri from rdf:type
         domain_types = [str(t) for t in types if t not in _OWL_STRUCTURAL_TYPES]
-        parent_uri = _most_specific_type(g, domain_types)
+        parent_uri = _most_specific_type(g, domain_types, base_parents)
 
         # An untyped labeled resource that carries a property-only predicate (owl:inverseOf,
         # rdfs:domain/range, rdfs:subPropertyOf, ...) is a property, not the individual fallback --
