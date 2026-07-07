@@ -7,6 +7,7 @@
 @prefix proeth: <http://proethica.org/ontology/intermediate#> .
 @prefix pcsh: <http://proethica.org/shapes/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix proeth-cases: <http://proethica.org/ontology/cases#> .
 
 # ProEthica core conformance shapes (domain-GENERAL; shared by every domain).
 # Run with pyshacl inference='owlrl' so the OWL-RL closure (subClassOf* transitivity
@@ -26,14 +27,15 @@ pcsh: a owl:Ontology ;
     sh:declare [ sh:prefix "rdf"  ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] .
 
 # Generic informational-field marker for the {{ <comp>_schema }} prompt wire. A sh:property
-# annotated pcsh:informationalOnly true is a field the COMMIT stage assigns (a TBox restriction
-# or resolver-produced edge), not a field the extraction LLM fills: _component_schema_block
-# (ProEthica prompt_variable_resolver) renders it with "(assigned at commit; do not output)"
+# annotated pcsh:informationalOnly true is a field the extraction LLM does not fill: the value
+# is either declared in the base ontology (a TBox restriction, e.g. governedByCode) or produced
+# by a commit-stage resolver (e.g. establishedBy). _component_schema_block (ProEthica
+# prompt_variable_resolver) renders it with "(ontology- or commit-assigned; do not output)"
 # instead of as a fillable field. The sh:description stays neutral because it dual-renders on
 # the OntServe entity page. Descriptive only; no validation effect.
 pcsh:informationalOnly a owl:AnnotationProperty ;
-    rdfs:label "informational only (assigned at commit)"@en ;
-    rdfs:comment "Marks a descriptive SHACL property as informational in the extraction field contract: the value is assigned at commit (TBox restriction or resolver edge), so the prompt renders it as non-fillable context rather than a requested output field."@en .
+    rdfs:label "informational only (not an extraction output)"@en ;
+    rdfs:comment "Marks a descriptive SHACL property as informational in the extraction field contract: the value is declared in the base ontology or assigned at commit (TBox restriction or resolver edge), so the prompt renders it as non-fillable context rather than a requested output field."@en .
 
 # CaseAnnotationShape: the shared per-case annotation fields EVERY committed individual carries,
 # regardless of component: extraction confidence, the verbatim supporting quotes, the source
@@ -283,24 +285,39 @@ pcsh:ResourceDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Resource ;
     rdfs:label "Resource definition schema (type-level, descriptive, field contract)"@en ;
-    rdfs:comment "What individuates a resource TYPE: its source kind (the category of professional knowledge, which drives the five-kind subClassOf typing) and the class-level governedByCode restriction for code resources. The specific document title, its topic, and the relying/citing agents are per-individual context declared on ResourcePropertyShape, mirroring the R/P/O/S Definition/Property split and the resource scopeNote (the TYPE is a bare category; a specific named or numbered document is an INDIVIDUAL, and 'topic, who-used, and which-document are context, not class identity'). Descriptive only (no validation result); source_kind is a routing input, not stored as a literal."@en ;
+    rdfs:comment "What individuates a resource TYPE: its source kind (the category of professional knowledge, which drives the five-kind subClassOf typing). The specific document title, its topic, and the relying/citing agents are per-individual context declared on ResourcePropertyShape, mirroring the R/P/O/S Definition/Property split: per the Resource definition and scope note, the TYPE is a bare category, a specific named or numbered document is an INDIVIDUAL, and topic, relying actor, and citing authority are context rather than class identity. The incoming governedByCode restriction from ProfessionalRole is informational context for code resources, not an individuating coordinate. Descriptive only (no validation result); source_kind is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:sourceKind ;     sh:name "source kind" ;      sh:description "The controlled source kind, which drives the five-kind typing: ethical_code, technical_standard, case_precedent, legal_resource, reference_material (professional_code was merged into ethical_code 2026-07-01). EthicalCode is typed subClassOf Guideline subClassOf Resource; the other four subClassOf Resource. A routing input, not stored as a literal." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:governedByCode ; sh:name "governed by code" ; sh:description "For a code resource, the incoming governedByCode relation from ProfessionalRole (a TBox restriction, range EthicalCode); relevant only to EthicalCode resources." ; pcsh:informationalOnly true ; sh:order 2 ] .
 
 # ResourcePropertyShape: the per-case fields a given resource INDIVIDUAL carries (the Rs-side analogue of the
 # other components' PropertyShapes). documentTitle names the specific document (which the scopeNote makes an
-# INDIVIDUAL); topic, availableTo, and citedByAgent are the per-case context the DefinitionShape's own comment
-# calls "context, not class identity". Targets core:Resource. Read by {{ resource_schema }} as the per-case
-# section and rendered as the Resource entity page's Bearer Attributes. Descriptive only (no sh:minCount/sh:datatype).
+# INDIVIDUAL); topic, availableTo, citedByAgent, provisionCodes, and containsProvision are the per-case context
+# the DefinitionShape's own comment calls context rather than class identity. Targets core:Resource. Read by
+# {{ resource_schema }} as the per-case section and rendered as the Resource entity page's Bearer Attributes.
+# Descriptive only (no sh:minCount/sh:datatype).
 pcsh:ResourcePropertyShape
     a sh:NodeShape ;
     sh:targetClass core:Resource ;
     rdfs:label "Resource per-case schema (individual data, non-definitional)"@en ;
-    rdfs:comment "What a given resource INDIVIDUAL is described by in a specific case: the specific document it is (its title), the subject it addresses, and the agents who relied on or cited it. These do NOT individuate the resource TYPE (that is ResourceDefinitionShape, keyed on source kind); their values are per-case, asserted on the individual. Descriptive only."@en ;
+    rdfs:comment "What a given resource INDIVIDUAL is described by in a specific case: the specific document it is (its title), the subject it addresses, the agents who relied on or cited it, and for a code resource the provision designations the case cites (kept as the provisionCodes literal and resolved to containsProvision edges). These do NOT individuate the resource TYPE (that is ResourceDefinitionShape, keyed on source kind); their values are per-case, asserted on the individual. Descriptive only."@en ;
     sh:property [ sh:path proeth:documentTitle ;  sh:name "document title" ;   sh:description "The title of the specific source document (the separately-citable INDIVIDUAL the scopeNote names)." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:topic ;          sh:name "topic" ;            sh:description "The subject the resource addresses, carried on the first-class proeth:topic datatype property (decision B2), not the otherAttribute overflow; context, not class identity." ; sh:order 2 ] ;
+    sh:property [ sh:path proeth:topic ;          sh:name "topic" ;            sh:description "The subject the resource addresses, carried on the first-class proeth:topic datatype property, not the otherAttribute overflow; context, not class identity." ; sh:order 2 ] ;
     sh:property [ sh:path core:availableTo ;      sh:name "available to" ;     sh:description "The case actor who relied on the resource (the Facts-section signal), via the availableTo edge. Range: Agent." ; sh:order 3 ] ;
-    sh:property [ sh:path core:citedByAgent ;     sh:name "cited by agent" ;   sh:description "The agent who cited the resource as authority (the Discussion-section signal), via the citedByAgent edge, resolved deterministically to the case-scoped NSPE Board of Ethical Review Agent when the text names the Board. Range: Agent." ; sh:order 4 ] .
+    sh:property [ sh:path core:citedByAgent ;     sh:name "cited by agent" ;   sh:description "The agent who cited the resource as authority (the Discussion-section signal), via the citedByAgent edge, resolved deterministically to the case-scoped NSPE Board of Ethical Review Agent when the text names the Board. Range: Agent." ; sh:order 4 ] ;
+    sh:property [ sh:path proeth:provisionCodes ; sh:name "provision codes" ;  sh:description "The provision designations the case cites the resource for (e.g. 'II.3.a'), kept verbatim on the individual; each designation that resolves against the NSPE provision registry is also materialized as a containsProvision edge, and an unresolvable designation (a Canon, an external-standard paragraph) survives only in this literal." ; sh:order 5 ] ;
+    sh:property [ sh:path core:containsProvision ; sh:name "contains provision" ; sh:description "For a code resource, the nspe: CodeProvisions the case cites for it, via the containsProvision edge materialized deterministically from the resolvable provisionCodes designations. Range: CodeProvision." ; pcsh:informationalOnly true ; sh:order 6 ] .
+
+# Cases-layer citing subjects: the analysis records that bear citesProvision (99 committed edges).
+# Declared here so the association renders on the citing-subject pages through the standard shape
+# mechanism, because the citesProvision domain row is suppressed page-side along with the other
+# universal-domain (iao:0000030) fan-out that wrongly implied every ICE component cites provisions.
+# Descriptive only; not read by any {{ <comp>_schema }} prompt block (these are commit-stage classes).
+pcsh:CaseAnalysisCitationShape
+    a sh:NodeShape ;
+    sh:targetClass proeth-cases:EthicalConclusion, proeth-cases:EthicalQuestion, proeth-cases:CausalNormativeLink ;
+    rdfs:label "Case analysis citation schema (citing subjects, descriptive)"@en ;
+    rdfs:comment "The Step-4 analysis records (conclusions, questions, causal-normative links) cite the NSPE provisions they rest on via citesProvision. Declared descriptively so the citing-subject pages document the edge; the extraction LLM never fills it (commit-stage resolution from the analysis text)."@en ;
+    sh:property [ sh:path core:citesProvision ; sh:name "cites provision" ; sh:description "The nspe: CodeProvision(s) this analysis record cites in support. Range: CodeProvision." ; pcsh:informationalOnly true ; sh:order 1 ] .
 
 # CapabilityDefinitionShape: the definitional field contract of any capability TYPE/individual (the Ca
 # component), read by the {{ capability_schema }} prompt block. Descriptive only (no validation result).

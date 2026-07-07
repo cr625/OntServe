@@ -19,7 +19,8 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.10.15"^^xsd:string ;
+    owl:versionInfo "2.10.16"^^xsd:string ;
+    skos:changeNote "v2.10.16: Property-layer pass on the Rs component from the 2026-07-07 Property Structure review. refersToDocument is marked owl:deprecated (zero committed uses, no emitter ever existed; containsProvision is the shipped provision linkage and documentTitle the document-identity carrier). The citedByAgent comment names the Discussion-section authority signal in place of the never-shipped References-section reading, and its dated range-broadening history moves to a change note. The establishes property deliberately keeps its IRI-only McLaren source per the recorded tenth-pass convention for the McLaren backbone (methodological derivation, not per-definition support)."@en ;
     skos:changeNote "v2.10.15: Resource citation layer (the Rs groundwork of the nine-component sweep). The malformed dual definition source on Resource (two works jammed in one string with no venues) is split into the settled per-source records: McLaren completed with the Artificial Intelligence 150 locator and DOI, Davis with the Philosophy & Public Affairs locator (pre-DOI era; JSTOR stable IRI in the machine tier), Frankel with the Journal of Business Ethics locator and DOI, each verified against the PDF. The editor note no longer attributes the conventions-that-coordinate account jointly: convention and coordination are Davis's own words and absent from Frankel, whose verified contribution is the profession as a normative reference group. Machine tier (dcterms:source) added to match."@en ;
     skos:changeNote "v2.10.14: Property-layer pass on the S component from the 2026-07-06 Property Structure review. Axiom additions: activatedByEvent and terminatedByEvent are asserted subproperties of the inverses of initiates and terminates, making the documented generalize relationship reasoner-visible (the two families remain independently populated evidence channels; Pellet-gated corpus-wide), and hasState is marked owl:deprecated (zero uses, no emitter; the v2.4.2 rationale preserved). The fluent family gains its verified literature tier (Kowalski and Sergot with the New Generation Computing locator; Berreby with the AAMAS record) and the fluent block scopes each vocabulary to its owner (fluent is not a Kowalski and Sergot word; happening is this design's umbrella term). activatesConstraint is stated in the full relational form (the activatesObligation pattern). The State editor note and scope note no longer claim an OWL-Time anchor on state individuals (no mechanism anchors states; boundaries are the event edges plus the activePeriod literal). Style: caps emphasis lowercased, possessives moved to the of form."@en ;
     skos:changeNote "v2.10.13: S text pass, style layer. The three-item individuation list in the State definition and scope note is restructured (the O-pass pattern). The editor-note constructs verified dissertation-grounded: the Contextual Framework, the persistence type, and the inertial-fluent vocabulary all occur in the dissertation text. Annotation-only."@en ;
@@ -638,13 +639,15 @@ proeth-core:provisionCategory a owl:DatatypeProperty ;
 # Added: 2025-10-07 - Support for linking Resources to IAO documents
 ###############################################################
 
-# Link Resource to IAO document
+# Link Resource to IAO document (deprecated 2026-07-07; never emitted)
 proeth-core:refersToDocument a owl:ObjectProperty ;
+    owl:deprecated true ;
     rdfs:domain proeth-core:Resource ;
     rdfs:range iao:0000310 ;  # IAO_0000310 = document (was iao:0000300, which is "textual entity")
     rdfs:label "refers to document"@en ;
-    rdfs:comment "Links a resource to the IAO document it represents or references. Used to connect ethical resources (NSPE Code, case precedents) to their document representations."@en ;
-    skos:definition "Relates a Resource to an Information Artifact Ontology document that it represents."@en .
+    rdfs:comment "Links a resource to the IAO document it represents or references. Deprecated: no emitter ever wrote it and no committed case carries it. The shipped provision linkage for code resources is containsProvision (resolved from provisionCodes designations), and the shipped document-identity carrier on resource individuals is the proeth:documentTitle literal."@en ;
+    skos:definition "Relates a Resource to an Information Artifact Ontology document that it represents."@en ;
+    skos:changeNote "2026-07-07 (Rs properties review): marked owl:deprecated. Zero uses across all committed cases and the extended store; no emitter ever existed (the provision resolver deliberately chose containsProvision because this property's range is an IAO document, not a CodeProvision). Retained for identifier stability."@en .
 
 # Indicate which agent uses or has access to a resource (case context).
 # Range broadened Role -> Agent on 2026-05-30: under the Agent model an actor is
@@ -666,8 +669,9 @@ proeth-core:citedByAgent a owl:ObjectProperty ;
     rdfs:domain proeth-core:Resource ;
     rdfs:range proeth-core:Agent ;
     rdfs:label "cited by agent"@en ;
-    rdfs:comment "Indicates which Agent(s) cited this resource as an authoritative source in their ethical analysis. Distinguishes citations (References section) from resources used by case participants (availableTo). Range broadened Role -> Agent on 2026-05-30 for parity with availableTo: citing is an actor-level fact, like resource usage."@en ;
-    skos:definition "Relates a Resource to an Agent indicating who cited it as authority."@en .
+    rdfs:comment "Indicates which Agent(s) cited this resource as an authoritative source in their ethical analysis. Distinguishes citations (the Discussion-section authority signal) from resources used by case participants (availableTo)."@en ;
+    skos:definition "Relates a Resource to an Agent indicating who cited it as authority."@en ;
+    skos:changeNote "2026-05-30: range broadened Role -> Agent for parity with availableTo; citing is an actor-level fact, like resource usage."@en .
 
 # State -> the Agent(s) it affects. Materialized from the state extractor's
 # `affectedParties` field (the actors a state bears on), resolved to the case

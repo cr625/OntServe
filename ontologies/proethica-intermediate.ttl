@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-07 (seventeenth pass, Rs properties review): the Resource carrier block aligned to the shipped contract. provisionCodes and citedBy gain declarations (the one live-emitted kept literal and the one edge-resolved Discussion signal were both undeclared, rendering unlabeled); usedInContext, createdBy, and version state their dropped-from-schema status (never written by the current pipeline); sourceKind records the resource_category schema spelling it bridges to; the dead :hasResource is deleted (zero uses anywhere; proeth-core:usesResource is the surviving process-to-Resource property). Three annotation properties asserted only in engineering-ethics (derivedFromResource, appliesToDomain, hasUrgency) gain declarations as owl:AnnotationProperty, ending their unlabeled rendering. The EthicalCode change note records that the deprecated ProfessionalCode alias has since been deleted."@en ;
     skos:changeNote "2026-07-07 (sixteenth pass, Rs text pass): the Resource subtree brought to the audited component pattern, every claim verified against the PDFs. EthicalCode moves its Frankel and Davis grounding out of the definitional slots into an editor note (the two-register discipline), corrects the convention preposition to Davis's own between, gains the settled 119 citations with the machine tier, and its scope note now states the type-individual-provision boundary in place of the caps-emphasis attribution; CasePrecedent likewise moves the McLaren extensional grounding from the definition into an editor note absorbing the attribution scope note. The three uncited kinds state their standing as extensions native to this ontology in place of the House-extension shorthand; TechnicalStandard records the standards-vetting contract on its individuals and the Section 508 LegalResource boundary. The four kind-retirement comments drop the stale closed-six count (five kinds since the ProfessionalCode merge). The five kinds match the five the dissertation enumerates (codes, precedents, technical standards, regulatory documents, guidance documents)."@en ;
     skos:changeNote "2026-07-06 (fifteenth pass, S properties review): the state carrier declarations aligned to the shipped contract. principleTransformation states its S->P->O content before its mechanics (the two-register pattern); affectedParties is described as a resolved-only carrier (never stored on fresh individuals); triggeringEvent and terminatedBy note their dual status (kept verbatim and resolved to the event-boundary edges); urgencyLevel drops the unpopulated Event arm; persistenceType covers the discovered leaves alongside the archetypes; the stateCategory routing comment names RegulatoryState, the actual archetype, in place of a discovered leaf. The archetype grounding comment carries the corrected Almpani and Stefaneas record."@en ;
     skos:changeNote "2026-07-06 (fourteenth pass, S text pass, style layer): the CompetenceGapState minting mechanics (decision D2\') move out of the definitional slots into the comment, the first enforcement of the two-register rule on a definitional field; the ConflictOfInterestState and DisclosureState exemplar triples are restructured or extended (the competence-gap modes triple stays as the designed closed set); the class comments align to their definitions. The four uncited archetype content-kind classes verified as clean design language with dissertation-grounded constructs."@en ;
@@ -837,7 +838,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
                 "Davis (1991). Thinking like an engineer: the place of a code of ethics in the practice of a profession. Philosophy & Public Affairs 20(2): 150-167." ;
     dcterms:source <https://doi.org/10.1007/BF00382575> , # Frankel 1989
                    <https://www.jstor.org/stable/2265293> ; # Davis 1991 (pre-DOI era)
-    skos:changeNote "v2.4.2: Changed rdfs:subClassOf from proeth-core:Principle to proeth-core:Guideline. An ethical code is a document that contains principles, obligations, and constraints. Classifying it as a Principle conflated the container with its contents. 2026-07-01: absorbed :ProfessionalCode (now owl:equivalentClass, deprecated); the two denoted the same code-of-ethics document; the Frankel/Davis grounding moved here."@en .
+    skos:changeNote "v2.4.2: Changed rdfs:subClassOf from proeth-core:Principle to proeth-core:Guideline. An ethical code is a document that contains principles, obligations, and constraints. Classifying it as a Principle conflated the container with its contents. 2026-07-01: absorbed :ProfessionalCode (then owl:equivalentClass, deprecated; the alias class has since been deleted from this file in the 2026-07-04 slim); the two denoted the same code-of-ethics document; the Frankel/Davis grounding moved here."@en .
 
 # :TechnicalCapability retired 2026-06-28: superseded by the canonical Capability kinds
 # (ratified Ca spec); a technical competence is one of the named competence kinds below.
@@ -858,6 +859,21 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 #    Annotation properties                                        
 #################################################################
 
+# Class-level annotations asserted only in engineering-ethics (on obligation classes).
+# Annotation (not object/datatype) properties because the subjects are owl:Class:
+# an ObjectProperty assertion there would introduce class-individual punning.
+:derivedFromResource a owl:AnnotationProperty ;
+    rdfs:label "derived from resource"@en ;
+    rdfs:comment "Class-level link from a domain obligation class to the external standard resource individual(s) whose scope grounds it (e.g. ComplyWithSafetyStandards -> IEC61508). Asserted only in engineering-ethics; the seven pairings were verified apt in the 2026-07-06 standards vetting."@en .
+
+:appliesToDomain a owl:AnnotationProperty ;
+    rdfs:label "applies to domain"@en ;
+    rdfs:comment "Class-level annotation on engineering-ethics obligation classes: the engineering domain the obligation applies to (e.g. regulated_engineering, all_engineering)."@en .
+
+:hasUrgency a owl:AnnotationProperty ;
+    rdfs:label "has urgency"@en ;
+    rdfs:comment "Class-level annotation on engineering-ethics obligation classes: the phase at which the obligation becomes pressing (e.g. design_phase, before_deployment)."@en .
+
 # 2026-07-06: :hasValueLabel was deleted (zero uses anywhere; the value-oriented
 # reading of a principle is carried by the minted class label and the
 # proeth:principleCategory routing input, so the annotation never gained an emitter).
@@ -866,12 +882,10 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 #    Object Properties                                           
 #################################################################
 
-:hasResource rdf:type owl:ObjectProperty ;
-    rdfs:domain bfo:BFO_0000015 ; # process
-    rdfs:range proeth-core:Resource ;
-    rdfs:label "has resource"@en ;
-    rdfs:comment "Relates a process to a resource it uses"@en ;
-    skos:changeNote "v2.4.2: Fixed range from :Resource (undefined in intermediate namespace) to proeth-core:Resource."@en .
+# 2026-07-07: the intermediate :hasResource (process -> Resource) was deleted. Zero uses
+# in committed cases, the extended store, and all code; proeth-core:usesResource
+# (Action -> Resource) is the surviving process-to-Resource property and the canonical
+# home for the decided Step-4 enrichment.
 
 # v2.8.0: the deprecated intermediate :fulfillsObligation equivalentProperty bridge
 # was deleted. proeth-core:fulfillsObligation is the single canonical property; no
@@ -1856,7 +1870,7 @@ proeth:topic a owl:DatatypeProperty ;
 proeth:usedInContext a owl:DatatypeProperty ;
     rdfs:label "used in context"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Resource: the context the resource is used in."@en .
+    rdfs:comment "Intended on Resource: the context the resource is used in. Dropped from the fresh-architecture ResourceIndividual schema (Rs spec, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
 
 proeth:usedBy a owl:DatatypeProperty ;
     rdfs:label "used by"@en ;
@@ -1866,17 +1880,27 @@ proeth:usedBy a owl:DatatypeProperty ;
 proeth:createdBy a owl:DatatypeProperty ;
     rdfs:label "created by"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Resource: who created it."@en .
+    rdfs:comment "Intended on Resource: who created it. Dropped from the fresh-architecture ResourceIndividual schema (Rs spec, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
 
 proeth:version a owl:DatatypeProperty ;
     rdfs:label "version"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Resource: resource version/edition."@en .
+    rdfs:comment "Intended on Resource: resource version/edition. Dropped from the fresh-architecture ResourceIndividual schema (Rs spec, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
 
 proeth:resourceClass a owl:DatatypeProperty ;
     rdfs:label "resource class"@en ;
     rdfs:range xsd:string ;
     rdfs:comment "Intended on Resource: the LLM-suggested ontology resource class label."@en .
+
+proeth:provisionCodes a owl:DatatypeProperty ;
+    rdfs:label "provision codes"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Resource: the provision designation strings the case cites from a code, standard, or regulation resource (e.g. 'II.3.a'). Kept as a literal; each designation resolvable against the NSPE provision registry is also materialized as a proeth-core:containsProvision edge to the nspe: CodeProvision at commit, and an unresolvable designation (a Canon, an external-standard paragraph) survives only in this literal."@en .
+
+proeth:citedBy a owl:DatatypeProperty ;
+    rdfs:label "cited by"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Resource: who cited it as authority in the ethical analysis (the Discussion-section signal, split from the conflated used_by). Not stored as a literal by the current serializer; resolved to the proeth-core:citedByAgent edge at commit by the participant applier (deterministic Board-pattern fallback for Board literals). Pre-2026-07-05 commits carried the literal; the gold-case recommit sweep removes the stale copies."@en .
 
 
 # --- Capability ---
@@ -2107,7 +2131,7 @@ proeth:stateCategory a owl:DatatypeProperty ;
 proeth:sourceKind a owl:DatatypeProperty ;
     rdfs:label "source kind"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Routing input: the controlled source kind driving the five-kind Resource typing (ethical_code, technical_standard, case_precedent, legal_resource, reference_material). Consumed at commit; not stored as a literal."@en .
+    rdfs:comment "Routing input: the controlled source kind driving the five-kind Resource typing (ethical_code, technical_standard, case_precedent, legal_resource, reference_material). Consumed at commit; not stored as a literal. The extraction schema field is spelled resource_category; the commit routing reads that key, and the class-path literal skip covers both spellings defensively."@en .
 
 proeth:capabilityKind a owl:DatatypeProperty ;
     rdfs:label "capability kind"@en ;

@@ -46,7 +46,7 @@
 
 {# Render one IRI value as a link to the target individual's entity page
    (falls back to a code span when no ontology context is available). #}
-{% macro render_iri_target(iri, ontology_name, code_style=false) %}
+{% macro render_iri_target(iri, ontology_name, code_style=false, label=none) %}
 {%- set frag = iri.split('#')[-1].split('/')[-1] -%}
 {# DISPLAY STANDARD (uniform across the entity pages): the fragment's first letter encodes the kind, per
    the ontology naming convention. PascalCase (uppercase first = a class or individual) is split into Title
@@ -56,6 +56,9 @@
    "(sh:path)" header) while staying a link; an unresolved sh:path already falls back to plain <code>, so
    the whole column reads as one pink family with the declared terms clickable. #}
 {%- set frag_label = (frag.replace('_', ' ') | split_pascal) if (frag and frag[0]|upper == frag[0] and frag[0]|lower != frag[0]) else frag -%}
+{# An OBO-numeric fragment is opaque; when the caller resolved its DB label, render
+   "process (BFO 0000015)" so the technical identifier stays visible but readable. #}
+{%- set frag_label = label ~ ' (' ~ frag_label ~ ')' if label else frag_label -%}
 {%- if ontology_name -%}
 <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=frag) }}" class="rel-target-link{% if code_style %} sh-path-link{% endif %}" title="{{ iri }}">{% if code_style %}<code>{{ frag_label }}</code>{% else %}{{ frag_label }}{% endif %}</a>
 {%- else -%}

@@ -35,7 +35,7 @@
                 <tr>
                     <td><a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=p.name) }}">{{ p.name }}</a>{% if not p.on_self %} <span class="badge bg-light text-muted border" title="rdfs:domain is an ancestor class">inherited</span>{% endif %}{% if p.kind == 'annotation' %} <span class="badge bg-light text-muted border" title="owl:AnnotationProperty">annotation</span>{% endif %}</td>
                     {# Union ranges render EVERY named member, each linked when its home ontology resolves. #}
-                    <td>{% if p.ranges %}{% for m in p.ranges %}<span class="badge bg-success">{% if m.ontology %}<a href="{{ url_for('ontology.entity_detail', ontology_name=m.ontology, fragment=m.name) }}" class="text-white text-decoration-none" title="{{ m.uri }}">{{ m.name }}</a>{% else %}{{ m.name }}{% endif %}</span>{% if not loop.last %} {% endif %}{% endfor %}{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
+                    <td>{% if p.ranges %}{% for m in p.ranges %}<span class="badge bg-success">{% if m.ontology %}<a href="{{ url_for('ontology.entity_detail', ontology_name=m.ontology, fragment=m.name) }}" class="text-white text-decoration-none" title="{{ m.uri }}">{{ m.label or m.name }}</a>{% else %}{{ m.label or m.name }}{% endif %}</span>{% if not loop.last %} {% endif %}{% endfor %}{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
                     <td class="small text-muted">{{ p.comment }}</td>
                 </tr>
                 {% endfor %}
@@ -47,7 +47,7 @@
                 <tbody>
                 {% for p in g.rows %}
                 <tr>
-                    <td>{% if p.from_uri %}{{ render_iri_target(p.from_uri, p.from_ontology) }}{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
+                    <td>{% if p.from_uri %}{{ render_iri_target(p.from_uri, p.from_ontology, label=p.from_label) }}{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
                     <td>{{ render_iri_target(p.uri, p.prop_ontology) }}{% if not p.on_self %} <span class="badge bg-light text-muted border" title="rdfs:range is an ancestor class">inherited</span>{% endif %}</td>
                     <td class="small text-muted">{{ p.comment }}</td>
                 </tr>
@@ -309,16 +309,27 @@
 {# Children: direct subclasses (for a class) or related entities (otherwise). #}
 {% macro children_card(children, entity, ontology) %}
 {% if children %}
+{# A class page splits its children by kind: classes are Subclasses, individuals are
+   Instances (an instance labeled a subclass contradicted the Resource scope notes'
+   own type/individual boundary). Non-class pages keep the single Related list. #}
+{% if entity.entity_type == 'class' %}
+{% set subclass_children = children | selectattr('entity_type', 'equalto', 'class') | list %}
+{% set instance_children = children | rejectattr('entity_type', 'equalto', 'class') | list %}
+{% else %}
+{% set subclass_children = children %}
+{% set instance_children = [] %}
+{% endif %}
+{% if subclass_children %}
 <div class="card mb-3">
     <div class="card-header">
         <h6 class="mb-0">
             {% if entity.entity_type == 'class' %}Subclasses{% else %}Related{% endif %}
-            <span class="badge bg-secondary ms-1">{{ children|length }}</span>
+            <span class="badge bg-secondary ms-1">{{ subclass_children|length }}</span>
         </h6>
     </div>
     <div class="card-body p-0">
         <div class="list-group list-group-flush">
-            {% for child in children %}
+            {% for child in subclass_children %}
             <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=child.uri.split('#')[-1] if '#' in child.uri else child.uri.split('/')[-1]) }}"
                class="list-group-item list-group-item-action">
                 <strong>{{ child.label or child.uri.split('#')[-1] }}</strong>
@@ -331,6 +342,29 @@
     </div>
 </div>
 {% endif %}
+{% if instance_children %}
+<div class="card mb-3">
+    <div class="card-header">
+        <h6 class="mb-0">Instances
+            <span class="badge bg-secondary ms-1">{{ instance_children|length }}</span>
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+            {% for child in instance_children %}
+            <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=child.uri.split('#')[-1] if '#' in child.uri else child.uri.split('/')[-1]) }}"
+               class="list-group-item list-group-item-action">
+                <strong>{{ child.label or child.uri.split('#')[-1] }}</strong>
+                {% if child.comment %}
+                <br><small class="text-muted">{{ child.comment[:120] }}{% if child.comment|length > 120 %}...{% endif %}</small>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
 {% endmacro %}
 
 
@@ -342,7 +376,7 @@
         <h6 class="mb-0">Used in cases <span class="badge bg-secondary ms-1">{{ using_cases|length }}</span></h6>
     </div>
     <div class="card-body">
-        <p class="small text-muted mb-2">Case ontologies that instantiate this class. Computed from each individual's type, so the list stays current as cases are extracted. The originating case is shown under Extraction details.</p>
+        <p class="small text-muted mb-2">Case ontologies that instantiate this class or one of its base-ontology descendants. Computed from each individual's type, so the list stays current as cases are extracted. The originating case is shown under Extraction details.</p>
         {% for c in using_cases %}
         <a href="{{ c.url }}" class="badge bg-light text-dark border text-decoration-none me-1 mb-1" title="{{ c.name }}">
             {% if c.num is not none %}Case {{ c.num }}{% else %}{{ c.name }}{% endif %}

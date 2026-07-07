@@ -94,8 +94,18 @@ def _entity_semantic_links(entity, ontology):
                     'external': False, 'note': ent.ontology.name,
                 })
             elif tgt.startswith('http'):
+                # Label DOIs with the full registrant-prefixed DOI (the bare final path
+                # segment is not a valid DOI string) and other external IRIs host-first.
+                label = None
+                for pref in ('https://doi.org/', 'http://doi.org/',
+                             'https://dx.doi.org/', 'http://dx.doi.org/'):
+                    if tgt.startswith(pref):
+                        label = tgt[len(pref):]
+                        break
+                if label is None:
+                    label = _re.sub(r'^www\.', '', tgt.split('://', 1)[-1])
                 links.append({
-                    'relation': rel_label, 'label': frag or tgt,
+                    'relation': rel_label, 'label': label,
                     'url': tgt, 'external': True, 'note': None,
                 })
     return links
@@ -104,17 +114,51 @@ def _entity_semantic_links(entity, ontology):
 _CASE_ONTOLOGY_RE = _re.compile(r'^proethica-case-(\d+)$')
 
 
+def _base_subclass_closure(uri):
+    """The class URI plus its named descendants across the BASE ontologies (via
+    parent_uri or a secondary rdf_superclasses parent). Lets a mid-chain class
+    (Guideline) count the case individuals typed to its descendants (EthicalCode)."""
+    rows = db.session.execute(
+        select(OntologyEntity.uri, OntologyEntity.parent_uri, OntologyEntity.properties)
+        .join(Ontology, OntologyEntity.ontology_id == Ontology.id)
+        .where(OntologyEntity.entity_type == 'class', Ontology.is_base.is_(True))
+    ).all()
+    children = {}
+    for u, parent, props in rows:
+        parents = set()
+        if parent:
+            parents.add(parent)
+        extra = (props or {}).get('rdf_superclasses') if isinstance(props, dict) else None
+        if isinstance(extra, list):
+            parents.update(str(x) for x in extra)
+        for p in parents:
+            children.setdefault(p, set()).add(u)
+    closure, frontier = {uri}, [uri]
+    while frontier:
+        nxt = []
+        for u in frontier:
+            for c in children.get(u, ()):
+                if c not in closure:
+                    closure.add(c)
+                    nxt.append(c)
+        frontier = nxt
+    return closure
+
+
 def _entity_using_cases(entity):
-    """Case ontologies that instantiate this class. An individual's rdf:type is stored
-    as parent_uri, so this is a single equality scan. Computed live rather than
-    materialized on the class, so the list stays accurate as new cases are extracted;
-    the originating case is recorded separately as firstDiscoveredInCase."""
+    """Case ontologies that instantiate this class or a base-ontology descendant of it.
+    An individual's rdf:type is stored as parent_uri; the base-layer subclass closure
+    makes mid-chain classes (Guideline) report the cases typed to their descendants.
+    Computed live rather than materialized on the class, so the list stays accurate as
+    new cases are extracted; the originating case is recorded separately as
+    firstDiscoveredInCase."""
     if not entity or entity.entity_type != 'class':
         return []
+    closure = _base_subclass_closure(entity.uri)
     names = db.session.execute(
         select(Ontology.name)
         .join(OntologyEntity, OntologyEntity.ontology_id == Ontology.id)
-        .where(OntologyEntity.parent_uri == entity.uri,
+        .where(OntologyEntity.parent_uri.in_(list(closure)),
                Ontology.name.like('proethica-case-%'))
         .distinct()
     ).scalars().all()
@@ -154,7 +198,7 @@ _DESCRIPTION_KEYS = frozenset({'caseinvolvement', 'casecontext'})
 # changeNote is version history: internal change rationale, kept in the TTL and the
 # DB version rows but not rendered on the public pages (2026-07-06 decision; the
 # iao:0000116 editor note, by contrast, is deliberate display and prompt content).
-_SKIP_KEYS = frozenset({'type', 'NamedIndividual', 'rdf_types', 'dtupleComponent', 'changeNote'})
+_SKIP_KEYS = frozenset({'type', 'NamedIndividual', 'rdf_types', 'rdf_superclasses', 'dtupleComponent', 'changeNote'})
 
 # Definition-layer keys -> the Definition card (kept out of the raw "core" property list).
 _DEFINITION_LAYER_GROUP = {
@@ -395,6 +439,11 @@ _UNIVERSAL_TOP_URIS = {
     "http://purl.obolibrary.org/obo/BFO_0000001",  # entity
     "http://purl.obolibrary.org/obo/BFO_0000002",  # continuant
     "http://purl.obolibrary.org/obo/BFO_0000003",  # occurrent
+    # information content entity: citesProvision is domained here, and rendering it on
+    # every ICE-descended component page wrongly implied resources/principles cite
+    # provisions; the actual citing subjects (the cases-layer analysis records) carry
+    # the association through the descriptive CaseAnalysisCitationShape instead.
+    "http://purl.obolibrary.org/obo/IAO_0000030",
 }
 
 
@@ -1070,17 +1119,40 @@ def class_property_schema(entity):
     link_uris = {r["uri"] for r in referenced_by} | {r["from_uri"] for r in referenced_by if r["from_uri"]}
     link_uris |= {m["uri"] for r in domain_props for m in r["ranges"]}
     if link_uris:
-        uri_to_ont = dict(db.session.execute(
-            select(OntologyEntity.uri, Ontology.name)
+        rows = db.session.execute(
+            select(OntologyEntity.uri, Ontology.name, OntologyEntity.label, Ontology.is_base)
             .join(Ontology, OntologyEntity.ontology_id == Ontology.id)
             .where(OntologyEntity.uri.in_(list(link_uris)))
-        ).all())
+        ).all()
+
+        # The same upper-level IRI is copied into several stores; resolve to the home
+        # ontology with the _hierarchy_node preference (canonical bfo/iao first, then
+        # any base ontology) so links and labels are consistent across pages.
+        def _canon_rank(u, ont_name, is_base):
+            frag = u.rsplit('#', 1)[-1].rsplit('/', 1)[-1]
+            canon = 'bfo' if frag.startswith('BFO_') else ('iao' if frag.startswith('IAO_') else None)
+            return (0 if (canon and ont_name == canon) else 1, 0 if is_base else 1, ont_name)
+
+        uri_to_ont, uri_to_label = {}, {}
+        for u, ont_name, label, is_base in sorted(rows, key=lambda r: _canon_rank(r[0], r[1], r[3])):
+            uri_to_ont.setdefault(u, ont_name)
+            if label:
+                uri_to_label.setdefault(u, label)
+
+        # OBO-numeric fragments (BFO_0000015, IAO_0000310) are opaque; attach the DB
+        # label so the templates can render "process (BFO 0000015)". PascalCase
+        # proethica fragments keep the fragment-derived display standard.
+        _obo_num = _re.compile(r'^(BFO|IAO)_\d+$')
         for r in referenced_by:
             r["prop_ontology"] = uri_to_ont.get(r["uri"])
             r["from_ontology"] = uri_to_ont.get(r["from_uri"])
+            if r["from_uri"] and _obo_num.match(_local(r["from_uri"]) or ''):
+                r["from_label"] = uri_to_label.get(r["from_uri"])
         for r in domain_props:
             for m in r["ranges"]:
                 m["ontology"] = uri_to_ont.get(m["uri"])
+                if _obo_num.match(m["name"] or ''):
+                    m["label"] = uri_to_label.get(m["uri"])
 
     # SHACL definitional/bearer schemas for ANY class a shape targets along its chain. Currently only
     # roles have such shapes, so non-role classes get empty lists; written generically so a future
