@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-07 (twenty-first pass, Ca/Cs properties review): three dead declarations deleted (constrainsAction and enablesAction, zero-use inverse twins of the reserved core Action-side directions; hasCapabilityLevel, a dropped-field carrier with no domain). capabilityKind states the shipped mechanism (the kind rides the class label through the match decision; no schema field or commit reader exists); boundaryType records its constraint_type spelling; source records its dual kept-and-resolved contract; requiredForObligations gains its declaration (the live inverted-resolution carrier whose legacy literals ride the sweep); the three dropped Ca carriers state their status; temporalScope and applicabilityCondition are disambiguated as window versus trigger, closing the recorded overlap question (both kept); the CompetenceGapState comments state the two routes (S-pass matching live, the D2' commit-stage minter pending); the Dennis verification record names the claim the paper supports."@en ;
     skos:changeNote "2026-07-07 (twentieth pass, Cs citation layer): content-level verify-or-drop over the ten boundary-type classes, whose per-kind references were one-off attributions of component-level literature. Surviving: Arkin on SafetyConstraint (safety precepts as constraints, verified) and Stenseke on LegalConstraint (re-grounded on his verbatim legal-versus-moral enforcement point; Kroll dropped). Dropped as decorative, with per-class change notes recording each check: Taddeo (Regulatory), Ganascia (Resource), Hallamaa and Kalliokoski (Competence), Dennis twice (Jurisdictional, Confidentiality), Furbach (Procedural), Govindarajulu and Bringsjord (Temporal); Benzmüller moved to core:Constraint, whose verification clause is what the dissertation cites him for. All definitional slots are now citation-free (two-register rule); every dropped kind keeps its text as design language."@en ;
     skos:changeNote "2026-07-07 (nineteenth pass, A/E properties review): the temporal machinery aligned to the shipped contract. The duplicate eventType declaration is deleted (the routing-input block is the single source); causesStateChange deleted (zero uses; the E spec folded it into description); hasTemporalRelation deprecated (never emitted; fromEntity/toEntity carry the linkage). causedByAction gains its two-register definition, the Wright reference beside Sarmiento, the ExogenousEvent guard note, and a placement changeNote (stays intermediate with its causal family). analyzesAction is re-domained to proeth-cases:CausalNormativeLink, the class its sole emitter asserts (the CausalChain domain wrongly inferred every reasoning node into the NESS chain population). Thirteen emitted-but-undeclared carriers gain declarations: the three TemporalRelation fields (fromEntityText, toEntityText, evidence), the nine CausalChain analysis fields (withinAgentControl with range xsd:boolean, matching the typed committed literals), and the agents decomposition. severity drops its retired Event half; hasAgent states its dual kept-and-resolved status; the TemporalRelation definition states the shipped carrier contract in place of the stored-URI claim."@en ;
     skos:changeNote "2026-07-07 (eighteenth pass, A/E citation layer): every Sarmiento record corrected to 2022 with the settled PRIMA locator (CausalChain family, responsibleAgent, EpistemicState; the DOI was already right, the year read the arXiv extended version's date onto the conference paper). The CausalChain NESS attribution stands verified: Sarmiento's causal definition is a formalisation of Wright's NESS test, in his own words."@en ;
@@ -1146,15 +1147,17 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     rdfs:comment "Condition of information disclosed, withheld, concealed, or selectively presented among parties."@en ;
     proeth:persistenceType "inertial" .
 
-# Action-scoped competence-gap leaf. Minted only at the commit edge-materialization
-# stage (decision D2'), not by a pipeline pass. Chained through CompetenceState so it
-# reaches proeth-core:State through its archetype.
+# Action-scoped competence-gap leaf. Reached today via the S-pass matched-class route
+# (states matching this class are honored at commit); the ratified commit-stage
+# deterministic minter (decision D2') is pending for the 119 rebuild with dedupe
+# against the S-pass route. Chained through CompetenceState so it reaches
+# proeth-core:State through its archetype.
 :CompetenceGapState a owl:Class ;
     rdfs:subClassOf :CompetenceState ;
     rdfs:label "Competence Gap State"@en ;
     iao:0000115 "A condition in which an agent lacks, has insufficient, or has not exercised the competence required for the work at hand, undercutting the obligations that attach to it."@en ;
     skos:definition "A condition in which an agent lacks, has insufficient, or has not exercised the competence required for the work at hand, undercutting the obligations that attach to it."@en ;
-    rdfs:comment "Condition of a lacking, insufficient, or unexercised competence undercutting attached obligations. Agent-level and action-scoped gap individuals are minted at the commit edge-materialization stage (decision D2'); an action-scoped gap links to the specific Action and licenses defeasibleUnder on the undercut obligation."@en ;
+    rdfs:comment "Condition of a lacking, insufficient, or unexercised competence undercutting attached obligations. Gap individuals reach the case today via the S-pass matched-class route; the ratified commit-stage deterministic minter (decision D2', fed by the withinCompetence signal) is pending for the 119 rebuild. An action-scoped gap links to the specific Action and licenses defeasibleUnder on the undercut obligation."@en ;
     proeth:persistenceType "inertial" .
 
 #################################################################
@@ -1275,7 +1278,7 @@ proeth:JurisdictionalConstraint a owl:Class ;
     rdfs:label "Jurisdictional Constraint"@en ;
     iao:0000115 "Boundaries of authority and geographical or organizational scope."@en ;
     rdfs:comment "Boundaries of authority and geographical or organizational scope."@en ;
-    skos:changeNote "2026-07-07 (Cs citation layer, content-level verify-or-drop): the Dennis et al. 2016 reference was dropped as decorative -- authority in the paper names certification bodies (the Civil Aviation Authority, the Vehicle Certification Authority) as rule sources, not boundaries of authority or scope; their verified complete-specification claim is cited on core:Constraint. The definition stays as design language within the component-level boundary literature recorded on core:Constraint."@en .
+    skos:changeNote "2026-07-07 (Cs citation layer, content-level verify-or-drop): the Dennis et al. 2016 reference was dropped as decorative -- authority in the paper names certification bodies (the Civil Aviation Authority, the Vehicle Certification Authority) as rule sources, not boundaries of authority or scope; their verified specification-into-context-dependent-constraints claim is cited on core:Constraint. The definition stays as design language within the component-level boundary literature recorded on core:Constraint."@en .
 
 proeth:ProceduralConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
@@ -1324,11 +1327,9 @@ proeth:TemporalConstraint a owl:Class ;
     rdfs:comment "Time-based limitations and deadlines."@en ;
     skos:changeNote "2026-07-07 (Cs citation layer, content-level verify-or-drop): the Govindarajulu and Bringsjord 2017 reference was dropped as decorative -- the paper automates the doctrine of double effect and carries no deadline or time-limit content; its verified intention formalization is cited on core:Action. The definition stays as design language within the component-level boundary literature recorded on core:Constraint."@en .
 
-proeth:constrainsAction a owl:ObjectProperty ;
-    rdfs:domain proeth-core:Constraint ;
-    rdfs:range proeth-core:Action ;
-    rdfs:label "constrains action"@en ;
-    rdfs:comment "Links constraint to actions it limits or prohibits"@en .
+# 2026-07-07: proeth:constrainsAction was deleted (Ca/Cs properties review). Zero uses in
+# committed cases (119/119 prod verified for the Cs pair), the extended store, and all
+# code; the Cs linkage is carried by constrainedEntity and the incoming activatesConstraint edges; proeth-core:constrainedBy is the reserved Action-side direction.
 
 # 2026-07-06 (O properties review): proeth:conflictsWithObligation was deleted (zero
 # uses anywhere; no emitter or reader). Obligation tension is carried by the
@@ -1515,17 +1516,13 @@ proeth:ThresholdDistinctionCapability a owl:Class ;
 
 
 # Capability properties for relationships
-proeth:hasCapabilityLevel a owl:DatatypeProperty ;  # was owl:ObjectProperty, corrected: range is xsd:string
-    rdfs:range xsd:string ;
-    rdfs:label "has capability level"@en ;
-    rdfs:comment "Indicates the level or degree of a capability"@en ;
-    skos:changeNote "v2.x: Changed from owl:ObjectProperty to owl:DatatypeProperty. A property relating to a string literal must be a DatatypeProperty."@en .
+# 2026-07-07: proeth:hasCapabilityLevel was deleted (Ca/Cs properties review). Zero uses in
+# committed cases (119/119 prod verified for the Cs pair), the extended store, and all
+# code; proficiency was dropped from the Ca field set (no successor; the kind classes carry no level dimension).
 
-proeth:enablesAction a owl:ObjectProperty ;
-    rdfs:domain proeth-core:Capability ;
-    rdfs:range proeth-core:Action ;
-    rdfs:label "enables action"@en ;
-    rdfs:comment "Relates a capability to the actions it enables"@en .
+# 2026-07-07: proeth:enablesAction was deleted (Ca/Cs properties review). Zero uses in
+# committed cases (119/119 prod verified for the Cs pair), the extended store, and all
+# code; the Ca linkage is carried by possessedBy and the incoming requiresCapability edges; proeth-core:realizesCapability is the reserved Action-side direction.
 
 #################################################################
 #    SPARQL Query Support
@@ -1888,7 +1885,7 @@ proeth:complianceStatus a owl:DatatypeProperty ;
 proeth:temporalScope a owl:DatatypeProperty ;
     rdfs:label "temporal scope"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Obligation/Constraint: when the duty/limit applies."@en .
+    rdfs:comment "Intended on Obligation/Constraint: the durational WINDOW during which the duty or boundary is in force in the case (e.g. for the duration of the engagement). Distinct from applicabilityCondition, the situational TRIGGER under which it applies; the 2026-07-07 census closed the recorded overlap question (48/48 co-occurring constraint pairs systematically distinct; both kept)."@en .
 
 proeth:caseContext a owl:DatatypeProperty ;
     rdfs:label "case context"@en ;
@@ -1996,20 +1993,25 @@ proeth:citedBy a owl:DatatypeProperty ;
 
 
 # --- Capability ---
+proeth:requiredForObligations a owl:DatatypeProperty ;
+    rdfs:label "required for obligations"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Intended on Capability: the extracted obligations of the case that presuppose the competence. Not stored by the fresh serializer; resolved (inverted) at commit to the core Obligation-to-Capability requiresCapability edge by the requires_capability_edges family. Pre-2026-07-06 commits carried the literal; the gold-case recommit sweep removes the stale copies."@en .
+
 proeth:capabilityStatement a owl:DatatypeProperty ;
     rdfs:label "capability statement"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Capability: the statement of the competence."@en .
+    rdfs:comment "Intended on Capability: the statement of the competence. Dropped from the fresh-architecture CapabilityIndividual schema (Ca section, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
 
 proeth:demonstratedThrough a owl:DatatypeProperty ;
     rdfs:label "demonstrated through"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Capability: textual evidence the capability was exercised."@en .
+    rdfs:comment "Intended on Capability: textual evidence the capability was exercised. Dropped from the fresh-architecture CapabilityIndividual schema (Ca section, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
 
 proeth:proficiencyLevel a owl:DatatypeProperty ;
     rdfs:label "proficiency level"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Capability: proficiency rating (e.g. expert)."@en .
+    rdfs:comment "Intended on Capability: proficiency rating (e.g. expert). Dropped from the fresh-architecture CapabilityIndividual schema (Ca section, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
 
 proeth:capabilityClass a owl:DatatypeProperty ;
     rdfs:label "capability class"@en ;
@@ -2031,7 +2033,7 @@ proeth:severity a owl:DatatypeProperty ;
 proeth:source a owl:DatatypeProperty ;
     rdfs:label "source"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Constraint: the source of the constraint."@en .
+    rdfs:comment "Intended on Constraint: the source of the constraint (the provision or authority string as extracted). Kept as a literal; each dotted NSPE designation resolvable against the provision registry is also materialized as a proeth-core:establishedBy edge at commit, and a non-code source survives only in this literal."@en .
 
 proeth:constraintClass a owl:DatatypeProperty ;
     rdfs:label "constraint class"@en ;
@@ -2227,12 +2229,12 @@ proeth:sourceKind a owl:DatatypeProperty ;
 proeth:capabilityKind a owl:DatatypeProperty ;
     rdfs:label "capability kind"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Routing input: the canonical, tool/actor-neutral competence kind driving the subClassOf typing to a named capability class. Consumed at commit; not stored as a literal."@en .
+    rdfs:comment "SHACL path anchor for the capability-kind row of the definition shape. No capability_kind schema field exists: the canonical, tool/actor-neutral competence kind is carried as the capability class label and resolved by the match decision to a named kind class (minted novel kinds anchor at bare core:Capability); no commit reader consumes this property, which appears in the pipeline only as a defensive literal-skip entry."@en .
 
 proeth:boundaryType a owl:DatatypeProperty ;
     rdfs:label "boundary type"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Routing input: the controlled constraint boundary type driving the subClassOf typing into the ten closed boundary-type classes (LegalConstraint, RegulatoryConstraint, ...). Consumed at commit; not stored as a literal."@en .
+    rdfs:comment "Routing input: the controlled constraint boundary type driving the subClassOf typing into the ten closed boundary-type classes (LegalConstraint, RegulatoryConstraint, ...). Consumed at commit; not stored as a literal. The extraction schema field and commit routing key are spelled constraint_type; the class-path literal skip covers both spellings defensively."@en .
 
 proeth:eventType a owl:DatatypeProperty ;
     rdfs:label "event type"@en ;
@@ -2249,7 +2251,7 @@ proeth:extensionalCases a owl:DatatypeProperty ;
 proeth:applicabilityCondition a owl:DatatypeProperty ;
     rdfs:label "applicability condition"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "The temporal and contextual circumstances under which a constraint or prohibition applies in a case (the Dennis complete-specification condition). Borne by constraint individuals."@en .
+    rdfs:comment "The situational TRIGGER: the circumstances under which a constraint or prohibition applies in a case (the Dennis specification-by-context condition). Borne by constraint individuals."@en .
 
 ###############################################################
 # Analysis-layer datatype properties (declared 2026-07-04)

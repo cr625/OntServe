@@ -41,7 +41,7 @@ pcsh:informationalOnly a owl:AnnotationProperty ;
 # per component: extraction confidence (all components except Action, whose Step-3 contract
 # carries no confidence field), the verbatim supporting quotes, the source snippet (the
 # Step-1/2 provenance layers; Step-3 A/E individuals ground via textReferences only), and the
-# involvement/context gloss. Declared once here (rather than nine times) so the
+# involvement/context gloss (caseInvolvement on roles; caseContext on obligation, capability, and constraint individuals). Declared once here (rather than nine times) so the
 # fields are schema-advertised instead of displayed-but-undeclared (correspondence audit T7).
 # Descriptive only; no validation effect.
 # Rendering intent (decided 2026-07-06): the shape is advertised in the entity-page TTL block
@@ -53,11 +53,11 @@ pcsh:CaseAnnotationShape
     sh:targetClass core:Role, core:Principle, core:Obligation, core:State, core:Resource,
         core:Action, core:Event, core:Capability, core:Constraint ;
     rdfs:label "Shared per-case annotation schema (all nine components)"@en ;
-    rdfs:comment "The cross-component annotation fields on committed case individuals: proeth:confidence (extraction confidence, decimal; all components except Action, whose Step-3 contract carries no confidence field), proeth:textReferences (verbatim supporting quotes, universal), proeth-prov sourceText (the source snippet, on the Step-1/2 provenance layers; Step-3 A/E individuals ground via textReferences only), and the involvement gloss (proeth:caseInvolvement on role individuals, proeth:caseContext on capability and constraint individuals). Values are per-individual; the fields do not individuate any type."@en ;
+    rdfs:comment "The cross-component annotation fields on committed case individuals: proeth:confidence (extraction confidence, decimal; all components except Action, whose Step-3 contract carries no confidence field), proeth:textReferences (verbatim supporting quotes, universal), proeth-prov sourceText (the source snippet, on the Step-1/2 provenance layers; Step-3 A/E individuals ground via textReferences only), and the involvement gloss (proeth:caseInvolvement on role individuals, proeth:caseContext on obligation, capability, and constraint individuals). Values are per-individual; the fields do not individuate any type."@en ;
     sh:property [ sh:path proeth:confidence ; sh:name "confidence" ; sh:description "Extraction confidence for this individual (0 to 1)." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:textReferences ; sh:name "text references" ; sh:description "Verbatim case quotes supporting this individual." ; sh:order 2 ] ;
     sh:property [ sh:path proeth:caseInvolvement ; sh:name "case involvement" ; sh:description "How this individual figures in the case narrative (role individuals; the same text is routed into rdfs:comment)." ; sh:order 3 ] ;
-    sh:property [ sh:path proeth:caseContext ; sh:name "case context" ; sh:description "Grounding context in this case (capability and constraint individuals)." ; sh:order 4 ] .
+    sh:property [ sh:path proeth:caseContext ; sh:name "case context" ; sh:description "Grounding context in this case (obligation, capability, and constraint individuals)." ; sh:order 4 ] .
 
 # RULE 1: no individual may resolve to two distinct disjoint core categories.
 # This is the structural projection of the nine-way owl:AllDisjointClasses. After the
@@ -319,7 +319,8 @@ pcsh:CaseAnalysisCitationShape
     sh:targetClass proeth-cases:EthicalConclusion, proeth-cases:EthicalQuestion, proeth-cases:CausalNormativeLink ;
     rdfs:label "Case analysis citation schema (citing subjects, descriptive)"@en ;
     rdfs:comment "The Step-4 analysis records (conclusions, questions, causal-normative links) cite the NSPE provisions they rest on via citesProvision. Declared descriptively so the citing-subject pages document the edge; the extraction LLM never fills it (commit-stage resolution from the analysis text)."@en ;
-    sh:property [ sh:path core:citesProvision ; sh:name "cites provision" ; sh:description "The nspe: CodeProvision(s) this analysis record cites in support. Range: CodeProvision." ; pcsh:informationalOnly true ; sh:order 1 ] .
+    sh:property [ sh:path core:citesProvision ; sh:name "cites provision" ; sh:description "The nspe: CodeProvision(s) this analysis record cites in support. Range: CodeProvision." ; pcsh:informationalOnly true ; sh:order 1 ] ;
+    sh:property [ sh:path proeth:citedProvision ; sh:name "cited provision" ; sh:description "The provision designation as cited (e.g. 'I.4.'), kept verbatim on the analysis record; each designation that resolves against the NSPE provision registry is also materialized as a citesProvision edge. Borne by EthicalConclusion records in the current corpus." ; pcsh:informationalOnly true ; sh:order 2 ] .
 
 # CapabilityDefinitionShape: the definitional field contract of any capability TYPE/individual (the Ca
 # component), read by the {{ capability_schema }} prompt block. Descriptive only (no validation result).
@@ -329,15 +330,15 @@ pcsh:CapabilityDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Capability ;
     rdfs:label "Capability definition schema (type-level, descriptive, field contract)"@en ;
-    rdfs:comment "What individuates a capability TYPE: its canonical competence kind (drives the subClassOf typing) and the Tolmeijer requirement the kind realizes (a class-level annotation). The possessor and the incoming requiresCapability edge are per-case and declared on CapabilityPropertyShape, mirroring the R/P/O/S/Rs Definition/Property split and the capability scopeNote (the type is 'the competence it is'; the bearer and the requiredForObligation edges attach to the case individual). Descriptive only (no validation result); capability_kind is a routing input, not stored as a literal."@en ;
-    sh:property [ sh:path proeth:capabilityKind ;       sh:name "capability kind" ;        sh:description "The canonical, tool/actor-neutral competence kind, which drives the subClassOf typing to one of the named capability classes (each subClassOf core:Capability with skos:altLabel synonyms). A routing input, not stored as a literal." ; sh:order 1 ] ;
+    rdfs:comment "What individuates a capability TYPE: its canonical competence kind (drives the subClassOf typing) and the Tolmeijer requirement the kind realizes (a class-level annotation). The possessor and the incoming requiresCapability edge are per-case and declared on CapabilityPropertyShape, mirroring the R/P/O/S/Rs Definition/Property split and the capability scopeNote (the type is 'the competence it is'; the bearer and the incoming requiresCapability edges attach to the case individual). Descriptive only (no validation result); the competence kind is carried as the capability class label and resolved by the match decision (no separate capability_kind field is filled)."@en ;
+    sh:property [ sh:path proeth:capabilityKind ;       sh:name "capability kind" ;        sh:description "The canonical, tool/actor-neutral competence kind, carried as the capability class label and resolved by the match decision to one of the named capability classes (each subClassOf core:Capability with skos:altLabel synonyms); minted novel kinds anchor at bare core:Capability. Not a separately filled field and not stored as a literal." ; sh:order 1 ] ;
     sh:property [ sh:path proeth:tolmeijerRequirement ; sh:name "Tolmeijer requirement" ;  sh:description "Class-level descriptive annotation naming which of the four Tolmeijer (2021) ethical-competence requirements the kind primarily realizes; descriptive only, with no per-individual field and no second typing axiom." ; sh:order 2 ] .
 
 # CapabilityPropertyShape: the per-case fields a given capability INDIVIDUAL carries (the Ca-side analogue of
 # the other components' PropertyShapes). possessedBy resolves to the bearer edge (the agent who possesses or
 # exercises the competence in this case); requiresCapability is the incoming Obligation->Capability edge (each
 # obligation that presupposes this capacity, per obligation-presupposes-capacity). The scopeNote assigns both
-# the bearer and the requiredForObligation edges to the case individual, not the class. Targets core:Capability.
+# the bearer and the incoming requiresCapability edges to the case individual, not the class. Targets core:Capability.
 # Read by {{ capability_schema }} as the per-case section and rendered as the entity page's Bearer Attributes.
 pcsh:CapabilityPropertyShape
     a sh:NodeShape ;
@@ -345,7 +346,7 @@ pcsh:CapabilityPropertyShape
     rdfs:label "Capability per-case schema (individual data, non-definitional)"@en ;
     rdfs:comment "What a given capability INDIVIDUAL is described by in a specific case: the agent who possesses or exercises it, and the obligations that presuppose it. These do NOT individuate the capability TYPE (that is CapabilityDefinitionShape, keyed on capability kind); their values are per-case, asserted on the individual. Descriptive only."@en ;
     sh:property [ sh:path core:possessedBy ;            sh:name "possessed by" ;           sh:description "The agent who possesses or exercises the capability, via the possessedBy edge. Range: Agent." ; sh:order 1 ] ;
-    sh:property [ sh:path core:requiresCapability ;     sh:name "required by obligation" ; sh:description "The incoming Obligation->Capability requiresCapability edge: each obligation that presupposes this capacity (re-domained to Obligation->Capability and promoted to core). Domain: Obligation." ; sh:order 2 ] .
+    sh:property [ sh:path core:requiresCapability ;     sh:name "required by obligation" ; sh:description "The incoming Obligation->Capability requiresCapability edge: each obligation that presupposes this capacity. Domain: Obligation." ; sh:order 2 ] .
 
 # ConstraintDefinitionShape / ConstraintPropertyShape: the Cs-component field contract, read by the
 # {{ constraint_schema }} prompt block and mirroring the R/P/O/S/Rs/Ca Definition/Property split. A
@@ -357,7 +358,7 @@ pcsh:ConstraintDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Constraint ;
     rdfs:label "Constraint definition schema (type-level, descriptive, field contract)"@en ;
-    rdfs:comment "What individuates a constraint TYPE: the boundary it states (boundary_type, which drives the subClassOf typing into one of the ten closed boundary-type classes) and the source provision that establishes it. The per-case severity and applicability, the agent it limits, and the action it bounds are per-individual and declared on ConstraintPropertyShape, mirroring the R/P/O/S/Rs/Ca Definition/Property split and the constraint scopeNote (the TYPE is the prohibition plus its source provision; the constrained party, per-occasion applicability, and any exception attach to the case individual). Descriptive only (no validation result); boundary_type is a routing input, not stored as a literal."@en ;
+    rdfs:comment "What individuates a constraint TYPE: the boundary it states (boundary_type, which drives the subClassOf typing into one of the ten closed boundary-type classes) and the source provision that establishes it. The per-case severity and applicability, the agent it limits, and the action it bounds are per-individual and declared on ConstraintPropertyShape, mirroring the R/P/O/S/Rs/Ca Definition/Property split and the constraint scopeNote (the TYPE is the prohibition plus its source provision; the constrained party, per-occasion applicability, and any exception attach to the case individual). Descriptive only (no validation result); the routing input is the constraint_type schema field (the boundaryType property is its shape-path anchor), not stored as a literal."@en ;
     sh:property [ sh:path proeth:boundaryType ; sh:name "boundary type" ; sh:description "The controlled boundary type, which drives the subClassOf typing into one of the ten closed boundary-type classes: LegalConstraint, RegulatoryConstraint, ResourceConstraint, CompetenceConstraint, JurisdictionalConstraint, ProceduralConstraint, EthicalConstraint, SafetyConstraint, ConfidentialityConstraint, TemporalConstraint. The prohibition/boundary content that individuates the type. A routing input, not stored as a literal." ; sh:order 1 ] ;
     sh:property [ sh:path core:establishedBy ; sh:name "established by" ; sh:description "The source CodeProvision that establishes the constraint, via the establishedBy edge. The second type-individuating coordinate: per the scopeNote a constraint type is the boundary it states plus its source provision. Range: CodeProvision." ; pcsh:informationalOnly true ; sh:order 2 ] .
 
@@ -374,9 +375,11 @@ pcsh:ConstraintPropertyShape
     rdfs:label "Constraint per-case schema (individual data, non-definitional)"@en ;
     rdfs:comment "What a given constraint INDIVIDUAL is described by in a specific case: its per-occasion severity and applicability window, the agent whose conduct it limits, and the action it bounds. These do NOT individuate the constraint TYPE (that is ConstraintDefinitionShape, keyed on the boundary it states and its source provision); their values are per-case, asserted on the individual. Descriptive only."@en ;
     sh:property [ sh:path proeth:severity ; sh:name "severity" ; sh:description "The severity of the constraint in this case (critical, high, medium, low); a per-occasion assessment (Dennis severity ordering) that can differ across cases sharing the same boundary." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:applicabilityCondition ; sh:name "applicability condition" ; sh:description "The temporal and contextual circumstances under which the prohibition applies in this case (the Dennis complete-specification condition)." ; sh:order 2 ] ;
+    sh:property [ sh:path proeth:applicabilityCondition ; sh:name "applicability condition" ; sh:description "The situational TRIGGER: the circumstances under which the prohibition applies in this case (the Dennis specification-by-context condition); temporalScope carries the durational window." ; sh:order 2 ] ;
     sh:property [ sh:path core:constrainedEntity ; sh:name "constrained entity" ; sh:description "The agent whose conduct the constraint limits, via the outgoing constrainedEntity edge. Range: Agent." ; sh:order 3 ] ;
-    sh:property [ sh:path proeth:temporalScope ; sh:name "temporal scope" ; sh:description "When the constraint applies in this case; carried on every committed constraint individual alongside applicabilityCondition (declared 2026-07-06 so the field contract matches the shipped data; the overlap with applicabilityCondition is a recorded Cs-sweep question)." ; sh:order 4 ] .
+    sh:property [ sh:path proeth:temporalScope ; sh:name "temporal scope" ; sh:description "The durational WINDOW during which the boundary is in force in this case (e.g. for the duration of the engagement); applicabilityCondition carries the situational trigger under which it applies." ; sh:order 4 ] ;
+    sh:property [ sh:path proeth:source ; sh:name "source" ; sh:description "The provision or authority string as extracted, kept verbatim on the individual; each dotted NSPE designation that resolves against the provision registry is also materialized as the establishedBy edge (a non-code source survives only in this literal)." ; sh:order 5 ] ;
+    sh:property [ sh:path proeth:constraintStatement ; sh:name "constraint statement" ; sh:description "The operative must-not clause, kept verbatim; mirrors skos:definition and is one of the narrative source fields the defeasibility harvest reads from committed TTLs." ; sh:order 6 ] .
 
 # EventDefinitionShape: the LIGHT field contract of any event TYPE/individual (the E component). Descriptive
 # only (no validation result). event_type drives the three-way origin subClassOf typing into the mutually
