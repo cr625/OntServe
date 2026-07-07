@@ -39,6 +39,7 @@ ONTSERVE_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_FILES = [
     ONTSERVE_ROOT / "ontologies" / "proethica-core.ttl",
     ONTSERVE_ROOT / "ontologies" / "proethica-intermediate.ttl",
+    ONTSERVE_ROOT / "ontologies" / "engineering-ethics.ttl",
 ]
 
 IAO119 = rdflib.URIRef("http://purl.obolibrary.org/obo/IAO_0000119")

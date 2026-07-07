@@ -13,7 +13,8 @@ proethica:engineering-ethics a owl:Ontology ;
     rdfs:comment "NSPE engineering ethics ontology with proper OWL class structure and case structure extensions" ;
     owl:imports proethica:proeth-core ;
     owl:imports <http://proethica.org/ontology/cases> ;
-    owl:versionInfo "3.0-owl-classes" .
+    skos:changeNote "2026-07-06 (standards vetting): all 14 external-standard individuals were resolved against their official catalogs. Every individual gains dcterms:publisher and a dcterms:source catalog IRI; stale designations updated (ANSI/ASSP Z359.1-2024 for the 2007 ASSE form, ANSI B11.0-2023 base, ISO/IEC 27001:2022 for 2013, ISO 14001:2026 for the April-2026-withdrawn 2015 edition); the withdrawn IEC 60950-1 individual was replaced by IEC 62368-1:2023 with a succession tombstone; the IEC 62304 gloss names life cycle processes per the official title; the B11 and Z359 entries are described as the series they are; the WCAG entry records the 2.2 Recommendation and the Section 508 rule's WCAG 2.0 AA incorporation. The seven derivedFromResource pairings on the four obligation classes were scope-checked against the official scope statements and verified apt."@en ;
+    owl:versionInfo "3.1-standards-vetted" .
 
 proethica:engineering_standards a owl:Ontology ;
     rdfs:label "Engineering Technical Standards Ontology" ;
@@ -32,10 +33,12 @@ proethica:engineering_standards a owl:Ontology ;
         "manufacturing_engineering",
         "mechanical_engineering" ;
     ns1:standardType "machine_safety" ;
-    dcterms:identifier "ANSI B11.0-2020" ;
-    rdfs:comment "Fundamental machinery safety standard for manufacturing and industrial applications" ;
+    dcterms:identifier "ANSI B11 series (base standard ANSI B11.0-2023)" ;
+    dcterms:publisher "B11 Standards, Inc. (ANSI accredited)" ;
+    dcterms:source <https://www.b11standards.org/> ;
+    rdfs:comment "Machinery safety standards series (nearly three dozen documents) for manufacturing and industrial applications" ;
     skos:definition "American national standard providing safety requirements for machine tools and related machinery",
-        "Fundamental machinery safety standard for manufacturing and industrial applications" .
+        "Machinery safety standards series (nearly three dozen documents) for manufacturing and industrial applications" .
 
 <http://proethica.org/ontology/engineering_standards#ANSIZ359> a owl:NamedIndividual, ns1:TechnicalStandard ;
     rdfs:label "ANSI Z359 Fall Protection" ;
@@ -43,10 +46,12 @@ proethica:engineering_standards a owl:Ontology ;
         "construction_engineering",
         "industrial_engineering" ;
     ns1:standardType "fall_protection" ;
-    dcterms:identifier "ANSI/ASSE Z359.1-2007" ;
-    rdfs:comment "Critical safety standard for construction and industrial engineering" ;
+    dcterms:identifier "ANSI/ASSP Z359 series (code: ANSI/ASSP Z359.1-2024)" ;
+    dcterms:publisher "American Society of Safety Professionals (ANSI accredited)" ;
+    dcterms:source <https://www.assp.org/standards/standards-topics/fall-protection-and-fall-restraint-z359> ;
+    rdfs:comment "Fall protection code and standards series for construction and industrial engineering" ;
     skos:definition "American national standard establishing minimum requirements for personal fall arrest systems, positioning systems, and travel restraint systems",
-        "Critical safety standard for construction and industrial engineering" .
+        "Fall protection code and standards series for construction and industrial engineering" .
 
 <http://proethica.org/ontology/engineering_standards#CertificationRequired> a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
@@ -91,16 +96,20 @@ proethica:engineering_standards a owl:Ontology ;
     skos:definition "Engineers must design systems that meet applicable accessibility standards and provide equitable access",
         "Legal and ethical obligation for inclusive design" .
 
-<http://proethica.org/ontology/engineering_standards#IEC60950> a owl:NamedIndividual, ns1:TechnicalStandard ;
-    rdfs:label "IEC 60950 IT Equipment Safety" ;
+# 2026-07-06 (standards vetting): the IEC60950 individual was replaced. IEC 60950-1
+# was withdrawn 2020-12-20 and superseded by IEC 62368-1 for audio/video and ICT
+# equipment safety; the palette offers current standards to extraction matching.
+<http://proethica.org/ontology/engineering_standards#IEC62368_1> a owl:NamedIndividual, ns1:TechnicalStandard ;
+    rdfs:label "IEC 62368-1 Audio/Video and ICT Equipment Safety" ;
     ns1:applicableDomains "computer_engineering",
         "electrical_engineering",
         "electronics_engineering" ;
     ns1:standardType "electrical_safety" ;
-    dcterms:identifier "IEC 60950-1:2005+AMD1:2009+AMD2:2013" ;
-    rdfs:comment "Fundamental safety standard for IT and electronics equipment" ;
-    skos:definition "Fundamental safety standard for IT and electronics equipment",
-        "International standard for safety of information technology equipment including electrical business equipment and associated equipment" .
+    dcterms:identifier "IEC 62368-1:2023" ;
+    dcterms:publisher "International Electrotechnical Commission" ;
+    dcterms:source <https://webstore.iec.ch/en/publication/69308> ;
+    rdfs:comment "Safety standard for audio/video, information and communication technology equipment; supersedes IEC 60950-1 (withdrawn 2020)" ;
+    skos:definition "Safety standard for audio/video, information and communication technology equipment; supersedes IEC 60950-1 (withdrawn 2020)" .
 
 <http://proethica.org/ontology/engineering_standards#IEC62304> a owl:NamedIndividual, ns1:TechnicalStandard ;
     rdfs:label "IEC 62304 Medical Device Software" ;
@@ -108,8 +117,10 @@ proethica:engineering_standards a owl:Ontology ;
         "software_engineering" ;
     ns1:standardType "medical_software_safety" ;
     dcterms:identifier "IEC 62304:2006+AMD1:2015" ;
-    rdfs:comment "Critical standard for medical device software safety and effectiveness" ;
-    skos:definition "Critical standard for medical device software safety and effectiveness",
+    dcterms:publisher "International Electrotechnical Commission" ;
+    dcterms:source <https://webstore.iec.ch/en/publication/22794> ;
+    rdfs:comment "Standard for medical device software life cycle processes" ;
+    skos:definition "Standard for medical device software life cycle processes",
         "International standard defining life cycle requirements for medical device software, including risk-based approach to software development" .
 
 <http://proethica.org/ontology/engineering_standards#IEEESTD603> a owl:NamedIndividual, ns1:TechnicalStandard ;
@@ -118,6 +129,8 @@ proethica:engineering_standards a owl:Ontology ;
         "nuclear_engineering" ;
     ns1:standardType "nuclear_safety" ;
     dcterms:identifier "IEEE Std 603-2018" ;
+    dcterms:publisher "Institute of Electrical and Electronics Engineers" ;
+    dcterms:source <https://standards.ieee.org/ieee/603/4557/> ;
     rdfs:comment "Fundamental safety standard for nuclear engineering applications" ;
     skos:definition "Fundamental safety standard for nuclear engineering applications",
         "IEEE standard providing criteria for safety systems in nuclear power generating stations" .
@@ -126,18 +139,22 @@ proethica:engineering_standards a owl:Ontology ;
     rdfs:label "ISO 14001 Environmental Management Systems" ;
     ns1:applicableDomains "all_engineering" ;
     ns1:standardType "environmental_management" ;
-    dcterms:identifier "ISO 14001:2015" ;
-    rdfs:comment "Environmental management standard with significant ethical implications for engineering projects" ;
+    dcterms:identifier "ISO 14001:2026" ;
+    dcterms:publisher "International Organization for Standardization" ;
+    dcterms:source <https://www.iso.org/standard/14001> ;
+    rdfs:comment "Environmental management standard with significant ethical implications for engineering projects. Current edition ISO 14001:2026; the 2015 edition was withdrawn in April 2026." ;
     skos:definition "Environmental management standard with significant ethical implications for engineering projects",
         "International standard specifying requirements for environmental management systems that organizations can use to enhance their environmental performance" .
 
 <http://proethica.org/ontology/engineering_standards#ISO27001> a owl:NamedIndividual, ns1:TechnicalStandard ;
-    rdfs:label "ISO 27001 Information Security Management" ;
+    rdfs:label "ISO/IEC 27001 Information Security Management" ;
     ns1:applicableDomains "computer_engineering",
         "software_engineering",
         "systems_engineering" ;
     ns1:standardType "information_security" ;
-    dcterms:identifier "ISO/IEC 27001:2013" ;
+    dcterms:identifier "ISO/IEC 27001:2022" ;
+    dcterms:publisher "International Organization for Standardization / International Electrotechnical Commission" ;
+    dcterms:source <https://www.iso.org/standard/27001> ;
     rdfs:comment "Critical cybersecurity standard for protecting information assets in engineering systems" ;
     skos:definition "Critical cybersecurity standard for protecting information assets in engineering systems",
         "International standard specifying requirements for establishing, implementing, maintaining and continually improving information security management systems" .
@@ -160,6 +177,8 @@ proethica:engineering_standards a owl:Ontology ;
         "systems_engineering" ;
     ns1:standardType "cybersecurity_controls" ;
     dcterms:identifier "NIST Special Publication 800-53 Rev. 5" ;
+    dcterms:publisher "National Institute of Standards and Technology" ;
+    dcterms:source <https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final> ;
     rdfs:comment "Comprehensive cybersecurity framework for critical infrastructure" ;
     skos:definition "Comprehensive cybersecurity framework for critical infrastructure",
         "NIST publication providing catalog of security and privacy controls for federal information systems and organizations" .
@@ -244,7 +263,9 @@ proethica:engineering_standards a owl:Ontology ;
         "electrical_engineering",
         "software_engineering" ;
     ns1:standardType "automotive_safety" ;
-    dcterms:identifier "ISO 26262:2018" ;
+    dcterms:identifier "ISO 26262:2018 (parts 1-12, edition 2)" ;
+    dcterms:publisher "International Organization for Standardization" ;
+    dcterms:source <https://www.iso.org/standard/68383.html> ;
     rdfs:comment "Critical standard for automotive safety systems and autonomous vehicles" ;
     skos:definition "Critical standard for automotive safety systems and autonomous vehicles",
         "International standard defining functional safety for automotive electrical and electronic systems, establishing Automotive Safety Integrity Levels (ASIL)" .
@@ -254,6 +275,8 @@ proethica:engineering_standards a owl:Ontology ;
     ns1:applicableDomains "all_engineering" ;
     ns1:standardType "safety_management" ;
     dcterms:identifier "ISO 45001:2018" ;
+    dcterms:publisher "International Organization for Standardization" ;
+    dcterms:source <https://www.iso.org/standard/63787.html> ;
     rdfs:comment "Critical safety standard for protecting workers and the public" ;
     skos:definition "Critical safety standard for protecting workers and the public",
         "International standard specifying requirements for occupational health and safety management systems to provide safe and healthy workplaces" .
@@ -263,6 +286,8 @@ proethica:engineering_standards a owl:Ontology ;
     ns1:applicableDomains "all_engineering" ;
     ns1:standardType "quality_management" ;
     dcterms:identifier "ISO 9001:2015" ;
+    dcterms:publisher "International Organization for Standardization" ;
+    dcterms:source <https://www.iso.org/standard/62085.html> ;
     rdfs:comment "Fundamental quality management standard applicable to all engineering disciplines" ;
     skos:definition "Fundamental quality management standard applicable to all engineering disciplines",
         "International standard specifying requirements for quality management systems where organizations need to demonstrate their ability to consistently provide products and services that meet customer and applicable statutory and regulatory requirements" .
@@ -274,6 +299,8 @@ proethica:engineering_standards a owl:Ontology ;
         "web_engineering" ;
     ns1:standardType "accessibility" ;
     dcterms:identifier "Section 508 (29 U.S.C. § 794d)" ;
+    dcterms:publisher "United States Access Board" ;
+    dcterms:source <https://www.section508.gov/> ;
     rdfs:comment "Legal requirement ensuring equitable access to technology systems" ;
     skos:definition "Legal requirement ensuring equitable access to technology systems",
         "U.S. federal law requiring electronic and information technology to be accessible to people with disabilities" .
@@ -284,8 +311,10 @@ proethica:engineering_standards a owl:Ontology ;
         "user_experience_engineering",
         "web_engineering" ;
     ns1:standardType "web_accessibility" ;
-    dcterms:identifier "WCAG 2.1 Level AA" ;
-    rdfs:comment "International standard for web accessibility and inclusive design" ;
+    dcterms:identifier "WCAG 2.1 (W3C Recommendation, 2018; Level AA conformance)" ;
+    dcterms:publisher "World Wide Web Consortium (W3C)" ;
+    dcterms:source <https://www.w3.org/TR/WCAG21/> ;
+    rdfs:comment "International standard for web accessibility and inclusive design. WCAG 2.2 (2023) is the latest Recommendation; the revised US Section 508 rule incorporates WCAG 2.0 Level AA." ;
     skos:definition "International standard for web accessibility and inclusive design",
         "Web Content Accessibility Guidelines providing recommendations for making web content more accessible to people with disabilities" .
 
@@ -306,7 +335,9 @@ proethica:engineering_standards a owl:Ontology ;
         "electrical_engineering",
         "electronics_engineering" ;
     ns1:standardType "functional_safety" ;
-    dcterms:identifier "IEC 61508:2010" ;
+    dcterms:identifier "IEC 61508:2010 (parts 1-7, edition 2)" ;
+    dcterms:publisher "International Electrotechnical Commission" ;
+    dcterms:source <https://webstore.iec.ch/en/publication/5515> ;
     rdfs:comment "Foundation standard for safety-critical electrical and electronic systems" ;
     skos:definition "Foundation standard for safety-critical electrical and electronic systems",
         "International standard for functional safety of electrical/electronic/programmable electronic safety-related systems, establishing Safety Integrity Levels (SIL)" .
