@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-07 (twentieth pass, Cs citation layer): content-level verify-or-drop over the ten boundary-type classes, whose per-kind references were one-off attributions of component-level literature. Surviving: Arkin on SafetyConstraint (safety precepts as constraints, verified) and Stenseke on LegalConstraint (re-grounded on his verbatim legal-versus-moral enforcement point; Kroll dropped). Dropped as decorative, with per-class change notes recording each check: Taddeo (Regulatory), Ganascia (Resource), Hallamaa and Kalliokoski (Competence), Dennis twice (Jurisdictional, Confidentiality), Furbach (Procedural), Govindarajulu and Bringsjord (Temporal); Benzmüller moved to core:Constraint, whose verification clause is what the dissertation cites him for. All definitional slots are now citation-free (two-register rule); every dropped kind keeps its text as design language."@en ;
     skos:changeNote "2026-07-07 (nineteenth pass, A/E properties review): the temporal machinery aligned to the shipped contract. The duplicate eventType declaration is deleted (the routing-input block is the single source); causesStateChange deleted (zero uses; the E spec folded it into description); hasTemporalRelation deprecated (never emitted; fromEntity/toEntity carry the linkage). causedByAction gains its two-register definition, the Wright reference beside Sarmiento, the ExogenousEvent guard note, and a placement changeNote (stays intermediate with its causal family). analyzesAction is re-domained to proeth-cases:CausalNormativeLink, the class its sole emitter asserts (the CausalChain domain wrongly inferred every reasoning node into the NESS chain population). Thirteen emitted-but-undeclared carriers gain declarations: the three TemporalRelation fields (fromEntityText, toEntityText, evidence), the nine CausalChain analysis fields (withinAgentControl with range xsd:boolean, matching the typed committed literals), and the agents decomposition. severity drops its retired Event half; hasAgent states its dual kept-and-resolved status; the TemporalRelation definition states the shipped carrier contract in place of the stored-URI claim."@en ;
     skos:changeNote "2026-07-07 (eighteenth pass, A/E citation layer): every Sarmiento record corrected to 2022 with the settled PRIMA locator (CausalChain family, responsibleAgent, EpistemicState; the DOI was already right, the year read the arXiv extended version's date onto the conference paper). The CausalChain NESS attribution stands verified: Sarmiento's causal definition is a formalisation of Wright's NESS test, in his own words."@en ;
     skos:changeNote "2026-07-07 (seventeenth pass, Rs properties review): the Resource carrier block aligned to the shipped contract. provisionCodes and citedBy gain declarations (the one live-emitted kept literal and the one edge-resolved Discussion signal were both undeclared, rendering unlabeled); usedInContext, createdBy, and version state their dropped-from-schema status (never written by the current pipeline); sourceKind records the resource_category schema spelling it bridges to; the dead :hasResource is deleted (zero uses anywhere; proeth-core:usesResource is the surviving process-to-Resource property). Three annotation properties asserted only in engineering-ethics (derivedFromResource, appliesToDomain, hasUrgency) gain declarations as owl:AnnotationProperty, ending their unlabeled rendering. The EthicalCode change note records that the deprecated ProfessionalCode alias has since been deleted."@en ;
@@ -1228,52 +1229,60 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     rdfs:comment "Primary ethical framework for professional engineers in the United States" .
 
 #################################################################
-# Constraint Categories from Chapter 2.2.9 Literature
-# Based on Ganascia (2007), Dennis et al. (2016), Taddeo et al. (2024)
+# Constraint Categories (the ten closed boundary types)
+# The component-level grounding (Arkin negative behavioral limits; Dennis complete
+# specification under temporal and contextual conditions; Ganascia default rules with
+# exceptions) is recorded on core:Constraint. Per-kind groundings verified 2026-07-07:
+# Arkin on SafetyConstraint and Stenseke on LegalConstraint survive content-level
+# verification; the other kinds are design language (their former one-off references
+# were dropped as decorative; per-class change notes record each check).
 #################################################################
 
 # Boundary Type Constraints
 proeth:LegalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Legal Constraint"@en ;
-    iao:0000115 "Constraints arising from legal requirements and statutes that establish inviolable boundaries (Kroll 2020, Stenseke 2024)"@en ;
-    rdfs:comment "Constraints arising from legal requirements and statutes that establish inviolable boundaries (Kroll 2020, Stenseke 2024)"@en ;
-    dcterms:references <https://doi.org/10.1093/oxfordhb/9780190067397.013.10> . # Kroll 2020
+    iao:0000115 "Constraints arising from legal requirements and statutes that establish inviolable boundaries on professional action."@en ;
+    rdfs:comment "Constraints arising from legal requirements and statutes that establish inviolable boundaries on professional action."@en ;
+    iao:0000116 "Grounded in Stenseke (2024): what separates legal from moral rules is that legal rules are backed by legislative mechanisms of jurisdiction and may be enforced by the state. The inviolable-boundary framing is design language from the component-level account (hard limits that benefit alone cannot justify crossing); Stenseke himself stresses that legal application is interpretively open, so the citation grounds the source-of-bindingness differentia, not absoluteness."@en ;
+    iao:0000119 "Stenseke (2024). On the computational complexity of ethics: moral tractability for minds and machines. Artificial Intelligence Review 57(4) (doi:10.1007/s10462-024-10732-3)." ;
+    skos:changeNote "2026-07-07 (Cs citation layer): Kroll 2020 dropped as decorative (his accountability chapter carries no statute or inviolable-boundary content; his verified causality-fault-duty claim is cited on core:Action); Stenseke re-grounded on his verbatim legal-versus-moral enforcement point and moved out of the definitional slot (two-register rule)."@en ;
+    dcterms:references <https://doi.org/10.1007/s10462-024-10732-3> . # Stenseke 2024
 
 proeth:RegulatoryConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Regulatory Constraint"@en ;
-    iao:0000115 "Constraints from regulatory bodies and professional standards organizations (Taddeo et al. 2024)"@en ;
-    rdfs:comment "Constraints from regulatory bodies and professional standards organizations (Taddeo et al. 2024)"@en ;
-    dcterms:references <https://doi.org/10.1007/s13347-024-00710-6> . # Taddeo et al. 2024
+    iao:0000115 "Constraints from regulatory bodies and professional standards organizations."@en ;
+    rdfs:comment "Constraints from regulatory bodies and professional standards organizations."@en ;
+    skos:changeNote "2026-07-07 (Cs citation layer, content-level verify-or-drop): the Taddeo et al. 2024 reference was dropped as decorative -- the construct of the paper is teleological principle balancing, and regulatory bodies or professional standards organizations occur nowhere in it (the dissertation cites it for balancing, not for this kind). The definition stays as design language within the component-level boundary literature recorded on core:Constraint."@en .
 
 proeth:ResourceConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Resource Constraint"@en ;
-    iao:0000115 "A boundary statement limiting the permissible action space by reference to available time, budget, materials, or personnel: it states what may not be undertaken given the resource situation, rather than describing the resources themselves (Ganascia 2007)."@en ;
-    rdfs:comment "A boundary statement limiting permissible action by reference to available time, budget, materials, or personnel (Ganascia 2007). States the limit, not the resources."@en ;
-    dcterms:references <https://doi.org/10.1007/s10676-006-9134-y> . # Ganascia 2007
+    iao:0000115 "A boundary statement limiting the permissible action space by reference to available time, budget, materials, or personnel: it states what may not be undertaken given the resource situation, rather than describing the resources themselves."@en ;
+    rdfs:comment "A boundary statement limiting permissible action by reference to available time, budget, materials, or personnel. States the limit, not the resources."@en ;
+    skos:changeNote "2026-07-07 (Cs citation layer, content-level verify-or-drop): the Ganascia 2007 reference was dropped as decorative -- budget, materials, personnel, and resource limits occur in neither Ganascia 2007 paper; his verified default-rules-with-exceptions construct is cited on core:Constraint. The definition stays as design language within the component-level boundary literature recorded on core:Constraint."@en .
 
 proeth:CompetenceConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Competence Constraint"@en ;
-    iao:0000115 "A boundary statement limiting the permissible action space by reference to the agent's competence or technical limitations: it states what may not be undertaken beyond demonstrated capability, rather than describing the capability itself (Hallamaa and Kalliokoski 2022)."@en ;
-    rdfs:comment "A boundary statement limiting permissible action by reference to competence or technical limits (Hallamaa and Kalliokoski 2022). States the limit, not the capability."@en ;
-    dcterms:references <https://doi.org/10.3389/fcomp.2022.776837> . # Hallamaa and Kalliokoski 2022
+    iao:0000115 "A boundary statement limiting the permissible action space by reference to the competence or technical limitations of the agent: it states what may not be undertaken beyond demonstrated capability, rather than describing the capability itself."@en ;
+    rdfs:comment "A boundary statement limiting permissible action by reference to competence or technical limits. States the limit, not the capability."@en ;
+    skos:changeNote "2026-07-07 (Cs citation layer, content-level verify-or-drop): the Hallamaa and Kalliokoski 2022 reference was dropped as decorative -- the paper contains one incidental competence mention (users as competent agents) and nothing on competence limits bounding action; their verified contribution stays cited on FundamentalEthicalPrinciple. The definition stays as design language within the component-level boundary literature recorded on core:Constraint."@en .
 
 proeth:JurisdictionalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Jurisdictional Constraint"@en ;
-    iao:0000115 "Boundaries of authority and geographical or organizational scope (Dennis et al. 2016)"@en ;
-    rdfs:comment "Boundaries of authority and geographical or organizational scope (Dennis et al. 2016)"@en ;
-    dcterms:references <https://doi.org/10.1016/j.robot.2015.11.012> . # Dennis et al. 2016
+    iao:0000115 "Boundaries of authority and geographical or organizational scope."@en ;
+    rdfs:comment "Boundaries of authority and geographical or organizational scope."@en ;
+    skos:changeNote "2026-07-07 (Cs citation layer, content-level verify-or-drop): the Dennis et al. 2016 reference was dropped as decorative -- authority in the paper names certification bodies (the Civil Aviation Authority, the Vehicle Certification Authority) as rule sources, not boundaries of authority or scope; their verified complete-specification claim is cited on core:Constraint. The definition stays as design language within the component-level boundary literature recorded on core:Constraint."@en .
 
 proeth:ProceduralConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Procedural Constraint"@en ;
-    iao:0000115 "Forbids carrying out professional work outside a mandated process or protocol; an act that skips or bypasses a required procedural step (a review, approval, or notification) falls outside the permissible action space (Furbach et al. 2014)."@en ;
-    rdfs:comment "Forbids carrying out professional work outside a mandated process or protocol; an act that skips or bypasses a required procedural step (a review, approval, or notification) falls outside the permissible action space (Furbach et al. 2014)."@en ;
-    dcterms:references <https://doi.org/10.1007/978-3-319-13365-2_6> . # Furbach et al. 2014
+    iao:0000115 "Forbids carrying out professional work outside a mandated process or protocol; an act that skips or bypasses a required procedural step (a review, approval, or notification) falls outside the permissible action space."@en ;
+    rdfs:comment "Forbids carrying out professional work outside a mandated process or protocol; an act that skips or bypasses a required procedural step (a review, approval, or notification) falls outside the permissible action space."@en ;
+    skos:changeNote "2026-07-07 (Cs citation layer, content-level verify-or-drop): the Furbach et al. 2014 reference was dropped as decorative -- the paper is automated reasoning in deontic logic (Hilbert-style calculi) and carries no professional-procedure or protocol content. The definition stays as design language within the component-level boundary literature recorded on core:Constraint."@en .
 
 # proeth:DefeasibleConstraint and proeth:InviolableConstraint retired 2026-06-28 (ratified Cs
 # spec): obligation competition is carried by the obligation-layer defeasibility edge family
@@ -1287,31 +1296,33 @@ proeth:ProceduralConstraint a owl:Class ;
 proeth:EthicalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Ethical Constraint"@en ;
-    iao:0000115 "Professional ethical boundaries beyond legal requirements (Benzmüller et al. 2020)"@en ;
-    rdfs:comment "Professional ethical boundaries beyond legal requirements (Benzmüller et al. 2020)"@en ;
-    dcterms:references <https://doi.org/10.1016/j.artint.2020.103348> . # Benzmüller et al. 2020
+    iao:0000115 "Professional ethical boundaries beyond legal requirements."@en ;
+    rdfs:comment "Professional ethical boundaries beyond legal requirements."@en ;
+    skos:changeNote "2026-07-07 (Cs citation layer, content-level verify-or-drop): the Benzmüller et al. 2020 reference moved to core:Constraint, where the claim it supports lives: the paper designs ethico-legal normative theories for formal verification and does not distinguish professional ethics beyond legal requirements (the differentia of this kind, which stays as design language)."@en .
 
 proeth:SafetyConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Safety Constraint"@en ;
-    iao:0000115 "Forbids actions that would breach applicable safety requirements, bounding the permissible action space to conduct that keeps those requirements satisfied (Arkin 2008)."@en ;
-    rdfs:comment "Forbids actions that would breach applicable safety requirements, bounding the permissible action space to conduct that keeps those requirements satisfied (Arkin 2008)."@en ;
+    iao:0000115 "Forbids actions that would breach applicable safety requirements, bounding the permissible action space to conduct that keeps those requirements satisfied."@en ;
+    rdfs:comment "Forbids actions that would breach applicable safety requirements, bounding the permissible action space to conduct that keeps those requirements satisfied."@en ;
+    iao:0000116 "Grounded in Arkin (2008): the ethical-governor architecture bounds behavior with safety precepts evaluated as constraints, verified content-level (the constraint construct is load-bearing throughout the paper). Moved out of the definitional slot per the two-register rule."@en ;
+    iao:0000119 "Arkin (2008). Governing lethal behavior: embedding ethics in a hybrid deliberative/reactive robot architecture. HRI 2008: 121-128 (doi:10.1145/1349822.1349839)." ;
     dcterms:references <https://doi.org/10.1145/1349822.1349839> . # Arkin 2008
 
 proeth:ConfidentialityConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Confidentiality Constraint"@en ;
-    iao:0000115 "Boundaries on information disclosure and privacy (Dennis et al. 2016)"@en ;
-    rdfs:comment "Boundaries on information disclosure and privacy (Dennis et al. 2016)"@en ;
-    dcterms:references <https://doi.org/10.1016/j.robot.2015.11.012> . # Dennis et al. 2016
+    iao:0000115 "Boundaries on information disclosure and privacy."@en ;
+    rdfs:comment "Boundaries on information disclosure and privacy."@en ;
+    skos:changeNote "2026-07-07 (Cs citation layer, content-level verify-or-drop): the Dennis et al. 2016 reference was dropped as decorative -- privacy occurs in the paper once, as a worked-example principle being weighed, not as confidentiality or disclosure boundaries. The definition stays as design language within the component-level boundary literature recorded on core:Constraint."@en .
 
 # Temporal Type Constraints
 proeth:TemporalConstraint a owl:Class ;
     rdfs:subClassOf proeth-core:Constraint ;
     rdfs:label "Temporal Constraint"@en ;
-    iao:0000115 "Time-based limitations and deadlines (Govindarajulu & Bringsjord 2017)"@en ;
-    rdfs:comment "Time-based limitations and deadlines (Govindarajulu & Bringsjord 2017)"@en ;
-    dcterms:references <https://doi.org/10.24963/ijcai.2017/658> . # Govindarajulu and Bringsjord 2017
+    iao:0000115 "Time-based limitations and deadlines."@en ;
+    rdfs:comment "Time-based limitations and deadlines."@en ;
+    skos:changeNote "2026-07-07 (Cs citation layer, content-level verify-or-drop): the Govindarajulu and Bringsjord 2017 reference was dropped as decorative -- the paper automates the doctrine of double effect and carries no deadline or time-limit content; its verified intention formalization is cited on core:Action. The definition stays as design language within the component-level boundary literature recorded on core:Constraint."@en .
 
 proeth:constrainsAction a owl:ObjectProperty ;
     rdfs:domain proeth-core:Constraint ;
