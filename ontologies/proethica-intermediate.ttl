@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-07 (eighteenth pass, A/E citation layer): every Sarmiento record corrected to 2022 with the settled PRIMA locator (CausalChain family, responsibleAgent, EpistemicState; the DOI was already right, the year read the arXiv extended version's date onto the conference paper). The CausalChain NESS attribution stands verified: Sarmiento's causal definition is a formalisation of Wright's NESS test, in his own words."@en ;
     skos:changeNote "2026-07-07 (seventeenth pass, Rs properties review): the Resource carrier block aligned to the shipped contract. provisionCodes and citedBy gain declarations (the one live-emitted kept literal and the one edge-resolved Discussion signal were both undeclared, rendering unlabeled); usedInContext, createdBy, and version state their dropped-from-schema status (never written by the current pipeline); sourceKind records the resource_category schema spelling it bridges to; the dead :hasResource is deleted (zero uses anywhere; proeth-core:usesResource is the surviving process-to-Resource property). Three annotation properties asserted only in engineering-ethics (derivedFromResource, appliesToDomain, hasUrgency) gain declarations as owl:AnnotationProperty, ending their unlabeled rendering. The EthicalCode change note records that the deprecated ProfessionalCode alias has since been deleted."@en ;
     skos:changeNote "2026-07-07 (sixteenth pass, Rs text pass): the Resource subtree brought to the audited component pattern, every claim verified against the PDFs. EthicalCode moves its Frankel and Davis grounding out of the definitional slots into an editor note (the two-register discipline), corrects the convention preposition to Davis's own between, gains the settled 119 citations with the machine tier, and its scope note now states the type-individual-provision boundary in place of the caps-emphasis attribution; CasePrecedent likewise moves the McLaren extensional grounding from the definition into an editor note absorbing the attribution scope note. The three uncited kinds state their standing as extensions native to this ontology in place of the House-extension shorthand; TechnicalStandard records the standards-vetting contract on its individuals and the Section 508 LegalResource boundary. The four kind-retirement comments drop the stale closed-six count (five kinds since the ProfessionalCode merge). The five kinds match the five the dissertation enumerates (codes, precedents, technical standards, regulatory documents, guidance documents)."@en ;
     skos:changeNote "2026-07-06 (fifteenth pass, S properties review): the state carrier declarations aligned to the shipped contract. principleTransformation states its S->P->O content before its mechanics (the two-register pattern); affectedParties is described as a resolved-only carrier (never stored on fresh individuals); triggeringEvent and terminatedBy note their dual status (kept verbatim and resolved to the event-boundary edges); urgencyLevel drops the unpopulated Event arm; persistenceType covers the discovered leaves alongside the archetypes; the stateCategory routing comment names RegulatoryState, the actual archetype, in place of a discovered leaf. The archetype grounding comment carries the corrected Almpani and Stefaneas record."@en ;
@@ -427,7 +428,7 @@ proeth:causedByAction a owl:ObjectProperty ;
     rdfs:range proeth-core:Action ;
     rdfs:label "caused by action"@en ;
     rdfs:comment "Links event to actions that caused it (Wright's NESS test)"@en ;
-    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_15> . # Sarmiento et al. 2023
+    dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_15> . # Sarmiento et al. 2022
 
 # Causal-chain class + endpoint edges (Step-3 Stage-5 causal analysis; Sarmiento et al.
 # 2023 NESS). cause/effect omit rdfs:range deliberately: their endpoints are Action OR
@@ -435,8 +436,8 @@ proeth:causedByAction a owl:ObjectProperty ;
 # domain/range guard (rpo_edges._CAUSAL_EDGE_RANGE) rather than by a blank-node owl:unionOf.
 proeth:CausalChain a owl:Class ;
     rdfs:label "Causal Chain"@en ;
-    iao:0000115 "A cause-to-effect linkage in the case timeline carrying a NESS responsibility analysis (Sarmiento et al. 2023). Not one of the nine disjoint D-tuple categories."@en ;
-    rdfs:comment "A cause-to-effect linkage in the case timeline carrying a NESS responsibility analysis (Sarmiento et al. 2023). Not one of the nine disjoint D-tuple categories."@en .
+    iao:0000115 "A cause-to-effect linkage in the case timeline carrying a NESS responsibility analysis (Sarmiento et al. 2022). Not one of the nine disjoint D-tuple categories."@en ;
+    rdfs:comment "A cause-to-effect linkage in the case timeline carrying a NESS responsibility analysis (Sarmiento et al. 2022). Not one of the nine disjoint D-tuple categories."@en .
 
 proeth:analyzesAction a owl:ObjectProperty ;
     rdfs:domain proeth:CausalChain ;
@@ -458,7 +459,7 @@ proeth:responsibleAgent a owl:ObjectProperty ;
     rdfs:domain proeth:CausalChain ;
     rdfs:range proeth-core:Agent ;
     rdfs:label "responsible agent"@en ;
-    rdfs:comment "Links a causal chain to the agent(s) bearing responsibility for it (NESS causal responsibility, Sarmiento et al. 2023)."@en ;
+    rdfs:comment "Links a causal chain to the agent(s) bearing responsibility for it (NESS causal responsibility, Sarmiento et al. 2022)."@en ;
     dcterms:references <https://doi.org/10.1007/s10458-023-09609-6> .
 
 ###############################################################
@@ -971,7 +972,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 # of interest).
 #
 # Grounding: Berreby et al. (2017) Event-Calculus fluents; Almpani and Stefaneas
-# (2022) context-based dynamic obligation priorities; Sarmiento et al. (2023)
+# (2022) context-based dynamic obligation priorities; Sarmiento et al. (2022)
 # causal chains initiating states; Stenseke (2024) the computational analogue of
 # ought-implies-can; Govindarajulu and Bringsjord (2017) the dependence of
 # obligation on the knowledge state.
@@ -980,14 +981,14 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 :EpistemicState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
     rdfs:label "Epistemic State"@en ;
-    iao:0000115 "A condition of what an agent knows, believes, or is uncertain of with respect to facts material to a decision. As a content kind it captures the agent's knowledge state, the classical Aristotelian epistemic condition for responsibility: an agent is answerable for conduct in proportion to what the agent knew or should have known; Sarmiento et al. (2023) name epistemic aspects fundamental for moving beyond causality to responsibility. Its deontic relevance is that knowledge conditions the obligations governing informed decision and decision-under-uncertainty."@en ;
-    skos:definition "A condition of what an agent knows, believes, or is uncertain of with respect to facts material to a decision. As a content kind it captures the agent's knowledge state, the classical Aristotelian epistemic condition for responsibility: an agent is answerable for conduct in proportion to what the agent knew or should have known; Sarmiento et al. (2023) name epistemic aspects fundamental for moving beyond causality to responsibility. Its deontic relevance is that knowledge conditions the obligations governing informed decision and decision-under-uncertainty."@en ;
+    iao:0000115 "A condition of what an agent knows, believes, or is uncertain of with respect to facts material to a decision. As a content kind it captures the agent's knowledge state, the classical Aristotelian epistemic condition for responsibility: an agent is answerable for conduct in proportion to what the agent knew or should have known; Sarmiento et al. (2022) name epistemic aspects fundamental for moving beyond causality to responsibility. Its deontic relevance is that knowledge conditions the obligations governing informed decision and decision-under-uncertainty."@en ;
+    skos:definition "A condition of what an agent knows, believes, or is uncertain of with respect to facts material to a decision. As a content kind it captures the agent's knowledge state, the classical Aristotelian epistemic condition for responsibility: an agent is answerable for conduct in proportion to what the agent knew or should have known; Sarmiento et al. (2022) name epistemic aspects fundamental for moving beyond causality to responsibility. Its deontic relevance is that knowledge conditions the obligations governing informed decision and decision-under-uncertainty."@en ;
     rdfs:comment "Knowledge-and-belief condition of an agent; the typed home of the responsibility epistemic condition."@en ;
     proeth:persistenceType "inertial" ;
     iao:0000119 "Govindarajulu and Bringsjord (2017). On Automating the Doctrine of Double Effect. Proceedings of the Twenty-Sixth International Joint Conference on Artificial Intelligence (IJCAI 2017): 4722-4730 (doi:10.24963/ijcai.2017/658)." ,
-                "Sarmiento et al. (2023). Action Languages Based Actual Causality in Decision Making Contexts. PRIMA 2022: Principles and Practice of Multi-Agent Systems, LNCS 13753: 243-259 (doi:10.1007/978-3-031-21203-1_15)." ;
+                "Sarmiento et al. (2022). Action Languages Based Actual Causality in Decision Making Contexts. PRIMA 2022: Principles and Practice of Multi-Agent Systems, LNCS 13753: 243-259 (doi:10.1007/978-3-031-21203-1_15)." ;
     dcterms:references <https://doi.org/10.24963/ijcai.2017/658> , # Govindarajulu and Bringsjord 2017
-                       <https://doi.org/10.1007/978-3-031-21203-1_15> . # Sarmiento et al. 2023
+                       <https://doi.org/10.1007/978-3-031-21203-1_15> . # Sarmiento et al. 2022
 
 :RiskState a owl:Class ;
     rdfs:subClassOf proeth-core:State ;
