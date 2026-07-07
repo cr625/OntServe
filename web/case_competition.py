@@ -7,20 +7,26 @@ obligation, so the case page can show the competition structure the KI2026 paper
 describes rather than a flat edge dump.
 
 These edges are already materialized in the committed case TTL (corpus-wide
-2026-05-23). The verbatim grounding quote is the `proeth:sourcetext` carried on each
-obligation/state individual (the committed cases attach the quote to the entity, not
-to a per-edge prov:Derivation node), surfaced for auditability and degraded gracefully
-when absent.
+2026-05-23). Two grounding layers are surfaced, each degrading gracefully when
+absent: the entity-level `sourceText` quote carried on each obligation/state
+individual, and (2026-07-08) the PER-EDGE provenance -- the commit-time emitters
+reify each defeasibility edge as a `prov:Derivation` individual
+(`defeasibility_edge_provenance_<S>_<pred>_<O>`) carrying the verbatim grounding
+quote in `prov:value` and "source_field=...; confidence=..." in `rdfs:comment`,
+so every rendered edge can show the quote that justified IT, not only the quotes
+attached to its endpoints. The fresh-architecture cases carry these nodes; older
+commits fall back to the entity-level quotes.
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
-from rdflib import Graph, Namespace, RDFS, URIRef
+from rdflib import Graph, Namespace, RDF, RDFS, URIRef
 
 CORE = Namespace("http://proethica.org/ontology/core#")
 PROETH = Namespace("http://proethica.org/ontology/intermediate#")
 PROETH_PROV = Namespace("http://proethica.org/provenance#")
+PROV = Namespace("http://www.w3.org/ns/prov#")
 
 COMPETES_WITH = CORE.competesWith
 PREVAILS_OVER = CORE.prevailsOver
@@ -33,6 +39,12 @@ DERIVED_FROM_PRINCIPLE = PROETH.derivedFromPrinciple
 # the corpus is re-extracted) carry it as proeth:sourceText / proeth:sourcetext, so
 # all three are tried in order for the transition window.
 SOURCETEXT_CANDIDATES = (PROETH_PROV.sourceText, PROETH.sourceText, PROETH.sourcetext)
+
+# Reified per-edge provenance node naming, as emitted by the ProEthica commit
+# pipeline (defeasibility_pipeline / edge prov emitters): the node's localname
+# encodes the directed edge it grounds.
+_EDGE_PROV_PREFIX = "defeasibility_edge_provenance_"
+_EDGE_PROV_PREDICATES = ("competesWith", "prevailsOver", "defeasibleUnder")
 
 
 def _localname(iri: str) -> str:
@@ -79,6 +91,38 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
     def ref(iri: URIRef) -> Dict[str, Optional[str]]:
         return {"iri": str(iri), "label": label(iri)}
 
+    # Per-edge provenance index: (subject-frag, predicate, object-frag) -> {quote, note}.
+    # Parsed from the reified prov:Derivation nodes whose localname encodes the edge.
+    edge_prov: Dict[Tuple[str, str, str], Dict[str, Optional[str]]] = {}
+    for node in g.subjects(RDF.type, PROV.Derivation):
+        local = _localname(str(node))
+        if not local.startswith(_EDGE_PROV_PREFIX):
+            continue
+        rest = local[len(_EDGE_PROV_PREFIX):]
+        for pred in _EDGE_PROV_PREDICATES:
+            sep = f"_{pred}_"
+            if sep in rest:
+                subj_frag, obj_frag = rest.split(sep, 1)
+                quote = g.value(node, PROV.value)
+                note = g.value(node, RDFS.comment)
+                edge_prov[(subj_frag, pred, obj_frag)] = {
+                    "quote": str(quote) if quote else None,
+                    "note": str(note) if note else None,
+                }
+                break
+
+    def edge_ref(display: URIRef, subj: URIRef, pred: str, obj: URIRef) -> Dict[str, Any]:
+        """ref(display) plus the (subj, pred, obj) edge's reified provenance when
+        present. For competesWith the emitters reify both closure directions, but a
+        legacy graph may carry only one, so the reverse key is the fallback."""
+        r: Dict[str, Any] = ref(display)
+        key = (_localname(str(subj)), pred, _localname(str(obj)))
+        p = edge_prov.get(key)
+        if p is None and pred == "competesWith":
+            p = edge_prov.get((_localname(str(obj)), pred, _localname(str(subj))))
+        r["prov"] = p
+        return r
+
     edge_counts = {
         "competesWith": len(list(g.triples((None, COMPETES_WITH, None)))),
         "prevailsOver": len(list(g.triples((None, PREVAILS_OVER, None)))),
@@ -112,7 +156,8 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
     clusters: List[Dict[str, Any]] = []
     for obl in sorted(obligations, key=lambda u: label(u).lower()):
         prevailed_over_by = [
-            ref(s) for s, _, o in g.triples((None, PREVAILS_OVER, obl)) if o == obl
+            edge_ref(s, s, "prevailsOver", obl)
+            for s, _, o in g.triples((None, PREVAILS_OVER, obl)) if o == obl
         ]
         roles = role_of.get(obl, [])
         # principles the bearing role adheres to (R->P), plus this obligation's own P
@@ -124,11 +169,17 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
             "iri": str(obl),
             "label": label(obl),
             "source_text": source_text(obl),
-            "competes_with": [ref(o) for _, _, o in g.triples((obl, COMPETES_WITH, None))],
-            "prevails_over": [ref(o) for _, _, o in g.triples((obl, PREVAILS_OVER, None))],
+            "competes_with": [
+                edge_ref(o, obl, "competesWith", o)
+                for _, _, o in g.triples((obl, COMPETES_WITH, None))
+            ],
+            "prevails_over": [
+                edge_ref(o, obl, "prevailsOver", o)
+                for _, _, o in g.triples((obl, PREVAILS_OVER, None))
+            ],
             "prevailed_over_by": prevailed_over_by,
             "defeasible_under": [
-                {**ref(st), "source_text": source_text(st)}
+                {**edge_ref(st, obl, "defeasibleUnder", st), "source_text": source_text(st)}
                 for _, _, st in g.triples((obl, DEFEASIBLE_UNDER, None))
             ],
             "derived_from_principle": [

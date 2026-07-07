@@ -101,3 +101,80 @@ def test_competition_panel_renders_in_case_template(model):
             stats={"total": 0}, competition=empty,
         )
         assert "Obligation Competition" not in html2  # graceful: no panel, no error
+
+
+# ---------------------------------------------------------------------------
+# Per-edge provenance (2026-07-08): the commit pipeline reifies each
+# defeasibility edge as a prov:Derivation node named
+# defeasibility_edge_provenance_<S>_<pred>_<O>, with the verbatim quote in
+# prov:value and "source_field=...; confidence=..." in rdfs:comment. The view
+# model attaches it to each rendered edge; graphs without the nodes (the
+# case_086 fixture, the legacy corpus) get prov=None and the template falls
+# back to entity-level quotes.
+# ---------------------------------------------------------------------------
+
+EDGE_PROV_TTL = """
+@prefix case: <http://proethica.org/ontology/case/99#> .
+@prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+case:Obl_A a proeth-core:Obligation ; rdfs:label "Duty A" ;
+    proeth-core:competesWith case:Obl_B ;
+    proeth-core:prevailsOver case:Obl_B .
+case:Obl_B a proeth-core:Obligation ; rdfs:label "Duty B" ;
+    proeth-core:competesWith case:Obl_A ;
+    proeth-core:defeasibleUnder case:State_S .
+case:State_S a proeth-core:State ; rdfs:label "State S" .
+
+case:defeasibility_edge_provenance_Obl_A_prevailsOver_Obl_B a prov:Derivation ;
+    rdfs:comment "source_field=tensionresolution; confidence=0.9" ;
+    prov:value "A overrode B in the circumstances." ;
+    prov:wasDerivedFrom case:Obl_A, case:Obl_B .
+case:defeasibility_edge_provenance_Obl_A_competesWith_Obl_B a prov:Derivation ;
+    rdfs:comment "source_field=balancingwith; confidence=0.8" ;
+    prov:value "A and B stood in tension." ;
+    prov:wasDerivedFrom case:Obl_A, case:Obl_B .
+case:defeasibility_edge_provenance_Obl_B_defeasibleUnder_State_S a prov:Derivation ;
+    rdfs:comment "source_field=tensionresolution; confidence=0.7" ;
+    prov:value "B yields when S obtains." ;
+    prov:wasDerivedFrom case:Obl_B, case:State_S .
+"""
+
+CASE99 = "http://proethica.org/ontology/case/99#"
+
+
+@pytest.fixture(scope="module")
+def prov_model():
+    return build_competition_clusters(EDGE_PROV_TTL)
+
+
+def test_per_edge_provenance_attached(prov_model):
+    a = next(c for c in prov_model["clusters"] if c["iri"] == CASE99 + "Obl_A")
+    b = next(c for c in prov_model["clusters"] if c["iri"] == CASE99 + "Obl_B")
+
+    # Directed edge: the winner's prevails_over ref carries the edge's own quote.
+    po = a["prevails_over"][0]
+    assert po["prov"]["quote"] == "A overrode B in the circumstances."
+    assert "confidence=0.9" in po["prov"]["note"]
+
+    # The loser's yields-to view of the SAME edge resolves the same node.
+    pob = b["prevailed_over_by"][0]
+    assert pob["prov"]["quote"] == "A overrode B in the circumstances."
+
+    # competesWith: only the A->B direction is reified here; the B->A ref
+    # falls back to the reverse key (symmetric pair, one grounding quote).
+    cw_b = b["competes_with"][0]
+    assert cw_b["prov"]["quote"] == "A and B stood in tension."
+
+    du = b["defeasible_under"][0]
+    assert du["prov"]["quote"] == "B yields when S obtains."
+
+
+def test_fixture_edges_have_no_prov(model):
+    """The case_086 fixture predates edge reification: every ref degrades to
+    prov=None (the template then falls back to entity-level quotes)."""
+    for c in model["clusters"]:
+        for key in ("competes_with", "prevails_over", "prevailed_over_by", "defeasible_under"):
+            for e in c[key]:
+                assert e["prov"] is None
