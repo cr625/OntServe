@@ -121,7 +121,9 @@ EDGE_PROV_TTL = """
 
 case:Obl_A a proeth-core:Obligation ; rdfs:label "Duty A" ;
     proeth-core:competesWith case:Obl_B ;
-    proeth-core:prevailsOver case:Obl_B .
+    proeth-core:prevailsOver case:Obl_B ;
+    proeth-core:derivedFromPrinciple case:Pr_X .
+case:Pr_X a proeth-core:Principle ; rdfs:label "Principle X" .
 case:Obl_B a proeth-core:Obligation ; rdfs:label "Duty B" ;
     proeth-core:competesWith case:Obl_A ;
     proeth-core:defeasibleUnder case:State_S .
@@ -169,6 +171,16 @@ def test_per_edge_provenance_attached(prov_model):
 
     du = b["defeasible_under"][0]
     assert du["prov"]["quote"] == "B yields when S obtains."
+
+
+def test_core_namespace_derived_from_principle(prov_model):
+    """The fresh-architecture commits emit derivedFromPrinciple in core#
+    (the legacy corpus used intermediate#); both must populate the cluster
+    row. Regression: the core# form rendered no 'derived from principle'
+    row on every fresh case (found examining case 9's Competence cluster)."""
+    a = next(c for c in prov_model["clusters"] if c["iri"] == CASE99 + "Obl_A")
+    assert [e["iri"] for e in a["derived_from_principle"]] == [CASE99 + "Pr_X"]
+    assert prov_model["edge_counts"]["derivedFromPrinciple"] == 1
 
 
 def test_fixture_edges_have_no_prov(model):

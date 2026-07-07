@@ -33,7 +33,10 @@ PREVAILS_OVER = CORE.prevailsOver
 DEFEASIBLE_UNDER = CORE.defeasibleUnder
 HAS_OBLIGATION = CORE.hasObligation
 ADHERES_TO_PRINCIPLE = CORE.adheresToPrinciple
-DERIVED_FROM_PRINCIPLE = PROETH.derivedFromPrinciple
+# derivedFromPrinciple moved namespaces: the legacy corpus (2026-05-23 R->P->O
+# backfill) emits intermediate#, the fresh-architecture commits emit core# (where
+# the property is declared since the nine-component work). Match both.
+DERIVED_FROM_PRINCIPLE_PREDS = (CORE.derivedFromPrinciple, PROETH.derivedFromPrinciple)
 # Grounding quote. The commit serializer emits it as proeth-prov:sourceText
 # (typed provenance). Older case TTLs (pre the 2026-05 serializer cleanup, before
 # the corpus is re-extracted) carry it as proeth:sourceText / proeth:sourcetext, so
@@ -129,7 +132,9 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
         "defeasibleUnder": len(list(g.triples((None, DEFEASIBLE_UNDER, None)))),
         "hasObligation": len(list(g.triples((None, HAS_OBLIGATION, None)))),
         "adheresToPrinciple": len(list(g.triples((None, ADHERES_TO_PRINCIPLE, None)))),
-        "derivedFromPrinciple": len(list(g.triples((None, DERIVED_FROM_PRINCIPLE, None)))),
+        "derivedFromPrinciple": sum(
+            len(list(g.triples((None, p, None)))) for p in DERIVED_FROM_PRINCIPLE_PREDS
+        ),
     }
     if not any(edge_counts.values()):
         return {**empty, "edge_counts": edge_counts}
@@ -143,8 +148,9 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
         obligations.add(s); obligations.add(o)
     for s, _, _o in g.triples((None, DEFEASIBLE_UNDER, None)):
         obligations.add(s)
-    for s, _, _o in g.triples((None, DERIVED_FROM_PRINCIPLE, None)):
-        obligations.add(s)
+    for pred in DERIVED_FROM_PRINCIPLE_PREDS:
+        for s, _, _o in g.triples((None, pred, None)):
+            obligations.add(s)
     for _s, _, o in g.triples((None, HAS_OBLIGATION, None)):
         obligations.add(o)
 
@@ -183,7 +189,9 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
                 for _, _, st in g.triples((obl, DEFEASIBLE_UNDER, None))
             ],
             "derived_from_principle": [
-                ref(p) for _, _, p in g.triples((obl, DERIVED_FROM_PRINCIPLE, None))
+                ref(p)
+                for pred in DERIVED_FROM_PRINCIPLE_PREDS
+                for _, _, p in g.triples((obl, pred, None))
             ],
             "borne_by_roles": [ref(r) for r in roles],
             "adheres_to_principles": adhered,
