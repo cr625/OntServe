@@ -90,12 +90,24 @@
         {% if not loop.first %}<hr class="my-2">{% endif %}
         <p class="mb-0">{{ val }}</p>
         {% endfor %}
-        {# Secondary: the rdfs:comment gloss, muted, unless it just repeats the definition. #}
-        {% if entity.comment and entity.comment not in prop_groups.definition %}
-        <p class="mb-0 small text-muted mt-2">{{ entity.comment }}</p>
-        {% endif %}
         {% elif entity.comment %}
+        {# For base classes iao:0000115 wins the comment column, so entity.comment
+           IS the formal definition here (the categorizer skips the duplicate 115
+           property, leaving the definition group empty). #}
         <p class="mb-0">{{ entity.comment }}</p>
+        {% endif %}
+        {# Secondary: the displaced rdfs:comment gloss, muted, unless it just
+           repeats whichever primary rendered above. The sync extractor stores it
+           under prop_groups.gloss when iao:0000115 won the comment column
+           (S-DISP-2); entity.comment doubles as a gloss slot for commit-routed
+           descriptor fields when a formal definition also rendered. #}
+        {% for val in prop_groups.gloss %}
+        {% if val not in prop_groups.definition and val != entity.comment %}
+        <p class="mb-0 small text-muted mt-2">{{ val }}</p>
+        {% endif %}
+        {% endfor %}
+        {% if prop_groups.definition and entity.comment and entity.comment not in prop_groups.definition %}
+        <p class="mb-0 small text-muted mt-2">{{ entity.comment }}</p>
         {% endif %}
         {# Description-layer fields (caseInvolvement, caseContext). The commit
            routes the same text into rdfs:comment for several components, so a

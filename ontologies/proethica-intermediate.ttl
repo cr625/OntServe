@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-06 (fifteenth pass, S properties review): the state carrier declarations aligned to the shipped contract. principleTransformation states its S->P->O content before its mechanics (the two-register pattern); affectedParties is described as a resolved-only carrier (never stored on fresh individuals); triggeringEvent and terminatedBy note their dual status (kept verbatim and resolved to the event-boundary edges); urgencyLevel drops the unpopulated Event arm; persistenceType covers the discovered leaves alongside the archetypes; the stateCategory routing comment names RegulatoryState, the actual archetype, in place of a discovered leaf. The archetype grounding comment carries the corrected Almpani and Stefaneas record."@en ;
     skos:changeNote "2026-07-06 (fourteenth pass, S text pass, style layer): the CompetenceGapState minting mechanics (decision D2\') move out of the definitional slots into the comment, the first enforcement of the two-register rule on a definitional field; the ConflictOfInterestState and DisclosureState exemplar triples are restructured or extended (the competence-gap modes triple stays as the designed closed set); the class comments align to their definitions. The four uncited archetype content-kind classes verified as clean design language with dissertation-grounded constructs."@en ;
     skos:changeNote "2026-07-06 (thirteenth pass, S text pass, citation layer): the six citation-bearing State classes verified against their sources and given the 119 companions. Corrections: the Stenseke capacity clause on CompetenceState names Kant's ought-implies-can with Stenseke as computational analogue (the recorded recurrence); the Almpani and Stefaneas citation is two-author and 2022 (Studia Humana 11:3-4), not et al. 2023; EmergencyState drops the reference entirely (emergency and suspension occur nowhere in the paper) and RiskState drops Berreby (defeat occurs nowhere in his), each clause staying as design language or re-grounded in the verified priority-ordering construct; TemporalState no longer reads Berreby fluents as duties (his fluents carry no deontic content; the inertial and non-inertial distinction is verbatim his); EpistemicState scopes the epistemic condition to the classical Aristotelian construct with the Sarmiento beyond-causality note stated as what the paper says, and gains the Sarmiento reference alongside the doctrine-of-double-effect formalization."@en ;
     skos:changeNote "2026-07-06 (twelfth pass, O properties review): six dead declarations deleted. The Event-side proeth:triggersObligation and proeth:altersPriority and the Constraint-side proeth:conflictsWithObligation had zero uses in committed cases, the extended store, code, and shapes; the live design carries their directions through the Event Calculus chain and the defeasibility family (tombstones name the successors). The three remaining participant literal twins, proeth:obligatedParty, proeth:possessedBy, and proeth:constrainedEntity, were deleted on the invokedBy-twin evidence (the commit never wrote them; the proeth-core object edges are the sole carriers), closing the recorded O, Ca, and Cs twin decision at once. The requiresCapabilityText comment no longer implies an Action-domain requiresCapability relation, and the constraint-retirement comment now credits the intrinsic force of a single constraint to its definition and severity attribute rather than to the edge family."@en ;
@@ -949,11 +950,11 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 # fall under several content kinds at once (a risk that also creates a conflict
 # of interest).
 #
-# Grounding: Berreby et al. (2017) Event-Calculus fluents; Almpani et al. (2023)
-# context-based dynamic obligation priorities; Sarmiento et al. (2023) causal
-# chains initiating states; Stenseke (2024) obligation-presupposes-capacity;
-# Govindarajulu & Bringsjord (2017) obligation's dependence on the knowledge
-# state.
+# Grounding: Berreby et al. (2017) Event-Calculus fluents; Almpani and Stefaneas
+# (2022) context-based dynamic obligation priorities; Sarmiento et al. (2023)
+# causal chains initiating states; Stenseke (2024) the computational analogue of
+# ought-implies-can; Govindarajulu and Bringsjord (2017) the dependence of
+# obligation on the knowledge state.
 # =================================================================
 
 :EpistemicState a owl:Class ;
@@ -1792,7 +1793,7 @@ proeth:subject a owl:DatatypeProperty ;
 proeth:affectedParties a owl:DatatypeProperty ;
     rdfs:label "affected parties"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on State: parties the state bears on (also resolved to proeth-core:affects edges)."@en .
+    rdfs:comment "Carrier field on the extracted state: parties the state bears on, resolved at commit to proeth-core:affects edges and not stored as a literal on fresh-architecture individuals (legacy rows may carry values)."@en .
 
 proeth:activePeriod a owl:DatatypeProperty ;
     rdfs:label "active period"@en ;
@@ -1802,27 +1803,27 @@ proeth:activePeriod a owl:DatatypeProperty ;
 proeth:triggeringEvent a owl:DatatypeProperty ;
     rdfs:label "triggering event"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on State: the event bringing the state into being."@en .
+    rdfs:comment "Intended on State: the event bringing the state into being. Kept verbatim on the individual and also resolved to the proeth-core:activatedByEvent edge."@en .
 
 proeth:terminatedBy a owl:DatatypeProperty ;
     rdfs:label "terminated by"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on State: what removes the state."@en .
+    rdfs:comment "Intended on State: what removes the state. Kept verbatim on the individual and also resolved to the proeth-core:terminatedByEvent edge."@en .
 
 proeth:urgencyLevel a owl:DatatypeProperty ;
     rdfs:label "urgency level"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended individual-level on State/Event: per-occurrence urgency judgment (Jones 1991 salience), not a subkind."@en .
+    rdfs:comment "Intended individual-level on State: per-occurrence urgency judgment (Jones 1991 salience), not a subkind."@en .
 
 proeth:persistenceType a owl:DatatypeProperty ;
     rdfs:label "persistence type"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended class-level on a State archetype: the Berreby et al. (2017) Event-Calculus fluent character, inertial (persists until terminated) or non_inertial (holds momentarily)."@en .
+    rdfs:comment "Intended class-level on a state class, the nine archetypes and the discovered leaves beneath them: the inertial versus non-inertial fluent character of Berreby et al. (2017), inertial (persists until terminated) or non_inertial (holds momentarily)."@en .
 
 proeth:principleTransformation a owl:DatatypeProperty ;
     rdfs:label "principle transformation"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on State: state-edge annotation grounding an R->P->O derivation."@en .
+    rdfs:comment "Intended on State: how the obtaining of the state turns an abstract principle into a concrete obligation for the parties it concerns (the S->P->O account). Written onto the committed state individual as a synthesis literal by the state-edge pass and read as grounding by the R->P->O derivation."@en .
 
 proeth:stateClass a owl:DatatypeProperty ;
     rdfs:label "state class"@en ;
@@ -2090,7 +2091,7 @@ proeth:obligationType a owl:DatatypeProperty ;
 proeth:stateCategory a owl:DatatypeProperty ;
     rdfs:label "state category"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Routing input: the content archetype driving the archetype subClassOf typing (EpistemicState, RiskState, CompetenceState, EmergencyState, ConflictOfInterestState, RegulatoryApplicabilityState, ...). Consumed at commit; not stored as a literal."@en .
+    rdfs:comment "Routing input: the content archetype driving the archetype subClassOf typing (EpistemicState, RiskState, CompetenceState, EmergencyState, ConflictOfInterestState, RegulatoryState, ...). Consumed at commit; not stored as a literal."@en .
 
 proeth:sourceKind a owl:DatatypeProperty ;
     rdfs:label "source kind"@en ;

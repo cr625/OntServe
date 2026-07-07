@@ -250,11 +250,12 @@ pcsh:StateDefinitionShape
     rdfs:label "State definition schema (type-level, descriptive, field contract)"@en ;
     rdfs:comment "What individuates a state TYPE: its content archetype (drives the archetype subClassOf typing) and its persistence type (inertial vs non-inertial fluent, a class-level datatype). Its per-case urgency and the activatesObligation edge are per-individual and declared on StatePropertyShape, mirroring the Role/Principle/Obligation Definition/Property split and the state scopeNote (which names the condition and its persistence type as type-defining). Descriptive only (no validation result); state_category is a routing input, not stored as a literal."@en ;
     sh:property [ sh:path proeth:stateCategory ;     sh:name "state archetype" ;      sh:description "The content archetype, which drives the archetype subClassOf typing: EpistemicState, RiskState, CompetenceState, EmergencyState, ConflictOfInterestState, RegulatoryState, TemporalState, ResourceState, DisclosureState. A classification of the state content, explicitly NOT the activatesObligation relation. A routing input, not stored as a literal." ; sh:order 1 ] ;
-    sh:property [ sh:path proeth:persistenceType ;   sh:name "persistence type" ;     sh:description "Whether the state is an inertial fluent (holds until an event terminates it) or a non-inertial fluent (true at a single time point), per Berreby's Event Calculus; a class-level datatype, a property of the fluent predicate itself." ; sh:order 2 ] .
+    sh:property [ sh:path proeth:persistenceType ;   sh:name "persistence type" ;     sh:description "Whether the state is an inertial fluent (holds until an event terminates it) or a non-inertial fluent (true at a single time point), the inertial versus non-inertial fluent distinction of Berreby et al. (2017) in the Event Calculus; a class-level datatype, a property of the fluent predicate itself." ; sh:order 2 ] .
 
 # StatePropertyShape: the per-case fields a state INDIVIDUAL carries in a given case (the S-side analogue of
-# ProfessionalRolePropertyShape / PrinciplePropertyShape / ObligationPropertyShape). urgencyLevel is a per-
-# individual literal (Jones salience); activatesObligation resolves to the outgoing S->O edge. Targets
+# ProfessionalRolePropertyShape / PrinciplePropertyShape / ObligationPropertyShape). urgencyLevel, subject,
+# activePeriod, and the demoted event shadows are per-individual literals; the activation, affects, and
+# event-boundary rows resolve to outgoing edges. Targets
 # core:State, NOT a narrower archetype: unlike Role (whose bearer data is professional-only), every state
 # archetype carries urgency and can activate obligations. Read by the {{ state_schema }} prompt as the per-case
 # section and rendered as the State entity page's Bearer Attributes. Descriptive only (no sh:minCount/sh:datatype).
@@ -262,9 +263,17 @@ pcsh:StatePropertyShape
     a sh:NodeShape ;
     sh:targetClass core:State ;
     rdfs:label "State per-case schema (individual data, non-definitional)"@en ;
-    rdfs:comment "What a given state INDIVIDUAL is described by in a specific case: its urgency (per-case salience) and the obligation it activates (an edge). These do NOT individuate the state TYPE (that is StateDefinitionShape); their values are per-case, asserted on the individual. Descriptive only."@en ;
-    sh:property [ sh:path proeth:urgencyLevel ;      sh:name "urgency level" ;        sh:description "The salience or acuteness of the state in this case (Jones moral-intensity salience: imminence, magnitude, proximity)." ; sh:order 1 ] ;
-    sh:property [ sh:path core:activatesObligation ; sh:name "activates obligation" ; sh:description "The obligation the state makes applicable, via the outgoing S->O activatesObligation edge; the incoming counterpart is defeasibleUnder (O->S), recording the obligation that yields when this state obtains. Range: Obligation." ; sh:order 2 ] .
+    rdfs:comment "What a given state INDIVIDUAL is described by in a specific case: its bearer and holding period, its urgency (per-case salience), the event boundaries of the fluent, and the obligations, constraints, and agents its obtaining engages via edges. These do NOT individuate the state TYPE (that is StateDefinitionShape); their values are per-case, asserted on the individual. The proeth:principleTransformation synthesis literal (the S->P->O grounding written onto the individual by the state-edge pass) is deliberately not part of the extraction field contract. Descriptive only."@en ;
+    sh:property [ sh:path proeth:urgencyLevel ;      sh:name "urgency level" ;        sh:description "The salience or acuteness of the state in this case (Jones 1991 moral-intensity salience; components include temporal immediacy, magnitude of consequences, and proximity)." ; sh:order 1 ] ;
+    sh:property [ sh:path core:activatesObligation ; sh:name "activates obligation" ; sh:description "The obligation the state makes applicable, via the outgoing S->O activatesObligation edge; the incoming counterpart is defeasibleUnder (O->S), recording the obligation that yields when this state obtains. Range: Obligation." ; sh:order 2 ] ;
+    sh:property [ sh:path core:activatesConstraint ; sh:name "activates constraint" ; sh:description "The constraint the state activates, via the outgoing S->Cs activatesConstraint edge, bounding the actions available while the state holds. Range: Constraint." ; sh:order 3 ] ;
+    sh:property [ sh:path core:affects ;             sh:name "affects" ;              sh:description "The agent(s) the state bears on, via the S->Agent affects edge, resolved from the affected-parties text by embedding shortlist + LLM multi-select. Range: Agent." ; sh:order 4 ] ;
+    sh:property [ sh:path proeth:subject ;           sh:name "subject" ;              sh:description "The entity the state holds of (the bearer text); a kept literal that also feeds the defeasibility prompt as state context." ; sh:order 5 ] ;
+    sh:property [ sh:path proeth:activePeriod ;      sh:name "active period" ;        sh:description "The period over which the state holds, as extracted text." ; sh:order 6 ] ;
+    sh:property [ sh:path proeth:triggeringEvent ;   sh:name "triggering event" ;     sh:description "The event bringing the state into being; kept verbatim on the individual and also resolved to the activatedByEvent edge (the start boundary of the fluent)." ; sh:order 7 ] ;
+    sh:property [ sh:path proeth:terminatedBy ;      sh:name "terminated by" ;        sh:description "What removes the state; kept verbatim on the individual and also resolved to the terminatedByEvent edge (the end boundary of the fluent)." ; sh:order 8 ] ;
+    sh:property [ sh:path core:activatedByEvent ;    sh:name "activated by event" ;   sh:description "The Event whose occurrence initiates this state, via the outgoing activatedByEvent edge (the start boundary of the fluent). Range: Event." ; sh:order 9 ] ;
+    sh:property [ sh:path core:terminatedByEvent ;   sh:name "terminated by event" ;  sh:description "The Event whose occurrence ends this state, via the outgoing terminatedByEvent edge (the end boundary of the fluent). Range: Event." ; sh:order 10 ] .
 
 # ResourceDefinitionShape: the definitional field contract of any resource TYPE/individual (the Rs
 # component), read by the {{ resource_schema }} prompt block. Descriptive only (no validation result).
@@ -358,7 +367,7 @@ pcsh:EventDefinitionShape
     a sh:NodeShape ;
     sh:targetClass core:Event ;
     rdfs:label "Event definition schema (light, descriptive, field contract)"@en ;
-    rdfs:comment "The light field contract of an event: its origin, the state fluents it initiates or terminates, and its persistence. Descriptive only (no validation result); event_origin drives the three-way origin subClassOf typing and is not stored as a literal. Kept deliberately light per the specification."@en ;
+    rdfs:comment "The light field contract of an event: its origin, the state fluents it initiates or terminates, and its temporal marker. Descriptive only (no validation result); event_origin drives the three-way origin subClassOf typing and is not stored as a literal. Kept deliberately light per the specification."@en ;
     sh:property [ sh:path proeth:eventType ;     sh:name "event type" ;     sh:description "The origin of the event, which drives the three-way subClassOf typing into the mutually disjoint origin subclasses: outcome maps to AgentCausedEvent, exogenous to ExogenousEvent, automatic to AutomaticEvent (Berreby/Sarmiento origin distinction). A routing input, not stored as a literal." ; sh:order 1 ] ;
     sh:property [ sh:path core:initiates ;         sh:name "initiates" ;        sh:description "The State (fluent) the event initiates, via the initiates edge (Event->State). Range: State." ; sh:order 2 ] ;
     sh:property [ sh:path core:terminates ;        sh:name "terminates" ;       sh:description "The State (fluent) the event terminates, via the terminates edge (Event->State). Range: State." ; sh:order 3 ] ;

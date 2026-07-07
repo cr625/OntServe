@@ -24,14 +24,15 @@ _SEMANTIC_LINK_PREDS = [
     ('http://www.w3.org/2004/02/skos/core#relatedMatch', 'related match'),
     ('http://www.w3.org/2000/01/rdf-schema#seeAlso', 'see also'),
     ('http://purl.org/dc/terms/source', 'source'),
+    ('http://purl.org/dc/terms/references', 'references'),
 ]
 
 # Local-name keys of the crosswalk predicates above, for suppressing duplicate
 # rendering: an IRI-valued source/seeAlso/match triple is surfaced by the
 # Mappings & provenance card and must not ALSO render as a Properties
 # relationship row (the same DOI link showed twice on principle-class pages).
-_CROSSWALK_KEYS = frozenset({'source', 'seealso', 'exactmatch', 'closematch',
-                             'broadmatch', 'relatedmatch'})
+_CROSSWALK_KEYS = frozenset({'source', 'seealso', 'references', 'exactmatch',
+                             'closematch', 'broadmatch', 'relatedmatch'})
 
 
 def _entity_semantic_links(entity, ontology):
@@ -224,6 +225,7 @@ def _categorize_entity_properties(entity):
     groups = {
         'description': [],
         'definition': [],
+        'gloss': [],
         'definition_source': [],
         'editor_note': [],
         'scope_notes': [],
@@ -251,6 +253,15 @@ def _categorize_entity_properties(entity):
         # obligationStatement, ...) into the comment AND keeps the field
         # literal, and the Definition card already shows the comment.
         if isinstance(value, str) and value == (getattr(entity, 'comment', None) or ''):
+            continue
+
+        # The displaced rdfs:comment gloss: the sync extractor stores it under
+        # 'comment' only when iao:0000115 won the comment column (S-DISP-2), so
+        # this is exactly the class-level gloss the definition_card renders as
+        # the muted secondary line.
+        if key.lower() == 'comment':
+            vals = value if isinstance(value, list) else [value]
+            groups['gloss'].extend(str(v) for v in vals if v)
             continue
 
         # skos:scopeNote is an inherited / contextual definition (e.g. the matched

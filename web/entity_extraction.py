@@ -315,6 +315,16 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         # Collect additional properties (e.g., discoveredInCase, importance)
         properties = _collect_properties(g, cls, class_skip_predicates)
 
+        # When iao:0000115 won the comment column, an rdfs:comment gloss on the
+        # class would otherwise be stored nowhere (class_skip_predicates drops
+        # it from the properties dict). Keep the displaced gloss under
+        # 'comment'; the entity page routes it to the Definition card's
+        # secondary line (S-DISP-2).
+        displaced_gloss = _first(g, cls, RDFS.comment)
+        if (displaced_gloss is not None and comment_str is not None
+                and str(displaced_gloss) != str(comment_str)):
+            properties['comment'] = str(displaced_gloss)
+
         # parent_uri is single-valued (the materialized primary via _pick_best_parent); a class with
         # MULTIPLE asserted named superclasses (PublicResponsibilityRole under RelationalRole AND
         # ProfessionalRole; the extraction-minted compound classes in intermediate-extended) would
