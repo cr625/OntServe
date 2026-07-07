@@ -1080,7 +1080,8 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     iao:0000115 "Documented cases from ethics review boards providing precedential knowledge and analogical reasoning patterns for similar situations, grounding abstract principles in professional reality per McLaren (2003): citing past cases provides the extensional definition of the principles."@en ;
     skos:definition "Documented cases from ethics review boards providing precedential knowledge and analogical reasoning patterns for similar situations, grounding abstract principles in professional reality per McLaren (2003): citing past cases provides the extensional definition of the principles." ;
     rdfs:comment "Concrete instances that exemplify principle application" ;
-    skos:scopeNote "Attribution: McLaren (Ashley & McLaren 1995; McLaren 2003, SIROCCO). This is McLaren's core contribution to the Resource component." ;
+    skos:scopeNote "Attribution: McLaren (Ashley and McLaren 1995; McLaren 2003, SIROCCO). This is McLaren's core contribution to the Resource component." ;
+    iao:0000119 "McLaren (2003). Extensionally defining principles and cases in ethics: an AI model. Artificial Intelligence 150(1-2): 145-181 (doi:10.1016/S0004-3702(03)00135-8)." ;
     dcterms:references <https://doi.org/10.1016/S0004-3702(03)00135-8> .
 
 # :ExpertInterpretation retired 2026-06-28: not one of the closed six Resource kinds; an
@@ -1101,7 +1102,11 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     iao:0000115 "Laws, regulations, and statutes governing professional practice that establish legal boundaries and compliance requirements for professional activities."@en ;
     skos:definition "Laws, regulations, and statutes governing professional practice that establish legal boundaries and compliance requirements for professional activities." ;
     rdfs:comment "Legal framework constraining professional practice" ;
-    skos:scopeNote "House extension with roots in legal case-based reasoning (Bench-Capon & Sartor 2003); treating legal materials as an ethics resource reflects the society-profession nexus (Frankel 1989)." .
+    skos:scopeNote "House extension with roots in legal case-based reasoning (Bench-Capon and Sartor 2003); treating legal materials as an ethics resource reflects the society-profession nexus (Frankel 1989, his coinage)." ;
+    iao:0000119 "Bench-Capon and Sartor (2003). A model of legal reasoning with cases incorporating theories and values. Artificial Intelligence 150(1-2): 97-143 (doi:10.1016/S0004-3702(03)00108-5)." ,
+                "Frankel (1989). Professional codes: why, how, and with what impact? Journal of Business Ethics 8(2-3): 109-115 (doi:10.1007/BF00382575)." ;
+    dcterms:source <https://doi.org/10.1016/S0004-3702(03)00108-5> , # Bench-Capon and Sartor 2003
+                   <https://doi.org/10.1007/BF00382575> . # Frankel 1989
 
 # :DecisionTool retired 2026-06-28: not one of the closed six Resource kinds; a decision-support
 # or ethics-workup schema folds to :ReferenceMaterial.
@@ -1850,7 +1855,7 @@ proeth:usedInContext a owl:DatatypeProperty ;
 proeth:usedBy a owl:DatatypeProperty ;
     rdfs:label "used by"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Resource: who uses it (also resolved to proeth-core:availableTo edges)."@en .
+    rdfs:comment "Intended on Resource: who uses it. Not stored as a literal; resolved to the proeth-core:availableTo edge at commit by the resource applier."@en .
 
 proeth:createdBy a owl:DatatypeProperty ;
     rdfs:label "created by"@en ;
