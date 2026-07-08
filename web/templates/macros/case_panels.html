@@ -17,12 +17,13 @@
     <div class="card-body">
         <p class="text-muted small mb-3">
             How the obligations in this case compete, which prevail, and the states
-            under which each is defeasible. Each obligation is one cluster; expand a
-            quote to see the verbatim case text grounding it, and hover an edge badge
-            for the quote grounding that specific edge (with its source field and
-            confidence), where the case records per-edge provenance.
+            under which each is defeasible. Each competing obligation is one cluster;
+            expand a quote to see the verbatim case text grounding it, and hover an
+            edge badge for the quote grounding that specific edge (with its source
+            field and confidence), where the case records per-edge provenance.
+            Obligations recorded without any competition are listed separately below.
         </p>
-        {% for c in competition.clusters %}
+        {% for c in competition.clusters if c.in_competition %}
         <div class="border rounded p-3 mb-3">
             <div class="d-flex justify-content-between align-items-start">
                 <h6 class="mb-1" title="{{ c.iri }}">
@@ -63,6 +64,25 @@
             </ul>
         </div>
         {% endfor %}
+        {% set lineage_only = competition.clusters | rejectattr('in_competition') | list %}
+        {% if lineage_only %}
+        <details class="small mt-2">
+            <summary class="text-muted" style="cursor:pointer;">
+                {{ lineage_only | length }} obligation(s) with principle/role lineage only (no recorded competition)
+            </summary>
+            <ul class="list-unstyled mt-2 mb-0 ms-2">
+                {% for c in lineage_only %}
+                <li class="mb-1">
+                    <span class="badge bg-light text-dark border" title="{{ c.iri }}">{{ c.label }}</span>
+                    {% if c.derived_from_principle %}<span class="text-muted">derived from</span>
+                        {% for e in c.derived_from_principle %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}{% endif %}
+                    {% if c.borne_by_roles %}<span class="text-muted">borne by</span>
+                        {% for e in c.borne_by_roles %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}{% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+        {% endif %}
     </div>
 </div>
 {% endmacro %}

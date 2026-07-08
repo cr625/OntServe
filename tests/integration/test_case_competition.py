@@ -190,3 +190,19 @@ def test_fixture_edges_have_no_prov(model):
         for key in ("competes_with", "prevails_over", "prevailed_over_by", "defeasible_under"):
             for e in c[key]:
                 assert e["prov"] is None
+
+
+def test_competing_count_and_in_competition_flags():
+    """Lineage-only obligations (derivedFromPrinciple / hasObligation but no
+    trio participation) cluster with in_competition=False and are excluded
+    from competing_count, which drives the panel's nav count (a 1-conflict
+    case previously showed its full obligation count)."""
+    ttl = EDGE_PROV_TTL + """
+case:Obl_L a proeth-core:Obligation ; rdfs:label "Duty L" ;
+    proeth-core:derivedFromPrinciple case:Pr_X .
+"""
+    m = build_competition_clusters(ttl)
+    flags = {c["label"]: c["in_competition"] for c in m["clusters"]}
+    assert flags == {"Duty A": True, "Duty B": True, "Duty L": False}
+    assert m["obligation_count"] == 3
+    assert m["competing_count"] == 2

@@ -68,6 +68,7 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
     empty = {
         "has_edges": False,
         "obligation_count": 0,
+        "competing_count": 0,
         "edge_counts": {},
         "clusters": [],
     }
@@ -171,7 +172,7 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
         for r in roles:
             adhered += [ref(p) for _, _, p in g.triples((r, ADHERES_TO_PRINCIPLE, None))]
 
-        clusters.append({
+        cluster = {
             "iri": str(obl),
             "label": label(obl),
             "source_text": source_text(obl),
@@ -195,11 +196,21 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
             ],
             "borne_by_roles": [ref(r) for r in roles],
             "adheres_to_principles": adhered,
-        })
+        }
+        # An obligation can enter the cluster set through lineage edges alone
+        # (derivedFromPrinciple / hasObligation); only trio participation makes
+        # it part of a competition. The view renders the two kinds differently
+        # and the panel count reports competing obligations, not all clusters.
+        cluster["in_competition"] = bool(
+            cluster["competes_with"] or cluster["prevails_over"]
+            or cluster["prevailed_over_by"] or cluster["defeasible_under"]
+        )
+        clusters.append(cluster)
 
     return {
         "has_edges": True,
         "obligation_count": len(clusters),
+        "competing_count": sum(1 for c in clusters if c["in_competition"]),
         "edge_counts": edge_counts,
         "clusters": clusters,
     }

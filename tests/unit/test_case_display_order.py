@@ -15,7 +15,9 @@ def _section(sid, n=1, title=None):
 def test_panels_interleave_with_sections_in_canonical_order():
     sections = [_section('nine_concepts'), _section('decision_points'),
                 _section('questions'), _section('other')]
-    competition = {'has_edges': True, 'clusters': [1, 2]}
+    # count comes from competing_count (competing obligations), not
+    # len(clusters): lineage-only clusters must not inflate the nav count.
+    competition = {'has_edges': True, 'clusters': [1, 2, 3], 'competing_count': 2}
     citations = {'has_citations': True, 'provision_count': 3}
     conclusions = {'has_conclusions': True, 'count': 4}
 

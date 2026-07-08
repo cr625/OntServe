@@ -576,7 +576,11 @@ def build_ordered_blocks(case_sections: List[Dict], competition=None,
 
     def _panel_count(name):
         if name == 'competition':
-            return len(competition.get('clusters', [])) if isinstance(competition, dict) else len(getattr(competition, 'clusters', []))
+            # Competing obligations, not all clusters: lineage-only obligations
+            # render collapsed and must not inflate the "Obligation Competition"
+            # nav count (a 1-conflict case previously showed 6).
+            return (competition.get('competing_count', 0) if isinstance(competition, dict)
+                    else getattr(competition, 'competing_count', 0))
         if name == 'citations':
             return citations.get('provision_count', 0) if isinstance(citations, dict) else getattr(citations, 'provision_count', 0)
         if name == 'conclusions':
