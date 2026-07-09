@@ -18,9 +18,10 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-07-04"^^xsd:date ;
     rdfs:comment "Case-analysis ontology: the classes that type the Step-4 analysis layer of committed ProEthica case ontologies (questions, conclusions, decision points, and their supporting analytic artifacts). Version 3.0.0 removes the unused LangExtract-era vocabulary (case type hierarchy, decision options, argumentation structures, section templates, scoring properties; roughly 30 classes and all 38 properties, none of which were instantiated in any committed case or referenced by any code path) and adds the five analysis-artifact classes the commit bridge and the case display use."@en ;
-    owl:versionInfo "3.0.0"^^xsd:string ;
+    owl:versionInfo "3.1.0"^^xsd:string ;
     owl:imports <http://proethica.org/ontology/intermediate> ;
-    skos:changeNote "v3.0.0 (2026-07-04): slimmed to the load-bearing surface. Kept EthicalQuestion, EthicalConclusion, DecisionPoint (359 typed individuals corpus-wide). Added QuestionEmergence, ResolutionPattern, CausalNormativeLink, CodeProvisionReference, PrecedentCaseReference so the commit bridge can type the Step-4 phase-2 analysis individuals it previously emitted as bare owl:NamedIndividual. The removed vocabulary is recoverable from version 2.0.0 in the OntServe version history."@en .
+    skos:changeNote "v3.0.0 (2026-07-04): slimmed to the load-bearing surface. Kept EthicalQuestion, EthicalConclusion, DecisionPoint (359 typed individuals corpus-wide). Added QuestionEmergence, ResolutionPattern, CausalNormativeLink, CodeProvisionReference, PrecedentCaseReference so the commit bridge can type the Step-4 phase-2 analysis individuals it previously emitted as bare owl:NamedIndividual. The removed vocabulary is recoverable from version 2.0.0 in the OntServe version history."@en ;
+    skos:changeNote "v3.1.0 (2026-07-09): added the citation-treatment vocabulary. citationType datatype property on PrecedentCaseReference plus a SKOS concept scheme defining the four treatment terms (supporting, distinguishing, analogizing, overruling), each with its correspondence to the treatment-signal convention of legal citator services (Shepard's). Previously the terms existed only in the extraction prompt; the extractor's vocabulary block is kept in sync with these definitions by a unit test in ProEthica."@en .
 
 ###############################################################
 # Analysis-layer classes
@@ -89,4 +90,57 @@ proeth-cases:PrecedentCaseReference a owl:Class ;
     rdfs:label "Precedent Case Reference"@en ;
     rdfs:comment "A citation node for a prior board case cited in the case analysis."@en ;
     skos:definition "An information content entity referencing a prior review-board case cited as precedent in a case analysis, carrying the cited case designation."@en ;
-    skos:changeNote "v3.0.0 (2026-07-04): added; precedent citation individuals were previously committed inconsistently typed."@en .
+    skos:changeNote "v3.0.0 (2026-07-04): added; precedent citation individuals were previously committed inconsistently typed."@en ;
+    skos:changeNote "v3.1.0 (2026-07-09): citationType now carries the citation-treatment term; see the CitationTreatmentScheme concepts for the term definitions."@en .
+
+###############################################################
+# Citation treatment vocabulary (v3.1.0)
+#
+# How the board USES a cited case, following the treatment-signal
+# convention of legal citator services (Shepard's Citations): a citing
+# reference is classified by its effect on the cited authority. The terms
+# are ProEthica's own; each concept records its nearest Shepard's signal
+# in an editorial note. The extraction prompt vocabulary block in
+# proethica/app/routes/scenario_pipeline/step4/precedents.py
+# (CITATION_TREATMENTS) must match these skos:definition strings verbatim;
+# tests/unit/test_precedent_vocabulary.py enforces the correspondence.
+###############################################################
+
+proeth-cases:citationType a owl:DatatypeProperty ;
+    rdfs:domain proeth-cases:PrecedentCaseReference ;
+    rdfs:range xsd:string ;
+    rdfs:label "citation type"@en ;
+    rdfs:comment "The citation-treatment term for a precedent case reference: how the board's analysis uses the cited case. Values are the skos:notation literals of the CitationTreatmentScheme concepts (supporting, distinguishing, analogizing, overruling)."@en ;
+    skos:changeNote "v3.1.0 (2026-07-09): added; the treatment term was previously carried only in the extraction JSON and never reached the committed graph."@en .
+
+proeth-cases:CitationTreatmentScheme a skos:ConceptScheme ;
+    rdfs:label "Citation Treatment Scheme"@en ;
+    skos:definition "The controlled vocabulary of citation-treatment terms for precedent case references, classifying a citation by the use the citing analysis makes of the cited case, after the treatment-signal convention of legal citator services."@en .
+
+proeth-cases:SupportingCitation a skos:Concept ;
+    skos:inScheme proeth-cases:CitationTreatmentScheme ;
+    skos:notation "supporting" ;
+    skos:prefLabel "supporting"@en ;
+    skos:definition "The Board cites the prior case as authority for the position taken in the present analysis, applying its principle to reach the same result."@en ;
+    skos:editorialNote "Nearest Shepard's signal: Followed (the citing opinion relies on the cited case as controlling or persuasive precedent)."@en .
+
+proeth-cases:DistinguishingCitation a skos:Concept ;
+    skos:inScheme proeth-cases:CitationTreatmentScheme ;
+    skos:notation "distinguishing" ;
+    skos:prefLabel "distinguishing"@en ;
+    skos:definition "The Board cites the prior case to show that its facts or principle do not govern the present case, explaining the material difference."@en ;
+    skos:editorialNote "Nearest Shepard's signal: Distinguished (the citing opinion differentiates the cited case on its facts or law)."@en .
+
+proeth-cases:AnalogizingCitation a skos:Concept ;
+    skos:inScheme proeth-cases:CitationTreatmentScheme ;
+    skos:notation "analogizing" ;
+    skos:prefLabel "analogizing"@en ;
+    skos:definition "The Board cites the prior case as a parallel fact situation and reasons from the similarity, without treating it as controlling authority."@en ;
+    skos:editorialNote "Nearest Shepard's signals: Explained / Harmonized (the citing opinion reasons from the cited case without adopting it as controlling). This is the characteristic mode of case-based ethics reasoning (McLaren 2003: analogizing or distinguishing a precedent against critical facts)."@en .
+
+proeth-cases:OverrulingCitation a skos:Concept ;
+    skos:inScheme proeth-cases:CitationTreatmentScheme ;
+    skos:notation "overruling" ;
+    skos:prefLabel "overruling"@en ;
+    skos:definition "The Board cites the prior case as superseded: its holding is disapproved, limited, or no longer reflects the Code as applied."@en ;
+    skos:editorialNote "Nearest Shepard's signals: Overruled / Limited / Questioned (the citing opinion negatively affects the cited case's authority)."@en .
