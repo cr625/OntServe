@@ -18,11 +18,12 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-07-09"^^xsd:date ;
     rdfs:comment "Case-analysis ontology: the typing vocabulary for the Step-4 analysis layer of committed ProEthica case ontologies. Eight pairwise-disjoint classes of analysis record (ethical questions and conclusions, decision points, question emergence rationales, resolution patterns, causal normative links, code provision references, and precedent case references), each an IAO information content entity about the case analysis and thereby outside the nine disjoint core categories of participants in the professional situation. Also carries the citation-treatment vocabulary (citationType plus the CitationTreatmentScheme concepts) for precedent case references."@en ;
-    owl:versionInfo "3.2.0"^^xsd:string ;
+    owl:versionInfo "3.3.0"^^xsd:string ;
     owl:imports <http://proethica.org/ontology/intermediate> ;
     skos:changeNote "v3.0.0 (2026-07-04): slimmed to the load-bearing surface, removing the unused LangExtract-era vocabulary (case type hierarchy, decision options, argumentation structures, section templates, scoring properties; roughly 30 classes and all 38 properties, none instantiated in any committed case or referenced by any code path). Kept EthicalQuestion, EthicalConclusion, DecisionPoint (359 typed individuals corpus-wide). Added QuestionEmergence, ResolutionPattern, CausalNormativeLink, CodeProvisionReference, PrecedentCaseReference so the commit bridge can type the Step-4 phase-2 analysis individuals it previously emitted as bare owl:NamedIndividual. The removed vocabulary is recoverable from version 2.0.0 in the OntServe version history."@en ;
     skos:changeNote "v3.1.0 (2026-07-09): added the citation-treatment vocabulary. citationType datatype property on PrecedentCaseReference plus a SKOS concept scheme defining the four treatment terms (supporting, distinguishing, analogizing, overruling), each with its correspondence to the treatment-signal convention of legal citator services (Shepard's). Previously the terms existed only in the extraction prompt; the extractor's vocabulary block is kept in sync with these definitions by a unit test in ProEthica."@en ;
-    skos:changeNote "v3.2.0 (2026-07-09): header cleanup (the version-removal narrative moved from rdfs:comment into the v3.0.0 change note where it belongs) and an AllDisjointClasses axiom over the eight analysis-record classes. The disjointness was verified against all 15 gold-corpus case ontologies (zero dual-typed individuals) before assertion; it makes cross-category typing errors in the analysis layer reasoner-visible instead of silently absorbed. EthicalQuestion's definition no longer calls a question a 'decision point': DecisionPoint is a sibling disjoint class."@en .
+    skos:changeNote "v3.2.0 (2026-07-09): header cleanup (the version-removal narrative moved from rdfs:comment into the v3.0.0 change note where it belongs) and an AllDisjointClasses axiom over the eight analysis-record classes. The disjointness was verified against all 15 gold-corpus case ontologies (zero dual-typed individuals) before assertion; it makes cross-category typing errors in the analysis layer reasoner-visible instead of silently absorbed. EthicalQuestion's definition no longer calls a question a 'decision point': DecisionPoint is a sibling disjoint class."@en ;
+    skos:changeNote "v3.3.0 (2026-07-09): added the PrecedentRelationshipScheme, the second controlled vocabulary of the precedent layer. The CitationTreatmentScheme classifies BOARD-AUTHORED citations by their treatment of the cited case; the PrecedentRelationshipScheme classifies SIMILARITY-DISCOVERED case relationships computed by the precedent discovery service (supporting, distinguishing, analogous, contrasting). Corresponding concepts across the two schemes are linked with skos:closeMatch; contrasting has no citation counterpart (a board does not cite a case in order to reach the opposite outcome on comparable facts). The discovery service's vocabulary block (RELATIONSHIP_TYPES in precedent_discovery_service.py) is kept in sync by the same ProEthica unit test that guards the citation treatments."@en .
 
 ###############################################################
 # Analysis-layer classes
@@ -166,3 +167,48 @@ proeth-cases:OverrulingCitation a skos:Concept ;
     skos:prefLabel "overruling"@en ;
     skos:definition "The Board cites the prior case as superseded: its holding is disapproved, limited, or no longer reflects the Code as applied."@en ;
     skos:editorialNote "Nearest Shepard's signals: Overruled / Limited / Questioned (the citing opinion negatively affects the cited case's authority)."@en .
+
+###############################################################
+# Precedent relationship vocabulary (v3.3.0)
+#
+# The second controlled vocabulary of the precedent layer: how a
+# SIMILARITY-DISCOVERED case relates to the source case, as classified by
+# the precedent discovery service (live similarity panel; not committed to
+# case graphs). Distinct from the CitationTreatmentScheme, which classifies
+# board-authored citations. RELATIONSHIP_TYPES in
+# proethica/app/services/precedent/precedent_discovery_service.py must
+# match these skos:definition strings verbatim;
+# tests/unit/test_precedent_vocabulary.py enforces the correspondence.
+###############################################################
+
+proeth-cases:PrecedentRelationshipScheme a skos:ConceptScheme ;
+    rdfs:label "Precedent Relationship Scheme"@en ;
+    skos:definition "The controlled vocabulary of relationship terms for similarity-discovered precedent candidates, classifying how a discovered case bears on the analysis of the source case. Assigned by the precedent discovery service from outcome agreement and similarity structure, in contrast to the CitationTreatmentScheme terms, which record the board's own use of a citation."@en .
+
+proeth-cases:SupportingRelationship a skos:Concept ;
+    skos:inScheme proeth-cases:PrecedentRelationshipScheme ;
+    skos:notation "supporting" ;
+    skos:prefLabel "supporting"@en ;
+    skos:definition "The discovered case reaches the same outcome on comparable facts, reinforcing the analysis of the source case."@en ;
+    skos:closeMatch proeth-cases:SupportingCitation .
+
+proeth-cases:DistinguishingRelationship a skos:Concept ;
+    skos:inScheme proeth-cases:PrecedentRelationshipScheme ;
+    skos:notation "distinguishing" ;
+    skos:prefLabel "distinguishing"@en ;
+    skos:definition "The discovered case is comparable in subject but differs in a material fact or principle, so its holding does not transfer to the source case."@en ;
+    skos:closeMatch proeth-cases:DistinguishingCitation .
+
+proeth-cases:AnalogousRelationship a skos:Concept ;
+    skos:inScheme proeth-cases:PrecedentRelationshipScheme ;
+    skos:notation "analogous" ;
+    skos:prefLabel "analogous"@en ;
+    skos:definition "The discovered case presents a parallel fact situation useful for reasoning by analogy, without outcome agreement being established."@en ;
+    skos:closeMatch proeth-cases:AnalogizingCitation .
+
+proeth-cases:ContrastingRelationship a skos:Concept ;
+    skos:inScheme proeth-cases:PrecedentRelationshipScheme ;
+    skos:notation "contrasting" ;
+    skos:prefLabel "contrasting"@en ;
+    skos:definition "The discovered case reaches a different outcome on comparable facts, marking a boundary of the principle at work in the source case."@en ;
+    skos:editorialNote "No citation-treatment counterpart: a board does not cite a case in order to reach the opposite outcome on comparable facts; outcome divergence is a product of similarity discovery."@en .
