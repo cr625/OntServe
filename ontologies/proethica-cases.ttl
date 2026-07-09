@@ -18,12 +18,13 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-07-09"^^xsd:date ;
     rdfs:comment "Case-analysis ontology: the typing vocabulary for the Step-4 analysis layer of committed ProEthica case ontologies. Eight pairwise-disjoint classes of analysis record (ethical questions and conclusions, decision points, question emergence rationales, resolution patterns, causal normative links, code provision references, and precedent case references), each an IAO information content entity about the case analysis and thereby outside the nine disjoint core categories of participants in the professional situation. Also carries the citation-treatment vocabulary (citationType plus the CitationTreatmentScheme concepts) for precedent case references."@en ;
-    owl:versionInfo "3.3.0"^^xsd:string ;
+    owl:versionInfo "3.4.0"^^xsd:string ;
     owl:imports <http://proethica.org/ontology/intermediate> ;
     skos:changeNote "v3.0.0 (2026-07-04): slimmed to the load-bearing surface, removing the unused LangExtract-era vocabulary (case type hierarchy, decision options, argumentation structures, section templates, scoring properties; roughly 30 classes and all 38 properties, none instantiated in any committed case or referenced by any code path). Kept EthicalQuestion, EthicalConclusion, DecisionPoint (359 typed individuals corpus-wide). Added QuestionEmergence, ResolutionPattern, CausalNormativeLink, CodeProvisionReference, PrecedentCaseReference so the commit bridge can type the Step-4 phase-2 analysis individuals it previously emitted as bare owl:NamedIndividual. The removed vocabulary is recoverable from version 2.0.0 in the OntServe version history."@en ;
     skos:changeNote "v3.1.0 (2026-07-09): added the citation-treatment vocabulary. citationType datatype property on PrecedentCaseReference plus a SKOS concept scheme defining the four treatment terms (supporting, distinguishing, analogizing, overruling), each with its correspondence to the treatment-signal convention of legal citator services (Shepard's). Previously the terms existed only in the extraction prompt; the extractor's vocabulary block is kept in sync with these definitions by a unit test in ProEthica."@en ;
     skos:changeNote "v3.2.0 (2026-07-09): header cleanup (the version-removal narrative moved from rdfs:comment into the v3.0.0 change note where it belongs) and an AllDisjointClasses axiom over the eight analysis-record classes. The disjointness was verified against all 15 gold-corpus case ontologies (zero dual-typed individuals) before assertion; it makes cross-category typing errors in the analysis layer reasoner-visible instead of silently absorbed. EthicalQuestion's definition no longer calls a question a 'decision point': DecisionPoint is a sibling disjoint class."@en ;
-    skos:changeNote "v3.3.0 (2026-07-09): added the PrecedentRelationshipScheme, the second controlled vocabulary of the precedent layer. The CitationTreatmentScheme classifies BOARD-AUTHORED citations by their treatment of the cited case; the PrecedentRelationshipScheme classifies SIMILARITY-DISCOVERED case relationships computed by the precedent discovery service (supporting, distinguishing, analogous, contrasting). Corresponding concepts across the two schemes are linked with skos:closeMatch; contrasting has no citation counterpart (a board does not cite a case in order to reach the opposite outcome on comparable facts). The discovery service's vocabulary block (RELATIONSHIP_TYPES in precedent_discovery_service.py) is kept in sync by the same ProEthica unit test that guards the citation treatments."@en .
+    skos:changeNote "v3.3.0 (2026-07-09): added the PrecedentRelationshipScheme, the second controlled vocabulary of the precedent layer. The CitationTreatmentScheme classifies BOARD-AUTHORED citations by their treatment of the cited case; the PrecedentRelationshipScheme classifies SIMILARITY-DISCOVERED case relationships computed by the precedent discovery service (supporting, distinguishing, analogous, contrasting). Corresponding concepts across the two schemes are linked with skos:closeMatch; contrasting has no citation counterpart (a board does not cite a case in order to reach the opposite outcome on comparable facts). The discovery service's vocabulary block (RELATIONSHIP_TYPES in precedent_discovery_service.py) is kept in sync by the same ProEthica unit test that guards the citation treatments."@en ;
+    skos:changeNote "v3.4.0 (2026-07-09): added the BoardOutcomeScheme, the outcome-polarity vocabulary behind the similarity system's outcome-alignment feature and 'same outcome' indicator (ethical, unethical, mixed, unclear). OUTCOME_TYPES in case_feature_extractor.py is kept in sync by the same ProEthica unit test."@en .
 
 ###############################################################
 # Analysis-layer classes
@@ -212,3 +213,49 @@ proeth-cases:ContrastingRelationship a skos:Concept ;
     skos:prefLabel "contrasting"@en ;
     skos:definition "The discovered case reaches a different outcome on comparable facts, marking a boundary of the principle at work in the source case."@en ;
     skos:editorialNote "No citation-treatment counterpart: a board does not cite a case in order to reach the opposite outcome on comparable facts; outcome divergence is a product of similarity discovery."@en .
+
+###############################################################
+# Board outcome vocabulary (v3.4.0)
+#
+# The outcome-polarity classification of a case's board conclusion,
+# extracted at ingestion (case_feature_extractor.extract_outcome) and used
+# by the similarity system's outcome-alignment feature. 'Same outcome'
+# (the outcome_match indicator on similar-case displays) means the two
+# cases carry the SAME POLARITY classification from this scheme; it does
+# not assert that the specific holdings agree. Outcome alignment scores
+# 1.0 for an identical classification, 0.0 for the ethical/unethical
+# opposition, and 0.5 for any pairing involving mixed or unclear (the
+# ternary indicator of the ICCBR 2026 evaluation). OUTCOME_TYPES in
+# proethica/app/services/precedent/case_feature_extractor.py must match
+# these skos:definition strings verbatim;
+# tests/unit/test_precedent_vocabulary.py enforces the correspondence.
+###############################################################
+
+proeth-cases:BoardOutcomeScheme a skos:ConceptScheme ;
+    rdfs:label "Board Outcome Scheme"@en ;
+    skos:definition "The controlled vocabulary of outcome-polarity classifications for a review-board conclusion, characterizing whether the board held the conduct at issue ethical, unethical, both in part, or left the polarity unclassifiable. The classification summarizes the polarity of the holding over the case as a whole and is the basis of the similarity system's outcome-alignment feature."@en .
+
+proeth-cases:EthicalOutcome a skos:Concept ;
+    skos:inScheme proeth-cases:BoardOutcomeScheme ;
+    skos:notation "ethical" ;
+    skos:prefLabel "ethical"@en ;
+    skos:definition "The board concluded the conduct at issue was ethical: the conclusion affirms conformance with the code, or the absence of a violation, and records no violation finding."@en .
+
+proeth-cases:UnethicalOutcome a skos:Concept ;
+    skos:inScheme proeth-cases:BoardOutcomeScheme ;
+    skos:notation "unethical" ;
+    skos:prefLabel "unethical"@en ;
+    skos:definition "The board concluded the conduct at issue was unethical: the conclusion records a violation of the code, or a finding of improper conduct, and no affirmation of conformance."@en .
+
+proeth-cases:MixedOutcome a skos:Concept ;
+    skos:inScheme proeth-cases:BoardOutcomeScheme ;
+    skos:notation "mixed" ;
+    skos:prefLabel "mixed"@en ;
+    skos:definition "The conclusion carries both a conformance finding and a violation finding, typically across distinct questions or aspects of the conduct."@en .
+
+proeth-cases:UnclearOutcome a skos:Concept ;
+    skos:inScheme proeth-cases:BoardOutcomeScheme ;
+    skos:notation "unclear" ;
+    skos:prefLabel "unclear"@en ;
+    skos:definition "The conclusion text yields no clear conformance or violation finding; the outcome polarity is not classified."@en ;
+    skos:editorialNote "Two unclear cases currently score 1.0 outcome alignment (identical classification), although agreement between two unclassified outcomes is vacuous; registered as a calibration item, corpus impact minimal (1 of 119 cases)."@en .
