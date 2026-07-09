@@ -16,12 +16,13 @@
 <http://proethica.org/ontology/cases> a owl:Ontology ;
     rdfs:label "ProEthica Cases Ontology"@en ;
     dc:creator "ProEthica AI"@en ;
-    dc:date "2026-07-04"^^xsd:date ;
-    rdfs:comment "Case-analysis ontology: the classes that type the Step-4 analysis layer of committed ProEthica case ontologies (questions, conclusions, decision points, and their supporting analytic artifacts). Version 3.0.0 removes the unused LangExtract-era vocabulary (case type hierarchy, decision options, argumentation structures, section templates, scoring properties; roughly 30 classes and all 38 properties, none of which were instantiated in any committed case or referenced by any code path) and adds the five analysis-artifact classes the commit bridge and the case display use."@en ;
-    owl:versionInfo "3.1.0"^^xsd:string ;
+    dc:date "2026-07-09"^^xsd:date ;
+    rdfs:comment "Case-analysis ontology: the typing vocabulary for the Step-4 analysis layer of committed ProEthica case ontologies. Eight pairwise-disjoint classes of analysis record (ethical questions and conclusions, decision points, question emergence rationales, resolution patterns, causal normative links, code provision references, and precedent case references), each an IAO information content entity about the case analysis and thereby outside the nine disjoint core categories of participants in the professional situation. Also carries the citation-treatment vocabulary (citationType plus the CitationTreatmentScheme concepts) for precedent case references."@en ;
+    owl:versionInfo "3.2.0"^^xsd:string ;
     owl:imports <http://proethica.org/ontology/intermediate> ;
-    skos:changeNote "v3.0.0 (2026-07-04): slimmed to the load-bearing surface. Kept EthicalQuestion, EthicalConclusion, DecisionPoint (359 typed individuals corpus-wide). Added QuestionEmergence, ResolutionPattern, CausalNormativeLink, CodeProvisionReference, PrecedentCaseReference so the commit bridge can type the Step-4 phase-2 analysis individuals it previously emitted as bare owl:NamedIndividual. The removed vocabulary is recoverable from version 2.0.0 in the OntServe version history."@en ;
-    skos:changeNote "v3.1.0 (2026-07-09): added the citation-treatment vocabulary. citationType datatype property on PrecedentCaseReference plus a SKOS concept scheme defining the four treatment terms (supporting, distinguishing, analogizing, overruling), each with its correspondence to the treatment-signal convention of legal citator services (Shepard's). Previously the terms existed only in the extraction prompt; the extractor's vocabulary block is kept in sync with these definitions by a unit test in ProEthica."@en .
+    skos:changeNote "v3.0.0 (2026-07-04): slimmed to the load-bearing surface, removing the unused LangExtract-era vocabulary (case type hierarchy, decision options, argumentation structures, section templates, scoring properties; roughly 30 classes and all 38 properties, none instantiated in any committed case or referenced by any code path). Kept EthicalQuestion, EthicalConclusion, DecisionPoint (359 typed individuals corpus-wide). Added QuestionEmergence, ResolutionPattern, CausalNormativeLink, CodeProvisionReference, PrecedentCaseReference so the commit bridge can type the Step-4 phase-2 analysis individuals it previously emitted as bare owl:NamedIndividual. The removed vocabulary is recoverable from version 2.0.0 in the OntServe version history."@en ;
+    skos:changeNote "v3.1.0 (2026-07-09): added the citation-treatment vocabulary. citationType datatype property on PrecedentCaseReference plus a SKOS concept scheme defining the four treatment terms (supporting, distinguishing, analogizing, overruling), each with its correspondence to the treatment-signal convention of legal citator services (Shepard's). Previously the terms existed only in the extraction prompt; the extractor's vocabulary block is kept in sync with these definitions by a unit test in ProEthica."@en ;
+    skos:changeNote "v3.2.0 (2026-07-09): header cleanup (the version-removal narrative moved from rdfs:comment into the v3.0.0 change note where it belongs) and an AllDisjointClasses axiom over the eight analysis-record classes. The disjointness was verified against all 15 gold-corpus case ontologies (zero dual-typed individuals) before assertion; it makes cross-category typing errors in the analysis layer reasoner-visible instead of silently absorbed. EthicalQuestion's definition no longer calls a question a 'decision point': DecisionPoint is a sibling disjoint class."@en .
 
 ###############################################################
 # Analysis-layer classes
@@ -32,8 +33,9 @@ proeth-cases:EthicalQuestion a owl:Class ;
     rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
     rdfs:label "Ethical Question"@en ;
     rdfs:comment "Specific ethical question posed in a case requiring professional resolution"@en ;
-    skos:definition "An information content entity representing a specific ethical question, dilemma, or decision point posed in a professional ethics case that requires systematic analysis and resolution through professional judgment"@en ;
-    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705> .
+    skos:definition "An information content entity representing a specific ethical question or dilemma posed in a professional ethics case that requires systematic analysis and resolution through professional judgment"@en ;
+    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705> ;
+    skos:changeNote "v3.2.0 (2026-07-09): 'or decision point' removed from the definition; DecisionPoint is a sibling class and the two are now asserted disjoint."@en .
 
 proeth-cases:EthicalConclusion a owl:Class ;
     rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
@@ -92,6 +94,26 @@ proeth-cases:PrecedentCaseReference a owl:Class ;
     skos:definition "An information content entity referencing a prior review-board case cited as precedent in a case analysis, carrying the cited case designation."@en ;
     skos:changeNote "v3.0.0 (2026-07-04): added; precedent citation individuals were previously committed inconsistently typed."@en ;
     skos:changeNote "v3.1.0 (2026-07-09): citationType now carries the citation-treatment term; see the CitationTreatmentScheme concepts for the term definitions."@en .
+
+# The eight analysis-record kinds are pairwise disjoint: a question is not a
+# conclusion, an emergence rationale is not a resolution pattern, a citation
+# node is not a decision point. Verified against all 15 gold-corpus case
+# ontologies (zero dual-typed individuals) before assertion; the axiom makes
+# a commit-bridge typing error a Pellet inconsistency rather than a silent
+# merge. All eight remain subclasses of IAO information content entity, so
+# the disjointness is internal to the analysis layer and does not interact
+# with the nine-way core category disjointness.
+[] a owl:AllDisjointClasses ;
+    owl:members (
+        proeth-cases:EthicalQuestion
+        proeth-cases:EthicalConclusion
+        proeth-cases:DecisionPoint
+        proeth-cases:QuestionEmergence
+        proeth-cases:ResolutionPattern
+        proeth-cases:CausalNormativeLink
+        proeth-cases:CodeProvisionReference
+        proeth-cases:PrecedentCaseReference
+    ) .
 
 ###############################################################
 # Citation treatment vocabulary (v3.1.0)
