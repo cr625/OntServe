@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-10 (Q&C edge materialization): proeth:answersQuestion deprecated; the conclusion-to-question linkage is the proeth-cases:answersQuestion object property (cases v3.5.0), edge-primary per CMT-3. The comment on proeth:questionType now names the QuestionTypeScheme concepts as its value vocabulary. The undeclared proeth:sourceQuestion literal is likewise superseded by proeth-cases:extendsQuestion and is no longer emitted."@en ;
     skos:changeNote "2026-07-07 (twenty-first pass, Ca/Cs properties review): three dead declarations deleted (constrainsAction and enablesAction, zero-use inverse twins of the reserved core Action-side directions; hasCapabilityLevel, a dropped-field carrier with no domain). capabilityKind states the shipped mechanism (the kind rides the class label through the match decision; no schema field or commit reader exists); boundaryType records its constraint_type spelling; source records its dual kept-and-resolved contract; requiredForObligations gains its declaration (the live inverted-resolution carrier whose legacy literals ride the sweep); the three dropped Ca carriers state their status; temporalScope and applicabilityCondition are disambiguated as window versus trigger, closing the recorded overlap question (both kept); the CompetenceGapState comments state the two routes (S-pass matching live, the D2' commit-stage minter pending); the Dennis verification record names the claim the paper supports."@en ;
     skos:changeNote "2026-07-07 (twentieth pass, Cs citation layer): content-level verify-or-drop over the ten boundary-type classes, whose per-kind references were one-off attributions of component-level literature. Surviving: Arkin on SafetyConstraint (safety precepts as constraints, verified) and Stenseke on LegalConstraint (re-grounded on his verbatim legal-versus-moral enforcement point; Kroll dropped). Dropped as decorative, with per-class change notes recording each check: Taddeo (Regulatory), Ganascia (Resource), Hallamaa and Kalliokoski (Competence), Dennis twice (Jurisdictional, Confidentiality), Furbach (Procedural), Govindarajulu and Bringsjord (Temporal); Benzmüller moved to core:Constraint, whose verification clause is what the dissertation cites him for. All definitional slots are now citation-free (two-register rule); every dropped kind keeps its text as design language."@en ;
     skos:changeNote "2026-07-07 (nineteenth pass, A/E properties review): the temporal machinery aligned to the shipped contract. The duplicate eventType declaration is deleted (the routing-input block is the single source); causesStateChange deleted (zero uses; the E spec folded it into description); hasTemporalRelation deprecated (never emitted; fromEntity/toEntity carry the linkage). causedByAction gains its two-register definition, the Wright reference beside Sarmiento, the ExogenousEvent guard note, and a placement changeNote (stays intermediate with its causal family). analyzesAction is re-domained to proeth-cases:CausalNormativeLink, the class its sole emitter asserts (the CausalChain domain wrongly inferred every reasoning node into the NESS chain population). Thirteen emitted-but-undeclared carriers gain declarations: the three TemporalRelation fields (fromEntityText, toEntityText, evidence), the nine CausalChain analysis fields (withinAgentControl with range xsd:boolean, matching the typed committed literals), and the agents decomposition. severity drops its retired Event half; hasAgent states its dual kept-and-resolved status; the TemporalRelation definition states the shipped carrier contract in place of the stored-URI claim."@en ;
@@ -2273,7 +2274,7 @@ proeth:questionText a owl:DatatypeProperty ;
 proeth:questionType a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:label "question type"@en ;
-    rdfs:comment "The kind of ethical question (board-explicit or derived). Borne by proeth-cases:EthicalQuestion individuals."@en .
+    rdfs:comment "The kind of ethical question. Values are the skos:notation literals of the proeth-cases:QuestionTypeScheme concepts (board_explicit, implicit, principle_tension, theoretical, counterfactual; cases v3.5.0). Borne by proeth-cases:EthicalQuestion individuals."@en .
 
 proeth:questionNumber a owl:DatatypeProperty ;
     rdfs:range xsd:integer ;
@@ -2341,9 +2342,10 @@ proeth:citedProvision a owl:DatatypeProperty ;
     rdfs:comment "A code provision designation cited by an analysis record. Repeated per provision. Replaces the unbounded citedProvision1/... family on conclusions (2026-07-04); the enrichment path already used the singular form."@en .
 
 proeth:answersQuestion a owl:DatatypeProperty ;
+    owl:deprecated true ;
     rdfs:range xsd:string ;
-    rdfs:label "answers question"@en ;
-    rdfs:comment "The number of an ethical question a conclusion answers. Repeated per question. Replaces the unbounded answersQuestion1/... family (2026-07-04)."@en .
+    rdfs:label "answers question (deprecated literal)"@en ;
+    rdfs:comment "DEPRECATED 2026-07-10: the conclusion-to-question linkage is the proeth-cases:answersQuestion object property (cases v3.5.0), edge-primary per CMT-3. This literal carried the question number as a string; the commit bridge no longer emits it and the gold corpus was converted by deterministic backfill. Historical: replaced the unbounded answersQuestion1/... family (2026-07-04)."@en .
 
 proeth:causalStep a owl:DatatypeProperty ;
     rdfs:range xsd:string ;

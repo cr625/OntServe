@@ -16,15 +16,16 @@
 <http://proethica.org/ontology/cases> a owl:Ontology ;
     rdfs:label "ProEthica Cases Ontology"@en ;
     dc:creator "ProEthica AI"@en ;
-    dc:date "2026-07-09"^^xsd:date ;
-    rdfs:comment "Case-analysis ontology: the typing vocabulary for the Step-4 analysis layer of committed ProEthica case ontologies. Eight pairwise-disjoint classes of analysis record (ethical questions and conclusions, decision points, question emergence rationales, resolution patterns, causal normative links, code provision references, and precedent case references), each an IAO information content entity about the case analysis and thereby outside the nine disjoint core categories of participants in the professional situation. Also carries the citation-treatment vocabulary (citationType plus the CitationTreatmentScheme concepts) for precedent case references."@en ;
-    owl:versionInfo "3.4.0"^^xsd:string ;
+    dc:date "2026-07-10"^^xsd:date ;
+    rdfs:comment "Case-analysis ontology: the typing vocabulary for the Step-4 analysis layer of committed ProEthica case ontologies. Eight pairwise-disjoint classes of analysis record (ethical questions and conclusions, decision points, question emergence rationales, resolution patterns, causal normative links, code provision references, and precedent case references), each an IAO information content entity about the case analysis and thereby outside the nine disjoint core categories of participants in the professional situation. Also carries the relationship properties of the analysis layer (answersQuestion, extendsQuestion) and its controlled vocabularies (citation treatment, precedent relationship, board outcome, question type)."@en ;
+    owl:versionInfo "3.5.0"^^xsd:string ;
     owl:imports <http://proethica.org/ontology/intermediate> ;
     skos:changeNote "v3.0.0 (2026-07-04): slimmed to the load-bearing surface, removing the unused LangExtract-era vocabulary (case type hierarchy, decision options, argumentation structures, section templates, scoring properties; roughly 30 classes and all 38 properties, none instantiated in any committed case or referenced by any code path). Kept EthicalQuestion, EthicalConclusion, DecisionPoint (359 typed individuals corpus-wide). Added QuestionEmergence, ResolutionPattern, CausalNormativeLink, CodeProvisionReference, PrecedentCaseReference so the commit bridge can type the Step-4 phase-2 analysis individuals it previously emitted as bare owl:NamedIndividual. The removed vocabulary is recoverable from version 2.0.0 in the OntServe version history."@en ;
     skos:changeNote "v3.1.0 (2026-07-09): added the citation-treatment vocabulary. citationType datatype property on PrecedentCaseReference plus a SKOS concept scheme defining the four treatment terms (supporting, distinguishing, analogizing, overruling), each with its correspondence to the treatment-signal convention of legal citator services (Shepard's). Previously the terms existed only in the extraction prompt; the extractor's vocabulary block is kept in sync with these definitions by a unit test in ProEthica."@en ;
     skos:changeNote "v3.2.0 (2026-07-09): header cleanup (the version-removal narrative moved from rdfs:comment into the v3.0.0 change note where it belongs) and an AllDisjointClasses axiom over the eight analysis-record classes. The disjointness was verified against all 15 gold-corpus case ontologies (zero dual-typed individuals) before assertion; it makes cross-category typing errors in the analysis layer reasoner-visible instead of silently absorbed. EthicalQuestion's definition no longer calls a question a 'decision point': DecisionPoint is a sibling disjoint class."@en ;
     skos:changeNote "v3.3.0 (2026-07-09): added the PrecedentRelationshipScheme, the second controlled vocabulary of the precedent layer. The CitationTreatmentScheme classifies BOARD-AUTHORED citations by their treatment of the cited case; the PrecedentRelationshipScheme classifies SIMILARITY-DISCOVERED case relationships computed by the precedent discovery service (supporting, distinguishing, analogous, contrasting). Corresponding concepts across the two schemes are linked with skos:closeMatch; contrasting has no citation counterpart (a board does not cite a case in order to reach the opposite outcome on comparable facts). The discovery service's vocabulary block (RELATIONSHIP_TYPES in precedent_discovery_service.py) is kept in sync by the same ProEthica unit test that guards the citation treatments."@en ;
-    skos:changeNote "v3.4.0 (2026-07-09): added the BoardOutcomeScheme, the outcome-polarity vocabulary behind the similarity system's outcome-alignment feature and 'same outcome' indicator (ethical, unethical, mixed, unclear). OUTCOME_TYPES in case_feature_extractor.py is kept in sync by the same ProEthica unit test."@en .
+    skos:changeNote "v3.4.0 (2026-07-09): added the BoardOutcomeScheme, the outcome-polarity vocabulary behind the similarity system's outcome-alignment feature and 'same outcome' indicator (ethical, unethical, mixed, unclear). OUTCOME_TYPES in case_feature_extractor.py is kept in sync by the same ProEthica unit test."@en ;
+    skos:changeNote "v3.5.0 (2026-07-10): the Q&C relationship layer becomes SPARQL-traversable (plan proethica/.claude/plans/qc-rdf-edges.md). Two object properties: answersQuestion (EthicalConclusion to the EthicalQuestion it resolves; previously the proeth:answersQuestion integer-as-string literal) and extendsQuestion (an analytical EthicalQuestion to the board EthicalQuestion it was generated from; previously the proeth:sourceQuestion integer literal, which never reached a committed graph). Both follow the edge-primary convention (CMT-3): the commit bridge emits the edge only, and the 15 gold case ontologies were converted by deterministic backfill from the committed literals. Also added the QuestionTypeScheme, the question-type vocabulary of the Q&C layer (board_explicit, implicit, principle_tension, theoretical, counterfactual); QUESTION_TYPES in question_analyzer.py is kept in sync by the same ProEthica unit test."@en .
 
 ###############################################################
 # Analysis-layer classes
@@ -116,6 +117,36 @@ proeth-cases:PrecedentCaseReference a owl:Class ;
         proeth-cases:CodeProvisionReference
         proeth-cases:PrecedentCaseReference
     ) .
+
+###############################################################
+# Q&C relationship edges (v3.5.0)
+#
+# The load-bearing relationships of the question-and-conclusion layer as
+# object properties, following the R->P->O and defeasibility materialization
+# lesson: relations are edges, never only literals. Both endpoints are
+# same-graph individuals with deterministic URIs (case#Question_<n>,
+# case#Conclusion_<n>), minted by the commit bridge in the same pass. The
+# declared domain and range make an endpoint typing error a Pellet
+# inconsistency under the eight-way analysis-layer disjointness.
+###############################################################
+
+proeth-cases:answersQuestion a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:EthicalConclusion ;
+    rdfs:range proeth-cases:EthicalQuestion ;
+    rdfs:label "answers question"@en ;
+    rdfs:comment "Links an ethical conclusion to an ethical question it resolves or responds to. A conclusion may answer several questions."@en ;
+    skos:definition "An object property linking an ethical conclusion to an ethical question that the conclusion resolves or responds to: a board conclusion answers the board question it rules on, and an analytical conclusion answers the analytical questions it addresses."@en ;
+    skos:changeNote "v3.5.0 (2026-07-10): added; replaces the proeth:answersQuestion integer-as-string literal (edge-primary, CMT-3). The question numbers stored by extraction resolve deterministically to the same-commit Question_<n> individuals."@en .
+
+proeth-cases:extendsQuestion a owl:ObjectProperty ,
+        owl:AsymmetricProperty ,
+        owl:IrreflexiveProperty ;
+    rdfs:domain proeth-cases:EthicalQuestion ;
+    rdfs:range proeth-cases:EthicalQuestion ;
+    rdfs:label "extends question"@en ;
+    rdfs:comment "Links an analytical question to the board question it was generated from. The committed question numbering encodes only the category (offsets 101/201/301/401); this edge is the sole parent linkage."@en ;
+    skos:definition "An object property linking a generated analytical question to the board question whose inquiry it extends, recording the source-question linkage assigned at generation. Not every analytical question extends a board question; the edge is present only when a source question was assigned."@en ;
+    skos:changeNote "v3.5.0 (2026-07-10): added; replaces the proeth:sourceQuestion integer literal, which was emitted by the bridge since 2026-07-09 but never reached a committed graph. Asymmetric and irreflexive after the prevailsOver precedent: a question extending itself, or a mutual extension pair, is a data error the reasoner should surface."@en .
 
 ###############################################################
 # Citation treatment vocabulary (v3.1.0)
@@ -259,3 +290,58 @@ proeth-cases:UnclearOutcome a skos:Concept ;
     skos:prefLabel "unclear"@en ;
     skos:definition "The conclusion text yields no clear conformance or violation finding; the outcome polarity is not classified."@en ;
     skos:editorialNote "Two unclear cases currently score 1.0 outcome alignment (identical classification), although agreement between two unclassified outcomes is vacuous; registered as a calibration item, corpus impact minimal (1 of 119 cases)."@en .
+
+###############################################################
+# Question type vocabulary (v3.5.0)
+#
+# The question-type classification of an EthicalQuestion, carried on the
+# committed individual as the proeth:questionType literal. One term for the
+# Board's own questions, four for the generated analytical categories. The
+# committed question number encodes the category by offset (board questions
+# numbered from 1, implicit from 101, principle_tension from 201, theoretical
+# from 301, counterfactual from 401); the offsets are category codes, NOT
+# parent references, and the parent linkage of an analytical question is the
+# extendsQuestion edge. QUESTION_TYPES in
+# proethica/app/services/step4_synthesis/question_analyzer.py must match
+# these skos:definition strings verbatim;
+# tests/unit/test_precedent_vocabulary.py enforces the correspondence.
+###############################################################
+
+proeth-cases:QuestionTypeScheme a skos:ConceptScheme ;
+    rdfs:label "Question Type Scheme"@en ;
+    skos:definition "The controlled vocabulary of question-type terms for ethical questions, distinguishing the questions the Board of Ethical Review itself posed from the four categories of analytical question generated to extend the board's inquiry."@en .
+
+proeth-cases:BoardExplicitQuestionType a skos:Concept ;
+    skos:inScheme proeth-cases:QuestionTypeScheme ;
+    skos:notation "board_explicit" ;
+    skos:prefLabel "board explicit"@en ;
+    skos:definition "A question the Board of Ethical Review itself posed in the case record, taken from the Questions section of the case (parsed directly when possible, otherwise extracted)."@en ;
+    skos:editorialNote "Committed question numbering: board questions are numbered from 1 in case order."@en .
+
+proeth-cases:ImplicitQuestionType a skos:Concept ;
+    skos:inScheme proeth-cases:QuestionTypeScheme ;
+    skos:notation "implicit" ;
+    skos:prefLabel "implicit"@en ;
+    skos:definition "An analytical question the case raises but the Board did not explicitly ask, surfaced from the case facts and extracted entities."@en ;
+    skos:editorialNote "Committed question numbering: implicit questions are numbered from 101. The offset is a category code, not a parent reference."@en .
+
+proeth-cases:PrincipleTensionQuestionType a skos:Concept ;
+    skos:inScheme proeth-cases:QuestionTypeScheme ;
+    skos:notation "principle_tension" ;
+    skos:prefLabel "principle tension"@en ;
+    skos:definition "An analytical question identifying a conflict between extracted principles or asking how such a conflict is to be balanced in the case."@en ;
+    skos:editorialNote "Committed question numbering: principle-tension questions are numbered from 201. The offset is a category code, not a parent reference."@en .
+
+proeth-cases:TheoreticalQuestionType a skos:Concept ;
+    skos:inScheme proeth-cases:QuestionTypeScheme ;
+    skos:notation "theoretical" ;
+    skos:prefLabel "theoretical"@en ;
+    skos:definition "An analytical question reframing the case in the terms of an ethical theory (deontological, consequentialist, or virtue-ethical), carrying its framework designation."@en ;
+    skos:editorialNote "Committed question numbering: theoretical questions are numbered from 301. The offset is a category code, not a parent reference. The framework designation rides the proeth:ethicalFramework literal."@en .
+
+proeth-cases:CounterfactualQuestionType a skos:Concept ;
+    skos:inScheme proeth-cases:QuestionTypeScheme ;
+    skos:notation "counterfactual" ;
+    skos:prefLabel "counterfactual"@en ;
+    skos:definition "An analytical question whose antecedent negates or alters a fact the case asserts, testing whether a specific board conclusion would still hold under the altered fact."@en ;
+    skos:editorialNote "Committed question numbering: counterfactual questions are numbered from 401. The offset is a category code, not a parent reference."@en .

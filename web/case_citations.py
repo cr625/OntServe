@@ -26,9 +26,10 @@ ETHICAL_CONCLUSION = CASES.EthicalConclusion
 CONCLUSION_TYPE = PROETH.conclusionType
 CONCLUSION_NUMBER = PROETH.conclusionNumber
 CONCLUSION_TEXT = PROETH.conclusionText
-ANSWERS_QUESTION = PROETH.answersQuestion
+# Object property since proethica-cases v3.5.0 (edge-primary; the former
+# intermediate-namespace string literal is deprecated and no longer emitted).
+ANSWERS_QUESTION = CASES.answersQuestion
 EXTRACTION_REASONING = PROETH.extractionReasoning
-ETHICAL_QUESTION = CASES.EthicalQuestion
 QUESTION_NUMBER = PROETH.questionNumber
 CONCEPT_TYPE = {
     CORE.Principle: "Principle",
@@ -204,23 +205,22 @@ def build_conclusions(case_ttl: Optional[str]) -> Dict[str, Any]:
     if not cidx:
         return empty
 
-    # Question number -> anchor localname, so answersQuestion values (bare
-    # number literals, e.g. "1", "101") can link to the question individuals.
-    question_anchor_by_number: Dict[str, str] = {}
-    for q in cg.subjects(RDF.type, ETHICAL_QUESTION):
-        qnum = cg.value(q, QUESTION_NUMBER)
-        if qnum is not None:
-            question_anchor_by_number[str(qnum)] = _localname(str(q))
-
     out: List[Dict[str, Any]] = []
     for iri, rec in cidx.items():
         s = URIRef(iri)
         cited = sorted({_localname(str(o)).replace("_", ".")
                         for o in cg.objects(s, CITES_PROVISION)})
-        answers = sorted(
-            ({"number": str(o), "anchor": question_anchor_by_number.get(str(o))}
-             for o in cg.objects(s, ANSWERS_QUESTION)),
-            key=lambda a: (len(a["number"]), a["number"]))
+        # answersQuestion targets the Question individual directly; the chip
+        # number comes from the target's questionNumber, falling back to the
+        # digits of the localname (Question_101) when the literal is absent.
+        answers = []
+        for q in cg.objects(s, ANSWERS_QUESTION):
+            anchor = _localname(str(q))
+            qnum = cg.value(q, QUESTION_NUMBER)
+            answers.append({"number": str(qnum) if qnum is not None
+                            else anchor.rsplit("_", 1)[-1],
+                            "anchor": anchor})
+        answers.sort(key=lambda a: (len(a["number"]), a["number"]))
         reasoning = cg.value(s, EXTRACTION_REASONING)
         out.append({**rec, "cited_provisions": cited,
                     "answers_questions": answers,
