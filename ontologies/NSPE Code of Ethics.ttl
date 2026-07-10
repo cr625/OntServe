@@ -686,27 +686,35 @@ nspe:Preamble a proeth-core:CodeProvision,
 
 nspe:III_4 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section III.4"@en ;
+    rdfs:label "Professional Obligations III.4"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:III .
+    dct:identifier "III.4" ;
+    dct:isPartOf nspe:III ;
+    skos:definition "Engineers shall not disclose, without consent, confidential information concerning the business affairs or technical processes of any present or former client or employer, or public body on which they serve."@en .
 
 nspe:III_5 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section III.5"@en ;
+    rdfs:label "Professional Obligations III.5"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:III .
+    dct:identifier "III.5" ;
+    dct:isPartOf nspe:III ;
+    skos:definition "Engineers shall not be influenced in their professional duties by conflicting interests."@en .
 
 nspe:III_8 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section III.8"@en ;
+    rdfs:label "Professional Obligations III.8"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:III .
+    dct:identifier "III.8" ;
+    dct:isPartOf nspe:III ;
+    skos:definition "Engineers shall accept personal responsibility for their professional activities, provided, however, that engineers may seek indemnification for services arising out of their practice for other than gross negligence."@en .
 
 nspe:II_5 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section II.5"@en ;
+    rdfs:label "Rules of Practice II.5"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:II .
+    dct:identifier "II.5" ;
+    dct:isPartOf nspe:II ;
+    skos:definition "Engineers shall avoid deceptive acts."@en .
 
 <http://proethica.org/ontology/obligations#Civic_Engagement> a proeth-core:Obligation,
         owl:NamedIndividual ;
@@ -754,33 +762,43 @@ nspe:II_5 a proeth-core:CodeProvision,
 
 nspe:III_3 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section III.3"@en ;
+    rdfs:label "Professional Obligations III.3"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:III .
+    dct:identifier "III.3" ;
+    dct:isPartOf nspe:III ;
+    skos:definition "Engineers shall avoid all conduct or practice that deceives the public."@en .
 
 nspe:III_6 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section III.6"@en ;
+    rdfs:label "Professional Obligations III.6"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:III .
+    dct:identifier "III.6" ;
+    dct:isPartOf nspe:III ;
+    skos:definition "Engineers shall not attempt to obtain employment or advancement or professional engagements by untruthfully criticizing other engineers, or by other improper or questionable methods."@en .
 
 nspe:III_7 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section III.7"@en ;
+    rdfs:label "Professional Obligations III.7"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:III .
+    dct:identifier "III.7" ;
+    dct:isPartOf nspe:III ;
+    skos:definition "Engineers shall not attempt to injure, maliciously or falsely, directly or indirectly, the professional reputation, prospects, practice, or employment of other engineers."@en .
 
 nspe:II_2 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section II.2"@en ;
+    rdfs:label "Rules of Practice II.2"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:II .
+    dct:identifier "II.2" ;
+    dct:isPartOf nspe:II ;
+    skos:definition "Engineers shall perform services only in the areas of their competence."@en .
 
 nspe:II_3 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section II.3"@en ;
+    rdfs:label "Rules of Practice II.3"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:II .
+    dct:identifier "II.3" ;
+    dct:isPartOf nspe:II ;
+    skos:definition "Engineers shall issue public statements only in an objective and truthful manner."@en .
 
 <http://proethica.org/ontology/obligations#Conflict_Disclosure> a proeth-core:Obligation,
         owl:NamedIndividual ;
@@ -800,9 +818,11 @@ nspe:II_3 a proeth-core:CodeProvision,
 
 nspe:III_9 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section III.9"@en ;
+    rdfs:label "Professional Obligations III.9"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:III .
+    dct:identifier "III.9" ;
+    dct:isPartOf nspe:III ;
+    skos:definition "Engineers shall give credit for engineering work to those to whom credit is due, and will recognize the proprietary interests of others."@en .
 
 <http://proethica.org/ontology/principles#Objectivity> a proeth-core:Principle,
         owl:NamedIndividual ;
@@ -816,19 +836,24 @@ nspe:II a proeth-core:CodeProvision,
         owl:NamedIndividual ;
     rdfs:label "Rules of Practice"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
+    dct:identifier "II" ;
     dct:isPartOf nspe:NSPECodeOfEthics .
 
 nspe:III_2 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section III.2"@en ;
+    rdfs:label "Professional Obligations III.2"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:III .
+    dct:identifier "III.2" ;
+    dct:isPartOf nspe:III ;
+    skos:definition "Engineers shall at all times strive to serve the public interest."@en .
 
 nspe:II_4 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section II.4"@en ;
+    rdfs:label "Rules of Practice II.4"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:II .
+    dct:identifier "II.4" ;
+    dct:isPartOf nspe:II ;
+    skos:definition "Engineers shall act for each employer or client as faithful agents or trustees."@en .
 
 <http://proethica.org/ontology/obligations#Ethical_Conduct> a proeth-core:Obligation,
         owl:NamedIndividual ;
@@ -846,19 +871,25 @@ nspe:I a proeth-core:CodeProvision,
         owl:NamedIndividual ;
     rdfs:label "Fundamental Canons"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:NSPECodeOfEthics .
+    dct:identifier "I" ;
+    dct:isPartOf nspe:NSPECodeOfEthics ;
+    skos:definition "Engineers, in the fulfillment of their professional duties, shall:"@en .
 
 nspe:III_1 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section III.1"@en ;
+    rdfs:label "Professional Obligations III.1"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:III .
+    dct:identifier "III.1" ;
+    dct:isPartOf nspe:III ;
+    skos:definition "Engineers shall be guided in all their relations by the highest standards of honesty and integrity."@en .
 
 nspe:II_1 a proeth-core:CodeProvision,
         owl:NamedIndividual ;
-    rdfs:label "NSPE Code Section II.1"@en ;
+    rdfs:label "Rules of Practice II.1"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
-    dct:isPartOf nspe:II .
+    dct:identifier "II.1" ;
+    dct:isPartOf nspe:II ;
+    skos:definition "Engineers shall hold paramount the safety, health, and welfare of the public."@en .
 
 <http://proethica.org/ontology/obligations#Disclosure> a proeth-core:Obligation,
         owl:NamedIndividual ;
@@ -884,6 +915,7 @@ nspe:III a proeth-core:CodeProvision,
         owl:NamedIndividual ;
     rdfs:label "Professional Obligations"@en ;
     proeth-core:partOfGuideline nspe:NSPECodeOfEthics ;
+    dct:identifier "III" ;
     dct:isPartOf nspe:NSPECodeOfEthics .
 
 <http://proethica.org/ontology/obligations#Faithful_Agency> a proeth-core:Obligation,
@@ -905,5 +937,4 @@ nspe:III a proeth-core:CodeProvision,
 nspe:NSPECodeOfEthics a proeth-core:Guideline,
         owl:NamedIndividual ;
     rdfs:label "NSPE Code of Ethics"@en .
-
 

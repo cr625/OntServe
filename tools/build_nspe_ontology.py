@@ -60,6 +60,12 @@ TOP_LEVEL_LABEL = {
     "II": "Rules of Practice",
     "III": "Professional Obligations",
 }
+# Section-heading definitions where the code itself carries prose. Verbatim
+# from proethica/app/data/nspe_code_for_engineers.txt (the canons' lead-in);
+# sections II and III are pure headings with no prose of their own.
+TOP_LEVEL_DEF = {
+    "I": "Engineers, in the fulfillment of their professional duties, shall:",
+}
 META_TYPE = {  # section_metadata establishes 'type' -> proeth-core class
     "principle": CORE.Principle,
     "obligation": CORE.Obligation,
@@ -151,14 +157,23 @@ def build_graph(rows):
         stats["concepts"] += 1
         return ref
 
+    def _has_children(code: str) -> bool:
+        prefix = code + "."
+        return any(other.startswith(prefix) for other in all_codes)
+
     for code in sorted(all_codes):
         node = NSPE[_frag(code)]
-        is_leaf = code in rows_by_code
         anc = _ancestors(code)
+        r = rows_by_code.get(code)
+        is_group = _has_children(code)
 
         g.add((node, RDF.type, OWL.NamedIndividual))
         g.add((node, RDF.type, CORE.CodeProvision))
         g.add((node, CORE.partOfGuideline, code_node))
+        # Every provision node carries its identifier (2026-07-10: group
+        # nodes were bare hierarchy stubs, yet cases cite group provisions
+        # directly -- case 9 cites III.8).
+        g.add((node, DCTERMS.identifier, Literal(code)))
 
         # Hierarchy: nest under immediate dotted ancestor, else under the document
         if len(anc) >= 2:
@@ -166,14 +181,16 @@ def build_graph(rows):
         else:
             g.add((node, DCTERMS.isPartOf, code_node))
 
-        if is_leaf:
-            r = rows_by_code[code]
+        if r:
             stats["provisions"] += 1
             g.add((node, RDFS.label, Literal(r["section_title"], lang="en")))
-            g.add((node, DCTERMS.identifier, Literal(code)))
             if r["section_text"]:
                 g.add((node, SKOS.definition, Literal(r["section_text"], lang="en")))
 
+        # Concept minting is LEAF-ONLY: a group provision's directive content
+        # is carried by its subsections' established concepts; minting for
+        # the group too would double-represent it.
+        if r and not is_group:
             category = r["section_category"]
             meta = r["section_metadata"] or {}
             establishes = meta.get("establishes") if isinstance(meta, dict) else None
@@ -205,10 +222,15 @@ def build_graph(rows):
                 g.add((node, CORE.establishes, prin))
                 stats["minted_obl"] += 1
             # preamble: no established concept
-        else:
+        elif not r:
+            # No row anywhere in guideline_sections: the three section
+            # headings. Identifier already emitted above; section I carries
+            # the canons' verbatim lead-in as its definition.
             stats["grouping"] += 1
             label = TOP_LEVEL_LABEL.get(code, f"NSPE Code Section {code}")
             g.add((node, RDFS.label, Literal(label, lang="en")))
+            if code in TOP_LEVEL_DEF:
+                g.add((node, SKOS.definition, Literal(TOP_LEVEL_DEF[code], lang="en")))
 
     return g, stats
 
@@ -238,10 +260,13 @@ def commit_to_ontserve(ttl_text: str):
                                                is_current, is_draft, workflow_status)
                 VALUES (%s, %s, %s, %s, %s, %s, 'build_nspe_ontology.py', true, false, 'published')
                 """,
-                (ont_id, next_ver, f"establishes-refresh-v{next_ver}", ttl_text, content_hash,
-                 "Refreshed after targeted establishes extraction over all 56 provisions: every "
-                 "CodeProvision now establishes shared Principle/Obligation/Constraint concepts; "
-                 "placeholder per-provision obligations removed."),
+                (ont_id, next_ver, f"group-provisions-v{next_ver}", ttl_text, content_hash,
+                 "Group provisions filled (2026-07-10): the 14 group-level provisions "
+                 "(II.1-II.5, III.1-III.9) now carry dct:identifier, family-prefixed labels, "
+                 "and verbatim skos:definition from guideline_sections (inserted from the "
+                 "in-repo annotated code); every provision node carries its identifier; "
+                 "section I carries the canons' lead-in. Concept minting stays leaf-only, "
+                 "so the established-concept layer is unchanged."),
             )
             conn.commit()
             print(f"Updated existing NSPE ontology id={ont_id} -> version {next_ver} (current).")
