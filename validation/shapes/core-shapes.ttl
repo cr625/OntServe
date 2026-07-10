@@ -403,8 +403,9 @@ pcsh:EventDefinitionShape
 # committed individuals are the richest per-individual carriers in the corpus, and the
 # StatePropertyShape/ResourcePropertyShape precedent is that per-individual reality is
 # documented on a PropertyShape. Descriptive only (no sh:minCount/sh:datatype); rendered as the
-# Action page's Bearer Attributes and NOT read by any prompt block (the actions prompt is
-# hand-built in the Step-3 extractor).
+# Action page's Bearer Attributes and read by the {{ action_schema }} prompt block (the
+# PropertyShape-only rendering in ProEthica's prompt_variable_resolver, injected into both the
+# seeded actions template and the hand-built Step-3 extractor prompt; wired 2026-07-10).
 pcsh:ActionPropertyShape
     a sh:NodeShape ;
     sh:targetClass core:Action ;
