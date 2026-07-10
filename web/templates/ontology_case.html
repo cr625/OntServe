@@ -509,7 +509,7 @@
             </div>
         </div>
         <div class="text-end">
-            <div style="font-size: 2rem; font-weight: 700;">{{ stats.total }}</div>
+            <div style="font-size: 2rem; font-weight: 700;">{{ stats.individuals if stats.individuals is defined else stats.total }}</div>
             <div style="font-size: 0.85rem; opacity: 0.9;">Named Individuals</div>
         </div>
     </div>
@@ -522,11 +522,12 @@
     <div class="formalism-panel-header">
         <h5><i class="bi bi-grid-3x3 me-2"></i>9-Concept Formalism</h5>
         <span class="stats-summary">
-            {% set ns = namespace(total=0) %}
+            {% set ns = namespace(ind=0, cls=0) %}
             {% for sub in section.subsections %}
-            {% set ns.total = ns.total + sub.entities|length %}
+            {% set ns.ind = ns.ind + (sub.entities | selectattr('entity_type', 'equalto', 'individual') | list | length) %}
+            {% set ns.cls = ns.cls + (sub.entities | rejectattr('entity_type', 'equalto', 'individual') | list | length) %}
             {% endfor %}
-            {{ ns.total }} individuals across 9 concepts
+            {{ ns.ind }} individuals and {{ ns.cls }} classes across 9 concepts
         </span>
     </div>
 

@@ -413,6 +413,12 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
     uncategorized = []
     stats = {
         'total': len(entities),
+        # True named-individual count (the header previously displayed
+        # 'total' -- individuals + class redeclarations + properties -- under
+        # the label 'Named Individuals'; 2026-07-10 alignment audit).
+        'individuals': sum(
+            1 for e in entities
+            if (getattr(e, 'entity_type', '') or '').lower() == 'individual'),
         'by_type': {},
         'by_section': {}
     }
