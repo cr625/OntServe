@@ -17,15 +17,16 @@
     rdfs:label "ProEthica Cases Ontology"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-07-10"^^xsd:date ;
-    rdfs:comment "Case-analysis ontology: the typing vocabulary for the Step-4 analysis layer of committed ProEthica case ontologies. Eight pairwise-disjoint classes of analysis record (ethical questions and conclusions, decision points, question emergence rationales, resolution patterns, causal normative links, code provision references, and precedent case references), each an IAO information content entity about the case analysis and thereby outside the nine disjoint core categories of participants in the professional situation. Also carries the relationship properties of the analysis layer (answersQuestion, extendsQuestion) and its controlled vocabularies (citation treatment, precedent relationship, board outcome, question type)."@en ;
-    owl:versionInfo "3.5.0"^^xsd:string ;
+    rdfs:comment "Case-analysis ontology: the typing vocabulary for the Step-4 analysis layer of committed ProEthica case ontologies. Eight pairwise-disjoint classes of analysis record (ethical questions and conclusions, decision points, question emergence rationales, resolution patterns, causal normative links, code provision references, and precedent case references), each an IAO information content entity about the case analysis and thereby outside the nine disjoint core categories of participants in the professional situation. Also carries the relationship properties of the analysis layer (the Q&C pair answersQuestion and extendsQuestion; explainsQuestion, describesResolutionOf, referencesProvision; and the DecisionPoint family decidesQuestion, addressesQuestion, alignsWithConclusion, involvesObligation, involvesAction, involvesConstraint, decidedByAgent) and its controlled vocabularies (citation treatment, precedent relationship, board outcome, question type)."@en ;
+    owl:versionInfo "3.6.0"^^xsd:string ;
     owl:imports <http://proethica.org/ontology/intermediate> ;
     skos:changeNote "v3.0.0 (2026-07-04): slimmed to the load-bearing surface, removing the unused LangExtract-era vocabulary (case type hierarchy, decision options, argumentation structures, section templates, scoring properties; roughly 30 classes and all 38 properties, none instantiated in any committed case or referenced by any code path). Kept EthicalQuestion, EthicalConclusion, DecisionPoint (359 typed individuals corpus-wide). Added QuestionEmergence, ResolutionPattern, CausalNormativeLink, CodeProvisionReference, PrecedentCaseReference so the commit bridge can type the Step-4 phase-2 analysis individuals it previously emitted as bare owl:NamedIndividual. The removed vocabulary is recoverable from version 2.0.0 in the OntServe version history."@en ;
     skos:changeNote "v3.1.0 (2026-07-09): added the citation-treatment vocabulary. citationType datatype property on PrecedentCaseReference plus a SKOS concept scheme defining the four treatment terms (supporting, distinguishing, analogizing, overruling), each with its correspondence to the treatment-signal convention of legal citator services (Shepard's). Previously the terms existed only in the extraction prompt; the extractor's vocabulary block is kept in sync with these definitions by a unit test in ProEthica."@en ;
     skos:changeNote "v3.2.0 (2026-07-09): header cleanup (the version-removal narrative moved from rdfs:comment into the v3.0.0 change note where it belongs) and an AllDisjointClasses axiom over the eight analysis-record classes. The disjointness was verified against all 15 gold-corpus case ontologies (zero dual-typed individuals) before assertion; it makes cross-category typing errors in the analysis layer reasoner-visible instead of silently absorbed. EthicalQuestion's definition no longer calls a question a 'decision point': DecisionPoint is a sibling disjoint class."@en ;
     skos:changeNote "v3.3.0 (2026-07-09): added the PrecedentRelationshipScheme, the second controlled vocabulary of the precedent layer. The CitationTreatmentScheme classifies BOARD-AUTHORED citations by their treatment of the cited case; the PrecedentRelationshipScheme classifies SIMILARITY-DISCOVERED case relationships computed by the precedent discovery service (supporting, distinguishing, analogous, contrasting). Corresponding concepts across the two schemes are linked with skos:closeMatch; contrasting has no citation counterpart (a board does not cite a case in order to reach the opposite outcome on comparable facts). The discovery service's vocabulary block (RELATIONSHIP_TYPES in precedent_discovery_service.py) is kept in sync by the same ProEthica unit test that guards the citation treatments."@en ;
     skos:changeNote "v3.4.0 (2026-07-09): added the BoardOutcomeScheme, the outcome-polarity vocabulary behind the similarity system's outcome-alignment feature and 'same outcome' indicator (ethical, unethical, mixed, unclear). OUTCOME_TYPES in case_feature_extractor.py is kept in sync by the same ProEthica unit test."@en ;
-    skos:changeNote "v3.5.0 (2026-07-10): the Q&C relationship layer becomes SPARQL-traversable (plan proethica/.claude/plans/qc-rdf-edges.md). Two object properties: answersQuestion (EthicalConclusion to the EthicalQuestion it resolves; previously the proeth:answersQuestion integer-as-string literal) and extendsQuestion (an analytical EthicalQuestion to the board EthicalQuestion it was generated from; previously the proeth:sourceQuestion integer literal, which never reached a committed graph). Both follow the edge-primary convention (CMT-3): the commit bridge emits the edge only, and the 15 gold case ontologies were converted by deterministic backfill from the committed literals. Also added the QuestionTypeScheme, the question-type vocabulary of the Q&C layer (board_explicit, implicit, principle_tension, theoretical, counterfactual); QUESTION_TYPES in question_analyzer.py is kept in sync by the same ProEthica unit test."@en .
+    skos:changeNote "v3.5.0 (2026-07-10): the Q&C relationship layer becomes SPARQL-traversable (plan proethica/.claude/plans/qc-rdf-edges.md). Two object properties: answersQuestion (EthicalConclusion to the EthicalQuestion it resolves; previously the proeth:answersQuestion integer-as-string literal) and extendsQuestion (an analytical EthicalQuestion to the board EthicalQuestion it was generated from; previously the proeth:sourceQuestion integer literal, which never reached a committed graph). Both follow the edge-primary convention (CMT-3): the commit bridge emits the edge only, and the 15 gold case ontologies were converted by deterministic backfill from the committed literals. Also added the QuestionTypeScheme, the question-type vocabulary of the Q&C layer (board_explicit, implicit, principle_tension, theoretical, counterfactual); QUESTION_TYPES in question_analyzer.py is kept in sync by the same ProEthica unit test."@en ;
+    skos:changeNote "v3.6.0 (2026-07-10): the remaining analysis-record relationships become SPARQL-traversable object properties (the qc-rdf-edges pattern, third application): explainsQuestion (QuestionEmergence), describesResolutionOf (ResolutionPattern), referencesProvision (CodeProvisionReference to the canonical nspe: CodeProvision), and the DecisionPoint family (decidesQuestion, addressesQuestion, alignsWithConclusion, involvesObligation, involvesAction, involvesConstraint, decidedByAgent). Emitted by the deterministic analysis-record edge applier in the ProEthica edge-materialization registry (position-resolved from the Step-4 synthesis store, text-verified where the store carries the target text, endpoint-existence-checked always); the 15 gold case ontologies were backfilled by the same applier. Same pass: citation verification over this ontology's dcterms:source annotations (crossref-resolved 2026-07-10). DecisionPoint's source resolved to Setbon, Raude, Fischler and Flahault (2005), a Risk Analysis article on BSE risk perception unrelated to the class, and its definition attributed a 'Hobbs and Moore (2005) scenario-directed decision analysis' matching no locatable work; both removed. The EthicalQuestion and EthicalConclusion source resolved to the Artificial Intelligence 307 XAI special-issue editorial (Miller, Hoffman, Amir and Holzinger 2022), decorative for these definitions; removed per the verify-or-drop rule. All definitional text is retained as design language."@en .
 
 ###############################################################
 # Analysis-layer classes
@@ -37,23 +38,23 @@ proeth-cases:EthicalQuestion a owl:Class ;
     rdfs:label "Ethical Question"@en ;
     rdfs:comment "Specific ethical question posed in a case requiring professional resolution"@en ;
     skos:definition "An information content entity representing a specific ethical question or dilemma posed in a professional ethics case that requires systematic analysis and resolution through professional judgment"@en ;
-    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705> ;
-    skos:changeNote "v3.2.0 (2026-07-09): 'or decision point' removed from the definition; DecisionPoint is a sibling class and the two are now asserted disjoint."@en .
+    skos:changeNote "v3.2.0 (2026-07-09): 'or decision point' removed from the definition; DecisionPoint is a sibling class and the two are now asserted disjoint."@en ;
+    skos:changeNote "v3.6.0 (2026-07-10): dcterms:source removed. The DOI resolved to the Artificial Intelligence 307 XAI special-issue editorial (Miller, Hoffman, Amir and Holzinger 2022), which does not ground this definition (verify-or-drop)."@en .
 
 proeth-cases:EthicalConclusion a owl:Class ;
     rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
     rdfs:label "Ethical Conclusion"@en ;
     rdfs:comment "Resolution or answer to an ethical question in a case"@en ;
     skos:definition "An information content entity representing the resolution, answer, or professional decision made in response to an ethical question, grounded in professional principles and precedential reasoning"@en ;
-    dcterms:source <https://doi.org/10.1016/j.artint.2022.103705> .
+    skos:changeNote "v3.6.0 (2026-07-10): dcterms:source removed. The DOI resolved to the Artificial Intelligence 307 XAI special-issue editorial (Miller, Hoffman, Amir and Holzinger 2022), which does not ground this definition (verify-or-drop)."@en .
 
 # Decision Point: Critical juncture requiring ethical choice
 proeth-cases:DecisionPoint a owl:Class ;
     rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
     rdfs:label "Decision Point"@en ;
     rdfs:comment "A point in an ethics case where a professional actor must make a choice between ethically significant alternatives."@en ;
-    skos:definition "Decision points mark critical junctures in ethics cases where actors face choices between alternatives with ethical implications. Per Hobbs and Moore (2005) scenario-directed decision analysis, these points structure the ethical problem space and enable systematic analysis of options, constraints, and outcomes."@en ;
-    dcterms:source <https://doi.org/10.1111/j.1539-6924.2005.00634.x> ;
+    skos:definition "Decision points mark critical junctures in ethics cases where actors face choices between alternatives with ethical implications. These points structure the ethical problem space of the case and support the analysis of options, constraints, and outcomes."@en ;
+    skos:changeNote "v3.6.0 (2026-07-10): citation verification. The dcterms:source DOI resolved to Setbon, Raude, Fischler and Flahault, 'Risk Perception of the Mad Cow Disease in France' (Risk Analysis 25(4), 2005), unrelated to this class, and the definition's 'Per Hobbs and Moore (2005) scenario-directed decision analysis' attribution matches no locatable work. Both removed; the definitional content is retained as design language per the two-register rule."@en ;
     skos:changeNote "v2.4.2: Added to cases namespace. 845 case instances reference proeth-cases:DecisionPoint but the class was previously only defined in intermediate namespace (intermediate#DecisionPoint)."@en ;
     skos:changeNote "v3.0.1 (2026-07-04): re-anchored from proeth-core:Event to IAO information content entity. The committed individuals are composed Step-4 analysis records (identifier, decision question, options, role) with no temporal participation, and the audited core Event definition (v2.10) restricts Event to NON-volitional occurrences, which a choice juncture is definitionally not. The juncture's temporal reality is carried by the Step-3 Action/Event timeline; the DecisionPoint record is the analytic artifact marking it, uniform with the rest of the analysis layer."@en .
 
@@ -147,6 +148,94 @@ proeth-cases:extendsQuestion a owl:ObjectProperty ,
     rdfs:comment "Links an analytical question to the board question it was generated from. The committed question numbering encodes only the category (offsets 101/201/301/401); this edge is the sole parent linkage."@en ;
     skos:definition "An object property linking a generated analytical question to the board question whose inquiry it extends, recording the source-question linkage assigned at generation. Not every analytical question extends a board question; the edge is present only when a source question was assigned."@en ;
     skos:changeNote "v3.5.0 (2026-07-10): added; replaces the proeth:sourceQuestion integer literal, which was emitted by the bridge since 2026-07-09 but never reached a committed graph. Asymmetric and irreflexive after the prevailsOver precedent: a question extending itself, or a mutual extension pair, is a data error the reasoner should surface."@en .
+
+###############################################################
+# Analysis-record relationship edges (v3.6.0)
+#
+# The remaining analysis-layer relationships as object properties, completing
+# the edge-primary conversion the v3.5.0 Q&C pass began: emergence rationales,
+# resolution patterns, provision references, and decision points previously
+# committed as record islands whose relationships existed only in the Step-4
+# synthesis store. All edges are emitted by the deterministic analysis-record
+# applier in the ProEthica edge-materialization registry: targets are resolved
+# positionally from the synthesis store, verified against carried target text
+# where the store provides it, and always checked for existence and typing in
+# the committed graph (never fabricate an endpoint).
+###############################################################
+
+proeth-cases:explainsQuestion a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:QuestionEmergence ;
+    rdfs:range proeth-cases:EthicalQuestion ;
+    rdfs:label "explains question"@en ;
+    rdfs:comment "Links an emergence rationale to the ethical question whose arising it explains. Pairs one-to-one per the QuestionEmergence definition."@en ;
+    skos:definition "An object property linking a question emergence record to the ethical question it accounts for, closing the analytic chain from case content to posed question in the committed graph."@en ;
+    skos:changeNote "v3.6.0 (2026-07-10): added; the linkage previously existed only as the synthesis store's question_uri key."@en .
+
+proeth-cases:describesResolutionOf a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:ResolutionPattern ;
+    rdfs:range proeth-cases:EthicalConclusion ;
+    rdfs:label "describes resolution of"@en ;
+    rdfs:comment "Links a resolution pattern to the ethical conclusion whose resolution it characterizes. The pattern's question linkage is derivable through the conclusion's answersQuestion edges."@en ;
+    skos:definition "An object property linking a resolution pattern record to the ethical conclusion it describes: the recurring form by which that conclusion resolves the case's tension."@en ;
+    skos:changeNote "v3.6.0 (2026-07-10): added; the linkage previously existed only as the synthesis store's conclusion_uri key."@en .
+
+proeth-cases:referencesProvision a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:CodeProvisionReference ;
+    rdfs:range proeth-core:CodeProvision ;
+    rdfs:label "references provision"@en ;
+    rdfs:comment "Links a code provision reference record to the canonical provision individual in the NSPE Code of Ethics ontology (nspe: namespace)."@en ;
+    skos:definition "An object property linking a case's code provision reference record to the canonical CodeProvision individual it cites, resolved through the shared provision-code normalization that also grounds conclusion-level citesProvision edges."@en ;
+    skos:changeNote "v3.6.0 (2026-07-10): added; the reference records previously carried the provision only as a code literal."@en .
+
+proeth-cases:decidesQuestion a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:DecisionPoint ;
+    rdfs:range proeth-cases:EthicalQuestion ;
+    rdfs:label "decides question"@en ;
+    rdfs:comment "Links a decision point to the ethical question its choice primarily decides (the aligned question of the Step-4 synthesis)."@en ;
+    skos:definition "An object property linking a decision point to the single ethical question whose answer the decision most directly determines."@en ;
+    skos:changeNote "v3.6.0 (2026-07-10): added, with addressesQuestion, alignsWithConclusion, involvesObligation, involvesAction, involvesConstraint and decidedByAgent, from the synthesis store's decision-point alignment fields."@en .
+
+proeth-cases:addressesQuestion a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:DecisionPoint ;
+    rdfs:range proeth-cases:EthicalQuestion ;
+    rdfs:label "addresses question"@en ;
+    rdfs:comment "Links a decision point to an ethical question its choice bears on. Broader than decidesQuestion; repeated per question."@en ;
+    skos:definition "An object property linking a decision point to an ethical question that the decision's alternatives engage, without the primacy decidesQuestion asserts."@en .
+
+proeth-cases:alignsWithConclusion a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:DecisionPoint ;
+    rdfs:range proeth-cases:EthicalConclusion ;
+    rdfs:label "aligns with conclusion"@en ;
+    rdfs:comment "Links a decision point to the ethical conclusion that records how the board's reasoning resolves the decision."@en ;
+    skos:definition "An object property linking a decision point to the ethical conclusion aligned with it in the Step-4 synthesis: the conclusion that settles the decision's question."@en .
+
+proeth-cases:involvesObligation a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:DecisionPoint ;
+    rdfs:range proeth-core:Obligation ;
+    rdfs:label "involves obligation"@en ;
+    rdfs:comment "Links a decision point to the case obligation most at stake in the choice."@en ;
+    skos:definition "An object property linking a decision point to the professional obligation that the decision's alternatives most directly engage."@en .
+
+proeth-cases:involvesAction a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:DecisionPoint ;
+    rdfs:range proeth-core:Action ;
+    rdfs:label "involves action"@en ;
+    rdfs:comment "Links a decision point to a committed Action individual realized by one of its alternatives. Repeated per action."@en ;
+    skos:definition "An object property linking a decision point to an action of the case timeline that one of the decision's alternatives comprises or forecloses."@en .
+
+proeth-cases:involvesConstraint a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:DecisionPoint ;
+    rdfs:range proeth-core:Constraint ;
+    rdfs:label "involves constraint"@en ;
+    rdfs:comment "Links a decision point to a constraint bounding its alternatives. Sparse: emitted only when the synthesis identified one. Distinct from the reserved core enrichment family on Actions."@en ;
+    skos:definition "An object property linking a decision point to a constraint of the case that bounds which of the decision's alternatives are available."@en .
+
+proeth-cases:decidedByAgent a owl:ObjectProperty ;
+    rdfs:domain proeth-cases:DecisionPoint ;
+    rdfs:range proeth-core:Agent ;
+    rdfs:label "decided by agent"@en ;
+    rdfs:comment "Links a decision point to the case agent who faces the choice. The roleLabel literal names the professional capacity; this edge grounds the actor."@en ;
+    skos:definition "An object property linking a decision point to the agent individual who must make the decision."@en .
 
 ###############################################################
 # Citation treatment vocabulary (v3.1.0)
