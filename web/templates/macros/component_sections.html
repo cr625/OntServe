@@ -33,7 +33,7 @@
                 <tbody>
                 {% for p in g.rows %}
                 <tr>
-                    <td><a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=p.name) }}">{{ p.name }}</a>{% if not p.on_self %} <span class="badge bg-light text-muted border" title="rdfs:domain is an ancestor class">inherited</span>{% endif %}{% if p.kind == 'annotation' %} <span class="badge bg-light text-muted border" title="owl:AnnotationProperty">annotation</span>{% endif %}</td>
+                    <td><a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=p.name) }}"{% if not p.on_self %} class="fst-italic" title="Inherited: rdfs:domain is an ancestor class"{% endif %}>{{ p.name }}</a>{% if p.kind == 'annotation' %} <span class="badge bg-light text-muted border" title="owl:AnnotationProperty">annotation</span>{% endif %}</td>
                     {# Union ranges render EVERY named member, each linked when its home ontology resolves. #}
                     <td>{% if p.ranges %}{% for m in p.ranges %}<span class="badge bg-success">{% if m.ontology %}<a href="{{ url_for('ontology.entity_detail', ontology_name=m.ontology, fragment=m.name) }}" class="text-white text-decoration-none" title="{{ m.uri }}">{{ m.label or m.name }}</a>{% else %}{{ m.label or m.name }}{% endif %}</span>{% if not loop.last %} {% endif %}{% endfor %}{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
                     <td class="small text-muted">{{ p.comment }}</td>
@@ -48,7 +48,7 @@
                 {% for p in g.rows %}
                 <tr>
                     <td>{% if p.from_uri %}{{ render_iri_target(p.from_uri, p.from_ontology, label=p.from_label) }}{% else %}<span class="text-muted">&mdash;</span>{% endif %}</td>
-                    <td>{{ render_iri_target(p.uri, p.prop_ontology) }}{% if not p.on_self %} <span class="badge bg-light text-muted border" title="rdfs:range is an ancestor class">inherited</span>{% endif %}</td>
+                    <td{% if not p.on_self %} class="fst-italic" title="Inherited: rdfs:range is an ancestor class"{% endif %}>{{ render_iri_target(p.uri, p.prop_ontology) }}</td>
                     <td class="small text-muted">{{ p.comment }}</td>
                 </tr>
                 {% endfor %}
