@@ -4,14 +4,15 @@
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix proeth-core: <http://proethica.org/ontology/core#> .
 @base <http://proethica.org/provenance#> .
 
 <http://proethica.org/provenance#> rdf:type owl:Ontology ;
     rdfs:label "ProEthica Provenance Ontology" ;
-    rdfs:comment "Provenance tracking for entities extracted from NSPE Board of Ethical Review cases. Tracks discovery context including case ID, extraction pass, section type, and source text." ;
-    owl:versionInfo "1.0.0" ;
+    rdfs:comment "Provenance tracking for entities extracted from NSPE Board of Ethical Review cases. Tracks discovery context including case ID, pipeline step, section type, and source text." ;
+    owl:versionInfo "1.1.0" ;
     owl:imports <http://www.w3.org/ns/prov#> ;
     owl:imports <http://proethica.org/ontology/core#> .
 
@@ -54,14 +55,15 @@
                      rdfs:comment "The section of the case document where this entity was first discovered. Valid values: 'facts', 'discussion', 'questions', 'conclusions'." ;
                      rdfs:subPropertyOf prov:hadPrimarySource .
 
-###  http://proethica.org/provenance#discoveredInPass
-:discoveredInPass rdf:type owl:DatatypeProperty ,
+###  http://proethica.org/provenance#discoveredInStep
+:discoveredInStep rdf:type owl:DatatypeProperty ,
                            owl:FunctionalProperty ;
                   rdfs:domain owl:Class ;
                   rdfs:range xsd:integer ;
-                  rdfs:label "discovered in pass" ;
-                  rdfs:comment "The extraction pass number where this entity was first discovered. Valid values: 1 (Contextual Framework), 2 (Normative Requirements), 3 (Temporal Dynamics)." ;
-                  rdfs:subPropertyOf prov:hadPrimarySource .
+                  rdfs:label "discovered in step" ;
+                  rdfs:comment "The pipeline step that discovered this entity. Valid values: 1 (Contextual Framework), 2 (Normative Requirements), 3 (Temporal Dynamics)." ;
+                  rdfs:subPropertyOf prov:hadPrimarySource ;
+                  skos:changeNote "2026-07-11: renamed from discoveredInPass (pre-rebuild gate decision 12). The recorded value has always been the step grouping; the pipeline reserves 'pass' for the facts/discussion split within a step, so the old name misdescribed the literal. Committed case graphs and stored extraction payloads were backfilled to the new predicate." .
 
 ###  http://proethica.org/provenance#sourceText
 :sourceText rdf:type owl:DatatypeProperty ;
