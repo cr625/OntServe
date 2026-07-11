@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-11 (DecisionPoint enrichment): ten analysis-layer datatype properties declared for the Step-4 fields that persisted in extraction storage but never reached the committed graphs -- the DecisionPoint Toulmin summary slots (toulminClaim, toulminData, toulminWarrant, toulminRebuttal, toulminQualifier), boardResolution, the two ranking scores (intensityScore, qcAlignmentScore, both xsd:decimal), boardChosenOption, and the CodeProvisionReference relevantExcerpt. Emitted by the commit serializer; the gold 15 were backfilled by the shared emission helper. The companion object property appliesTo is declared in proethica-cases v3.7.0."@en ;
     skos:changeNote "2026-07-11 (B10 temporal provenance): proeth:agentKnowledge and proeth:interveningFactors declared on CausalChain. The extraction prompt has requested both responsibility-attribution fields since the chain schema was designed, but the converter dropped them before storage; the same change routes proeth:discoveredInSection onto Actions and Events (previously chains only), giving every happening auditable section provenance ahead of the legacy-case rebuild."@en ;
     skos:changeNote "2026-07-10 (Q&C edge materialization): proeth:answersQuestion deprecated; the conclusion-to-question linkage is the proeth-cases:answersQuestion object property (cases v3.5.0), edge-primary per CMT-3. The comment on proeth:questionType now names the QuestionTypeScheme concepts as its value vocabulary. The undeclared proeth:sourceQuestion literal is likewise superseded by proeth-cases:extendsQuestion and is no longer emitted."@en ;
     skos:changeNote "2026-07-07 (twenty-first pass, Ca/Cs properties review): three dead declarations deleted (constrainsAction and enablesAction, zero-use inverse twins of the reserved core Action-side directions; hasCapabilityLevel, a dropped-field carrier with no domain). capabilityKind states the shipped mechanism (the kind rides the class label through the match decision; no schema field or commit reader exists); boundaryType records its constraint_type spelling; source records its dual kept-and-resolved contract; requiredForObligations gains its declaration (the live inverted-resolution carrier whose legacy literals ride the sweep); the three dropped Ca carriers state their status; temporalScope and applicabilityCondition are disambiguated as window versus trigger, closing the recorded overlap question (both kept); the CompetenceGapState comments state the two routes (S-pass matching live, the D2' commit-stage minter pending); the Dennis verification record names the claim the paper supports."@en ;
@@ -2333,6 +2334,56 @@ proeth:focus a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:label "focus"@en ;
     rdfs:comment "The full description of what a decision point concerns. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:boardResolution a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "board resolution"@en ;
+    rdfs:comment "How the board's holding resolves this decision point: the resolution narrative the Phase-3 synthesis derives from the conclusions the point aligns with. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:intensityScore a owl:DatatypeProperty ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "intensity score"@en ;
+    rdfs:comment "The moral-intensity heuristic score (0-1, Jones 1991 informed) the composition assigns when ranking decision-point candidates. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:qcAlignmentScore a owl:DatatypeProperty ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "question-conclusion alignment score"@en ;
+    rdfs:comment "How well the decision point aligns with the board's questions and conclusions (0-1), the second ranking axis of the candidate composition. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:toulminClaim a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "toulmin claim"@en ;
+    rdfs:comment "The claim slot of the decision point's Toulmin argument summary: the position the analysis takes on the decision. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:toulminData a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "toulmin data"@en ;
+    rdfs:comment "The data slot of the decision point's Toulmin argument summary: the case facts (Step-3 events and actions) grounding the claim. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:toulminWarrant a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "toulmin warrant"@en ;
+    rdfs:comment "The warrant slot of the decision point's Toulmin argument summary: the obligations and principles licensing the step from data to claim. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:toulminRebuttal a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "toulmin rebuttal"@en ;
+    rdfs:comment "The rebuttal slot of the decision point's Toulmin argument summary: the defeater conditions under which the claim would not hold. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:toulminQualifier a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "toulmin qualifier"@en ;
+    rdfs:comment "The qualifier slot of the decision point's Toulmin argument summary: the scope condition under which the claim holds. Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:boardChosenOption a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "board chosen option"@en ;
+    rdfs:comment "The label of the decision option the board's holding endorses (the is_board_choice member of the option set). Borne by proeth-cases:DecisionPoint individuals."@en .
+
+proeth:relevantExcerpt a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "relevant excerpt"@en ;
+    rdfs:comment "A '[section] text' excerpt of the case that applies the cited provision, carried by the provision reference record (one literal per excerpt). Borne by proeth-cases:CodeProvisionReference individuals."@en .
 
 proeth:context a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
