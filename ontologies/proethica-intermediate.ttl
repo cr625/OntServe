@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-11 (B10 temporal provenance): proeth:agentKnowledge and proeth:interveningFactors declared on CausalChain. The extraction prompt has requested both responsibility-attribution fields since the chain schema was designed, but the converter dropped them before storage; the same change routes proeth:discoveredInSection onto Actions and Events (previously chains only), giving every happening auditable section provenance ahead of the legacy-case rebuild."@en ;
     skos:changeNote "2026-07-10 (Q&C edge materialization): proeth:answersQuestion deprecated; the conclusion-to-question linkage is the proeth-cases:answersQuestion object property (cases v3.5.0), edge-primary per CMT-3. The comment on proeth:questionType now names the QuestionTypeScheme concepts as its value vocabulary. The undeclared proeth:sourceQuestion literal is likewise superseded by proeth-cases:extendsQuestion and is no longer emitted."@en ;
     skos:changeNote "2026-07-07 (twenty-first pass, Ca/Cs properties review): three dead declarations deleted (constrainsAction and enablesAction, zero-use inverse twins of the reserved core Action-side directions; hasCapabilityLevel, a dropped-field carrier with no domain). capabilityKind states the shipped mechanism (the kind rides the class label through the match decision; no schema field or commit reader exists); boundaryType records its constraint_type spelling; source records its dual kept-and-resolved contract; requiredForObligations gains its declaration (the live inverted-resolution carrier whose legacy literals ride the sweep); the three dropped Ca carriers state their status; temporalScope and applicabilityCondition are disambiguated as window versus trigger, closing the recorded overlap question (both kept); the CompetenceGapState comments state the two routes (S-pass matching live, the D2' commit-stage minter pending); the Dennis verification record names the claim the paper supports."@en ;
     skos:changeNote "2026-07-07 (twentieth pass, Cs citation layer): content-level verify-or-drop over the ten boundary-type classes, whose per-kind references were one-off attributions of component-level literature. Surviving: Arkin on SafetyConstraint (safety precepts as constraints, verified) and Stenseke on LegalConstraint (re-grounded on his verbatim legal-versus-moral enforcement point; Kroll dropped). Dropped as decorative, with per-class change notes recording each check: Taddeo (Regulatory), Ganascia (Resource), Hallamaa and Kalliokoski (Competence), Dennis twice (Jurisdictional, Confidentiality), Furbach (Procedural), Govindarajulu and Bringsjord (Temporal); Benzmüller moved to core:Constraint, whose verification clause is what the dissertation cites him for. All definitional slots are now citation-free (two-register rule); every dropped kind keeps its text as design language."@en ;
@@ -524,6 +525,18 @@ proeth:withinAgentControl a owl:DatatypeProperty ;
     rdfs:range xsd:boolean ;
     rdfs:label "within agent control"@en ;
     rdfs:comment "Intended on CausalChain: whether the causal factor lay within the control of the agent. Range xsd:boolean: the serializer preserves the native boolean, and every committed literal is typed."@en .
+
+proeth:agentKnowledge a owl:DatatypeProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range xsd:string ;
+    rdfs:label "agent knowledge"@en ;
+    rdfs:comment "Intended on CausalChain: what the responsible agent knew at the time of the causal contribution, the epistemic input to the responsibility attribution (extraction requests the field alongside responsibleAgent and withinAgentControl)."@en .
+
+proeth:interveningFactors a owl:DatatypeProperty ;
+    rdfs:domain proeth:CausalChain ;
+    rdfs:range xsd:string ;
+    rdfs:label "intervening factors"@en ;
+    rdfs:comment "Intended on CausalChain: circumstances between the agent's contribution and the effect that bear on the responsibility attribution (one literal per factor)."@en .
 
 ###############################################################
 # OWL-Time Temporal Properties (Allen Interval Algebra)
