@@ -5,9 +5,8 @@ Handles resolving ontology entity URIs via query parameter and path-based access
 """
 
 from flask import Blueprint, request, jsonify, current_app, redirect, url_for
-from sqlalchemy import select
 
-from web.models import db, OntologyEntity
+from web.models import db
 from web.rdf_helpers import generate_entity_ttl, generate_concept_ttl
 
 uri_bp = Blueprint('uri', __name__)
@@ -47,9 +46,12 @@ def resolve_uri():
 
         current_app.logger.info(f"Resolving URI: {uri}")
 
-        # Find entity in ontology_entities table first
-        stmt = select(OntologyEntity).where(OntologyEntity.uri == uri)
-        entity = db.session.execute(stmt).scalar_one_or_none()
+        # Find entity in ontology_entities table first. The same URI holds a row in
+        # every ontology that declares it (case stubs, the foundation mirror), so
+        # resolve to the definitional row instead of scalar_one_or_none(), which
+        # raises MultipleResultsFound for any shared URI.
+        from web.ontology_routes.helpers import definitional_entity_for_uri
+        entity = definitional_entity_for_uri(uri)
 
         # Check Accept header for content negotiation
         accept_header = request.headers.get('Accept', '')
@@ -154,9 +156,8 @@ def resolve_embedding():
         }), 400
 
     try:
-        entity = db.session.execute(
-            select(OntologyEntity).where(OntologyEntity.uri == uri)
-        ).scalar_one_or_none()
+        from web.ontology_routes.helpers import definitional_entity_for_uri
+        entity = definitional_entity_for_uri(uri)
         if not entity:
             return jsonify({'error': 'Entity not found', 'uri': uri}), 404
 
@@ -240,9 +241,9 @@ def resolve_uri_path(ontology_path, entity_name):
     base_uri = f"http://proethica.org/ontology/{ontology_path}"
     full_uri = f"{base_uri}#{entity_name}"
 
-    # Find entity in database
-    stmt = select(OntologyEntity).where(OntologyEntity.uri == full_uri)
-    entity = db.session.execute(stmt).scalar_one_or_none()
+    # Find entity in database (definitional row; the URI may also exist as case stubs)
+    from web.ontology_routes.helpers import definitional_entity_for_uri
+    entity = definitional_entity_for_uri(full_uri)
 
     if not entity:
         return jsonify({

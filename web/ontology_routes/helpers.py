@@ -83,9 +83,7 @@ def _entity_semantic_links(entity, ontology):
                         'external': False, 'note': case_name,
                     })
                     continue
-            ent = db.session.execute(
-                select(OntologyEntity).where(OntologyEntity.uri == tgt)
-            ).scalar_one_or_none()
+            ent = definitional_entity_for_uri(tgt)
             if ent is not None and ent.ontology is not None:
                 links.append({
                     'relation': rel_label, 'label': ent.label or frag,
@@ -634,6 +632,39 @@ def _canonical_upper_ontology(uri):
     if '/obo/IAO_' in uri or frag.startswith('IAO_'):
         return 'iao'
     return None
+
+
+def definitional_entity_for_uri(uri):
+    """The definitional OntologyEntity row for a URI that may appear in several
+    ontologies. The same URI legitimately holds a row in every store that declares
+    it: an intermediate class is re-extracted as a stub row in each case ontology
+    that uses it (100+ ontologies for common classes), upper-level BFO/IAO IRIs sit
+    in bfo/iao plus the proethica-foundation reasoner stub, and the provenance
+    properties are mirrored into the extended discovery store. A bare
+    scalar_one_or_none() on uri therefore raises MultipleResultsFound.
+
+    Preference order: the canonical upper ontology for BFO/IAO IRIs, then
+    definitional stores (ontology_type upper/core/base/domain) over derived ones
+    (extracted, case), then non-case ontologies, with the ontology name as the
+    deterministic tie-break. Returns None when the URI is unknown."""
+    rows = db.session.execute(
+        select(OntologyEntity).where(OntologyEntity.uri == uri)
+    ).scalars().all()
+    if len(rows) <= 1:
+        return rows[0] if rows else None
+    canon = _canonical_upper_ontology(uri)
+
+    def rank(e):
+        o = e.ontology
+        name = o.name if o else ''
+        otype = (o.ontology_type or '') if o else ''
+        return (
+            0 if (canon and name == canon) else 1,
+            0 if otype in ('upper', 'core', 'base', 'domain') else 1,
+            1 if name.startswith('proethica-case-') else 0,
+            name,
+        )
+    return min(rows, key=rank)
 
 
 def _hierarchy_node(uri, is_current=False):
