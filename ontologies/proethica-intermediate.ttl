@@ -29,6 +29,7 @@
     skos:changeNote "2026-07-10 (Q&C edge materialization): proeth:answersQuestion deprecated; the conclusion-to-question linkage is the proeth-cases:answersQuestion object property (cases v3.5.0), edge-primary per CMT-3. The comment on proeth:questionType now names the QuestionTypeScheme concepts as its value vocabulary. The undeclared proeth:sourceQuestion literal is likewise superseded by proeth-cases:extendsQuestion and is no longer emitted."@en ;
     skos:changeNote "2026-07-07 (twenty-first pass, Ca/Cs properties review): three dead declarations deleted (constrainsAction and enablesAction, zero-use inverse twins of the reserved core Action-side directions; hasCapabilityLevel, a dropped-field carrier with no domain). capabilityKind states the shipped mechanism (the kind rides the class label through the match decision; no schema field or commit reader exists); boundaryType records its constraint_type spelling; source records its dual kept-and-resolved contract; requiredForObligations gains its declaration (the live inverted-resolution carrier whose legacy literals ride the sweep); the three dropped Ca carriers state their status; temporalScope and applicabilityCondition are disambiguated as window versus trigger, closing the recorded overlap question (both kept); the CompetenceGapState comments state the two routes (S-pass matching live, the D2' commit-stage minter pending); the Dennis verification record names the claim the paper supports."@en ;
     skos:changeNote "2026-07-07 (twentieth pass, Cs citation layer): content-level verify-or-drop over the ten boundary-type classes, whose per-kind references were one-off attributions of component-level literature. Surviving: Arkin on SafetyConstraint (safety precepts as constraints, verified) and Stenseke on LegalConstraint (re-grounded on his verbatim legal-versus-moral enforcement point; Kroll dropped). Dropped as decorative, with per-class change notes recording each check: Taddeo (Regulatory), Ganascia (Resource), Hallamaa and Kalliokoski (Competence), Dennis twice (Jurisdictional, Confidentiality), Furbach (Procedural), Govindarajulu and Bringsjord (Temporal); Benzmüller moved to core:Constraint, whose verification clause is what the dissertation cites him for. All definitional slots are now citation-free (two-register rule); every dropped kind keeps its text as design language."@en ;
+    skos:changeNote "2026-07-16 (public-annotation editorial pass): internal process commentary (correction narratives, sweep and review references, emitter module names, internal decision codes, roadmap language) removed from the displayed annotations (rdfs:comment, iao:0000115, iao:0000116, skos:scopeNote); history remains in the skos:changeNote entries. No logical axioms changed."@en ;
     skos:changeNote "2026-07-07 (nineteenth pass, A/E properties review): the temporal machinery aligned to the shipped contract. The duplicate eventType declaration is deleted (the routing-input block is the single source); causesStateChange deleted (zero uses; the E spec folded it into description); hasTemporalRelation deprecated (never emitted; fromEntity/toEntity carry the linkage). causedByAction gains its two-register definition, the Wright reference beside Sarmiento, the ExogenousEvent guard note, and a placement changeNote (stays intermediate with its causal family). analyzesAction is re-domained to proeth-cases:CausalNormativeLink, the class its sole emitter asserts (the CausalChain domain wrongly inferred every reasoning node into the NESS chain population). Thirteen emitted-but-undeclared carriers gain declarations: the three TemporalRelation fields (fromEntityText, toEntityText, evidence), the nine CausalChain analysis fields (withinAgentControl with range xsd:boolean, matching the typed committed literals), and the agents decomposition. severity drops its retired Event half; hasAgent states its dual kept-and-resolved status; the TemporalRelation definition states the shipped carrier contract in place of the stored-URI claim."@en ;
     skos:changeNote "2026-07-07 (eighteenth pass, A/E citation layer): every Sarmiento record corrected to 2022 with the settled PRIMA locator (CausalChain family, responsibleAgent, EpistemicState; the DOI was already right, the year read the arXiv extended version's date onto the conference paper). The CausalChain NESS attribution stands verified: Sarmiento's causal definition is a formalisation of Wright's NESS test, in his own words."@en ;
     skos:changeNote "2026-07-07 (seventeenth pass, Rs properties review): the Resource carrier block aligned to the shipped contract. provisionCodes and citedBy gain declarations (the one live-emitted kept literal and the one edge-resolved Discussion signal were both undeclared, rendering unlabeled); usedInContext, createdBy, and version state their dropped-from-schema status (never written by the current pipeline); sourceKind records the resource_category schema spelling it bridges to; the dead :hasResource is deleted (zero uses anywhere; proeth-core:usesResource is the surviving process-to-Resource property). Three annotation properties asserted only in engineering-ethics (derivedFromResource, appliesToDomain, hasUrgency) gain declarations as owl:AnnotationProperty, ending their unlabeled rendering. The EthicalCode change note records that the deprecated ProfessionalCode alias has since been deleted."@en ;
@@ -435,7 +436,7 @@ proeth:causedByAction a owl:ObjectProperty ;
     rdfs:range proeth-core:Action ;
     rdfs:label "caused by action"@en ;
     skos:definition "Links an Event to the Action that caused or enabled it."@en ;
-    rdfs:comment "Links an Event to the Action that caused or enabled it: cause-in-fact per the NESS test of Wright (1985), formalized for action languages by Sarmiento et al. (2022). Resolved deterministically at commit by causal_edges.apply_event_cause_edges from the converter reference (fragment remap; no embedding or LLM); records the enabling action in the AutomaticEvent origin tie-break, and a commit guard skips the edge on ExogenousEvent subjects (no proximate agent cause by definition)."@en ;
+    rdfs:comment "Links an Event to the Action that caused or enabled it: cause-in-fact per the NESS test of Wright (1985), formalized for action languages by Sarmiento et al. (2022). Resolved deterministically at commit from the converter reference (no embedding or LLM inference); records the enabling action for an AutomaticEvent, and is omitted on ExogenousEvent subjects (no proximate agent cause by definition)."@en ;
     skos:changeNote "2026-07-07 (A/E properties review): stays in the intermediate namespace with its causal-analysis family (CausalChain, cause, effect, responsibleAgent, analyzesAction); the v2.8.0 promotion criterion is family single-namespacing, satisfied once core:triggersEvent is deprecated."@en ;
     dcterms:references <https://doi.org/10.1007/978-3-031-21203-1_15> , # Sarmiento et al. 2022
                        <https://doi.org/10.2307/3480373> . # Wright 1985
@@ -453,7 +454,7 @@ proeth:analyzesAction a owl:ObjectProperty ;
     rdfs:domain proeth-cases:CausalNormativeLink ;
     rdfs:range proeth-core:Action ;
     rdfs:label "analyzes action"@en ;
-    rdfs:comment "Links a Step-4 causal-normative-link (reasoning) node to the committed Action it analyzes, so the reasoning is grounded in the graph and the obligation edges of the action are reachable from it. Domain proeth-cases:CausalNormativeLink, the class the emitter actually asserts (the earlier CausalChain domain wrongly inferred every reasoning node into the Step-3 NESS chain population); neither class is among the nine D-tuple categories, so there is no disjointness impact. Range Action."@en ;
+    rdfs:comment "Links a Step-4 causal-normative-link (reasoning) node to the committed Action it analyzes, so the reasoning is grounded in the graph and the obligation edges of the action are reachable from it."@en ;
     skos:changeNote "2026-07-07 (A/E properties review): rdfs:domain corrected CausalChain -> proeth-cases:CausalNormativeLink to match the sole emitter (causal_edges.apply_causal_normative_link_edges) and the committed data."@en .
 
 proeth:cause a owl:ObjectProperty ;
@@ -526,7 +527,7 @@ proeth:withinAgentControl a owl:DatatypeProperty ;
     rdfs:domain proeth:CausalChain ;
     rdfs:range xsd:boolean ;
     rdfs:label "within agent control"@en ;
-    rdfs:comment "Intended on CausalChain: whether the causal factor lay within the control of the agent. Range xsd:boolean: the serializer preserves the native boolean, and every committed literal is typed."@en .
+    rdfs:comment "Intended on CausalChain: whether the causal factor lay within the control of the agent. Range xsd:boolean; committed literals carry the type."@en .
 
 proeth:agentKnowledge a owl:DatatypeProperty ;
     rdfs:domain proeth:CausalChain ;
@@ -555,11 +556,11 @@ proeth:temporalSequence a owl:DatatypeProperty ;
     rdfs:domain [ a owl:Class ; owl:unionOf (proeth-core:Action proeth-core:Event) ] ;
     rdfs:range xsd:nonNegativeInteger ;
     rdfs:label "temporal sequence"@en ;
-    rdfs:comment "Chronological position of an action or event within its case, 1-based, no gaps. Populated by an LLM ordering pass over the case's actions and events; consumed by the validation Timeline view to render entries in chronological order. Free-text temporalMarker is the human-readable signal; temporalSequence is the sortable companion."@en .
+    rdfs:comment "Chronological position of an action or event within its case, 1-based, no gaps. Populated by an LLM ordering pass over the case's actions and events; consumed by timeline rendering to order entries chronologically. Free-text temporalMarker is the human-readable signal; temporalSequence is the sortable companion."@en .
 
 proeth:TemporalRelation a owl:Class ;
     rdfs:label "Temporal Relation"@en ;
-    iao:0000115 "A reified Allen interval algebra relation between two happenings (Actions or Events) of the case timeline. Carries the Allen relation name (proeth:allenRelation) and the prefixed OWL-Time property name (proeth:owlTimeProperty); the endpoint phrasings land on the fromEntityText/toEntityText literal shadows, with the declared fromEntity/toEntity object properties as the resolver target of the temporal_relation_edges family."@en ;
+    iao:0000115 "A reified Allen interval algebra relation between two happenings (Actions or Events) of the case timeline. Carries the Allen relation name (proeth:allenRelation) and the prefixed OWL-Time property name (proeth:owlTimeProperty); the endpoint phrasings are carried on the fromEntityText/toEntityText literals and resolved to the fromEntity/toEntity object properties at commit."@en ;
     rdfs:comment "A reified Allen interval algebra relation between two temporal entities (actions or events). Stores both the ProEthica relation name and the corresponding OWL-Time property URI."@en .
 
 proeth:hasTemporalRelation a owl:ObjectProperty ;
@@ -567,7 +568,7 @@ proeth:hasTemporalRelation a owl:ObjectProperty ;
     rdfs:domain [ a owl:Class ; owl:unionOf (proeth-core:Action proeth-core:Event) ] ;
     rdfs:range proeth:TemporalRelation ;
     rdfs:label "has temporal relation"@en ;
-    rdfs:comment "Links an action or event to a reified Allen interval relation instance. Deprecated: never emitted; the relation is anchored the other way, from the relation node to its happenings via fromEntity/toEntity."@en ;
+    rdfs:comment "Links an action or event to a reified Allen interval relation instance. Deprecated: the linkage is anchored the other way, from the relation node to its happenings via fromEntity/toEntity."@en ;
     skos:changeNote "2026-07-07 (A/E properties review): marked owl:deprecated on the hasState precedent. Zero uses in any committed case and no emitter or consumer in either repository; fromEntity/toEntity carry the live linkage."@en .
 
 proeth:fromEntity a owl:ObjectProperty ;
@@ -586,7 +587,7 @@ proeth:allenRelation a owl:DatatypeProperty ;
     rdfs:domain proeth:TemporalRelation ;
     rdfs:range xsd:string ;
     rdfs:label "Allen relation"@en ;
-    rdfs:comment "The Allen interval algebra relation name (before, after, meets, overlaps, during, starts, finishes, equals, and their inverses). Maps to OWL-Time properties via allen_owl_time_mapper.py (app/services/temporal_dynamics/utils)."@en .
+    rdfs:comment "The Allen interval algebra relation name (before, after, meets, overlaps, during, starts, finishes, equals, and their inverses). Maps to the corresponding OWL-Time interval property, carried on proeth:owlTimeProperty."@en .
 
 proeth:owlTimeProperty a owl:DatatypeProperty ;
     rdfs:domain proeth:TemporalRelation ;
@@ -598,13 +599,13 @@ proeth:fromEntityText a owl:DatatypeProperty ;
     rdfs:domain proeth:TemporalRelation ;
     rdfs:range xsd:string ;
     rdfs:label "from entity text"@en ;
-    rdfs:comment "Literal shadow of the fromEntity edge: the free-text timeline phrasing of the source happening, kept verbatim; the temporal_relation_edges family resolves it to the fromEntity object edge."@en .
+    rdfs:comment "Literal shadow of the fromEntity edge: the free-text timeline phrasing of the source happening, kept verbatim and resolved to the fromEntity object edge at commit."@en .
 
 proeth:toEntityText a owl:DatatypeProperty ;
     rdfs:domain proeth:TemporalRelation ;
     rdfs:range xsd:string ;
     rdfs:label "to entity text"@en ;
-    rdfs:comment "Literal shadow of the toEntity edge: the free-text timeline phrasing of the target happening, kept verbatim; the temporal_relation_edges family resolves it to the toEntity object edge."@en .
+    rdfs:comment "Literal shadow of the toEntity edge: the free-text timeline phrasing of the target happening, kept verbatim and resolved to the toEntity object edge at commit."@en .
 
 proeth:evidence a owl:DatatypeProperty ;
     rdfs:domain proeth:TemporalRelation ;
@@ -805,9 +806,9 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     rdfs:label "Relational Role"@en ;
     iao:0000115 "A role individuated by the duty relationship it establishes toward a counterparty audience, the party toward which the duties of the role run, not by the occupation or attributes of its bearer. Its subtypes are the four relational archetypes derived from the audience categories of Kong et al. (2020), :ProviderClientRole (duties toward a client), :ProfessionalPeerRole (duties toward practitioner peers), :EmployerRelationshipRole (duties toward an employing organization), and :PublicResponsibilityRole (duties toward the general public). Structural head of the relational archetype axis, complementary to the occupational axis headed by :ProfessionalRole and :ParticipantRole."@en ;
     rdfs:comment "A role individuated by the duty relationship it establishes toward a counterparty audience, the party toward which the duties of the role run, not by the occupation or attributes of its bearer. Its subtypes are the four relational archetypes derived from the audience categories of Kong et al. (2020), :ProviderClientRole (duties toward a client), :ProfessionalPeerRole (duties toward practitioner peers), :EmployerRelationshipRole (duties toward an employing organization), and :PublicResponsibilityRole (duties toward the general public). Structural head of the relational archetype axis, complementary to the occupational axis headed by :ProfessionalRole and :ParticipantRole."@en ;
-    iao:0000116 "Operationalizes the audience-relationship part of the core:Role individuation, under which a role is individuated in part by the audience relationships it establishes. The four archetypes realize the identity-role categories of Kong et al. (2020), who read codes of ethics for the relationships a professional displays toward audiences such as the client, the professional peer, the employer, and the public; the extraction scheme groups role attribution into the same four categories (provider-client, professional peer, employer relationship, public responsibility). Each archetype is a reasoner-inferred defined class carrying an owl:equivalentClass restriction on the actor edge that marks its counterparty (proeth-core:hasClient, proeth-core:professionalPeerOf, proeth-core:employedBy, :owesDutyToward), so a role classifies into its archetype from the committed relationship edges, not from a hand-assigned category (edge-primary, decision R1). The rdfs:subClassOf :RelationalRole on each archetype is asserted, not entailed, because this head is a primitive class."@en ;
+    iao:0000116 "Operationalizes the audience-relationship part of the core:Role individuation, under which a role is individuated in part by the audience relationships it establishes. The four archetypes realize the identity-role categories of Kong et al. (2020), who read codes of ethics for the relationships a professional displays toward audiences such as the client, the professional peer, the employer, and the public; the extraction scheme groups role attribution into the same four categories (provider-client, professional peer, employer relationship, public responsibility). Each archetype is a reasoner-inferred defined class carrying an owl:equivalentClass restriction on the actor edge that marks its counterparty (proeth-core:hasClient, proeth-core:professionalPeerOf, proeth-core:employedBy, :owesDutyToward), so a role classifies into its archetype from the committed relationship edges, not from a hand-assigned category. The rdfs:subClassOf :RelationalRole on each archetype is asserted, not entailed, because this head is a primitive class."@en ;
     iao:0000119 "Kong et al. (2020). Corpus-based empirical approach to professionalism: Identifying interactional roles and dispositions in professional codes of ethics. Journal of Applied Linguistics and Professional Practice 14(1): 3-28." ;
-    skos:scopeNote "The relational axis is orthogonal to the occupational axis, so a relational archetype composes with any occupational archetype without crossing the disjointness between :ProfessionalRole and :ParticipantRole. The exception is :PublicResponsibilityRole, whose defining :owesDutyToward edge has rdfs:domain :ProfessionalRole; the class is professional-side by entailment and, since 2026-07-02, by an explicit rdfs:subClassOf :ProfessionalRole, so it composes only with professional-side occupational archetypes. Neither this head nor its four defined subclasses carries the :archetypeAxis marker; presence of that annotation enrolls a class as an occupational-resolver placement target, and relational classification is reasoner-inferred from the actor edges, not annotated."@en ;
+    skos:scopeNote "The relational axis is orthogonal to the occupational axis, so a relational archetype composes with any occupational archetype without crossing the disjointness between :ProfessionalRole and :ParticipantRole. The exception is :PublicResponsibilityRole, whose defining :owesDutyToward edge has rdfs:domain :ProfessionalRole; the class is professional-side by entailment and by an explicit rdfs:subClassOf :ProfessionalRole, so it composes only with professional-side occupational archetypes. Neither this head nor its four defined subclasses carries the :archetypeAxis marker; presence of that annotation enrolls a class as an occupational-resolver placement target, and relational classification is reasoner-inferred from the actor edges, not annotated."@en ;
     skos:changeNote "2026-07-06: annotation restructured to the component pattern (definition, editor note, definition source, scope note). The prior text, duplicated across iao:0000115 and rdfs:comment, stated the axis mechanics without saying what a relational role is; the definition now gives the counterparty-audience differentia with the four Kong-derived archetypes as subtypes, the Kong et al. (2020) grounding moved to iao:0000116 and iao:0000119, and the mechanics moved to the skos:scopeNote. The stale trailing clause describing the retired relational-annotation regime (marks only leaves whose archetype diverges from the structural parent) is corrected to the live convention, under which :archetypeAxis presence enrolls occupational-resolver placement targets. No logical axioms changed."@en .
 
 #################################################################
@@ -963,7 +964,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
 # an ObjectProperty assertion there would introduce class-individual punning.
 :derivedFromResource a owl:AnnotationProperty ;
     rdfs:label "derived from resource"@en ;
-    rdfs:comment "Class-level link from a domain obligation class to the external standard resource individual(s) whose scope grounds it (e.g. ComplyWithSafetyStandards -> IEC61508). Asserted only in engineering-ethics; the seven pairings were verified apt in the 2026-07-06 standards vetting."@en .
+    rdfs:comment "Class-level link from a domain obligation class to the external standard resource individual(s) whose scope grounds it (e.g. ComplyWithSafetyStandards -> IEC61508). Asserted only in engineering-ethics; each pairing is verified against the stated scope of the issuing body."@en .
 
 :appliesToDomain a owl:AnnotationProperty ;
     rdfs:label "applies to domain"@en ;
@@ -1173,7 +1174,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     rdfs:label "Competence Gap State"@en ;
     iao:0000115 "A condition in which an agent lacks, has insufficient, or has not exercised the competence required for the work at hand, undercutting the obligations that attach to it."@en ;
     skos:definition "A condition in which an agent lacks, has insufficient, or has not exercised the competence required for the work at hand, undercutting the obligations that attach to it."@en ;
-    rdfs:comment "Condition of a lacking, insufficient, or unexercised competence undercutting attached obligations. Gap individuals reach the case today via the S-pass matched-class route; the ratified commit-stage deterministic minter (decision D2', fed by the withinCompetence signal) is pending for the 119 rebuild. An action-scoped gap links to the specific Action and licenses defeasibleUnder on the undercut obligation."@en ;
+    rdfs:comment "Condition of a lacking, insufficient, or unexercised competence undercutting attached obligations. An action-scoped gap links to the specific Action and licenses defeasibleUnder on the undercut obligation."@en ;
     proeth:persistenceType "inertial" .
 
 #################################################################
@@ -1215,7 +1216,7 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     iao:0000115 "Industry standards and specifications defining acceptable practice (e.g., ISO, IEEE, ASME standards) that embody collective professional agreement on technical acceptability and minimum competence benchmarks."@en ;
     skos:definition "Industry standards and specifications defining acceptable practice (e.g., ISO, IEEE, ASME standards) that embody collective professional agreement on technical acceptability and minimum competence benchmarks." ;
     rdfs:comment "Collective professional agreement on technical acceptability" ;
-    skos:scopeNote "An extension native to this ontology (engineering domain), not derived from a cited ethics-reasoning source (the prior McLaren citation was removed by the 2026-06-30 audit). The committed standard individuals in engineering-ethics carry catalog identifiers, publisher, and currency verified against the issuing bodies (the 2026-07-06 standards vetting); a statute or regulation such as Section 508 is typed LegalResource instead." .
+    skos:scopeNote "An extension native to this ontology (engineering domain), not derived from a cited ethics-reasoning source. The committed standard individuals in engineering-ethics carry catalog identifiers, publisher, and currency verified against the issuing bodies; a statute or regulation such as Section 508 is typed LegalResource instead." .
 
 :LegalResource rdf:type owl:Class ;
     rdfs:subClassOf proeth-core:Resource ;
@@ -1370,7 +1371,7 @@ proeth:TemporalConstraint a owl:Class ;
 proeth:tolmeijerRequirement a owl:AnnotationProperty ;
     rdfs:range xsd:string ;
     rdfs:label "Tolmeijer requirement"@en ;
-    rdfs:comment "Class-level descriptive annotation naming which of the four ethical-competence requirements a Capability kind primarily realizes (norm competence, situational awareness, learning and adaptation, explanation and justification), after the Chapter 2.2.8 analysis of the Tolmeijer et al. (2021) survey of machine-ethics implementations. Descriptive only (decision E5): it adds no typing axiom and no per-individual field."@en ;
+    rdfs:comment "Class-level descriptive annotation naming which of the four ethical-competence requirements a Capability kind primarily realizes (norm competence, situational awareness, learning and adaptation, explanation and justification), after the analysis of the Tolmeijer et al. (2021) survey of machine-ethics implementations. Descriptive only: it adds no typing axiom and no per-individual field."@en ;
     dcterms:references <https://doi.org/10.1145/3419633> . # Tolmeijer et al. 2021, Implementations in Machine Ethics: A Survey
 
 proeth:roleKind a owl:AnnotationProperty ;
@@ -1600,7 +1601,7 @@ proeth:RelationalArchetype a owl:NamedIndividual, skos:Concept ;
     skos:notation "relational" ; skos:prefLabel "relational"@en ;
     rdfs:label "Relational archetype"@en ;
     skos:definition "Classifies the bearer by the duty relationship the role establishes (provider-client, professional-peer, employer, public-responsibility)."@en ;
-    skos:scopeNote "No longer used as a proeth:archetypeAxis annotation value; the relational archetype is now a reasoner-inferred owl:equivalentClass defined class (ProviderClientRole etc.) derived from the role-to-role relationship edge. Retained to document the axis."@en ;
+    skos:scopeNote "Not used as a proeth:archetypeAxis annotation value; the relational archetype is a reasoner-inferred owl:equivalentClass defined class (ProviderClientRole and its siblings) derived from the role-to-role relationship edges. Documented here to record the axis."@en ;
     dcterms:source "Kong et al. (2020)." .
 
 proeth:RoleSpecializationScheme a skos:ConceptScheme ;
@@ -1623,7 +1624,7 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 :archetypeAxis rdf:type owl:AnnotationProperty ;
     rdfs:label "archetype axis"@en ;
     rdfs:seeAlso proeth:RoleArchetypeAxisScheme ;
-    rdfs:comment "Role-archetype axis marker. The value is a concept (URI) in proeth:RoleArchetypeAxisScheme (currently :OccupationalArchetype; the relational pole is now a reasoner-inferred defined class, not an annotation). skos:notation carries the short code. Note on presence-flag semantics after the relational retirement: the axis is now single-valued, so the value :OccupationalArchetype no longer discriminates; the presence versus absence of the marker is load-bearing. Presence is the selector the occupational resolver queries, g.subjects(:archetypeAxis, :OccupationalArchetype), to enroll a class (by its rdfs:label + skos:altLabel) in data-driven placement; a class without the marker (the ProfessionalRole and ParticipantRole backbone heads, the relational defined classes) is deliberately not a placement target. 'Occupational' means occupational or positional kind (the who-the-bearer-is axis), which is why participant heads (Client, Owner, Public, and the rest) carry it too; they are positional kinds, not occupations in the labor sense. Do not remove it from the participant heads to clean up the label; that un-indexes them from the resolver."@en .
+    rdfs:comment "Role-archetype axis marker. The value is a concept (URI) in proeth:RoleArchetypeAxisScheme (currently :OccupationalArchetype; the relational archetype is a reasoner-inferred defined class, not an annotation value). skos:notation carries the short code. The axis is single-valued, so the presence of the marker, not its value, is the operative signal: a class carrying the marker is enrolled (by its rdfs:label + skos:altLabel) as a data-driven placement target for occupational role resolution, while the ProfessionalRole and ParticipantRole backbone heads and the relational defined classes deliberately carry no marker and are not placement targets. 'Occupational' means occupational or positional kind (the who-the-bearer-is axis), which is why participant heads (Client, Owner, Public, and the rest) carry it too; they are positional kinds, not occupations in the labor sense. The marker on the participant heads is load-bearing for placement; a head without it is not indexed for placement."@en .
 
 # specializationAxis applies to occupational role leaves under an archetype head (e.g. EngineerRole):
 # "discipline" = a branch of the profession (CivilEngineerRole, crosswalked to an IFC discipline role);
@@ -1631,7 +1632,8 @@ proeth:FunctionSpecialization a owl:NamedIndividual, skos:Concept ;
 :specializationAxis rdf:type owl:AnnotationProperty ;
     rdfs:label "specialization axis"@en ;
     rdfs:seeAlso proeth:RoleSpecializationScheme ;
-    rdfs:comment "Role specialization axis. On an occupational role leaf the value is a concept (URI) in proeth:RoleSpecializationScheme (:DisciplineSpecialization or :FunctionSpecialization; skos:notation carries the short code). The former principle-kind use (values fundamental, virtue, relational, and domain) was a shadow of the principle-kind classes and was retired 2026-06-27 in favor of rdfs:subClassOf the kind class."@en .
+    rdfs:comment "Role specialization axis. On an occupational role leaf the value is a concept (URI) in proeth:RoleSpecializationScheme (:DisciplineSpecialization or :FunctionSpecialization; skos:notation carries the short code)."@en ;
+    skos:changeNote "2026-06-27: the former principle-kind use (values fundamental, virtue, relational, and domain), a shadow of the principle-kind classes, retired in favor of rdfs:subClassOf the kind class."@en .
 
 # Engineer specializations (under :EngineerRole, itself under :ProfessionalRole)
 :CivilEngineerRole rdf:type owl:Class ; rdfs:subClassOf :EngineerRole ;
@@ -1824,7 +1826,7 @@ proeth:conceptCategory a owl:DatatypeProperty ;
 proeth:confidence a owl:DatatypeProperty ;
     rdfs:label "confidence"@en ;
     rdfs:range xsd:decimal ;
-    rdfs:comment "Extraction confidence for the individual, 0..1 as a decimal (numerically comparable in SPARQL). The commit serializer types the value xsd:decimal (B12); the pre-B12 corpus carried plain string literals, retyped by the 2026-07-06 backfill after the case-56 probe exposed the range clash."@en ;
+    rdfs:comment "Extraction confidence for the individual, 0..1 as a decimal (numerically comparable in SPARQL). Committed values carry the xsd:decimal type."@en ;
     skos:changeNote "2026-07-06: rdfs:range corrected from xsd:string to xsd:decimal. The B12 serializer change (decimal-typed emission for SPARQL comparability) and the CaseAnnotationShape prose already said decimal; the string range predated both, and the first post-B12 commit (the case-56 pipeline probe) made the merged ontology Pellet-inconsistent on the clash (Thing subClassOf Nothing via NSPE_Code_of_Ethics confidence 0.95). Gold-case string literals retyped in the same pass."@en .
 
 proeth:textReferences a owl:DatatypeProperty ;
@@ -1923,7 +1925,7 @@ proeth:subject a owl:DatatypeProperty ;
 proeth:affectedParties a owl:DatatypeProperty ;
     rdfs:label "affected parties"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Carrier field on the extracted state: parties the state bears on, resolved at commit to proeth-core:affects edges and not stored as a literal on fresh-architecture individuals (legacy rows may carry values)."@en .
+    rdfs:comment "Carrier field on the extracted state: parties the state bears on, resolved at commit to proeth-core:affects edges and not stored as a literal on current individuals (rows from earlier extractions may carry values)."@en .
 
 proeth:activePeriod a owl:DatatypeProperty ;
     rdfs:label "active period"@en ;
@@ -1970,27 +1972,27 @@ proeth:documentTitle a owl:DatatypeProperty ;
 proeth:topic a owl:DatatypeProperty ;
     rdfs:label "topic"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Resource: the subject the resource addresses. A first-class Resource field (decision B2), declared distinct from the otherAttribute overflow string because topic is a known, near-always-present field rather than the uncontrolled tail."@en .
+    rdfs:comment "Intended on Resource: the subject the resource addresses. A first-class Resource field, declared distinct from the otherAttribute overflow string because topic is a known, near-always-present field rather than the uncontrolled tail."@en .
 
 proeth:usedInContext a owl:DatatypeProperty ;
     rdfs:label "used in context"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Resource: the context the resource is used in. Dropped from the fresh-architecture ResourceIndividual schema (Rs spec, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
+    rdfs:comment "Intended on Resource: the context the resource is used in. Not written by the current pipeline; retained for case data from earlier extractions."@en .
 
 proeth:usedBy a owl:DatatypeProperty ;
     rdfs:label "used by"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Resource: who uses it. Not stored as a literal; resolved to the proeth-core:availableTo edge at commit by the resource applier."@en .
+    rdfs:comment "Intended on Resource: who uses it. Not stored as a literal; represented as the proeth-core:availableTo edge at commit."@en .
 
 proeth:createdBy a owl:DatatypeProperty ;
     rdfs:label "created by"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Resource: who created it. Dropped from the fresh-architecture ResourceIndividual schema (Rs spec, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
+    rdfs:comment "Intended on Resource: who created it. Not written by the current pipeline; retained for case data from earlier extractions."@en .
 
 proeth:version a owl:DatatypeProperty ;
     rdfs:label "version"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Resource: resource version/edition. Dropped from the fresh-architecture ResourceIndividual schema (Rs spec, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
+    rdfs:comment "Intended on Resource: resource version/edition. Not written by the current pipeline; retained for case data from earlier extractions."@en .
 
 proeth:resourceClass a owl:DatatypeProperty ;
     rdfs:label "resource class"@en ;
@@ -2005,29 +2007,29 @@ proeth:provisionCodes a owl:DatatypeProperty ;
 proeth:citedBy a owl:DatatypeProperty ;
     rdfs:label "cited by"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Resource: who cited it as authority in the ethical analysis (the Discussion-section signal, split from the conflated used_by). Not stored as a literal by the current serializer; resolved to the proeth-core:citedByAgent edge at commit by the participant applier (deterministic Board-pattern fallback for Board literals). Pre-2026-07-05 commits carried the literal; the gold-case recommit sweep removes the stale copies."@en .
+    rdfs:comment "Intended on Resource: who cited it as authority in the ethical analysis, distinct from usedBy. Not stored as a literal; represented as the proeth-core:citedByAgent edge at commit."@en .
 
 
 # --- Capability ---
 proeth:requiredForObligations a owl:DatatypeProperty ;
     rdfs:label "required for obligations"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Capability: the extracted obligations of the case that presuppose the competence. Not stored by the fresh serializer; resolved (inverted) at commit to the core Obligation-to-Capability requiresCapability edge by the requires_capability_edges family. Pre-2026-07-06 commits carried the literal; the gold-case recommit sweep removes the stale copies."@en .
+    rdfs:comment "Intended on Capability: the extracted obligations of the case that presuppose the competence. Not stored as a literal; represented (inverted) at commit as the core Obligation-to-Capability requiresCapability edge."@en .
 
 proeth:capabilityStatement a owl:DatatypeProperty ;
     rdfs:label "capability statement"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Capability: the statement of the competence. Dropped from the fresh-architecture CapabilityIndividual schema (Ca section, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
+    rdfs:comment "Intended on Capability: the statement of the competence. Not written by the current pipeline; retained for case data from earlier extractions."@en .
 
 proeth:demonstratedThrough a owl:DatatypeProperty ;
     rdfs:label "demonstrated through"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Capability: textual evidence the capability was exercised. Dropped from the fresh-architecture CapabilityIndividual schema (Ca section, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
+    rdfs:comment "Intended on Capability: textual evidence the capability was exercised. Not written by the current pipeline; retained for case data from earlier extractions."@en .
 
 proeth:proficiencyLevel a owl:DatatypeProperty ;
     rdfs:label "proficiency level"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Capability: proficiency rating (e.g. expert). Dropped from the fresh-architecture CapabilityIndividual schema (Ca section, 2026-06); not written by the current pipeline; retained for prior-extraction case data."@en .
+    rdfs:comment "Intended on Capability: proficiency rating (e.g. expert). Not written by the current pipeline; retained for case data from earlier extractions."@en .
 
 proeth:capabilityClass a owl:DatatypeProperty ;
     rdfs:label "capability class"@en ;
@@ -2044,7 +2046,7 @@ proeth:constraintStatement a owl:DatatypeProperty ;
 proeth:severity a owl:DatatypeProperty ;
     rdfs:label "severity"@en ;
     rdfs:range xsd:string ;
-    rdfs:comment "Intended on Constraint: severity judgment. The Event half was retired with the E spec (emergency salience is carried structurally by the RiskState/EmergencyState the event initiates)."@en .
+    rdfs:comment "Intended on Constraint: severity judgment. Emergency salience on events is carried structurally by the RiskState/EmergencyState the event initiates, not by this property."@en .
 
 proeth:source a owl:DatatypeProperty ;
     rdfs:label "source"@en ;
@@ -2415,9 +2417,11 @@ proeth:answersQuestion a owl:DatatypeProperty ;
     owl:deprecated true ;
     rdfs:range xsd:string ;
     rdfs:label "answers question (deprecated literal)"@en ;
-    rdfs:comment "DEPRECATED 2026-07-10: the conclusion-to-question linkage is the proeth-cases:answersQuestion object property (cases v3.5.0), edge-primary per CMT-3. This literal carried the question number as a string; the commit bridge no longer emits it and the gold corpus was converted by deterministic backfill. Historical: replaced the unbounded answersQuestion1/... family (2026-07-04)."@en .
+    rdfs:comment "Deprecated: the conclusion-to-question linkage is the proeth-cases:answersQuestion object property (cases v3.5.0). This literal carried the question number as a string and is no longer written."@en ;
+    skos:changeNote "2026-07-10: deprecated in favor of the proeth-cases:answersQuestion object property; the literal itself (2026-07-04) replaced the unbounded answersQuestion1/... family."@en .
 
 proeth:causalStep a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:label "causal step"@en ;
-    rdfs:comment "One step of a causal chain, prefixed with its ordinal so the sequence survives as a repeated single predicate. Replaces the unbounded causalStep1/... family (2026-07-04)."@en .
+    rdfs:comment "One step of a causal chain, prefixed with its ordinal so the sequence survives as a repeated single predicate."@en ;
+    skos:changeNote "2026-07-04: replaces the unbounded causalStep1/... family."@en .
