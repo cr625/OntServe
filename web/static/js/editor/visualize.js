@@ -629,29 +629,77 @@
                 `;
             }
 
-            // Show connections
-            const connectedEdges = node.connectedEdges();
-            const parents = connectedEdges.filter(edge => edge.target().id() === node.id()).sources();
-            const children = connectedEdges.filter(edge => edge.source().id() === node.id()).targets();
+            // Entity page link (this ontology's entities only; external
+            // reference nodes have no page here).
+            if (nodeData.uri && nodeData.type !== 'external_class') {
+                const frag = nodeData.uri.includes('#')
+                    ? nodeData.uri.split('#').pop()
+                    : nodeData.uri.split('/').pop();
+                html += `
+                    <a class="btn btn-sm btn-outline-primary mb-2"
+                       href="/entity/${encodeURIComponent(ontologyId)}/${encodeURIComponent(frag)}"
+                       target="_blank" rel="noopener">
+                        <i class="fas fa-external-link-alt me-1"></i>Open entity page
+                    </a>
+                `;
+            }
 
-            if (parents.length > 0) {
+            // Hierarchy. subClassOf edges are stored child -> parent, so this
+            // node's parents are the TARGETS of its outgoing subClassOf edges
+            // and its children the SOURCES of incoming ones. Property edges
+            // are relations, never hierarchy.
+            const allEdges = node.connectedEdges();
+            const subEdges = allEdges.filter(e =>
+                e.data('type') === 'subClassOf' || e.data('type') === 'rdf:type');
+            const propEdges = allEdges.filter(e => e.data('type') === 'objectProperty');
+
+            const item = (n, suffix) => {
+                const id = n.id().replace(/'/g, "\\'");
+                return `<small class="d-block"><a href="#" onclick="focusNode('${id}'); return false;">` +
+                       `${n.data('label')}</a>${suffix || ''}</small>`;
+            };
+            const inferredTag = ' <span class="badge bg-success">inferred</span>';
+
+            const parentItems = subEdges
+                .filter(e => e.source().id() === node.id())
+                .map(e => item(e.target(), e.data('is_inferred') ? inferredTag : ''));
+            const childItems = subEdges
+                .filter(e => e.target().id() === node.id())
+                .map(e => item(e.source(), e.data('is_inferred') ? inferredTag : ''));
+
+            if (parentItems.length > 0) {
                 html += `
                     <div class="entity-property">
                         <span class="entity-property-name">Parents:</span>
-                        <div class="entity-property-value">
-                            ${parents.map(p => `<small class="d-block">${p.data('label')}</small>`).join('')}
-                        </div>
+                        <div class="entity-property-value">${parentItems.join('')}</div>
                     </div>
                 `;
             }
 
-            if (children.length > 0) {
+            if (childItems.length > 0) {
                 html += `
                     <div class="entity-property">
                         <span class="entity-property-name">Children:</span>
-                        <div class="entity-property-value">
-                            ${children.map(c => `<small class="d-block">${c.data('label')}</small>`).join('')}
-                        </div>
+                        <div class="entity-property-value">${childItems.join('')}</div>
+                    </div>
+                `;
+            }
+
+            // Object-property relations touching this node, direction shown.
+            const relItems = propEdges.map(e => {
+                const outgoing = e.source().id() === node.id();
+                const other = outgoing ? e.target() : e.source();
+                const id = other.id().replace(/'/g, "\\'");
+                const otherLink = `<a href="#" onclick="focusNode('${id}'); return false;">${other.data('label')}</a>`;
+                return `<small class="d-block">${outgoing
+                    ? `<em>${e.data('label')}</em> &rarr; ${otherLink}`
+                    : `${otherLink} &rarr; <em>${e.data('label')}</em>`}</small>`;
+            });
+            if (relItems.length > 0) {
+                html += `
+                    <div class="entity-property">
+                        <span class="entity-property-name">Relations:</span>
+                        <div class="entity-property-value">${relItems.join('')}</div>
                     </div>
                 `;
             }
@@ -659,6 +707,18 @@
             detailsElement.innerHTML = html;
             detailsCard.style.display = 'block';
             findSimilarBtn.style.display = nodeData.uri ? 'block' : 'none';
+        }
+
+        function focusNode(id) {
+            if (!cy) return;
+            const n = cy.getElementById(id);
+            if (n && n.length) {
+                cy.elements().unselect();
+                n.select();
+                cy.animate({ center: { eles: n }, zoom: Math.max(cy.zoom(), 1.2) }, { duration: 300 });
+                showNodeDetails(n);
+                highlightConnectedNodes(n);
+            }
         }
 
         function highlightConnectedNodes(node) {
