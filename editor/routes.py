@@ -633,19 +633,27 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
 
     @bp.route('/api/simple/reasoning/<ontology_name>', methods=['POST'])
     def simple_reasoning(ontology_name: str):
-        """Simple reasoning endpoint using owlready2 directly."""
+        """Read-only merged-graph Pellet reasoning (shared harness).
+
+        Version writing was removed 2026-07-18: the former save_as_version /
+        auto_promote path could replace the current ontology version from an
+        unauthenticated public page. Requests still sending those flags get a
+        note; nothing is written.
+        """
         from .reasoning_service import ReasoningRequest, execute_reasoning
 
         data = request.get_json() or {}
         req = ReasoningRequest(
             ontology_name=ontology_name,
             reasoner_type=data.get('reasoner_type', 'pellet'),
-            save_as_version=data.get('save_as_version', False),
-            auto_promote_significant=data.get('auto_promote_significant', False),
         )
         result = execute_reasoning(req)
+        payload = result.to_response_dict()
+        if data.get('save_as_version') or data.get('auto_promote_significant'):
+            payload['note'] = ('Reasoning is read-only; version writing was '
+                               'removed from this endpoint.')
         status = 200 if result.success else 500
-        return jsonify(result.to_response_dict()), status
+        return jsonify(payload), status
     
     @bp.route('/api/hierarchy/visualization/<ontology_name>', methods=['GET'])
     def hierarchy_visualization(ontology_name: str):

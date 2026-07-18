@@ -24,9 +24,20 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 import tempfile
 from dataclasses import asdict
+from pathlib import Path
 from typing import Any, Dict, List
+
+# `validation` is a namespace package (no __init__.py), invisible to consumers
+# that reach this module through the editable install (e.g. the web app) rather
+# than the MCP server's explicit sys.path setup. Insert the OntServe root here,
+# at the shared module, so every consumer resolves it; root must PRECEDE
+# OntServe/web on the path (the known services-shadowing gotcha).
+_ONTSERVE_ROOT = Path(__file__).resolve().parent.parent
+if str(_ONTSERVE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ONTSERVE_ROOT))
 
 logger = logging.getLogger(__name__)
 
