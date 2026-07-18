@@ -365,9 +365,8 @@
                     <div class="mb-3">
                         <label class="form-label">Entity Type Filter</label>
                         <select class="form-select form-select-sm" id="filterType">
-                            <option value="all">All Types</option>
-                            <option value="class" selected>Classes Only</option>
-                            <option value="property">Properties Only</option>
+                            <option value="all" selected>All Types</option>
+                            <option value="class">Classes Only</option>
                             <option value="individual">Individuals Only</option>
                         </select>
                     </div>
@@ -402,13 +401,6 @@
                         </label>
                     </div>
 
-                    <button class="btn btn-outline-secondary btn-sm w-100 mb-2" id="classesOnlyBtn" onclick="toggleClassesOnly()">
-                        Classes Only (hide Properties)
-                    </button>
-
-                    <button class="btn btn-outline-primary btn-sm w-100" onclick="applyFilters()">
-                        <i class="fas fa-filter me-1"></i>Apply Filters
-                    </button>
 
                     <button class="btn btn-outline-success btn-sm w-100 mt-2" onclick="runInference()"
                         id="inferenceBtn">
@@ -416,8 +408,8 @@
                     </button>
 
                     <div class="form-text small mt-1">
-                        Read-only: runs Pellet over the merged proethica graph and
-                        overlays inferred relations; nothing is saved.
+                        Runs Pellet over the merged proethica graph and overlays
+                        inferred relations. Nothing is saved.
                     </div>
 
                     <button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="loadOntologyData()"

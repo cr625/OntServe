@@ -3,7 +3,6 @@
         let ontologyData;
         let currentEntityData;
         let originalElements; // Store original elements for filtering
-        let hidePropertyNodes = false; // Classes Only quick filter state
         const ontologyId = window.VISUALIZE.ontologyId;
 
         // Use hierarchical layout by default for hierarchical ontologies
@@ -942,21 +941,6 @@
             performSemanticSearch();
         }
 
-        function toggleClassesOnly() {
-            hidePropertyNodes = !hidePropertyNodes;
-            const btn = document.getElementById('classesOnlyBtn');
-            if (hidePropertyNodes) {
-                // Set dropdown to "All Types" so the quick filter has something to act on
-                document.getElementById('filterType').value = 'all';
-                btn.classList.remove('btn-outline-secondary');
-                btn.classList.add('btn-secondary', 'text-white');
-            } else {
-                btn.classList.remove('btn-secondary', 'text-white');
-                btn.classList.add('btn-outline-secondary');
-            }
-            applyFilters();
-        }
-
         function applyFilters() {
             const filterType = document.getElementById('filterType').value;
             const showInferred = document.getElementById('showInferred').checked;
@@ -990,19 +974,6 @@
             if (!showInferred) {
                 filteredElements = filteredElements.filter(element => {
                     return !element.data.is_inferred;
-                });
-            }
-
-            // Classes Only quick filter: remove property-type nodes and any edges touching them
-            if (hidePropertyNodes) {
-                filteredElements = filteredElements.filter(element => {
-                    if (element.group === 'edges') return true;
-                    return element.data.type !== 'property';
-                });
-                const keepIds = new Set(filteredElements.filter(e => e.group === 'nodes').map(e => e.data.id));
-                filteredElements = filteredElements.filter(element => {
-                    if (element.group === 'nodes') return true;
-                    return keepIds.has(element.data.source) && keepIds.has(element.data.target);
                 });
             }
 
