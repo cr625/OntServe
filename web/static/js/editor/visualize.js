@@ -241,6 +241,21 @@
                         }
                     },
                     {
+                        selector: 'edge.property-edge',
+                        style: {
+                            'line-color': '#8e44ad',
+                            'target-arrow-color': '#8e44ad',
+                            'line-style': 'dashed',
+                            'label': 'data(label)',
+                            'font-size': '8px',
+                            'color': '#8e44ad',
+                            'text-rotation': 'autorotate',
+                            'text-background-color': '#ffffff',
+                            'text-background-opacity': 0.85,
+                            'text-background-padding': '1px'
+                        }
+                    },
+                    {
                         selector: 'edge:selected',
                         style: {
                             'line-color': '#ff6b6b',

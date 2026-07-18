@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
 from flask import Blueprint, request, jsonify, render_template, current_app, flash
+from markupsafe import escape
 from werkzeug.exceptions import BadRequest, NotFound
 from sqlalchemy import select, func
 
@@ -319,18 +320,19 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 logger.warning(f"Ontology {ontology_name} not found in database")
-                return f"<h1>Ontology Not Found</h1><p>Ontology '{ontology_name}' was not found in the database.</p>", 404
-            
+                return (f"<h1>Ontology Not Found</h1><p>Ontology '{escape(ontology_name)}' "
+                        f"was not found in the database.</p>"), 404
+
             logger.info(f"Found ontology: {ontology.name}, ID: {ontology.id}")
-            
+
             return render_template('editor/visualize.html',
                                  ontology=ontology,
                                  ontology_name=ontology_name,
                                  page_title=f"Visualize {ontology.name}")
-                                 
+
         except Exception as e:
             logger.error(f"Error loading visualization for {ontology_name}: {e}", exc_info=True)
-            return f"<h1>Error</h1><p>Error loading visualization: {str(e)}</p>", 500
+            return f"<h1>Error</h1><p>Error loading visualization: {escape(str(e))}</p>", 500
     
     @bp.route('/ontology/<ontology_id>/versions')
     def get_versions(ontology_id: str):
