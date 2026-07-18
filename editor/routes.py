@@ -9,7 +9,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
-from flask import Blueprint, request, jsonify, render_template, current_app, flash
+from flask import Blueprint, request, jsonify, render_template, current_app, flash, redirect, url_for
 from markupsafe import escape
 from werkzeug.exceptions import BadRequest, NotFound
 from sqlalchemy import select, func
@@ -37,9 +37,6 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
     
     # Configuration defaults
     config = config or {}
-    require_auth = config.get('require_auth', False)
-    admin_only = config.get('admin_only', False)
-    
     # Initialize storage backend
     if storage_backend is None:
         storage_config = config.get('storage', {})
@@ -48,7 +45,12 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
     # Initialize services
     entity_service = OntologyEntityService(storage_backend)
     validation_service = OntologyValidationService(storage_backend)
-    
+
+    # NOTE on auth: /editor access control is enforced APP-LEVEL in
+    # web/app.py (_guard_editor_space), not here. Several routes from OTHER
+    # blueprints (ontology, api, draft) are registered under /editor paths, so
+    # a blueprint-scoped before_request cannot cover the URL space.
+
     @bp.route('/')
     def index():
         """Main editor interface."""
