@@ -65,7 +65,7 @@
             const button = document.getElementById('inferenceBtn');
             const originalText = button.innerHTML;
             button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Running Inference...';
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Checking consistency...';
 
             // Read-only merged-graph Pellet run (shared reasoning harness).
             fetch(`/editor/api/simple/reasoning/${ontologyId}`, {
