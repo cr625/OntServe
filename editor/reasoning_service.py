@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 class ReasoningRequest:
     ontology_name: str
     reasoner_type: str = 'pellet'
+    explain: bool = False
 
 
 @dataclass
@@ -41,6 +42,8 @@ class ReasoningResult:
     truncated: bool = False
     error: Optional[str] = None
     error_explanation: Optional[str] = None
+    explanations: List[dict] = field(default_factory=list)
+    inconsistency_explanation: Optional[dict] = None
 
     def to_response_dict(self) -> dict:
         return {
@@ -55,6 +58,8 @@ class ReasoningResult:
             'truncated': self.truncated,
             'error': self.error,
             'error_explanation': self.error_explanation,
+            'explanations': self.explanations,
+            'inconsistency_explanation': self.inconsistency_explanation,
         }
 
 
@@ -87,7 +92,7 @@ def execute_reasoning(req: ReasoningRequest, _content_loader=None) -> ReasoningR
         return ReasoningResult(success=False, message=str(exc), error='not-found')
 
     from servers.reasoning_tools import reason_detailed
-    detail = reason_detailed(req.ontology_name, content=content)
+    detail = reason_detailed(req.ontology_name, content=content, explain=req.explain)
 
     error = detail.get('error')
     # An inconsistent ontology is a successful reasoning RUN with a negative
@@ -119,4 +124,6 @@ def execute_reasoning(req: ReasoningRequest, _content_loader=None) -> ReasoningR
         truncated=bool(detail.get('truncated')),
         error=detail.get('error'),
         error_explanation=detail.get('error_explanation'),
+        explanations=detail.get('explanations', []),
+        inconsistency_explanation=detail.get('inconsistency_explanation'),
     )

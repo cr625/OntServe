@@ -66,7 +66,11 @@ def check_consistency(ontology_name: str) -> Dict[str, Any]:
     }
 
 
-def reason_detailed(ontology_name: str, content: str | None = None) -> Dict[str, Any]:
+def reason_detailed(
+    ontology_name: str,
+    content: str | None = None,
+    explain: bool = False,
+) -> Dict[str, Any]:
     """Run Pellet and return the ACTUAL inferred edges and owl:Nothing entities,
     not just counts. Backs get_inferred_hierarchy + get_inconsistent_classes.
 
@@ -76,6 +80,12 @@ def reason_detailed(ontology_name: str, content: str | None = None) -> Dict[str,
 
     `content` (case TTL) may be passed to skip the DB fetch — used by tests to run
     against an on-disk fixture without a database.
+
+    `explain=True` additionally runs `pellet explain` (validation/pellet_explain)
+    over the same serialized merged graph: per-entailment justifications (capped)
+    under `explanations`, and on an inconsistent graph the clashing axiom set
+    under `inconsistency_explanation`. Each justification is one extra JVM
+    invocation (~1s), so explain is opt-in.
     """
     import owlready2
     from validation.pellet_validate import (
@@ -135,6 +145,9 @@ def reason_detailed(ontology_name: str, content: str | None = None) -> Dict[str,
             base["consistent"] = False
             base["error"] = "OwlReadyInconsistentOntologyError"
             base["error_explanation"] = str(e)[:1000]
+            if explain:
+                from validation.pellet_explain import explain_inconsistency
+                base["inconsistency_explanation"] = explain_inconsistency(tmp_path)
 
         if base["consistent"]:
             sub_edges: List[Dict[str, str]] = []
@@ -181,6 +194,11 @@ def reason_detailed(ontology_name: str, content: str | None = None) -> Dict[str,
             base["inferred_types"] = type_edges[:_MAX_ITEMS]
             if len(sub_edges) > _MAX_ITEMS or len(type_edges) > _MAX_ITEMS:
                 base["truncated"] = True
+            if explain:
+                from validation.pellet_explain import explain_entailments
+                base["explanations"] = explain_entailments(
+                    tmp_path, type_edges, sub_edges
+                )
         return base
     except Exception as exc:  # noqa: BLE001
         base["error"] = f"reason-failed: {type(exc).__name__}: {exc}"

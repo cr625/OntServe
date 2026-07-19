@@ -1,0 +1,26 @@
+{# Public OWL-DL reasoning panel: on-demand Pellet consistency + entailments
+   with per-entailment justifications. Backed by the read-only public endpoint
+   /editor/api/simple/reasoning/<name> (explain=true); rendering in
+   static/js/reasoning-panel.js. Included on the case view and the standard
+   ontology detail view. #}
+{% macro render_reasoning_panel(ontology_name) %}
+<div class="card mb-4" id="reasoning-panel">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span class="fw-semibold">
+            <i class="bi bi-cpu me-1"></i> OWL-DL Reasoning (Pellet)
+        </span>
+        <button type="button" class="btn btn-sm btn-primary" id="reasoningRunBtn"
+                data-ontology="{{ ontology_name }}">
+            <i class="bi bi-play-fill me-1"></i>Check Consistency &amp; Entailments
+        </button>
+    </div>
+    <div class="card-body" id="reasoningPanelBody">
+        <p class="text-muted small mb-0">
+            Runs the Pellet reasoner over the merged graph (foundation + core +
+            intermediate + this ontology): verifies logical consistency, then lists
+            the statements the reasoner derives that are asserted nowhere, each with
+            the axiom set that justifies it. Read-only; nothing is saved.
+        </p>
+    </div>
+</div>
+{% endmacro %}

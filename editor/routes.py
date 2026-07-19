@@ -648,6 +648,7 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         req = ReasoningRequest(
             ontology_name=ontology_name,
             reasoner_type=data.get('reasoner_type', 'pellet'),
+            explain=bool(data.get('explain')),
         )
         result = execute_reasoning(req)
         payload = result.to_response_dict()
