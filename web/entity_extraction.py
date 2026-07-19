@@ -369,7 +369,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         # ProfessionalRole; the extraction-minted compound classes in intermediate-extended) would
         # otherwise silently lose every non-primary parent at ingest, hiding it from subclass lists
         # and dropping the non-primary axis from the ancestor-union schema walks. Store the full
-        # named-superclass list so display and schema consumers can union it (helpers._get_entity_children,
+        # named-superclass list so display and schema consumers can union it (helpers.get_entity_children,
         # _class_ancestor_uris_all). Single-parent classes stay lean: parent_uri already carries them.
         named_supers = sorted(str(p) for p in g.objects(cls, RDFS.subClassOf)
                               if isinstance(p, rdflib.URIRef))
@@ -666,7 +666,7 @@ def _collect_properties(g, subject, skip_predicates):
         # is a bare hex id that rendered as noise on entity pages
         # (ObligationPropertyShape showed 'n6f48f294...'). Structured views
         # that need the nested content parse the version graph directly
-        # (_shape_attr_schema, _entity_equivalent_class).
+        # (shape_attr_schema, entity_equivalent_class).
         if isinstance(obj, rdflib.BNode):
             continue
         pred_str = str(pred)
