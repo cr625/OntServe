@@ -29,7 +29,7 @@ def _detail(**over):
 class TestExecuteReasoning:
 
     def test_consistent_run_maps_fields(self, monkeypatch):
-        monkeypatch.setattr(rt, 'reason_detailed', lambda name, content=None, explain=False: _detail())
+        monkeypatch.setattr(rt, 'reason_detailed', lambda name, content=None, explain=False, scope='merged': _detail())
         r = execute_reasoning(ReasoningRequest('proethica-intermediate'), _content_loader=_loader)
         assert r.success and r.consistent
         assert r.inferred_subclass_count == 1
@@ -37,7 +37,7 @@ class TestExecuteReasoning:
         assert 'consistent' in r.message
 
     def test_inconsistent_is_successful_run(self, monkeypatch):
-        monkeypatch.setattr(rt, 'reason_detailed', lambda name, content=None, explain=False: _detail(
+        monkeypatch.setattr(rt, 'reason_detailed', lambda name, content=None, explain=False, scope='merged': _detail(
             consistent=False, error='OwlReadyInconsistentOntologyError',
             error_explanation='clash', inferred_subclasses=[], inferred_types=[],
             inferred_subclass_count=0, inferred_type_count=0))
@@ -46,7 +46,7 @@ class TestExecuteReasoning:
         assert 'INCONSISTENT' in r.message
 
     def test_infrastructure_error_fails(self, monkeypatch):
-        monkeypatch.setattr(rt, 'reason_detailed', lambda name, content=None, explain=False: _detail(
+        monkeypatch.setattr(rt, 'reason_detailed', lambda name, content=None, explain=False, scope='merged': _detail(
             consistent=False, error='reason-failed: OSError: java not found'))
         r = execute_reasoning(ReasoningRequest('x'), _content_loader=_loader)
         assert not r.success
@@ -59,7 +59,7 @@ class TestExecuteReasoning:
         assert not r.success and r.error == 'not-found'
 
     def test_response_dict_shape(self, monkeypatch):
-        monkeypatch.setattr(rt, 'reason_detailed', lambda name, content=None, explain=False: _detail())
+        monkeypatch.setattr(rt, 'reason_detailed', lambda name, content=None, explain=False, scope='merged': _detail())
         d = execute_reasoning(ReasoningRequest('x'), _content_loader=_loader).to_response_dict()
         for key in ('success', 'consistent', 'inferred_subclasses', 'inferred_types',
                     'nothing_entities', 'inferred_subclass_count', 'truncated'):

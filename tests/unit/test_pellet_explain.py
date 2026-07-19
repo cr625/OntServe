@@ -99,7 +99,7 @@ class TestAdapterPassthrough:
 
         seen = {}
 
-        def fake_detail(name, content=None, explain=False):
+        def fake_detail(name, content=None, explain=False, scope='merged'):
             seen["explain"] = explain
             return {
                 "ontology_name": name, "consistent": True,

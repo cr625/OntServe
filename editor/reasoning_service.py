@@ -27,6 +27,7 @@ class ReasoningRequest:
     ontology_name: str
     reasoner_type: str = 'pellet'
     explain: bool = False
+    scope: str = 'merged'  # 'merged' = whole-graph diff; 'local' = target-declared subjects only
 
 
 @dataclass
@@ -92,7 +93,8 @@ def execute_reasoning(req: ReasoningRequest, _content_loader=None) -> ReasoningR
         return ReasoningResult(success=False, message=str(exc), error='not-found')
 
     from servers.reasoning_tools import reason_detailed
-    detail = reason_detailed(req.ontology_name, content=content, explain=req.explain)
+    detail = reason_detailed(req.ontology_name, content=content,
+                             explain=req.explain, scope=req.scope)
 
     error = detail.get('error')
     # An inconsistent ontology is a successful reasoning RUN with a negative
