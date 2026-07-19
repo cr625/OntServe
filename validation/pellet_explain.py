@@ -43,13 +43,19 @@ def _parse_explain_output(text: str) -> Dict[str, Any]:
 
         Explanation(s):
         1)   citedByAgent domain Resource
-             BER_Case_67-10 citedByAgent Agent_Board_of_Ethical_Review
+             ProviderClientRole equivalentTo Role
+                                             and hasClient some Role
 
         2)   ...
+
+    Axiom lines within a group share one base indent; a line indented
+    deeper than that is a wrapped continuation of the previous axiom (one
+    class expression printed across lines) and is rejoined onto it.
     """
     axiom = None
     explanations: List[List[str]] = []
     current: Optional[List[str]] = None
+    base_indent: Optional[int] = None
     in_explanations = False
 
     for raw in text.splitlines():
@@ -68,8 +74,14 @@ def _parse_explain_output(text: str) -> Dict[str, Any]:
         if numbered:
             current = [numbered.group(1).strip()]
             explanations.append(current)
+            # Axiom lines in this group align under the numbered line's text.
+            base_indent = numbered.start(1)
         elif current is not None:
-            current.append(line.strip())
+            indent = len(line) - len(line.lstrip())
+            if base_indent is not None and indent > base_indent:
+                current[-1] += " " + line.strip()
+            else:
+                current.append(line.strip())
 
     return {"axiom": axiom, "explanations": explanations}
 

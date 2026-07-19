@@ -47,7 +47,10 @@ class TestParseExplainOutput:
         parsed = pe._parse_explain_output(SAMPLE_SUBCLASS_OUTPUT)
         assert parsed["axiom"].startswith("ForensicExpertWitnessEngineerRole subClassOf")
         assert len(parsed["explanations"]) == 2
-        assert len(parsed["explanations"][0]) == 6
+        # The wrapped "and hasClient some Role" continuation rejoins its axiom line.
+        assert len(parsed["explanations"][0]) == 5
+        assert ("ProviderClientRole equivalentTo Role and hasClient some Role"
+                in parsed["explanations"][0])
         assert parsed["explanations"][1][0].startswith(
             "ForensicExpertWitnessEngineerRole subClassOf hasClient")
 
