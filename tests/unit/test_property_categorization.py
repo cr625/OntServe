@@ -1,5 +1,5 @@
 """Unit tests for the attribute/relationship split shared by the case-page
-cards and the entity detail page (web/ontology_routes._categorize_entity_properties).
+cards and the entity detail page (web/ontology_routes.categorize_entity_properties).
 
 IRI-valued triples are object properties (R->P->O / defeasibility edges) and must
 be grouped as relationships; literal-valued triples stay as attributes; the
@@ -7,14 +7,14 @@ conceptCategory and <concept>class keys are dropped from display.
 """
 from types import SimpleNamespace
 
-from web.ontology_routes import _categorize_entity_properties, _iri_values
+from web.ontology_routes import categorize_entity_properties, iri_values
 
 
 def test_iri_values_detects_single_and_list_and_literal():
-    assert _iri_values('http://x/case/60#Foo') == ['http://x/case/60#Foo']
-    assert _iri_values(['http://x#A', 'http://x#B']) == ['http://x#A', 'http://x#B']
-    assert _iri_values('public_responsibility') is None
-    assert _iri_values(['plain', 'text']) is None
+    assert iri_values('http://x/case/60#Foo') == ['http://x/case/60#Foo']
+    assert iri_values(['http://x#A', 'http://x#B']) == ['http://x#A', 'http://x#B']
+    assert iri_values('public_responsibility') is None
+    assert iri_values(['plain', 'text']) is None
 
 
 def test_categorize_splits_relationships_from_attributes():
@@ -29,7 +29,7 @@ def test_categorize_splits_relationships_from_attributes():
         'sourcetext': 'verbatim quote',
     })
 
-    groups = _categorize_entity_properties(entity)
+    groups = categorize_entity_properties(entity)
 
     rel_keys = [k for k, _ in groups['relationships']]
     assert set(rel_keys) == {'hasObligation', 'adheresToPrinciple'}

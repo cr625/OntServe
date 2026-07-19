@@ -47,7 +47,7 @@ def _is_secondary_parent_of(uri):
     return OntologyEntity.properties.op('->>')('rdf_superclasses').like(f'%"{uri}"%')
 
 
-def _get_entity_children(ontology, entity):
+def get_entity_children(ontology, entity):
     """Get entities that have this entity as an asserted parent: the materialized parent_uri OR a
     secondary parent recorded in rdf_superclasses (multi-parent classes, e.g. PublicResponsibilityRole
     under both RelationalRole and ProfessionalRole)."""
@@ -278,7 +278,7 @@ def class_hierarchy(entity, child_cap=25):
     return {'chain': chain, 'children': children, 'children_overflow': len(rows) > child_cap}
 
 
-def _entity_secondary_parents(entity):
+def entity_secondary_parents(entity):
     """The asserted named superclasses of a multi-parent class beyond the materialized primary
     parent_uri, resolved to linkable rows. Read from the rdf_superclasses properties JSON written
     at extraction (multi-parent classes only); empty for the single-parent common case. Rendered

@@ -39,7 +39,7 @@ _UNIVERSAL_TOP_URIS = {
 }
 
 
-def _shape_attr_schema(shape_name):
+def shape_attr_schema(shape_name):
     """Parse a descriptive SHACL property shape (sh:path/sh:name/sh:description/sh:order) by local
     name from validation/shapes/core-shapes.ttl. Cached per shape on file mtime; the shape is the
     single source of truth. Returns [{name, uri, description, order}]."""
@@ -130,7 +130,7 @@ def _class_shape_schemas(ancestor_list):
                 tier, seen = bearer, seen_b
             else:
                 continue
-            for a in _shape_attr_schema(name):
+            for a in shape_attr_schema(name):
                 if a["uri"] not in seen:
                     seen.add(a["uri"])
                     tier.append(a)

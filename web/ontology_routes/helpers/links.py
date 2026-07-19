@@ -24,7 +24,7 @@ _SEMANTIC_LINK_PREDS = [
 ]
 
 
-def _entity_semantic_links(entity, ontology):
+def entity_semantic_links(entity, ontology):
     """Crosswalk links (SKOS mappings, seeAlso, source) for an entity, resolved at render
     time from the ontology's current TTL. A target that is itself an OntServe entity becomes
     an INTERNAL link. That is the navigable crosswalk. For example ClientRole links to the IFC
@@ -101,7 +101,7 @@ def _entity_semantic_links(entity, ontology):
 _CASE_ONTOLOGY_RE = _re.compile(r'^proethica-case-(\d+)$')
 
 
-def _entity_using_cases(entity):
+def entity_using_cases(entity):
     """Case ontologies that instantiate this class or a base-ontology descendant of it.
     An individual's rdf:type is stored as parent_uri; the base-layer subclass closure
     makes mid-chain classes (Guideline) report the cases typed to their descendants.
@@ -130,7 +130,7 @@ def _entity_using_cases(entity):
     return cases
 
 
-def _uri_ends_with_fragment(fragment):
+def uri_ends_with_fragment(fragment):
     """SQLAlchemy predicate matching a URI whose final segment is `fragment`,
     delimited by either '#' (proethica URIs) or '/' (OBO/BFO URIs). Lets the
     entity page resolve slash-delimited BFO links such as obo/BFO_0000001."""
@@ -138,7 +138,7 @@ def _uri_ends_with_fragment(fragment):
                OntologyEntity.uri.like(f'%/{fragment}'))
 
 
-def _find_entity_by_fragment(ontology, fragment):
+def find_entity_by_fragment(ontology, fragment):
     """Find entity by URI fragment (the final segment after # or /)."""
     # Try exact fragment match against the ontology's base URI (hash form).
     if ontology.base_uri:
@@ -154,7 +154,7 @@ def _find_entity_by_fragment(ontology, fragment):
     # Fallback: URI ending with #fragment or /fragment (OBO/BFO are slash-delimited).
     stmt = select(OntologyEntity).where(
         OntologyEntity.ontology_id == ontology.id,
-        _uri_ends_with_fragment(fragment)
+        uri_ends_with_fragment(fragment)
     ).limit(1)
     return db.session.execute(stmt).scalars().first()
 
@@ -192,7 +192,7 @@ def definitional_entity_for_uri(uri):
     return min(rows, key=rank)
 
 
-def _entity_disjoint_classes(entity, ontology):
+def entity_disjoint_classes(entity, ontology):
     """All classes disjoint with this entity: explicit owl:disjointWith (either direction) PLUS the
     co-members of any owl:AllDisjointClasses it belongs to. Parsed from the current version content,
     because the AllDisjointClasses node is not stored as an entity triple (so the entity page would
@@ -242,7 +242,7 @@ def _entity_disjoint_classes(entity, ontology):
         return []
 
 
-def _entity_case_provenance(entity):
+def entity_case_provenance(entity):
     """Case citations for a case-discovered class: the cases recorded by the
     commit-time proeth-prov:discoveredInCase / firstDiscoveredInCase markers,
     resolved to linked case ontologies with their display titles.
@@ -294,13 +294,13 @@ def _entity_case_provenance(entity):
     return out
 
 
-def _entity_incoming_edges(entity, ontology):
+def entity_incoming_edges(entity, ontology):
     """Object-property edges POINTING AT this entity in the current ontology
     version: [(predicate_localname, [{uri, fragment, label}])]. The commit
     writes several families one-directional (Agent hasRole facet, Obligation
     requiresCapability, obligatedParty, isPerformedBy ...), so without this an
     individual never shows who bears/requires/performs it (correspondence
-    audit T8, 2026-07-05). Mirrors _entity_disjoint_classes: parsed from the
+    audit T8, 2026-07-05). Mirrors entity_disjoint_classes: parsed from the
     version content because inverse edges are not stored on the entity row."""
     try:
         v = db.session.execute(
@@ -340,12 +340,12 @@ def _entity_incoming_edges(entity, ontology):
         return []
 
 
-def _entity_equivalent_class(entity, ontology):
+def entity_equivalent_class(entity, ontology):
     """For a DEFINED class (owl:equivalentClass with an owl:intersectionOf), the human-readable
     definition: the ordered conjuncts -- named classes and property restrictions (onProperty +
     some/only filler). Parsed from the current version content because the intersection/restriction
     nodes are anonymous blank nodes (not stored as entity triples). Returns {'conjuncts': [...]} or
-    None. Mirrors _entity_disjoint_classes."""
+    None. Mirrors entity_disjoint_classes."""
     try:
         from rdflib.collection import Collection
         v = db.session.execute(

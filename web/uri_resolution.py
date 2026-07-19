@@ -78,8 +78,8 @@ def resolve_uri():
             # Render the entity's ACTUAL source triples (skos:definition, IAO annotations,
             # restrictions, skos crosswalks), the same faithful TTL the entity page shows --
             # not the thin label/comment/parent projection from the structured columns.
-            from web.ontology_routes.helpers import _generate_entity_ttl_display
-            ttl_content = _generate_entity_ttl_display(entity, ontology)
+            from web.ontology_routes.helpers import generate_entity_ttl_display
+            ttl_content = generate_entity_ttl_display(entity, ontology)
         else:
             # Fallback: check concepts table
             concept = db.session.execute(

@@ -11,21 +11,21 @@ from web.models import db, Ontology, OntologyEntity, OntologyVersion
 from web.ontology_stats import build_stats_context
 from web.entity_extraction import extract_entities_from_content
 from web.ontology_routes.helpers import (
-    _entity_semantic_links,
-    _entity_using_cases,
-    _categorize_entity_properties,
-    _find_entity_by_fragment,
-    _uri_ends_with_fragment,
-    _get_entity_children,
-    _generate_entity_ttl_display,
-    _extract_entity_from_ttl,
+    entity_semantic_links,
+    entity_using_cases,
+    categorize_entity_properties,
+    find_entity_by_fragment,
+    uri_ends_with_fragment,
+    get_entity_children,
+    generate_entity_ttl_display,
+    extract_entity_from_ttl,
     class_property_schema,
     class_hierarchy,
-    _entity_disjoint_classes,
-    _entity_secondary_parents,
-    _entity_equivalent_class,
-    _entity_incoming_edges,
-    _entity_case_provenance,
+    entity_disjoint_classes,
+    entity_secondary_parents,
+    entity_equivalent_class,
+    entity_incoming_edges,
+    entity_case_provenance,
 )
 
 
@@ -318,7 +318,7 @@ def register_detail_routes(bp):
         stmt = select(Ontology).where(Ontology.name == ontology_name)
         ontology = db.session.execute(stmt).scalar_one_or_none()
 
-        entity = _find_entity_by_fragment(ontology, fragment) if ontology else None
+        entity = find_entity_by_fragment(ontology, fragment) if ontology else None
 
         # Cross-ontology fallback: entity may be in a related ontology
         # (e.g., classes targeted to proethica-intermediate are in proethica-intermediate-extended).
@@ -327,7 +327,7 @@ def register_detail_routes(bp):
         # definitional copy so the page lands on the one holding firstDiscoveredInCase etc.
         if not entity:
             candidates = db.session.execute(
-                select(OntologyEntity).where(_uri_ends_with_fragment(fragment))
+                select(OntologyEntity).where(uri_ends_with_fragment(fragment))
             ).scalars().all()
             if candidates:
                 entity = next(
@@ -339,31 +339,31 @@ def register_detail_routes(bp):
                 from flask import abort
                 abort(404)
 
-        children = _get_entity_children(ontology, entity)
-        ttl_content = _generate_entity_ttl_display(entity, ontology)
-        prop_groups = _categorize_entity_properties(entity)
-        semantic_links = _entity_semantic_links(entity, ontology)
-        using_cases = _entity_using_cases(entity)
+        children = get_entity_children(ontology, entity)
+        ttl_content = generate_entity_ttl_display(entity, ontology)
+        prop_groups = categorize_entity_properties(entity)
+        semantic_links = entity_semantic_links(entity, ontology)
+        using_cases = entity_using_cases(entity)
         class_schema = class_property_schema(entity)
         hierarchy = class_hierarchy(entity)
-        disjoint_classes = _entity_disjoint_classes(entity, ontology)
-        secondary_parents = _entity_secondary_parents(entity)
-        equivalent_class = _entity_equivalent_class(entity, ontology)
+        disjoint_classes = entity_disjoint_classes(entity, ontology)
+        secondary_parents = entity_secondary_parents(entity)
+        equivalent_class = entity_equivalent_class(entity, ontology)
         # Incoming edges for INDIVIDUALS only (classes have the class-page
         # Referenced By section; parsing the full version content per request
         # is reserved for the case-individual pages that need it).
-        incoming_edges = (_entity_incoming_edges(entity, ontology)
+        incoming_edges = (entity_incoming_edges(entity, ontology)
                           if entity.entity_type in ('individual', 'concept') else [])
         # Case citations for case-discovered classes (extended store): the
         # discoveredInCase markers resolved to linked, titled case ontologies.
-        case_provenance = _entity_case_provenance(entity)
+        case_provenance = entity_case_provenance(entity)
         # SHACL node shapes: their sh:property rows are blank nodes (the raw
         # ids used to leak onto the page); render the parsed field contract
         # instead via the same cached parser the class pages use.
         shape_fields = []
         if str(entity.parent_uri or '').endswith('shacl#NodeShape'):
-            from web.ontology_routes.helpers import _shape_attr_schema
-            shape_fields = _shape_attr_schema(fragment)
+            from web.ontology_routes.helpers import shape_attr_schema
+            shape_fields = shape_attr_schema(fragment)
 
         return render_template('entity_detail.html',
                              ontology=ontology,
@@ -403,7 +403,7 @@ def register_detail_routes(bp):
             abort(404)
 
         # Parse entity from the version's TTL content
-        entity_data = _extract_entity_from_ttl(version.content, ontology, fragment)
+        entity_data = extract_entity_from_ttl(version.content, ontology, fragment)
         if not entity_data:
             from flask import abort
             abort(404)

@@ -22,6 +22,6 @@ register_manage_routes(ontology_bp)
 register_editor_routes(ontology_bp)
 
 # Back-compat re-export: tests/unit/test_property_categorization.py imports these helpers directly.
-from web.ontology_routes.helpers import _categorize_entity_properties, _iri_values  # noqa: E402,F401
+from web.ontology_routes.helpers import categorize_entity_properties, iri_values  # noqa: E402,F401
 
 __all__ = ["ontology_bp"]

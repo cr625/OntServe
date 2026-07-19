@@ -94,7 +94,7 @@ def _format_property_value(value):
     return value
 
 
-def _categorize_entity_properties(entity):
+def categorize_entity_properties(entity):
     """Categorize entity properties into display groups.
 
     Returns a dict with keys:
@@ -168,10 +168,10 @@ def _categorize_entity_properties(entity):
         # edges); group them as relationships, keeping the bare predicate and the
         # target IRIs so the template can link them (mirrors the card view).
         # Crosswalk predicates are excluded: the Mappings & provenance card owns
-        # them (_entity_semantic_links), and the literal-valued proeth:source
+        # them (entity_semantic_links), and the literal-valued proeth:source
         # provision string on Constraint individuals is unaffected because it
         # takes the attribute branch below.
-        iris = _iri_values(value)
+        iris = iri_values(value)
         if iris is not None:
             if key.lower() in _CROSSWALK_KEYS:
                 continue
@@ -198,7 +198,7 @@ def _categorize_entity_properties(entity):
     return groups
 
 
-def _iri_values(value):
+def iri_values(value):
     """Return a list of IRI strings if value is IRI-valued (object property),
     else None. Mirrors the literal-vs-IRI split used by the case-page cards."""
     if isinstance(value, str) and value.startswith(('http://', 'https://')):
@@ -209,7 +209,7 @@ def _iri_values(value):
     return None
 
 
-def _generate_entity_ttl_display(entity, ontology):
+def generate_entity_ttl_display(entity, ontology):
     """TTL for display. Render the entity's ACTUAL source triples from the ontology's
     current version. This way skos:exactMatch, skos:inScheme, skos:Concept typing,
     skos:definition, and dcterms:source all show, not just the few fields the entity
@@ -252,7 +252,7 @@ def _generate_entity_ttl_display(entity, ontology):
     return generate_entity_ttl(entity, ontology)
 
 
-def _extract_entity_from_ttl(ttl_content, ontology, fragment):
+def extract_entity_from_ttl(ttl_content, ontology, fragment):
     """Extract a single entity's data from TTL content for versioned display.
 
     Returns a dict-like object with entity attributes, or None if not found.
