@@ -12,6 +12,11 @@
     const body = document.getElementById('reasoningPanelBody');
     if (!btn || !body) return;
 
+    const info = document.getElementById('reasoningInfoIcon');
+    if (info && window.bootstrap && bootstrap.Popover) {
+        new bootstrap.Popover(info);
+    }
+
     const esc = s => String(s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const local = iri => String(iri).split('#').pop().split('/').pop();

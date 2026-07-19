@@ -8,6 +8,12 @@
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <span class="fw-semibold">
             <i class="bi bi-cpu me-1"></i> OWL-DL Reasoning (Pellet)
+            <a tabindex="0" class="ms-1 text-muted" role="button" id="reasoningInfoIcon"
+               data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="bottom"
+               data-bs-title="Why few derived statements is expected"
+               data-bs-content="The extraction pipeline asserts at commit time most of what the reasoner licenses: explicit types, subclass chains to the nine components, materialized dependency and defeasibility edges. The reasoner's role is therefore verification, and the consistency verdict is the primary output: no individual violates the nine-component disjointness, no property is used against its domain or range, and no prevailsOver pair violates asymmetry. Statements listed below are the remainder: derivable from the axioms but asserted nowhere.">
+                <i class="bi bi-info-circle"></i>
+            </a>
         </span>
         <button type="button" class="btn btn-sm btn-primary" id="reasoningRunBtn"
                 data-ontology="{{ ontology_name }}">
