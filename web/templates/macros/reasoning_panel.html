@@ -19,7 +19,9 @@
             Runs the Pellet reasoner over the merged graph (foundation + core +
             intermediate + this ontology): verifies logical consistency, then lists
             the statements the reasoner derives that are asserted nowhere, each with
-            the axiom set that justifies it. Read-only; nothing is saved.
+            the axiom set that justifies it. Because the merged graph spans the whole
+            stack, a derived statement is tagged with the layer it belongs to.
+            Read-only; nothing is saved.
         </p>
     </div>
 </div>

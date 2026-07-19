@@ -1363,12 +1363,16 @@
             </div>
         </div>
 
-        {# Width-matched to the col-md-8 entity column above it #}
+        {# Only for the proethica stack: the harness reasons over the merged
+           proethica graph, which is meaningless on external ontology pages
+           (BFO, IAO, RO, PROV-O). Width-matched to the col-md-8 entity column. #}
+        {% if ontology.name.startswith('proethica') or ontology.name.startswith('engineering') %}
         <div class="row">
             <div class="col-md-8">
                 {{ render_reasoning_panel(ontology.name) }}
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 

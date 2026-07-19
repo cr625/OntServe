@@ -13,6 +13,15 @@
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const local = iri => String(iri).split('#').pop().split('/').pop();
 
+    // Which layer of the proethica stack a statement's subject belongs to --
+    // the merged graph spans foundation + core + intermediate + cases, so a
+    // derived statement is not necessarily about this page's ontology.
+    function layerOf(iri) {
+        const m = String(iri).match(/proethica\.org\/(?:ontology\/)?(?:case\/(\d+)|([a-z-]+))#/);
+        if (!m) return null;
+        return m[1] ? `case ${m[1]}` : m[2];
+    }
+
     function statementLabel(e) {
         if (e.axiom) return e.axiom;
         const verb = e.kind === 'instance' ? 'type' : 'subClassOf';
@@ -35,6 +44,7 @@
                 <div class="alert alert-success py-2 mb-3">
                     <i class="bi bi-check-circle me-1"></i>
                     <strong>Consistent.</strong>
+                    ${(data.nothing_entities || []).length} disjointness violation(s),
                     ${data.inferred_type_count || 0} inferred type assertion(s),
                     ${data.inferred_subclass_count || 0} inferred subclass relation(s)
                     over the merged graph.
@@ -61,6 +71,7 @@
                         <div style="overflow-wrap: anywhere;">
                             <span class="badge bg-success me-1">derived</span>
                             <strong><code>${esc(statementLabel(e))}</code></strong>
+                            ${layerOf(e.subject) ? `<span class="text-muted small ms-1">in ${esc(layerOf(e.subject))}</span>` : ''}
                         </div>
                         ${e.error
                             ? `<div class="text-muted small ps-3">justification unavailable (${esc(e.error)})</div>`
