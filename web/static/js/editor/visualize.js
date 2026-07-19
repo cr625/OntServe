@@ -72,7 +72,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ reasoner_type: 'pellet', explain: true })
+                body: JSON.stringify({ reasoner_type: 'pellet' })
             })
                 .then(response => response.json())
                 .then(data => {
@@ -1079,30 +1079,13 @@
                 </div>
             `;
 
-            const explained = data.explanations || [];
-            if (explained.length > 0) {
-                const localName = iri => String(iri).split('#').pop().split('/').pop();
-                htmlContent += `<h6 class="mt-2"><i class="fas fa-project-diagram text-success"></i> Derived statements and why they hold</h6>`;
-                explained.forEach(e => {
-                    const verb = e.kind === 'instance' ? 'type' : 'subClassOf';
-                    const label = e.axiom || `${localName(e.subject)} ${verb} ${localName(e.object)}`;
-                    htmlContent += `<div class="mb-2" style="overflow-wrap: anywhere;"><strong><code>${esc(label)}</code></strong>`;
-                    (e.explanations || []).forEach(lines => {
-                        htmlContent += `<div class="border-start border-3 border-success ps-2 mt-1" style="min-width: 0;">` +
-                            `<code class="d-block small" style="white-space: pre-wrap; overflow-wrap: anywhere;">${lines.map(esc).join('\n')}</code></div>`;
-                    });
-                    htmlContent += `</div>`;
+            const sample = (data.inferred_subclasses || []).slice(0, 8);
+            if (sample.length > 0) {
+                htmlContent += `<h6 class="mt-2"><i class="fas fa-project-diagram text-success"></i> Inferred subclass relations</h6><ul class="small">`;
+                sample.forEach(rel => {
+                    htmlContent += `<li>${esc(rel.child.split('#').pop())} &rarr; ${esc(rel.parent.split('#').pop())}</li>`;
                 });
-                htmlContent += `<p class="small text-muted mb-0">Overlaid on the graph as green dashed edges (toggle "Show Inferred Relations").</p>`;
-            } else {
-                const sample = (data.inferred_subclasses || []).slice(0, 8);
-                if (sample.length > 0) {
-                    htmlContent += `<h6 class="mt-2"><i class="fas fa-project-diagram text-success"></i> Inferred subclass relations</h6><ul class="small">`;
-                    sample.forEach(rel => {
-                        htmlContent += `<li>${esc(rel.child.split('#').pop())} &rarr; ${esc(rel.parent.split('#').pop())}</li>`;
-                    });
-                    htmlContent += `</ul><p class="small text-muted mb-0">Overlaid on the graph as green dashed edges (toggle "Show Inferred Relations").</p>`;
-                }
+                htmlContent += `</ul><p class="small text-muted mb-0">Overlaid on the graph as green dashed edges (toggle "Show Inferred Relations").</p>`;
             }
 
             if (!data.consistent) {

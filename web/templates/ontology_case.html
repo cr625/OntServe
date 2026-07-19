@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% from "macros/case_display.html" import render_entity_card, render_section %}
-{% from "macros/reasoning_panel.html" import render_reasoning_panel %}
 {% from "macros/case_panels.html" import render_competition, render_citations, render_conclusions %}
 
 {% block title %}{{ ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else ontology.name }} - Case View - OntServe{% endblock %}
@@ -569,9 +568,6 @@
                         <span class="badge bg-secondary">{{ block.count }}</span>
                     </a>
                     {% endfor %}
-                    <a class="nav-link d-flex justify-content-between align-items-center" href="#reasoning-panel">
-                        <span><i class="bi bi-cpu me-1"></i>Reasoning</span>
-                    </a>
                 </nav>
             </div>
 
@@ -615,8 +611,6 @@
         {{ render_conclusions(conclusions, ontology_name=ontology.name) }}
         {% endif %}
         {% endfor %}
-
-        {{ render_reasoning_panel(ontology.name) }}
     </div>
 </div>
 {% endblock %}
@@ -624,5 +618,4 @@
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/ontology_case.js') }}"></script>
-<script src="{{ url_for('static', filename='js/reasoning-panel.js') }}"></script>
 {% endblock %}
