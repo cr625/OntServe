@@ -1363,7 +1363,12 @@
             </div>
         </div>
 
-        {{ render_reasoning_panel(ontology.name) }}
+        {# Width-matched to the col-md-8 entity column above it #}
+        <div class="row">
+            <div class="col-md-8">
+                {{ render_reasoning_panel(ontology.name) }}
+            </div>
+        </div>
     </div>
 </div>
 
