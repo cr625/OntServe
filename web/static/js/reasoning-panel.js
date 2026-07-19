@@ -22,9 +22,9 @@
     function justificationHtml(groups) {
         if (!groups || !groups.length) return '';
         return groups.map((lines, i) => `
-            <div class="border-start border-3 border-success ps-3 mt-1">
+            <div class="border-start border-3 border-success ps-3 mt-1" style="min-width: 0;">
                 ${groups.length > 1 ? `<div class="text-muted small">justification ${i + 1}</div>` : ''}
-                <code class="d-block small" style="white-space: pre-wrap;">${lines.map(esc).join('\n')}</code>
+                <code class="d-block small" style="white-space: pre-wrap; overflow-wrap: anywhere;">${lines.map(esc).join('\n')}</code>
             </div>`).join('');
     }
 
@@ -57,8 +57,8 @@
             html += '<h6 class="mb-2">Derived statements and why they hold</h6>';
             explained.forEach(e => {
                 html += `
-                    <div class="mb-3">
-                        <div>
+                    <div class="mb-3" style="min-width: 0;">
+                        <div style="overflow-wrap: anywhere;">
                             <span class="badge bg-success me-1">derived</span>
                             <strong><code>${esc(statementLabel(e))}</code></strong>
                         </div>
@@ -80,7 +80,7 @@
             .filter(t => !explainedKeys.has(`${t.s}|${t.o}`));
         if (rest.length) {
             html += `<h6 class="mt-3 mb-1">Further entailments</h6>
-                <ul class="small mb-0">${rest.map(t =>
+                <ul class="small mb-0" style="overflow-wrap: anywhere;">${rest.map(t =>
                     `<li><code>${esc(local(t.s))} ${t.verb} ${esc(local(t.o))}</code></li>`).join('')}</ul>`;
         }
 

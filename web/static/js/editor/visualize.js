@@ -1086,10 +1086,10 @@
                 explained.forEach(e => {
                     const verb = e.kind === 'instance' ? 'type' : 'subClassOf';
                     const label = e.axiom || `${localName(e.subject)} ${verb} ${localName(e.object)}`;
-                    htmlContent += `<div class="mb-2"><strong><code>${esc(label)}</code></strong>`;
+                    htmlContent += `<div class="mb-2" style="overflow-wrap: anywhere;"><strong><code>${esc(label)}</code></strong>`;
                     (e.explanations || []).forEach(lines => {
-                        htmlContent += `<div class="border-start border-3 border-success ps-2 mt-1">` +
-                            `<code class="d-block small" style="white-space: pre-wrap;">${lines.map(esc).join('\n')}</code></div>`;
+                        htmlContent += `<div class="border-start border-3 border-success ps-2 mt-1" style="min-width: 0;">` +
+                            `<code class="d-block small" style="white-space: pre-wrap; overflow-wrap: anywhere;">${lines.map(esc).join('\n')}</code></div>`;
                     });
                     htmlContent += `</div>`;
                 });
