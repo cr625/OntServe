@@ -63,7 +63,7 @@
                   rdfs:label "discovered in step" ;
                   rdfs:comment "The pipeline step that discovered this entity. Valid values: 1 (Contextual Framework), 2 (Normative Requirements), 3 (Temporal Dynamics)." ;
                   rdfs:subPropertyOf prov:hadPrimarySource ;
-                  skos:changeNote "2026-07-11: renamed from discoveredInPass (pre-rebuild gate decision 12). The recorded value has always been the step grouping; the pipeline reserves 'pass' for the facts/discussion split within a step, so the old name misdescribed the literal. Committed case graphs and stored extraction payloads were backfilled to the new predicate." .
+                  skos:changeNote "2026-07-11: renamed from discoveredInPass. The recorded value has always been the step grouping; 'pass' names the facts/discussion split within a step, so the old name misdescribed the literal. Committed case graphs were converted to the new predicate." .
 
 ###  http://proethica.org/provenance#sourceText
 :sourceText rdf:type owl:DatatypeProperty ;

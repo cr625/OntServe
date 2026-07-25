@@ -9,7 +9,8 @@ import logging
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
-from flask import Blueprint, request, jsonify, render_template, current_app, flash
+from flask import Blueprint, request, jsonify, render_template, current_app, flash, redirect, url_for
+from markupsafe import escape
 from werkzeug.exceptions import BadRequest, NotFound
 from sqlalchemy import select, func
 
@@ -36,9 +37,6 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
     
     # Configuration defaults
     config = config or {}
-    require_auth = config.get('require_auth', False)
-    admin_only = config.get('admin_only', False)
-    
     # Initialize storage backend
     if storage_backend is None:
         storage_config = config.get('storage', {})
@@ -47,7 +45,12 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
     # Initialize services
     entity_service = OntologyEntityService(storage_backend)
     validation_service = OntologyValidationService(storage_backend)
-    
+
+    # NOTE on auth: /editor access control is enforced APP-LEVEL in
+    # web/app.py (_guard_editor_space), not here. Several routes from OTHER
+    # blueprints (ontology, api, draft) are registered under /editor paths, so
+    # a blueprint-scoped before_request cannot cover the URL space.
+
     @bp.route('/')
     def index():
         """Main editor interface."""
@@ -319,18 +322,19 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
             ontology = db.session.execute(stmt).scalar_one_or_none()
             if not ontology:
                 logger.warning(f"Ontology {ontology_name} not found in database")
-                return f"<h1>Ontology Not Found</h1><p>Ontology '{ontology_name}' was not found in the database.</p>", 404
-            
+                return (f"<h1>Ontology Not Found</h1><p>Ontology '{escape(ontology_name)}' "
+                        f"was not found in the database.</p>"), 404
+
             logger.info(f"Found ontology: {ontology.name}, ID: {ontology.id}")
-            
+
             return render_template('editor/visualize.html',
                                  ontology=ontology,
                                  ontology_name=ontology_name,
                                  page_title=f"Visualize {ontology.name}")
-                                 
+
         except Exception as e:
             logger.error(f"Error loading visualization for {ontology_name}: {e}", exc_info=True)
-            return f"<h1>Error</h1><p>Error loading visualization: {str(e)}</p>", 500
+            return f"<h1>Error</h1><p>Error loading visualization: {escape(str(e))}</p>", 500
     
     @bp.route('/ontology/<ontology_id>/versions')
     def get_versions(ontology_id: str):
@@ -631,19 +635,32 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
 
     @bp.route('/api/simple/reasoning/<ontology_name>', methods=['POST'])
     def simple_reasoning(ontology_name: str):
-        """Simple reasoning endpoint using owlready2 directly."""
+        """Read-only merged-graph Pellet reasoning (shared harness).
+
+        Version writing was removed 2026-07-18: the former save_as_version /
+        auto_promote path could replace the current ontology version from an
+        unauthenticated public page. Requests still sending those flags get a
+        note; nothing is written.
+        """
         from .reasoning_service import ReasoningRequest, execute_reasoning
 
         data = request.get_json() or {}
+        scope = data.get('scope', 'merged')
+        if scope not in ('merged', 'local'):
+            scope = 'merged'
         req = ReasoningRequest(
             ontology_name=ontology_name,
             reasoner_type=data.get('reasoner_type', 'pellet'),
-            save_as_version=data.get('save_as_version', False),
-            auto_promote_significant=data.get('auto_promote_significant', False),
+            explain=bool(data.get('explain')),
+            scope=scope,
         )
         result = execute_reasoning(req)
+        payload = result.to_response_dict()
+        if data.get('save_as_version') or data.get('auto_promote_significant'):
+            payload['note'] = ('Reasoning is read-only; version writing was '
+                               'removed from this endpoint.')
         status = 200 if result.success else 500
-        return jsonify(result.to_response_dict()), status
+        return jsonify(payload), status
     
     @bp.route('/api/hierarchy/visualization/<ontology_name>', methods=['GET'])
     def hierarchy_visualization(ontology_name: str):

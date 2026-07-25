@@ -3,7 +3,6 @@
         let ontologyData;
         let currentEntityData;
         let originalElements; // Store original elements for filtering
-        let hidePropertyNodes = false; // Classes Only quick filter state
         const ontologyId = window.VISUALIZE.ontologyId;
 
         // Use hierarchical layout by default for hierarchical ontologies
@@ -15,76 +14,95 @@
             // Simple initialization without template expressions
         });
 
+        function overlayInferredEdges(data) {
+            // Fold inferred relations into originalElements (marked 'inferred')
+            // so the Show Inferred Relations filter governs them, then re-apply
+            // filters. Only relations whose endpoints are on the graph render.
+            if (!originalElements) return 0;
+            originalElements = originalElements.filter(el =>
+                !(el.group === 'edges' && el.data && el.data.is_inferred));
+            const nodeIds = new Set(originalElements
+                .filter(el => el.group === 'nodes').map(el => el.data.id));
+            let added = 0;
+            (data.inferred_subclasses || []).forEach((rel, i) => {
+                if (nodeIds.has(rel.child) && nodeIds.has(rel.parent)) {
+                    originalElements.push({
+                        group: 'edges',
+                        data: {
+                            id: `inferred_sub_${i}`,
+                            source: rel.child,
+                            target: rel.parent,
+                            type: 'subClassOf',
+                            is_inferred: true
+                        },
+                        classes: 'inferred'
+                    });
+                    added++;
+                }
+            });
+            (data.inferred_types || []).forEach((rel, i) => {
+                if (nodeIds.has(rel.individual) && nodeIds.has(rel.type)) {
+                    originalElements.push({
+                        group: 'edges',
+                        data: {
+                            id: `inferred_type_${i}`,
+                            source: rel.individual,
+                            target: rel.type,
+                            type: 'rdf:type',
+                            is_inferred: true
+                        },
+                        classes: 'inferred'
+                    });
+                    added++;
+                }
+            });
+            if (added > 0) applyFilters();
+            return added;
+        }
+
         function runInference() {
             const button = document.getElementById('inferenceBtn');
             const originalText = button.innerHTML;
             button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Running Inference...';
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Checking consistency...';
 
-            // Check if we should save as version and auto-promote
-            const saveAsVersion = document.getElementById('saveReasoningAsVersion').checked;
-            const autoPromoteSignificant = document.getElementById('autoPromoteSignificant').checked;
-
-            // Use the simple reasoning endpoint
+            // Read-only merged-graph Pellet run (shared reasoning harness).
             fetch(`/editor/api/simple/reasoning/${ontologyId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    include_reasoning: true,
-                    force_refresh: true,
-                    reasoner_type: 'pellet',
-                    save_as_version: saveAsVersion,
-                    auto_promote_significant: autoPromoteSignificant && saveAsVersion
-                })
+                body: JSON.stringify({ reasoner_type: 'pellet' })
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        const results = data.results || {};
-                        const classesInferred = results.classes_inferred || 0;
-                        const propertiesInferred = results.properties_inferred || 0;
-                        const hierarchicalRels = results.hierarchical_relationships || 0;
-                        const newInferredRels = results.new_inferred_relationships || 0;
-                        const sampleHierarchy = results.sample_hierarchy || [];
-
-                        let message = `Inference completed successfully!\n\n`;
+                        let message = `${data.message}\n\n`;
                         message += `📊 Results:\n`;
-                        message += `• ${results.classes_before || 0} classes, ${results.properties_before || 0} properties loaded\n`;
-                        message += `• ${hierarchicalRels} hierarchical relationships discovered\n`;
+                        message += `• Consistent: ${data.consistent ? 'yes' : 'NO'}\n`;
+                        message += `• ${data.inferred_subclass_count || 0} inferred subclass relations\n`;
+                        message += `• ${data.inferred_type_count || 0} inferred type assertions\n`;
 
-                        if (classesInferred > 0 || propertiesInferred > 0) {
-                            message += `• ${classesInferred} new classes, ${propertiesInferred} new properties inferred\n`;
-                        }
-
-                        if (newInferredRels > 0) {
-                            message += `• ${newInferredRels} new logical relationships inferred\n`;
-                        }
-
-                        if (sampleHierarchy.length > 0) {
-                            message += `\n🏗️ Sample Class Hierarchy:\n`;
-                            sampleHierarchy.slice(0, 5).forEach(item => {
-                                message += `• ${item.class} ← ${item.parents.join(', ')}\n`;
+                        if ((data.nothing_entities || []).length > 0) {
+                            message += `\n⚠️ ${data.nothing_entities.length} entities forced to owl:Nothing (disjointness violations):\n`;
+                            data.nothing_entities.slice(0, 5).forEach(uri => {
+                                message += `• ${uri}\n`;
                             });
                         }
+                        if (!data.consistent && data.error_explanation) {
+                            message += `\n⚠️ ${data.error_explanation}\n`;
+                        }
 
-                        // Add version creation info if present
-                        if (data.version && data.version.version_created) {
-                            message += `\n✅ Version Created:\n`;
-                            message += `• Version ${data.version.version_number} (${data.version.version_tag})\n`;
-                            message += `• Status: Draft - ready for review\n`;
-                            message += `• You can switch to this version in the Versions tab\n`;
-
-                            // Update button text after creating a new version
-                            setTimeout(() => {
-                                const buttonText = document.getElementById('inferenceButtonText');
-                                if (buttonText) {
-                                    buttonText.textContent = 'Re-run Inference';
-                                }
-                            }, 100);
-                        } else if (data.version && !data.version.version_created) {
-                            message += `\n⚠️ Version creation failed: ${data.version.error}\n`;
+                        const overlaid = overlayInferredEdges(data);
+                        if (overlaid > 0) {
+                            message += `\n🟢 ${overlaid} inferred relations overlaid on the graph `;
+                            message += `(green dashed; toggle "Show Inferred Relations").\n`;
+                        }
+                        if (data.truncated) {
+                            message += `\nResult lists were truncated by the server cap.\n`;
+                        }
+                        if (data.note) {
+                            message += `\n${data.note}\n`;
                         }
 
                         showInferenceResultsModal(data, message);
@@ -238,6 +256,21 @@
                             'target-arrow-color': '#7ED321',
                             'line-style': 'dashed',
                             'width': 3
+                        }
+                    },
+                    {
+                        selector: 'edge.property-edge',
+                        style: {
+                            'line-color': '#8e44ad',
+                            'target-arrow-color': '#8e44ad',
+                            'line-style': 'dashed',
+                            'label': 'data(label)',
+                            'font-size': '8px',
+                            'color': '#8e44ad',
+                            'text-rotation': 'autorotate',
+                            'text-background-color': '#ffffff',
+                            'text-background-opacity': 0.85,
+                            'text-background-padding': '1px'
                         }
                     },
                     {
@@ -595,29 +628,77 @@
                 `;
             }
 
-            // Show connections
-            const connectedEdges = node.connectedEdges();
-            const parents = connectedEdges.filter(edge => edge.target().id() === node.id()).sources();
-            const children = connectedEdges.filter(edge => edge.source().id() === node.id()).targets();
+            // Entity page link (this ontology's entities only; external
+            // reference nodes have no page here).
+            if (nodeData.uri && nodeData.type !== 'external_class') {
+                const frag = nodeData.uri.includes('#')
+                    ? nodeData.uri.split('#').pop()
+                    : nodeData.uri.split('/').pop();
+                html += `
+                    <a class="btn btn-sm btn-outline-primary mb-2"
+                       href="/entity/${encodeURIComponent(ontologyId)}/${encodeURIComponent(frag)}"
+                       target="_blank" rel="noopener">
+                        <i class="fas fa-external-link-alt me-1"></i>Open entity page
+                    </a>
+                `;
+            }
 
-            if (parents.length > 0) {
+            // Hierarchy. subClassOf edges are stored child -> parent, so this
+            // node's parents are the TARGETS of its outgoing subClassOf edges
+            // and its children the SOURCES of incoming ones. Property edges
+            // are relations, never hierarchy.
+            const allEdges = node.connectedEdges();
+            const subEdges = allEdges.filter(e =>
+                e.data('type') === 'subClassOf' || e.data('type') === 'rdf:type');
+            const propEdges = allEdges.filter(e => e.data('type') === 'objectProperty');
+
+            const item = (n, suffix) => {
+                const id = n.id().replace(/'/g, "\\'");
+                return `<small class="d-block"><a href="#" onclick="focusNode('${id}'); return false;">` +
+                       `${n.data('label')}</a>${suffix || ''}</small>`;
+            };
+            const inferredTag = ' <span class="badge bg-success">inferred</span>';
+
+            const parentItems = subEdges
+                .filter(e => e.source().id() === node.id())
+                .map(e => item(e.target(), e.data('is_inferred') ? inferredTag : ''));
+            const childItems = subEdges
+                .filter(e => e.target().id() === node.id())
+                .map(e => item(e.source(), e.data('is_inferred') ? inferredTag : ''));
+
+            if (parentItems.length > 0) {
                 html += `
                     <div class="entity-property">
                         <span class="entity-property-name">Parents:</span>
-                        <div class="entity-property-value">
-                            ${parents.map(p => `<small class="d-block">${p.data('label')}</small>`).join('')}
-                        </div>
+                        <div class="entity-property-value">${parentItems.join('')}</div>
                     </div>
                 `;
             }
 
-            if (children.length > 0) {
+            if (childItems.length > 0) {
                 html += `
                     <div class="entity-property">
                         <span class="entity-property-name">Children:</span>
-                        <div class="entity-property-value">
-                            ${children.map(c => `<small class="d-block">${c.data('label')}</small>`).join('')}
-                        </div>
+                        <div class="entity-property-value">${childItems.join('')}</div>
+                    </div>
+                `;
+            }
+
+            // Object-property relations touching this node, direction shown.
+            const relItems = propEdges.map(e => {
+                const outgoing = e.source().id() === node.id();
+                const other = outgoing ? e.target() : e.source();
+                const id = other.id().replace(/'/g, "\\'");
+                const otherLink = `<a href="#" onclick="focusNode('${id}'); return false;">${other.data('label')}</a>`;
+                return `<small class="d-block">${outgoing
+                    ? `<em>${e.data('label')}</em> &rarr; ${otherLink}`
+                    : `${otherLink} &rarr; <em>${e.data('label')}</em>`}</small>`;
+            });
+            if (relItems.length > 0) {
+                html += `
+                    <div class="entity-property">
+                        <span class="entity-property-name">Relations:</span>
+                        <div class="entity-property-value">${relItems.join('')}</div>
                     </div>
                 `;
             }
@@ -625,6 +706,18 @@
             detailsElement.innerHTML = html;
             detailsCard.style.display = 'block';
             findSimilarBtn.style.display = nodeData.uri ? 'block' : 'none';
+        }
+
+        function focusNode(id) {
+            if (!cy) return;
+            const n = cy.getElementById(id);
+            if (n && n.length) {
+                cy.elements().unselect();
+                n.select();
+                cy.animate({ center: { eles: n }, zoom: Math.max(cy.zoom(), 1.2) }, { duration: 300 });
+                showNodeDetails(n);
+                highlightConnectedNodes(n);
+            }
         }
 
         function highlightConnectedNodes(node) {
@@ -848,21 +941,6 @@
             performSemanticSearch();
         }
 
-        function toggleClassesOnly() {
-            hidePropertyNodes = !hidePropertyNodes;
-            const btn = document.getElementById('classesOnlyBtn');
-            if (hidePropertyNodes) {
-                // Set dropdown to "All Types" so the quick filter has something to act on
-                document.getElementById('filterType').value = 'all';
-                btn.classList.remove('btn-outline-secondary');
-                btn.classList.add('btn-secondary', 'text-white');
-            } else {
-                btn.classList.remove('btn-secondary', 'text-white');
-                btn.classList.add('btn-outline-secondary');
-            }
-            applyFilters();
-        }
-
         function applyFilters() {
             const filterType = document.getElementById('filterType').value;
             const showInferred = document.getElementById('showInferred').checked;
@@ -896,19 +974,6 @@
             if (!showInferred) {
                 filteredElements = filteredElements.filter(element => {
                     return !element.data.is_inferred;
-                });
-            }
-
-            // Classes Only quick filter: remove property-type nodes and any edges touching them
-            if (hidePropertyNodes) {
-                filteredElements = filteredElements.filter(element => {
-                    if (element.group === 'edges') return true;
-                    return element.data.type !== 'property';
-                });
-                const keepIds = new Set(filteredElements.filter(e => e.group === 'nodes').map(e => e.data.id));
-                filteredElements = filteredElements.filter(element => {
-                    if (element.group === 'nodes') return true;
-                    return keepIds.has(element.data.source) && keepIds.has(element.data.target);
                 });
             }
 
@@ -987,73 +1052,58 @@
             const modal = document.getElementById('inferenceResultsModal');
             const modalBody = document.getElementById('inferenceResultsContent');
             const loadVersionBtn = document.getElementById('loadVersionBtn');
+            // Read-only reasoning: no version is ever created from this page.
+            if (loadVersionBtn) loadVersionBtn.style.display = 'none';
 
-            // Format the results for better display
-            const results = data.results || {};
-            const classesInferred = results.classes_inferred || 0;
-            const propertiesInferred = results.properties_inferred || 0;
-            const hierarchicalInferred = results.hierarchical_inferred || 0;
-            const relationshipsInferred = results.relationships_inferred || 0;
-            const totalInferred = results.total_inferred || (classesInferred + propertiesInferred + hierarchicalInferred + relationshipsInferred);
+            const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const nothing = data.nothing_entities || [];
 
             let htmlContent = `
                 <div class="row">
                     <div class="col-md-6">
-                        <h6><i class="fas fa-sitemap text-primary"></i> Inference Results</h6>
+                        <h6><i class="fas fa-sitemap text-primary"></i> Inferred (merged graph)</h6>
                         <ul class="list-unstyled">
-                            <li><strong>Classes Inferred:</strong> ${classesInferred}</li>
-                            <li><strong>Properties Inferred:</strong> ${propertiesInferred}</li>
-                            <li><strong>Hierarchical:</strong> ${hierarchicalInferred}</li>
-                            <li><strong>Total New:</strong> ${totalInferred}</li>
+                            <li><strong>Subclass relations:</strong> ${data.inferred_subclass_count || 0}</li>
+                            <li><strong>Type assertions:</strong> ${data.inferred_type_count || 0}</li>
+                            ${data.truncated ? '<li class="text-muted small">(lists truncated by server cap)</li>' : ''}
                         </ul>
                     </div>
                     <div class="col-md-6">
                         <h6><i class="fas fa-check-circle text-success"></i> Status</h6>
                         <ul class="list-unstyled">
-                            <li><strong>Consistent:</strong> ${results.is_consistent ? '✅ Yes' : '❌ No'}</li>
-                            <li><strong>Reasoner:</strong> ${results.reasoner_type || 'Pellet'}</li>
-                            <li><strong>Duration:</strong> ${results.processing_time || 'N/A'}</li>
+                            <li><strong>Consistent:</strong> ${data.consistent ? '✅ Yes' : '❌ No'}</li>
+                            <li><strong>Reasoner:</strong> Pellet</li>
+                            <li><strong>Mode:</strong> read-only</li>
                         </ul>
                     </div>
                 </div>
             `;
 
-            // Add version information if created
-            if (data.version && data.version.version_created) {
-                const isAutoPromoted = data.version.auto_promoted || data.version.is_current;
-                const statusText = isAutoPromoted ? 'Current Version (Auto-promoted)' : 'Draft - ready for review';
-                const statusClass = isAutoPromoted ? 'alert-info' : 'alert-success';
+            const sample = (data.inferred_subclasses || []).slice(0, 8);
+            if (sample.length > 0) {
+                htmlContent += `<h6 class="mt-2"><i class="fas fa-project-diagram text-success"></i> Inferred subclass relations</h6><ul class="small">`;
+                sample.forEach(rel => {
+                    htmlContent += `<li>${esc(rel.child.split('#').pop())} &rarr; ${esc(rel.parent.split('#').pop())}</li>`;
+                });
+                htmlContent += `</ul><p class="small text-muted mb-0">Overlaid on the graph as green dashed edges (toggle "Show Inferred Relations").</p>`;
+            }
 
+            if (!data.consistent) {
                 htmlContent += `
-                    <div class="alert ${statusClass} mt-3">
-                        <h6><i class="fas fa-code-branch text-${isAutoPromoted ? 'info' : 'success'}"></i> New Version Created</h6>
-                        <ul class="list-unstyled mb-0">
-                            <li><strong>Version:</strong> ${data.version.version_number} (${data.version.version_tag})</li>
-                            <li><strong>Status:</strong> ${statusText}</li>
-                            ${isAutoPromoted ? '<li><strong>Note:</strong> Version automatically promoted due to significant inferences</li>' : ''}
-                        </ul>
-                    </div>
-                `;
-
-                // Show different button behavior based on promotion status
-                if (isAutoPromoted) {
-                    // Already current, just show reload button
-                    loadVersionBtn.textContent = 'Reload Page';
-                    loadVersionBtn.innerHTML = '<i class="fas fa-sync me-1"></i>Reload Page';
-                    loadVersionBtn.style.display = 'inline-block';
-                    loadVersionBtn.onclick = () => {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('inferenceResultsModal'));
-                        modal.hide();
-                        setTimeout(() => location.reload(), 500);
-                    };
-                } else {
-                    // Show the "Load New Version" button
-                    loadVersionBtn.innerHTML = '<i class="fas fa-code-branch me-1"></i>Load New Version';
-                    loadVersionBtn.style.display = 'inline-block';
-                    loadVersionBtn.onclick = () => loadNewVersion(data.version.version_id);
-                }
-            } else {
-                loadVersionBtn.style.display = 'none';
+                    <div class="alert alert-danger mt-3">
+                        <strong>The merged ontology is inconsistent.</strong>
+                        ${data.error_explanation ? `<div class="small mt-1">${esc(data.error_explanation)}</div>` : ''}
+                    </div>`;
+            }
+            if (nothing.length > 0) {
+                htmlContent += `
+                    <div class="alert alert-warning mt-3">
+                        <strong>${nothing.length} entities forced to owl:Nothing</strong> (disjointness violations)
+                        <ul class="small mb-0">${nothing.slice(0, 5).map(u => `<li>${esc(u)}</li>`).join('')}</ul>
+                    </div>`;
+            }
+            if (data.note) {
+                htmlContent += `<p class="small text-muted mt-2 mb-0">${esc(data.note)}</p>`;
             }
 
             modalBody.innerHTML = htmlContent;

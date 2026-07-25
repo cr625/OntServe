@@ -74,7 +74,7 @@
 
 {# Definition card: the full definition layer for any entity, in one place.
    The PRIMARY definition text is the formal definition (skos:definition / IAO_0000115), routed into
-   prop_groups.definition by _categorize_entity_properties. The shorter rdfs:comment is shown as a
+   prop_groups.definition by categorize_entity_properties. The shorter rdfs:comment is shown as a
    SECONDARY muted gloss beneath it (suppressed when it merely repeats the definition); when no formal
    definition exists, rdfs:comment is the primary text instead. skos:scopeNote is the contextual/
    inherited note; IAO_0000116 is the editor note (extraction framing); IAO_0000119 is the definition
@@ -155,7 +155,7 @@
 {# Defined-as card: the owl:equivalentClass definition of a DEFINED class, rendered as a
    human-readable class expression (named conjuncts joined by "and", property restrictions as
    "(property some/only filler)"). The axiom is an anonymous blank node, so it is parsed from the
-   source graph by _entity_equivalent_class -- the flat per-entity property table cannot show it. #}
+   source graph by entity_equivalent_class -- the flat per-entity property table cannot show it. #}
 {% macro defined_as_card(equivalent_class) %}
 {% if equivalent_class and equivalent_class.conjuncts %}
 <div class="card mb-3">

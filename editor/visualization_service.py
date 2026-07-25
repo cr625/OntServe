@@ -70,22 +70,58 @@ def _make_external_node(parent_uri: str) -> dict:
 # Builder: basic entity visualization (enhanced_get_visualization route)
 # ---------------------------------------------------------------------------
 
-def build_basic_visualization(ontology_name: str) -> dict:
-    """Build Cytoscape.js data from database entities with parent_uri edges.
+_XSD_NS = 'http://www.w3.org/2001/XMLSchema#'
+_RDFS_LITERAL = 'http://www.w3.org/2000/01/rdf-schema#Literal'
 
-    Returns a dict suitable for jsonify().
+
+def _is_deprecated(entity) -> bool:
+    props = entity.properties if isinstance(entity.properties, dict) else {}
+    return props.get('deprecated') in (True, 'true')
+
+
+def _uri_list(value) -> list:
+    """Normalize a domain/range JSON value (null, string, or list) to URIs."""
+    if not value:
+        return []
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        return [v for v in value if isinstance(v, str)]
+    return []
+
+
+def _is_datatype_uri(uri: str) -> bool:
+    return uri.startswith(_XSD_NS) or uri == _RDFS_LITERAL
+
+
+def build_basic_visualization(ontology_name: str) -> dict:
+    """Build Cytoscape.js data from database entities.
+
+    Classes (and other non-property entities) become nodes with subClassOf
+    edges from parent_uri. Object properties are rendered as labeled
+    domain -> range edges rather than isolated nodes; datatype and annotation
+    properties (literal-valued or without a class range) are omitted from the
+    class graph and reported in the statistics, the same convention as a UML
+    class diagram showing associations but not attributes. Deprecated entities
+    are excluded. Returns a dict suitable for jsonify().
     """
     ontology, entities = _load_ontology_entities(ontology_name)
     if ontology is None:
         return {'success': False, 'error': f'Ontology {ontology_name} not found'}
 
+    deprecated_excluded = sum(1 for e in entities if _is_deprecated(e))
+    entities = [e for e in entities if not _is_deprecated(e)]
+
+    node_entities = [e for e in entities if e.entity_type != 'property']
+    property_entities = [e for e in entities if e.entity_type == 'property']
+
     nodes = []
     edges = []
-    entity_uris = {e.uri for e in entities}
-    external_parents = set()
+    entity_uris = {e.uri for e in node_entities}
+    external_refs = set()
     edge_id = 0
 
-    for entity in entities:
+    for entity in node_entities:
         nodes.append({
             'group': 'nodes',
             'data': {
@@ -106,7 +142,7 @@ def build_basic_visualization(ontology_name: str) -> dict:
 
         if entity.parent_uri:
             if entity.parent_uri not in entity_uris:
-                external_parents.add(entity.parent_uri)
+                external_refs.add(entity.parent_uri)
             edges.append({
                 'group': 'edges',
                 'data': {
@@ -120,27 +156,40 @@ def build_basic_visualization(ontology_name: str) -> dict:
             })
             edge_id += 1
 
-    # Add external parent nodes
-    for parent_uri in external_parents:
-        nodes.append(_make_external_node(parent_uri))
+    # Object properties as labeled domain -> range edges.
+    object_property_edges = 0
+    omitted_properties = 0
+    for prop in property_entities:
+        domains = _uri_list(prop.domain)
+        object_ranges = [r for r in _uri_list(prop.range) if not _is_datatype_uri(r)]
+        if not domains or not object_ranges:
+            omitted_properties += 1
+            continue
+        label = prop.label or _uri_fragment(prop.uri)
+        for d in domains:
+            for r in object_ranges:
+                for endpoint in (d, r):
+                    if endpoint not in entity_uris:
+                        external_refs.add(endpoint)
+                edges.append({
+                    'group': 'edges',
+                    'data': {
+                        'id': f'property_{edge_id}',
+                        'source': d,
+                        'target': r,
+                        'label': label,
+                        'uri': prop.uri,
+                        'type': 'objectProperty',
+                        'description': prop.comment or '',
+                        'is_inferred': False,
+                    },
+                    'classes': 'explicit property-edge',
+                })
+                edge_id += 1
+                object_property_edges += 1
 
-    # Connect unlinked properties to classes (limited)
-    class_uris = [n['data']['id'] for n in nodes if n['data']['type'] == 'class']
-    property_nodes = [n for n in nodes if n['data']['type'] == 'property']
-    for i, prop in enumerate(property_nodes):
-        if class_uris and edge_id < 20:
-            edges.append({
-                'group': 'edges',
-                'data': {
-                    'id': f'edge_{edge_id}',
-                    'source': prop['data']['id'],
-                    'target': class_uris[i % len(class_uris)],
-                    'type': 'relatedTo',
-                    'is_inferred': False,
-                },
-                'classes': 'explicit',
-            })
-            edge_id += 1
+    for uri in external_refs:
+        nodes.append(_make_external_node(uri))
 
     counts = _count_by_type(nodes)
     return {
@@ -149,10 +198,14 @@ def build_basic_visualization(ontology_name: str) -> dict:
         'statistics': {
             'total_entities': len(nodes),
             'entity_type_counts': counts,
+            'object_property_edges': object_property_edges,
+            'omitted_datatype_properties': omitted_properties,
+            'deprecated_excluded': deprecated_excluded,
             'inferred_count': 0,
             'consistency_check': True,
         },
-        'message': f"Retrieved {len(nodes)} entities for visualization",
+        'message': (f"Retrieved {len(nodes)} entities, {object_property_edges} object-property "
+                    f"edges ({omitted_properties} literal-valued properties not shown)"),
     }
 
 
@@ -222,7 +275,7 @@ def _build_hierarchy_from_owlready(ontology: Ontology) -> dict:
                     'type': 'class',
                     'entity_type': 'class',
                     'description': f'Class: {class_name}',
-                    'namespace': 'prov',
+                    'namespace': getattr(getattr(cls, 'namespace', None), 'base_iri', '') or '',
                 },
                 'classes': 'class-node',
             }
@@ -246,26 +299,9 @@ def _build_hierarchy_from_owlready(ontology: Ontology) -> dict:
                     })
                     edge_id += 1
 
-        property_nodes = {}
-        for prop in list(onto.properties())[:20]:
-            prop_name = prop.name or str(prop).split('.')[-1]
-            node_id = str(prop)
-            property_nodes[node_id] = {
-                'group': 'nodes',
-                'data': {
-                    'id': node_id,
-                    'label': prop_name,
-                    'name': prop_name,
-                    'uri': str(prop),
-                    'type': 'property',
-                    'entity_type': 'property',
-                    'description': f'Property: {prop_name}',
-                    'namespace': 'prov',
-                },
-                'classes': 'property-node',
-            }
-            nodes.append(property_nodes[node_id])
-
+        # Properties are deliberately NOT added as nodes here: with no edges
+        # they render as singletons. The basic view carries object properties
+        # as domain -> range edges; this view is the pure class hierarchy.
         return {
             'success': True,
             'message': f'Extracted {len(nodes)} nodes and {len(edges)} hierarchical relationships',
@@ -274,7 +310,7 @@ def _build_hierarchy_from_owlready(ontology: Ontology) -> dict:
                 'total_nodes': len(nodes),
                 'total_edges': len(edges),
                 'classes': len(class_nodes),
-                'properties': len(property_nodes),
+                'properties': 0,
                 'hierarchical_relationships': len(edges),
             },
         }

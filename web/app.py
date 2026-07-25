@@ -159,12 +159,46 @@ def create_app(config_name=None):
     # Register enhanced editor blueprint
     storage_backend = FileStorage({'storage_dir': app.config['ONTSERVE_STORAGE_DIR']})
     editor_config = {
-        'require_auth': False,
-        'admin_only': False,
+        # Auth for the /editor URL space is enforced app-level; see
+        # _guard_editor_space below.
         'storage': {'storage_dir': app.config['ONTSERVE_STORAGE_DIR']}
     }
     editor_blueprint = create_editor_blueprint(storage_backend, editor_config)
     app.register_blueprint(editor_blueprint)
+
+    # The /editor URL space requires login, enforced here at APP level because
+    # several blueprints (ontology_editor, ontology, api, draft) register
+    # routes under /editor paths and a blueprint-scoped guard would miss the
+    # foreign ones (the pre-fix hole: ontology.extract_entities_editor, an
+    # unauthenticated write). Public exceptions: the read-only visualization
+    # surface (the visualize page is linked from the ProEthica homepage; its
+    # reasoning endpoint is strictly read-only) and the documented ProEthica
+    # integration contract for entity listing.
+    EDITOR_PUBLIC_ENDPOINTS = {
+        'ontology_editor.visualize_ontology',
+        'ontology_editor.enhanced_get_visualization',
+        'ontology_editor.hierarchy_visualization',
+        'ontology_editor.simple_reasoning',
+        'ontology_editor.search_entities',
+        'ontology_editor.get_similar_entities',
+        'api.api_ontology_entities',
+    }
+
+    @app.before_request
+    def _guard_editor_space():
+        from flask import request, jsonify, redirect, url_for
+        if not request.path.startswith('/editor'):
+            return None
+        if app.config.get('LOGIN_DISABLED'):
+            return None
+        if request.endpoint in EDITOR_PUBLIC_ENDPOINTS:
+            return None
+        from flask_login import current_user
+        if current_user.is_authenticated:
+            return None
+        if '/api/' in request.path:
+            return jsonify({'success': False, 'error': 'Authentication required'}), 401
+        return redirect(url_for('auth.login', next=request.url))
 
     # Add custom template filters for safe URI handling
     @app.template_filter('extract_name')

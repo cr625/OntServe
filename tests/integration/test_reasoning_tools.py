@@ -68,3 +68,31 @@ def test_reason_detailed_missing_ontology_returns_error():
     d = rt.reason_detailed("does-not-exist-xyz")
     assert d["consistent"] is False
     assert d["error"] is not None
+
+
+@pytest.mark.integration
+@pytest.mark.requires_java
+def test_reason_detailed_local_scope_filters_to_target_subjects(case86_content):
+    """scope='local' keeps only entailments whose subject is declared in the
+    target content, dropping the stack-level entailments (e.g. intermediate
+    archetype subsumptions) that recur identically on every merged run."""
+    from servers import reasoning_tools as rt
+
+    merged = rt.reason_detailed("proethica-case-86-fixture", content=case86_content)
+    local = rt.reason_detailed("proethica-case-86-fixture", content=case86_content,
+                               scope="local")
+
+    assert local["error"] is None and local["consistent"] is True
+    subjects = rt._local_subjects(case86_content)
+    for edge in local["inferred_subclasses"]:
+        assert edge["child"] in subjects, edge
+    for edge in local["inferred_types"]:
+        assert edge["individual"] in subjects, edge
+    # The merged run carries stack-level subclass entailments the fixture does
+    # not declare; local scope must report strictly fewer or equal, and every
+    # dropped edge must be one whose subject is foreign to the fixture.
+    assert local["inferred_subclass_count"] <= merged["inferred_subclass_count"]
+    dropped = [e for e in merged["inferred_subclasses"]
+               if e not in local["inferred_subclasses"]]
+    for edge in dropped:
+        assert edge["child"] not in subjects, edge

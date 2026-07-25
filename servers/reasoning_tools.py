@@ -24,9 +24,20 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
 import tempfile
 from dataclasses import asdict
+from pathlib import Path
 from typing import Any, Dict, List
+
+# `validation` is a namespace package (no __init__.py), invisible to consumers
+# that reach this module through the editable install (e.g. the web app) rather
+# than the MCP server's explicit sys.path setup. Insert the OntServe root here,
+# at the shared module, so every consumer resolves it; root must PRECEDE
+# OntServe/web on the path (the known services-shadowing gotcha).
+_ONTSERVE_ROOT = Path(__file__).resolve().parent.parent
+if str(_ONTSERVE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ONTSERVE_ROOT))
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +66,26 @@ def check_consistency(ontology_name: str) -> Dict[str, Any]:
     }
 
 
-def reason_detailed(ontology_name: str, content: str | None = None) -> Dict[str, Any]:
+def _local_subjects(content: str) -> set:
+    """IRIs that occur as a SUBJECT in the target ontology's asserted content.
+
+    The attribution rule for scope='local': an entailment belongs to the target
+    ontology iff its subject is declared there. Namespace-agnostic, so classes a
+    case mints into the intermediate namespace count for the case page only when
+    the case TTL itself declares them.
+    """
+    from rdflib import Graph, URIRef
+    g = Graph()
+    g.parse(data=content, format="turtle")
+    return {str(s) for s in g.subjects() if isinstance(s, URIRef)}
+
+
+def reason_detailed(
+    ontology_name: str,
+    content: str | None = None,
+    explain: bool = False,
+    scope: str = "merged",
+) -> Dict[str, Any]:
     """Run Pellet and return the ACTUAL inferred edges and owl:Nothing entities,
     not just counts. Backs get_inferred_hierarchy + get_inconsistent_classes.
 
@@ -65,6 +95,19 @@ def reason_detailed(ontology_name: str, content: str | None = None) -> Dict[str,
 
     `content` (case TTL) may be passed to skip the DB fetch — used by tests to run
     against an on-disk fixture without a database.
+
+    `explain=True` additionally runs `pellet explain` (validation/pellet_explain)
+    over the same serialized merged graph: per-entailment justifications (capped)
+    under `explanations`, and on an inconsistent graph the clashing axiom set
+    under `inconsistency_explanation`. Each justification is one extra JVM
+    invocation (~1s), so explain is opt-in.
+
+    `scope='local'` filters the reported entailments (and owl:Nothing entities)
+    to subjects declared in the TARGET ontology's own content (`_local_subjects`),
+    so stack-level entailments (e.g. intermediate archetype subsumptions) do not
+    recur on every page. Reasoning always runs over the full merged graph; the
+    consistency verdict is unaffected. Filtering happens BEFORE explain, so
+    justification JVM calls run only for statements that will be reported.
     """
     import owlready2
     from validation.pellet_validate import (
@@ -124,6 +167,9 @@ def reason_detailed(ontology_name: str, content: str | None = None) -> Dict[str,
             base["consistent"] = False
             base["error"] = "OwlReadyInconsistentOntologyError"
             base["error_explanation"] = str(e)[:1000]
+            if explain:
+                from validation.pellet_explain import explain_inconsistency
+                base["inconsistency_explanation"] = explain_inconsistency(tmp_path)
 
         if base["consistent"]:
             sub_edges: List[Dict[str, str]] = []
@@ -163,6 +209,12 @@ def reason_detailed(ontology_name: str, content: str | None = None) -> Dict[str,
                 if any("Nothing" in str(c) for c in ind.is_a):
                     nothing.append(str(ind.iri))
 
+            if scope == "local":
+                local = _local_subjects(content)
+                sub_edges = [e for e in sub_edges if e["child"] in local]
+                type_edges = [e for e in type_edges if e["individual"] in local]
+                nothing = [n for n in nothing if n in local]
+
             base["inferred_subclass_count"] = len(sub_edges)
             base["inferred_type_count"] = len(type_edges)
             base["nothing_entities"] = nothing[:_MAX_ITEMS]
@@ -170,6 +222,11 @@ def reason_detailed(ontology_name: str, content: str | None = None) -> Dict[str,
             base["inferred_types"] = type_edges[:_MAX_ITEMS]
             if len(sub_edges) > _MAX_ITEMS or len(type_edges) > _MAX_ITEMS:
                 base["truncated"] = True
+            if explain:
+                from validation.pellet_explain import explain_entailments
+                base["explanations"] = explain_entailments(
+                    tmp_path, type_edges, sub_edges
+                )
         return base
     except Exception as exc:  # noqa: BLE001
         base["error"] = f"reason-failed: {type(exc).__name__}: {exc}"
