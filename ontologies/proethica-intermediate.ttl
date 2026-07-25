@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-07-25 (resolution kind): proeth:resolutionKind declared for the board's tension-resolution mode (override, specification, dissolution), the distinction surfaced by the 2026-07-25 recall audit over the 96 cases without competition edges, which found the board resolving most apparent duty tensions by boundary specification rather than defeat (approximately 52 no-tension, 35 specification, 25 defeat corpus-wide). The defeasibility applier emits override on every prevailsOver derivation record; earlier defeat cases receive the marker by scripted backfill. Specification and dissolution values are reserved for the tension-resolution records of cases whose board analysis sets a duty boundary or dissolves the conflict; their emitter is a separate, separately gated work package."@en ;
     skos:changeNote "2026-07-11 (DecisionPoint enrichment): ten analysis-layer datatype properties declared for the Step-4 fields that persisted in extraction storage but never reached the committed graphs -- the DecisionPoint Toulmin summary slots (toulminClaim, toulminData, toulminWarrant, toulminRebuttal, toulminQualifier), boardResolution, the two ranking scores (intensityScore, qcAlignmentScore, both xsd:decimal), boardChosenOption, and the CodeProvisionReference relevantExcerpt. Emitted by the commit serializer; the gold 15 were backfilled by the shared emission helper. The companion object property appliesTo is declared in proethica-cases v3.7.0."@en ;
     skos:changeNote "2026-07-11 (conclusion disposition): proeth:boardConclusionType declared for the deterministic board-disposition category the conclusion analyzer has computed since the Step-4 rework but which was dropped before storage until the provenance mini-batch; the commit serializer now emits it on EthicalConclusion individuals when detection yields a category."@en ;
     skos:changeNote "2026-07-11 (B10 temporal provenance): proeth:agentKnowledge and proeth:interveningFactors declared on CausalChain. The extraction prompt has requested both responsibility-attribution fields since the chain schema was designed, but the converter dropped them before storage; the same change routes proeth:discoveredInSection onto Actions and Events (previously chains only), giving every happening auditable section provenance ahead of the legacy-case rebuild."@en ;
@@ -2345,6 +2346,11 @@ proeth:boardConclusionType a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:label "board conclusion type"@en ;
     rdfs:comment "The board's disposition category for a conclusion (violation, no_violation, compliance, recommendation, interpretation), detected deterministically from the conclusion text by the conclusion analyzer. Borne by proeth-cases:EthicalConclusion individuals; absent when detection returns no category."@en .
+
+proeth:resolutionKind a owl:DatatypeProperty ;
+    rdfs:range xsd:string ;
+    rdfs:label "resolution kind"@en ;
+    rdfs:comment "The mode by which the board resolved an apparent obligation tension. Value vocabulary: override (one duty prevails over a named competitor), specification (the board defines a duty boundary so that only one duty applies on the facts), dissolution (the apparent conflict is found not to exist). Borne by the reified prov:Derivation records of defeasibility edges; emitted as override on prevailsOver derivations."@en .
 
 proeth:intensityScore a owl:DatatypeProperty ;
     rdfs:range xsd:decimal ;
