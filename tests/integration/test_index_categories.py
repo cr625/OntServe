@@ -23,11 +23,28 @@ def case_names(app):
             db.session.add(Ontology(name=name, base_uri=f'http://proethica.org/ontology/case/{9000 + i}#',
                                     ontology_type='case', source_system='proethica', meta_data={}))
             names.append(name)
-        if not db.session.execute(select(Ontology).where(Ontology.name == 'proethica-core')).scalar_one_or_none():
+        core = db.session.execute(select(Ontology).where(Ontology.name == 'proethica-core')).scalar_one_or_none()
+        if core is None:
             db.session.add(Ontology(name='proethica-core', base_uri='http://proethica.org/ontology/core#',
                                     ontology_type='core', source_system='proethica', meta_data={}))
+        elif (core.meta_data or {}).get('category') or (core.meta_data or {}).get('subcategory'):
+            # A failed settings test may leave an explicit category behind; the rule default is assumed below
+            core.meta_data = {k: v for k, v in (core.meta_data or {}).items() if k not in ('category', 'subcategory')}
         db.session.commit()
     return names
+
+
+def _section_span(html, section_id):
+    """[start, end) of the <section id=...> element, honouring nested <section>s."""
+    m = re.search(r'<section[^>]*\bid="%s"' % re.escape(section_id), html)
+    if not m:
+        return None
+    depth = 0
+    for tok in re.finditer(r'<section\b|</section>', html[m.start():]):
+        depth += 1 if tok.group() == '<section' else -1
+        if depth == 0:
+            return (m.start(), m.start() + tok.end())
+    return None
 
 
 @pytest.mark.integration
@@ -39,11 +56,13 @@ class TestIndexGrouping:
         html = r.get_data(as_text=True)
         assert 'id="category-cases"' in html
         assert 'Browse all' in html
-        # Cases sit inside the ProEthica family section, next to the framework layers
-        assert 'id="family-proethica"' in html
-        fam_start = html.index('id="family-proethica"')
-        assert 'id="category-cases"' in html[fam_start:]
-        assert html.index('id="category-proethica-framework"') < html.index('id="category-cases"')
+        # Cases sit INSIDE the ProEthica family section, after the framework layers
+        fam = _section_span(html, 'family-proethica')
+        assert fam is not None
+        inner = html[fam[0]:fam[1]]
+        assert 'id="category-proethica-framework"' in inner and 'id="category-cases"' in inner
+        assert inner.index('id="category-proethica-framework"') < inner.index('id="category-cases"')
+        assert '>Framework</a>' in inner and '>Cases</a>' in inner
         # Individual case rows are collapsed away when the group exceeds the threshold
         threshold = client.application.config.get('INDEX_COLLAPSE_THRESHOLD', 12)
         if len(case_names) > threshold:
@@ -55,6 +74,9 @@ class TestIndexGrouping:
         html = r.get_data(as_text=True)
         assert re.search(r'<strong>proethica-case-\d+</strong>', html)
         assert 'Clear category' in html
+        # Flat view: no family sections, banner uses the full standalone label
+        assert 'id="family-proethica"' not in html and 'family-section' not in html
+        assert 'ProEthica Cases' in html
 
     def test_subcategory_filter(self, client, app, case_names):
         """An explicit metadata.subcategory routes the case into a chip and a filter."""

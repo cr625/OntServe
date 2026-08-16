@@ -135,18 +135,20 @@
         {% set cat = group.category %}
         <section class="{{ 'mb-3' if nested else 'mb-4' }}" id="category-{{ cat.key|replace(' ', '-')|lower }}">
             <div class="border-bottom pb-2 mb-2">
+                {# Outline: page h1 > section h2 (family or lone category) > nested category h3.
+                   Sizes come from the heading utility classes so the outline stays honest. #}
                 {% if nested %}
-                <h5 class="d-flex align-items-center gap-2 mb-0">
+                <h3 class="h5 d-flex align-items-center gap-2 mb-0">
                     <i class="bi {{ cat.icon }} text-{{ cat.color }}"></i>
                     <a href="{{ url_for('main.index', category=cat.key) }}" class="text-decoration-none text-reset">{{ cat.section_label }}</a>
                     <span class="badge bg-{{ cat.color }}{% if cat.color in ('warning', 'light', 'info') %} text-dark{% endif %}">{{ group.count }}</span>
-                </h5>
+                </h3>
                 {% else %}
-                <h4 class="d-flex align-items-center gap-2 mb-0">
+                <h2 class="h4 d-flex align-items-center gap-2 mb-0">
                     <i class="bi {{ cat.icon }} text-{{ cat.color }}"></i>
                     <a href="{{ url_for('main.index', category=cat.key) }}" class="text-decoration-none text-reset">{{ cat.label }}</a>
                     <span class="badge bg-{{ cat.color }}{% if cat.color in ('warning', 'light', 'info') %} text-dark{% endif %}">{{ group.count }}</span>
-                </h4>
+                </h2>
                 {% endif %}
                 {% if not group.collapsed and cat.description %}
                 <div class="text-muted small mt-1">{{ cat.description }}</div>
@@ -174,10 +176,11 @@
         {% set fam = section.family %}
         <section class="mb-4 family-section" id="family-{{ fam.key|replace(' ', '-')|lower }}">
             <div class="d-flex align-items-center gap-2 mb-1">
-                <h3 class="d-flex align-items-center gap-2 mb-0">
+                <h2 class="h3 d-flex align-items-center gap-2 mb-0">
                     <i class="bi {{ fam.icon }} text-{{ fam.color }}"></i> {{ fam.label }}
-                    <span class="badge bg-{{ fam.color }}">{{ section.count }}</span>
-                </h3>
+                    <span class="badge bg-{{ fam.color }}{% if fam.color in ('warning', 'light', 'info') %} text-dark{% endif %}"
+                          title="{% for g in section.groups %}{{ g.category.section_label }} {{ g.count }}{% if not loop.last %} + {% endif %}{% endfor %}. Other ProEthica-sourced ontologies (the foundation subset, the domain ontology) are listed under their own categories, so this differs from the Source filter count.">{{ section.count }}</span>
+                </h2>
                 <span class="text-muted small ms-2">
                     {% for g in section.groups %}{{ g.category.section_label }} {{ g.count }}{% if not loop.last %} &middot; {% endif %}{% endfor %}
                 </span>

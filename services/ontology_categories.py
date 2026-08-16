@@ -62,7 +62,7 @@ class Category:
 
 
 FAMILIES: Tuple[Family, ...] = (
-    Family('ProEthica', 'ProEthica', 'bi-cpu', 'primary',
+    Family('ProEthica', 'ProEthica', 'bi-collection', 'primary',
            'The ProEthica ontology stack: the framework layers that define the vocabulary, and the '
            'per-case ontologies that ProEthica commits from its case analyses using that vocabulary.'),
 )
