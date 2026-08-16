@@ -1,0 +1,122 @@
+{# Ontology repository list macros. Shared by the grouped (unfiltered) and
+   flat (filtered) modes of index.html so a row renders identically in both. #}
+
+{% macro source_badge(ontology) %}
+    {% if ontology.source_system == 'proethica' %}
+    <span class="badge bg-success">ProEthica</span>
+    {% elif ontology.source_system == 'external' %}
+    <span class="badge bg-info">External</span>
+    {% elif ontology.source_system == 'manual' %}
+    <span class="badge bg-secondary">Manual</span>
+    {% else %}
+    <span class="badge bg-secondary">{{ ontology.source_system }}</span>
+    {% endif %}
+{% endmacro %}
+
+{% macro type_badge(ontology) %}
+    {% if ontology.ontology_type == 'upper' %}
+    <span class="badge bg-danger"><i class="bi bi-diagram-3"></i> Upper</span>
+    {% elif ontology.ontology_type == 'case' %}
+    <span class="badge bg-warning text-dark">Case</span>
+    {% elif ontology.ontology_type == 'core' %}
+    <span class="badge bg-primary">Core</span>
+    {% elif ontology.ontology_type == 'extracted' %}
+    <span class="badge bg-secondary">Extracted</span>
+    {% elif ontology.ontology_type == 'domain' %}
+    <span class="badge bg-dark">Domain</span>
+    {% elif ontology.ontology_type == 'base' %}
+    <span class="badge bg-light text-dark">Base</span>
+    {% else %}
+    <span class="badge bg-light text-dark">{{ ontology.ontology_type }}</span>
+    {% endif %}
+    {% if ontology.meta_data and ontology.meta_data.get('stub') %}
+    <span class="badge bg-warning text-dark border border-dark"
+          title="A curated selection of terms, not the full upstream ontology">
+        <i class="bi bi-scissors"></i> Subset
+    </span>
+    {% endif %}
+{% endmacro %}
+
+{# One table row. show_subcategory adds the subcategory as a muted tag under
+   the name (used in the flat view, where the group header is absent). #}
+{% macro ontology_row(ontology, show_subcategory=false) %}
+    <tr>
+        <td>
+            <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}">
+                <strong>{{ ontology.name }}</strong>
+            </a>
+            {% if ontology.meta_data and ontology.meta_data.get('display_name') and ontology.meta_data.get('display_name') != ontology.name %}
+            <br><small>{{ ontology.meta_data.get('display_name') }}</small>
+            {% endif %}
+            {% if ontology.current_version %}
+            <br>
+            <small class="text-muted">
+                v{{ ontology.current_version.version_number }}
+                {% if ontology.current_version.version_tag and 'reasoned' in
+                ontology.current_version.version_tag %}
+                <span class="badge bg-info ms-1" style="font-size: 0.7em;">
+                    <i class="bi bi-brain"></i> Reasoned
+                </span>
+                {% endif %}
+                {% if show_subcategory and ontology.subcategory %}
+                <span class="badge bg-light text-dark border ms-1" style="font-size: 0.7em;">
+                    <i class="bi bi-tag"></i> {{ ontology.subcategory }}
+                </span>
+                {% endif %}
+            </small>
+            {% endif %}
+        </td>
+        <td>{{ source_badge(ontology) }}</td>
+        <td>{{ type_badge(ontology) }}</td>
+        <td>{{ ontology.description[:80] if ontology.description else '-' }}
+            {% if ontology.description and ontology.description|length > 80 %}...{% endif %}
+        </td>
+        <td>{{ ontology.triple_count or '-' }}</td>
+    </tr>
+{% endmacro %}
+
+{% macro table_head() %}
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Source</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Entities</th>
+        </tr>
+    </thead>
+{% endmacro %}
+
+{# Summary card for a collapsed group: count, description, one chip per
+   subcategory linking to the filtered flat view, and a browse-all link. #}
+{% macro collapsed_group(group) %}
+    {% set cat = group.category %}
+    <div class="card border-{{ cat.color }} mb-2">
+        <div class="card-body py-3">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <a href="{{ url_for('main.index', category=cat.key) }}" class="btn btn-outline-{{ cat.color }} btn-sm">
+                    <i class="bi bi-list-ul"></i> Browse all {{ group.count }}
+                </a>
+                {% if cat.description %}
+                <span class="text-muted small">{{ cat.description }}</span>
+                {% endif %}
+            </div>
+            {% if group.subgroups|length > 1 or (group.subgroups|length == 1 and group.subgroups[0][0]) %}
+            <div class="mt-2 d-flex flex-wrap gap-1">
+                {% for sub, n in group.subgroups %}
+                {% if sub %}
+                <a href="{{ url_for('main.index', category=cat.key, subcategory=sub) }}"
+                   class="badge rounded-pill bg-light text-dark border text-decoration-none fs-6 fw-normal">
+                    <i class="bi bi-tag"></i> {{ sub }} <span class="text-muted">{{ n }}</span>
+                </a>
+                {% else %}
+                <span class="badge rounded-pill bg-light text-dark border fs-6 fw-normal" title="No subcategory set">
+                    unlabelled <span class="text-muted">{{ n }}</span>
+                </span>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endmacro %}

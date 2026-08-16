@@ -76,6 +76,21 @@ class Ontology(db.Model):
     parent = db.relationship('Ontology', remote_side=[id], backref='children')
     
     @property
+    def classification(self):
+        """(category, subcategory) resolved by services.ontology_categories:
+        explicit metadata first, rule-based default otherwise."""
+        from services.ontology_categories import resolve
+        return resolve(self)
+
+    @property
+    def category(self) -> str:
+        return self.classification.category
+
+    @property
+    def subcategory(self):
+        return self.classification.subcategory
+
+    @property
     def current_content(self):
         """Get the content of the current version."""
         stmt = select(OntologyVersion).where(
@@ -189,6 +204,8 @@ class Ontology(db.Model):
             'is_derived': self.is_derived,
             'has_children': self.has_children,
             'metadata': self.meta_data if self.meta_data else {},
+            'category': self.category,
+            'subcategory': self.subcategory,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
             'version_count': len(self.versions) if hasattr(self, 'versions') else 0,

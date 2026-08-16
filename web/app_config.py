@@ -30,6 +30,8 @@ class Config:
     
     # Pagination
     ONTOLOGIES_PER_PAGE = 20
+    # Index page: a category with more ontologies than this collapses to one summary row
+    INDEX_COLLAPSE_THRESHOLD = 12
     ENTITIES_PER_PAGE = 50
     
     # File upload settings

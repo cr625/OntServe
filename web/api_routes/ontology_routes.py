@@ -101,6 +101,15 @@ def register_ontology(bp):
             md = dict(ontology.meta_data or {})
             if 'is_stub' in data:
                 md['stub'] = bool(data.get('is_stub'))
+            # Category / subcategory: explicit values live in metadata; blank clears
+            # the key so the rule-based default applies again.
+            for key in ('category', 'subcategory'):
+                if key in data:
+                    value = (data.get(key) or '').strip()
+                    if value:
+                        md[key] = value
+                    else:
+                        md.pop(key, None)
             md['last_metadata_update'] = datetime.now(timezone.utc).isoformat()
             md['updated_by'] = current_user.username
             ontology.meta_data = md

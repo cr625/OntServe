@@ -14,7 +14,9 @@
             source_system: formData.get('source_system'),
             is_editable: formData.has('is_editable'),
             is_base: formData.has('is_base'),
-            is_stub: formData.has('is_stub')
+            is_stub: formData.has('is_stub'),
+            category: formData.get('category'),
+            subcategory: formData.get('subcategory')
         };
 
         // Show loading state

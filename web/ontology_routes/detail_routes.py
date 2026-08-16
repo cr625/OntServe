@@ -506,4 +506,16 @@ def register_detail_routes(bp):
 
         stmt = select(Ontology).where(Ontology.name == ontology_name)
         ontology = db.one_or_404(stmt)
-        return render_template('ontology_settings.html', ontology=ontology)
+        from services import ontology_categories as categories
+        md = ontology.meta_data or {}
+        # Subcategory suggestions: every value already in use, so labels stay consistent
+        used_subs = sorted({
+            (o.meta_data or {}).get(categories.SUBCATEGORY_KEY)
+            for o in db.session.execute(select(Ontology)).scalars()
+            if (o.meta_data or {}).get(categories.SUBCATEGORY_KEY)
+        })
+        return render_template('ontology_settings.html', ontology=ontology,
+                               explicit_category=md.get(categories.CATEGORY_KEY),
+                               explicit_subcategory=md.get(categories.SUBCATEGORY_KEY),
+                               category_options=categories.known_category_keys(),
+                               subcategory_options=used_subs)

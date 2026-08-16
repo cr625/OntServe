@@ -8,19 +8,29 @@ from flask import Blueprint, render_template, request, jsonify, current_app
 from sqlalchemy import select, func, or_
 
 from web.models import db, Ontology, OntologyEntity
+from services import ontology_categories as categories
 
 main_bp = Blueprint('main', __name__)
 
 
 @main_bp.route('/')
 def index():
-    """Home page showing list of ontologies with filtering."""
+    """Home page.
+
+    Unfiltered: ontologies grouped by category (services.ontology_categories);
+    large groups collapse to a summary row so the per-case ontologies do not
+    swamp the list. With any filter (source, type, category, subcategory): the
+    flat paginated table.
+    """
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config['ONTOLOGIES_PER_PAGE']
 
     # Filter parameters
-    source_system = request.args.get('source', None)
-    ontology_type = request.args.get('type', None)
+    source_system = request.args.get('source', None) or None
+    ontology_type = request.args.get('type', None) or None
+    category = request.args.get('category', None) or None
+    subcategory = request.args.get('subcategory', None) or None
+    filtered = bool(source_system or ontology_type or category or subcategory)
 
     # Build query with filters
     stmt = select(Ontology)
@@ -29,39 +39,37 @@ def index():
         stmt = stmt.where(Ontology.source_system == source_system)
     if ontology_type:
         stmt = stmt.where(Ontology.ontology_type == ontology_type)
+    if category or subcategory:
+        # Category is resolved in Python (explicit metadata or rule default),
+        # so restrict by id. The ontologies table is small (hundreds of rows);
+        # revisit with a persisted column if it grows by orders of magnitude.
+        candidates = db.session.execute(select(Ontology)).scalars().all()
+        ids = [o.id for o in candidates if categories.matches(o, category, subcategory)]
+        stmt = stmt.where(Ontology.id.in_(ids)) if ids else stmt.where(False)
 
     # Order by name
     stmt = stmt.order_by(Ontology.name)
 
-    pagination = db.paginate(
-        stmt,
-        page=page,
-        per_page=per_page,
-        error_out=False
-    )
-    ontologies = pagination.items
+    groups = None
+    if filtered:
+        pagination = db.paginate(
+            stmt,
+            page=page,
+            per_page=per_page,
+            error_out=False
+        )
+        ontologies = pagination.items
+        display_ontologies = ontologies
+    else:
+        pagination = None
+        ontologies = db.session.execute(stmt).scalars().all()
+        groups = categories.group_ontologies(
+            ontologies, collapse_threshold=current_app.config.get(
+                'INDEX_COLLAPSE_THRESHOLD', categories.DEFAULT_COLLAPSE_THRESHOLD))
+        # Entity counts are only rendered for rows shown inline
+        display_ontologies = [o for g in groups if not g.collapsed for o in g.ontologies]
 
-    # Preload entity counts in a single query to avoid N+1 (2 COUNT queries per ontology)
-    if ontologies:
-        ont_ids = [o.id for o in ontologies]
-        count_rows = db.session.execute(
-            select(
-                OntologyEntity.ontology_id,
-                OntologyEntity.entity_type,
-                func.count(OntologyEntity.id)
-            )
-            .where(OntologyEntity.ontology_id.in_(ont_ids))
-            .group_by(OntologyEntity.ontology_id, OntologyEntity.entity_type)
-        ).all()
-        counts_by_ont = {}
-        for ont_id, etype, cnt in count_rows:
-            if ont_id not in counts_by_ont:
-                counts_by_ont[ont_id] = {'class': 0, 'property': 0, 'individual': 0}
-            counts_by_ont[ont_id][etype] = cnt
-        for ont in ontologies:
-            c = counts_by_ont.get(ont.id, {})
-            ont._prefetched_class_count = c.get('class', 0)
-            ont._prefetched_triple_count = c.get('class', 0) + c.get('property', 0) + c.get('individual', 0)
+    _prefetch_entity_counts(display_ontologies)
 
     # Get counts for filter badges (unfiltered totals per category)
     source_counts = dict(db.session.execute(
@@ -78,12 +86,42 @@ def index():
 
     return render_template('index.html',
                          ontologies=ontologies,
+                         groups=groups,
                          pagination=pagination,
+                         filtered=filtered,
                          current_source=source_system,
                          current_type=ontology_type,
+                         current_category=category,
+                         current_subcategory=subcategory,
+                         category_info=categories.category_info,
                          source_counts=source_counts,
                          type_counts=type_counts,
                          total_count=total_count)
+
+
+def _prefetch_entity_counts(ontologies):
+    """Preload entity counts in a single query to avoid N+1 (2 COUNT queries per ontology)."""
+    if not ontologies:
+        return
+    ont_ids = [o.id for o in ontologies]
+    count_rows = db.session.execute(
+        select(
+            OntologyEntity.ontology_id,
+            OntologyEntity.entity_type,
+            func.count(OntologyEntity.id)
+        )
+        .where(OntologyEntity.ontology_id.in_(ont_ids))
+        .group_by(OntologyEntity.ontology_id, OntologyEntity.entity_type)
+    ).all()
+    counts_by_ont = {}
+    for ont_id, etype, cnt in count_rows:
+        if ont_id not in counts_by_ont:
+            counts_by_ont[ont_id] = {'class': 0, 'property': 0, 'individual': 0}
+        counts_by_ont[ont_id][etype] = cnt
+    for ont in ontologies:
+        c = counts_by_ont.get(ont.id, {})
+        ont._prefetched_class_count = c.get('class', 0)
+        ont._prefetched_triple_count = c.get('class', 0) + c.get('property', 0) + c.get('individual', 0)
 
 
 @main_bp.route('/health')

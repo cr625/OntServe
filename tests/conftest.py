@@ -172,6 +172,29 @@ def app(test_config):
     return app
 
 
+@pytest.fixture()
+def logged_in_client(app):
+    """Client with a real user in the session; the user is removed after."""
+    from web.models import db, User
+
+    with app.app_context():
+        user = User(username='guard-test-user', email='guard@test.local',
+                    password='irrelevant', is_admin=True)
+        db.session.add(user)
+        db.session.commit()
+        user_id = user.id
+
+    client = app.test_client()
+    with client.session_transaction() as sess:
+        sess['_user_id'] = str(user_id)
+
+    yield client
+
+    with app.app_context():
+        db.session.delete(db.session.get(User, user_id))
+        db.session.commit()
+
+
 @pytest.fixture(scope='function')
 def client(app):
     """Create Flask test client."""

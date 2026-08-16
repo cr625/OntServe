@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/ontology_list.html" import ontology_row, table_head, collapsed_group %}
 
 {% block title %}OntServe - Ontologies{% endblock %}
 
@@ -28,12 +29,12 @@
         <div class="mb-4">
             <div class="btn-group me-3" role="group" aria-label="Source filter">
                 <span class="text-muted me-2 align-self-center">Source:</span>
-                <a href="{{ url_for('main.index', type=current_type) }}"
+                <a href="{{ url_for('main.index', type=current_type, category=current_category, subcategory=current_subcategory) }}"
                    class="btn btn-outline-secondary btn-sm {% if not current_source %}active{% endif %}">
                     All
                 </a>
                 {% for key, label, color, icon in source_filters %}
-                <a href="{{ url_for('main.index', source=key, type=current_type) }}"
+                <a href="{{ url_for('main.index', source=key, type=current_type, category=current_category, subcategory=current_subcategory) }}"
                    class="btn btn-outline-{{ color }} btn-sm {% if current_source == key %}active{% endif %}">
                     <i class="bi {{ icon }}"></i> {{ label }}
                     <span class="badge bg-{{ color }}{% if color in ('warning', 'light') %} text-dark{% endif %}">{{ source_counts.get(key, 0) if source_counts else 0 }}</span>
@@ -43,12 +44,12 @@
 
             <div class="btn-group" role="group" aria-label="Type filter">
                 <span class="text-muted me-2 align-self-center">Type:</span>
-                <a href="{{ url_for('main.index', source=current_source) }}"
+                <a href="{{ url_for('main.index', source=current_source, category=current_category, subcategory=current_subcategory) }}"
                    class="btn btn-outline-secondary btn-sm {% if not current_type %}active{% endif %}">
                     All
                 </a>
                 {% for key, label, color, icon in type_filters %}
-                <a href="{{ url_for('main.index', source=current_source, type=key) }}"
+                <a href="{{ url_for('main.index', source=current_source, type=key, category=current_category, subcategory=current_subcategory) }}"
                    class="btn btn-outline-{{ color }} btn-sm {% if current_type == key %}active{% endif %}">
                     <i class="bi {{ icon }}"></i> {{ label }}
                     <span class="badge bg-{{ color }}{% if color in ('warning', 'light') %} text-dark{% endif %}">{{ type_counts.get(key, 0) if type_counts else 0 }}</span>
@@ -62,8 +63,8 @@
             <div class="col-md-3">
                 <div class="card text-white bg-primary">
                     <div class="card-body">
-                        <h5 class="card-title">{% if current_source or current_type %}Filtered{% else %}Total{% endif %} Ontologies</h5>
-                        <h2 class="card-text">{{ pagination.total if pagination else 0 }}</h2>
+                        <h5 class="card-title">{% if filtered %}Filtered{% else %}Total{% endif %} Ontologies</h5>
+                        <h2 class="card-text">{{ pagination.total if pagination else total_count }}</h2>
                     </div>
                 </div>
             </div>
@@ -88,7 +89,7 @@
                 </a>
             </div>
             <div class="col-md-3">
-                <a href="{{ url_for('main.index', type='case') }}" class="text-decoration-none">
+                <a href="{{ url_for('main.index', category='Cases') }}" class="text-decoration-none">
                     <div class="card text-white bg-warning">
                         <div class="card-body">
                             <h5 class="card-title">Case Ontologies</h5>
@@ -106,91 +107,81 @@
             </a>
         </div>
 
-        <!-- Ontologies table -->
-        {% if ontologies %}
+        <!-- Active category filter banner -->
+        {% if current_category or current_subcategory %}
+        {% set cat = category_info(current_category) if current_category else none %}
+        <div class="alert alert-light border d-flex flex-wrap align-items-center gap-2 py-2 mb-3" role="status">
+            <span class="text-muted">Category:</span>
+            {% if cat %}
+            <a href="{{ url_for('main.index', category=cat.key, source=current_source, type=current_type) }}"
+               class="badge bg-{{ cat.color }}{% if cat.color in ('warning', 'light', 'info') %} text-dark{% endif %} text-decoration-none"><i class="bi {{ cat.icon }}"></i> {{ cat.label }}</a>
+            {% endif %}
+            {% if current_subcategory %}
+            <i class="bi bi-chevron-right text-muted"></i>
+            <span class="badge bg-light text-dark border"><i class="bi bi-tag"></i> {{ current_subcategory }}</span>
+            {% endif %}
+            <span class="text-muted">{{ pagination.total }} ontolog{{ 'y' if pagination.total == 1 else 'ies' }}</span>
+            <a href="{{ url_for('main.index', source=current_source, type=current_type) }}" class="btn btn-outline-secondary btn-sm ms-auto">
+                <i class="bi bi-x-circle"></i> Clear category
+            </a>
+        </div>
+        {% endif %}
+
+        {% if groups %}
+        <!-- Grouped view (no filter active): one section per category; large
+             categories collapse to a summary card with subcategory chips. -->
+        {% for group in groups %}
+        {% set cat = group.category %}
+        <section class="mb-4" id="category-{{ cat.key|replace(' ', '-')|lower }}">
+            <div class="border-bottom pb-2 mb-2">
+                <h4 class="d-flex align-items-center gap-2 mb-0">
+                    <i class="bi {{ cat.icon }} text-{{ cat.color }}"></i>
+                    <a href="{{ url_for('main.index', category=cat.key) }}" class="text-decoration-none text-reset">{{ cat.label }}</a>
+                    <span class="badge bg-{{ cat.color }}{% if cat.color in ('warning', 'light', 'info') %} text-dark{% endif %}">{{ group.count }}</span>
+                </h4>
+                {% if not group.collapsed and cat.description %}
+                <div class="text-muted small mt-1">{{ cat.description }}</div>
+                {% endif %}
+            </div>
+            {% if group.collapsed %}
+            {{ collapsed_group(group) }}
+            {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    {{ table_head() }}
+                    <tbody>
+                        {% for ontology in group.ontologies %}
+                        {{ ontology_row(ontology, show_subcategory=true) }}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </section>
+        {% endfor %}
+
+        {% elif ontologies %}
+        <!-- Flat view (filter active) -->
         <div class="table-responsive">
             <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Source</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                        <th>Entities</th>
-                    </tr>
-                </thead>
+                {{ table_head() }}
                 <tbody>
                     {% for ontology in ontologies %}
-                    <tr>
-                        <td>
-                            <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}">
-                                <strong>{{ ontology.name }}</strong>
-                            </a>
-                            {% if ontology.current_version %}
-                            <br>
-                            <small class="text-muted">
-                                v{{ ontology.current_version.version_number }}
-                                {% if ontology.current_version.version_tag and 'reasoned' in
-                                ontology.current_version.version_tag %}
-                                <span class="badge bg-info ms-1" style="font-size: 0.7em;">
-                                    <i class="bi bi-brain"></i> Reasoned
-                                </span>
-                                {% endif %}
-                            </small>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if ontology.source_system == 'proethica' %}
-                            <span class="badge bg-success">ProEthica</span>
-                            {% elif ontology.source_system == 'external' %}
-                            <span class="badge bg-info">External</span>
-                            {% elif ontology.source_system == 'manual' %}
-                            <span class="badge bg-secondary">Manual</span>
-                            {% else %}
-                            <span class="badge bg-secondary">{{ ontology.source_system }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if ontology.ontology_type == 'upper' %}
-                            <span class="badge bg-danger"><i class="bi bi-diagram-3"></i> Upper</span>
-                            {% elif ontology.ontology_type == 'case' %}
-                            <span class="badge bg-warning text-dark">Case</span>
-                            {% elif ontology.ontology_type == 'core' %}
-                            <span class="badge bg-primary">Core</span>
-                            {% elif ontology.ontology_type == 'extracted' %}
-                            <span class="badge bg-secondary">Extracted</span>
-                            {% elif ontology.ontology_type == 'domain' %}
-                            <span class="badge bg-dark">Domain</span>
-                            {% elif ontology.ontology_type == 'base' %}
-                            <span class="badge bg-light text-dark">Base</span>
-                            {% else %}
-                            <span class="badge bg-light text-dark">{{ ontology.ontology_type }}</span>
-                            {% endif %}
-                            {% if ontology.meta_data and ontology.meta_data.get('stub') %}
-                            <span class="badge bg-warning text-dark border border-dark"
-                                  title="A curated selection of terms, not the full upstream ontology">
-                                <i class="bi bi-scissors"></i> Subset
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td>{{ ontology.description[:80] if ontology.description else '-' }}
-                            {% if ontology.description and ontology.description|length > 80 %}...{% endif %}
-                        </td>
-                        <td>{{ ontology.triple_count or '-' }}</td>
-                    </tr>
+                    {{ ontology_row(ontology, show_subcategory=true) }}
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <!-- Pagination (links preserve the active source/type filters) -->
+        <!-- Pagination (links preserve the active filters) -->
         {% if pagination and pagination.pages > 1 %}
+        {% set pargs = {'source': current_source, 'type': current_type, 'category': current_category, 'subcategory': current_subcategory} %}
         <nav aria-label="Page navigation">
             <ul class="pagination justify-content-center">
                 {% if pagination.has_prev %}
                 <li class="page-item">
                     <a class="page-link"
-                       href="{{ url_for('main.index', page=pagination.prev_num, source=current_source, type=current_type) }}">Previous</a>
+                       href="{{ url_for('main.index', page=pagination.prev_num, **pargs) }}">Previous</a>
                 </li>
                 {% endif %}
 
@@ -199,7 +190,7 @@
                 {% if page_num != pagination.page %}
                 <li class="page-item">
                     <a class="page-link"
-                       href="{{ url_for('main.index', page=page_num, source=current_source, type=current_type) }}">{{ page_num }}</a>
+                       href="{{ url_for('main.index', page=page_num, **pargs) }}">{{ page_num }}</a>
                 </li>
                 {% else %}
                 <li class="page-item active">
@@ -216,7 +207,7 @@
                 {% if pagination.has_next %}
                 <li class="page-item">
                     <a class="page-link"
-                       href="{{ url_for('main.index', page=pagination.next_num, source=current_source, type=current_type) }}">Next</a>
+                       href="{{ url_for('main.index', page=pagination.next_num, **pargs) }}">Next</a>
                 </li>
                 {% endif %}
             </ul>
