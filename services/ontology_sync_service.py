@@ -114,9 +114,11 @@ class OntologySyncService:
 
     def _extract_ontology_meta(self, ttl_path: Path) -> Dict:
         """Read owl:Ontology-level provenance from a TTL: rdfs:comment (-> description),
-        dcterms:source, owl:versionInfo, dcterms:title. Lets imported vocabularies (e.g. the
-        ifc-roles crosswalk stub) carry their provenance into the OntServe ontology record
-        instead of the generic 'Auto-imported from ...' default."""
+        dcterms:source, owl:versionInfo, dcterms:title, dcterms:identifier (-> case_number)
+        and dcterms:temporal (-> subcategory, e.g. the NSPE decade "1990s" ProEthica writes
+        into case headers; see proethica app/services/commit/case_header.py). Lets imported
+        vocabularies (e.g. the ifc-roles crosswalk stub) carry their provenance into the
+        OntServe ontology record instead of the generic 'Auto-imported from ...' default."""
         from rdflib import Graph
         from rdflib.namespace import OWL, RDF, RDFS, DCTERMS
         out: Dict = {}
@@ -136,6 +138,12 @@ class OntologySyncService:
                 title = g.value(subj, DCTERMS.title)
                 if title:
                     out['title'] = str(title).strip()
+                identifier = g.value(subj, DCTERMS.identifier)
+                if identifier:
+                    out['identifier'] = str(identifier).strip()
+                temporal = g.value(subj, DCTERMS.temporal)
+                if temporal:
+                    out['temporal'] = str(temporal).strip()
                 break  # one owl:Ontology subject expected
         except Exception as e:
             logger.warning(f"Could not read owl:Ontology metadata from {ttl_path.name}: {e}")
@@ -196,6 +204,10 @@ class OntologySyncService:
                 meta_data['source'] = ometa['source']
             if ometa.get('version'):
                 meta_data['version'] = ometa['version']
+            if ometa.get('identifier'):
+                meta_data['case_number'] = ometa['identifier']
+            if ometa.get('temporal'):
+                meta_data['subcategory'] = ometa['temporal']
             inferred_type, inferred_source = self._infer_type_and_source(ontology_name)
             ontology = Ontology(
                 name=ontology_name,
@@ -242,6 +254,10 @@ class OntologySyncService:
             md['version'] = ometa['version']
         if ometa.get('title') and not md.get('display_name'):
             md['display_name'] = ometa['title']
+        if ometa.get('identifier') and not md.get('case_number'):
+            md['case_number'] = ometa['identifier']
+        if ometa.get('temporal') and not md.get('subcategory'):
+            md['subcategory'] = ometa['temporal']
         ontology.meta_data = md
 
         # Read TTL content

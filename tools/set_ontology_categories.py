@@ -8,7 +8,8 @@ Usage:
     # one ontology
     python tools/set_ontology_categories.py --set proethica-case-7 --category Cases --subcategory 2020s
 
-    # many, from a manifest {"<ontology name>": {"category": ..., "subcategory": ...}, ...}
+    # many, from a manifest {"<ontology name>": {"category", "subcategory", "case_number", "clear": [...]}, ...}
+    # (ProEthica produces the case manifest: proethica/scripts/export_case_categories_manifest.py)
     python tools/set_ontology_categories.py --manifest tools/migrations/case_categories.json
 
     # clear an explicit value (rule default applies again)
@@ -52,7 +53,7 @@ def make_app() -> Flask:
     return app
 
 
-def apply(session, name: str, category=None, subcategory=None, clear=()) -> str:
+def apply(session, name: str, category=None, subcategory=None, clear=(), case_number=None) -> str:
     ont = session.execute(select(Ontology).where(Ontology.name == name)).scalar_one_or_none()
     if ont is None:
         return f'{name}: NOT FOUND'
@@ -62,6 +63,8 @@ def apply(session, name: str, category=None, subcategory=None, clear=()) -> str:
         md[categories.CATEGORY_KEY] = category.strip()
     if subcategory is not None:
         md[categories.SUBCATEGORY_KEY] = subcategory.strip()
+    if case_number is not None:
+        md['case_number'] = case_number.strip()   # same key the sync fills from dcterms:identifier
     for key in clear:
         md.pop(key, None)
     if md == before:
@@ -76,7 +79,7 @@ def main(argv=None):
     ap.add_argument('--category')
     ap.add_argument('--subcategory')
     ap.add_argument('--clear', action='append', choices=['category', 'subcategory'], default=[])
-    ap.add_argument('--manifest', type=Path, help='JSON file: {name: {category, subcategory}}')
+    ap.add_argument('--manifest', type=Path, help='JSON file: {name: {category, subcategory, case_number, clear}}')
     ap.add_argument('--report', action='store_true', help='print resolved classification for all ontologies')
     ap.add_argument('--dry-run', action='store_true')
     args = ap.parse_args(argv)
@@ -99,7 +102,7 @@ def main(argv=None):
             manifest = json.loads(args.manifest.read_text())
             for name, spec in manifest.items():
                 lines.append(apply(session, name, spec.get('category'), spec.get('subcategory'),
-                                   spec.get('clear', [])))
+                                   spec.get('clear', []), spec.get('case_number')))
         if not lines:
             ap.error('nothing to do: pass --set, --manifest or --report')
         for line in lines:

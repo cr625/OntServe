@@ -34,3 +34,23 @@ def test_returns_none_when_absent():
     svc = OntologySyncService.__new__(OntologySyncService)
     p = _write('')
     assert svc._extract_dcterms_title(p) is None
+
+
+def test_extract_ontology_meta_reads_case_number_and_decade():
+    """ProEthica's case header carries dcterms:identifier (NSPE case number) and
+    dcterms:temporal (decade); the sync maps them to metadata.case_number and
+    metadata.subcategory (index grouping)."""
+    svc = OntologySyncService.__new__(OntologySyncService)
+    p = _write('    dcterms:title "Misrepresentation of Qualifications" ;\n'
+               '    dcterms:identifier "24-2" ;\n'
+               '    dcterms:temporal "2020s" ;\n')
+    meta = svc._extract_ontology_meta(p)
+    assert meta['title'] == "Misrepresentation of Qualifications"
+    assert meta['identifier'] == "24-2"
+    assert meta['temporal'] == "2020s"
+
+
+def test_extract_ontology_meta_without_case_fields():
+    svc = OntologySyncService.__new__(OntologySyncService)
+    meta = svc._extract_ontology_meta(_write(''))
+    assert 'identifier' not in meta and 'temporal' not in meta
