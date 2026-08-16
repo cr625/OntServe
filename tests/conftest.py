@@ -112,12 +112,20 @@ def database_engine(test_config):
 
 @pytest.fixture(scope='session')
 def _db_tables(app):
-    """Create all tables once for the test session (DDL is expensive)."""
+    """Create all tables once for the test session (DDL is expensive).
+
+    Push the app context only around the DDL. Yielding inside the context
+    left it pushed for the rest of the session, so every later request reused
+    it (and its ``g``): Flask-Login's cached anonymous ``_login_user`` from the
+    first request then made every logged-in test fail once this fixture had
+    run -- an order-dependent flake across the suite.
+    """
     from web.models import db
 
     with app.app_context():
         db.create_all()
-        yield
+    yield
+    with app.app_context():
         db.drop_all()
 
 

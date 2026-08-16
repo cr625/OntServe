@@ -6,18 +6,32 @@ import pytest
 from sqlalchemy import select
 
 
+@pytest.fixture()
+def case_names(app):
+    """Names of case ontologies, seeding enough to exceed the collapse threshold.
+
+    Other test modules' db_session fixture wipes every table, so this test
+    cannot rely on the startup TTL sync having populated the shared test DB.
+    """
+    from web.models import db, Ontology
+    threshold = app.config.get('INDEX_COLLAPSE_THRESHOLD', 12)
+    with app.app_context():
+        names = db.session.execute(
+            select(Ontology.name).where(Ontology.ontology_type == 'case')).scalars().all()
+        for i in range(len(names), threshold + 2):
+            name = f'proethica-case-{9000 + i}'
+            db.session.add(Ontology(name=name, base_uri=f'http://proethica.org/ontology/case/{9000 + i}#',
+                                    ontology_type='case', source_system='proethica', meta_data={}))
+            names.append(name)
+        if not db.session.execute(select(Ontology).where(Ontology.name == 'proethica-core')).scalar_one_or_none():
+            db.session.add(Ontology(name='proethica-core', base_uri='http://proethica.org/ontology/core#',
+                                    ontology_type='core', source_system='proethica', meta_data={}))
+        db.session.commit()
+    return names
+
+
 @pytest.mark.integration
 class TestIndexGrouping:
-
-    @pytest.fixture()
-    def case_names(self, app):
-        from web.models import db, Ontology
-        with app.app_context():
-            names = db.session.execute(
-                select(Ontology.name).where(Ontology.ontology_type == 'case')).scalars().all()
-        if not names:
-            pytest.skip('no case ontologies in the test database')
-        return names
 
     def test_unfiltered_index_is_grouped(self, client, case_names):
         r = client.get('/')
@@ -74,7 +88,7 @@ class TestIndexGrouping:
         assert r.status_code == 200
         assert re.search(r'<strong>proethica-case-\d+</strong>', r.get_data(as_text=True))
 
-    def test_api_exposes_category(self, client):
+    def test_api_exposes_category(self, client, case_names):
         r = client.get('/api/ontologies')
         assert r.status_code == 200
         data = r.get_json()
@@ -84,7 +98,7 @@ class TestIndexGrouping:
 @pytest.mark.integration
 class TestCategorySettings:
 
-    def test_settings_page_and_api_round_trip(self, logged_in_client):
+    def test_settings_page_and_api_round_trip(self, logged_in_client, case_names):
         r = logged_in_client.get('/ontology/proethica-core/settings')
         assert r.status_code == 200
         html = r.get_data(as_text=True)
