@@ -1,5 +1,6 @@
 """register_detail_routes."""
 import logging
+import re
 from datetime import datetime, timezone
 
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app
@@ -211,8 +212,15 @@ def register_detail_routes(bp):
             page_blocks = build_ordered_blocks(
                 case_data['sections'], competition, citations, conclusions)
 
+            # Back-link to the ProEthica case page (the source of this ontology)
+            case_id_match = re.fullmatch(r'proethica-case-(\d+)', ontology.name)
+            proethica_case_url = (
+                f"{current_app.config.get('PROETHICA_BASE_URL', '').rstrip('/')}/cases/{case_id_match.group(1)}"
+                if case_id_match and current_app.config.get('PROETHICA_BASE_URL') else None)
+
             return render_template('ontology_case.html',
                                  ontology=ontology,
+                                 proethica_case_url=proethica_case_url,
                                  case_sections=case_data['sections'],
                                  page_blocks=page_blocks,
                                  stats=case_data['stats'],

@@ -49,6 +49,9 @@ class Config:
     ONTSERVE_STORAGE_DIR = os.environ.get('ONTSERVE_STORAGE_DIR') or str(basedir.parent / 'storage')
     ONTSERVE_CACHE_DIR = os.environ.get('ONTSERVE_CACHE_DIR') or str(basedir.parent / 'storage' / 'cache' / 'downloads')
     
+    # ProEthica web app (case pages link back to it: {PROETHICA_BASE_URL}/cases/<id>)
+    PROETHICA_BASE_URL = os.environ.get('PROETHICA_BASE_URL') or 'http://localhost:5000'
+
     # Ontology URI settings
     ONTOLOGY_BASE_URI = os.environ.get('ONTOLOGY_BASE_URI') or 'https://ontserve.ontorealm.net/'
     ONTOLOGY_NAMESPACE_TEMPLATE = os.environ.get('ONTOLOGY_NAMESPACE_TEMPLATE') or '{base_uri}ontology/{name}#'
@@ -65,6 +68,7 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
+    PROETHICA_BASE_URL = os.environ.get('PROETHICA_BASE_URL') or 'https://proethica.org'
 
     @classmethod
     def init_app(cls, app):

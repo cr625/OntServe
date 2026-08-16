@@ -494,9 +494,21 @@
                 <i class="bi bi-briefcase me-2"></i>
                 {{ display_title if display_title else ontology.name }}
             </h1>
-            {% if display_title %}
-            <div class="mt-1" style="font-size: 0.8rem; opacity: 0.85;">
-                <i class="bi bi-hash"></i>{{ ontology.name }}
+            {% set md = ontology.meta_data or {} %}
+            {% if display_title or md.case_number or md.subcategory %}
+            <div class="mt-1 d-flex flex-wrap align-items-center gap-2" style="font-size: 0.8rem; opacity: 0.9;">
+                {% if display_title %}<span><i class="bi bi-hash"></i>{{ ontology.name }}</span>{% endif %}
+                {% if md.case_number %}
+                <span class="badge bg-light text-dark" title="NSPE Board of Ethical Review case number">
+                    <i class="bi bi-journal-text"></i> NSPE {{ md.case_number }}
+                </span>
+                {% endif %}
+                {% if md.subcategory %}
+                <a href="{{ url_for('main.index', category='Cases', subcategory=md.subcategory) }}"
+                   class="badge bg-light text-dark text-decoration-none" title="Other cases from this decade">
+                    <i class="bi bi-tag"></i> {{ md.subcategory }}
+                </a>
+                {% endif %}
             </div>
             {% endif %}
             {% if ontology.description and not ontology.description.startswith('Auto-imported') %}
@@ -512,6 +524,12 @@
         <div class="text-end">
             <div style="font-size: 2rem; font-weight: 700;">{{ stats.individuals if stats.individuals is defined else stats.total }}</div>
             <div style="font-size: 0.85rem; opacity: 0.9;">Named Individuals</div>
+            {% if proethica_case_url %}
+            <a href="{{ proethica_case_url }}" class="btn btn-light btn-sm mt-2" target="_blank" rel="noopener"
+               title="Open this case in ProEthica, where the analysis behind this ontology lives">
+                <i class="bi bi-box-arrow-up-right"></i> View case in ProEthica
+            </a>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -115,3 +115,38 @@ class TestCategorySettings:
         logged_in_client.put('/api/ontology/proethica-core/metadata', json={'category': '', 'subcategory': ''})
         data = logged_in_client.get('/api/ontology/proethica-core').get_json()
         assert (data['category'], data['subcategory']) == ('ProEthica Framework', None)
+
+
+@pytest.mark.integration
+class TestCaseHeaderBacklink:
+
+    def test_case_page_links_to_proethica_case(self, client, app, case_names):
+        name = case_names[0]
+        case_id = name.rsplit('-', 1)[1]
+        app.config['PROETHICA_BASE_URL'] = 'https://proethica.example/'
+        try:
+            r = client.get(f'/ontology/{name}', headers={'Accept': 'text/html'})
+            assert r.status_code == 200
+            html = r.get_data(as_text=True)
+            assert f'href="https://proethica.example/cases/{case_id}"' in html
+            assert 'View case in ProEthica' in html
+        finally:
+            app.config.pop('PROETHICA_BASE_URL', None)
+
+    def test_case_number_and_decade_badges(self, client, app, case_names):
+        from web.models import db, Ontology
+        name = case_names[0]
+        with app.app_context():
+            o = db.session.execute(select(Ontology).where(Ontology.name == name)).scalar_one()
+            saved = dict(o.meta_data or {})
+            o.meta_data = {**saved, 'case_number': '99-7', 'subcategory': '1990s'}
+            db.session.commit()
+        try:
+            html = client.get(f'/ontology/{name}', headers={'Accept': 'text/html'}).get_data(as_text=True)
+            assert 'NSPE 99-7' in html
+            assert 'subcategory=1990s' in html
+        finally:
+            with app.app_context():
+                o = db.session.execute(select(Ontology).where(Ontology.name == name)).scalar_one()
+                o.meta_data = saved
+                db.session.commit()
