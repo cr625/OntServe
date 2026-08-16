@@ -128,17 +128,26 @@
         {% endif %}
 
         {% if groups %}
-        <!-- Grouped view (no filter active): one section per category; large
-             categories collapse to a summary card with subcategory chips. -->
-        {% for group in groups %}
+        <!-- Grouped view (no filter active): one section per family or lone
+             category; large categories collapse to a summary card with
+             subcategory chips. -->
+        {% macro category_section(group, nested=false) %}
         {% set cat = group.category %}
-        <section class="mb-4" id="category-{{ cat.key|replace(' ', '-')|lower }}">
+        <section class="{{ 'mb-3' if nested else 'mb-4' }}" id="category-{{ cat.key|replace(' ', '-')|lower }}">
             <div class="border-bottom pb-2 mb-2">
+                {% if nested %}
+                <h5 class="d-flex align-items-center gap-2 mb-0">
+                    <i class="bi {{ cat.icon }} text-{{ cat.color }}"></i>
+                    <a href="{{ url_for('main.index', category=cat.key) }}" class="text-decoration-none text-reset">{{ cat.section_label }}</a>
+                    <span class="badge bg-{{ cat.color }}{% if cat.color in ('warning', 'light', 'info') %} text-dark{% endif %}">{{ group.count }}</span>
+                </h5>
+                {% else %}
                 <h4 class="d-flex align-items-center gap-2 mb-0">
                     <i class="bi {{ cat.icon }} text-{{ cat.color }}"></i>
                     <a href="{{ url_for('main.index', category=cat.key) }}" class="text-decoration-none text-reset">{{ cat.label }}</a>
                     <span class="badge bg-{{ cat.color }}{% if cat.color in ('warning', 'light', 'info') %} text-dark{% endif %}">{{ group.count }}</span>
                 </h4>
+                {% endif %}
                 {% if not group.collapsed and cat.description %}
                 <div class="text-muted small mt-1">{{ cat.description }}</div>
                 {% endif %}
@@ -158,6 +167,31 @@
             </div>
             {% endif %}
         </section>
+        {% endmacro %}
+
+        {% for section in sections %}
+        {% if section.family %}
+        {% set fam = section.family %}
+        <section class="mb-4 family-section" id="family-{{ fam.key|replace(' ', '-')|lower }}">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h3 class="d-flex align-items-center gap-2 mb-0">
+                    <i class="bi {{ fam.icon }} text-{{ fam.color }}"></i> {{ fam.label }}
+                    <span class="badge bg-{{ fam.color }}">{{ section.count }}</span>
+                </h3>
+                <span class="text-muted small ms-2">
+                    {% for g in section.groups %}{{ g.category.section_label }} {{ g.count }}{% if not loop.last %} &middot; {% endif %}{% endfor %}
+                </span>
+            </div>
+            {% if fam.description %}<div class="text-muted small mb-3">{{ fam.description }}</div>{% endif %}
+            <div class="ps-3 border-start border-3 border-{{ fam.color }}">
+                {% for group in section.groups %}
+                {{ category_section(group, nested=true) }}
+                {% endfor %}
+            </div>
+        </section>
+        {% else %}
+        {{ category_section(section.groups[0]) }}
+        {% endif %}
         {% endfor %}
 
         {% elif ontologies %}

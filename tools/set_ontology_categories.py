@@ -89,10 +89,15 @@ def main(argv=None):
         session = db.session
         if args.report:
             onts = session.execute(select(Ontology).order_by(Ontology.name)).scalars().all()
-            for grp in categories.group_ontologies(onts):
-                print(f'== {grp.category.label} ({grp.count}){"  [collapsed]" if grp.collapsed else ""}')
-                for sub, n in grp.subgroups:
-                    print(f'   {sub or "(none)"}: {n}')
+            for section in categories.group_by_family(categories.group_ontologies(onts)):
+                if section.family:
+                    print(f'## {section.family.label} ({section.count})')
+                for grp in section.groups:
+                    indent = '   ' if section.family else ''
+                    label = grp.category.section_label if section.family else grp.category.label
+                    print(f'{indent}== {label} ({grp.count}){"  [collapsed]" if grp.collapsed else ""}')
+                    for sub, n in grp.subgroups:
+                        print(f'{indent}   {sub or "(none)"}: {n}')
             return 0
 
         lines = []

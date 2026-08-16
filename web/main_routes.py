@@ -51,6 +51,7 @@ def index():
     stmt = stmt.order_by(Ontology.name)
 
     groups = None
+    sections = None
     if filtered:
         pagination = db.paginate(
             stmt,
@@ -66,6 +67,7 @@ def index():
         groups = categories.group_ontologies(
             ontologies, collapse_threshold=current_app.config.get(
                 'INDEX_COLLAPSE_THRESHOLD', categories.DEFAULT_COLLAPSE_THRESHOLD))
+        sections = categories.group_by_family(groups)
         # Entity counts are only rendered for rows shown inline
         display_ontologies = [o for g in groups if not g.collapsed for o in g.ontologies]
 
@@ -87,6 +89,7 @@ def index():
     return render_template('index.html',
                          ontologies=ontologies,
                          groups=groups,
+                         sections=sections,
                          pagination=pagination,
                          filtered=filtered,
                          current_source=source_system,

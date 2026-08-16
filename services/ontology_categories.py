@@ -12,7 +12,10 @@ result wrapped in ``SimpleNamespace``, or a test stub).
 
 The catalog (``CATEGORIES``) carries display order, icon, colour and collapse
 behaviour per category so the index template stays free of category-specific
-branches. A category collapses to a single summary row when it holds more
+branches. Categories can belong to a ``Family`` (``FAMILIES``): the index renders
+a family as one section with its categories nested (ProEthica = Framework +
+Cases), which is what ties the per-case ontologies to the framework they are
+written in. A category collapses to a single summary row when it holds more
 than ``collapse_threshold`` ontologies unless the catalog pins it open or
 closed.
 
@@ -32,14 +35,38 @@ DEFAULT_COLLAPSE_THRESHOLD = 12
 
 
 @dataclass(frozen=True)
-class Category:
+class Family:
+    """A named group of categories rendered under one heading on the index
+    (e.g. ProEthica = Framework + Cases). Categories with family=None stand alone."""
     key: str
     label: str
+    icon: str
+    color: str
+    description: str = ''
+
+
+@dataclass(frozen=True)
+class Category:
+    key: str
+    label: str           # full label, used wherever the category stands alone (filters, banners)
     icon: str            # bootstrap icon class
     color: str           # bootstrap contextual colour
     description: str = ''
     collapse: Optional[bool] = None   # None = threshold decides; True/False pins
+    family: Optional[str] = None      # Family.key this category belongs to, if any
+    short_label: Optional[str] = None  # label inside its family section ("Cases" under "ProEthica")
 
+    @property
+    def section_label(self) -> str:
+        return self.short_label or self.label
+
+
+FAMILIES: Tuple[Family, ...] = (
+    Family('ProEthica', 'ProEthica', 'bi-cpu', 'primary',
+           'The ProEthica ontology stack: the framework layers that define the vocabulary, and the '
+           'per-case ontologies that ProEthica commits from its case analyses using that vocabulary.'),
+)
+FAMILY_BY_KEY: Dict[str, Family] = {f.key: f for f in FAMILIES}
 
 UNCATEGORIZED = Category(
     key='Uncategorized', label='Uncategorized', icon='bi-question-circle', color='secondary',
@@ -49,15 +76,22 @@ CATEGORIES: Tuple[Category, ...] = (
     Category('Foundation', 'Foundation', 'bi-diagram-3', 'danger',
              'Upper-level ontologies the framework builds on (BFO, IAO, RO, PROV-O) and the ProEthica foundation layer.'),
     Category('ProEthica Framework', 'ProEthica Framework', 'bi-layers', 'primary',
-             'The core, intermediate, cases and provenance layers of the ProEthica ontology, its SHACL shapes, and the extracted extension.'),
+             'The layers that define the ProEthica vocabulary: core (the nine components), intermediate, '
+             'proethica-cases (the case-analysis vocabulary the case ontologies below are written in), '
+             'provenance, the SHACL shapes, and the extracted extension.',
+             family='ProEthica', short_label='Framework'),
+    Category('Cases', 'ProEthica Cases', 'bi-folder2-open', 'warning',
+             'One ontology per NSPE case analysed in ProEthica: the individuals (roles, principles, '
+             'obligations, states, actions, events, ...) extracted from that case, typed with the '
+             'framework vocabulary above -- each case ontology imports proethica-cases and '
+             'proethica-intermediate. Grouped by the decade of the Board of Ethical Review decision.',
+             family='ProEthica', short_label='Cases'),
     Category('Domain', 'Domain', 'bi-globe', 'success',
              'Professional-domain ontologies that specialise the framework.'),
     Category('Professional Codes', 'Professional Codes', 'bi-journal-text', 'info',
              'Codes of ethics of professional societies, imported as vocabularies.'),
     Category('External Vocabularies', 'External Vocabularies', 'bi-cloud-download', 'info',
              'Other external vocabularies and curated subsets.'),
-    Category('Cases', 'Cases', 'bi-folder2-open', 'warning',
-             'Per-case ontologies committed by ProEthica, one per analysed case.'),
     UNCATEGORIZED,
 )
 
@@ -206,6 +240,42 @@ def group_ontologies(ontologies: Iterable[Any],
         grp.collapsed = pin if pin is not None else grp.count > collapse_threshold
         groups.append(grp)
     return groups
+
+
+@dataclass
+class FamilyGroup:
+    """One index section: either a named family holding several category groups,
+    or a lone category (family is None, groups has one element)."""
+    family: Optional[Family]
+    groups: List[Group] = field(default_factory=list)
+
+    @property
+    def count(self) -> int:
+        return sum(g.count for g in self.groups)
+
+    @property
+    def key(self) -> str:
+        return self.family.key if self.family else self.groups[0].key
+
+
+def group_by_family(groups: Iterable[Group]) -> List[FamilyGroup]:
+    """Fold ordered category groups into index sections. A family's section sits
+    where its first category appears in the catalog order; categories without a
+    family become sections of their own. Order within a family follows the
+    incoming group order."""
+    sections: List[FamilyGroup] = []
+    by_family: Dict[str, FamilyGroup] = {}
+    for grp in groups:
+        fam_key = grp.category.family
+        if fam_key and fam_key in FAMILY_BY_KEY:
+            section = by_family.get(fam_key)
+            if section is None:
+                section = by_family[fam_key] = FamilyGroup(family=FAMILY_BY_KEY[fam_key])
+                sections.append(section)
+            section.groups.append(grp)
+        else:
+            sections.append(FamilyGroup(family=None, groups=[grp]))
+    return sections
 
 
 def matches(ontology: Any, category: Optional[str], subcategory: Optional[str],

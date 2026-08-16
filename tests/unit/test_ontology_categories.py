@@ -72,8 +72,32 @@ class TestGrouping:
 
     def test_catalog_order_then_custom_then_uncategorized(self):
         keys = [g.key for g in cat.group_ontologies(self._corpus())]
-        assert keys == ['Foundation', 'ProEthica Framework', 'Domain', 'Professional Codes',
-                        'Cases', 'Sandbox', cat.UNCATEGORIZED.key]
+        assert keys == ['Foundation', 'ProEthica Framework', 'Cases', 'Domain', 'Professional Codes',
+                        'Sandbox', cat.UNCATEGORIZED.key]
+
+    def test_family_sections(self):
+        """ProEthica Framework and Cases fold into one ProEthica section at the
+        position of the first; everything else is a section of its own."""
+        sections = cat.group_by_family(cat.group_ontologies(self._corpus()))
+        keys = [(s.family.key if s.family else None, [g.key for g in s.groups]) for s in sections]
+        assert keys == [
+            (None, ['Foundation']),
+            ('ProEthica', ['ProEthica Framework', 'Cases']),
+            (None, ['Domain']),
+            (None, ['Professional Codes']),
+            (None, ['Sandbox']),
+            (None, [cat.UNCATEGORIZED.key]),
+        ]
+        proethica = sections[1]
+        assert proethica.count == 1 + 16 and proethica.key == 'ProEthica'
+        assert [g.category.section_label for g in proethica.groups] == ['Framework', 'Cases']
+        assert cat.category_info('Cases').label == 'ProEthica Cases'
+
+    def test_family_section_appears_even_with_one_member(self):
+        groups = cat.group_ontologies([ont('proethica-case-1', 'case', 'proethica')])
+        sections = cat.group_by_family(groups)
+        assert len(sections) == 1 and sections[0].family.key == 'ProEthica'
+        assert [g.key for g in sections[0].groups] == ['Cases']
 
     def test_collapse_threshold(self):
         groups = {g.key: g for g in cat.group_ontologies(self._corpus(), collapse_threshold=12)}

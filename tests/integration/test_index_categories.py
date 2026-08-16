@@ -39,6 +39,11 @@ class TestIndexGrouping:
         html = r.get_data(as_text=True)
         assert 'id="category-cases"' in html
         assert 'Browse all' in html
+        # Cases sit inside the ProEthica family section, next to the framework layers
+        assert 'id="family-proethica"' in html
+        fam_start = html.index('id="family-proethica"')
+        assert 'id="category-cases"' in html[fam_start:]
+        assert html.index('id="category-proethica-framework"') < html.index('id="category-cases"')
         # Individual case rows are collapsed away when the group exceeds the threshold
         threshold = client.application.config.get('INDEX_COLLAPSE_THRESHOLD', 12)
         if len(case_names) > threshold:
