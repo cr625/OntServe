@@ -333,12 +333,13 @@ def create_app(config_name=None):
 
     # Single source of truth for the front-end Bootstrap version, referenced by
     # base.html and the two standalone editor pages (editor/edit.html,
-    # editor/visualize.html). Bumping the version here updates every page; see
-    # the "Bootstrap 5.3 upgrade" item in .claude/plans/ROADMAP.md before doing so
-    # (5.3 enables native bg-*-subtle / text-*-emphasis and color modes, but needs
-    # a visual regression pass across all page types).
-    _bootstrap_version = '5.1.3'
-    _bootstrap_icons_version = '1.8.1'
+    # editor/visualize.html). Bumping the version here updates every page.
+    # 5.1.3 -> 5.3.8 on 2026-08-16 after a per-page-type screenshot pass
+    # (index, ontology, case, entity, search, drafts, import, settings, editor
+    # index/edit/visualize, login); 5.3 supplies text-bg-*, bg-*-subtle,
+    # text-*-emphasis and colour modes.
+    _bootstrap_version = '5.3.8'
+    _bootstrap_icons_version = '1.13.1'
     _cdn = 'https://cdn.jsdelivr.net/npm'
     app.jinja_env.globals['BOOTSTRAP_CSS_URL'] = f'{_cdn}/bootstrap@{_bootstrap_version}/dist/css/bootstrap.min.css'
     app.jinja_env.globals['BOOTSTRAP_JS_URL'] = f'{_cdn}/bootstrap@{_bootstrap_version}/dist/js/bootstrap.bundle.min.js'
