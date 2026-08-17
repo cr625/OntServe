@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros/ontology_list.html" import ontology_row, table_head, category_section, family_section %}
+{% from "macros/ontology_list.html" import ontology_row, table_head, category_section, family_section, filter_button, SOURCE_STYLES, TYPE_STYLES %}
 
 {% block title %}OntServe - Ontologies{% endblock %}
 
@@ -13,31 +13,22 @@
         <!-- Filter buttons. Each group's links carry the OTHER group's active
              filter, so switching source never silently clears the type filter
              (and vice versa). url_for drops None-valued params. -->
-        {% set source_filters = [
-            ('proethica', 'ProEthica', 'primary', 'bi-cpu'),
-            ('external', 'External', 'info', 'bi-cloud-download'),
-            ('manual', 'Manual', 'secondary', 'bi-pencil'),
-        ] %}
-        {% set type_filters = [
-            ('upper', 'Upper', 'danger', 'bi-diagram-3'),
-            ('core', 'Core', 'warning', 'bi-star'),
-            ('base', 'Base', 'dark', 'bi-box'),
-            ('domain', 'Domain', 'success', 'bi-globe'),
-            ('case', 'Cases', 'primary', 'bi-folder'),
-            ('extracted', 'Extracted', 'secondary', 'bi-funnel'),
-        ] %}
+        {# Filter buttons draw label / colour / icon from the shared vocabulary
+           tables (macros/ontology_list.html), so filters, row badges and the
+           settings selects agree. Key order is explicit: 'derived' is a valid
+           type but not a filter. #}
+        {% set source_filter_keys = ['proethica', 'external', 'manual'] %}
+        {% set type_filter_keys = ['upper', 'core', 'base', 'domain', 'case', 'extracted'] %}
         <div class="mb-4 d-flex flex-wrap align-items-center gap-3">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted">Source:</span>
                 <div class="btn-group btn-group-sm" role="group" aria-label="Source filter">
                     <a href="{{ url_for('main.index', type=current_type, category=current_category, subcategory=current_subcategory) }}"
                        class="btn btn-outline-secondary {% if not current_source %}active{% endif %}">All</a>
-                    {% for key, label, color, icon in source_filters %}
-                    <a href="{{ url_for('main.index', source=key, type=current_type, category=current_category, subcategory=current_subcategory) }}"
-                       class="btn btn-outline-{{ color }} {% if current_source == key %}active{% endif %}">
-                        <i class="bi {{ icon }}"></i> {{ label }}
-                        <span class="badge text-bg-{{ color }}">{{ source_counts.get(key, 0) if source_counts else 0 }}</span>
-                    </a>
+                    {% for key in source_filter_keys %}
+                    {{ filter_button(SOURCE_STYLES[key], key == current_source,
+                                     url_for('main.index', source=key, type=current_type, category=current_category, subcategory=current_subcategory),
+                                     source_counts.get(key, 0) if source_counts else 0) }}
                     {% endfor %}
                 </div>
             </div>
@@ -47,12 +38,10 @@
                 <div class="btn-group btn-group-sm" role="group" aria-label="Type filter">
                     <a href="{{ url_for('main.index', source=current_source, category=current_category, subcategory=current_subcategory) }}"
                        class="btn btn-outline-secondary {% if not current_type %}active{% endif %}">All</a>
-                    {% for key, label, color, icon in type_filters %}
-                    <a href="{{ url_for('main.index', source=current_source, type=key, category=current_category, subcategory=current_subcategory) }}"
-                       class="btn btn-outline-{{ color }} {% if current_type == key %}active{% endif %}">
-                        <i class="bi {{ icon }}"></i> {{ label }}
-                        <span class="badge text-bg-{{ color }}">{{ type_counts.get(key, 0) if type_counts else 0 }}</span>
-                    </a>
+                    {% for key in type_filter_keys %}
+                    {{ filter_button(TYPE_STYLES[key], key == current_type,
+                                     url_for('main.index', source=current_source, type=key, category=current_category, subcategory=current_subcategory),
+                                     type_counts.get(key, 0) if type_counts else 0) }}
                     {% endfor %}
                 </div>
             </div>
@@ -61,7 +50,7 @@
         <!-- Statistics cards -->
         <div class="row mb-4">
             <div class="col-md-3">
-                <div class="card text-white bg-primary">
+                <div class="card text-bg-primary">
                     <div class="card-body">
                         <h5 class="card-title">{% if filtered %}Filtered{% else %}Total{% endif %} Ontologies</h5>
                         <h2 class="card-text">{{ pagination.total if pagination else total_count }}</h2>
@@ -70,7 +59,7 @@
             </div>
             <div class="col-md-3">
                 <a href="{{ url_for('main.index', source='proethica') }}" class="text-decoration-none">
-                    <div class="card text-white bg-success">
+                    <div class="card text-bg-{{ SOURCE_STYLES['proethica'][1] }}">
                         <div class="card-body">
                             <h5 class="card-title">ProEthica</h5>
                             <p class="card-text">{{ source_counts.get('proethica', 0) if source_counts else 0 }} ontologies</p>
@@ -80,7 +69,7 @@
             </div>
             <div class="col-md-3">
                 <a href="{{ url_for('main.index', source='external') }}" class="text-decoration-none">
-                    <div class="card text-white bg-info">
+                    <div class="card text-bg-{{ SOURCE_STYLES['external'][1] }}">
                         <div class="card-body">
                             <h5 class="card-title">External</h5>
                             <p class="card-text">{{ source_counts.get('external', 0) if source_counts else 0 }} ontologies</p>
@@ -90,7 +79,7 @@
             </div>
             <div class="col-md-3">
                 <a href="{{ url_for('main.index', category='Cases') }}" class="text-decoration-none">
-                    <div class="card text-white bg-warning">
+                    <div class="card text-bg-{{ TYPE_STYLES['case'][1] }}">
                         <div class="card-body">
                             <h5 class="card-title">Case Ontologies</h5>
                             <p class="card-text">{{ type_counts.get('case', 0) if type_counts else 0 }} cases</p>

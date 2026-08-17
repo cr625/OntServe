@@ -244,7 +244,7 @@
             <li style="padding-left: {{ hierarchy.chain|length * 1.5 }}rem;">
                 <span class="text-muted">&#8627; </span>
                 <a href="{{ url_for('ontology.entity_detail', ontology_name=child.ontology, fragment=child.fragment) }}">{{ child.label }}</a>
-                {% if child.specialization_axis %}{% if child.specialization_concept %}<a class="badge bg-info text-dark small text-decoration-none" href="{{ url_for('ontology.entity_detail', ontology_name=child.specialization_concept.ontology, fragment=child.specialization_concept.fragment) }}" title="{{ child.specialization_concept.definition }}">{{ child.specialization_axis }}</a>{% else %}<span class="badge bg-info text-dark small" title="specialization axis">{{ child.specialization_axis }}</span>{% endif %}{% endif %}
+                {% if child.specialization_axis %}{% if child.specialization_concept %}<a class="badge text-bg-info small text-decoration-none" href="{{ url_for('ontology.entity_detail', ontology_name=child.specialization_concept.ontology, fragment=child.specialization_concept.fragment) }}" title="{{ child.specialization_concept.definition }}">{{ child.specialization_axis }}</a>{% else %}<span class="badge text-bg-info small" title="specialization axis">{{ child.specialization_axis }}</span>{% endif %}{% endif %}
                 {# archetype-axis ("occupational") badge intentionally NOT rendered: since the relational pole was retired as an annotation the axis is single-valued, so the badge always read "occupational" and distinguished nothing (confusing on participant heads especially). The marker stays in the ontology -- it is the load-bearing selector for the occupational resolver -- and it still drives the child ordering below (child.archetype_axis in the _rank sort); only the redundant badge is dropped. Specialization (discipline/function) still renders above. #}
                 {% if child.ontology != ontology.name %}<span class="text-muted small">({{ child.ontology }})</span>{% endif %}
             </li>
@@ -378,7 +378,7 @@
     <div class="card-body">
         <p class="small text-muted mb-2">Case ontologies that instantiate this class or one of its base-ontology descendants. Computed from each individual's type, so the list stays current as cases are extracted. The originating case is shown under Extraction details.</p>
         {% for c in using_cases %}
-        <a href="{{ c.url }}" class="badge bg-light text-dark border text-decoration-none me-1 mb-1" title="{{ c.name }}">
+        <a href="{{ c.url }}" class="badge text-bg-light border text-decoration-none me-1 mb-1" title="{{ c.name }}">
             {% if c.num is not none %}Case {{ c.num }}{% else %}{{ c.name }}{% endif %}
         </a>
         {% endfor %}

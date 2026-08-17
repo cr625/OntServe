@@ -39,27 +39,27 @@
             <ul class="list-unstyled mb-0 small">
                 {% if c.prevails_over %}
                 <li><i class="bi bi-arrow-up-circle text-success me-1"></i><strong>prevails over:</strong>
-                    {% for e in c.prevails_over %}<span class="badge bg-light text-dark border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else e.iri }}">{{ e.label }}</span> {% endfor %}
+                    {% for e in c.prevails_over %}<span class="badge text-bg-light border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else e.iri }}">{{ e.label }}</span> {% endfor %}
                 </li>{% endif %}
                 {% if c.prevailed_over_by %}
                 <li><i class="bi bi-arrow-down-circle text-danger me-1"></i><strong>yields to:</strong>
-                    {% for e in c.prevailed_over_by %}<span class="badge bg-light text-dark border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else e.iri }}">{{ e.label }}</span> {% endfor %}
+                    {% for e in c.prevailed_over_by %}<span class="badge text-bg-light border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else e.iri }}">{{ e.label }}</span> {% endfor %}
                 </li>{% endif %}
                 {% if c.competes_with %}
                 <li><i class="bi bi-arrow-left-right text-primary me-1"></i><strong>competes with:</strong>
-                    {% for e in c.competes_with %}<span class="badge bg-light text-dark border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else e.iri }}">{{ e.label }}</span> {% endfor %}
+                    {% for e in c.competes_with %}<span class="badge text-bg-light border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else e.iri }}">{{ e.label }}</span> {% endfor %}
                 </li>{% endif %}
                 {% if c.defeasible_under %}
                 <li><i class="bi bi-shield-exclamation text-warning me-1"></i><strong>defeasible under:</strong>
-                    {% for e in c.defeasible_under %}<span class="badge bg-light text-dark border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else (e.source_text or e.iri) }}">{{ e.label }}</span> {% endfor %}
+                    {% for e in c.defeasible_under %}<span class="badge text-bg-light border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else (e.source_text or e.iri) }}">{{ e.label }}</span> {% endfor %}
                 </li>{% endif %}
                 {% if c.derived_from_principle %}
                 <li><i class="bi bi-diagram-2 text-info me-1"></i><strong>derived from principle:</strong>
-                    {% for e in c.derived_from_principle %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                    {% for e in c.derived_from_principle %}<span class="badge text-bg-light border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
                 </li>{% endif %}
                 {% if c.borne_by_roles %}
                 <li><i class="bi bi-person me-1"></i><strong>borne by:</strong>
-                    {% for e in c.borne_by_roles %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+                    {% for e in c.borne_by_roles %}<span class="badge text-bg-light border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
                 </li>{% endif %}
             </ul>
         </div>
@@ -73,11 +73,11 @@
             <ul class="list-unstyled mt-2 mb-0 ms-2">
                 {% for c in lineage_only %}
                 <li class="mb-1">
-                    <span class="badge bg-light text-dark border" title="{{ c.iri }}">{{ c.label }}</span>
+                    <span class="badge text-bg-light border" title="{{ c.iri }}">{{ c.label }}</span>
                     {% if c.derived_from_principle %}<span class="text-muted">derived from</span>
-                        {% for e in c.derived_from_principle %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}{% endif %}
+                        {% for e in c.derived_from_principle %}<span class="badge text-bg-light border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}{% endif %}
                     {% if c.borne_by_roles %}<span class="text-muted">borne by</span>
-                        {% for e in c.borne_by_roles %}<span class="badge bg-light text-dark border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}{% endif %}
+                        {% for e in c.borne_by_roles %}<span class="badge text-bg-light border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}{% endif %}
                 </li>
                 {% endfor %}
             </ul>
@@ -109,7 +109,7 @@
             <div class="d-flex justify-content-between align-items-start">
                 <h6 class="mb-1" title="{{ p.iri }}">
                     <i class="bi bi-bookmark-fill text-primary me-1"></i>{{ p.label }}
-                    <span class="badge bg-light text-dark border ms-1">{{ p.code }}</span>
+                    <span class="badge text-bg-light border ms-1">{{ p.code }}</span>
                 </h6>
             </div>
             {% if p.text %}
@@ -128,7 +128,7 @@
                     {% endfor %}
                 </li>{% endif %}
                 <li><i class="bi bi-chat-left-quote text-muted me-1"></i><strong>cited by:</strong>
-                    {% for e in p.cited_by %}<a href="#conclusion-{{ e.anchor }}" class="badge bg-light text-dark border text-decoration-none" title="{{ e.snippet or e.iri }}">{{ e.label }}</a> {% endfor %}
+                    {% for e in p.cited_by %}<a href="#conclusion-{{ e.anchor }}" class="badge text-bg-light border text-decoration-none" title="{{ e.snippet or e.iri }}">{{ e.label }}</a> {% endfor %}
                 </li>
             </ul>
         </div>
@@ -158,7 +158,7 @@
                 <h6 class="mb-1" title="{{ c.iri }}">
                     <i class="bi bi-chat-left-text text-secondary me-1"></i>{{ c.label }}
                 </h6>
-                <span class="badge bg-light text-dark border">{{ c.type_label }}</span>
+                <span class="badge text-bg-light border">{{ c.type_label }}</span>
             </div>
             {% if c.text %}
             {% if c.text|length > 240 %}
@@ -170,13 +170,13 @@
             {% endif %}
             {% if c.cited_provisions %}
             <div class="small"><i class="bi bi-link-45deg text-muted me-1"></i><strong>cites:</strong>
-                {% for code in c.cited_provisions %}<span class="badge bg-light text-dark border">{{ code }}</span> {% endfor %}
+                {% for code in c.cited_provisions %}<span class="badge text-bg-light border">{{ code }}</span> {% endfor %}
             </div>{% endif %}
             {% if c.answers_questions %}
             <div class="small mt-1"><i class="bi bi-question-circle text-muted me-1"></i><strong>answers:</strong>
                 {% for q in c.answers_questions %}
-                {% if q.anchor and ontology_name %}<a class="badge bg-light text-dark border text-decoration-none" href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=q.anchor) }}">Question {{ q.number }}</a>
-                {% else %}<span class="badge bg-light text-dark border">Question {{ q.number }}</span>{% endif %}
+                {% if q.anchor and ontology_name %}<a class="badge text-bg-light border text-decoration-none" href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=q.anchor) }}">Question {{ q.number }}</a>
+                {% else %}<span class="badge text-bg-light border">Question {{ q.number }}</span>{% endif %}
                 {% endfor %}
             </div>{% endif %}
             {% if c.reasoning %}

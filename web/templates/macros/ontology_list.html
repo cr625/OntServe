@@ -2,9 +2,8 @@
    badges every ontology listing shares, one table row, and the grouped-view
    sections (family / category / collapsed summary) used by index.html. #}
 
-{# Vocabulary tables. key -> (label, colour, icon). These drive the row badges
-   and the settings-page selects; index.html keeps its own filter palette until
-   the palette is unified (see OntServe ROADMAP "Index vocabulary tables"). #}
+{# Vocabulary tables. key -> (label, colour, icon). One palette for the row
+   badges, the index filters and stat cards, and the settings-page selects. #}
 {% set SOURCE_STYLES = {
     'proethica': ('ProEthica', 'success', 'bi-cpu'),
     'external': ('External', 'info', 'bi-cloud-download'),
@@ -19,6 +18,17 @@
     'extracted': ('Extracted', 'secondary', 'bi-funnel'),
     'derived': ('Derived', 'secondary', 'bi-diagram-2'),
 } %}
+
+{# A filter toggle for one vocabulary entry: outline button in the entry's
+   colour (secondary for 'light', which has no usable outline on white) with the
+   entry's icon and a count badge. #}
+{% macro filter_button(style, active, href, count) %}
+    {% set color = 'secondary' if style[1] == 'light' else style[1] %}
+    <a href="{{ href }}" class="btn btn-outline-{{ color }} {% if active %}active{% endif %}">
+        <i class="bi {{ style[2] }}"></i> {{ style[0] }}
+        <span class="badge text-bg-{{ style[1] }}{% if style[1] == 'light' %} border{% endif %}">{{ count }}</span>
+    </a>
+{% endmacro %}
 
 {% macro source_badge(ontology) %}
     {% set style = SOURCE_STYLES.get(ontology.source_system) %}

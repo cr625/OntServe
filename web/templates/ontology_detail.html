@@ -651,7 +651,7 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0"><i class="bi bi-collection"></i> Named Individuals</h5>
-                                <span class="badge bg-warning">{{ stats.individual_count }}</span>
+                                <span class="badge text-bg-warning">{{ stats.individual_count }}</span>
                             </div>
                             <div class="card-body">
                                 {% if stats.from_ttl and stats.ttl_individuals %}
@@ -889,7 +889,7 @@
                                     <span class="badge bg-success ms-1">Current</span>
                                     {% endif %}
                                     {% if version.is_tagged_release %}
-                                    <span class="badge bg-warning ms-1"><i class="bi bi-tag-fill"></i></span>
+                                    <span class="badge text-bg-warning ms-1"><i class="bi bi-tag-fill"></i></span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -901,7 +901,7 @@
                                 </td>
                                 <td>
                                     {% if version.is_draft %}
-                                    <span class="badge bg-warning">Draft</span>
+                                    <span class="badge text-bg-warning">Draft</span>
                                     {% else %}
                                     <span class="badge bg-primary">Published</span>
                                     {% endif %}
@@ -971,7 +971,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <strong>Relationships:</strong><br>
-                                    <span class="badge bg-warning">{{
+                                    <span class="badge text-bg-warning">{{
                                         ontology.current_version.meta_data.reasoning.hierarchical_relationships }}
                                         total</span>
                                 </div>
@@ -1266,7 +1266,7 @@
                                     <tr>
                                         <td><strong>{{ entity.label or entity.uri|extract_name }}</strong></td>
                                         <td>
-                                            <span class="badge bg-light text-dark">{{ entity.entity_type|title }}</span>
+                                            <span class="badge text-bg-light">{{ entity.entity_type|title }}</span>
                                         </td>
                                         <td>
                                             <small>{{ entity.comment[:100] }}{% if entity.comment|length > 100 %}...{%

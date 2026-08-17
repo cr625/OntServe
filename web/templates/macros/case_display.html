@@ -15,7 +15,7 @@
         <span class="concept-chip" style="background: {{ cm.color }};" title="{{ cm.name }} ({{ 'class' if is_class else 'individual' }})">{{ cm.abbrev }}</span>
         {% endif %}
         {% if is_class %}
-        <span class="badge bg-light text-dark border" style="font-size:.65rem;" title="A class this case's individuals are typed with, redeclared in the case ontology; not a case individual">class</span>
+        <span class="badge text-bg-light border" style="font-size:.65rem;" title="A class this case's individuals are typed with, redeclared in the case ontology; not a case individual">class</span>
         {% endif %}
         <span class="entity-label">
             {% if ontology_name %}

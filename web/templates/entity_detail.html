@@ -285,7 +285,7 @@
                             {% for c in case_provenance %}
                             <li>
                                 <a href="{{ c.url }}">Case {{ c.num }}: {{ c.title }}</a>
-                                {% if c.first and case_provenance|length > 1 %}<span class="badge bg-light text-dark border ms-1">first</span>{% endif %}
+                                {% if c.first and case_provenance|length > 1 %}<span class="badge text-bg-light border ms-1">first</span>{% endif %}
                             </li>
                             {% endfor %}
                         </ul>
