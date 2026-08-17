@@ -29,6 +29,25 @@
         margin-top: 0.5rem;
     }
 
+    .case-header .case-meta {
+        font-size: 0.8rem;
+        opacity: 0.9;
+    }
+
+    .case-header .case-description {
+        font-size: 0.9rem;
+    }
+
+    .case-header .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .case-header .stat-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
     .breadcrumb-nav {
         margin-bottom: 1rem;
     }
@@ -344,32 +363,6 @@
         background: #6c757d;
     }
 
-    .entity-type-badge {
-        font-size: 0.65rem;
-        padding: 0.15rem 0.4rem;
-    }
-
-    /* Stats card in sidebar */
-    .stats-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-        text-align: center;
-    }
-
-    .stats-card h2 {
-        font-size: 2rem;
-        margin: 0;
-        font-weight: 700;
-    }
-
-    .stats-card .stats-label {
-        font-size: 0.8rem;
-        opacity: 0.9;
-    }
-
     /* Relationship (object-property) triples: visually distinct from literal
        attributes. Bare camelCase predicate in monospace + linked target. */
     .entity-relationships {
@@ -418,26 +411,14 @@
         font-size: 0.8rem;
     }
 
-    /* Quick nav card */
-    .quick-nav-card {
-        border: none;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .quick-nav-card .card-header {
-        background: #f8f9fa;
-        border-bottom: none;
-        font-size: 0.85rem;
-        font-weight: 600;
-        padding: 0.5rem 0.75rem;
-    }
-
-    /* Actions card */
+    /* Sidebar cards (quick nav, actions) */
+    .quick-nav-card,
     .actions-card {
         border: none;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
+    .quick-nav-card .card-header,
     .actions-card .card-header {
         background: #f8f9fa;
         border-bottom: none;
@@ -449,9 +430,6 @@
     .actions-card .btn {
         font-size: 0.8rem;
     }
-
-    /* Individual type indicator */
-    /* Removed: .individual-type-note was cluttering subsection headers */
 
     /* Progressive disclosure: clamp long prose to a 3-line preview until the
        reader expands it. Preview-first reduces the wall-of-text that long
@@ -495,35 +473,36 @@
                 {{ display_title if display_title else ontology.name }}
             </h1>
             {% set md = ontology.meta_data or {} %}
-            {% if display_title or md.case_number or md.subcategory %}
-            <div class="mt-1 d-flex flex-wrap align-items-center gap-2" style="font-size: 0.8rem; opacity: 0.9;">
+            {% set sub = ontology.subcategory %}
+            {% if display_title or md.case_number or sub %}
+            <div class="case-meta mt-1 d-flex flex-wrap align-items-center gap-2">
                 {% if display_title %}<span><i class="bi bi-hash"></i>{{ ontology.name }}</span>{% endif %}
                 {% if md.case_number %}
-                <span class="badge bg-light text-dark" title="NSPE Board of Ethical Review case number">
+                <span class="badge text-bg-light" title="NSPE Board of Ethical Review case number">
                     <i class="bi bi-journal-text"></i> NSPE {{ md.case_number }}
                 </span>
                 {% endif %}
-                {% if md.subcategory %}
-                <a href="{{ url_for('main.index', category='Cases', subcategory=md.subcategory) }}"
-                   class="badge bg-light text-dark text-decoration-none" title="Other cases from this decade">
-                    <i class="bi bi-tag"></i> {{ md.subcategory }}
+                {% if sub %}
+                <a href="{{ url_for('main.index', category=ontology.category, subcategory=sub) }}"
+                   class="badge text-bg-light text-decoration-none" title="Other cases from this decade">
+                    <i class="bi bi-tag"></i> {{ sub }}
                 </a>
                 {% endif %}
             </div>
             {% endif %}
             {% if ontology.description and not ontology.description.startswith('Auto-imported') %}
-            <p class="mb-0 mt-2 opacity-90" style="font-size: 0.9rem;">{{ ontology.description }}</p>
+            <p class="case-description mb-0 mt-2">{{ ontology.description }}</p>
             {% endif %}
             <div class="case-uri mt-2">
                 <i class="bi bi-link-45deg"></i> {{ ontology.base_uri }}
                 {% if ontology.current_version %}
-                <span class="badge bg-light text-dark ms-2">v{{ ontology.current_version.version_number }}</span>
+                <span class="badge text-bg-light ms-2">v{{ ontology.current_version.version_number }}</span>
                 {% endif %}
             </div>
         </div>
         <div class="text-end">
-            <div style="font-size: 2rem; font-weight: 700;">{{ stats.individuals if stats.individuals is defined else stats.total }}</div>
-            <div style="font-size: 0.85rem; opacity: 0.9;">Named Individuals</div>
+            <div class="stat-value">{{ stats.individuals if stats.individuals is defined else stats.total }}</div>
+            <div class="stat-label">Named Individuals</div>
             {% if proethica_case_url %}
             <a href="{{ proethica_case_url }}" class="btn btn-light btn-sm mt-2" target="_blank" rel="noopener"
                title="Open this case in ProEthica, where the analysis behind this ontology lives">

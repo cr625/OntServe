@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/ontology_list.html" import subset_badge, reasoned_badge %}
 {% from "macros/entity_display.html" import render_entity_properties, render_entity_properties_compact %}
 {% from "macros/reasoning_panel.html" import render_reasoning_panel %}
 
@@ -41,19 +42,12 @@
                     ontology.name }}
                     {% if ontology.current_version %}
                     <span class="badge bg-secondary ms-2">v{{ ontology.current_version.version_number }}</span>
-                    {% if ontology.current_version.version_tag %}
-                    {% if 'reasoned' in ontology.current_version.version_tag %}
-                    <span class="badge bg-info ms-1">
-                        <i class="bi bi-brain"></i> Reasoned
-                    </span>
-                    {% endif %}
+                    {% if ontology.current_version.version_tag and 'reasoned' in ontology.current_version.version_tag %}
+                    {{ reasoned_badge('ms-1') }}
                     {% endif %}
                     {% endif %}
                     {% if ontology.meta_data and ontology.meta_data.get('stub') %}
-                    <span class="badge bg-warning text-dark border border-dark ms-1"
-                          title="A curated selection of terms, not the full upstream ontology">
-                        <i class="bi bi-scissors"></i> Subset
-                    </span>
+                    {{ subset_badge('ms-1') }}
                     {% endif %}
                 </h1>
                 {% if ontology.meta_data and ontology.meta_data.original_name and ontology.meta_data.original_name !=

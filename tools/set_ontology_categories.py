@@ -60,11 +60,11 @@ def apply(session, name: str, category=None, subcategory=None, clear=(), case_nu
     md = dict(ont.meta_data or {})
     before = dict(md)
     if category is not None:
-        md[categories.CATEGORY_KEY] = category.strip()
+        categories.set_explicit(md, categories.CATEGORY_KEY, category)
     if subcategory is not None:
-        md[categories.SUBCATEGORY_KEY] = subcategory.strip()
+        categories.set_explicit(md, categories.SUBCATEGORY_KEY, subcategory)
     if case_number is not None:
-        md['case_number'] = case_number.strip()   # same key the sync fills from dcterms:identifier
+        categories.set_explicit(md, categories.CASE_NUMBER_KEY, case_number)  # same key the sync fills from dcterms:identifier
     for key in clear:
         md.pop(key, None)
     if md == before:
@@ -78,7 +78,7 @@ def main(argv=None):
     ap.add_argument('--set', metavar='NAME', help='ontology name to update')
     ap.add_argument('--category')
     ap.add_argument('--subcategory')
-    ap.add_argument('--clear', action='append', choices=['category', 'subcategory'], default=[])
+    ap.add_argument('--clear', action='append', choices=list(categories.EXPLICIT_KEYS), default=[])
     ap.add_argument('--manifest', type=Path, help='JSON file: {name: {category, subcategory, case_number, clear}}')
     ap.add_argument('--report', action='store_true', help='print resolved classification for all ontologies')
     ap.add_argument('--dry-run', action='store_true')

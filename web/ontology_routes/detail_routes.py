@@ -1,6 +1,5 @@
 """register_detail_routes."""
 import logging
-import re
 from datetime import datetime, timezone
 
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app
@@ -9,6 +8,7 @@ from sqlalchemy import select, func
 import rdflib
 
 from web.models import db, Ontology, OntologyEntity, OntologyVersion
+from services import ontology_categories as categories
 from web.ontology_stats import build_stats_context
 from web.entity_extraction import extract_entities_from_content
 from web.ontology_routes.helpers import (
@@ -213,10 +213,9 @@ def register_detail_routes(bp):
                 case_data['sections'], competition, citations, conclusions)
 
             # Back-link to the ProEthica case page (the source of this ontology)
-            case_id_match = re.fullmatch(r'proethica-case-(\d+)', ontology.name)
-            proethica_case_url = (
-                f"{current_app.config.get('PROETHICA_BASE_URL', '').rstrip('/')}/cases/{case_id_match.group(1)}"
-                if case_id_match and current_app.config.get('PROETHICA_BASE_URL') else None)
+            base_url = current_app.config.get('PROETHICA_BASE_URL')
+            case_id = categories.case_id_from_name(ontology.name)
+            proethica_case_url = f"{base_url.rstrip('/')}/cases/{case_id}" if base_url and case_id else None
 
             return render_template('ontology_case.html',
                                  ontology=ontology,
@@ -514,7 +513,6 @@ def register_detail_routes(bp):
 
         stmt = select(Ontology).where(Ontology.name == ontology_name)
         ontology = db.one_or_404(stmt)
-        from services import ontology_categories as categories
         md = ontology.meta_data or {}
         # Subcategory suggestions: every value already in use, so labels stay consistent
         used_subs = sorted({
@@ -525,5 +523,6 @@ def register_detail_routes(bp):
         return render_template('ontology_settings.html', ontology=ontology,
                                explicit_category=md.get(categories.CATEGORY_KEY),
                                explicit_subcategory=md.get(categories.SUBCATEGORY_KEY),
+                               default_category=ontology.classification.rule_category,
                                category_options=categories.known_category_keys(),
                                subcategory_options=used_subs)

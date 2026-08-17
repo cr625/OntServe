@@ -39,6 +39,23 @@ class TestResolve:
     def test_explicit_category_wins(self):
         r = cat.resolve(ont('proethica-case-7', 'case', 'proethica', {'category': 'Teaching Set'}))
         assert r.category == 'Teaching Set' and r.explicit
+        assert r.rule_category == 'Cases'   # what the settings page shows as the default
+
+    def test_rule_category_for_unmatched(self):
+        assert cat.resolve(ont('something', 'base', 'manual')).rule_category == cat.UNCATEGORIZED.key
+
+    def test_case_id_from_name(self):
+        assert cat.case_id_from_name('proethica-case-102') == '102'
+        assert cat.case_id_from_name('proethica-cases') is None
+        assert cat.case_id_from_name('proethica-case-7x') is None
+        assert cat.case_id_from_name(None) is None
+
+    def test_set_explicit_blank_clears(self):
+        md = {'category': 'X', 'other': 1}
+        cat.set_explicit(md, 'category', '   ')
+        cat.set_explicit(md, 'subcategory', ' 1990s ')
+        cat.set_explicit(md, 'case_number', None)
+        assert md == {'other': 1, 'subcategory': '1990s'}
 
     def test_explicit_subcategory_kept_with_rule_category(self):
         r = cat.resolve(ont('proethica-case-7', 'case', 'proethica', {'subcategory': '2020s'}))

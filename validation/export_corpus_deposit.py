@@ -27,8 +27,11 @@ from pathlib import Path
 import rdflib
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
+# ROOT must precede ROOT/web: both contain a `services` package, and the root
+# one carries ontology_sync_service / ontology_categories (web/services would
+# shadow it, e.g. via Ontology.classification).
 sys.path.insert(0, str(ROOT / "web"))
+sys.path.insert(0, str(ROOT))
 
 from config.config_loader import load_ontserve_config  # noqa: E402
 

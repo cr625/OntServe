@@ -98,7 +98,7 @@ def entity_semantic_links(entity, ontology):
     return links
 
 
-_CASE_ONTOLOGY_RE = _re.compile(r'^proethica-case-(\d+)$')
+from services.ontology_categories import CASE_NAME_RE as _CASE_ONTOLOGY_RE
 
 
 def entity_using_cases(entity):

@@ -30,6 +30,10 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tupl
 
 CATEGORY_KEY = 'category'
 SUBCATEGORY_KEY = 'subcategory'
+EXPLICIT_KEYS = (CATEGORY_KEY, SUBCATEGORY_KEY)   # the settable classification keys
+# Other metadata keys the sync fills from ProEthica case headers (see ontology_sync_service)
+CASE_NUMBER_KEY = 'case_number'
+DISPLAY_NAME_KEY = 'display_name'
 
 DEFAULT_COLLAPSE_THRESHOLD = 12
 
@@ -103,8 +107,16 @@ CATEGORY_ORDER: Dict[str, int] = {c.key: i for i, c in enumerate(CATEGORIES)}
 # Default rules: first match wins. Each rule is (predicate, category, subcategory).
 # ---------------------------------------------------------------------------
 
-_CASE_NAME = re.compile(r'^proethica-case-\d+$')
+# One home for the proethica-case-<id> naming convention shared by the sync
+# service (auto-create typing), the case page (ProEthica back-link) and links.
+CASE_NAME_RE = re.compile(r'^proethica-case-(\d+)$')
 _CODE_NAME = re.compile(r'code of ethics', re.IGNORECASE)
+
+
+def case_id_from_name(name: Any) -> Optional[str]:
+    """'proethica-case-102' -> '102'; None for anything else."""
+    m = CASE_NAME_RE.match(str(name or ''))
+    return m.group(1) if m else None
 
 
 def _attr(obj: Any, name: str, default: Any = None) -> Any:
@@ -139,6 +151,7 @@ class Classification:
     category: str
     subcategory: Optional[str]
     explicit: bool          # True when metadata.category supplied the category
+    rule_category: Optional[str] = None   # what the rules alone would give (the settings-page default)
 
 
 def resolve(ontology: Any, rules: Sequence[Rule] = DEFAULT_RULES) -> Classification:
@@ -163,7 +176,8 @@ def resolve(ontology: Any, rules: Sequence[Rule] = DEFAULT_RULES) -> Classificat
 
     category = explicit_cat or rule_cat or UNCATEGORIZED.key
     subcategory = explicit_sub or (rule_sub if not explicit_cat or explicit_cat == rule_cat else None)
-    return Classification(category=category, subcategory=subcategory, explicit=bool(explicit_cat))
+    return Classification(category=category, subcategory=subcategory, explicit=bool(explicit_cat),
+                          rule_category=rule_cat or UNCATEGORIZED.key)
 
 
 def _clean(value: Any) -> Optional[str]:
@@ -171,6 +185,17 @@ def _clean(value: Any) -> Optional[str]:
         return None
     value = str(value).strip()
     return value or None
+
+
+def set_explicit(md: Dict[str, Any], key: str, value: Any) -> None:
+    """Store an explicit metadata value in place; blank/None clears the key so
+    the rule default applies again. Shared by the metadata API and the CLI tool
+    so both have identical blank semantics."""
+    value = _clean(value)
+    if value:
+        md[key] = value
+    else:
+        md.pop(key, None)
 
 
 def category_info(key: str) -> Category:

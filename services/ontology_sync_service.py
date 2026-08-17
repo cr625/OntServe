@@ -7,14 +7,17 @@ Uses hash-based change detection to only re-extract when files change.
 
 import hashlib
 import logging
-import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timezone
 
 from rdflib import Graph, RDF, RDFS, OWL, SKOS, Namespace, BNode
+from rdflib.namespace import DCTERMS
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+
+from services.ontology_categories import (
+    CASE_NUMBER_KEY, DISPLAY_NAME_KEY, SUBCATEGORY_KEY, case_id_from_name)
 
 logger = logging.getLogger(__name__)
 
@@ -95,22 +98,28 @@ class OntologySyncService:
         logger.info(f"Sync complete: {results['updated']} updated, {results['skipped']} skipped, {len(results['errors'])} errors")
         return results
 
-    def _extract_dcterms_title(self, ttl_path: Path) -> Optional[str]:
-        """Return the dcterms:title of the owl:Ontology subject in a TTL file,
-        or None if absent. Used to seed display_name for newly synced case
-        ontologies (ProEthica emits the human case title in the header)."""
-        from rdflib import Graph
-        from rdflib.namespace import OWL, RDF, DCTERMS
-        try:
-            g = Graph()
-            g.parse(str(ttl_path), format='turtle')
-            for subj in g.subjects(RDF.type, OWL.Ontology):
-                title = g.value(subj, DCTERMS.title)
-                if title:
-                    return str(title).strip() or None
-        except Exception as e:
-            logger.warning(f"Could not read dcterms:title from {ttl_path.name}: {e}")
-        return None
+    # owl:Ontology header field -> metadata key, and whether a re-sync overwrites
+    # (refresh) or only fills a missing value. display_name / case_number /
+    # subcategory are filled once so a value edited on the settings page or by
+    # tools/set_ontology_categories.py survives later commits; source / version
+    # track the header. The header fields come from ProEthica's
+    # app/services/commit/case_header.py (dcterms:title / identifier / temporal).
+    HEADER_META = (
+        ('source', 'source', True),
+        ('version', 'version', True),
+        ('title', DISPLAY_NAME_KEY, False),
+        ('identifier', CASE_NUMBER_KEY, False),
+        ('temporal', SUBCATEGORY_KEY, False),
+    )
+
+    @classmethod
+    def _apply_header_meta(cls, md: Dict, ometa: Dict) -> Dict:
+        """Merge extracted header fields into a metadata dict per HEADER_META."""
+        for field, key, refresh in cls.HEADER_META:
+            value = ometa.get(field)
+            if value and (refresh or not md.get(key)):
+                md[key] = value
+        return md
 
     def _extract_ontology_meta(self, ttl_path: Path) -> Dict:
         """Read owl:Ontology-level provenance from a TTL: rdfs:comment (-> description),
@@ -119,8 +128,6 @@ class OntologySyncService:
         into case headers; see proethica app/services/commit/case_header.py). Lets imported
         vocabularies (e.g. the ifc-roles crosswalk stub) carry their provenance into the
         OntServe ontology record instead of the generic 'Auto-imported from ...' default."""
-        from rdflib import Graph
-        from rdflib.namespace import OWL, RDF, RDFS, DCTERMS
         out: Dict = {}
         try:
             g = Graph()
@@ -158,7 +165,7 @@ class OntologySyncService:
         'base'/'manual' -- that renders them unreachable via the Type=case filter
         and mislabels them as hand-authored. Mirrors
         scripts/active/register_case_ontologies.py."""
-        if re.fullmatch(r'proethica-case-\d+', ontology_name):
+        if case_id_from_name(ontology_name):
             return 'case', 'proethica'
         if ontology_name.startswith('proethica-'):
             return 'base', 'proethica'
@@ -190,33 +197,19 @@ class OntologySyncService:
         ontology = self.db_session.execute(stmt).scalar_one_or_none()
 
         if not ontology:
-            # Create new ontology record
+            # Create new ontology record. Header-derived metadata (title, source,
+            # version, case number, decade) is filled by the version block below,
+            # which always runs for a fresh row (no latest_version yet).
             logger.info(f"Creating new ontology record for {ontology_name}")
-            # ProEthica emits the human case title as dcterms:title in the TTL
-            # header; carry it into display_name so the case view shows the real
-            # title instead of the opaque "proethica-case-N" id. Set on create
-            # only, so a manually edited display_name is never overwritten.
-            ometa = self._extract_ontology_meta(ttl_path)
-            meta_data = {}
-            if ometa.get('title'):
-                meta_data['display_name'] = ometa['title']
-            if ometa.get('source'):
-                meta_data['source'] = ometa['source']
-            if ometa.get('version'):
-                meta_data['version'] = ometa['version']
-            if ometa.get('identifier'):
-                meta_data['case_number'] = ometa['identifier']
-            if ometa.get('temporal'):
-                meta_data['subcategory'] = ometa['temporal']
             inferred_type, inferred_source = self._infer_type_and_source(ontology_name)
             ontology = Ontology(
                 name=ontology_name,
                 base_uri=f"http://proethica.org/ontology/{ontology_name}#",
-                description=ometa.get('description') or f"Auto-imported from {ttl_path.name}",
+                description=f"Auto-imported from {ttl_path.name}",
                 is_editable=True,
                 ontology_type=inferred_type,
                 source_system=inferred_source,
-                meta_data=meta_data
+                meta_data={}
             )
             self.db_session.add(ontology)
             self.db_session.flush()
@@ -241,24 +234,14 @@ class OntologySyncService:
 
         logger.info(f"Updating {ontology_name} - {'forced' if force else 'hash changed'}")
 
-        # Refresh ontology-level provenance from the TTL on every (re)sync, preserving a
-        # manually-set display_name. Lets a vocabulary's owl:Ontology comment/source/version
-        # reach the OntServe record instead of the generic 'Auto-imported' default.
+        # Refresh ontology-level provenance from the TTL on every (re)sync. Lets a
+        # vocabulary's owl:Ontology comment/source/version reach the OntServe record
+        # instead of the generic 'Auto-imported' default; see HEADER_META for which
+        # keys are refreshed and which are filled once.
         ometa = self._extract_ontology_meta(ttl_path)
         if ometa.get('description'):
             ontology.description = ometa['description']
-        md = dict(ontology.meta_data or {})
-        if ometa.get('source'):
-            md['source'] = ometa['source']
-        if ometa.get('version'):
-            md['version'] = ometa['version']
-        if ometa.get('title') and not md.get('display_name'):
-            md['display_name'] = ometa['title']
-        if ometa.get('identifier') and not md.get('case_number'):
-            md['case_number'] = ometa['identifier']
-        if ometa.get('temporal') and not md.get('subcategory'):
-            md['subcategory'] = ometa['temporal']
-        ontology.meta_data = md
+        ontology.meta_data = self._apply_header_meta(dict(ontology.meta_data or {}), ometa)
 
         # Read TTL content
         with open(ttl_path, 'r', encoding='utf-8') as f:

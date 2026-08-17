@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros/ontology_list.html" import ontology_row, table_head, collapsed_group %}
+{% from "macros/ontology_list.html" import ontology_row, table_head, category_section, family_section %}
 
 {% block title %}OntServe - Ontologies{% endblock %}
 
@@ -26,35 +26,35 @@
             ('case', 'Cases', 'primary', 'bi-folder'),
             ('extracted', 'Extracted', 'secondary', 'bi-funnel'),
         ] %}
-        <div class="mb-4">
-            <div class="btn-group me-3" role="group" aria-label="Source filter">
-                <span class="text-muted me-2 align-self-center">Source:</span>
-                <a href="{{ url_for('main.index', type=current_type, category=current_category, subcategory=current_subcategory) }}"
-                   class="btn btn-outline-secondary btn-sm {% if not current_source %}active{% endif %}">
-                    All
-                </a>
-                {% for key, label, color, icon in source_filters %}
-                <a href="{{ url_for('main.index', source=key, type=current_type, category=current_category, subcategory=current_subcategory) }}"
-                   class="btn btn-outline-{{ color }} btn-sm {% if current_source == key %}active{% endif %}">
-                    <i class="bi {{ icon }}"></i> {{ label }}
-                    <span class="badge bg-{{ color }}{% if color in ('warning', 'light') %} text-dark{% endif %}">{{ source_counts.get(key, 0) if source_counts else 0 }}</span>
-                </a>
-                {% endfor %}
+        <div class="mb-4 d-flex flex-wrap align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted">Source:</span>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Source filter">
+                    <a href="{{ url_for('main.index', type=current_type, category=current_category, subcategory=current_subcategory) }}"
+                       class="btn btn-outline-secondary {% if not current_source %}active{% endif %}">All</a>
+                    {% for key, label, color, icon in source_filters %}
+                    <a href="{{ url_for('main.index', source=key, type=current_type, category=current_category, subcategory=current_subcategory) }}"
+                       class="btn btn-outline-{{ color }} {% if current_source == key %}active{% endif %}">
+                        <i class="bi {{ icon }}"></i> {{ label }}
+                        <span class="badge text-bg-{{ color }}">{{ source_counts.get(key, 0) if source_counts else 0 }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
 
-            <div class="btn-group" role="group" aria-label="Type filter">
-                <span class="text-muted me-2 align-self-center">Type:</span>
-                <a href="{{ url_for('main.index', source=current_source, category=current_category, subcategory=current_subcategory) }}"
-                   class="btn btn-outline-secondary btn-sm {% if not current_type %}active{% endif %}">
-                    All
-                </a>
-                {% for key, label, color, icon in type_filters %}
-                <a href="{{ url_for('main.index', source=current_source, type=key, category=current_category, subcategory=current_subcategory) }}"
-                   class="btn btn-outline-{{ color }} btn-sm {% if current_type == key %}active{% endif %}">
-                    <i class="bi {{ icon }}"></i> {{ label }}
-                    <span class="badge bg-{{ color }}{% if color in ('warning', 'light') %} text-dark{% endif %}">{{ type_counts.get(key, 0) if type_counts else 0 }}</span>
-                </a>
-                {% endfor %}
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted">Type:</span>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Type filter">
+                    <a href="{{ url_for('main.index', source=current_source, category=current_category, subcategory=current_subcategory) }}"
+                       class="btn btn-outline-secondary {% if not current_type %}active{% endif %}">All</a>
+                    {% for key, label, color, icon in type_filters %}
+                    <a href="{{ url_for('main.index', source=current_source, type=key, category=current_category, subcategory=current_subcategory) }}"
+                       class="btn btn-outline-{{ color }} {% if current_type == key %}active{% endif %}">
+                        <i class="bi {{ icon }}"></i> {{ label }}
+                        <span class="badge text-bg-{{ color }}">{{ type_counts.get(key, 0) if type_counts else 0 }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
@@ -114,11 +114,11 @@
             <span class="text-muted">Category:</span>
             {% if cat %}
             <a href="{{ url_for('main.index', category=cat.key, source=current_source, type=current_type) }}"
-               class="badge bg-{{ cat.color }}{% if cat.color in ('warning', 'light', 'info') %} text-dark{% endif %} text-decoration-none"><i class="bi {{ cat.icon }}"></i> {{ cat.label }}</a>
+               class="badge text-bg-{{ cat.color }} text-decoration-none"><i class="bi {{ cat.icon }}"></i> {{ cat.label }}</a>
             {% endif %}
             {% if current_subcategory %}
             <i class="bi bi-chevron-right text-muted"></i>
-            <span class="badge bg-light text-dark border"><i class="bi bi-tag"></i> {{ current_subcategory }}</span>
+            <span class="badge text-bg-light border"><i class="bi bi-tag"></i> {{ current_subcategory }}</span>
             {% endif %}
             <span class="text-muted">{{ pagination.total }} ontolog{{ 'y' if pagination.total == 1 else 'ies' }}</span>
             <a href="{{ url_for('main.index', source=current_source, type=current_type) }}" class="btn btn-outline-secondary btn-sm ms-auto">
@@ -129,72 +129,10 @@
 
         {% if groups %}
         <!-- Grouped view (no filter active): one section per family or lone
-             category; large categories collapse to a summary card with
-             subcategory chips. -->
-        {% macro category_section(group, nested=false) %}
-        {% set cat = group.category %}
-        <section class="{{ 'mb-3' if nested else 'mb-4' }}" id="category-{{ cat.key|replace(' ', '-')|lower }}">
-            <div class="border-bottom pb-2 mb-2">
-                {# Outline: page h1 > section h2 (family or lone category) > nested category h3.
-                   Sizes come from the heading utility classes so the outline stays honest. #}
-                {% if nested %}
-                <h3 class="h5 d-flex align-items-center gap-2 mb-0">
-                    <i class="bi {{ cat.icon }} text-{{ cat.color }}"></i>
-                    <a href="{{ url_for('main.index', category=cat.key) }}" class="text-decoration-none text-reset">{{ cat.section_label }}</a>
-                    <span class="badge bg-{{ cat.color }}{% if cat.color in ('warning', 'light', 'info') %} text-dark{% endif %}">{{ group.count }}</span>
-                </h3>
-                {% else %}
-                <h2 class="h4 d-flex align-items-center gap-2 mb-0">
-                    <i class="bi {{ cat.icon }} text-{{ cat.color }}"></i>
-                    <a href="{{ url_for('main.index', category=cat.key) }}" class="text-decoration-none text-reset">{{ cat.label }}</a>
-                    <span class="badge bg-{{ cat.color }}{% if cat.color in ('warning', 'light', 'info') %} text-dark{% endif %}">{{ group.count }}</span>
-                </h2>
-                {% endif %}
-                {% if not group.collapsed and cat.description %}
-                <div class="text-muted small mt-1">{{ cat.description }}</div>
-                {% endif %}
-            </div>
-            {% if group.collapsed %}
-            {{ collapsed_group(group) }}
-            {% else %}
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    {{ table_head() }}
-                    <tbody>
-                        {% for ontology in group.ontologies %}
-                        {{ ontology_row(ontology, show_subcategory=true) }}
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endif %}
-        </section>
-        {% endmacro %}
-
+             category (macros/ontology_list.html); large categories collapse to
+             a summary card with subcategory chips. -->
         {% for section in sections %}
-        {% if section.family %}
-        {% set fam = section.family %}
-        <section class="mb-4 family-section" id="family-{{ fam.key|replace(' ', '-')|lower }}">
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <h2 class="h3 d-flex align-items-center gap-2 mb-0">
-                    <i class="bi {{ fam.icon }} text-{{ fam.color }}"></i> {{ fam.label }}
-                    <span class="badge bg-{{ fam.color }}{% if fam.color in ('warning', 'light', 'info') %} text-dark{% endif %}"
-                          title="{% for g in section.groups %}{{ g.category.section_label }} {{ g.count }}{% if not loop.last %} + {% endif %}{% endfor %}. Other ProEthica-sourced ontologies (the foundation subset, the domain ontology) are listed under their own categories, so this differs from the Source filter count.">{{ section.count }}</span>
-                </h2>
-                <span class="text-muted small ms-2">
-                    {% for g in section.groups %}{{ g.category.section_label }} {{ g.count }}{% if not loop.last %} &middot; {% endif %}{% endfor %}
-                </span>
-            </div>
-            {% if fam.description %}<div class="text-muted small mb-3">{{ fam.description }}</div>{% endif %}
-            <div class="ps-3 border-start border-3 border-{{ fam.color }}">
-                {% for group in section.groups %}
-                {{ category_section(group, nested=true) }}
-                {% endfor %}
-            </div>
-        </section>
-        {% else %}
-        {{ category_section(section.groups[0]) }}
-        {% endif %}
+        {% if section.family %}{{ family_section(section) }}{% else %}{{ category_section(section.groups[0]) }}{% endif %}
         {% endfor %}
 
         {% elif ontologies %}

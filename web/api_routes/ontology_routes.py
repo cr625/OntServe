@@ -12,6 +12,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import select, func
 
 from web.models import db, Ontology, OntologyEntity, OntologyVersion
+from services import ontology_categories as categories
 from web.entity_extraction import extract_entities_from_content
 
 logger = logging.getLogger(__name__)
@@ -102,14 +103,10 @@ def register_ontology(bp):
             if 'is_stub' in data:
                 md['stub'] = bool(data.get('is_stub'))
             # Category / subcategory: explicit values live in metadata; blank clears
-            # the key so the rule-based default applies again.
-            for key in ('category', 'subcategory'):
+            # the key so the rule-based default applies again (same rule as the CLI tool).
+            for key in categories.EXPLICIT_KEYS:
                 if key in data:
-                    value = (data.get(key) or '').strip()
-                    if value:
-                        md[key] = value
-                    else:
-                        md.pop(key, None)
+                    categories.set_explicit(md, key, data.get(key))
             md['last_metadata_update'] = datetime.now(timezone.utc).isoformat()
             md['updated_by'] = current_user.username
             ontology.meta_data = md

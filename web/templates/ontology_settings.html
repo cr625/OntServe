@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "macros/ontology_list.html" import SOURCE_STYLES, TYPE_STYLES %}
 
 {% block title %}Settings - {{ ontology.name }} - OntServe{% endblock %}
 
@@ -31,7 +32,7 @@
                         <h5><i class="bi bi-info-circle"></i> Basic Information</h5>
                     </div>
                     <div class="card-body">
-                        <form id="ontologySettingsForm">
+                        <form id="ontologySettingsForm" data-ontology-name="{{ ontology.name }}">
                             <div class="mb-3">
                                 <label for="ontologyName" class="form-label">Name *</label>
                                 <input type="text" class="form-control" id="ontologyName" name="name"
@@ -64,20 +65,9 @@
                                     <div class="mb-3">
                                         <label for="ontologyType" class="form-label">Type</label>
                                         <select class="form-select" id="ontologyType" name="ontology_type">
-                                            <option value="upper" {{ 'selected' if ontology.ontology_type=='upper'
-                                                else '' }}>Upper</option>
-                                            <option value="core" {{ 'selected' if ontology.ontology_type=='core' else ''
-                                                }}>Core</option>
-                                            <option value="base" {{ 'selected' if ontology.ontology_type=='base' else ''
-                                                }}>Base</option>
-                                            <option value="domain" {{ 'selected' if ontology.ontology_type=='domain'
-                                                else '' }}>Domain</option>
-                                            <option value="case" {{ 'selected' if ontology.ontology_type=='case'
-                                                else '' }}>Case</option>
-                                            <option value="extracted" {{ 'selected' if
-                                                ontology.ontology_type=='extracted' else '' }}>Extracted</option>
-                                            <option value="derived" {{ 'selected' if ontology.ontology_type=='derived'
-                                                else '' }}>Derived</option>
+                                            {% for key, style in TYPE_STYLES.items() %}
+                                            <option value="{{ key }}" {{ 'selected' if ontology.ontology_type == key else '' }}>{{ style[0] }}</option>
+                                            {% endfor %}
                                         </select>
                                     </div>
                                 </div>
@@ -85,12 +75,9 @@
                                     <div class="mb-3">
                                         <label for="sourceSystem" class="form-label">Source</label>
                                         <select class="form-select" id="sourceSystem" name="source_system">
-                                            <option value="proethica" {{ 'selected' if
-                                                ontology.source_system=='proethica' else '' }}>ProEthica</option>
-                                            <option value="external" {{ 'selected' if
-                                                ontology.source_system=='external' else '' }}>External</option>
-                                            <option value="manual" {{ 'selected' if ontology.source_system=='manual'
-                                                else '' }}>Manual</option>
+                                            {% for key, style in SOURCE_STYLES.items() %}
+                                            <option value="{{ key }}" {{ 'selected' if ontology.source_system == key else '' }}>{{ style[0] }}</option>
+                                            {% endfor %}
                                         </select>
                                     </div>
                                 </div>
@@ -128,13 +115,13 @@
                                         <label for="ontologyCategory" class="form-label">Category</label>
                                         <input type="text" class="form-control" id="ontologyCategory" name="category"
                                             list="categoryOptions" value="{{ explicit_category or '' }}"
-                                            placeholder="default: {{ ontology.category }}">
+                                            placeholder="default: {{ default_category }}">
                                         <datalist id="categoryOptions">
                                             {% for key in category_options %}<option value="{{ key }}"></option>{% endfor %}
                                         </datalist>
                                         <div class="form-text">
                                             Groups the ontology on the repository index. Leave blank to use the
-                                            default derived from Type and Source ({{ ontology.category }}).
+                                            default derived from Type and Source ({{ default_category }}).
                                         </div>
                                     </div>
                                 </div>
@@ -157,7 +144,7 @@
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-check-circle"></i> Save Changes
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                <button type="reset" class="btn btn-outline-secondary">
                                     <i class="bi bi-arrow-clockwise"></i> Reset
                                 </button>
                             </div>
@@ -257,7 +244,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled onclick="confirmDelete()">
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
                     Delete Permanently
                 </button>
             </div>
@@ -266,8 +253,5 @@
 </div>
 {% endif %}
 
-<script>
-    window.ONTOLOGY_SETTINGS = { ontologyName: '{{ ontology.name }}' };
-</script>
 <script src="{{ url_for('static', filename='js/ontology_settings.js') }}"></script>
 {% endblock %}

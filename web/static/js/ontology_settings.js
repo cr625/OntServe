@@ -1,100 +1,84 @@
-    function resetForm() {
-        document.getElementById('ontologySettingsForm').reset();
+// Ontology settings page: save the metadata form through the JSON API and
+// handle the delete confirmation. The form's data-ontology-name attribute
+// carries the ontology name; fields are collected generically from the form,
+// so a new input only needs a `name` attribute here and handling in the API.
+(function () {
+    const form = document.getElementById('ontologySettingsForm');
+    if (!form) return;
+    const ontologyName = form.dataset.ontologyName;
+
+    function showAlert(kind, iconClass, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-' + kind + ' alert-dismissible fade show mt-3';
+        alertDiv.innerHTML = '<i class="bi ' + iconClass + '"></i> ' + message +
+            '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+        form.insertBefore(alertDiv, form.firstChild);
     }
 
-    document.getElementById('ontologySettingsForm').addEventListener('submit', function (e) {
+    form.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const formData = new FormData(this);
-        const data = {
-            name: formData.get('name'),
-            base_uri: formData.get('base_uri'),
-            description: formData.get('description'),
-            ontology_type: formData.get('ontology_type'),
-            source_system: formData.get('source_system'),
-            is_editable: formData.has('is_editable'),
-            is_base: formData.has('is_base'),
-            is_stub: formData.has('is_stub'),
-            category: formData.get('category'),
-            subcategory: formData.get('subcategory')
-        };
+        // Every named field as submitted; checkboxes become booleans (unchecked
+        // boxes are absent from FormData, so set them explicitly).
+        const data = Object.fromEntries(new FormData(form));
+        form.querySelectorAll('input[type=checkbox][name]').forEach(function (cb) {
+            data[cb.name] = cb.checked;
+        });
 
-        // Show loading state
-        const submitBtn = this.querySelector('button[type="submit"]');
+        const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
         submitBtn.disabled = true;
 
-        fetch('/api/ontology/' + window.ONTOLOGY_SETTINGS.ontologyName + '/metadata', {
+        fetch('/api/ontology/' + encodeURIComponent(ontologyName) + '/metadata', {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    // Show success message
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
-                    alertDiv.innerHTML = `
-                <i class="bi bi-check-circle"></i> Settings saved successfully!
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-                    this.insertBefore(alertDiv, this.firstChild);
-
-                    // If name changed, redirect to new URL
-                    if (result.name_changed) {
-                        setTimeout(() => {
-                            window.location.href = `/ontology/${data.name}/settings`;
-                        }, 2000);
-                    }
-                } else {
+            .then(function (response) { return response.json(); })
+            .then(function (result) {
+                if (!result.success) {
                     throw new Error(result.error || 'Unknown error');
                 }
+                showAlert('success', 'bi-check-circle', 'Settings saved successfully.');
+                if (result.name_changed) {
+                    setTimeout(function () {
+                        window.location.href = '/ontology/' + encodeURIComponent(data.name) + '/settings';
+                    }, 2000);
+                }
             })
-            .catch(error => {
-                // Show error message
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-danger alert-dismissible fade show mt-3';
-                alertDiv.innerHTML = `
-            <i class="bi bi-exclamation-circle"></i> Error: ${error.message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-                this.insertBefore(alertDiv, this.firstChild);
+            .catch(function (error) {
+                showAlert('danger', 'bi-exclamation-circle', 'Error: ' + error.message);
             })
-            .finally(() => {
-                // Reset button state
+            .finally(function () {
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             });
     });
 
-    // Delete confirmation
+    // Delete confirmation: the button unlocks when the typed name matches.
     const deleteInput = document.getElementById('deleteConfirmInput');
     const deleteBtn = document.getElementById('confirmDeleteBtn');
-
     if (deleteInput && deleteBtn) {
         deleteInput.addEventListener('input', function () {
-            deleteBtn.disabled = this.value !== window.ONTOLOGY_SETTINGS.ontologyName;
+            deleteBtn.disabled = this.value !== ontologyName;
+        });
+        deleteBtn.addEventListener('click', function () {
+            fetch('/ontology/' + encodeURIComponent(ontologyName), {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(function (response) { return response.json(); })
+                .then(function (result) {
+                    if (result.success) {
+                        window.location.href = '/';
+                    } else {
+                        alert('Delete failed: ' + (result.error || 'Unknown error'));
+                    }
+                })
+                .catch(function (error) {
+                    alert('Delete failed: ' + error.message);
+                });
         });
     }
-
-    function confirmDelete() {
-        fetch('/ontology/' + window.ONTOLOGY_SETTINGS.ontologyName, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/';
-                } else {
-                    alert('Delete failed: ' + (data.error || 'Unknown error'));
-                }
-            })
-            .catch(error => {
-                alert('Delete failed: ' + error.message);
-            });
-    }
+})();
