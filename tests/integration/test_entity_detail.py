@@ -46,6 +46,49 @@ class TestEntityDetailRoute:
 
 
 @pytest.mark.integration
+class TestMultiValuedDomainRange:
+    """Property pages whose domain/range is a JSON list must render.
+
+    entity_extraction stores a single domain/range as a string and a
+    multi-valued one (multiple rdfs:domain assertions, or an
+    owl:unionOf) as a list. The entity template called .split() on the
+    value, so every multi-valued property page returned 500
+    (UndefinedError: 'list object' has no attribute 'split'; observed on
+    production 2026-10-14 for w3c-prov-o properties such as
+    qualifiedInfluence and atLocation).
+    """
+
+    def test_entity_detail_list_domain_and_range(self, client, db_session, helpers):
+        from web.models import OntologyEntity
+
+        ontology = helpers.create_test_ontology(db_session, name='test-multi')
+        entity = OntologyEntity(
+            ontology_id=ontology.id,
+            entity_type='property',
+            uri='http://test.org/test-multi#qualifiedInfluence',
+            label='qualifiedInfluence',
+            comment='A multi-domain property',
+            domain=['http://test.org/test-multi#Activity',
+                    'http://test.org/test-multi#Agent'],
+            range=['http://test.org/test-multi#Influence',
+                   'http://test.org/test-multi#Entity'],
+            content_hash=OntologyEntity.compute_content_hash(
+                'http://test.org/test-multi#qualifiedInfluence',
+                'qualifiedInfluence', 'A multi-domain property'
+            )
+        )
+        db_session.add(entity)
+        db_session.commit()
+
+        response = client.get('/entity/test-multi/qualifiedInfluence')
+        assert response.status_code == 200
+        assert b'Activity' in response.data
+        assert b'Agent' in response.data
+        assert b'Influence' in response.data
+        assert b'Entity' in response.data
+
+
+@pytest.mark.integration
 class TestCrossOntologyFallback:
     """Test cross-ontology entity lookup fallback.
 

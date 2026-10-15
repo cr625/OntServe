@@ -308,24 +308,29 @@
                     <div class="card-body">
                         {# parent/subclass-of intentionally omitted here: the Class Hierarchy card above
                            shows the full BFO-rooted ancestry with working cross-ontology links. #}
+                        {# domain/range are JSON: a single URI is stored as a string,
+                           a multi-valued one (multiple assertions or owl:unionOf) as a
+                           list. Normalize to a list before rendering each member. #}
                         {% if entity.domain %}
+                        {% set domains = entity.domain if entity.domain is sequence and entity.domain is not string else [entity.domain] %}
                         <div class="property-row">
                             <div class="property-key">Domain</div>
                             <div class="property-value">
-                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.domain.split('#')[-1] if '#' in entity.domain else entity.domain.split('/')[-1]) }}">
-                                    {{ entity.domain.split('#')[-1] if '#' in entity.domain else entity.domain.split('/')[-1] }}
-                                </a>
+                                {% for d in domains %}
+                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=d.split('#')[-1] if '#' in d else d.split('/')[-1]) }}">{{ d.split('#')[-1] if '#' in d else d.split('/')[-1] }}</a>{% if not loop.last %}, {% endif %}
+                                {% endfor %}
                             </div>
                         </div>
                         {% endif %}
 
                         {% if entity.range %}
+                        {% set ranges = entity.range if entity.range is sequence and entity.range is not string else [entity.range] %}
                         <div class="property-row">
                             <div class="property-key">Range</div>
                             <div class="property-value">
-                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.range.split('#')[-1] if '#' in entity.range else entity.range.split('/')[-1]) }}">
-                                    {{ entity.range.split('#')[-1] if '#' in entity.range else entity.range.split('/')[-1] }}
-                                </a>
+                                {% for r in ranges %}
+                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=r.split('#')[-1] if '#' in r else r.split('/')[-1]) }}">{{ r.split('#')[-1] if '#' in r else r.split('/')[-1] }}</a>{% if not loop.last %}, {% endif %}
+                                {% endfor %}
                             </div>
                         </div>
                         {% endif %}
