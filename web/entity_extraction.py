@@ -9,6 +9,16 @@ Extraction passes:
 2. Named individuals: owl:NamedIndividual (with full property collection)
 3. Catch-all: any labeled URI resource not captured above (handles domain-typed
    individuals like proethica:Obligation instances, and OBO-style bare resources)
+
+Both individual passes store entity_type 'individual'. The declaration itself is
+recorded in properties['named_individual'] (True from pass 2, False from the
+catch-all), so the reified PROV-O edge-provenance nodes and OWL-Time anchors of a
+case graph, which the catch-all captures, are distinguishable from the
+owl:NamedIndividual declarations without a namespace heuristic.
+
+build_entity_rows holds the passes without any database access;
+extract_entities_from_content wraps it with the parse, the clear and the
+embedding restore.
 """
 
 import decimal
@@ -329,14 +339,44 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
     for entity in entities_to_clear:
         db.session.delete(entity)
 
-    entity_counts = {'class': 0, 'property': 0, 'individual': 0}
-    captured_uris = set()
-    new_entities = []
     # Base-layer hierarchy for most-specific-type subsumption (built once per run;
     # empty during a cold first sync, which degrades to the graph-local rule).
     base_parents = _base_superclass_map()
 
-    now = datetime.now(timezone.utc)
+    new_entities, entity_counts = build_entity_rows(ontology.id, g, base_parents)
+
+    # Restore embeddings for entities whose (uri, content_hash) is unchanged, then persist all.
+    for e in new_entities:
+        prev = prev_emb.get(e.uri)
+        if prev is not None and prev[0] == e.content_hash and prev[1] is not None:
+            e.embedding = prev[1]
+        db.session.add(e)
+
+    return entity_counts
+
+
+def build_entity_rows(ontology_id, g, base_parents=None, now=None):
+    """The six extraction passes over a parsed graph, as unsaved OntologyEntity rows.
+
+    Pure with respect to the database: nothing is read or written, so the pass
+    logic can be exercised on a small rdflib graph. extract_entities_from_content
+    wraps this with the parse, the clear and the embedding restore.
+
+    Args:
+        ontology_id: value for OntologyEntity.ontology_id on every row
+        g: parsed rdflib.Graph
+        base_parents: child URI -> parent URIs of the base ontologies
+            (_base_superclass_map), empty when unavailable
+        now: timestamp for updated_at (defaults to the current UTC time)
+
+    Returns:
+        (rows, counts): the OntologyEntity instances and the counts by entity_type
+    """
+    base_parents = base_parents or {}
+    now = now or datetime.now(timezone.utc)
+    entity_counts = {'class': 0, 'property': 0, 'individual': 0}
+    captured_uris = set()
+    new_entities = []
 
     # Predicates to skip when collecting class properties. skos:definition is
     # surfaced as the entity comment, so it is not also repeated as a property.
@@ -378,7 +418,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             properties['rdf_superclasses'] = named_supers
 
         entity = OntologyEntity(
-            ontology_id=ontology.id,
+            ontology_id=ontology_id,
             entity_type='class',
             uri=str(cls),
             label=label_str,
@@ -408,7 +448,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         comment_str = _comment_or_definition(g, prop)
 
         entity = OntologyEntity(
-            ontology_id=ontology.id,
+            ontology_id=ontology_id,
             entity_type='property',
             properties=_property_metadata(g, prop, 'object', soft_typing=soft),
             uri=str(prop),
@@ -439,7 +479,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         comment_str = _comment_or_definition(g, prop)
 
         entity = OntologyEntity(
-            ontology_id=ontology.id,
+            ontology_id=ontology_id,
             entity_type='property',
             properties=_property_metadata(g, prop, 'datatype', soft_typing=soft),
             uri=str(prop),
@@ -478,7 +518,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         # a description on the entity page instead of a blank Description cell.
         comment_str = _comment_or_definition(g, prop)
         entity = OntologyEntity(
-            ontology_id=ontology.id,
+            ontology_id=ontology_id,
             entity_type='property',
             properties=_property_metadata(g, prop, 'annotation', soft_typing=soft),
             uri=uri_str,
@@ -520,9 +560,16 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         properties = _collect_properties(g, indiv, skip_predicates)
         if len(types) > 1:
             properties['rdf_types'] = types
+        # Explicit declaration flag: this row stands for an owl:NamedIndividual
+        # axiom. The catch-all pass below also stores rows as entity_type
+        # 'individual' (domain-typed resources, the reified prov:Derivation
+        # edge-provenance nodes, OWL-Time anchors) and marks them False, so a
+        # consumer counting the named individuals of a case reads the flag
+        # instead of entity_type (web/case_display.is_named_individual).
+        properties['named_individual'] = True
 
         entity = OntologyEntity(
-            ontology_id=ontology.id,
+            ontology_id=ontology_id,
             entity_type=entity_type,
             uri=uri_str,
             label=label_str,
@@ -553,7 +600,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         properties = _collect_properties(g, scheme, scheme_skip_predicates)
 
         entity = OntologyEntity(
-            ontology_id=ontology.id,
+            ontology_id=ontology_id,
             entity_type='scheme',
             uri=uri_str,
             label=label_str,
@@ -610,11 +657,15 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
             # inverses) are object properties; give them the same kind marker
             # the typed passes write so the detail view groups them.
             properties.update(_property_metadata(g, subj, 'object'))
+        else:
+            # Stored as 'individual' for browsing, but not declared
+            # owl:NamedIndividual (see the flag in pass 4).
+            properties['named_individual'] = False
         if len(domain_types) > 1:
             properties['rdf_types'] = domain_types
 
         entity = OntologyEntity(
-            ontology_id=ontology.id,
+            ontology_id=ontology_id,
             entity_type=entity_type,
             uri=uri_str,
             label=label_str,
@@ -630,14 +681,7 @@ def extract_entities_from_content(ontology, content, format_hint='turtle'):
         captured_uris.add(uri_str)
         entity_counts[entity_type] = entity_counts.get(entity_type, 0) + 1
 
-    # Restore embeddings for entities whose (uri, content_hash) is unchanged, then persist all.
-    for e in new_entities:
-        prev = prev_emb.get(e.uri)
-        if prev is not None and prev[0] == e.content_hash and prev[1] is not None:
-            e.embedding = prev[1]
-        db.session.add(e)
-
-    return entity_counts
+    return new_entities, entity_counts
 
 
 def _json_literal_value(obj):
