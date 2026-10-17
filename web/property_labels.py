@@ -104,6 +104,50 @@ def qualify_predicate(key):
     return f"{prefix}:{key}" if prefix else key
 
 
+def split_pascal_case(text):
+    """Split PascalCase/camelCase into readable words.
+
+    'CompetenceBoundaryComplianceObligation' -> 'Competence Boundary Compliance Obligation'
+    'Post-FailureInvestigationState' -> 'Post-Failure Investigation State'
+    'PublicSafetyatRisk' -> 'Public Safety at Risk'
+
+    A display fallback for a class IRI fragment when no rdfs:label is at hand
+    (web.case_display.type_display_label prefers the label). Registered as the
+    ``split_pascal`` Jinja filter in web/app.py.
+    """
+    if not text:
+        return text
+    # Insert space before uppercase letters preceded by lowercase
+    result = re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
+    # Insert space between consecutive uppercase + lowercase (e.g., 'HTMLParser' -> 'HTML Parser')
+    result = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1 \2', result)
+    # After PascalCase splitting, some words end with lowercase joiners
+    # glued to the next word, e.g., 'Safetyat Risk' or 'Standardsvs Emerging'.
+    # Split these: look for a known joiner suffix on a word. Guards
+    # (2026-07-05): 'in' and 'or' are excluded (pervasive English false
+    # positives -- 'Chain' -> 'Cha in', 'Factor' -> 'Fact or'); the
+    # remainder must be a plausible word (>= 5 chars, so 'Format' stays
+    # whole); and the glued word must not be label-final -- a genuine
+    # joiner joins to a FOLLOWING word ('Safetyat Risk'), while a
+    # label-final match is just a word that happens to end with a joiner.
+    _JOINERS = ['for', 'the', 'and', 'at', 'vs', 'of', 'to', 'by']
+    words = result.split()
+    fixed = []
+    for idx, w in enumerate(words):
+        split_found = False
+        if idx < len(words) - 1:
+            for j in _JOINERS:
+                if len(w) >= len(j) + 5 and w.endswith(j) and w[0].isupper():
+                    # e.g., 'Safetyat' -> 'Safety' + 'at'
+                    fixed.append(w[:-len(j)])
+                    fixed.append(j)
+                    split_found = True
+                    break
+        if not split_found:
+            fixed.append(w)
+    return ' '.join(fixed)
+
+
 def humanize_key(key):
     """Return a human-readable label for a property key.
 
