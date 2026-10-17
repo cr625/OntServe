@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timezone
 
-from rdflib import Graph, RDF, RDFS, OWL, SKOS, Namespace, BNode
+from rdflib import Graph, RDF, RDFS, OWL, SKOS, Namespace, BNode, URIRef
 from rdflib.namespace import DCTERMS
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -23,6 +23,47 @@ logger = logging.getLogger(__name__)
 
 # Namespaces for parsing
 PROETH = Namespace("http://proethica.org/ontology/intermediate#")
+
+
+def ontology_iri_from_graph(g: Graph) -> Optional[str]:
+    """The IRI of the graph's owl:Ontology declaration, or None when it declares
+    none (or only an anonymous one). With several declarations the first in
+    sorted order is taken, so the result is stable across parses."""
+    iris = sorted(str(s) for s in g.subjects(RDF.type, OWL.Ontology) if isinstance(s, URIRef))
+    return iris[0] if iris else None
+
+
+def ontology_iri_from_content(content: Optional[str]) -> Optional[str]:
+    """ontology_iri_from_graph over serialized Turtle. None for empty or unparsable content."""
+    if not content:
+        return None
+    g = Graph()
+    try:
+        g.parse(data=content, format='turtle')
+    except Exception as e:  # noqa: BLE001 - a malformed version must not break a backfill run
+        logger.warning(f"Could not parse ontology content for its IRI: {e}")
+        return None
+    return ontology_iri_from_graph(g)
+
+
+def declared_base_uri(ontology_name: str, base_uri: Optional[str],
+                      content: Optional[str]) -> Tuple[Optional[str], str]:
+    """Backfill decision for a stored row: ``(new base_uri, reason)``.
+
+    The new value is the owl:Ontology IRI declared in ``content`` when it differs
+    from the stored ``base_uri``, else None. The reason is one of 'no content',
+    'no owl:Ontology declaration', 'unchanged' or 'declared IRI'. Used by
+    tools/backfill_base_uri.py for the rows registered before the sync read the
+    IRI (every case row carried http://proethica.org/ontology/<name>#, a
+    namespace that occurs nowhere in a case graph)."""
+    if not content:
+        return None, 'no content'
+    iri = ontology_iri_from_content(content)
+    if not iri:
+        return None, 'no owl:Ontology declaration'
+    if iri == base_uri:
+        return None, 'unchanged'
+    return iri, 'declared IRI'
 
 
 class OntologySyncService:
@@ -122,17 +163,24 @@ class OntologySyncService:
         return md
 
     def _extract_ontology_meta(self, ttl_path: Path) -> Dict:
-        """Read owl:Ontology-level provenance from a TTL: rdfs:comment (-> description),
-        dcterms:source, owl:versionInfo, dcterms:title, dcterms:identifier (-> case_number)
-        and dcterms:temporal (-> subcategory, e.g. the NSPE decade "1990s" ProEthica writes
-        into case headers; see proethica app/services/commit/case_header.py). Lets imported
-        vocabularies (e.g. the ifc-roles crosswalk stub) carry their provenance into the
-        OntServe ontology record instead of the generic 'Auto-imported from ...' default."""
+        """Read owl:Ontology-level provenance from a TTL: the ontology IRI itself
+        (-> base_uri), rdfs:comment (-> description), dcterms:source, owl:versionInfo,
+        dcterms:title, dcterms:identifier (-> case_number) and dcterms:temporal
+        (-> subcategory, e.g. the NSPE decade "1990s" ProEthica writes into case headers;
+        see proethica app/services/commit/case_header.py). Lets imported vocabularies
+        (e.g. the ifc-roles crosswalk stub) carry their provenance into the OntServe
+        ontology record instead of the generic 'Auto-imported from ...' default."""
         out: Dict = {}
         try:
             g = Graph()
             g.parse(str(ttl_path), format='turtle')
-            for subj in g.subjects(RDF.type, OWL.Ontology):
+            iri = ontology_iri_from_graph(g)
+            if iri:
+                out['iri'] = iri
+            # The IRI-bearing declaration when there is one, else the first
+            # (anonymous) owl:Ontology subject.
+            subjects = [URIRef(iri)] if iri else list(g.subjects(RDF.type, OWL.Ontology))
+            for subj in subjects:
                 comment = g.value(subj, RDFS.comment)
                 if comment:
                     out['description'] = str(comment).strip()
@@ -155,6 +203,15 @@ class OntologySyncService:
         except Exception as e:
             logger.warning(f"Could not read owl:Ontology metadata from {ttl_path.name}: {e}")
         return out
+
+    @staticmethod
+    def default_base_uri(ontology_name: str) -> str:
+        """The file-name pattern base_uri, used only when a TTL declares no
+        owl:Ontology IRI. Every row registered before 2026-10 carries it. For a
+        case ontology it names a namespace that occurs nowhere in the graph (the
+        case namespace is http://proethica.org/ontology/case/<n>#, the ontology
+        IRI http://proethica.org/ontology/case/<n>)."""
+        return f"http://proethica.org/ontology/{ontology_name}#"
 
     @staticmethod
     def _infer_type_and_source(ontology_name: str) -> Tuple[str, str]:
@@ -196,15 +253,22 @@ class OntologySyncService:
         stmt = select(Ontology).where(Ontology.name == ontology_name)
         ontology = self.db_session.execute(stmt).scalar_one_or_none()
 
+        # owl:Ontology header fields, parsed once per sync (the create path needs
+        # the IRI now, the version block below needs the rest).
+        ometa: Optional[Dict] = None
+
         if not ontology:
-            # Create new ontology record. Header-derived metadata (title, source,
-            # version, case number, decade) is filled by the version block below,
-            # which always runs for a fresh row (no latest_version yet).
+            # Create new ontology record. base_uri is the owl:Ontology IRI the TTL
+            # declares (the file-name pattern only when it declares none). The
+            # other header-derived metadata (title, source, version, case number,
+            # decade) is filled by the version block below, which always runs for
+            # a fresh row (no latest_version yet).
             logger.info(f"Creating new ontology record for {ontology_name}")
             inferred_type, inferred_source = self._infer_type_and_source(ontology_name)
+            ometa = self._extract_ontology_meta(ttl_path)
             ontology = Ontology(
                 name=ontology_name,
-                base_uri=f"http://proethica.org/ontology/{ontology_name}#",
+                base_uri=ometa.get('iri') or self.default_base_uri(ontology_name),
                 description=f"Auto-imported from {ttl_path.name}",
                 is_editable=True,
                 ontology_type=inferred_type,
@@ -238,10 +302,16 @@ class OntologySyncService:
         # vocabulary's owl:Ontology comment/source/version reach the OntServe record
         # instead of the generic 'Auto-imported' default; see HEADER_META for which
         # keys are refreshed and which are filled once.
-        ometa = self._extract_ontology_meta(ttl_path)
+        if ometa is None:
+            ometa = self._extract_ontology_meta(ttl_path)
         if ometa.get('description'):
             ontology.description = ometa['description']
         ontology.meta_data = self._apply_header_meta(dict(ontology.meta_data or {}), ometa)
+        # A row registered before the IRI was read still carries the file-name
+        # pattern: replace it with the declared IRI. A base_uri set by hand (the
+        # settings page) is left alone.
+        if ometa.get('iri') and ontology.base_uri == self.default_base_uri(ontology_name):
+            ontology.base_uri = ometa['iri']
 
         # Read TTL content
         with open(ttl_path, 'r', encoding='utf-8') as f:

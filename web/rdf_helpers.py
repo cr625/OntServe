@@ -71,6 +71,18 @@ def generate_rdf_from_concepts(ontology_name, concepts, base_imports):
     return prefixes + ontology_declaration + concept_triples
 
 
+def namespace_from_base_uri(base_uri):
+    """The namespace for a @prefix line derived from an ontology's base_uri.
+
+    base_uri holds the owl:Ontology IRI (http://proethica.org/ontology/case/8),
+    which the proethica vocabularies extend with '#' to form the entity
+    namespace (http://proethica.org/ontology/case/8#). A value that already ends
+    in '#' or '/' is a namespace and is used as is."""
+    if not base_uri:
+        return base_uri
+    return base_uri if base_uri.endswith(('#', '/')) else base_uri + '#'
+
+
 def generate_entity_ttl(entity, ontology):
     """Generate TTL representation for an entity."""
     lines = []
@@ -83,7 +95,7 @@ def generate_entity_ttl(entity, ontology):
     # Add ontology prefix
     if ontology.base_uri:
         prefix_name = ontology.name.replace('-', '_')
-        lines.append(f"@prefix {prefix_name}: <{ontology.base_uri}> .")
+        lines.append(f"@prefix {prefix_name}: <{namespace_from_base_uri(ontology.base_uri)}> .")
 
     lines.append("")  # Empty line
 
