@@ -20,10 +20,13 @@ Usage:
     python tools/backfill_base_uri.py --all                 # every row whose content declares an IRI
     python tools/backfill_base_uri.py --name proethica-case-8
 
-Only a row whose stored base_uri differs from the declared IRI is rewritten. A
-row whose current content declares no owl:Ontology IRI is reported and left as
-is. Idempotent. Uses the same config bootstrap as tools/sync_ontology_to_db.py
-(FLASK_CONFIG, ONTSERVE_DB_URL).
+Only a row whose stored base_uri is the file-name pattern and whose current
+content declares a different owl:Ontology IRI is rewritten, so the dry run lists
+exactly the pattern-valued rows. A value that is not the pattern was set by hand
+(the settings page, a migration) and is reported and kept, as the sync keeps it
+on re-sync. A row whose current content declares no owl:Ontology IRI is reported
+and left as is. Idempotent. Uses the same config bootstrap as
+tools/sync_ontology_to_db.py (FLASK_CONFIG, ONTSERVE_DB_URL).
 """
 from __future__ import annotations
 
@@ -88,7 +91,8 @@ def main(argv=None) -> int:
             new_uri, reason = declared_base_uri(ont.name, ont.base_uri, ont.current_content)
             if new_uri:
                 print(f'{ont.name}: {ont.base_uri} -> {new_uri}')
-                ont.base_uri = new_uri
+                if not args.dry_run:
+                    ont.base_uri = new_uri
                 changed += 1
             else:
                 print(f'{ont.name}: {reason}')

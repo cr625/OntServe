@@ -25,15 +25,41 @@ logger = logging.getLogger(__name__)
 PROETH = Namespace("http://proethica.org/ontology/intermediate#")
 
 
-def ontology_iri_from_graph(g: Graph) -> Optional[str]:
+def default_base_uri(ontology_name: str) -> str:
+    """The file-name pattern base_uri, used only when a TTL declares no
+    owl:Ontology IRI. Every row registered before 2026-10 carries it. For a
+    case ontology it names a namespace that occurs nowhere in the graph (the
+    case namespace is http://proethica.org/ontology/case/<n>#, the ontology
+    IRI http://proethica.org/ontology/case/<n>). Module-level so the backfill
+    decision can test a stored value against it."""
+    return f"http://proethica.org/ontology/{ontology_name}#"
+
+
+def _iri_local_name(iri: str) -> str:
+    """The last path segment of an ontology IRI, a trailing '#' or '/' removed:
+    http://proethica.org/ontology/engineering-ethics -> engineering-ethics."""
+    return iri.rstrip('#/').rsplit('/', 1)[-1].rsplit('#', 1)[-1]
+
+
+def ontology_iri_from_graph(g: Graph, preferred_name: Optional[str] = None) -> Optional[str]:
     """The IRI of the graph's owl:Ontology declaration, or None when it declares
-    none (or only an anonymous one). With several declarations the first in
-    sorted order is taken, so the result is stable across parses."""
+    none (or only an anonymous one). With several declarations the one whose
+    local name equals ``preferred_name`` (the file stem, which is the ontology
+    name) is taken when there is one (ontologies/engineering-ethics.ttl declares
+    both .../engineering-ethics and .../engineering_standards), else the first
+    in sorted order, so the result is stable across parses."""
     iris = sorted(str(s) for s in g.subjects(RDF.type, OWL.Ontology) if isinstance(s, URIRef))
-    return iris[0] if iris else None
+    if not iris:
+        return None
+    if preferred_name and len(iris) > 1:
+        named = [iri for iri in iris if _iri_local_name(iri) == preferred_name]
+        if named:
+            return named[0]
+    return iris[0]
 
 
-def ontology_iri_from_content(content: Optional[str]) -> Optional[str]:
+def ontology_iri_from_content(content: Optional[str],
+                              preferred_name: Optional[str] = None) -> Optional[str]:
     """ontology_iri_from_graph over serialized Turtle. None for empty or unparsable content."""
     if not content:
         return None
@@ -43,26 +69,31 @@ def ontology_iri_from_content(content: Optional[str]) -> Optional[str]:
     except Exception as e:  # noqa: BLE001 - a malformed version must not break a backfill run
         logger.warning(f"Could not parse ontology content for its IRI: {e}")
         return None
-    return ontology_iri_from_graph(g)
+    return ontology_iri_from_graph(g, preferred_name=preferred_name)
 
 
 def declared_base_uri(ontology_name: str, base_uri: Optional[str],
                       content: Optional[str]) -> Tuple[Optional[str], str]:
     """Backfill decision for a stored row: ``(new base_uri, reason)``.
 
-    The new value is the owl:Ontology IRI declared in ``content`` when it differs
-    from the stored ``base_uri``, else None. The reason is one of 'no content',
-    'no owl:Ontology declaration', 'unchanged' or 'declared IRI'. Used by
-    tools/backfill_base_uri.py for the rows registered before the sync read the
-    IRI (every case row carried http://proethica.org/ontology/<name>#, a
-    namespace that occurs nowhere in a case graph)."""
+    The new value is the owl:Ontology IRI declared in ``content`` when the stored
+    ``base_uri`` is the file-name pattern (default_base_uri) and differs from it,
+    else None. A value that is not the pattern was set by hand (the settings
+    page, a migration) and is kept, as the sync keeps it on re-sync. The reason
+    is one of 'no content', 'no owl:Ontology declaration', 'unchanged',
+    'hand-set base_uri kept' or 'declared IRI'. Used by tools/backfill_base_uri.py
+    for the rows registered before the sync read the IRI (every case row carried
+    http://proethica.org/ontology/<name>#, a namespace that occurs nowhere in a
+    case graph)."""
     if not content:
         return None, 'no content'
-    iri = ontology_iri_from_content(content)
+    iri = ontology_iri_from_content(content, preferred_name=ontology_name)
     if not iri:
         return None, 'no owl:Ontology declaration'
     if iri == base_uri:
         return None, 'unchanged'
+    if base_uri != default_base_uri(ontology_name):
+        return None, 'hand-set base_uri kept'
     return iri, 'declared IRI'
 
 
@@ -174,7 +205,7 @@ class OntologySyncService:
         try:
             g = Graph()
             g.parse(str(ttl_path), format='turtle')
-            iri = ontology_iri_from_graph(g)
+            iri = ontology_iri_from_graph(g, preferred_name=ttl_path.stem)
             if iri:
                 out['iri'] = iri
             # The IRI-bearing declaration when there is one, else the first
@@ -206,12 +237,8 @@ class OntologySyncService:
 
     @staticmethod
     def default_base_uri(ontology_name: str) -> str:
-        """The file-name pattern base_uri, used only when a TTL declares no
-        owl:Ontology IRI. Every row registered before 2026-10 carries it. For a
-        case ontology it names a namespace that occurs nowhere in the graph (the
-        case namespace is http://proethica.org/ontology/case/<n>#, the ontology
-        IRI http://proethica.org/ontology/case/<n>)."""
-        return f"http://proethica.org/ontology/{ontology_name}#"
+        """The file-name pattern base_uri (module-level default_base_uri)."""
+        return default_base_uri(ontology_name)
 
     @staticmethod
     def _infer_type_and_source(ontology_name: str) -> Tuple[str, str]:

@@ -153,3 +153,42 @@ def test_adapter_without_checks_keeps_the_key_null(monkeypatch):
     d = execute_reasoning(ReasoningRequest("x"),
                           _content_loader=lambda n: "@prefix : <http://example.org/> .").to_response_dict()
     assert "checks" in d and d["checks"] is None
+
+
+UNION_BASE = """
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix core: <http://proethica.org/ontology/core#> .
+
+core:Action a owl:Class . core:Event a owl:Class . core:State a owl:Class . core:Role a owl:Class .
+core:initiates a owl:ObjectProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( core:Action core:Event ) ] ;
+    rdfs:range core:State .
+core:boundBy a owl:ObjectProperty ;
+    rdfs:domain [ a owl:Restriction ; owl:onProperty core:initiates ; owl:someValuesFrom core:State ] .
+core:mentions a owl:ObjectProperty .
+"""
+
+UNION_TARGET = """
+@prefix core: <http://proethica.org/ontology/core#> .
+@prefix case: <http://proethica.org/ontology/case/8#> .
+
+case:Act_1 a core:Action ; core:initiates case:State_1 ; core:boundBy case:Role_R ; core:mentions case:Role_R .
+case:State_1 a core:State .
+case:Role_R a core:Role .
+"""
+
+
+def test_checks_list_union_and_anonymous_domain_constraints():
+    """Review fix: core:initiates, core:terminates, core:establishedBy and the
+    intermediate temporal properties constrain their domain or range through an
+    anonymous owl:unionOf class; the checks skipped them, so the panel under-
+    reported the domain and range constraints Pellet verifies."""
+    merged, target = _graph(UNION_BASE, UNION_TARGET), _graph(UNION_TARGET)
+    dr = {p["property"]: p for p in rt.reasoning_checks(merged, target)["domain_range_properties"]}
+    assert set(dr) == {CORE + "initiates", CORE + "boundBy"}   # mentions: unconstrained
+    assert dr[CORE + "initiates"] == {"property": CORE + "initiates",
+                                      "domain": [CORE + "Action", CORE + "Event"],
+                                      "range": [CORE + "State"], "uses": 1}
+    assert dr[CORE + "boundBy"]["domain"] == [rt._ANON_CLASS_EXPRESSION]
+    assert dr[CORE + "boundBy"]["range"] == []

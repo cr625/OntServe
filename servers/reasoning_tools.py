@@ -98,6 +98,30 @@ _OWL_CHARACTERISTICS = (
 )
 
 
+# Marker for an rdfs:domain / rdfs:range given as an anonymous class expression
+# other than a union (a restriction, an intersection): the constraint is present
+# and Pellet enforces it, but it has no named classes to list.
+_ANON_CLASS_EXPRESSION = "(anonymous class expression)"
+
+
+def _class_expr_iris(g, node) -> List[str]:
+    """The classes an rdfs:domain / rdfs:range object names: the IRI itself, the
+    named members of an anonymous owl:unionOf (the (Action or Event) domains of
+    core:initiates, core:terminates and the intermediate temporal properties),
+    else the _ANON_CLASS_EXPRESSION marker. A property constrained through a
+    class expression is reported like one constrained by a named class."""
+    from rdflib import OWL, URIRef
+    from rdflib.collection import Collection
+    if isinstance(node, URIRef):
+        return [str(node)]
+    union = g.value(node, OWL.unionOf)
+    if union is not None:
+        members = sorted(str(m) for m in Collection(g, union) if isinstance(m, URIRef))
+        if members:
+            return members
+    return [_ANON_CLASS_EXPRESSION]
+
+
 def reasoning_checks(merged, target) -> Dict[str, Any]:
     """The constraints a Pellet run over ``merged`` verifies for ``target``, as data.
 
@@ -114,7 +138,9 @@ def reasoning_checks(merged, target) -> Dict[str, Any]:
       characteristic (Asymmetric, Irreflexive, Symmetric, ...) that the target
       asserts at least one pair for, with the pairs examined (capped)
     - ``domain_range_properties``: each property the target uses that carries
-      an rdfs:domain or rdfs:range in the merged graph, with its use count
+      an rdfs:domain or rdfs:range in the merged graph, with its use count; a
+      union class expression is listed by its members, another anonymous
+      expression by a marker (_class_expr_iris)
 
     Pure rdflib, no reasoner. ``merged`` is the graph the reasoner loads,
     ``target`` the ontology's own content.
@@ -162,8 +188,10 @@ def reasoning_checks(merged, target) -> Dict[str, Any]:
 
     domain_range: List[Dict[str, Any]] = []
     for prop in sorted({p for p in target.predicates() if isinstance(p, URIRef)}, key=str):
-        domains = sorted(str(d) for d in merged.objects(prop, RDFS.domain) if isinstance(d, URIRef))
-        ranges = sorted(str(r) for r in merged.objects(prop, RDFS.range) if isinstance(r, URIRef))
+        domains = sorted({iri for d in merged.objects(prop, RDFS.domain)
+                          for iri in _class_expr_iris(merged, d)})
+        ranges = sorted({iri for r in merged.objects(prop, RDFS.range)
+                         for iri in _class_expr_iris(merged, r)})
         if not domains and not ranges:
             continue
         domain_range.append({

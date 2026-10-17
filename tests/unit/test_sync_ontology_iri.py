@@ -75,6 +75,54 @@ def test_declared_base_uri_decisions():
     assert declared_base_uri("proethica-case-8", PATTERN, None) == (None, "no content")
 
 
+def test_declared_base_uri_keeps_a_hand_set_value():
+    """Review fix: the backfill rewrites only a pattern-valued row, as the sync
+    does on re-sync. A base_uri set on the settings page (or by a migration)
+    differs from the declared IRI as well and used to be listed for a change."""
+    assert declared_base_uri("proethica-case-8", "http://example.org/custom#", CASE_HEADER) \
+        == (None, "hand-set base_uri kept")
+    # the draft form of the pattern (no '#') is not the pattern either
+    assert declared_base_uri("proethica-case-8", "http://proethica.org/ontology/proethica-case-8", CASE_HEADER) \
+        == (None, "hand-set base_uri kept")
+
+
+TWO_DECLARATIONS = """@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+<http://proethica.org/ontology/engineering-ethics> a owl:Ontology ;
+    rdfs:comment "NSPE engineering ethics ontology" ;
+    owl:versionInfo "3.1" .
+<http://proethica.org/ontology/aaa-standards> a owl:Ontology ;
+    dcterms:title "Technical Standards" ;
+    owl:versionInfo "1.0" .
+"""
+
+
+def test_several_declarations_prefer_the_one_named_like_the_file():
+    """Review fix: ontologies/engineering-ethics.ttl declares two ontologies
+    (.../engineering-ethics and .../engineering_standards); sorted order picks
+    the file's own IRI there only because '-' sorts before '_'. The file stem
+    (the ontology name) decides when it names one of the declarations."""
+    assert ontology_iri_from_content(TWO_DECLARATIONS) == "http://proethica.org/ontology/aaa-standards"
+    assert ontology_iri_from_content(TWO_DECLARATIONS, preferred_name="engineering-ethics") \
+        == "http://proethica.org/ontology/engineering-ethics"
+    # a name that matches no declaration falls back to the sorted order
+    assert ontology_iri_from_content(TWO_DECLARATIONS, preferred_name="other") \
+        == "http://proethica.org/ontology/aaa-standards"
+    assert declared_base_uri("engineering-ethics", "http://proethica.org/ontology/engineering-ethics#",
+                             TWO_DECLARATIONS) == ("http://proethica.org/ontology/engineering-ethics", "declared IRI")
+
+
+def test_extract_ontology_meta_reads_the_header_of_the_preferred_declaration(tmp_path):
+    p = tmp_path / "engineering-ethics.ttl"
+    p.write_text(TWO_DECLARATIONS)
+    meta = OntologySyncService.__new__(OntologySyncService)._extract_ontology_meta(p)
+    assert meta["iri"] == "http://proethica.org/ontology/engineering-ethics"
+    assert meta["description"] == "NSPE engineering ethics ontology"
+    assert meta["version"] == "3.1"
+    assert "title" not in meta   # the other declaration's title is not read
+
+
 def test_default_base_uri_is_the_legacy_pattern():
     assert OntologySyncService.default_base_uri("proethica-case-8") == PATTERN
 
