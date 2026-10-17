@@ -36,6 +36,37 @@
             </div>`).join('');
     }
 
+    // The constraints present for this run (reasoning_tools.reasoning_checks),
+    // rendered as data: which disjointness axioms the merged graph carries,
+    // which characteristic-bearing properties the ontology asserts pairs for,
+    // and how many domain- or range-constrained properties it uses.
+    function checksHtml(c) {
+        if (!c) return '';
+        const axioms = c.disjointness_axioms || [];
+        const chars = c.characteristic_properties || [];
+        const drCount = c.domain_range_property_count || 0;
+        const drUses = (c.domain_range_properties || []).reduce((n, p) => n + (p.uses || 0), 0);
+        const plural = (n, one, many) => (n === 1 ? one : many);
+        const axiomItems = axioms.map(d => `
+            <li><code>${esc(d.kind)}</code> ${(d.members || []).map(m => esc(local(m))).join(', ')}</li>`).join('');
+        const charItems = chars.map(p => `
+            <li><code>${esc(local(p.property))}</code> (${(p.characteristics || []).map(esc).join(', ')}):
+                ${p.pairs_examined} ${plural(p.pairs_examined, 'pair', 'pairs')} examined</li>`).join('');
+        const drItems = (c.domain_range_properties || []).map(p => `
+            <li><code>${esc(local(p.property))}</code>${p.domain && p.domain.length ? ` domain ${p.domain.map(d => esc(local(d))).join(' | ')}` : ''}${p.range && p.range.length ? ` range ${p.range.map(r => esc(local(r))).join(' | ')}` : ''}: ${p.uses} ${plural(p.uses, 'use', 'uses')}</li>`).join('');
+        return `
+            <details class="small mb-3">
+                <summary class="text-muted" style="cursor:pointer;">
+                    Checks applied: ${axioms.length} disjointness ${plural(axioms.length, 'axiom', 'axioms')},
+                    ${c.pairs_examined || 0} property ${plural(c.pairs_examined || 0, 'pair', 'pairs')} under declared characteristics,
+                    ${drCount} domain- or range-constrained ${plural(drCount, 'property', 'properties')} used
+                </summary>
+                ${axiomItems ? `<div class="mt-2 fw-semibold">Disjointness axioms present in the merged graph</div><ul class="mb-2" style="overflow-wrap: anywhere;">${axiomItems}</ul>` : '<div class="mt-2 text-muted">No disjointness axioms in the merged graph.</div>'}
+                ${charItems ? `<div class="fw-semibold">Property characteristics checked</div><ul class="mb-2" style="overflow-wrap: anywhere;">${charItems}</ul>` : '<div class="text-muted">No pairs asserted for a characteristic-bearing property.</div>'}
+                ${drItems ? `<div class="fw-semibold">Domain and range constraints (${drUses} ${plural(drUses, 'use', 'uses')})</div><ul class="mb-0" style="overflow-wrap: anywhere;">${drItems}</ul>` : '<div class="text-muted">No domain- or range-constrained property used.</div>'}
+            </details>`;
+    }
+
     function render(data) {
         let html = '';
         if (data.consistent) {
@@ -60,6 +91,8 @@
                 html += `<h6 class="mt-2">Clashing axiom set</h6>${justificationHtml(inc.explanations)}`;
             }
         }
+
+        html += checksHtml(data.checks);
 
         const explained = data.explanations || [];
         if (explained.length) {

@@ -45,6 +45,10 @@ class ReasoningResult:
     error_explanation: Optional[str] = None
     explanations: List[dict] = field(default_factory=list)
     inconsistency_explanation: Optional[dict] = None
+    # The constraints present for this run (servers.reasoning_tools.reasoning_checks):
+    # disjointness axioms, characteristic-bearing property pairs, domain/range
+    # constrained properties. Rendered by the panel in place of a static sentence.
+    checks: Optional[dict] = None
 
     def to_response_dict(self) -> dict:
         return {
@@ -61,6 +65,7 @@ class ReasoningResult:
             'error_explanation': self.error_explanation,
             'explanations': self.explanations,
             'inconsistency_explanation': self.inconsistency_explanation,
+            'checks': self.checks,
         }
 
 
@@ -128,4 +133,5 @@ def execute_reasoning(req: ReasoningRequest, _content_loader=None) -> ReasoningR
         error_explanation=detail.get('error_explanation'),
         explanations=detail.get('explanations', []),
         inconsistency_explanation=detail.get('inconsistency_explanation'),
+        checks=detail.get('checks'),
     )
