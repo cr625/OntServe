@@ -25,6 +25,7 @@ canonical_parents:                        # the reusable role parents already in
   - ContractorRole
   - ProviderClientRole
   - PublicResponsibilityRole
+  - PublicRole
   - EmployerRelationshipRole
 
 # ---------------------------------------------------------------------------
@@ -174,15 +175,30 @@ canonical:
     label: Public Responsibility Role
     parent: PublicResponsibilityRole
     definition: >-
-      A party acting in the public interest / affected public.
+      The engineer-side role that owes the paramount public duty of Canon I.1 toward the general
+      public (owesDutyToward some PublicInterest). The affected public itself bears PublicRole, a
+      participant role, so a community or public stakeholder label never folds into this class.
     alt_labels:
-      - Affected Community
       - Environmental Violation Monitor
     status: provisional
-    source_cases: [8, 86]
+    source_cases: [86]
     curate: >-
       OPEN CALL: "Environmental Violation Monitor" may be an Action (monitoring) by an engineer rather
       than a distinct public role. Confirm.
+
+  - iri: PublicRole
+    label: Public Role
+    parent: PublicRole
+    definition: >-
+      The role borne by members of the public affected by the professional situation: a participant
+      role with standing in the case and no profession-generated duties. The engineer-side duty toward
+      them is PublicResponsibilityRole (case 24-1 review 2026-10-17, S-7).
+    alt_labels:
+      - Affected Community
+      - Affected Public
+      - Community Affected Public
+    status: canonical
+    source_cases: [8]
 
 # ---------------------------------------------------------------------------
 # 2. DO-NOT-MINT (compound role labels -> decompose to canonical role + State/Obligation/relation).
