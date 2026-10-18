@@ -19,9 +19,13 @@
             How the obligations in this case compete, which prevail, and the states
             under which each is defeasible. Each competing obligation is one cluster;
             expand a quote to see the verbatim case text grounding it, and hover an
-            edge badge for the quote grounding that specific edge (with its source
-            field and confidence), where the case records per-edge provenance.
-            Obligations recorded without any competition are listed separately below.
+            edge badge for the passage grounding that specific edge, with its source
+            field and confidence, where the case records per-edge provenance. A
+            passage quoted from the case text is shown as is. A passage taken from a
+            narrative field of an individual (its tension resolution, balancing text
+            or case context, written at extraction) is marked "derived from" that
+            field. Obligations recorded without any competition are listed separately
+            below.
         </p>
         {% for c in competition.clusters if c.in_competition %}
         <div class="border rounded p-3 mb-3">
@@ -39,19 +43,19 @@
             <ul class="list-unstyled mb-0 small">
                 {% if c.prevails_over %}
                 <li><i class="bi bi-arrow-up-circle text-success me-1"></i><strong>prevails over:</strong>
-                    {% for e in c.prevails_over %}<span class="badge text-bg-light border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else e.iri }}">{{ e.label }}</span> {% endfor %}
+                    {% for e in c.prevails_over %}<span class="badge text-bg-light border" title="{{ e.prov.hover if (e.prov and e.prov.hover) else e.iri }}">{{ e.label }}</span> {% endfor %}
                 </li>{% endif %}
                 {% if c.prevailed_over_by %}
                 <li><i class="bi bi-arrow-down-circle text-danger me-1"></i><strong>yields to:</strong>
-                    {% for e in c.prevailed_over_by %}<span class="badge text-bg-light border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else e.iri }}">{{ e.label }}</span> {% endfor %}
+                    {% for e in c.prevailed_over_by %}<span class="badge text-bg-light border" title="{{ e.prov.hover if (e.prov and e.prov.hover) else e.iri }}">{{ e.label }}</span> {% endfor %}
                 </li>{% endif %}
                 {% if c.competes_with %}
                 <li><i class="bi bi-arrow-left-right text-primary me-1"></i><strong>competes with:</strong>
-                    {% for e in c.competes_with %}<span class="badge text-bg-light border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else e.iri }}">{{ e.label }}</span> {% endfor %}
+                    {% for e in c.competes_with %}<span class="badge text-bg-light border" title="{{ e.prov.hover if (e.prov and e.prov.hover) else e.iri }}">{{ e.label }}</span> {% endfor %}
                 </li>{% endif %}
                 {% if c.defeasible_under %}
                 <li><i class="bi bi-shield-exclamation text-warning me-1"></i><strong>defeasible under:</strong>
-                    {% for e in c.defeasible_under %}<span class="badge text-bg-light border" title="{{ (e.prov.quote ~ ' [' ~ (e.prov.note or '') ~ ']') if (e.prov and e.prov.quote) else (e.source_text or e.iri) }}">{{ e.label }}</span> {% endfor %}
+                    {% for e in c.defeasible_under %}<span class="badge text-bg-light border" title="{{ e.prov.hover if (e.prov and e.prov.hover) else (e.source_text or e.iri) }}">{{ e.label }}</span> {% endfor %}
                 </li>{% endif %}
                 {% if c.derived_from_principle %}
                 <li><i class="bi bi-diagram-2 text-info me-1"></i><strong>derived from principle:</strong>

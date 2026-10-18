@@ -260,3 +260,4 @@ entity_types:
     exclude_fields:
       - generatedAtTime
       - wasGeneratedBy
+      - named_individual

@@ -15,10 +15,28 @@
 #     icon: bootstrap icon class (optional)
 #     collapsed: start collapsed (default: false)
 #     max_preview: max items to show before "show more" (default: 10)
+#
+# Routing (web/case_display.py organize_entities_for_case): an individual's
+# materialized core category (rdf:type proeth-core:<Category>) or actor type
+# (proeth-core:Agent, proeth-cases:DeliberativeBody) selects its section first,
+# then the parent type name. PROV-O and OWL-Time nodes and property declarations
+# go to 'support'. A class row that only redeclares a shared class (rdf:type
+# owl:Class + rdfs:subClassOf, no definition) is listed in the matched section's
+# "types used" chip row instead of as a card.
 
 # Default case display (used when domain not specified)
 default:
   sections:
+    - id: agents
+      title: Agents
+      description: The actors of the case (the persons, firms and bodies that bear the roles below) and the deliberative body whose conclusions the case records
+      entity_types:
+        - Agent
+        - DeliberativeBody
+      icon: bi-people
+      collapsed: false
+      max_preview: 10
+
     - id: nine_concepts
       title: 9-Concept Formalism
       description: Named individuals organized by the 9 core concepts

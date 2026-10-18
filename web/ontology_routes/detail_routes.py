@@ -212,6 +212,12 @@ def register_detail_routes(bp):
             page_blocks = build_ordered_blocks(
                 case_data['sections'], competition, citations, conclusions)
 
+            # rdfs:label (and home ontology) of every class the case's rows are
+            # typed with, so the cards and the "types used" chips print the
+            # declared label rather than a split IRI fragment. One query.
+            from web.case_display import class_label_index, type_uris_used
+            type_labels = class_label_index(type_uris_used(all_entities))
+
             # Back-link to the ProEthica case page (the source of this ontology)
             base_url = current_app.config.get('PROETHICA_BASE_URL')
             case_id = categories.case_id_from_name(ontology.name)
@@ -223,6 +229,7 @@ def register_detail_routes(bp):
                                  case_sections=case_data['sections'],
                                  page_blocks=page_blocks,
                                  stats=case_data['stats'],
+                                 type_labels=type_labels,
                                  competition=competition,
                                  citations=citations,
                                  conclusions=conclusions)

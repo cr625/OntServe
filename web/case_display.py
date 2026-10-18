@@ -12,6 +12,8 @@ import fnmatch
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
+from web.property_labels import split_pascal_case
+
 
 # Cache for loaded config
 _config_cache = None
@@ -150,8 +152,36 @@ def get_entity_type_name(entity) -> Optional[str]:
 
 
 _CORE_NS = "http://proethica.org/ontology/core#"
+_CASES_NS = "http://proethica.org/ontology/cases#"
 _NINE_CORE_CATEGORIES = {'Role', 'Principle', 'Obligation', 'State', 'Resource',
                          'Action', 'Event', 'Capability', 'Constraint'}
+# The actor types of a case graph. Not components of the nine-tuple (an Agent
+# bears Roles, it is not one), so materialized_category() is None for them and
+# they have their own section (config/case_display.yaml 'agents').
+_AGENT_TYPES = {
+    _CORE_NS + 'Agent': 'Agent',
+    _CASES_NS + 'DeliberativeBody': 'DeliberativeBody',
+}
+# Machine-facing plumbing of a case graph: PROV-O edge-provenance derivations and
+# OWL-Time instants/intervals. Routed to the collapsed support section and kept
+# out of the named-individual count.
+_SUPPORT_NAMESPACES = ("http://www.w3.org/ns/prov#", "http://www.w3.org/2006/time#")
+
+
+def _type_candidates(entity) -> List[str]:
+    """Every rdf:type URI recorded on a row: ``properties['rdf_types']`` (the
+    extractor keeps the full list when there is more than one) plus ``parent_uri``
+    (the materialized primary type)."""
+    candidates: List[str] = []
+    props = getattr(entity, 'properties', None)
+    if isinstance(props, dict):
+        rdf_types = props.get('rdf_types')
+        if isinstance(rdf_types, (list, tuple)):
+            candidates.extend(str(t) for t in rdf_types)
+    parent = getattr(entity, 'parent_uri', None)
+    if parent:
+        candidates.append(str(parent))
+    return candidates
 
 
 def materialized_category(entity) -> Optional[str]:
@@ -163,22 +193,73 @@ def materialized_category(entity) -> Optional[str]:
     entity extractor preserves all rdf:type URIs in ``properties['rdf_types']`` (and
     one of them in ``parent_uri``). This replaces the retired conceptCategory
     property as the category signal for the nine-concept colour coding."""
-    candidates = []
-    props = getattr(entity, 'properties', None)
-    if isinstance(props, dict):
-        rdf_types = props.get('rdf_types')
-        if isinstance(rdf_types, (list, tuple)):
-            candidates.extend(rdf_types)
-    parent = getattr(entity, 'parent_uri', None)
-    if parent:
-        candidates.append(parent)
-    for t in candidates:
-        ts = str(t)
+    for ts in _type_candidates(entity):
         if ts.startswith(_CORE_NS):
             local = ts.rsplit('#', 1)[-1]
             if local in _NINE_CORE_CATEGORIES:
                 return local
     return None
+
+
+def agent_kind(entity) -> Optional[str]:
+    """'Agent' or 'DeliberativeBody' when any rdf:type of the row is
+    proeth-core:Agent or proeth-cases:DeliberativeBody, else None. These are the
+    actors the case graph hangs on (the bearer of every role facet, the board whose
+    conclusions the case records); before the Agents section existed they fell into
+    the Other catch-all because they are not one of the nine components."""
+    for ts in _type_candidates(entity):
+        kind = _AGENT_TYPES.get(ts)
+        if kind:
+            return kind
+    return None
+
+
+def is_support_node(entity) -> bool:
+    """True for a row whose rdf:type (or parent_uri) is in the PROV-O or OWL-Time
+    namespace: the reified ``prov:Derivation`` edge-provenance nodes and the
+    ``time:Instant`` / ``time:Interval`` anchors of a case graph."""
+    return any(ts.startswith(_SUPPORT_NAMESPACES) for ts in _type_candidates(entity))
+
+
+def is_named_individual(entity) -> bool:
+    """True when the row stands for an owl:NamedIndividual declaration of the case.
+
+    The extractor stores support nodes as entity_type 'individual' too (case 8:
+    176 declarations, but 595 'individual' rows once the 405 prov:Derivation
+    nodes and 14 time anchors are counted), so entity_type alone overstates the
+    count. Rows extracted since the flag was added carry the answer in
+    ``properties['named_individual']`` (web/entity_extraction.py). Older rows
+    have no flag: an 'individual' row then counts unless it is a support node."""
+    if (getattr(entity, 'entity_type', '') or '').lower() != 'individual':
+        return False
+    props = getattr(entity, 'properties', None)
+    if isinstance(props, dict) and 'named_individual' in props:
+        return bool(props['named_individual'])
+    return not is_support_node(entity)
+
+
+# Keys a class row may carry and still be a bare declaration: the extractor
+# records the full superclass list when a class has more than one parent.
+_CLASS_DECLARATION_ONLY_KEYS = frozenset({'rdf_superclasses'})
+
+
+def is_bare_class_declaration(entity) -> bool:
+    """True for a class row whose source triples were only ``rdf:type owl:Class``
+    and ``rdfs:subClassOf <parent>``: the lean per-case redeclaration of a shared
+    class (no definition, no annotation). Such a row names a type the case uses
+    rather than contributing a class, so the case page lists it in a section's
+    ``types_used`` chip row instead of rendering a card for it (case 8 carried 34,
+    doubling the apparent size of the States and Capabilities sections and
+    listing base classes such as Safety Obligation as if the case defined them).
+    A class row with a definition (comment) or any other property stays a card."""
+    if (getattr(entity, 'entity_type', '') or '') != 'class':
+        return False
+    if getattr(entity, 'comment', None):
+        return False
+    props = getattr(entity, 'properties', None)
+    if isinstance(props, dict) and any(k not in _CLASS_DECLARATION_ONLY_KEYS for k in props):
+        return False
+    return True
 
 
 # Cache for ontology hierarchy mapping (type_name -> root concept)
@@ -383,6 +464,9 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
 
     for section in sections_config:
         section_id = section.get('id')
+        # 'types_used' collects the bare class redeclarations matched to the
+        # section (is_bare_class_declaration): rendered as a chip row, not as
+        # cards, and not counted among the section's entities.
         section_data = {
             'id': section_id,
             'title': section.get('title', section_id),
@@ -391,6 +475,7 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
             'collapsed': section.get('collapsed', False),
             'max_preview': section.get('max_preview', 10),
             'entities': [],
+            'types_used': [],
             'subsections': None
         }
 
@@ -403,7 +488,8 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
                     'icon': subsection.get('icon'),
                     'color': subsection.get('color'),
                     'abbrev': subsection.get('abbrev'),
-                    'entities': []
+                    'entities': [],
+                    'types_used': []
                 })
 
         result_sections.append(section_data)
@@ -413,12 +499,15 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
     uncategorized = []
     stats = {
         'total': len(entities),
-        # True named-individual count (the header previously displayed
-        # 'total' -- individuals + class redeclarations + properties -- under
-        # the label 'Named Individuals'; 2026-07-10 alignment audit).
-        'individuals': sum(
-            1 for e in entities
-            if (getattr(e, 'entity_type', '') or '').lower() == 'individual'),
+        # owl:NamedIndividual declarations only (is_named_individual). The header
+        # previously displayed 'total' (2026-07-10 alignment audit), then every
+        # entity_type 'individual' row, which still included the reified
+        # prov:Derivation nodes and the time anchors (case 24-1 review, 2026-10).
+        'individuals': sum(1 for e in entities if is_named_individual(e)),
+        # Rows routed to the support section (prov/time nodes, property declarations).
+        'support': 0,
+        # Bare class redeclarations listed as types used (not rendered as cards).
+        'types_used': 0,
         'by_type': {},
         'by_section': {}
     }
@@ -427,6 +516,15 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
     all_concept_types = list(type_to_section.keys())
 
     support_section = section_entities.get('support')
+
+    def _place(target: Dict, entity) -> None:
+        """Add the entity to a section or subsection: bare class redeclarations go
+        to its types_used chip row, everything else to its entity cards."""
+        if is_bare_class_declaration(entity):
+            target['types_used'].append(entity)
+            stats['types_used'] += 1
+        else:
+            target['entities'].append(entity)
 
     for entity in entities:
         entity_type = get_entity_type_name(entity)
@@ -441,22 +539,22 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
         # dominated the Other catch-all (200+ nodes on a fresh case) and buried
         # its genuine content.
         if support_section is not None:
-            parent = str(getattr(entity, 'parent_uri', '') or '')
-            if (getattr(entity, 'entity_type', None) == 'property'
-                    or parent.startswith('http://www.w3.org/ns/prov#')
-                    or parent.startswith('http://www.w3.org/2006/time#')):
+            if getattr(entity, 'entity_type', None) == 'property' or is_support_node(entity):
                 support_section['entities'].append(entity)
+                stats['support'] += 1
                 continue
 
         # Find matching section.
-        # Priority: materialized direct type (set at commit time) > exact type match > hierarchy walk
+        # Priority: materialized direct type (set at commit time) > agent type
+        # > exact type match > hierarchy walk
         matched = False
         matched_type = None
 
         # Check the materialized direct rdf:type proeth-core:<Category> first
         # (reliable, asserted by ProEthica at commit; CMT-1 replaces the retired
-        # conceptCategory property).
-        concept_cat = materialized_category(entity)
+        # conceptCategory property), then the actor types (core:Agent,
+        # cases:DeliberativeBody), which are not nine-tuple components.
+        concept_cat = materialized_category(entity) or agent_kind(entity)
         if concept_cat and concept_cat in type_to_section:
             matched_type = concept_cat
         elif entity_type:
@@ -475,11 +573,11 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
                     # Add to subsection
                     for subsection in section['subsections']:
                         if subsection['id'] == subsection_id:
-                            subsection['entities'].append(entity)
+                            _place(subsection, entity)
                             matched = True
                             break
                 else:
-                    section['entities'].append(entity)
+                    _place(section, entity)
                     matched = True
 
         if not matched:
@@ -488,7 +586,8 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
     # Add uncategorized to "other" section
     other_section = section_entities.get('other')
     if other_section:
-        other_section['entities'].extend(uncategorized)
+        for entity in uncategorized:
+            _place(other_section, entity)
 
     # Calculate section stats
     for section in result_sections:
@@ -498,20 +597,26 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
         stats['by_section'][section['id']] = section_count
 
     # Filter out empty sections (except "other" which we keep if non-empty)
-    # Within every section, list case INDIVIDUALS before the bare case-local
-    # class redeclarations (entity_type='class'): interleaving them made a
+    # Within every section, list case INDIVIDUALS before the class rows that
+    # still render as cards (a class row with a definition or other content;
+    # the bare redeclarations are in types_used): interleaving them made a
     # component section read as one undifferentiated pool (nine-component
     # correspondence audit T13, 2026-07-05). The class cards keep their badge
-    # and now group at the tail.
+    # and group at the tail.
     def _individuals_first(items):
         return sorted(items, key=lambda e: (
             getattr(e, 'entity_type', '') == 'class',
             (getattr(e, 'label', None) or '').lower()))
 
+    def _by_label(items):
+        return sorted(items, key=lambda e: (getattr(e, 'label', None) or getattr(e, 'uri', '') or '').lower())
+
     for section in result_sections:
         section['entities'] = _individuals_first(section['entities'])
+        section['types_used'] = _by_label(section['types_used'])
         for subsection in section.get('subsections') or []:
             subsection['entities'] = _individuals_first(subsection['entities'])
+            subsection['types_used'] = _by_label(subsection['types_used'])
 
     non_empty_sections = []
     for section in result_sections:
@@ -535,6 +640,7 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
 # conclusions). Any YAML section not named here is appended in its original
 # order, just before "other".
 PAGE_BLOCK_ORDER = [
+    'agents',            # the actors (core:Agent, cases:DeliberativeBody) the graph hangs on
     'nine_concepts',     # the extracted entities (foundation)
     'competition',       # panel: how the obligations compete / prevail
     'citations',         # panel: NSPE provisions grounding the conclusions
@@ -673,6 +779,82 @@ def concept_type_meta(concept_type: str) -> Optional[Dict[str, str]]:
                     }
         _concept_meta_cache = cache
     return _concept_meta_cache.get(concept_type) if concept_type else None
+
+
+def type_display_label(type_uri, label_index: Optional[Dict[str, Any]] = None) -> str:
+    """Display text for a class IRI: its rdfs:label when ``label_index`` knows one,
+    else the IRI fragment split into words (web.property_labels.split_pascal_case).
+
+    The split is a fallback, not the label. A fragment minted without a capital at
+    a word break (``SafetyWithdrawalandNotificationObligation``, whose label is
+    "Safety Withdrawal and Notification Obligation") can only be rendered
+    correctly from the declared label. Index values are either a label string or
+    a dict with a ``label`` key (build_type_label_index)."""
+    if not type_uri:
+        return ''
+    uri = str(type_uri)
+    if label_index:
+        entry = label_index.get(uri)
+        label = entry.get('label') if isinstance(entry, dict) else entry
+        if label:
+            return str(label)
+    frag = uri.rsplit('#', 1)[-1].rsplit('/', 1)[-1]
+    return split_pascal_case(frag.replace('_', ' '))
+
+
+def type_uris_used(entities: List[Any]) -> set:
+    """Every class IRI the rows reference as a type (parent_uri and rdf_types),
+    plus the IRIs of the class rows themselves."""
+    uris = set()
+    for e in entities:
+        uris.update(_type_candidates(e))
+        if (getattr(e, 'entity_type', '') or '') == 'class' and getattr(e, 'uri', None):
+            uris.add(str(e.uri))
+    return uris
+
+
+def build_type_label_index(rows) -> Dict[str, Dict[str, Optional[str]]]:
+    """``{class IRI: {'label': rdfs:label, 'ontology': ontology name}}`` from
+    ``(uri, label, ontology_name)`` class rows.
+
+    A row of a definitional ontology (intermediate, extended, core, cases) wins
+    over a per-case redeclaration of the same class: the case row's stored label
+    is the fragment fallback the extractor writes when the TTL carries no
+    rdfs:label, and the definitional row is also the page the chip should link
+    to. Rows without a label are ignored."""
+    index: Dict[str, Dict[str, Optional[str]]] = {}
+    for uri, label, ontology_name in rows:
+        if not label:
+            continue
+        uri = str(uri)
+        from_case = bool(ontology_name) and str(ontology_name).startswith('proethica-case-')
+        existing = index.get(uri)
+        if existing is None or (existing.get('from_case') and not from_case):
+            index[uri] = {'label': str(label), 'ontology': ontology_name, 'from_case': from_case}
+    for entry in index.values():
+        entry.pop('from_case', None)
+    return index
+
+
+def class_label_index(uris) -> Dict[str, Dict[str, Optional[str]]]:
+    """build_type_label_index over the ontology_entities class rows for ``uris``.
+    Empty on any database failure, so the page falls back to the split fragment."""
+    uris = [str(u) for u in uris if u]
+    if not uris:
+        return {}
+    try:
+        from web.models import OntologyEntity, Ontology, db
+        from sqlalchemy import select
+        rows = db.session.execute(
+            select(OntologyEntity.uri, OntologyEntity.label, Ontology.name)
+            .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
+            .where(OntologyEntity.uri.in_(uris),
+                   OntologyEntity.entity_type == 'class',
+                   OntologyEntity.label.isnot(None))
+        ).all()
+    except Exception:
+        return {}
+    return build_type_label_index(rows)
 
 
 def get_section_summary(sections: List[Dict]) -> List[Dict]:

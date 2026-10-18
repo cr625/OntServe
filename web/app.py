@@ -272,51 +272,20 @@ def create_app(config_name=None):
 
     app.jinja_env.filters['format_key'] = format_property_key
 
-    def split_pascal_case(text):
-        """Split PascalCase/camelCase into readable words.
-
-        'CompetenceBoundaryComplianceObligation' -> 'Competence Boundary Compliance Obligation'
-        'Post-FailureInvestigationState' -> 'Post-Failure Investigation State'
-        'PublicSafetyatRisk' -> 'Public Safety at Risk'
-        """
-        if not text:
-            return text
-        # Insert space before uppercase letters preceded by lowercase
-        result = re.sub(r'([a-z])([A-Z])', r'\1 \2', text)
-        # Insert space between consecutive uppercase + lowercase (e.g., 'HTMLParser' -> 'HTML Parser')
-        result = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1 \2', result)
-        # After PascalCase splitting, some words end with lowercase joiners
-        # glued to the next word, e.g., 'Safetyat Risk' or 'Standardsvs Emerging'.
-        # Split these: look for a known joiner suffix on a word. Guards
-        # (2026-07-05): 'in' and 'or' are excluded (pervasive English false
-        # positives -- 'Chain' -> 'Cha in', 'Factor' -> 'Fact or'); the
-        # remainder must be a plausible word (>= 5 chars, so 'Format' stays
-        # whole); and the glued word must not be label-final -- a genuine
-        # joiner joins to a FOLLOWING word ('Safetyat Risk'), while a
-        # label-final match is just a word that happens to end with a joiner.
-        _JOINERS = ['for', 'the', 'and', 'at', 'vs', 'of', 'to', 'by']
-        words = result.split()
-        fixed = []
-        for idx, w in enumerate(words):
-            split_found = False
-            if idx < len(words) - 1:
-                for j in _JOINERS:
-                    if len(w) >= len(j) + 5 and w.endswith(j) and w[0].isupper():
-                        # e.g., 'Safetyat' -> 'Safety' + 'at'
-                        fixed.append(w[:-len(j)])
-                        fixed.append(j)
-                        split_found = True
-                        break
-            if not split_found:
-                fixed.append(w)
-        return ' '.join(fixed)
-
+    # Shared, human-readable property-key labels for case cards + detail page,
+    # and the PascalCase fragment splitter (module-level in web/property_labels
+    # so the display helpers can call it outside a request).
+    from web.property_labels import humanize_key, qualify_predicate, split_pascal_case
     app.jinja_env.filters['split_pascal'] = split_pascal_case
-
-    # Shared, human-readable property-key labels for case cards + detail page.
-    from web.property_labels import humanize_key, qualify_predicate
     app.jinja_env.filters['pretty_key'] = humanize_key
     app.jinja_env.filters['qualify_pred'] = qualify_predicate
+
+    # Class display text: the rdfs:label from a per-request label index when the
+    # route supplies one, else the split fragment. A fragment such as
+    # SafetyWithdrawalandNotificationObligation has no capital where the label
+    # has a word break, so the label is preferred wherever it is known.
+    from web.case_display import type_display_label
+    app.jinja_env.globals['type_label'] = type_display_label
 
     # Concept-type badge metadata (abbrev / colour / icon / name) sourced from
     # config/case_display.yaml, so the 9-concept colour coding is consistent

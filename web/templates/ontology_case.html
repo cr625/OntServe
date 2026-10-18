@@ -48,6 +48,33 @@
         opacity: 0.9;
     }
 
+    .case-header .stat-note {
+        font-size: 0.72rem;
+        opacity: 0.8;
+    }
+
+    /* "Types used" chip row: the shared classes a section's individuals are
+       typed with (bare per-case redeclarations), listed instead of cards. */
+    .types-used {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin: 0.25rem 0 0.5rem 0.25rem;
+    }
+
+    .types-used-label {
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #adb5bd;
+        margin-right: 0.35rem;
+    }
+
+    .types-used .badge {
+        font-weight: 500;
+        margin: 0 0.15rem 0.2rem 0;
+    }
+
     .breadcrumb-nav {
         margin-bottom: 1rem;
     }
@@ -493,7 +520,9 @@
             {% if ontology.description and not ontology.description.startswith('Auto-imported') %}
             <p class="case-description mb-0 mt-2">{{ ontology.description }}</p>
             {% endif %}
-            <div class="case-uri mt-2">
+            {# base_uri holds the owl:Ontology IRI declared in the TTL (set at sync,
+               backfilled for older rows by tools/backfill_base_uri.py). #}
+            <div class="case-uri mt-2" title="Ontology IRI: the owl:Ontology subject of this case TTL">
                 <i class="bi bi-link-45deg"></i> {{ ontology.base_uri }}
                 {% if ontology.current_version %}
                 <span class="badge text-bg-light ms-2">v{{ ontology.current_version.version_number }}</span>
@@ -501,8 +530,16 @@
             </div>
         </div>
         <div class="text-end">
+            {# owl:NamedIndividual declarations only (case_display.is_named_individual);
+               the provenance derivations and time anchors stored beside them are
+               counted separately below. #}
             <div class="stat-value">{{ stats.individuals if stats.individuals is defined else stats.total }}</div>
             <div class="stat-label">Named Individuals</div>
+            {% if stats.support is defined and stats.support %}
+            <div class="stat-note" title="PROV-O edge-provenance derivations, OWL-Time anchors and property declarations, listed under Provenance and Support Nodes">
+                + {{ stats.support }} provenance and support nodes
+            </div>
+            {% endif %}
             {% if proethica_case_url %}
             <a href="{{ proethica_case_url }}" class="btn btn-light btn-sm mt-2" target="_blank" rel="noopener"
                title="Open this case in ProEthica, where the analysis behind this ontology lives">
@@ -520,12 +557,14 @@
     <div class="formalism-panel-header">
         <h5><i class="bi bi-grid-3x3 me-2"></i>9-Concept Formalism</h5>
         <span class="stats-summary">
+            {# Classes = the bare redeclarations listed as types used plus any
+               class row still rendered as a card (one with a definition). #}
             {% set ns = namespace(ind=0, cls=0) %}
             {% for sub in section.subsections %}
             {% set ns.ind = ns.ind + (sub.entities | selectattr('entity_type', 'equalto', 'individual') | list | length) %}
-            {% set ns.cls = ns.cls + (sub.entities | rejectattr('entity_type', 'equalto', 'individual') | list | length) %}
+            {% set ns.cls = ns.cls + (sub.types_used | default([]) | list | length) + (sub.entities | rejectattr('entity_type', 'equalto', 'individual') | list | length) %}
             {% endfor %}
-            {{ ns.ind }} individuals and {{ ns.cls }} classes across 9 concepts
+            {{ ns.ind }} individuals across 9 concepts, typed with {{ ns.cls }} classes
         </span>
     </div>
 
@@ -603,7 +642,7 @@
            to their macros. This is the single source of truth for order. #}
         {% for block in page_blocks %}
         {% if block.kind == 'section' %}
-        {{ render_section(block.section, ontology_name=ontology.name) }}
+        {{ render_section(block.section, ontology_name=ontology.name, type_labels=type_labels|default(none)) }}
         {% elif block.id == 'competition' %}
         {{ render_competition(competition) }}
         {% elif block.id == 'citations' %}

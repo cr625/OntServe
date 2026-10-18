@@ -11,17 +11,28 @@ These edges are already materialized in the committed case TTL (corpus-wide
 absent: the entity-level `sourceText` quote carried on each obligation/state
 individual, and (2026-07-08) the PER-EDGE provenance -- the commit-time emitters
 reify each defeasibility edge as a `prov:Derivation` individual
-(`defeasibility_edge_provenance_<S>_<pred>_<O>`) carrying the verbatim grounding
-quote in `prov:value` and "source_field=...; confidence=..." in `rdfs:comment`,
-so every rendered edge can show the quote that justified IT, not only the quotes
+(`defeasibility_edge_provenance_<S>_<pred>_<O>`) carrying the passage the
+extractor cited in `prov:value`, "source_field=...; confidence=..." in
+`rdfs:comment` and the individuals it read in `prov:wasDerivedFrom`, so every
+rendered edge can show the passage that justified IT, not only the quotes
 attached to its endpoints. The fresh-architecture cases carry these nodes; older
 commits fall back to the entity-level quotes.
+
+The passage in `prov:value` is a verbatim quote of the case text only when
+`source_field` is textReferences or sourceText. For every other field
+(tensionResolution, balancingWith, caseContext, ...) it is a passage of a
+narrative field written by the extraction model on another individual, so the
+panel labels it "derived from <field> of <individual>" (case 24-1 review, 2026-10)
+instead of presenting it as case text. See edge_provenance.
 """
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from rdflib import Graph, Namespace, RDF, RDFS, URIRef
+
+from web.property_labels import humanize_key
 
 CORE = Namespace("http://proethica.org/ontology/core#")
 PROETH = Namespace("http://proethica.org/ontology/intermediate#")
@@ -48,6 +59,11 @@ SOURCETEXT_CANDIDATES = (PROETH_PROV.sourceText, PROETH.sourceText, PROETH.sourc
 # encodes the directed edge it grounds.
 _EDGE_PROV_PREFIX = "defeasibility_edge_provenance_"
 _EDGE_PROV_PREDICATES = ("competesWith", "prevailsOver", "defeasibleUnder")
+# The two source_field values that quote the case text itself. Every other value
+# of the DefeasibilityEdge.source_field vocabulary (ProEthica schemas.py) names a
+# narrative datatype field of an individual, written by the extraction model.
+_VERBATIM_SOURCE_FIELDS = frozenset({"textreferences", "sourcetext"})
+_SOURCE_FIELD_RE = re.compile(r"source_field=([^;\s]+)")
 
 
 def _localname(iri: str) -> str:
@@ -55,6 +71,71 @@ def _localname(iri: str) -> str:
         if sep in iri:
             return iri.rsplit(sep, 1)[1]
     return iri
+
+
+def _source_field(note: Optional[str]) -> Optional[str]:
+    """The source_field value of a "source_field=...; confidence=..." note, or None."""
+    if not note:
+        return None
+    m = _SOURCE_FIELD_RE.search(note)
+    return m.group(1) if m else None
+
+
+def _source_individual(g: Graph, node: URIRef, subj_frag: str, obj_frag: str) -> Optional[URIRef]:
+    """The individual whose field supplied the passage: the prov:wasDerivedFrom
+    target that is neither endpoint of the edge (the emitter adds the source
+    individual as a third target when it knows one), else the edge subject (the
+    obligation whose own narrative field was read)."""
+    targets = [t for t in g.objects(node, PROV.wasDerivedFrom) if isinstance(t, URIRef)]
+    for t in targets:
+        if _localname(str(t)) not in (subj_frag, obj_frag):
+            return t
+    for t in targets:
+        if _localname(str(t)) == subj_frag:
+            return t
+    return None
+
+
+def edge_provenance(g: Graph, node: URIRef, subj_frag: str, obj_frag: str, label) -> Dict[str, Any]:
+    """The provenance record of one reified edge node.
+
+    Keys: ``quote`` (prov:value), ``note`` (rdfs:comment), ``source_field``,
+    ``verbatim`` (True when the field is textReferences or sourceText, or when the
+    note names no field), ``derived_from`` ({iri, label, field} when the passage
+    comes from a narrative field of an individual, else None) and ``hover``, the
+    badge title the panel shows: "<quote> [<note>]" for a verbatim passage,
+    prefixed with "derived from <field> of <individual>: " otherwise.
+    """
+    quote = g.value(node, PROV.value)
+    note = g.value(node, RDFS.comment)
+    quote_s = str(quote) if quote else None
+    note_s = str(note) if note else None
+    field = _source_field(note_s)
+    verbatim = field is None or field.lower() in _VERBATIM_SOURCE_FIELDS
+    derived_from = None
+    if not verbatim:
+        source = _source_individual(g, node, subj_frag, obj_frag)
+        derived_from = {
+            "iri": str(source) if source is not None else None,
+            "label": label(source) if source is not None else None,
+            "field": field,
+        }
+    hover = None
+    if quote_s:
+        hover = f"{quote_s} [{note_s or ''}]"
+        if derived_from is not None:
+            field_text = humanize_key(field) or field
+            field_text = field_text[0].lower() + field_text[1:]
+            of = f" of {derived_from['label']}" if derived_from["label"] else ""
+            hover = f"derived from {field_text}{of}: {hover}"
+    return {
+        "quote": quote_s,
+        "note": note_s,
+        "source_field": field,
+        "verbatim": verbatim,
+        "derived_from": derived_from,
+        "hover": hover,
+    }
 
 
 def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
@@ -95,9 +176,10 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
     def ref(iri: URIRef) -> Dict[str, Optional[str]]:
         return {"iri": str(iri), "label": label(iri)}
 
-    # Per-edge provenance index: (subject-frag, predicate, object-frag) -> {quote, note}.
-    # Parsed from the reified prov:Derivation nodes whose localname encodes the edge.
-    edge_prov: Dict[Tuple[str, str, str], Dict[str, Optional[str]]] = {}
+    # Per-edge provenance index: (subject-frag, predicate, object-frag) -> the
+    # edge_provenance record. Parsed from the reified prov:Derivation nodes whose
+    # localname encodes the edge.
+    edge_prov: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
     for node in g.subjects(RDF.type, PROV.Derivation):
         local = _localname(str(node))
         if not local.startswith(_EDGE_PROV_PREFIX):
@@ -107,12 +189,8 @@ def build_competition_clusters(ttl_content: Optional[str]) -> Dict[str, Any]:
             sep = f"_{pred}_"
             if sep in rest:
                 subj_frag, obj_frag = rest.split(sep, 1)
-                quote = g.value(node, PROV.value)
-                note = g.value(node, RDFS.comment)
-                edge_prov[(subj_frag, pred, obj_frag)] = {
-                    "quote": str(quote) if quote else None,
-                    "note": str(note) if note else None,
-                }
+                edge_prov[(subj_frag, pred, obj_frag)] = edge_provenance(
+                    g, node, subj_frag, obj_frag, label)
                 break
 
     def edge_ref(display: URIRef, subj: URIRef, pred: str, obj: URIRef) -> Dict[str, Any]:

@@ -66,6 +66,12 @@ def check_consistency(ontology_name: str) -> Dict[str, Any]:
     }
 
 
+def _subject_iris(g) -> set:
+    """IRIs that occur as a SUBJECT in a parsed graph."""
+    from rdflib import URIRef
+    return {str(s) for s in g.subjects() if isinstance(s, URIRef)}
+
+
 def _local_subjects(content: str) -> set:
     """IRIs that occur as a SUBJECT in the target ontology's asserted content.
 
@@ -74,10 +80,135 @@ def _local_subjects(content: str) -> set:
     case mints into the intermediate namespace count for the case page only when
     the case TTL itself declares them.
     """
-    from rdflib import Graph, URIRef
+    from rdflib import Graph
     g = Graph()
     g.parse(data=content, format="turtle")
-    return {str(s) for s in g.subjects() if isinstance(s, URIRef)}
+    return _subject_iris(g)
+
+
+# OWL property characteristics Pellet enforces, with display names.
+_OWL_CHARACTERISTICS = (
+    ("http://www.w3.org/2002/07/owl#AsymmetricProperty", "Asymmetric"),
+    ("http://www.w3.org/2002/07/owl#IrreflexiveProperty", "Irreflexive"),
+    ("http://www.w3.org/2002/07/owl#SymmetricProperty", "Symmetric"),
+    ("http://www.w3.org/2002/07/owl#TransitiveProperty", "Transitive"),
+    ("http://www.w3.org/2002/07/owl#ReflexiveProperty", "Reflexive"),
+    ("http://www.w3.org/2002/07/owl#FunctionalProperty", "Functional"),
+    ("http://www.w3.org/2002/07/owl#InverseFunctionalProperty", "InverseFunctional"),
+)
+
+
+# Marker for an rdfs:domain / rdfs:range given as an anonymous class expression
+# other than a union (a restriction, an intersection): the constraint is present
+# and Pellet enforces it, but it has no named classes to list.
+_ANON_CLASS_EXPRESSION = "(anonymous class expression)"
+
+
+def _class_expr_iris(g, node) -> List[str]:
+    """The classes an rdfs:domain / rdfs:range object names: the IRI itself, the
+    named members of an anonymous owl:unionOf (the (Action or Event) domains of
+    core:initiates, core:terminates and the intermediate temporal properties),
+    else the _ANON_CLASS_EXPRESSION marker. A property constrained through a
+    class expression is reported like one constrained by a named class."""
+    from rdflib import OWL, URIRef
+    from rdflib.collection import Collection
+    if isinstance(node, URIRef):
+        return [str(node)]
+    union = g.value(node, OWL.unionOf)
+    if union is not None:
+        members = sorted(str(m) for m in Collection(g, union) if isinstance(m, URIRef))
+        if members:
+            return members
+    return [_ANON_CLASS_EXPRESSION]
+
+
+def reasoning_checks(merged, target) -> Dict[str, Any]:
+    """The constraints a Pellet run over ``merged`` verifies for ``target``, as data.
+
+    The reasoning panel used to state them as a fixed sentence ("no individual
+    violates the nine-component disjointness, no property is used against its
+    domain or range, no prevailsOver pair violates asymmetry") whatever the
+    graph contained. This returns what is actually present, so the panel can
+    render the checks that applied to this run (case 24-1 review, 2026-10):
+
+    - ``disjointness_axioms``: every owl:AllDisjointClasses member list and
+      every pairwise owl:disjointWith in the merged graph (the nine-component
+      disjointness lives in proethica-core, not in the case file)
+    - ``characteristic_properties``: each property declared with an OWL
+      characteristic (Asymmetric, Irreflexive, Symmetric, ...) that the target
+      asserts at least one pair for, with the pairs examined (capped)
+    - ``domain_range_properties``: each property the target uses that carries
+      an rdfs:domain or rdfs:range in the merged graph, with its use count; a
+      union class expression is listed by its members, another anonymous
+      expression by a marker (_class_expr_iris)
+
+    Pure rdflib, no reasoner. ``merged`` is the graph the reasoner loads,
+    ``target`` the ontology's own content.
+    """
+    from rdflib import OWL, RDF, RDFS, URIRef
+    from rdflib.collection import Collection
+
+    disjoint: List[Dict[str, Any]] = []
+    for node in merged.subjects(RDF.type, OWL.AllDisjointClasses):
+        members_node = merged.value(node, OWL.members)
+        members = []
+        if members_node is not None:
+            members = sorted(str(m) for m in Collection(merged, members_node)
+                             if isinstance(m, URIRef))
+        if members:
+            disjoint.append({"kind": "AllDisjointClasses", "members": members})
+    seen_pairs = set()
+    for a, _, b in merged.triples((None, OWL.disjointWith, None)):
+        if not (isinstance(a, URIRef) and isinstance(b, URIRef)):
+            continue
+        pair = tuple(sorted((str(a), str(b))))
+        if pair in seen_pairs:
+            continue
+        seen_pairs.add(pair)
+        disjoint.append({"kind": "disjointWith", "members": list(pair)})
+    disjoint.sort(key=lambda d: (d["kind"], d["members"]))
+
+    characteristic_props: List[Dict[str, Any]] = []
+    declared = set()
+    for char_iri, _name in _OWL_CHARACTERISTICS:
+        declared.update(p for p in merged.subjects(RDF.type, URIRef(char_iri))
+                        if isinstance(p, URIRef))
+    for prop in sorted(declared, key=str):
+        names = [name for char_iri, name in _OWL_CHARACTERISTICS
+                 if (prop, RDF.type, URIRef(char_iri)) in merged]
+        pairs = sorted(((str(s), str(o)) for s, o in target.subject_objects(prop)))
+        if not pairs:
+            continue
+        characteristic_props.append({
+            "property": str(prop),
+            "characteristics": names,
+            "pairs_examined": len(pairs),
+            "pairs": [{"subject": s, "object": o} for s, o in pairs[:_MAX_ITEMS]],
+        })
+
+    domain_range: List[Dict[str, Any]] = []
+    for prop in sorted({p for p in target.predicates() if isinstance(p, URIRef)}, key=str):
+        domains = sorted({iri for d in merged.objects(prop, RDFS.domain)
+                          for iri in _class_expr_iris(merged, d)})
+        ranges = sorted({iri for r in merged.objects(prop, RDFS.range)
+                         for iri in _class_expr_iris(merged, r)})
+        if not domains and not ranges:
+            continue
+        domain_range.append({
+            "property": str(prop),
+            "domain": domains,
+            "range": ranges,
+            "uses": sum(1 for _ in target.subject_objects(prop)),
+        })
+
+    return {
+        "disjointness_axioms": disjoint,
+        "disjointness_axiom_count": len(disjoint),
+        "characteristic_properties": characteristic_props,
+        "pairs_examined": sum(p["pairs_examined"] for p in characteristic_props),
+        "domain_range_properties": domain_range[:_MAX_ITEMS],
+        "domain_range_property_count": len(domain_range),
+    }
 
 
 def reason_detailed(
@@ -108,8 +239,15 @@ def reason_detailed(
     recur on every page. Reasoning always runs over the full merged graph; the
     consistency verdict is unaffected. Filtering happens BEFORE explain, so
     justification JVM calls run only for statements that will be reported.
+
+    `checks` (reasoning_checks) reports the constraints present for this run --
+    the disjointness axioms, the characteristic-bearing properties with the pairs
+    examined, the domain- and range-constrained properties used -- so the panel
+    renders what was verified rather than a fixed sentence. Assembled from the
+    merged graph before Pellet runs, so it is present whatever the verdict.
     """
     import owlready2
+    from rdflib import Graph
     from validation.pellet_validate import (
         _fetch_case_content_from_db,
         _build_merged_graph,
@@ -124,6 +262,7 @@ def reason_detailed(
         "inferred_subclass_count": 0,
         "inferred_type_count": 0,
         "truncated": False,
+        "checks": None,
         "error": None,
     }
 
@@ -136,6 +275,9 @@ def reason_detailed(
 
     try:
         merged = _build_merged_graph(content)
+        target = Graph()
+        target.parse(data=content, format="turtle")
+        base["checks"] = reasoning_checks(merged, target)
         serialized = merged.serialize(format="nt")
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".nt", delete=False, encoding="utf-8"
@@ -210,7 +352,7 @@ def reason_detailed(
                     nothing.append(str(ind.iri))
 
             if scope == "local":
-                local = _local_subjects(content)
+                local = _subject_iris(target)
                 sub_edges = [e for e in sub_edges if e["child"] in local]
                 type_edges = [e for e in type_edges if e["individual"] in local]
                 nothing = [n for n in nothing if n in local]

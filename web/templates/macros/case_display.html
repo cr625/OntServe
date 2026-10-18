@@ -3,8 +3,10 @@
 
 {# Render an individual entity card. Individuals are colour-coded by their
    9-concept type (the concept_meta chip + left accent), labelled as instances
-   of their class (clickable), and never repeat the class in the body. #}
-{% macro render_entity_card(entity, color=none, ontology_name=none) %}
+   of their class (clickable), and never repeat the class in the body.
+   type_labels: the route's {class IRI: {label, ontology}} index, so class
+   names render from rdfs:label (type_label) rather than the split fragment. #}
+{% macro render_entity_card(entity, color=none, ontology_name=none, type_labels=none) %}
 {% set cc = materialized_category(entity) %}
 {% set cm = concept_meta(cc) if cc else none %}
 {% set accent = (cm.color if cm else color) or '#6c757d' %}
@@ -36,9 +38,9 @@
         <i class="bi bi-chevron-right"></i>
         {% if ontology_name %}
         <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=raw_type) }}"
-           class="instance-of-link" title="{{ entity.parent_uri }}">{{ raw_type | split_pascal }}</a>
+           class="instance-of-link" title="{{ entity.parent_uri }}">{{ type_label(entity.parent_uri, type_labels) }}</a>
         {% else %}
-        <span class="instance-of-link">{{ raw_type | split_pascal }}</span>
+        <span class="instance-of-link">{{ type_label(entity.parent_uri, type_labels) }}</span>
         {% endif %}
         {# Secondary classifications: the individual's other non-core rdf:types
            (e.g. the Kong relational archetypes materialized from actor edges,
@@ -53,9 +55,9 @@
         {% if ontology_name %}
         <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=t_frag) }}"
            class="badge bg-light text-secondary border text-decoration-none ms-1"
-           title="Also classified as ({{ t }})">{{ t_frag | split_pascal }}</a>
+           title="Also classified as ({{ t }})">{{ type_label(t, type_labels) }}</a>
         {% else %}
-        <span class="badge bg-light text-secondary border ms-1">{{ t_frag | split_pascal }}</span>
+        <span class="badge bg-light text-secondary border ms-1">{{ type_label(t, type_labels) }}</span>
         {% endif %}
         {% endif %}
         {% endfor %}
@@ -96,8 +98,34 @@
 </div>
 {% endmacro %}
 
+{# "Types used" chip row: the shared classes a section's individuals are typed
+   with, which the case ontology redeclares without a definition (rdf:type
+   owl:Class + rdfs:subClassOf only; case_display.is_bare_class_declaration).
+   Listed as links to the class pages instead of rendered as cards, so a
+   section's size reflects its individuals. Each chip links to the ontology
+   holding the labelled (definitional) copy when the label index knows it,
+   else to this ontology's copy. #}
+{% macro render_types_used(types, ontology_name=none, type_labels=none) %}
+{% if types %}
+<div class="types-used">
+    <span class="types-used-label" title="Classes the individuals above are typed with. This case ontology redeclares each as a subclass of its core component without a definition, so they are listed here rather than as cards. The definition is on the class page.">Types used</span>
+    {% for t in types %}
+    {% set frag = t.uri.split('#')[-1].split('/')[-1] %}
+    {% set home = type_labels.get(t.uri) if type_labels else none %}
+    {% set link_ontology = (home.ontology if (home is mapping and home.ontology) else ontology_name) %}
+    {% if link_ontology %}
+    <a href="{{ url_for('ontology.entity_detail', ontology_name=link_ontology, fragment=frag) }}"
+       class="badge bg-light text-secondary border text-decoration-none" title="{{ t.uri }}">{{ type_label(t.uri, type_labels) }}</a>
+    {% else %}
+    <span class="badge bg-light text-secondary border" title="{{ t.uri }}">{{ type_label(t.uri, type_labels) }}</span>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+{% endmacro %}
+
 {# Render a section with entities #}
-{% macro render_section(section, ontology_name=none) %}
+{% macro render_section(section, ontology_name=none, type_labels=none) %}
 {% set ns = namespace(count=section.entities|length) %}
 {% if section.subsections %}
 {% set ns.count = 0 %}
@@ -136,14 +164,14 @@
 
             <div class="entity-list" id="list-{{ section.id }}-{{ subsection.id }}">
                 {% for entity in subsection.entities[:section.max_preview|default(10)] %}
-                {{ render_entity_card(entity, subsection.color, ontology_name) }}
+                {{ render_entity_card(entity, subsection.color, ontology_name, type_labels) }}
                 {% endfor %}
             </div>
 
             {% if subsection.entities|length > section.max_preview|default(10) %}
             <div class="hidden-entities" id="hidden-{{ section.id }}-{{ subsection.id }}" style="display: none;">
                 {% for entity in subsection.entities[section.max_preview|default(10):] %}
-                {{ render_entity_card(entity, subsection.color, ontology_name) }}
+                {{ render_entity_card(entity, subsection.color, ontology_name, type_labels) }}
                 {% endfor %}
             </div>
             <button class="btn btn-outline-secondary btn-sm show-more-btn"
@@ -152,6 +180,7 @@
                 Show {{ subsection.entities|length - section.max_preview|default(10) }} more
             </button>
             {% endif %}
+            {{ render_types_used(subsection.types_used, ontology_name, type_labels) }}
         </div>
         {% endif %}
         {% endfor %}
@@ -159,14 +188,14 @@
         <!-- Render entities directly -->
         <div class="entity-list" id="list-{{ section.id }}">
             {% for entity in section.entities[:section.max_preview|default(10)] %}
-            {{ render_entity_card(entity, ontology_name=ontology_name) }}
+            {{ render_entity_card(entity, ontology_name=ontology_name, type_labels=type_labels) }}
             {% endfor %}
         </div>
 
         {% if section.entities|length > section.max_preview|default(10) %}
         <div class="hidden-entities" id="hidden-{{ section.id }}" style="display: none;">
             {% for entity in section.entities[section.max_preview|default(10):] %}
-            {{ render_entity_card(entity, ontology_name=ontology_name) }}
+            {{ render_entity_card(entity, ontology_name=ontology_name, type_labels=type_labels) }}
             {% endfor %}
         </div>
         <button class="btn btn-outline-secondary btn-sm show-more-btn"
@@ -174,6 +203,7 @@
             Show {{ section.entities|length - section.max_preview|default(10) }} more
         </button>
         {% endif %}
+        {{ render_types_used(section.types_used, ontology_name, type_labels) }}
         {% endif %}
     </div>
 </div>
