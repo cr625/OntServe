@@ -5,7 +5,7 @@ Provides generic stats computation from TTL content when OntologyEntity
 records aren't populated, and display_config based customization.
 """
 
-from rdflib import Graph, RDF, RDFS, OWL, Namespace, BNode
+from rdflib import Graph, RDF, RDFS, OWL, Namespace, BNode, URIRef
 from rdflib.collection import Collection
 from collections import defaultdict
 import re
@@ -143,66 +143,66 @@ def compute_stats_from_ttl(ttl_content: str) -> dict:
     }
 
 
-def compute_category_counts(ttl_content: str, categories: list) -> dict:
-    """Compute entity counts by category using rdfs:subClassOf relationships.
+def _category_entities_from_graph(g, prefix: str) -> list:
+    """Entities for one category, from a merged ontology graph.
 
-    For ProEthica ontologies, entities are organized via rdfs:subClassOf
-    relationships to core concept types (Role, Principle, Obligation, etc.)
-
-    Args:
-        ttl_content: Raw TTL string
-        categories: List of category configs with 'prefix' keys
-
-    Returns:
-        Dict mapping category labels to counts
+    A category is the direct subclasses of its core (or intermediate)
+    class. Action and Event keep their categories in the core layer
+    (origin subclasses for Event; Action itself is the category), so
+    when no subclass exists the category class is the single entry.
+    Deprecated classes are not served as category members.
     """
-    if not ttl_content or not categories:
-        return {}
+    PROETH_CORE = Namespace('http://proethica.org/ontology/core#')
+    PROETH = Namespace('http://proethica.org/ontology/intermediate#')
 
+    uris = []
+    for parent in (PROETH_CORE[prefix], PROETH[prefix]):
+        for s in g.subjects(RDFS.subClassOf, parent):
+            if isinstance(s, BNode) or str(s) in uris:
+                continue
+            if (s, OWL.deprecated, None) in g and any(
+                    str(v).lower() == 'true' for v in g.objects(s, OWL.deprecated)):
+                continue
+            uris.append(str(s))
+
+    if not uris:
+        category_uri = PROETH_CORE[prefix]
+        if (category_uri, RDF.type, OWL.Class) in g:
+            uris = [str(category_uri)]
+
+    entities = []
+    for uri in uris:
+        ref = URIRef(uri)
+        entity_label = g.value(ref, RDFS.label)
+        comment = g.value(ref, RDFS.comment)
+        entities.append({
+            'uri': uri,
+            'label': str(entity_label) if entity_label else extract_local_name(uri),
+            'comment': str(comment) if comment else None
+        })
+    entities.sort(key=lambda x: x['label'])
+    return entities
+
+
+def _parse_category_graph(ttl_content: str, extra_ttl_content: str = None):
     g = Graph()
     try:
         g.parse(data=ttl_content, format='turtle')
     except Exception:
-        return {}
+        return None
+    if extra_ttl_content:
+        try:
+            g.parse(data=extra_ttl_content, format='turtle')
+        except Exception:
+            pass
+    return g
 
-    counts = {}
 
-    # Known namespaces for ProEthica core concepts
-    PROETH_CORE = Namespace('http://proethica.org/ontology/core#')
-    PROETH = Namespace('http://proethica.org/ontology/intermediate#')
-
-    for cat in categories:
-        prefix = cat.get('prefix', '')
-        label = cat.get('label', prefix)
-
-        # Count subclasses of the core concept type
-        counted_uris = set()
-
-        # Check proeth-core:Prefix
-        for s, p, o in g.triples((None, RDFS.subClassOf, PROETH_CORE[prefix])):
-            counted_uris.add(str(s))
-
-        # Also check proeth:Prefix (intermediate namespace)
-        for s, p, o in g.triples((None, RDFS.subClassOf, PROETH[prefix])):
-            counted_uris.add(str(s))
-
-        count = len(counted_uris)
-
-        # Fallback: count by local name containing the prefix if no subClassOf found
-        if count == 0:
-            class_uris = set()
-            for s in g.subjects(RDF.type, OWL.Class):
-                class_uris.add(str(s))
-
-            for uri in class_uris:
-                local_name = extract_local_name(uri)
-                # Check if local name contains the prefix (e.g., "FundamentalEthicalPrinciple" contains "Principle")
-                if prefix in local_name:
-                    count += 1
-
-        counts[label] = count
-
-    return counts
+def compute_category_counts(ttl_content: str, categories: list,
+                            extra_ttl_content: str = None) -> dict:
+    """Entity counts by category; identical classification to the Concepts tab."""
+    entities = compute_category_entities(ttl_content, categories, extra_ttl_content)
+    return {label: data['count'] for label, data in entities.items()}
 
 
 def extract_local_name(uri: str) -> str:
@@ -241,12 +241,15 @@ def humanize_domain_range(graph, node, full_uri=False):
     return str(node) if full_uri else extract_local_name(str(node))
 
 
-def compute_category_entities(ttl_content: str, categories: list) -> dict:
+def compute_category_entities(ttl_content: str, categories: list,
+                              extra_ttl_content: str = None) -> dict:
     """Compute entities grouped by category for the Concepts tab.
 
     Args:
         ttl_content: Raw TTL string
         categories: List of category configs with 'prefix' keys
+        extra_ttl_content: Optional TTL merged into the graph (the core
+            ontology, which carries the Action and Event categories)
 
     Returns:
         Dict mapping category labels to lists of entities
@@ -254,55 +257,20 @@ def compute_category_entities(ttl_content: str, categories: list) -> dict:
     if not ttl_content or not categories:
         return {}
 
-    g = Graph()
-    try:
-        g.parse(data=ttl_content, format='turtle')
-    except Exception:
+    g = _parse_category_graph(ttl_content, extra_ttl_content)
+    if g is None:
         return {}
 
     result = {}
-
-    PROETH_CORE = Namespace('http://proethica.org/ontology/core#')
-    PROETH = Namespace('http://proethica.org/ontology/intermediate#')
-
     for cat in categories:
         prefix = cat.get('prefix', '')
         label = cat.get('label', prefix)
-        color = cat.get('color', '#6c757d')
-        icon = cat.get('icon', 'bi-circle')
-
-        entities = []
-
-        # Find subclasses of the core concept type
-        for s, p, o in g.triples((None, RDFS.subClassOf, PROETH_CORE[prefix])):
-            entity_label = g.value(s, RDFS.label)
-            comment = g.value(s, RDFS.comment)
-            entities.append({
-                'uri': str(s),
-                'label': str(entity_label) if entity_label else extract_local_name(str(s)),
-                'comment': str(comment) if comment else None
-            })
-
-        # Also check intermediate namespace
-        for s, p, o in g.triples((None, RDFS.subClassOf, PROETH[prefix])):
-            uri_str = str(s)
-            if uri_str not in [e['uri'] for e in entities]:
-                entity_label = g.value(s, RDFS.label)
-                comment = g.value(s, RDFS.comment)
-                entities.append({
-                    'uri': uri_str,
-                    'label': str(entity_label) if entity_label else extract_local_name(uri_str),
-                    'comment': str(comment) if comment else None
-                })
-
-        # Sort by label
-        entities.sort(key=lambda x: x['label'])
-
+        entities = _category_entities_from_graph(g, prefix)
         result[label] = {
             'entities': entities,
             'count': len(entities),
-            'color': color,
-            'icon': icon,
+            'color': cat.get('color', '#6c757d'),
+            'icon': cat.get('icon', 'bi-circle'),
             'prefix': prefix
         }
 
@@ -546,14 +514,31 @@ def build_stats_context(ontology, entities: dict, relationships: dict) -> dict:
     # Category counts and entities (for domain-specific views like ProEthica)
     featured_categories = display_config.get('featured_categories', [])
     if featured_categories and ontology.current_content:
-        stats['category_counts'] = compute_category_counts(
-            ontology.current_content,
-            featured_categories
-        )
+        # Action and Event categories live in the core layer; merge it so
+        # all nine categories resolve in the presentation.
+        core_content = None
+        if ontology.name != 'proethica-core':
+            try:
+                from sqlalchemy import select
+
+                from web.models import Ontology, db
+
+                core = db.session.execute(
+                    select(Ontology).where(Ontology.name == 'proethica-core')
+                ).scalar_one_or_none()
+                if core is not None:
+                    core_content = core.current_content
+            except Exception:
+                core_content = None
         stats['category_entities'] = compute_category_entities(
             ontology.current_content,
-            featured_categories
+            featured_categories,
+            extra_ttl_content=core_content
         )
+        stats['category_counts'] = {
+            label: data['count']
+            for label, data in stats['category_entities'].items()
+        }
         # Calculate total entities in categories
         stats['category_total'] = sum(
             cat_data['count'] for cat_data in stats['category_entities'].values()
