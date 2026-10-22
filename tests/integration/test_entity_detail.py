@@ -89,6 +89,40 @@ class TestMultiValuedDomainRange:
 
 
 @pytest.mark.integration
+class TestSourceExcerpt:
+    """A proeth-core:sourceExcerpt quote renders in the Definition card beside the
+    iao:0000119 definition source it evidences."""
+
+    def test_entity_detail_renders_source_excerpt(self, client, db_session, helpers):
+        from web.models import OntologyEntity
+
+        ontology = helpers.create_test_ontology(db_session, name='test-excerpt')
+        uri = 'http://test.org/test-excerpt#ProfessionalRole'
+        entity = OntologyEntity(
+            ontology_id=ontology.id,
+            entity_type='class',
+            uri=uri,
+            label='Professional Role',
+            comment='A role borne by an agent who practices a profession.',
+            properties={
+                'IAO_0000119': 'Dennis et al. (2016). Formal verification of ethical choices.',
+                'sourceExcerpt': 'Dennis et al. (2016, p. 4): "a code of ethics that has already '
+                                 'been decided upon by relevant authorities and associations."',
+            },
+            content_hash=OntologyEntity.compute_content_hash(
+                uri, 'Professional Role', 'A role borne by an agent who practices a profession.'
+            )
+        )
+        db_session.add(entity)
+        db_session.commit()
+
+        response = client.get('/entity/test-excerpt/ProfessionalRole')
+        assert response.status_code == 200
+        assert b'Source excerpt' in response.data
+        assert b'relevant authorities and associations' in response.data
+
+
+@pytest.mark.integration
 class TestCrossOntologyFallback:
     """Test cross-ontology entity lookup fallback.
 

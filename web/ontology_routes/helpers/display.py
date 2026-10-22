@@ -46,6 +46,7 @@ _DEFINITION_LAYER_GROUP = {
     'IAO_0000115': 'definition',         # IAO textual definition (primary; same group)
     'IAO_0000119': 'definition_source',  # definition source / citations
     'IAO_0000116': 'editor_note',        # editor note / extraction framing
+    'sourceExcerpt': 'source_excerpt',   # proeth-core:sourceExcerpt, a page-cited quote from a 119 source
 }
 
 # Human-readable labels for property keys
@@ -111,6 +112,7 @@ def categorize_entity_properties(entity):
         'definition': [],
         'gloss': [],
         'definition_source': [],
+        'source_excerpt': [],
         'editor_note': [],
         'scope_notes': [],
         'core': [],
@@ -159,7 +161,8 @@ def categorize_entity_properties(entity):
             continue
 
         # IAO definition layer -> the Definition card, not the raw core list:
-        # IAO_0000115 (definition text), IAO_0000119 (definition source), IAO_0000116 (editor note).
+        # IAO_0000115 (definition text), IAO_0000119 (definition source), IAO_0000116 (editor note),
+        # and the sourceExcerpt quotes that evidence a 119 source.
         if key in _DEFINITION_LAYER_GROUP:
             vals = value if isinstance(value, list) else [value]
             groups[_DEFINITION_LAYER_GROUP[key]].extend(str(v) for v in vals if v)

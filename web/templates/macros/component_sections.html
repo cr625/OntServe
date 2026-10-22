@@ -78,9 +78,10 @@
    SECONDARY muted gloss beneath it (suppressed when it merely repeats the definition); when no formal
    definition exists, rdfs:comment is the primary text instead. skos:scopeNote is the contextual/
    inherited note; IAO_0000116 is the editor note (extraction framing); IAO_0000119 is the definition
-   source (citations). These keys are routed here so they no longer appear as raw rows in Properties. #}
+   source (citations), and proeth-core:sourceExcerpt carries a page-cited quote from one of those
+   sources. These keys are routed here so they no longer appear as raw rows in Properties. #}
 {% macro definition_card(entity, prop_groups) %}
-{% if entity.comment or prop_groups.definition or prop_groups.description or prop_groups.scope_notes or prop_groups.editor_note or prop_groups.definition_source %}
+{% if entity.comment or prop_groups.definition or prop_groups.description or prop_groups.scope_notes or prop_groups.editor_note or prop_groups.definition_source or prop_groups.source_excerpt %}
 <div class="card mb-3">
     <div class="card-header"><h6 class="mb-0">Definition</h6></div>
     <div class="card-body">
@@ -143,6 +144,15 @@
             <div class="text-uppercase text-muted mb-1" style="font-size:0.7em; letter-spacing:0.04em;">Definition source</div>
             <ul class="small text-muted mb-0 ps-3">
             {% for src in prop_groups.definition_source %}<li>{{ src }}</li>{% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {# proeth-core:sourceExcerpt: verbatim quotes, each led by author, year, and page #}
+        {% if prop_groups.source_excerpt %}
+        <div class="mt-2 pt-2 border-top">
+            <div class="text-uppercase text-muted mb-1" style="font-size:0.7em; letter-spacing:0.04em;">Source excerpt</div>
+            <ul class="small text-muted mb-0 ps-3">
+            {% for quote in prop_groups.source_excerpt %}<li>{{ quote }}</li>{% endfor %}
             </ul>
         </div>
         {% endif %}

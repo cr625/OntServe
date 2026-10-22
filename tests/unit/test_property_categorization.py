@@ -51,3 +51,20 @@ def test_categorize_splits_relationships_from_attributes():
     # caseinvolvement is the description; sourcetext is evidence
     assert any('engineer did X' in str(v) for _, v in groups['description'])
     assert groups['evidence']
+
+
+def test_source_excerpt_routes_to_the_definition_card():
+    # proeth-core:sourceExcerpt is a page-cited quote from an iao:0000119 source: it joins the
+    # definition layer beside the source, not the raw Properties list.
+    excerpt = 'Dennis et al. (2016, p. 4): "We can focus not on developing ethical principles..."'
+    entity = SimpleNamespace(properties={
+        'IAO_0000119': ['Davis (1991). Thinking Like an Engineer.',
+                        'Dennis et al. (2016). Formal verification of ethical choices.'],
+        'sourceExcerpt': excerpt,
+    })
+
+    groups = categorize_entity_properties(entity)
+
+    assert groups['source_excerpt'] == [excerpt]
+    assert len(groups['definition_source']) == 2
+    assert not groups['core']
