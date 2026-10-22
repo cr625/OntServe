@@ -351,7 +351,7 @@ iao:0000116 a owl:AnnotationProperty ;
     rdfs:comment "Editor note; used here to carry the literature-grounded extraction framing for a component."@en .
 proeth-core:sourceExcerpt a owl:AnnotationProperty ;
     rdfs:label "source excerpt"@en ;
-    rdfs:comment "A verbatim excerpt from one of the iao:0000119 definition sources of the same class, led by the author, year, and page, which evidences the claim the annotations of the class attribute to that source. The extraction prompts read it at injection time."@en .
+    rdfs:comment "A verbatim excerpt from one of the iao:0000119 definition sources of the same class, led by the author, year, and page, which evidences the claim the annotations of the class attribute to that source."@en .
 
 # --- Role-type definitional attributes (the R component's class-level schema, Fix 2B).
 # Annotation properties applied to role CLASSES (the role-type carries them), distinct from the
