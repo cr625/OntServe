@@ -19,7 +19,8 @@
     dc:creator "ProEthica AI"@en ;
     dc:date "2026-02-19"^^xsd:date ;
     rdfs:comment "Core ontology defining the formal specification D=(R,P,O,S,Rs,A,E,Ca,Cs) with CodeProvision extension for ethics code integration."@en ;
-    owl:versionInfo "2.10.23"^^xsd:string ;
+    owl:versionInfo "2.10.24"^^xsd:string ;
+    skos:changeNote "v2.10.24: proeth-core:sourceExcerpt declared for verbatim, page-cited excerpts from the definition sources of a class, first used on proeth:ProfessionalRole for Dennis et al. (2016). No logical axioms changed."@en ;
     skos:changeNote "v2.10.23: annotation editorial revision. Displayed annotations (rdfs:comment, iao:0000115, iao:0000116, skos:scopeNote) restated as descriptions of the current vocabulary, and the change-note history restated as vocabulary evolution. No logical axioms changed."@en ;
     skos:changeNote "v2.10.22: documentation revisions on the Ca and Cs components. usesResource, constrainedBy, and realizesCapability are documented as reserved rather than deprecated. The Dennis et al. (2016) specification claim is restated in the terms of the paper (specification into precise context-dependent constraints, not complete specification). The Capability editor note states the competence-kind mechanism (the kind rides the class label through the match decision) and the CompetenceGapState route for lacked competences; hasCapability records that committed data assert the possessedBy direction. The capability kind count is corrected to nineteen."@en ;
     skos:changeNote "v2.10.21: the Capability scope note names the incoming requiresCapability edge (the earlier requiredForObligation wording named a carrier field, not the edge). Annotation-only."@en ;
@@ -348,6 +349,9 @@ iao:0000119 a owl:AnnotationProperty ;
 iao:0000116 a owl:AnnotationProperty ;
     rdfs:label "editor note"@en ;
     rdfs:comment "Editor note; used here to carry the literature-grounded extraction framing for a component."@en .
+proeth-core:sourceExcerpt a owl:AnnotationProperty ;
+    rdfs:label "source excerpt"@en ;
+    rdfs:comment "A verbatim excerpt from one of the iao:0000119 definition sources of the same class, led by the author, year, and page, which evidences the claim the annotations of the class attribute to that source. The extraction prompts read it at injection time."@en .
 
 # --- Role-type definitional attributes (the R component's class-level schema, Fix 2B).
 # Annotation properties applied to role CLASSES (the role-type carries them), distinct from the
