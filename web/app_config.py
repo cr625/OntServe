@@ -22,6 +22,16 @@ class Config:
     # Database settings
     SQLALCHEMY_DATABASE_URI = get_database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Pool resilience against server-side connection loss: pre_ping discards
+    # a pooled connection the server has already closed instead of handing it
+    # to the next request as a 500. Under gunicorn --preload --max-requests,
+    # every replacement worker inherits the pooled connection the master
+    # opened at startup, which the previous worker closed on exit. recycle
+    # retires connections before typical server and network idle limits.
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+    }
     
     # Application settings
     PORT = 5003
@@ -82,6 +92,9 @@ class TestingConfig(Config):
     """Testing configuration"""
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    # The in-memory database exists only inside its one pooled connection, so
+    # a recycled connection would be an empty database.
+    SQLALCHEMY_ENGINE_OPTIONS = {'pool_pre_ping': True}
     WTF_CSRF_ENABLED = False
     
     # Storage directories for testing
