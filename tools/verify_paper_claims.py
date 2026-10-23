@@ -51,6 +51,10 @@ from typing import List, Optional
 
 DEFAULT_BASE_URL = "https://ontserve.ontorealm.net"
 
+# The public site answers 403 to the default Python-urllib user agent (bot protection),
+# while library clients such as requests, SPARQLWrapper and rdflib pass. Each probe names itself.
+USER_AGENT = "OntServe-verify-paper-claims/1.0"
+
 # Ontologies the paper enumerates or implies, with their live-site slugs.
 # Slugs come from the live homepage listing; some use URL-encoded spaces
 # because that is how the Flask route registers them.
@@ -111,7 +115,7 @@ def _head_or_get(url: str, timeout: float = 15.0) -> tuple[int, str]:
     Returns (status_code, "") on success; (0, detail) on error.
     """
     try:
-        req = urllib.request.Request(url, headers={"Accept": "text/html"})
+        req = urllib.request.Request(url, headers={"Accept": "text/html", "User-Agent": USER_AGENT})
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return resp.status, ""
     except urllib.error.HTTPError as exc:
@@ -141,7 +145,7 @@ def _check_sparql_endpoint(base_url: str) -> CheckResult:
     req = urllib.request.Request(
         url,
         data=body,
-        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        headers={"Content-Type": "application/json", "Accept": "application/json", "User-Agent": USER_AGENT},
         method="POST",
     )
     try:
