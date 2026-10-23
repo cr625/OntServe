@@ -37,35 +37,8 @@
         word-break: break-word;
     }
 
-    /* Relationship (object-property) triples, matching the case-page cards */
-    .entity-relationships {
-        border-top: 1px dashed #e9ecef;
-        margin-top: 0.5rem;
-        padding-top: 0.5rem;
-    }
-    .relationships-label {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: #adb5bd;
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-    }
-    .relationship-row {
-        font-size: 0.88rem;
-        line-height: 1.6;
-        color: #495057;
-    }
-    .relationship-row .bi { color: #adb5bd; vertical-align: -0.1rem; }
-    .rel-predicate {
-        font-family: var(--bs-font-monospace, monospace);
-        color: #6f42c1;
-        font-size: 0.82rem;
-        margin-right: 0.4rem;
-    }
-    .rel-target-link { color: #0d6efd; text-decoration: none; }
-    .rel-target-link:hover { text-decoration: underline; }
-    /* sh:path column: pink (the code colour, matching the "(sh:path)" header) but still a link.
+    /* Relationship triples: the shared .entity-relationships rules in style.css.
+       sh:path column: pink (the code colour, matching the "(sh:path)" header) but still a link.
        Colour the anchor directly -- the nested <code> inherits it (Bootstrap's code rule resolves
        an empty --bs-code-color to no value, so <code> takes its parent's colour). */
     .rel-target-link.sh-path-link, .rel-target-link.sh-path-link code { color: var(--bs-code-color, #d63384); }

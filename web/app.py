@@ -318,8 +318,9 @@ def create_app(config_name=None):
     # Concept-type badge metadata (abbrev / colour / icon / name) sourced from
     # config/case_display.yaml, so the 9-concept colour coding is consistent
     # across the formalism filter row, the cards, and the entity detail page.
-    from web.case_display import concept_type_meta
+    from web.case_display import component_meta, concept_type_meta
     app.jinja_env.globals['concept_meta'] = concept_type_meta
+    app.jinja_env.globals['component_meta'] = component_meta
 
     # The individual's materialized direct core category (one of the nine D-tuple
     # categories), read from its rdf:type proeth-core:<Category> assertion (CMT-1).
@@ -327,6 +328,13 @@ def create_app(config_name=None):
     # property is retired.
     from web.case_display import materialized_category
     app.jinja_env.globals['materialized_category'] = materialized_category
+
+    # The case page groups its ordered blocks into parts, prints a summary line
+    # of counts and the type counts of the sections that load on demand.
+    from web.case_display import build_case_summary, group_blocks, section_type_counts
+    app.jinja_env.globals['group_case_blocks'] = group_blocks
+    app.jinja_env.globals['case_summary'] = build_case_summary
+    app.jinja_env.globals['section_type_counts'] = section_type_counts
 
     # Single source of truth for the front-end Bootstrap version, referenced by
     # base.html and the two standalone editor pages (editor/edit.html,

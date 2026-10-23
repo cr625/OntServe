@@ -1,658 +1,122 @@
 {% extends "base.html" %}
-{% from "macros/case_display.html" import render_entity_card, render_section %}
+{% from "macros/case_display.html" import render_section %}
 {% from "macros/reasoning_panel.html" import render_reasoning_panel %}
 {% from "macros/case_panels.html" import render_competition, render_citations, render_conclusions %}
 
-{% block title %}{{ ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else ontology.name }} - Case View - OntServe{% endblock %}
+{% set md = ontology.meta_data or {} %}
+{% set display_title = md.get('display_name') %}
+{% set case_id = ontology.name.rsplit('-', 1)[-1] if ontology.name.startswith('proethica-case-') else none %}
+
+{% block title %}{{ display_title or ontology.name }} - Case - OntServe{% endblock %}
 
 {% block extra_css %}
-<style>
-    /* Page header */
-    .case-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        margin-bottom: 1rem;
-    }
-
-    .case-header h1 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 600;
-    }
-
-    .case-header .case-uri {
-        font-family: monospace;
-        font-size: 0.8rem;
-        opacity: 0.85;
-        margin-top: 0.5rem;
-    }
-
-    .case-header .case-meta {
-        font-size: 0.8rem;
-        opacity: 0.9;
-    }
-
-    .case-header .case-description {
-        font-size: 0.9rem;
-    }
-
-    .case-header .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-    }
-
-    .case-header .stat-label {
-        font-size: 0.85rem;
-        opacity: 0.9;
-    }
-
-    .case-header .stat-note {
-        font-size: 0.72rem;
-        opacity: 0.8;
-    }
-
-    /* "Types used" chip row: the shared classes a section's individuals are
-       typed with (bare per-case redeclarations), listed instead of cards. */
-    .types-used {
-        font-size: 0.8rem;
-        color: #6c757d;
-        margin: 0.25rem 0 0.5rem 0.25rem;
-    }
-
-    .types-used-label {
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        font-size: 0.68rem;
-        font-weight: 600;
-        color: #adb5bd;
-        margin-right: 0.35rem;
-    }
-
-    .types-used .badge {
-        font-weight: 500;
-        margin: 0 0.15rem 0.2rem 0;
-    }
-
-    .breadcrumb-nav {
-        margin-bottom: 1rem;
-    }
-
-    .breadcrumb-nav a {
-        color: #6c757d;
-        text-decoration: none;
-    }
-
-    .breadcrumb-nav a:hover {
-        color: #495057;
-    }
-
-    /* 9-Concept Formalism Panel - Full width above content */
-    .formalism-panel {
-        background: white;
-        border: 1px solid #e9ecef;
-        border-radius: 0.75rem;
-        padding: 1rem 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    .formalism-panel-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.75rem;
-    }
-
-    .formalism-panel-header h5 {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #495057;
-    }
-
-    .formalism-panel-header .stats-summary {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-
-    /* Horizontal concept filter row */
-    .concept-filter-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        justify-content: center;
-    }
-
-    .concept-filter-item {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.4rem 0.75rem;
-        border-radius: 2rem;
-        text-decoration: none;
-        color: inherit;
-        border: 1px solid #dee2e6;
-        transition: all 0.15s;
-        background: white;
-        font-size: 0.85rem;
-    }
-
-    .concept-filter-item:hover {
-        border-color: var(--concept-color);
-        background: #fafafa;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    }
-
-    .concept-filter-item.disabled {
-        opacity: 0.35;
-        pointer-events: none;
-        border-style: dashed;
-    }
-
-    .concept-filter-abbrev {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 1.5rem;
-        height: 1.5rem;
-        border-radius: 50%;
-        background: var(--concept-color);
-        color: white;
-        font-size: 0.7rem;
-        font-weight: bold;
-    }
-
-    .concept-filter-name {
-        font-weight: 500;
-        color: #495057;
-    }
-
-    .concept-filter-count {
-        font-size: 0.75rem;
-        color: #6c757d;
-    }
-
-    /* Section styles */
-    .case-section {
-        margin-bottom: 1.5rem;
-    }
-
-    .case-section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        padding: 0.6rem 1rem;
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 0.5rem;
-        margin-bottom: 0.5rem;
-        transition: background 0.15s;
-    }
-
-    .case-section-header:hover {
-        background: #e9ecef;
-    }
-
-    .case-section-header h4 {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 600;
-    }
-
-    .case-section-header .badge {
-        font-size: 0.75rem;
-    }
-
-    /* Individual cards - tightened */
-    .entity-card {
-        background: #fff;
-        border: 1px solid #e9ecef;
-        border-left: 3px solid var(--entity-color, #6c757d);
-        border-radius: 0 0.375rem 0.375rem 0;
-        padding: 0.5rem 0.75rem;
-        margin-bottom: 0.4rem;
-        transition: box-shadow 0.15s, transform 0.15s;
-    }
-
-    .entity-card:hover {
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        transform: translateX(2px);
-    }
-
-    /* Title row: concept chip + label */
-    .individual-head {
-        display: flex;
-        align-items: baseline;
-        gap: 0.45rem;
-    }
-
-    /* Concept-type chip (R, P, O, ...) marking the item as an individual of
-       that 9-concept type. Colour matches the concept. */
-    .concept-chip {
-        flex-shrink: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 1.35rem;
-        height: 1.35rem;
-        padding: 0 0.3rem;
-        border-radius: 0.3rem;
-        color: #fff;
-        font-size: 0.68rem;
-        font-weight: 700;
-        line-height: 1;
-        transform: translateY(1px);
-    }
-
-    /* "instance of > Class" line: makes the individual/class distinction explicit */
-    .instance-of {
-        font-size: 0.78rem;
-        color: #6c757d;
-        margin: 0.1rem 0 0.15rem 1.8rem;
-    }
-
-    .instance-of .bi { font-size: 0.65rem; }
-
-    .instance-of-label { font-style: italic; }
-
-    .instance-of-link {
-        color: var(--entity-color, #495057);
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .instance-of-link:hover { text-decoration: underline; }
-
-    .entity-label {
-        font-weight: 600;
-        font-size: 0.95rem;
-        color: #212529;
-    }
-
-    .entity-link {
-        color: #212529;
-        text-decoration: none;
-        transition: color 0.15s;
-    }
-
-    .entity-link:hover {
-        color: #0d6efd;
-        text-decoration: underline;
-    }
-
-    .entity-comment {
-        font-size: 0.85rem;
-        color: #6c757d;
-        margin: 0.25rem 0;
-        line-height: 1.4;
-    }
-
-    /* Entity properties display */
-    .entity-properties {
-        background: #f8f9fa;
-        border-radius: 0.25rem;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.8rem;
-    }
-
-    .property-row {
-        display: flex;
-        gap: 0.5rem;
-        padding: 0.2rem 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .property-row:last-child {
-        border-bottom: none;
-    }
-
-    .property-key {
-        color: #6c757d;
-        font-weight: 500;
-        min-width: 100px;
-        flex-shrink: 0;
-    }
-
-    .property-value {
-        color: #212529;
-        word-break: break-word;
-    }
-
-    .property-value code {
-        font-size: 0.75rem;
-        padding: 0.1rem 0.3rem;
-        background: #e9ecef;
-        border-radius: 0.2rem;
-    }
-
-    /* Sidebar */
-    .section-nav {
-        position: sticky;
-        top: 1rem;
-    }
-
-    .section-nav .nav-link {
-        padding: 0.4rem 0.75rem;
-        color: #495057;
-        border-radius: 0.25rem;
-        font-size: 0.875rem;
-    }
-
-    .section-nav .nav-link:hover {
-        background: #f8f9fa;
-    }
-
-    .section-nav .nav-link.active {
-        background: #e7f1ff;
-        color: #0d6efd;
-    }
-
-    /* Subsections */
-    .subsection {
-        margin-left: 0.5rem;
-        padding-left: 0.75rem;
-        border-left: 2px solid var(--subsection-color, #dee2e6);
-        margin-bottom: 1rem;
-    }
-
-    .subsection-header {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #495057;
-        margin-bottom: 0.5rem;
-        margin-top: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.4rem 0;
-    }
-
-    .subsection-count {
-        color: #6c757d;
-        font-weight: 400;
-        font-size: 0.85rem;
-    }
-
-    .subsection-abbrev {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 1.75rem;
-        height: 1.75rem;
-        border-radius: 0.25rem;
-        color: white;
-        font-size: 0.75rem;
-        font-weight: bold;
-        background: #6c757d;
-    }
-
-    /* Relationship (object-property) triples: visually distinct from literal
-       attributes. Bare camelCase predicate in monospace + linked target. */
-    .entity-relationships {
-        border-top: 1px dashed #e9ecef;
-        padding-top: 0.4rem;
-    }
-
-    .relationships-label {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: #adb5bd;
-        font-weight: 600;
-        margin-bottom: 0.15rem;
-    }
-
-    .relationship-row {
-        font-size: 0.82rem;
-        line-height: 1.5;
-        color: #495057;
-    }
-
-    .relationship-row .bi {
-        color: #adb5bd;
-        font-size: 0.95rem;
-        vertical-align: -0.1rem;
-    }
-
-    .rel-predicate {
-        font-family: var(--bs-font-monospace, monospace);
-        color: #6f42c1;
-        font-size: 0.78rem;
-        margin-right: 0.35rem;
-    }
-
-    .rel-target-link {
-        color: #0d6efd;
-        text-decoration: none;
-    }
-
-    .rel-target-link:hover { text-decoration: underline; }
-
-    .show-more-btn {
-        width: 100%;
-        margin-top: 0.5rem;
-        font-size: 0.8rem;
-    }
-
-    /* Sidebar cards (quick nav, actions) */
-    .quick-nav-card,
-    .actions-card {
-        border: none;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .quick-nav-card .card-header,
-    .actions-card .card-header {
-        background: #f8f9fa;
-        border-bottom: none;
-        font-size: 0.85rem;
-        font-weight: 600;
-        padding: 0.5rem 0.75rem;
-    }
-
-    .actions-card .btn {
-        font-size: 0.8rem;
-    }
-
-    /* Progressive disclosure: clamp long prose to a 3-line preview until the
-       reader expands it. Preview-first reduces the wall-of-text that long
-       conclusion or comment text would otherwise produce. */
-    .text-clamp {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .text-clamp.expanded {
-        -webkit-line-clamp: unset;
-        overflow: visible;
-    }
-
-    .clamp-toggle {
-        text-decoration: none;
-        font-size: 0.8rem;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ontology_case.css') }}">
 {% endblock %}
 
 {% block content %}
-<!-- Breadcrumb -->
-<nav class="breadcrumb-nav" aria-label="breadcrumb">
-    <ol class="breadcrumb mb-2">
-        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}"><i class="bi bi-house"></i> Ontologies</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('main.index', type='case') }}">Cases</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{ ontology.name }}</li>
-    </ol>
-</nav>
+{# One ordered list of blocks drives the sidebar and the body
+   (case_display.build_ordered_blocks), grouped into the three parts. #}
+{% set parts = group_case_blocks(page_blocks) %}
+{% set summary = case_summary(stats or {}, page_blocks) %}
+{% set sub = ontology.subcategory %}
 
-<!-- Case Header -->
-<div class="case-header">
-    <div class="d-flex justify-content-between align-items-start">
-        <div>
-            {% set display_title = ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else None %}
-            <h1>
-                <i class="bi bi-briefcase me-2"></i>
-                {{ display_title if display_title else ontology.name }}
-            </h1>
-            {% set md = ontology.meta_data or {} %}
-            {% set sub = ontology.subcategory %}
-            {% if display_title or md.case_number or sub %}
-            <div class="case-meta mt-1 d-flex flex-wrap align-items-center gap-2">
-                {% if display_title %}<span><i class="bi bi-hash"></i>{{ ontology.name }}</span>{% endif %}
-                {% if md.case_number %}
-                <span class="badge text-bg-light" title="NSPE Board of Ethical Review case number">
-                    <i class="bi bi-journal-text"></i> NSPE {{ md.case_number }}
-                </span>
-                {% endif %}
-                {% if sub %}
-                <a href="{{ url_for('main.index', category=ontology.category, subcategory=sub) }}"
-                   class="badge text-bg-light text-decoration-none" title="Other cases from this decade">
-                    <i class="bi bi-tag"></i> {{ sub }}
-                </a>
-                {% endif %}
-            </div>
-            {% endif %}
-            {% if ontology.description and not ontology.description.startswith('Auto-imported') %}
-            <p class="case-description mb-0 mt-2">{{ ontology.description }}</p>
-            {% endif %}
+<header class="mb-3">
+    <nav class="small mb-2" aria-label="Case trail">
+        <a href="{{ url_for('main.index', category=CASES_CATEGORY) }}">ProEthica cases</a>
+        {% if sub %}<span class="text-body-secondary" aria-hidden="true">&rsaquo;</span>
+        <a href="{{ url_for('main.index', category=CASES_CATEGORY, subcategory=sub) }}">{{ sub }}</a>{% endif %}
+        <span class="text-body-secondary" aria-hidden="true">&rsaquo;</span>
+        <span aria-current="page">{% if case_id %}Case {{ case_id }}{% else %}{{ ontology.name }}{% endif %}</span>
+    </nav>
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+        <div class="page-heading">
+            <h1 class="mb-1">{{ display_title or ontology.name }}</h1>
             {# base_uri holds the owl:Ontology IRI declared in the TTL (set at sync,
                backfilled for older rows by tools/backfill_base_uri.py). #}
-            <div class="case-uri mt-2" title="Ontology IRI: the owl:Ontology subject of this case TTL">
-                <i class="bi bi-link-45deg"></i> {{ ontology.base_uri }}
-                {% if ontology.current_version %}
-                <span class="badge text-bg-light ms-2">v{{ ontology.current_version.version_number }}</span>
-                {% endif %}
-            </div>
+            <p class="small text-body-secondary mb-0">
+                {% if md.get('case_number') %}<span title="NSPE Board of Ethical Review case number">NSPE {{ md.get('case_number') }}</span> &middot; {% endif %}
+                <span class="font-monospace">{{ ontology.name }}</span>
+                {% if ontology.current_version %}&middot; version {{ ontology.current_version.version_number }}{% endif %}
+                {% if ontology.base_uri %}&middot; <code class="text-body-secondary">{{ ontology.base_uri }}</code>{% endif %}
+            </p>
         </div>
-        <div class="text-end">
-            {# owl:NamedIndividual declarations only (case_display.is_named_individual);
-               the provenance derivations and time anchors stored beside them are
-               counted separately below. #}
-            <div class="stat-value">{{ stats.individuals if stats.individuals is defined else stats.total }}</div>
-            <div class="stat-label">Named Individuals</div>
-            {% if stats.support is defined and stats.support %}
-            <div class="stat-note" title="PROV-O edge-provenance derivations, OWL-Time anchors and property declarations, listed under Provenance and Support Nodes">
-                + {{ stats.support }} provenance and support nodes
-            </div>
-            {% endif %}
+        <div class="d-flex flex-wrap gap-2 page-actions">
             {% if proethica_case_url %}
-            <a href="{{ proethica_case_url }}" class="btn btn-light btn-sm mt-2" target="_blank" rel="noopener"
-               title="Open this case in ProEthica, where the analysis behind this ontology lives">
-                <i class="bi bi-box-arrow-up-right"></i> View case in ProEthica
-            </a>
+            <a href="{{ proethica_case_url }}" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener"
+               title="Open this case in ProEthica, where the analysis behind this ontology lives">Open in ProEthica</a>
             {% endif %}
+            <a href="{{ url_for('ontology.ontology_content', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary" target="_blank">View TTL</a>
+            <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name, view='standard') }}" class="btn btn-sm btn-outline-secondary">Schema view</a>
+            <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary">Visualize</a>
         </div>
     </div>
-</div>
+    {% if case_vocabulary %}
+    <p class="small mt-2 mb-0">
+        Individuals are typed with
+        <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=case_vocabulary.intermediate) }}">{{ case_vocabulary.intermediate }}</a>
+        and <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=case_vocabulary.extended, case=case_id) }}" title="The classes minted from this case">its extension</a>,
+        and analysis records with
+        <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=case_vocabulary.cases) }}">{{ case_vocabulary.cases }}</a>.
+        Conclusions cite the
+        <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=case_vocabulary.code) }}">{{ case_vocabulary.code }}</a>.
+    </p>
+    {% endif %}
+    {% if ontology.description and not ontology.description.startswith('Auto-imported') %}
+    <p class="mt-2 mb-0">{{ ontology.description }}</p>
+    {% endif %}
+</header>
 
-<!-- 9-Concept Formalism Panel - Full width above content -->
-{% for section in case_sections %}
-{% if section.id == 'nine_concepts' and section.subsections %}
-<div class="formalism-panel" id="formalism-top">
-    <div class="formalism-panel-header">
-        <h5><i class="bi bi-grid-3x3 me-2"></i>9-Concept Formalism</h5>
-        <span class="stats-summary">
-            {# Classes = the bare redeclarations listed as types used plus any
-               class row still rendered as a card (one with a definition). #}
-            {% set ns = namespace(ind=0, cls=0) %}
-            {% for sub in section.subsections %}
-            {% set ns.ind = ns.ind + (sub.entities | selectattr('entity_type', 'equalto', 'individual') | list | length) %}
-            {% set ns.cls = ns.cls + (sub.types_used | default([]) | list | length) + (sub.entities | rejectattr('entity_type', 'equalto', 'individual') | list | length) %}
-            {% endfor %}
-            {{ ns.ind }} individuals across 9 concepts, typed with {{ ns.cls }} classes
-        </span>
-    </div>
-
-    <div class="concept-filter-row">
-        {% for sub in section.subsections %}
-        <a href="#subsection-{{ sub.id }}" class="concept-filter-item {% if sub.entities|length == 0 %}disabled{% endif %}"
-           style="--concept-color: {{ sub.color or '#6c757d' }};">
-            <span class="concept-filter-abbrev">{{ sub.abbrev or sub.id[:2]|upper }}</span>
-            <span class="concept-filter-name">{{ sub.title }}</span>
-            <span class="concept-filter-count">{{ sub.entities|length }}</span>
-        </a>
-        {% endfor %}
-    </div>
-</div>
+{% if summary %}
+<p class="case-summary">
+    {% for item in summary %}<a href="#{{ item.anchor }}">{{ item.count }} {{ item.label }}</a>{% if not loop.last %} <span class="text-body-secondary" aria-hidden="true">&middot;</span> {% endif %}{% endfor %}
+</p>
 {% endif %}
-{% endfor %}
 
 <div class="row">
-    <!-- Sidebar navigation -->
-    <div class="col-lg-3 col-md-4 order-md-2">
-        <div class="section-nav">
-            <!-- Quick nav -->
-            <div class="card quick-nav-card mb-3">
-                <div class="card-header">
-                    <i class="bi bi-list me-1"></i> Sections
-                </div>
-                <nav class="nav flex-column p-2">
-                    {# Single ordered list shared with the body (see build_ordered_blocks) #}
-                    {% for block in page_blocks %}
-                    {# nine_concepts links to the top filter panel (its concept-type
-                       chips), so the reader can jump between concept types; other
-                       blocks link to their section body. #}
-                    <a class="nav-link d-flex justify-content-between align-items-center" href="#{{ 'formalism-top' if block.id == 'nine_concepts' else 'section-' ~ block.id }}">
-                        <span>
-                            {% if block.icon %}<i class="{{ block.icon }} me-1"></i>{% endif %}
-                            {{ block.title }}
-                        </span>
-                        <span class="badge bg-secondary">{{ block.count }}</span>
-                    </a>
-                    {% endfor %}
-                    <a class="nav-link d-flex justify-content-between align-items-center" href="#reasoning-panel">
-                        <span><i class="bi bi-cpu me-1"></i>Reasoning</span>
-                    </a>
-                </nav>
-            </div>
-
-            <!-- Actions -->
-            <div class="card actions-card">
-                <div class="card-header">
-                    <i class="bi bi-tools me-1"></i> Actions
-                </div>
-                <div class="card-body p-2">
-                    <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}?view=standard"
-                       class="btn btn-outline-secondary btn-sm w-100 mb-2">
-                        <i class="bi bi-grid me-1"></i> Standard View
-                    </a>
-                    <a href="{{ url_for('ontology.ontology_content', ontology_name=ontology.name) }}"
-                       class="btn btn-outline-secondary btn-sm w-100 mb-2" target="_blank">
-                        <i class="bi bi-file-code me-1"></i> View TTL
-                    </a>
-                    <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}"
-                       class="btn btn-outline-success btn-sm w-100">
-                        <i class="bi bi-diagram-3 me-1"></i> Visualize
-                    </a>
-                </div>
-            </div>
-        </div>
+    <!-- Sidebar: the parts and their sections -->
+    <div class="col-lg-3 order-lg-2">
+        <nav class="case-nav" aria-label="Case sections">
+            {% for part in parts %}
+            <div class="case-nav-part"><a href="#part-{{ part.key }}">{{ part.title }}</a></div>
+            <ul class="list-unstyled">
+                {% for block in part.blocks %}
+                <li><a class="nav-link" href="#section-{{ block.id }}">{{ block.title }} <span class="nav-count">{{ block.count }}</span></a></li>
+                {% endfor %}
+            </ul>
+            {% endfor %}
+            <div class="case-nav-part"><a href="#part-reasoning">Reasoning</a></div>
+        </nav>
     </div>
 
-    <!-- Main content -->
-    <div class="col-lg-9 col-md-8 order-md-1">
-
-        {# Body renders from the same ordered list as the nav (page_blocks),
-           dispatching sections to render_section and the three bespoke panels
-           to their macros. This is the single source of truth for order. #}
-        {% for block in page_blocks %}
-        {% if block.kind == 'section' %}
-        {{ render_section(block.section, ontology_name=ontology.name, type_labels=type_labels|default(none)) }}
-        {% elif block.id == 'competition' %}
-        {{ render_competition(competition) }}
-        {% elif block.id == 'citations' %}
-        {{ render_citations(citations) }}
-        {% elif block.id == 'conclusions' %}
-        {{ render_conclusions(conclusions, ontology_name=ontology.name) }}
-        {% endif %}
+    <!-- Body -->
+    <div class="col-lg-9 order-lg-1">
+        {% for part in parts %}
+        <section class="case-part" id="part-{{ part.key }}" aria-labelledby="part-{{ part.key }}-title">
+            <h2 class="case-part-title" id="part-{{ part.key }}-title">{{ part.title }}</h2>
+            {% for block in part.blocks %}
+            {% if block.kind == 'section' %}
+            {% if block.deferred %}
+            {{ render_section(block.section, ontology_name=ontology.name, type_labels=type_labels|default(none),
+                              deferred_url=url_for('ontology.case_section', ontology_name=ontology.name, section_id=block.id),
+                              type_counts=section_type_counts(block.section, type_labels|default(none))) }}
+            {% else %}
+            {{ render_section(block.section, ontology_name=ontology.name, type_labels=type_labels|default(none)) }}
+            {% endif %}
+            {% elif block.id == 'competition' %}
+            {{ render_competition(competition) }}
+            {% elif block.id == 'citations' %}
+            {{ render_citations(citations) }}
+            {% elif block.id == 'conclusions' %}
+            {{ render_conclusions(conclusions, ontology_name=ontology.name) }}
+            {% endif %}
+            {% endfor %}
+        </section>
         {% endfor %}
 
-        {{ render_reasoning_panel(ontology.name) }}
+        <section class="case-part" id="part-reasoning" aria-labelledby="part-reasoning-title">
+            <h2 class="case-part-title" id="part-reasoning-title">Reasoning</h2>
+            {{ render_reasoning_panel(ontology.name) }}
+        </section>
     </div>
 </div>
 {% endblock %}

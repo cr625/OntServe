@@ -77,6 +77,7 @@ class TestIntermediate:
     def test_taxonomy(self, client, seeded):
         main = _page(client, '/ontology/proethica-intermediate')
         roles = _section(main, 'component-r')
+        assert 'style="background: #0d6efd; border-color: #0d6efd; color: #ffffff;">R</span>' in roles
         professional = roles.index('>Professional Role</a>')
         assert professional < roles.index('>Engineer Role</a>') < roles.index('>Civil Engineer Role</a>')
         assert 'id="component-other"' in main and '>Causal Chain</a>' in main
@@ -154,8 +155,10 @@ class TestCore:
     def test_grid_and_schema(self, client, seeded):
         main = _page(client, '/ontology/proethica-core')
         grid = _section(main, 'components')
-        assert len(re.findall(r'class="component-letter"', grid)) == 9
-        assert 'Grounded in' in grid and 'style=' not in grid
+        # The nine letters in their concept colours; the cards themselves stay neutral
+        letters = re.findall(r'class="component-letter" title="[^"]*" style="background: (#[0-9a-f]{6});', grid)
+        assert len(letters) == 9 and letters[0] == '#0d6efd'
+        assert 'Grounded in' in grid and 'border-left' not in grid
         assert '<h2 class="h4 mt-4 mb-2" id="schema">Schema</h2>' in main
         assert 'class="tab-count"' in main and 'class="badge' not in main
 

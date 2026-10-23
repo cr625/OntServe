@@ -36,6 +36,7 @@ class Category:
     key: str
     label: str           # heading and filter-banner text
     description: str = ''
+    listing: str = 'table'   # the flat list of /?category=: 'table', or 'cases' (the case index)
 
 
 UNCATEGORIZED = Category(
@@ -53,7 +54,8 @@ CATEGORIES: Tuple[Category, ...] = (
              'One ontology per NSPE case analysed in ProEthica: the individuals (roles, principles, '
              'obligations, states, actions, events, ...) extracted from that case, typed with the '
              'framework vocabulary -- each case ontology imports proethica-cases and '
-             'proethica-intermediate. Grouped by the decade of the Board of Ethical Review decision.'),
+             'proethica-intermediate. Grouped by the decade of the Board of Ethical Review decision.',
+             listing='cases'),
     Category('Domain', 'Domain',
              'Professional-domain ontologies that specialise the framework.'),
     Category('Professional Codes', 'Professional Codes',
@@ -81,6 +83,21 @@ def case_id_from_name(name: Any) -> Optional[str]:
     """'proethica-case-102' -> '102'; None for anything else."""
     m = CASE_NAME_RE.match(str(name or ''))
     return m.group(1) if m else None
+
+
+_NSPE_CASE_NUMBER = re.compile(r'^\s*(\d{2})-(\d+)\s*$')
+
+
+def nspe_case_order(case_number: Any) -> Optional[Tuple[int, int]]:
+    """(year, sequence) of an NSPE Board of Ethical Review case number YY-N,
+    with the two-digit-year pivot of ProEthica (app/utils/nspe_case_number.py):
+    YY >= 50 is 19YY, otherwise 20YY. '58-1' -> (1958, 1), '24-2' -> (2024, 2);
+    None when the value is not of that form."""
+    m = _NSPE_CASE_NUMBER.match(str(case_number or ''))
+    if not m:
+        return None
+    yy = int(m.group(1))
+    return (1900 + yy if yy >= 50 else 2000 + yy, int(m.group(2)))
 
 
 def _attr(obj: Any, name: str, default: Any = None) -> Any:

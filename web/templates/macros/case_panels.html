@@ -1,193 +1,177 @@
 {# Bespoke case-view panels (obligation competition, NSPE citations,
-   synthesized conclusions). Extracted from ontology_case.html so the body can
-   render them from the single ordered page_blocks loop, keeping the body in
-   lockstep with the sidebar nav. Each panel's outer element keeps its
-   id="section-<id>" so the nav anchors resolve. #}
+   synthesized conclusions). The body renders them from the same ordered
+   page_blocks as the sidebar, so the two stay in lockstep. Each panel's outer
+   element keeps its id="section-<id>" so the nav anchors resolve. Counts are
+   text and edge targets are outline chips; component letters carry their colour. #}
+{% from "macros/level_items.html" import component_letter %}
 
 {% macro render_competition(competition) %}
-<div class="card case-section mb-4" id="section-competition">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-shield-exclamation me-1"></i> Obligation Competition</span>
-        <span class="badge bg-secondary" title="competesWith / prevailsOver / defeasibleUnder edges">
-            {{ competition.edge_counts.competesWith }} competes ·
-            {{ competition.edge_counts.prevailsOver }} prevails ·
+<div class="case-section" id="section-competition">
+    <h3 class="case-section-title">
+        Obligation competition
+        <span class="section-count" title="competesWith / prevailsOver / defeasibleUnder edges">
+            {{ competition.edge_counts.competesWith }} competes &middot;
+            {{ competition.edge_counts.prevailsOver }} prevails &middot;
             {{ competition.edge_counts.defeasibleUnder }} defeasible
         </span>
-    </div>
-    <div class="card-body">
-        <p class="text-muted small mb-3">
-            How the obligations in this case compete, which prevail, and the states
-            under which each is defeasible. Each competing obligation is one cluster;
-            expand a quote to see the verbatim case text grounding it, and hover an
-            edge badge for the passage grounding that specific edge, with its source
-            field and confidence, where the case records per-edge provenance. A
-            passage quoted from the case text is shown as is. A passage taken from a
-            narrative field of an individual (its tension resolution, balancing text
-            or case context, written at extraction) is marked "derived from" that
-            field. Obligations recorded without any competition are listed separately
-            below.
-        </p>
-        {% for c in competition.clusters if c.in_competition %}
-        <div class="border rounded p-3 mb-3">
-            <div class="d-flex justify-content-between align-items-start">
-                <h6 class="mb-1" title="{{ c.iri }}">
-                    <i class="bi bi-asterisk text-warning me-1"></i>{{ c.label }}
-                </h6>
-            </div>
-            {% if c.source_text %}
-            <details class="small mb-2">
-                <summary class="text-muted" style="cursor:pointer;">source text</summary>
-                <blockquote class="border-start ps-2 ms-1 mt-1 text-muted small">{{ c.source_text }}</blockquote>
-            </details>
-            {% endif %}
-            <ul class="list-unstyled mb-0 small">
-                {% if c.prevails_over %}
-                <li><i class="bi bi-arrow-up-circle text-success me-1"></i><strong>prevails over:</strong>
-                    {% for e in c.prevails_over %}<span class="badge text-bg-light border" title="{{ e.prov.hover if (e.prov and e.prov.hover) else e.iri }}">{{ e.label }}</span> {% endfor %}
-                </li>{% endif %}
-                {% if c.prevailed_over_by %}
-                <li><i class="bi bi-arrow-down-circle text-danger me-1"></i><strong>yields to:</strong>
-                    {% for e in c.prevailed_over_by %}<span class="badge text-bg-light border" title="{{ e.prov.hover if (e.prov and e.prov.hover) else e.iri }}">{{ e.label }}</span> {% endfor %}
-                </li>{% endif %}
-                {% if c.competes_with %}
-                <li><i class="bi bi-arrow-left-right text-primary me-1"></i><strong>competes with:</strong>
-                    {% for e in c.competes_with %}<span class="badge text-bg-light border" title="{{ e.prov.hover if (e.prov and e.prov.hover) else e.iri }}">{{ e.label }}</span> {% endfor %}
-                </li>{% endif %}
-                {% if c.defeasible_under %}
-                <li><i class="bi bi-shield-exclamation text-warning me-1"></i><strong>defeasible under:</strong>
-                    {% for e in c.defeasible_under %}<span class="badge text-bg-light border" title="{{ e.prov.hover if (e.prov and e.prov.hover) else (e.source_text or e.iri) }}">{{ e.label }}</span> {% endfor %}
-                </li>{% endif %}
-                {% if c.derived_from_principle %}
-                <li><i class="bi bi-diagram-2 text-info me-1"></i><strong>derived from principle:</strong>
-                    {% for e in c.derived_from_principle %}<span class="badge text-bg-light border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
-                </li>{% endif %}
-                {% if c.borne_by_roles %}
-                <li><i class="bi bi-person me-1"></i><strong>borne by:</strong>
-                    {% for e in c.borne_by_roles %}<span class="badge text-bg-light border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
-                </li>{% endif %}
-            </ul>
-        </div>
-        {% endfor %}
-        {% set lineage_only = competition.clusters | rejectattr('in_competition') | list %}
-        {% if lineage_only %}
-        <details class="small mt-2">
-            <summary class="text-muted" style="cursor:pointer;">
-                {{ lineage_only | length }} obligation(s) with principle/role lineage only (no recorded competition)
-            </summary>
-            <ul class="list-unstyled mt-2 mb-0 ms-2">
-                {% for c in lineage_only %}
-                <li class="mb-1">
-                    <span class="badge text-bg-light border" title="{{ c.iri }}">{{ c.label }}</span>
-                    {% if c.derived_from_principle %}<span class="text-muted">derived from</span>
-                        {% for e in c.derived_from_principle %}<span class="badge text-bg-light border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}{% endif %}
-                    {% if c.borne_by_roles %}<span class="text-muted">borne by</span>
-                        {% for e in c.borne_by_roles %}<span class="badge text-bg-light border" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}{% endif %}
-                </li>
-                {% endfor %}
-            </ul>
+    </h3>
+    <p class="section-description">
+        How the obligations in this case compete, which prevail, and the states
+        under which each is defeasible. Each competing obligation is one cluster;
+        expand a quote to see the verbatim case text grounding it, and hover an
+        edge for the passage grounding that specific edge, with its source
+        field and confidence, where the case records per-edge provenance. A
+        passage quoted from the case text is shown as is. A passage taken from a
+        narrative field of an individual (its tension resolution, balancing text
+        or case context, written at extraction) is marked "derived from" that
+        field. Obligations recorded without any competition are listed separately
+        below.
+    </p>
+    {% for c in competition.clusters if c.in_competition %}
+    <div class="panel-item">
+        <h4 class="panel-item-title" title="{{ c.iri }}">
+            <i class="bi bi-asterisk text-body-secondary me-1"></i>{{ c.label }}
+        </h4>
+        {% if c.source_text %}
+        <details class="small mb-2">
+            <summary class="text-body-secondary">source text</summary>
+            <blockquote class="panel-quote">{{ c.source_text }}</blockquote>
         </details>
         {% endif %}
+        <ul class="list-unstyled mb-0 small relation-list">
+            {% if c.prevails_over %}
+            <li><strong>prevails over:</strong>
+                {% for e in c.prevails_over %}<span class="chip" title="{{ e.prov.hover if (e.prov and e.prov.hover) else e.iri }}">{{ e.label }}</span> {% endfor %}
+            </li>{% endif %}
+            {% if c.prevailed_over_by %}
+            <li><strong>yields to:</strong>
+                {% for e in c.prevailed_over_by %}<span class="chip" title="{{ e.prov.hover if (e.prov and e.prov.hover) else e.iri }}">{{ e.label }}</span> {% endfor %}
+            </li>{% endif %}
+            {% if c.competes_with %}
+            <li><strong>competes with:</strong>
+                {% for e in c.competes_with %}<span class="chip" title="{{ e.prov.hover if (e.prov and e.prov.hover) else e.iri }}">{{ e.label }}</span> {% endfor %}
+            </li>{% endif %}
+            {% if c.defeasible_under %}
+            <li><strong>defeasible under:</strong>
+                {% for e in c.defeasible_under %}<span class="chip" title="{{ e.prov.hover if (e.prov and e.prov.hover) else (e.source_text or e.iri) }}">{{ e.label }}</span> {% endfor %}
+            </li>{% endif %}
+            {% if c.derived_from_principle %}
+            <li><strong>derived from principle:</strong>
+                {% for e in c.derived_from_principle %}<span class="chip" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+            </li>{% endif %}
+            {% if c.borne_by_roles %}
+            <li><strong>borne by:</strong>
+                {% for e in c.borne_by_roles %}<span class="chip" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}
+            </li>{% endif %}
+        </ul>
     </div>
+    {% endfor %}
+    {% set lineage_only = competition.clusters | rejectattr('in_competition') | list %}
+    {% if lineage_only %}
+    <details class="small mt-2">
+        <summary class="text-body-secondary">
+            {{ lineage_only | length }} obligation(s) with principle/role lineage only (no recorded competition)
+        </summary>
+        <ul class="list-unstyled mt-2 mb-0 ms-2">
+            {% for c in lineage_only %}
+            <li class="mb-1">
+                <span class="chip" title="{{ c.iri }}">{{ c.label }}</span>
+                {% if c.derived_from_principle %}<span class="text-body-secondary">derived from</span>
+                    {% for e in c.derived_from_principle %}<span class="chip" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}{% endif %}
+                {% if c.borne_by_roles %}<span class="text-body-secondary">borne by</span>
+                    {% for e in c.borne_by_roles %}<span class="chip" title="{{ e.iri }}">{{ e.label }}</span> {% endfor %}{% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </details>
+    {% endif %}
 </div>
 {% endmacro %}
 
 {% macro render_citations(citations) %}
-<div class="card case-section mb-4" id="section-citations">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-link-45deg me-1"></i> Cited NSPE Provisions</span>
-        <span class="badge bg-secondary" title="distinct provisions cited / total citesProvision edges">
-            {{ citations.provision_count }} provisions · {{ citations.citation_count }} citations
+<div class="case-section" id="section-citations">
+    <h3 class="case-section-title">
+        Cited NSPE provisions
+        <span class="section-count" title="distinct provisions cited / total citesProvision edges">
+            {{ citations.provision_count }} provisions &middot; {{ citations.citation_count }} citations
         </span>
+    </h3>
+    <p class="section-description">
+        NSPE Code provisions cited by this case's synthesized conclusions, and the
+        Principles, Obligations, and Constraints each provision establishes in the
+        NSPE Code of Ethics ontology. This is the conclusion-grounding subset:
+        provisions the case references without a conclusion citing them appear in
+        the ProEthica Provisions view (board and analysis union) and among the
+        Analysis elements, not here.
+    </p>
+    {% for p in citations.provisions %}
+    <div class="panel-item">
+        <h4 class="panel-item-title" title="{{ p.iri }}">
+            {{ p.label }} <span class="chip ms-1">{{ p.code }}</span>
+        </h4>
+        {% if p.text %}
+        <details class="small mb-2">
+            <summary class="text-body-secondary">provision text</summary>
+            <blockquote class="panel-quote">{{ p.text }}</blockquote>
+        </details>
+        {% endif %}
+        <ul class="list-unstyled mb-0 small relation-list">
+            {% if p.establishes %}
+            <li><strong>establishes:</strong>
+                {% for c in p.establishes %}
+                {% set m = concept_meta(c.type) %}
+                <span class="chip" title="{{ c.type }}: {{ c.iri }}">{% if m %}{{ component_letter(m.abbrev, 'component-letter-sm') }}{% endif %}{{ c.label }}</span>
+                {% endfor %}
+            </li>{% endif %}
+            <li><strong>cited by:</strong>
+                {% for e in p.cited_by %}<a href="#conclusion-{{ e.anchor }}" class="chip" title="{{ e.snippet or e.iri }}">{{ e.label }}</a> {% endfor %}
+            </li>
+        </ul>
     </div>
-    <div class="card-body">
-        <p class="text-muted small mb-3">
-            NSPE Code provisions cited by this case's synthesized conclusions, and the
-            Principles, Obligations, and Constraints each provision establishes in the
-            NSPE Code of Ethics ontology. This is the conclusion-grounding subset:
-            provisions the case references without a conclusion citing them appear in
-            the ProEthica Provisions view (board and analysis union) and among the
-            Analysis Elements below, not here.
-        </p>
-        {% for p in citations.provisions %}
-        <div class="border rounded p-3 mb-3">
-            <div class="d-flex justify-content-between align-items-start">
-                <h6 class="mb-1" title="{{ p.iri }}">
-                    <i class="bi bi-bookmark-fill text-primary me-1"></i>{{ p.label }}
-                    <span class="badge text-bg-light border ms-1">{{ p.code }}</span>
-                </h6>
-            </div>
-            {% if p.text %}
-            <details class="small mb-2">
-                <summary class="text-muted" style="cursor:pointer;">provision text</summary>
-                <blockquote class="border-start ps-2 ms-1 mt-1 text-muted small">{{ p.text }}</blockquote>
-            </details>
-            {% endif %}
-            <ul class="list-unstyled mb-0 small">
-                {% if p.establishes %}
-                <li class="mb-1"><i class="bi bi-arrow-right-circle text-success me-1"></i><strong>establishes:</strong>
-                    {% for c in p.establishes %}
-                    {% set m = concept_meta(c.type) %}
-                    <span class="badge border" title="{{ c.type }}: {{ c.iri }}"
-                          style="{% if m %}background: {{ m.color }}; color: #fff; border-color: {{ m.color }} !important;{% else %}background: #e9ecef; color: #212529;{% endif %}">{{ c.label }}</span>
-                    {% endfor %}
-                </li>{% endif %}
-                <li><i class="bi bi-chat-left-quote text-muted me-1"></i><strong>cited by:</strong>
-                    {% for e in p.cited_by %}<a href="#conclusion-{{ e.anchor }}" class="badge text-bg-light border text-decoration-none" title="{{ e.snippet or e.iri }}">{{ e.label }}</a> {% endfor %}
-                </li>
-            </ul>
-        </div>
-        {% endfor %}
-    </div>
+    {% endfor %}
 </div>
 {% endmacro %}
 
 {% macro render_conclusions(conclusions, ontology_name=none) %}
-<div class="card case-section mb-4" id="section-conclusions">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="bi bi-chat-left-quote me-1"></i> Conclusions</span>
-        <span class="badge bg-secondary" title="ProEthica-synthesized ethical conclusions">
-            {{ conclusions.count }} conclusions
-        </span>
-    </div>
-    <div class="card-body">
-        <p class="text-muted small mb-3">
-            Ethical conclusions synthesized for this case (analytical extensions of
-            the Board's findings, question responses, and principle syntheses). These
-            are the targets of the "cited by" links above; the Board's verbatim
-            conclusion is in the case source text.
-        </p>
-        {% for c in conclusions.conclusions %}
-        <div class="border rounded p-3 mb-3" id="conclusion-{{ c.anchor }}">
-            <div class="d-flex justify-content-between align-items-start">
-                <h6 class="mb-1" title="{{ c.iri }}">
-                    <i class="bi bi-chat-left-text text-secondary me-1"></i>{{ c.label }}
-                </h6>
-                <span class="badge text-bg-light border">{{ c.type_label }}</span>
-            </div>
-            {% if c.text %}
-            {% if c.text|length > 240 %}
-            <div class="text-clamp small text-muted mb-1">{{ c.text }}</div>
-            <button type="button" class="clamp-toggle btn btn-link btn-sm p-0 mb-2">Show more</button>
-            {% else %}
-            <p class="small text-muted mb-2">{{ c.text }}</p>
-            {% endif %}
-            {% endif %}
-            {% if c.cited_provisions %}
-            <div class="small"><i class="bi bi-link-45deg text-muted me-1"></i><strong>cites:</strong>
-                {% for code in c.cited_provisions %}<span class="badge text-bg-light border">{{ code }}</span> {% endfor %}
-            </div>{% endif %}
-            {% if c.answers_questions %}
-            <div class="small mt-1"><i class="bi bi-question-circle text-muted me-1"></i><strong>answers:</strong>
-                {% for q in c.answers_questions %}
-                {% if q.anchor and ontology_name %}<a class="badge text-bg-light border text-decoration-none" href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=q.anchor) }}">Question {{ q.number }}</a>
-                {% else %}<span class="badge text-bg-light border">Question {{ q.number }}</span>{% endif %}
-                {% endfor %}
-            </div>{% endif %}
-            {% if c.reasoning %}
-            <div class="small text-muted fst-italic mt-1" title="Extraction reasoning">{{ c.reasoning }}</div>
-            {% endif %}
+<div class="case-section" id="section-conclusions">
+    <h3 class="case-section-title">
+        Conclusions <span class="section-count" title="ProEthica-synthesized ethical conclusions">{{ conclusions.count }}</span>
+    </h3>
+    <p class="section-description">
+        Ethical conclusions synthesized for this case (analytical extensions of
+        the Board's findings, question responses, and principle syntheses). These
+        are the targets of the "cited by" links under Cited NSPE provisions; the
+        Board's verbatim conclusion is in the case source text.
+    </p>
+    {% for c in conclusions.conclusions %}
+    <div class="panel-item" id="conclusion-{{ c.anchor }}">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+            <h4 class="panel-item-title" title="{{ c.iri }}">{{ c.label }}</h4>
+            <span class="chip">{{ c.type_label }}</span>
         </div>
-        {% endfor %}
+        {% if c.text %}
+        {% if c.text|length > 240 %}
+        <div class="text-clamp small text-body-secondary mb-1">{{ c.text }}</div>
+        <button type="button" class="clamp-toggle btn btn-link btn-sm p-0 mb-2">Show more</button>
+        {% else %}
+        <p class="small text-body-secondary mb-2">{{ c.text }}</p>
+        {% endif %}
+        {% endif %}
+        {% if c.cited_provisions %}
+        <div class="small"><strong>cites:</strong>
+            {% for code in c.cited_provisions %}<span class="chip">{{ code }}</span> {% endfor %}
+        </div>{% endif %}
+        {% if c.answers_questions %}
+        <div class="small mt-1"><strong>answers:</strong>
+            {% for q in c.answers_questions %}
+            {% if q.anchor and ontology_name %}<a class="chip" href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=q.anchor) }}">Question {{ q.number }}</a>
+            {% else %}<span class="chip">Question {{ q.number }}</span>{% endif %}
+            {% endfor %}
+        </div>{% endif %}
+        {% if c.reasoning %}
+        <div class="small text-body-secondary fst-italic mt-1" title="Extraction reasoning">{{ c.reasoning }}</div>
+        {% endif %}
     </div>
+    {% endfor %}
 </div>
 {% endmacro %}

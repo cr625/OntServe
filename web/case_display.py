@@ -633,30 +633,39 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
     }
 
 
-# Canonical reading order for the case page. Drives BOTH the sidebar nav and
-# the body so the two cannot drift apart (the prior template listed YAML
-# sections and the bespoke panels in different orders). Ids are either YAML
-# section ids or the three bespoke panel ids (competition / citations /
-# conclusions). Any YAML section not named here is appended in its original
-# order, just before "other".
-PAGE_BLOCK_ORDER = [
-    'agents',            # the actors (core:Agent, cases:DeliberativeBody) the graph hangs on
-    'nine_concepts',     # the extracted entities (foundation)
-    'case_documents',    # the documents of the case events (proeth:CaseDocument), not Resources
-    'competition',       # panel: how the obligations compete / prevail
-    'citations',         # panel: NSPE provisions grounding the conclusions
-    'decision_points',
-    'arguments',
-    'questions',
-    'conclusions',       # panel: synthesized ethical conclusions (cited-by targets)
-    'validation',
-    'analysis',
-    'other',
-]
+# Canonical reading order for the case page, in three parts. Drives BOTH the
+# sidebar nav and the body so the two cannot drift apart (the prior template
+# listed YAML sections and the bespoke panels in different orders). Ids are
+# either YAML section ids or the three bespoke panel ids (competition /
+# citations / conclusions). Any YAML section not named here joins the case
+# entities, just before "other".
+PAGE_PARTS = (
+    ('entities', 'Case entities', (
+        'agents',            # the actors (core:Agent, cases:DeliberativeBody) the graph hangs on
+        'nine_concepts',     # the extracted entities (foundation)
+        'case_documents',    # the documents of the case events (proeth:CaseDocument), not Resources
+        'competition',       # panel: how the obligations compete / prevail
+        'other',             # named individuals no section above matches
+    )),
+    ('analysis', 'Analysis record', (
+        'decision_points',
+        'arguments',
+        'questions',
+        'conclusions',       # panel: synthesized ethical conclusions (cited-by targets)
+        'citations',         # panel: NSPE provisions grounding the conclusions
+        'validation',
+        'analysis',
+    )),
+    ('provenance', 'Provenance and support', (
+        'support',           # PROV-O derivations, OWL-Time anchors, property declarations
+    )),
+)
+PAGE_BLOCK_ORDER = [block_id for _, _, ids in PAGE_PARTS for block_id in ids]
+BLOCK_PART = {block_id: key for key, _, ids in PAGE_PARTS for block_id in ids}
 
 _PANEL_META = {
-    'competition': {'title': 'Obligation Competition', 'icon': 'bi bi-shield-exclamation'},
-    'citations': {'title': 'Cited NSPE Provisions', 'icon': 'bi bi-link-45deg'},
+    'competition': {'title': 'Obligation competition', 'icon': 'bi bi-shield-exclamation'},
+    'citations': {'title': 'Cited NSPE provisions', 'icon': 'bi bi-link-45deg'},
     'conclusions': {'title': 'Conclusions', 'icon': 'bi bi-chat-left-quote'},
 }
 
@@ -673,11 +682,12 @@ def build_ordered_blocks(case_sections: List[Dict], competition=None,
     """Build one ordered list of renderable page blocks for nav + body parity.
 
     Each block is a dict with: kind ('section'|'panel'), id, title, icon,
-    count, and (for sections) the section object. Only blocks with content are
-    returned. The bespoke ``conclusions`` panel supersedes the YAML
-    ``conclusions`` section when the panel has data, so the redundant YAML
-    section is dropped (it previously produced a duplicate "Conclusions" entry
-    and an ``id="section-conclusions"`` collision).
+    count, part (a PAGE_PARTS key), deferred (a section configured collapsed,
+    whose body loads on demand) and, for sections, the section object. Only
+    blocks with content are returned. The bespoke ``conclusions`` panel
+    supersedes the YAML ``conclusions`` section when the panel has data, so the
+    redundant YAML section is dropped (it previously produced a duplicate
+    "Conclusions" entry and an ``id="section-conclusions"`` collision).
     """
     sections_by_id = {s['id']: s for s in case_sections}
 
@@ -716,6 +726,8 @@ def build_ordered_blocks(case_sections: List[Dict], competition=None,
                 'title': meta['title'],
                 'icon': meta['icon'],
                 'count': _panel_count(block_id),
+                'part': BLOCK_PART[block_id],
+                'deferred': False,
             })
         else:
             section = sections_by_id.get(block_id)
@@ -731,36 +743,86 @@ def build_ordered_blocks(case_sections: List[Dict], competition=None,
                 'title': section.get('title', block_id),
                 'icon': section.get('icon'),
                 'count': count,
+                'part': BLOCK_PART[block_id],
+                'deferred': bool(section.get('collapsed')),
                 'section': section,
             })
 
-    # Append any YAML sections not named in PAGE_BLOCK_ORDER, in their original
-    # order, before the trailing "other" block if one was emitted.
+    # Append any YAML sections not named in PAGE_PARTS, in their original
+    # order, to the case entities: before "other", else after the last entity block.
     extra = [s for s in case_sections
              if s['id'] not in consumed_sections and _section_count(s) > 0]
     if extra:
-        insert_at = len(blocks)
-        for i, b in enumerate(blocks):
-            if b['id'] == 'other':
-                insert_at = i
-                break
+        entity_positions = [i for i, b in enumerate(blocks) if b['part'] == 'entities']
+        other = [i for i, b in enumerate(blocks) if b['id'] == 'other']
+        insert_at = other[0] if other else (entity_positions[-1] + 1 if entity_positions else 0)
         extra_blocks = [{
             'kind': 'section', 'id': s['id'], 'title': s.get('title', s['id']),
-            'icon': s.get('icon'), 'count': _section_count(s), 'section': s,
+            'icon': s.get('icon'), 'count': _section_count(s), 'part': 'entities',
+            'deferred': bool(s.get('collapsed')), 'section': s,
         } for s in extra]
         blocks[insert_at:insert_at] = extra_blocks
 
     return blocks
 
 
+def group_blocks(blocks: List[Dict]) -> List[Dict]:
+    """The page parts in PAGE_PARTS order, each with its blocks; empty parts
+    are left out. Shared by the sidebar and the body."""
+    parts = []
+    for key, title, _ in PAGE_PARTS:
+        members = [b for b in blocks if b['part'] == key]
+        if members:
+            parts.append({'key': key, 'title': title, 'blocks': members})
+    return parts
+
+
+def section_type_counts(section: Dict, label_index: Optional[Dict[str, Any]] = None,
+                        limit: int = 6) -> List[Dict[str, Any]]:
+    """The entity types of a section with their counts, largest first, for the
+    summary of a section whose body loads on demand. Types past ``limit`` are
+    folded into one remainder entry (label None)."""
+    counts: Dict[str, int] = {}
+    entities = list(section.get('entities') or [])
+    for sub in section.get('subsections') or []:
+        entities.extend(sub.get('entities') or [])
+    for entity in entities:
+        if getattr(entity, 'entity_type', None) == 'property':
+            label = 'Property declaration'
+        elif getattr(entity, 'parent_uri', None):
+            label = type_display_label(entity.parent_uri, label_index)
+        else:
+            label = 'Untyped'
+        counts[label] = counts.get(label, 0) + 1
+    ordered = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0].lower()))
+    out = [{'label': label, 'count': n} for label, n in ordered[:limit]]
+    rest = sum(n for _, n in ordered[limit:])
+    if rest:
+        out.append({'label': None, 'count': rest})
+    return out
+
+
+def build_case_summary(stats: Dict, blocks: List[Dict]) -> List[Dict[str, Any]]:
+    """The one-line summary of the case page: named individuals, decision
+    points, questions, conclusions, cited provisions and competing
+    obligations, each with the anchor it links to. Zero counts are left out."""
+    by_id = {b['id']: b for b in blocks}
+    items = [(stats.get('individuals', 0), 'named individual', 'named individuals', 'part-entities')]
+    for block_id, singular, plural in (('decision_points', 'decision point', 'decision points'),
+                                       ('questions', 'question', 'questions'),
+                                       ('conclusions', 'conclusion', 'conclusions'),
+                                       ('citations', 'cited provision', 'cited provisions'),
+                                       ('competition', 'competing obligation', 'competing obligations')):
+        block = by_id.get(block_id)
+        items.append((block['count'] if block else 0, singular, plural, f'section-{block_id}'))
+    return [{'count': n, 'label': singular if n == 1 else plural, 'anchor': anchor}
+            for n, singular, plural, anchor in items if n]
+
+
 _concept_meta_cache = None
 
 
-def concept_type_meta(concept_type: str) -> Optional[Dict[str, str]]:
-    """Return {abbrev, color, icon, name} for one of the 9 core concept types
-    (Role, Principle, ...), sourced from the nine_concepts subsections in
-    case_display.yaml. None for unknown types. Used to colour-code individuals
-    consistently across the case page and the entity detail page."""
+def _concept_meta() -> Dict[str, Dict[str, str]]:
     global _concept_meta_cache
     if _concept_meta_cache is None:
         cache: Dict[str, Dict[str, str]] = {}
@@ -775,11 +837,27 @@ def concept_type_meta(concept_type: str) -> Optional[Dict[str, str]]:
                     cache[et] = {
                         'abbrev': sub.get('abbrev'),
                         'color': sub.get('color'),
+                        'text_color': sub.get('text_color') or '#ffffff',
                         'icon': sub.get('icon'),
                         'name': et,
                     }
         _concept_meta_cache = cache
-    return _concept_meta_cache.get(concept_type) if concept_type else None
+    return _concept_meta_cache
+
+
+def concept_type_meta(concept_type: str) -> Optional[Dict[str, str]]:
+    """Return {abbrev, color, text_color, icon, name} for one of the 9 core
+    concept types (Role, Principle, ...), sourced from the nine_concepts
+    subsections in case_display.yaml. None for unknown types. Used to
+    colour-code the component letters across the level, case and entity pages."""
+    return _concept_meta().get(concept_type) if concept_type else None
+
+
+def component_meta(abbrev: str) -> Optional[Dict[str, str]]:
+    """concept_type_meta by component letter (R, P, ..., Cs), None for others."""
+    if not abbrev:
+        return None
+    return next((m for m in _concept_meta().values() if m['abbrev'] == abbrev), None)
 
 
 def type_display_label(type_uri, label_index: Optional[Dict[str, Any]] = None) -> str:

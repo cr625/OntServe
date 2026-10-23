@@ -208,6 +208,12 @@ def resolve_uri_path(ontology_path, entity_name):
         /ontology/intermediate/Honesty
         /ontology/core/Principle
     """
+    # The on-demand sections of the case page, /ontology/<name>/case-section/<id>,
+    # arrive here as ontology_path '<name>/case-section'. Direct call, as below.
+    name, sep, action = ontology_path.rpartition('/')
+    if sep and '/' not in name and action == 'case-section':
+        return current_app.view_functions['ontology.case_section'](name, entity_name)
+
     # Exclude reserved route names that have specific handlers.
     # Call the handler directly instead of redirecting to avoid redirect
     # loops (this catch-all route matches the same URL the redirect targets).

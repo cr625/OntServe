@@ -85,6 +85,23 @@ def index():
                                publications=publications,
                                total_count=len(ontologies))
 
+    # A category listed as 'cases' renders the case index: every matching case on
+    # one page, newest NSPE case first, with the decades of the whole category.
+    cat = categories.category_info(category) if category else None
+    if cat and cat.listing == 'cases' and not (source_system or ontology_type):
+        rows = db.session.execute(stmt).scalars().all()
+        all_cases = [o for o in candidates if categories.matches(o, category, None)]
+        decades = categories.group_ontologies(all_cases)
+        return render_template('index.html',
+                               stack=None,
+                               case_index=_case_rows(rows),
+                               case_category=cat,
+                               case_decades=decades[0].subgroups if decades else [],
+                               case_total=len(all_cases),
+                               current_category=category,
+                               current_subcategory=subcategory,
+                               total_count=len(candidates))
+
     pagination = db.paginate(
         stmt,
         page=page,
@@ -108,6 +125,20 @@ def index():
                          current_subcategory=subcategory,
                          category_info=categories.category_info,
                          total_count=total_count)
+
+
+def _case_rows(ontologies):
+    """Rows of the case index, newest NSPE case number first (two-digit-year
+    pivot of categories.nspe_case_order); cases without a number come last."""
+    rows = []
+    for o in ontologies:
+        md = o.meta_data if isinstance(o.meta_data, dict) else {}
+        number = md.get(categories.CASE_NUMBER_KEY)
+        rows.append({'name': o.name, 'title': md.get(categories.DISPLAY_NAME_KEY) or o.name,
+                     'case_number': number, 'decade': o.subcategory,
+                     'order': categories.nspe_case_order(number)})
+    rows.sort(key=lambda r: (r['order'] is None, tuple(-v for v in (r['order'] or (0, 0))), r['name']))
+    return rows
 
 
 def _prefetch_entity_counts(ontologies):

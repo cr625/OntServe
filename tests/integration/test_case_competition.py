@@ -88,7 +88,7 @@ def test_competition_panel_renders_in_case_template(model):
             ontology=ont, case_sections=[], page_blocks=blocks,
             stats={"total": 0}, competition=model,
         )
-        assert "Obligation Competition" in html
+        assert "Obligation competition" in html
         assert "prevails over" in html
         assert "defeasible under" in html
         assert html.count("bi-asterisk") == model["obligation_count"]
@@ -100,7 +100,7 @@ def test_competition_panel_renders_in_case_template(model):
             ontology=ont, case_sections=[], page_blocks=empty_blocks,
             stats={"total": 0}, competition=empty,
         )
-        assert "Obligation Competition" not in html2  # graceful: no panel, no error
+        assert "Obligation competition" not in html2  # graceful: no panel, no error
 
 
 # ---------------------------------------------------------------------------

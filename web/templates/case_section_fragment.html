@@ -1,0 +1,5 @@
+{# The body of one on-demand case section, inserted by static/js/ontology_case.js
+   (route ontology.case_section with ?fragment=1). #}
+{% from "macros/case_display.html" import render_section_body, render_component_index %}
+{% if section.subsections %}{{ render_component_index(section) }}{% endif %}
+{{ render_section_body(section, ontology_name=ontology.name, type_labels=type_labels) }}

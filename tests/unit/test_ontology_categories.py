@@ -44,6 +44,19 @@ class TestResolve:
     def test_rule_category_for_unmatched(self):
         assert cat.resolve(ont('something', 'base', 'manual')).rule_category == cat.UNCATEGORIZED.key
 
+    def test_nspe_case_order(self):
+        # ProEthica's two-digit-year pivot: >= 50 is the 1900s
+        assert cat.nspe_case_order('58-1') == (1958, 1)
+        assert cat.nspe_case_order(' 24-12 ') == (2024, 12)
+        assert cat.nspe_case_order('49-3') == (2049, 3)
+        assert cat.nspe_case_order('Case 58-1') is None
+        assert cat.nspe_case_order(None) is None
+
+    def test_cases_category_lists_as_the_case_index(self):
+        assert cat.category_info('Cases').listing == 'cases'
+        assert cat.category_info('Foundation').listing == 'table'
+        assert cat.category_info('Sandbox').listing == 'table'
+
     def test_case_id_from_name(self):
         assert cat.case_id_from_name('proethica-case-102') == '102'
         assert cat.case_id_from_name('proethica-cases') is None

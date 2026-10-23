@@ -187,7 +187,7 @@ def test_type_uris_used_collects_parents_types_and_class_rows():
 def _macro_environment():
     """The case_display macros with the app's filters and globals stubbed."""
     from web.property_labels import humanize_key, qualify_predicate, split_pascal_case
-    from web.case_display import concept_type_meta, materialized_category
+    from web.case_display import component_meta, concept_type_meta, materialized_category
     templates = Path(__file__).resolve().parents[2] / "web" / "templates"
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(str(templates)), autoescape=True)
     env.filters["split_pascal"] = split_pascal_case
@@ -197,6 +197,7 @@ def _macro_environment():
     env.globals["url_for"] = lambda endpoint, **kw: f"/entity/{kw['ontology_name']}/{kw['fragment']}"
     env.globals["type_label"] = type_display_label
     env.globals["concept_meta"] = concept_type_meta
+    env.globals["component_meta"] = component_meta
     env.globals["materialized_category"] = materialized_category
     return env
 

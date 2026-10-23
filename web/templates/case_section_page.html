@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{# One case section as a page of its own: the link target of an on-demand
+   section for a visitor without JavaScript (route ontology.case_section). #}
+{% from "macros/case_display.html" import render_section_body, render_component_index %}
+
+{% block title %}{{ section.title }} - {{ (ontology.meta_data or {}).get('display_name') or ontology.name }} - OntServe{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ontology_case.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set display_title = (ontology.meta_data or {}).get('display_name') or ontology.name %}
+<nav class="small mb-2" aria-label="Case trail">
+    <a href="{{ url_for('main.index', category=CASES_CATEGORY) }}">ProEthica cases</a>
+    <span class="text-body-secondary" aria-hidden="true">&rsaquo;</span>
+    <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}#section-{{ section.id }}">{{ display_title }}</a>
+    <span class="text-body-secondary" aria-hidden="true">&rsaquo;</span>
+    <span aria-current="page">{{ section.title }}</span>
+</nav>
+<h1 class="mb-1">{{ section.title }}</h1>
+{% if section.description %}<p class="section-description">{{ section.description }}</p>{% endif %}
+{% if section.subsections %}{{ render_component_index(section) }}{% endif %}
+{{ render_section_body(section, ontology_name=ontology.name, type_labels=type_labels) }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/ontology_case.js') }}"></script>
+{% endblock %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "macros/ontology_list.html" import ontology_row, table_head %}
 
-{% block title %}{% if stack %}{{ super() }}{% else %}Ontologies - OntServe{% endif %}{% endblock %}
+{% block title %}{% if stack %}{{ super() }}{% elif case_category %}ProEthica cases - OntServe{% else %}Ontologies - OntServe{% endif %}{% endblock %}
 
 {# The home page names the server in its heading, so it carries no footer. #}
 {% block footer %}{% if not stack %}{{ super() }}{% endif %}{% endblock %}
@@ -94,6 +94,47 @@
 
 {% if not total_count %}
 <p class="text-body-secondary">No ontologies are loaded.</p>
+{% endif %}
+
+{% elif case_category %}
+{# The case index: a category listed as 'cases' (main_routes._case_rows). #}
+<h1 class="h3 mb-1">ProEthica cases</h1>
+{% if case_category.description %}<p class="text-body-secondary mb-2">{{ case_category.description }}</p>{% endif %}
+<ul class="list-inline mb-3" aria-label="Cases by decade">
+    <li class="list-inline-item mb-1">
+        <a href="{{ url_for('main.index', category=case_category.key) }}" class="chip{% if not current_subcategory %} active" aria-current="page{% endif %}">All decades <span class="chip-count">{{ case_total }}</span></a>
+    </li>
+    {% for sub, n in case_decades if sub %}
+    <li class="list-inline-item mb-1">
+        <a href="{{ url_for('main.index', category=case_category.key, subcategory=sub) }}" class="chip{% if sub == current_subcategory %} active" aria-current="page{% endif %}">{{ sub }} <span class="chip-count">{{ n }}</span></a>
+    </li>
+    {% endfor %}
+</ul>
+{% if case_index %}
+<div class="table-responsive">
+    <table class="table table-sm table-hover align-middle case-index">
+        <thead>
+            <tr>
+                <th>Case</th>
+                <th>NSPE</th>
+                <th>Decade</th>
+                <th>Ontology</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in case_index %}
+            <tr>
+                <td><a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=row.name) }}">{{ row.title }}</a></td>
+                <td class="text-nowrap">{{ row.case_number or '' }}</td>
+                <td class="text-nowrap">{{ row.decade or '' }}</td>
+                <td class="font-monospace small text-body-secondary">{{ row.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-body-secondary">No cases match this decade.</p>
 {% endif %}
 
 {% else %}

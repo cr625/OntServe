@@ -1,0 +1,31 @@
+@prefix case9901: <http://proethica.org/ontology/case/9901#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Test fixture for the case page (tests/integration/test_case_page.py): two
+# component individuals and one provenance node, which the page routes to the
+# support section that loads on demand.
+
+<http://proethica.org/ontology/case/9901> a owl:Ontology ;
+    rdfs:label "ProEthica Case 9901 Ontology" ;
+    dcterms:title "Fixture Case on Drainage Design" ;
+    dcterms:identifier "99-1" ;
+    dcterms:temporal "1990s" .
+
+case9901:Engineer_A_Design_Engineer a owl:NamedIndividual, proeth-core:Role, proeth:EngineerRole ;
+    rdfs:label "Engineer A Design Engineer" ;
+    rdfs:comment "The engineer who designed the drainage system." .
+
+case9901:Engineer_A_Public_Safety_Duty a owl:NamedIndividual, proeth-core:Obligation ;
+    rdfs:label "Engineer A Public Safety Duty" ;
+    rdfs:comment "The duty to protect the public from flooding." .
+
+case9901:edge_provenance_hasObligation a prov:Derivation ;
+    rdfs:label "Fixture edge provenance" ;
+    rdfs:comment "property=hasObligation; fixture" ;
+    prov:value "http://proethica.org/ontology/case/9901#Engineer_A_Public_Safety_Duty" ;
+    prov:wasDerivedFrom case9901:Engineer_A_Design_Engineer .

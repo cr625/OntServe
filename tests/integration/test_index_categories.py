@@ -175,14 +175,39 @@ class TestNavbar:
 @pytest.mark.integration
 class TestFlatList:
 
-    def test_category_filter_lists_cases_flat(self, client, case_names):
+    def test_cases_category_renders_the_case_index(self, client, case_names):
         r = client.get('/?category=Cases')
         assert r.status_code == 200
-        html = r.get_data(as_text=True)
-        assert re.search(r'<strong>proethica-case-\d+</strong>', html)
-        assert 'Clear category' in html
-        assert 'ProEthica Cases' in html
-        assert 'id="reference"' not in html
+        main = _main(r.get_data(as_text=True))
+        assert '<h1 class="h3 mb-1">ProEthica cases</h1>' in main
+        assert re.search(r'<td class="font-monospace small text-body-secondary">proethica-case-\d+</td>', main)
+        assert 'class="chip active" aria-current="page">All decades' in main
+        assert 'id="reference"' not in main and 'pagination' not in main
+
+    def test_case_index_is_newest_first(self, client, app, case_names):
+        """NSPE case numbers sort with ProEthica's two-digit-year pivot (>= 50 is
+        the 1900s); cases without a number come last."""
+        from web.models import db, Ontology
+        numbers = {case_names[0]: '58-1', case_names[1]: '24-2', case_names[2]: None}
+        saved = {}
+        with app.app_context():
+            for name, number in numbers.items():
+                o = db.session.execute(select(Ontology).where(Ontology.name == name)).scalar_one()
+                saved[name] = dict(o.meta_data or {})
+                md = {k: v for k, v in saved[name].items() if k != 'case_number'}
+                o.meta_data = {**md, 'case_number': number} if number else md
+            db.session.commit()
+        try:
+            main = _main(client.get('/?category=Cases').get_data(as_text=True))
+            order = re.findall(r'<td class="font-monospace small text-body-secondary">(proethica-case-\d+)</td>', main)
+            positions = [order.index(n) for n in (case_names[1], case_names[0], case_names[2])]
+            assert positions == sorted(positions)
+        finally:
+            with app.app_context():
+                for name, md in saved.items():
+                    o = db.session.execute(select(Ontology).where(Ontology.name == name)).scalar_one()
+                    o.meta_data = md
+                db.session.commit()
 
     def test_subcategory_filter(self, client, app, case_names):
         """An explicit metadata.subcategory routes the case into a chip and a filter."""
@@ -196,11 +221,10 @@ class TestFlatList:
         try:
             r = client.get('/?category=Cases&subcategory=Test%20Decade')
             assert r.status_code == 200
-            html = r.get_data(as_text=True)
-            assert f'<strong>{name}</strong>' in html
-            assert 'Test Decade' in html
-            others = re.findall(r'<strong>(proethica-case-\d+)</strong>', html)
-            assert others == [name]
+            main = _main(r.get_data(as_text=True))
+            names = re.findall(r'<td class="font-monospace small text-body-secondary">(proethica-case-\d+)</td>', main)
+            assert names == [name]
+            assert 'class="chip active" aria-current="page">Test Decade' in main
             # The home page advertises the subcategory as a decade chip
             assert 'subcategory=Test+Decade' in client.get('/').get_data(as_text=True)
         finally:
@@ -274,7 +298,7 @@ class TestCaseHeaderBacklink:
             assert r.status_code == 200
             html = r.get_data(as_text=True)
             assert f'href="https://proethica.example/cases/{case_id}"' in html
-            assert 'View case in ProEthica' in html
+            assert 'Open in ProEthica' in html
         finally:
             app.config.pop('PROETHICA_BASE_URL', None)
 

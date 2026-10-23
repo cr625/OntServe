@@ -1,7 +1,8 @@
 {# Items of the ProEthica level pages: links to classes, the component
-   heading and index, and one node of the intermediate subclass tree. The
-   builders are in web/level_views.py. No concept colours here: the nine
-   colours belong to the case pages. #}
+   letter, heading and index, and one node of the intermediate subclass tree.
+   The builders are in web/level_views.py. The nine concept colours mark the
+   component letters only (config/case_display.yaml, the palette of the
+   ProEthica color-scheme docs page). #}
 
 {# A class reference from ClassIndex.ref: linked when its ontology is loaded,
    plain text otherwise (a BFO or IAO parent). #}
@@ -21,9 +22,12 @@
 {% if refs %}<span class="small text-body-secondary">also under {% for r in refs %}{{ ref_link(r) }}{% if not loop.last %}, {% endif %}{% endfor %}</span>{% endif %}
 {% endmacro %}
 
-{# The letter of a component, neutral. #}
-{% macro component_letter(letter) %}
-{% if letter %}<span class="component-letter" title="D-tuple component {{ letter }}">{{ letter }}</span>{% endif %}
+{# The letter of a component in its concept colour. #}
+{% macro component_letter(letter, extra_class='') %}
+{%- if letter -%}
+{%- set m = component_meta(letter) -%}
+<span class="component-letter{{ ' ' ~ extra_class if extra_class }}" title="{{ m.name if m else 'D-tuple component ' ~ letter }}"{% if m %} style="background: {{ m.color }}; border-color: {{ m.color }}; color: {{ m.text_color }};"{% endif %}>{{ letter }}</span>
+{%- endif -%}
 {% endmacro %}
 
 {% macro group_id(group) %}component-{{ (group.letter or 'other')|lower }}{% endmacro %}
@@ -34,7 +38,7 @@
     <ul class="list-inline mb-0">
         {% for group in groups %}
         <li class="list-inline-item mb-1">
-            <a href="#{{ group_id(group) }}" class="chip">{% if group.letter %}<span class="fw-semibold">{{ group.letter }}</span> {% endif %}{{ group.label }} <span class="chip-count">{{ group.count }}</span></a>
+            <a href="#{{ group_id(group) }}" class="chip">{% if group.letter %}{{ component_letter(group.letter, 'component-letter-sm') }} {% endif %}{{ group.label }} <span class="chip-count">{{ group.count }}</span></a>
         </li>
         {% endfor %}
     </ul>

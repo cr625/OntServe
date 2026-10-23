@@ -1,23 +1,21 @@
-{# Case Display Macros - Rendering for case ontology entities #}
-{% from "macros/entity_display.html" import render_entity_properties %}
+{# Case Display Macros - Rendering for case ontology entities.
 
-{# Render an individual entity card. Individuals are colour-coded by their
-   9-concept type (the concept_meta chip + left accent), labelled as instances
-   of their class (clickable), and never repeat the class in the body.
+   The nine concept colours mark the component letters (macros/level_items.html,
+   component_letter) and the thin left border of each component group; the
+   component index above the groups serves as their legend. Cards are neutral. #}
+{% from "macros/entity_display.html" import render_entity_properties %}
+{% from "macros/level_items.html" import component_letter %}
+
+{# Render an individual entity card, labelled as an instance of its class
+   (clickable), never repeating the class in the body.
    type_labels: the route's {class IRI: {label, ontology}} index, so class
    names render from rdfs:label (type_label) rather than the split fragment. #}
 {% macro render_entity_card(entity, color=none, ontology_name=none, type_labels=none) %}
-{% set cc = materialized_category(entity) %}
-{% set cm = concept_meta(cc) if cc else none %}
-{% set accent = (cm.color if cm else color) or '#6c757d' %}
 {% set is_class = entity.entity_type == 'class' %}
-<div class="entity-card individual-card" style="--entity-color: {{ accent }};">
+<div class="entity-card individual-card">
     <div class="individual-head">
-        {% if cm %}
-        <span class="concept-chip" style="background: {{ cm.color }};" title="{{ cm.name }} ({{ 'class' if is_class else 'individual' }})">{{ cm.abbrev }}</span>
-        {% endif %}
         {% if is_class %}
-        <span class="badge text-bg-light border" style="font-size:.65rem;" title="A class this case's individuals are typed with, redeclared in the case ontology; not a case individual">class</span>
+        <span class="chip" title="A class this case's individuals are typed with, redeclared in the case ontology; not a case individual">class</span>
         {% endif %}
         <span class="entity-label">
             {% if ontology_name %}
@@ -54,10 +52,9 @@
         {% if t != entity.parent_uri and 'ontology/core#' not in t %}
         {% if ontology_name %}
         <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology_name, fragment=t_frag) }}"
-           class="badge bg-light text-secondary border text-decoration-none ms-1"
-           title="Also classified as ({{ t }})">{{ type_label(t, type_labels) }}</a>
+           class="chip ms-1" title="Also classified as ({{ t }})">{{ type_label(t, type_labels) }}</a>
         {% else %}
-        <span class="badge bg-light text-secondary border ms-1">{{ type_label(t, type_labels) }}</span>
+        <span class="chip ms-1">{{ type_label(t, type_labels) }}</span>
         {% endif %}
         {% endif %}
         {% endfor %}
@@ -73,7 +70,7 @@
     {% if scope_notes and scope_notes is string %}{% set scope_notes = [scope_notes] %}{% endif %}
 
     {% if entity.comment %}
-    {% if scope_notes %}<div class="text-uppercase text-muted" style="font-size:0.62em; letter-spacing:0.04em;">Definition</div>{% endif %}
+    {% if scope_notes %}<div class="card-kicker">Definition</div>{% endif %}
     {% if entity.comment|length > 240 %}
     <div class="entity-comment text-clamp">{{ entity.comment }}</div>
     <button type="button" class="clamp-toggle btn btn-link btn-sm p-0">Show more</button>
@@ -85,11 +82,11 @@
     {% if scope_notes %}
     {% for note in scope_notes %}
     {% set has_tag = note.startswith('[') and ']' in note %}
-    <div class="ps-2 my-1 border-start border-3 border-info">
-        <div class="text-uppercase text-muted" style="font-size:0.62em; letter-spacing:0.04em;">
+    <div class="inherited-note">
+        <div class="card-kicker">
             Inherited{% if has_tag %} from {{ note.split(']')[0][1:] }}{% endif %}
         </div>
-        <div class="entity-comment small text-muted fst-italic">{{ note.split(']', 1)[1].strip() if has_tag else note }}</div>
+        <div class="entity-comment small fst-italic">{{ note.split(']', 1)[1].strip() if has_tag else note }}</div>
     </div>
     {% endfor %}
     {% endif %}
@@ -115,17 +112,77 @@
     {% set link_ontology = (home.ontology if (home is mapping and home.ontology) else ontology_name) %}
     {% if link_ontology %}
     <a href="{{ url_for('ontology.entity_detail', ontology_name=link_ontology, fragment=frag) }}"
-       class="badge bg-light text-secondary border text-decoration-none" title="{{ t.uri }}">{{ type_label(t.uri, type_labels) }}</a>
+       class="chip" title="{{ t.uri }}">{{ type_label(t.uri, type_labels) }}</a>
     {% else %}
-    <span class="badge bg-light text-secondary border" title="{{ t.uri }}">{{ type_label(t.uri, type_labels) }}</span>
+    <span class="chip" title="{{ t.uri }}">{{ type_label(t.uri, type_labels) }}</span>
     {% endif %}
     {% endfor %}
 </div>
 {% endif %}
 {% endmacro %}
 
-{# Render a section with entities #}
-{% macro render_section(section, ontology_name=none, type_labels=none) %}
+{# The cards of one list, the first max_preview shown and the rest behind a
+   Show more button (toggleMore in static/js/ontology_case.js). #}
+{% macro render_entity_list(entities, list_id, max_preview, ontology_name=none, type_labels=none) %}
+<div class="entity-list" id="list-{{ list_id }}">
+    {% for entity in entities[:max_preview] %}
+    {{ render_entity_card(entity, ontology_name=ontology_name, type_labels=type_labels) }}
+    {% endfor %}
+</div>
+{% if entities|length > max_preview %}
+<div class="hidden-entities" id="hidden-{{ list_id }}" style="display: none;">
+    {% for entity in entities[max_preview:] %}
+    {{ render_entity_card(entity, ontology_name=ontology_name, type_labels=type_labels) }}
+    {% endfor %}
+</div>
+<button class="btn btn-outline-secondary btn-sm show-more-btn" onclick="toggleMore('{{ list_id }}', this)">
+    Show {{ entities|length - max_preview }} more
+</button>
+{% endif %}
+{% endmacro %}
+
+{# The content of a section: its component groups or its card list, and the
+   types used. Also the body of the on-demand fragment (case_section_fragment.html). #}
+{% macro render_section_body(section, ontology_name=none, type_labels=none) %}
+{% set max_preview = section.max_preview|default(10) %}
+{% if section.subsections %}
+{% for subsection in section.subsections %}
+{% if subsection.entities|length > 0 %}
+<div class="subsection" id="subsection-{{ subsection.id }}"{% if subsection.color %} style="--subsection-color: {{ subsection.color }};"{% endif %}>
+    <div class="subsection-header">
+        {{ component_letter(subsection.abbrev or subsection.id[:2]|upper) }}
+        <span class="subsection-title">{{ subsection.title }}</span>
+        <span class="subsection-count">{{ subsection.entities|length }}</span>
+    </div>
+    {{ render_entity_list(subsection.entities, section.id ~ '-' ~ subsection.id, max_preview, ontology_name, type_labels) }}
+    {{ render_types_used(subsection.types_used, ontology_name, type_labels) }}
+</div>
+{% endif %}
+{% endfor %}
+{% else %}
+{{ render_entity_list(section.entities, section.id, max_preview, ontology_name, type_labels) }}
+{{ render_types_used(section.types_used, ontology_name, type_labels) }}
+{% endif %}
+{% endmacro %}
+
+{# The component index above the nine component groups: each entry carries
+   its letter in the concept colour, the legend for the group borders below. #}
+{% macro render_component_index(section) %}
+<nav class="component-legend" aria-label="Components">
+    {% for sub in section.subsections %}
+    <a href="#subsection-{{ sub.id }}" class="legend-item{% if not sub.entities %} empty{% endif %}">
+        {{ component_letter(sub.abbrev or sub.id[:2]|upper, 'component-letter-sm') }}
+        <span>{{ sub.title }}</span>
+        <span class="legend-count">{{ sub.entities|length }}</span>
+    </a>
+    {% endfor %}
+</nav>
+{% endmacro %}
+
+{# A section of the case page. deferred_url set: the section shows its type
+   counts and loads its body from that URL on demand (a plain nofollow link
+   without JavaScript); otherwise the body renders in place. #}
+{% macro render_section(section, ontology_name=none, type_labels=none, deferred_url=none, type_counts=none) %}
 {% set ns = namespace(count=section.entities|length) %}
 {% if section.subsections %}
 {% set ns.count = 0 %}
@@ -137,75 +194,29 @@
 
 {% if section_count > 0 %}
 <div class="case-section" id="section-{{ section.id }}">
-    <div class="case-section-header" data-bs-toggle="collapse" data-bs-target="#content-{{ section.id }}">
-        <h4>
-            {% if section.icon %}<i class="{{ section.icon }} me-2"></i>{% endif %}
-            {{ section.title }}
-            <span class="badge bg-primary ms-2">{{ section_count }}</span>
-        </h4>
-        <i class="bi bi-chevron-down"></i>
-    </div>
-
+    <h3 class="case-section-title">
+        {{ section.title }} <span class="section-count">{{ section_count }}</span>
+    </h3>
     {% if section.description %}
-    <p class="text-muted small mb-2 ms-1">{{ section.description }}</p>
+    <p class="section-description">{{ section.description }}</p>
     {% endif %}
 
-    <div class="collapse {% if not section.collapsed %}show{% endif %}" id="content-{{ section.id }}">
-        {% if section.subsections %}
-        <!-- Render subsections -->
-        {% for subsection in section.subsections %}
-        {% if subsection.entities|length > 0 %}
-        <div class="subsection" id="subsection-{{ subsection.id }}" style="{% if subsection.color %}--subsection-color: {{ subsection.color }}; border-left-color: {{ subsection.color }};{% endif %}">
-            <div class="subsection-header">
-                <span class="subsection-abbrev" style="{% if subsection.color %}background: {{ subsection.color }};{% endif %}">{{ subsection.abbrev or subsection.id[:2]|upper }}</span>
-                <span class="subsection-title">{{ subsection.title }}</span>
-                <span class="subsection-count">({{ subsection.entities|length }})</span>
-            </div>
-
-            <div class="entity-list" id="list-{{ section.id }}-{{ subsection.id }}">
-                {% for entity in subsection.entities[:section.max_preview|default(10)] %}
-                {{ render_entity_card(entity, subsection.color, ontology_name, type_labels) }}
-                {% endfor %}
-            </div>
-
-            {% if subsection.entities|length > section.max_preview|default(10) %}
-            <div class="hidden-entities" id="hidden-{{ section.id }}-{{ subsection.id }}" style="display: none;">
-                {% for entity in subsection.entities[section.max_preview|default(10):] %}
-                {{ render_entity_card(entity, subsection.color, ontology_name, type_labels) }}
-                {% endfor %}
-            </div>
-            <button class="btn btn-outline-secondary btn-sm show-more-btn"
-                    onclick="toggleMore('{{ section.id }}-{{ subsection.id }}', this)"
-                    style="{% if subsection.color %}border-color: {{ subsection.color }}; color: {{ subsection.color }};{% endif %}">
-                Show {{ subsection.entities|length - section.max_preview|default(10) }} more
-            </button>
-            {% endif %}
-            {{ render_types_used(subsection.types_used, ontology_name, type_labels) }}
-        </div>
-        {% endif %}
-        {% endfor %}
-        {% else %}
-        <!-- Render entities directly -->
-        <div class="entity-list" id="list-{{ section.id }}">
-            {% for entity in section.entities[:section.max_preview|default(10)] %}
-            {{ render_entity_card(entity, ontology_name=ontology_name, type_labels=type_labels) }}
-            {% endfor %}
-        </div>
-
-        {% if section.entities|length > section.max_preview|default(10) %}
-        <div class="hidden-entities" id="hidden-{{ section.id }}" style="display: none;">
-            {% for entity in section.entities[section.max_preview|default(10):] %}
-            {{ render_entity_card(entity, ontology_name=ontology_name, type_labels=type_labels) }}
-            {% endfor %}
-        </div>
-        <button class="btn btn-outline-secondary btn-sm show-more-btn"
-                onclick="toggleMore('{{ section.id }}', this)">
-            Show {{ section.entities|length - section.max_preview|default(10) }} more
-        </button>
-        {% endif %}
-        {{ render_types_used(section.types_used, ontology_name, type_labels) }}
-        {% endif %}
+    {% if deferred_url %}
+    {% if type_counts %}
+    <p class="small text-body-secondary mb-2">
+        {% for t in type_counts %}{{ t.label or 'other types' }} {{ t.count }}{% if not loop.last %} &middot; {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+    <div class="deferred-body" id="content-{{ section.id }}">
+        <a href="{{ deferred_url }}" rel="nofollow" class="btn btn-sm btn-outline-secondary deferred-load"
+           data-fragment="{{ deferred_url }}?fragment=1">Show the {{ section_count }} entries</a>
     </div>
+    {% else %}
+    {% if section.subsections %}{{ render_component_index(section) }}{% endif %}
+    <div id="content-{{ section.id }}">
+        {{ render_section_body(section, ontology_name, type_labels) }}
+    </div>
+    {% endif %}
 </div>
 {% endif %}
 {% endmacro %}

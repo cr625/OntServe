@@ -1,0 +1,357 @@
+/* Case page (ontology_case.html, case_section_page.html and the case macros).
+   Neutral surfaces: the nine concept colours mark the component letters
+   (.component-letter, style.css) and the thin left border of a component group
+   (--subsection-color); the component index is their legend. */
+
+/* Summary line under the header */
+.case-summary {
+    margin: 0 0 1.5rem;
+    font-size: 0.95rem;
+}
+
+.case-summary a {
+    text-decoration: none;
+}
+
+.case-summary a:hover {
+    text-decoration: underline;
+}
+
+/* Parts and sections */
+.case-part {
+    margin-bottom: 2.5rem;
+}
+
+.case-part-title {
+    font-size: 1.5rem;
+    padding-bottom: 0.35rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.case-section {
+    margin-bottom: 2rem;
+}
+
+.case-section-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.section-count {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--bs-secondary-color);
+    margin-left: 0.25rem;
+}
+
+.section-description {
+    font-size: 0.875rem;
+    color: var(--bs-secondary-color);
+    margin-bottom: 0.75rem;
+    max-width: 60rem;
+}
+
+/* Component index: the legend of the group borders */
+.component-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0.6rem 0.15rem 0.3rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-pill);
+    font-size: 0.85rem;
+    color: var(--bs-body-color);
+    text-decoration: none;
+    background: var(--bs-body-bg);
+}
+
+.legend-item:hover {
+    border-color: var(--bs-link-color);
+}
+
+.legend-item.empty {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.legend-count {
+    color: var(--bs-secondary-color);
+}
+
+/* Component groups: a thin border in the colour of the component */
+.subsection {
+    padding-left: 0.85rem;
+    border-left: 3px solid var(--subsection-color, var(--bs-border-color));
+    margin-bottom: 1.25rem;
+}
+
+.subsection-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.75rem 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.subsection-count {
+    color: var(--bs-secondary-color);
+    font-weight: 400;
+    font-size: 0.875rem;
+}
+
+/* Entity cards: neutral */
+.entity-card {
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color-translucent);
+    border-radius: var(--bs-border-radius-sm);
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.4rem;
+}
+
+.individual-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+}
+
+.entity-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.entity-link {
+    color: var(--bs-body-color);
+    text-decoration: none;
+}
+
+.entity-link:hover {
+    color: var(--bs-link-color);
+    text-decoration: underline;
+}
+
+/* "instance of > Class" line: makes the individual/class distinction explicit */
+.instance-of {
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color);
+    margin: 0.1rem 0 0.15rem;
+}
+
+.instance-of .bi {
+    font-size: 0.65rem;
+}
+
+.instance-of-label {
+    font-style: italic;
+}
+
+.instance-of-link {
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.instance-of-link:hover {
+    text-decoration: underline;
+}
+
+.entity-comment {
+    font-size: 0.85rem;
+    color: var(--bs-secondary-color);
+    margin: 0.25rem 0;
+    line-height: 1.4;
+}
+
+.card-kicker {
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color);
+}
+
+.inherited-note {
+    padding-left: 0.5rem;
+    margin: 0.25rem 0;
+    border-left: 2px solid var(--bs-border-color);
+}
+
+/* Entity properties display (page-local; the entity page has its own) */
+.entity-properties {
+    background: var(--bs-tertiary-bg);
+    border-radius: var(--bs-border-radius-sm);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.property-row {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+.property-row:last-child {
+    border-bottom: none;
+}
+
+.property-key {
+    color: var(--bs-secondary-color);
+    font-weight: 500;
+    min-width: 100px;
+    flex-shrink: 0;
+}
+
+.property-value {
+    word-break: break-word;
+}
+
+.property-value code {
+    font-size: 0.75rem;
+    padding: 0.1rem 0.3rem;
+    background: var(--bs-secondary-bg);
+    border-radius: 0.2rem;
+}
+
+/* "Types used" chip row: the shared classes a section's individuals are typed
+   with (bare per-case redeclarations), listed instead of cards. */
+.types-used {
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color);
+    margin: 0.25rem 0 0.5rem;
+}
+
+.types-used-label {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.68rem;
+    font-weight: 600;
+    margin-right: 0.35rem;
+}
+
+.types-used .chip {
+    margin: 0 0.15rem 0.2rem 0;
+}
+
+.show-more-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Bespoke panels: obligation competition, cited provisions, conclusions */
+.panel-item {
+    border: 1px solid var(--bs-border-color-translucent);
+    border-radius: var(--bs-border-radius);
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    background: var(--bs-body-bg);
+}
+
+.panel-item-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.panel-quote {
+    border-left: 2px solid var(--bs-border-color);
+    padding-left: 0.5rem;
+    margin: 0.25rem 0 0.25rem 0.25rem;
+    color: var(--bs-secondary-color);
+}
+
+.relation-list li {
+    margin-bottom: 0.2rem;
+}
+
+.relation-list .chip {
+    margin-bottom: 0.15rem;
+}
+
+.chip .component-letter-sm {
+    margin-right: 0.3rem;
+}
+
+details > summary {
+    cursor: pointer;
+}
+
+/* Sections that load on demand */
+.deferred-body {
+    margin-top: 0.25rem;
+}
+
+/* Sidebar */
+.case-nav {
+    position: sticky;
+    top: 1rem;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+.case-nav-part {
+    font-weight: 600;
+    margin: 0.75rem 0 0.25rem;
+}
+
+.case-nav-part:first-child {
+    margin-top: 0;
+}
+
+.case-nav-part a {
+    color: var(--bs-body-color);
+    text-decoration: none;
+}
+
+.case-nav .nav-link {
+    padding: 0.15rem 0.5rem;
+    color: var(--bs-secondary-color);
+    border-left: 2px solid transparent;
+}
+
+.case-nav .nav-link:hover {
+    color: var(--bs-body-color);
+}
+
+.case-nav .nav-link.active {
+    color: var(--bs-link-color);
+    border-left-color: var(--bs-link-color);
+}
+
+.nav-count {
+    color: var(--bs-secondary-color);
+    font-size: 0.8rem;
+}
+
+/* Progressive disclosure: clamp long prose to a 3-line preview until the
+   reader expands it. */
+.text-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.text-clamp.expanded {
+    -webkit-line-clamp: unset;
+    overflow: visible;
+}
+
+.clamp-toggle {
+    text-decoration: none;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 991.98px) {
+    .case-nav {
+        position: static;
+    }
+}

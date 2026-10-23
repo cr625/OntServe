@@ -2,7 +2,7 @@
 import logging
 from datetime import datetime, timezone
 
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, abort, make_response
 from flask_login import login_required, current_user
 from sqlalchemy import select, func
 import rdflib
@@ -250,9 +250,18 @@ def register_detail_routes(bp):
             case_id = categories.case_id_from_name(ontology.name)
             proethica_case_url = f"{base_url.rstrip('/')}/cases/{case_id}" if base_url and case_id else None
 
+            # The ontologies the case is written in and the code its conclusions cite
+            case_vocabulary = {
+                'intermediate': stack.LEVEL_BY_KEY['intermediate'].ontology,
+                'extended': stack.LEVEL_BY_KEY['extended'].ontology,
+                'cases': stack.CASES_VOCABULARY,
+                'code': stack.CASES_CODE,
+            }
+
             return render_template('ontology_case.html',
                                  ontology=ontology,
                                  proethica_case_url=proethica_case_url,
+                                 case_vocabulary=case_vocabulary,
                                  case_sections=case_data['sections'],
                                  page_blocks=page_blocks,
                                  stats=case_data['stats'],
@@ -348,6 +357,36 @@ def register_detail_routes(bp):
                              versions=versions,
                              stats=stats,
                              case_filter=case_filter)
+
+
+    @bp.route('/ontology/<ontology_name>/case-section/<section_id>')
+    def case_section(ontology_name, section_id):
+        """The body of one section of a case page. The page loads the sections
+        configured collapsed in config/case_display.yaml on demand: its script
+        asks for ?fragment=1 and inserts the HTML; without JavaScript the link
+        opens the same body as a page of its own. Kept out of search indexes."""
+        from web.case_display import (is_case_ontology, organize_entities_for_case,
+                                      get_domain_from_ontology, class_label_index, type_uris_used)
+        ontology = db.one_or_404(select(Ontology).where(Ontology.name == ontology_name))
+        all_entities = db.session.execute(
+            select(OntologyEntity).where(OntologyEntity.ontology_id == ontology.id)
+        ).scalars().all()
+        if not is_case_ontology(ontology_name, all_entities):
+            abort(404)
+        case_data = organize_entities_for_case(all_entities, get_domain_from_ontology(ontology_name))
+        section = next((s for s in case_data['sections'] if s['id'] == section_id), None)
+        if section is None:
+            abort(404)
+        members = list(section['entities']) + list(section['types_used'])
+        for sub in section.get('subsections') or []:
+            members += list(sub['entities']) + list(sub['types_used'])
+        type_labels = class_label_index(type_uris_used(members))
+        template = ('case_section_fragment.html' if request.args.get('fragment') == '1'
+                    else 'case_section_page.html')
+        response = make_response(render_template(template, ontology=ontology, section=section,
+                                                 type_labels=type_labels))
+        response.headers['X-Robots-Tag'] = 'noindex'
+        return response
 
 
     @bp.route('/ontology/<ontology_name>/content')

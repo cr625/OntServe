@@ -13,8 +13,12 @@
 #     description: optional section description
 #     entity_types: list of parent_uri patterns to match
 #     icon: bootstrap icon class (optional)
-#     collapsed: start collapsed (default: false)
+#     collapsed: on the case page, show a summary and load the body on demand (default: false)
 #     max_preview: max items to show before "show more" (default: 10)
+#
+# Nine-concept subsections carry the colour of their component letter (the
+# palette of the ProEthica docs page concepts/color-scheme.md) and, on the two
+# light hues, text_color for the letter (default white).
 #
 # Routing (web/case_display.py organize_entities_for_case): an individual's
 # materialized core category (rdf:type proeth-core:<Category>) or actor type
@@ -38,8 +42,8 @@ default:
       max_preview: 10
 
     - id: nine_concepts
-      title: 9-Concept Formalism
-      description: Named individuals organized by the 9 core concepts
+      title: Nine components
+      description: Named individuals of the case, grouped by the nine components of D = (R, P, O, S, Rs, A, E, Ca, Cs)
       subsections:
         - id: roles
           title: Roles
@@ -83,12 +87,14 @@ default:
           entity_types: [Event]
           icon: bi-calendar-event
           color: '#ffc107'
+          text_color: '#212529'
         - id: capabilities
           title: Capabilities
           abbrev: Ca
           entity_types: [Capability]
           icon: bi-gear
           color: '#0dcaf0'
+          text_color: '#212529'
         - id: constraints
           title: Constraints
           abbrev: Cs
@@ -100,7 +106,7 @@ default:
       max_preview: 30
 
     - id: case_documents
-      title: Case Documents
+      title: Case documents
       description: The reports, data, drawings and photographs that the participants produce, hold or consult within the case events, as distinct from the Resources above, the professional knowledge sources the case draws on
       entity_types: [CaseDocument]
       icon: bi-file-earmark-text
@@ -108,7 +114,7 @@ default:
       max_preview: 10
 
     - id: decision_points
-      title: Decision Points
+      title: Decision points
       description: Key decision moments in the case
       entity_types:
         - DecisionPoint
@@ -126,7 +132,7 @@ default:
       max_preview: 20
 
     - id: questions
-      title: Ethical Questions
+      title: Ethical questions
       description: Questions that emerge from the case analysis
       entity_types:
         - EthicalQuestion
@@ -144,7 +150,7 @@ default:
       max_preview: 10
 
     - id: validation
-      title: Argument Validation
+      title: Argument validation
       description: Validation results for arguments
       entity_types:
         - ArgumentValidation
@@ -153,7 +159,7 @@ default:
       max_preview: 20
 
     - id: analysis
-      title: Analysis Elements
+      title: Analysis elements
       description: Causal links, resolution patterns, and other analysis
       entity_types:
         - CausalNormativeLink
@@ -168,7 +174,7 @@ default:
       max_preview: 20
 
     - id: other
-      title: Other Individuals
+      title: Other individuals
       description: Named individuals not categorized above
       entity_types: []  # Catch-all for unmatched entities
       icon: bi-collection
@@ -176,7 +182,7 @@ default:
       max_preview: 50
 
     - id: support
-      title: Provenance and Support Nodes
+      title: Support nodes
       description: Edge provenance (PROV-O derivations), OWL-Time instants and intervals, and property declarations behind the case graph
       entity_types: []  # Routed by code (prov/time namespaces + property rows), not by type matching
       icon: bi-gear

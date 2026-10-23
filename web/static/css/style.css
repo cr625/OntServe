@@ -172,15 +172,6 @@ body {
 
 /* Form improvements */
 
-/* Ontology detail page improvements */
-.ontology-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border-radius: 0.5rem;
-}
-
 /* Version history styling */
 .version-item {
     transition: all 0.2s ease;
@@ -246,10 +237,6 @@ body {
 
 /* Responsive improvements */
 @media (max-width: 768px) {
-    .ontology-header {
-        padding: 1rem;
-    }
-
     .stats-card h3 {
         font-size: 1.5rem;
     }
@@ -365,6 +352,9 @@ a.chip.active {
 }
 
 /* Level pages (level_*.html, macros/level_items.html) */
+
+/* A component letter (R, P, ..., Cs), filled with its concept colour by the
+   component_letter macro; the colour marks the letter, nothing else. */
 .component-letter {
     display: inline-block;
     min-width: 1.9rem;
@@ -372,10 +362,17 @@ a.chip.active {
     border: 1px solid var(--bs-border-color);
     border-radius: var(--bs-border-radius-sm);
     font-size: 0.8125rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.6;
     text-align: center;
     color: var(--bs-secondary-color);
+}
+
+.component-letter-sm {
+    min-width: 1.5rem;
+    padding: 0 0.2rem;
+    font-size: 0.7rem;
+    line-height: 1.45;
 }
 
 .line-clamp-2 {
@@ -470,4 +467,48 @@ a.chip.active {
 
 .component-card .card-body {
     padding: 0.85rem 1rem;
+}
+
+/* Relationship (object-property) triples of an entity, on the case-page cards
+   (macros/entity_display.html) and the entity page (macros/component_sections.html):
+   the bare camelCase predicate in monospace and the linked target. */
+.entity-relationships {
+    border-top: 1px dashed var(--bs-border-color);
+    margin-top: 0.5rem;
+    padding-top: 0.4rem;
+}
+
+.entity-relationships .relationships-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--bs-secondary-color);
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+}
+
+.entity-relationships .relationship-row {
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--bs-body-color);
+}
+
+.entity-relationships .relationship-row .bi {
+    color: var(--bs-secondary-color);
+    vertical-align: -0.1rem;
+}
+
+.entity-relationships .rel-predicate {
+    font-family: var(--bs-font-monospace, monospace);
+    color: var(--bs-secondary-color);
+    font-size: 0.8rem;
+    margin-right: 0.35rem;
+}
+
+.rel-target-link {
+    text-decoration: none;
+}
+
+.rel-target-link:hover {
+    text-decoration: underline;
 }
