@@ -129,7 +129,7 @@
                             <div class="small text-body-secondary mb-1">Grounded in
                                 <a href="{{ url_for('ontology.entity_detail', ontology_name=('iao' if c.grounding_frag.startswith('IAO_') else 'bfo'), fragment=c.grounding_frag) }}">{{ c.grounding_label }}</a></div>
                             {% endif %}
-                            {% if c.definition %}<div class="small">{{ c.definition }}</div>{% endif %}
+                            {% if c.gloss %}<div class="small">{{ c.gloss }}</div>{% endif %}
                         </div>
                     </div>
                 </div>

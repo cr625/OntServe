@@ -14,8 +14,8 @@ import rdflib
 
 from services import proethica_stack as stack
 from web.entity_extraction import build_entity_rows
-from web.level_views import (catalog_from_rows, case_numbers, framework_grid, standards_from_rows,
-                             taxonomy_from_rows)
+from web.level_views import (catalog_from_rows, case_numbers, component_gloss, framework_grid,
+                             standards_from_rows, taxonomy_from_rows)
 
 ONTOLOGIES = Path(__file__).resolve().parents[2] / 'ontologies'
 CORE = 'http://proethica.org/ontology/core#'
@@ -131,6 +131,20 @@ class TestFrameworkGrid:
         assert [c['letter'] for c in grid] == list(stack.DTUPLE_ORDER)
         role = grid[0]
         assert role['fragment'] == 'Role' and role['grounding_label'] == 'BFO role'
+
+    def test_grid_shows_the_gloss_without_the_component_phrase(self, stack_rows):
+        grid = framework_grid([r for r in stack_rows if r.ontology == 'proethica-core'])
+        assert grid[0]['gloss'].startswith('A position or standing borne by an agent')
+        for c in grid:
+            assert 'component of' not in c['gloss'] and c['gloss'].endswith('.'), c['letter']
+            assert not c['gloss'].endswith('...'), c['letter']   # a whole gloss, not a cut definition
+
+    def test_gloss_falls_back_to_the_cut_definition(self):
+        row = SimpleNamespace(comment='x' * 200, properties={})
+        assert component_gloss(row) == 'x' * 150 + '...'
+        row = SimpleNamespace(comment='Long definition.', properties={
+            'comment': 'A short gloss; the R component of D=(R,P,O,S,Rs,A,E,Ca,Cs).'})
+        assert component_gloss(row) == 'A short gloss.'
 
 
 def _cls(uri, parent, ontology, **props):

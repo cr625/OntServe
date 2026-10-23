@@ -13,6 +13,7 @@ index serves the intermediate taxonomy, the intermediate-extended catalog,
 the engineering-ethics standards view, the core grid and the headline counts.
 """
 
+import re
 from collections import defaultdict, deque
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 from urllib.parse import urlparse
@@ -254,10 +255,32 @@ def headline_counts(session) -> Dict[str, int]:
 # Core: the D-tuple grid
 # ---------------------------------------------------------------------------
 
+# The closing phrase of the core glosses ("This is the A component of the formal
+# specification D=(...)." or "; the R component of D=(...)."), which the
+# component letter on the grid already states.
+_COMPONENT_PHRASE = re.compile(
+    r'(?:\s*This is the|\s*;\s*the) \S+ component of (?:the formal specification )?D\s*=\s*\([^)]*\)\.?\s*$')
+
+
+def component_gloss(row: Any) -> str:
+    """The short reading of a core component for the grid: its rdfs:comment
+    gloss, which the extractor keeps in ``properties['comment']`` when
+    iao:0000115 takes the comment column, without the closing component
+    phrase. Without a gloss, the definition cut at 150 characters."""
+    gloss = _props(row).get('comment')
+    if isinstance(gloss, list):
+        gloss = next((g for g in gloss if g), None)
+    gloss = _COMPONENT_PHRASE.sub('', str(gloss or '')).strip()
+    if gloss:
+        return gloss if gloss[-1] in '.!?' else gloss + '.'
+    text = (row.comment or '').strip()
+    return (text[:150].rstrip() + '...') if len(text) > 150 else text
+
+
 def framework_grid(classes: Iterable[Any]) -> List[Dict[str, Any]]:
     """The nine components in tuple order, from the core class rows: letter,
-    name, fragment, definition (the stored ``comment``, which the extractor
-    fills from iao:0000115 first) and the BFO or IAO class it grounds in."""
+    name, fragment, gloss (component_gloss) and the BFO or IAO class it
+    grounds in. The full definition is on the class page."""
     order = {ltr: i for i, ltr in enumerate(stack.DTUPLE_ORDER)}
     out = []
     for row in classes:
@@ -266,12 +289,11 @@ def framework_grid(classes: Iterable[Any]) -> List[Dict[str, Any]]:
             continue
         grounding = next((fragment(p) for p in [row.parent_uri] + extra_parents(row)
                           if p and fragment(p) in GROUNDING_LABELS), None)
-        text = (row.comment or '').strip()
         out.append({
             'letter': str(letter),
             'name': row.label or fragment(row.uri),
             'fragment': fragment(row.uri),
-            'definition': (text[:150].rstrip() + '...') if len(text) > 150 else text,
+            'gloss': component_gloss(row),
             'grounding_frag': grounding,
             'grounding_label': GROUNDING_LABELS.get(grounding),
         })
