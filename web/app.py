@@ -350,6 +350,19 @@ def create_app(config_name=None):
     app.jinja_env.globals['BOOTSTRAP_JS_URL'] = f'{_cdn}/bootstrap@{_bootstrap_version}/dist/js/bootstrap.bundle.min.js'
     app.jinja_env.globals['BOOTSTRAP_ICONS_CSS_URL'] = f'{_cdn}/bootstrap-icons@{_bootstrap_icons_version}/font/bootstrap-icons.css'
 
+    # Every url_for('static', ...) carries ?v=<content hash>: nginx serves
+    # /static/ with a 7-day max-age and Cloudflare caches it at the edge, so a
+    # stylesheet or script changed by a deploy needs a new URL (2026-10-23: the
+    # interface deploy served the August style.css from the Cloudflare cache).
+    from web.static_assets import asset_version
+
+    @app.url_defaults
+    def version_static_urls(endpoint, values):
+        if endpoint == 'static' and 'filename' in values:
+            version = asset_version(app.static_folder, values['filename'])
+            if version:
+                values.setdefault('v', version)
+
     # Initialize CLI commands
     from web.cli import init_cli
     init_cli(app)
