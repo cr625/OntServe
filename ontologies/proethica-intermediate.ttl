@@ -23,6 +23,7 @@
     rdfs:comment "A mid-level ontology bridging BFO to domain-specific ethical frameworks"@en ;
     dc:creator "ProEthica AI"@en ;
     dc:date "2025-05-31"^^xsd:date ;
+    skos:changeNote "2026-10-23: :CaseDocument declared (an IAO information content entity, disjoint with proeth-core:Resource) with :heldBy and :usesDocument, for the reports, data, drawings, and photographs that participants produce, hold, or consult within the case events. The extraction had typed such documents as Resources, against the Resource definition."@en ;
     skos:changeNote "2026-10-22: :ProfessionalRole gains Dennis et al. (2016) as a definition source for code governance, with a page-cited proeth-core:sourceExcerpt beside the citation."@en ;
     skos:changeNote "2026-07-25: proeth:resolutionKind declared for the mode by which an apparent obligation tension is resolved (override, specification, dissolution). Emitted as override on prevailsOver derivation records by the defeasibility applier, and assigned to ResolutionPattern individuals where the analysis records boundary specification or dissolution rather than defeat."@en ;
     skos:changeNote "2026-07-11: ten analysis-layer datatype properties declared for Step-4 analysis fields previously absent from committed graphs: the DecisionPoint Toulmin summary slots (toulminClaim, toulminData, toulminWarrant, toulminRebuttal, toulminQualifier), boardResolution, the two ranking scores (intensityScore, qcAlignmentScore, both xsd:decimal), boardChosenOption, and the CodeProvisionReference relevantExcerpt. The companion object property appliesTo is declared in proethica-cases v3.7.0."@en ;
@@ -1247,6 +1248,32 @@ proeth:obligatedparty a owl:DatatypeProperty ;
     skos:definition "Handbooks, manuals, guides, and other documentation supporting professional practice with technical and procedural knowledge." ;
     rdfs:comment "Supporting documentation for professional practice" ;
     skos:scopeNote "An extension native to this ontology, not from a cited ethics source; structurally grounded in the Information Artifact Ontology (documents and manuals as information content entities, iao:0000030, the parent of proeth-core:Resource)." .
+
+# Documents that exist within the case events. Kept outside proeth-core:Resource, which is
+# a professional knowledge source individuated by its source kind.
+:CaseDocument rdf:type owl:Class ;
+    rdfs:subClassOf iao:0000030 ;  # IAO:information content entity
+    owl:disjointWith proeth-core:Resource ;
+    rdfs:label "Case Document"@en ;
+    iao:0000115 "An information content entity that a participant produces, holds, or consults within the events of a case, such as a report, a data set, drawings, inspection records, or photographs, whose content concerns the case situation. It is not a Resource: a Resource is a source of professional knowledge individuated by its source kind (a code, a precedent, a standard, a legal or regulatory text, reference material), while a case document is individuated by the situation it records."@en ;
+    skos:definition "An information content entity that a participant produces, holds, or consults within the events of a case, such as a report, a data set, drawings, inspection records, or photographs, whose content concerns the case situation."@en ;
+    skos:example "a firm's report on a public engagement process; groundwater monitoring data; an inspector's prior reports and photographs of a bridge"@en ;
+    rdfs:comment "A document of the case situation, as distinct from a professional knowledge source"@en ;
+    skos:scopeNote "An extension native to this ontology, grounded in the Information Artifact Ontology. The documents participants act on shape what they know and can do: an action that uses a case document (:usesDocument) and realizes a capability (proeth-core:realizesCapability) connects the document to that capability."@en .
+
+:heldBy rdf:type owl:ObjectProperty ;
+    rdfs:domain :CaseDocument ;
+    rdfs:range proeth-core:Agent ;
+    rdfs:label "held by"@en ;
+    iao:0000115 "Relates a case document to a participant who produces, holds, or consults it within the case events. The counterpart of proeth-core:availableTo, which relates a Resource to the agents who use it."@en ;
+    rdfs:comment "Relates a case document to a participant who produces, holds, or consults it within the case events."@en .
+
+:usesDocument rdf:type owl:ObjectProperty ;
+    rdfs:domain proeth-core:Action ;
+    rdfs:range :CaseDocument ;
+    rdfs:label "uses document"@en ;
+    iao:0000115 "Relates an action to a case document it consults, produces, or relies on. The counterpart of proeth-core:usesResource; with proeth-core:realizesCapability it connects a document to the capability the action exercises."@en ;
+    rdfs:comment "Relates an action to a case document it consults, produces, or relies on."@en .
 
 # Specific instances of professional codes (examples)
 :NSPECodeOfEthics rdf:type owl:NamedIndividual ;
