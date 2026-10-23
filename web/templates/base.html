@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}OntServe - Unified Ontology Server{% endblock %}</title>
+    <title>{% block title %}OntServe, ontology server for ProEthica{% endblock %}</title>
     <link rel="icon"
         href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='3' r='2.2' fill='%230d6efd'/%3E%3Ccircle cx='3' cy='12' r='2.2' fill='%230d6efd'/%3E%3Ccircle cx='13' cy='12' r='2.2' fill='%230d6efd'/%3E%3Cpath d='M8 5v3M8 8L4 10.5M8 8l4 2.5' stroke='%230d6efd' stroke-width='1.2' fill='none'/%3E%3C/svg%3E">
     <script defer src="https://cloud.umami.is/script.js" data-website-id="df11828a-8c48-40a0-a9b6-763a142b9ab7"></script>
@@ -30,34 +30,34 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
+                {# The ProEthica stack in stack order (services.proethica_stack, via
+                   the inject_stack context processor), then the cases and search. #}
                 <ul class="navbar-nav me-auto">
+                    {% for level in STACK_LEVELS %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.index') }}">
-                            <i class="bi bi-house"></i> Home
-                        </a>
+                        <a class="nav-link{% if nav_active == level.key %} active{% endif %}"{% if nav_active == level.key %} aria-current="page"{% endif %}
+                           href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=level.ontology) }}">{{ level.nav_label }}</a>
+                    </li>
+                    {% endfor %}
+                    <li class="nav-item">
+                        <a class="nav-link{% if nav_active == 'cases' %} active{% endif %}"{% if nav_active == 'cases' %} aria-current="page"{% endif %}
+                           href="{{ url_for('main.index', category=CASES_CATEGORY) }}">Cases</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if nav_active == 'search' %} active{% endif %}"{% if nav_active == 'search' %} aria-current="page"{% endif %}
+                           href="{{ url_for('main.search') }}">Search</a>
                     </li>
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('ontology.import_ontology') }}">
-                            <i class="bi bi-cloud-upload"></i> Import
-                        </a>
+                        <a class="nav-link" href="{{ url_for('ontology.import_ontology') }}">Import</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('ontology_editor.index') }}">
-                            <i class="bi bi-pencil-square"></i> Editor
-                        </a>
+                        <a class="nav-link" href="{{ url_for('ontology_editor.index') }}">Editor</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('draft.drafts') }}">
-                            <i class="bi bi-file-earmark-text"></i> Drafts
-                        </a>
+                        <a class="nav-link" href="{{ url_for('draft.drafts') }}">Drafts</a>
                     </li>
                     {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.search') }}">
-                            <i class="bi bi-search"></i> Search
-                        </a>
-                    </li>
                 </ul>
 
                 <!-- User authentication -->
@@ -68,7 +68,7 @@
                             data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> {{ current_user.username }}
                             {% if current_user.is_admin %}
-                            <span class="badge text-bg-warning ms-1">Admin</span>
+                            <span class="chip ms-1">Admin</span>
                             {% endif %}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -97,9 +97,7 @@
                     <li class="nav-item">
                         <span class="navbar-text">
                             {% if config.get('ENVIRONMENT', 'production') == 'development' %}
-                            <span class="badge bg-info" title="Development Environment - Full access enabled">
-                                <i class="bi bi-gear"></i> Development
-                            </span>
+                            <span class="chip" title="Development environment">Development</span>
                             {% endif %}
                         </span>
                     </li>
@@ -138,7 +136,7 @@
     <!-- Footer -->
     <footer class="bg-light text-center text-lg-start mt-5">
         <div class="text-center p-3 bg-body-secondary">
-            © 2026 OntServe - Unified Ontology Server
+            OntServe, ontology server for ProEthica
         </div>
     </footer>
 

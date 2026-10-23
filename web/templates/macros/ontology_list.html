@@ -1,59 +1,32 @@
-{# Ontology repository list macros: the source/type vocabulary tables, the
-   badges every ontology listing shares, one table row, and the grouped-view
-   sections (family / category / collapsed summary) used by index.html. #}
+{# Ontology list macros: the source and type labels, the status chips every
+   ontology listing shares, and one row of the flat list (index.html). #}
 
-{# Vocabulary tables. key -> (label, colour, icon). One palette for the row
-   badges, the index filters and stat cards, and the settings-page selects. #}
-{% set SOURCE_STYLES = {
-    'proethica': ('ProEthica', 'success', 'bi-cpu'),
-    'external': ('External', 'info', 'bi-cloud-download'),
-    'manual': ('Manual', 'secondary', 'bi-pencil'),
+{# Vocabulary labels, key -> label, shared by the rows and the settings-page selects. #}
+{% set SOURCE_LABELS = {
+    'proethica': 'ProEthica',
+    'external': 'External',
+    'manual': 'Manual',
 } %}
-{% set TYPE_STYLES = {
-    'upper': ('Upper', 'danger', 'bi-diagram-3'),
-    'core': ('Core', 'primary', 'bi-star'),
-    'base': ('Base', 'light', 'bi-box'),
-    'domain': ('Domain', 'dark', 'bi-globe'),
-    'case': ('Case', 'warning', 'bi-folder'),
-    'extracted': ('Extracted', 'secondary', 'bi-funnel'),
-    'derived': ('Derived', 'secondary', 'bi-diagram-2'),
+{% set TYPE_LABELS = {
+    'upper': 'Upper',
+    'core': 'Core',
+    'base': 'Base',
+    'domain': 'Domain',
+    'case': 'Case',
+    'extracted': 'Extracted',
+    'derived': 'Derived',
 } %}
 
-{# A filter toggle for one vocabulary entry: outline button in the entry's
-   colour (secondary for 'light', which has no usable outline on white) with the
-   entry's icon and a count badge. #}
-{% macro filter_button(style, active, href, count) %}
-    {% set color = 'secondary' if style[1] == 'light' else style[1] %}
-    <a href="{{ href }}" class="btn btn-outline-{{ color }} {% if active %}active{% endif %}">
-        <i class="bi {{ style[2] }}"></i> {{ style[0] }}
-        <span class="badge text-bg-{{ style[1] }}{% if style[1] == 'light' %} border{% endif %}">{{ count }}</span>
-    </a>
+{# Status chips: outline, never filled. #}
+{% macro subset_chip(extra_class='') %}
+    <span class="chip {{ extra_class }}" title="A curated selection of terms, not the full upstream ontology">Subset</span>
 {% endmacro %}
 
-{% macro source_badge(ontology) %}
-    {% set style = SOURCE_STYLES.get(ontology.source_system) %}
-    <span class="badge text-bg-{{ style[1] if style else 'secondary' }}">{{ style[0] if style else ontology.source_system }}</span>
+{% macro reasoned_chip(extra_class='') %}
+    <span class="chip {{ extra_class }}">Reasoned</span>
 {% endmacro %}
 
-{% macro type_badge(ontology) %}
-    {% set style = TYPE_STYLES.get(ontology.ontology_type) %}
-    <span class="badge text-bg-{{ style[1] if style else 'light' }}">{% if style and ontology.ontology_type == 'upper' %}<i class="bi {{ style[2] }}"></i> {% endif %}{{ style[0] if style else ontology.ontology_type }}</span>
-    {% if ontology.meta_data and ontology.meta_data.get('stub') %}{{ subset_badge() }}{% endif %}
-{% endmacro %}
-
-{% macro subset_badge(extra_class='') %}
-    <span class="badge text-bg-warning border border-dark {{ extra_class }}"
-          title="A curated selection of terms, not the full upstream ontology">
-        <i class="bi bi-scissors"></i> Subset
-    </span>
-{% endmacro %}
-
-{% macro reasoned_badge(extra_class='') %}
-    <span class="badge text-bg-info {{ extra_class }}"><i class="bi bi-brain"></i> Reasoned</span>
-{% endmacro %}
-
-{# One table row. show_subcategory adds the subcategory as a muted tag under
-   the name (used in the flat view, where the group header is absent). #}
+{# One table row. show_subcategory adds the subcategory to the muted version line. #}
 {% macro ontology_row(ontology, show_subcategory=false) %}
     <tr>
         <td>
@@ -63,22 +36,21 @@
             {% if ontology.meta_data and ontology.meta_data.get('display_name') and ontology.meta_data.get('display_name') != ontology.name %}
             <br><small>{{ ontology.meta_data.get('display_name') }}</small>
             {% endif %}
-            {% if ontology.current_version %}
+            {% set version = ontology.current_version %}
+            {% if version or (show_subcategory and ontology.subcategory) %}
             <br>
-            <small class="text-muted">
-                v{{ ontology.current_version.version_number }}
-                {% if ontology.current_version.version_tag and 'reasoned' in
-                ontology.current_version.version_tag %}
-                {{ reasoned_badge('ms-1') }}
-                {% endif %}
-                {% if show_subcategory and ontology.subcategory %}
-                <span class="badge text-bg-light border ms-1"><i class="bi bi-tag"></i> {{ ontology.subcategory }}</span>
-                {% endif %}
+            <small class="text-body-secondary">
+                {% if version %}v{{ version.version_number }}{% endif %}
+                {% if show_subcategory and ontology.subcategory %}{% if version %} &middot; {% endif %}{{ ontology.subcategory }}{% endif %}
+                {% if version and version.version_tag and 'reasoned' in version.version_tag %}{{ reasoned_chip('ms-1') }}{% endif %}
             </small>
             {% endif %}
         </td>
-        <td>{{ source_badge(ontology) }}</td>
-        <td>{{ type_badge(ontology) }}</td>
+        <td>{{ SOURCE_LABELS.get(ontology.source_system, ontology.source_system) }}</td>
+        <td>
+            {{ TYPE_LABELS.get(ontology.ontology_type, ontology.ontology_type) }}
+            {% if ontology.meta_data and ontology.meta_data.get('stub') %}{{ subset_chip('ms-1') }}{% endif %}
+        </td>
         <td>{{ ontology.description[:80] if ontology.description else '-' }}
             {% if ontology.description and ontology.description|length > 80 %}...{% endif %}
         </td>
@@ -96,96 +68,4 @@
             <th>Entities</th>
         </tr>
     </thead>
-{% endmacro %}
-
-{# Summary card for a collapsed group: count, description, one chip per
-   subcategory linking to the filtered flat view, and a browse-all link. #}
-{% macro collapsed_group(group) %}
-    {% set cat = group.category %}
-    <div class="card border-{{ cat.color }} mb-2">
-        <div class="card-body py-3">
-            <div class="d-flex flex-wrap align-items-center gap-2">
-                <a href="{{ url_for('main.index', category=cat.key) }}" class="btn btn-outline-{{ cat.color }} btn-sm">
-                    <i class="bi bi-list-ul"></i> Browse all {{ group.count }}
-                </a>
-                {% if cat.description %}
-                <span class="text-muted small">{{ cat.description }}</span>
-                {% endif %}
-            </div>
-            {% if group.subgroups|length > 1 or (group.subgroups|length == 1 and group.subgroups[0][0]) %}
-            <div class="mt-2 d-flex flex-wrap gap-1">
-                {% for sub, n in group.subgroups %}
-                {% if sub %}
-                <a href="{{ url_for('main.index', category=cat.key, subcategory=sub) }}"
-                   class="badge rounded-pill text-bg-light border text-decoration-none fs-6 fw-normal">
-                    <i class="bi bi-tag"></i> {{ sub }} <span class="text-muted">{{ n }}</span>
-                </a>
-                {% else %}
-                <span class="badge rounded-pill text-bg-light border fs-6 fw-normal" title="No subcategory set">
-                    unlabelled <span class="text-muted">{{ n }}</span>
-                </span>
-                {% endif %}
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
-    </div>
-{% endmacro %}
-
-{# One category on the grouped index. Outline: page h1 > section h2 (family or
-   lone category) > nested category h3; sizes come from the heading utility
-   classes so the outline stays honest. #}
-{% macro category_section(group, nested=false) %}
-    {% set cat = group.category %}
-    {% set tag = 'h3' if nested else 'h2' %}
-    <section class="{{ 'mb-3' if nested else 'mb-4' }}" id="category-{{ cat.key|replace(' ', '-')|lower }}">
-        <div class="border-bottom pb-2 mb-2">
-            <{{ tag }} class="{{ 'h5' if nested else 'h4' }} d-flex align-items-center gap-2 mb-0">
-                <i class="bi {{ cat.icon }} text-{{ cat.color }}"></i>
-                <a href="{{ url_for('main.index', category=cat.key) }}" class="text-decoration-none text-reset">{{ cat.section_label if nested else cat.label }}</a>
-                <span class="badge text-bg-{{ cat.color }}">{{ group.count }}</span>
-            </{{ tag }}>
-            {% if not group.collapsed and cat.description %}
-            <div class="text-muted small mt-1">{{ cat.description }}</div>
-            {% endif %}
-        </div>
-        {% if group.collapsed %}
-        {{ collapsed_group(group) }}
-        {% else %}
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                {{ table_head() }}
-                <tbody>
-                    {% for ontology in group.ontologies %}
-                    {{ ontology_row(ontology, show_subcategory=true) }}
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
-    </section>
-{% endmacro %}
-
-{# A family (e.g. ProEthica = Framework + Cases): one h2 with the member
-   categories nested as h3 sections. #}
-{% macro family_section(section) %}
-    {% set fam = section.family %}
-    <section class="mb-4 family-section" id="family-{{ fam.key|replace(' ', '-')|lower }}">
-        <div class="d-flex align-items-center gap-2 mb-1">
-            <h2 class="h3 d-flex align-items-center gap-2 mb-0">
-                <i class="bi {{ fam.icon }} text-{{ fam.color }}"></i> {{ fam.label }}
-                <span class="badge text-bg-{{ fam.color }}"
-                      title="{% for g in section.groups %}{{ g.category.section_label }} {{ g.count }}{% if not loop.last %} + {% endif %}{% endfor %}. Other ProEthica-sourced ontologies (the foundation subset, the domain ontology) are listed under their own categories, so this differs from the Source filter count.">{{ section.count }}</span>
-            </h2>
-            <span class="text-muted small ms-2">
-                {% for g in section.groups %}{{ g.category.section_label }} {{ g.count }}{% if not loop.last %} &middot; {% endif %}{% endfor %}
-            </span>
-        </div>
-        {% if fam.description %}<div class="text-muted small mb-3">{{ fam.description }}</div>{% endif %}
-        <div class="ps-3 border-start border-3 border-{{ fam.color }}">
-            {% for group in section.groups %}
-            {{ category_section(group, nested=true) }}
-            {% endfor %}
-        </div>
-    </section>
 {% endmacro %}

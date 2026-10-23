@@ -289,3 +289,77 @@ body {
 .bfo-not-aligned {
     border-left: 4px solid #dc3545;
 }
+/* ProEthica stack pages. One accent, the link colour; surfaces stay neutral. */
+
+/* Outline chip: a decade link, or a status that changes a decision
+   (deprecated, reasoned, draft, subset). Never filled. */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.05rem 0.55rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-pill);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background: transparent;
+    white-space: nowrap;
+    vertical-align: baseline;
+}
+
+a.chip {
+    text-decoration: none;
+}
+
+a.chip:hover,
+a.chip:focus-visible,
+a.chip.active {
+    border-color: var(--bs-link-color);
+    color: var(--bs-link-color);
+}
+
+a.chip.active {
+    font-weight: 600;
+}
+
+.chip .chip-count {
+    color: var(--bs-secondary-color);
+}
+
+.navbar .chip {
+    color: rgba(255, 255, 255, 0.85);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.stack-card .card-title a {
+    text-decoration: none;
+}
+
+.stack-count {
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+}
+
+.reference-list > summary {
+    cursor: pointer;
+}
+
+.reference-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: baseline;
+    min-width: 0;
+}
+
+.reference-item > a {
+    flex: none;
+}
+
+.reference-description {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

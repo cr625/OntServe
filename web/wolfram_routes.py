@@ -1,8 +1,9 @@
 """
 Wolfram AgentOne Blueprint for OntServe
 
-Provides a web interface and JSON API for querying the Wolfram AgentOne API.
-Conversation history is maintained in the Flask session.
+Provides a web interface and JSON API for querying the Wolfram AgentOne API,
+for signed-in maintainers. Conversation history is maintained in the Flask
+session.
 """
 
 import logging
@@ -15,6 +16,7 @@ from flask import (
     request,
     session,
 )
+from flask_login import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,7 @@ def _get_service():
 
 
 @wolfram_bp.route("/")
+@login_required
 def index():
     """Wolfram query interface."""
     service = _get_service()
@@ -39,6 +42,7 @@ def index():
 
 
 @wolfram_bp.route("/query", methods=["POST"])
+@login_required
 def query():
     """
     Send a query to Wolfram AgentOne.
@@ -75,6 +79,7 @@ def query():
 
 
 @wolfram_bp.route("/clear", methods=["POST"])
+@login_required
 def clear_history():
     """Clear the conversation history stored in the session."""
     session.pop("wolfram_history", None)
@@ -82,6 +87,7 @@ def clear_history():
 
 
 @wolfram_bp.route("/status")
+@login_required
 def status():
     """Return Wolfram service status as JSON."""
     service = _get_service()

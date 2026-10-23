@@ -1,0 +1,12 @@
+# Publications listed at the foot of the OntServe home page, newest first.
+#
+# The list names authors, so the home page shows it only when ANONYMOUS_MODE
+# is false (web/app_config.py). Fields: authors, title, container (the
+# proceedings or journal), status ("in press" until the DOI exists), and the
+# optional url, which links the title.
+
+publications:
+  - authors: "Rauch, C.B., Conry-Murray, S., McClellan, S., Gerber, C., Veigel, D., Greenberg, J."
+    title: "Metadata Terminology Standardization for AI-Assisted Materials Science Research"
+    container: "Metadata and Semantic Research (MTSR 2026). Communications in Computer and Information Science. Springer"
+    status: "in press"

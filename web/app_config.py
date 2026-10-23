@@ -40,8 +40,6 @@ class Config:
     
     # Pagination
     ONTOLOGIES_PER_PAGE = 20
-    # Index page: a category with more ontologies than this collapses to one summary row
-    INDEX_COLLAPSE_THRESHOLD = 12
     ENTITIES_PER_PAGE = 50
     
     # File upload settings
@@ -61,6 +59,13 @@ class Config:
     
     # ProEthica web app (case pages link back to it: {PROETHICA_BASE_URL}/cases/<id>)
     PROETHICA_BASE_URL = os.environ.get('PROETHICA_BASE_URL') or 'http://localhost:5000'
+
+    # Double-blind anonymization, the counterpart of ANONYMOUS_MODE in ProEthica.
+    # When true, the surfaces that name authors are withheld: the publications
+    # list of the home page (config/publications.yaml). The default is true so
+    # that a deploy without the setting stays anonymous; set ANONYMOUS_MODE=false
+    # in the environment to show them.
+    ANONYMOUS_MODE = os.environ.get('ANONYMOUS_MODE', 'true').lower() == 'true'
 
     # Ontology URI settings
     ONTOLOGY_BASE_URI = os.environ.get('ONTOLOGY_BASE_URI') or 'https://ontserve.ontorealm.net/'
@@ -96,7 +101,9 @@ class TestingConfig(Config):
     # a recycled connection would be an empty database.
     SQLALCHEMY_ENGINE_OPTIONS = {'pool_pre_ping': True}
     WTF_CSRF_ENABLED = False
-    
+    # The suite exercises the full pages; tests of the withheld state set it.
+    ANONYMOUS_MODE = False
+
     # Storage directories for testing
     ONTSERVE_STORAGE_DIR = '/tmp/ontserve_test_storage'
     ONTSERVE_CACHE_DIR = '/tmp/ontserve_test_cache'

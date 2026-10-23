@@ -4,23 +4,46 @@ Main routes for OntServe web application.
 Handles index page, health check, search, and error handlers.
 """
 
+import logging
+from functools import lru_cache
+from pathlib import Path
+
+import yaml
 from flask import Blueprint, render_template, request, jsonify, current_app
 from sqlalchemy import select, func, or_
 
 from web.models import db, Ontology, OntologyEntity
+from web.level_views import headline_counts
 from services import ontology_categories as categories
+from services import proethica_stack as stack
+
+logger = logging.getLogger(__name__)
 
 main_bp = Blueprint('main', __name__)
+
+PUBLICATIONS_PATH = Path(__file__).resolve().parent.parent / 'config' / 'publications.yaml'
+
+
+@lru_cache(maxsize=1)
+def load_publications():
+    """The publications list of config/publications.yaml, read once per process."""
+    try:
+        data = yaml.safe_load(PUBLICATIONS_PATH.read_text(encoding='utf-8')) or {}
+    except (OSError, yaml.YAMLError) as exc:
+        logger.warning('Publications list not loaded: %s', exc)
+        return ()
+    return tuple(p for p in data.get('publications') or []
+                 if isinstance(p, dict) and p.get('title'))
 
 
 @main_bp.route('/')
 def index():
     """Home page.
 
-    Unfiltered: ontologies grouped by category (services.ontology_categories);
-    large groups collapse to a summary row so the per-case ontologies do not
-    swamp the list. With any filter (source, type, category, subcategory): the
-    flat paginated table.
+    Unfiltered: the ProEthica stack (services.proethica_stack): the four
+    levels with their headline counts, the cases by decade, and every other
+    ontology in a Reference list. With any filter (source, type, category,
+    subcategory): the flat paginated table.
     """
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config['ONTOLOGIES_PER_PAGE']
@@ -50,55 +73,40 @@ def index():
     # Order by name
     stmt = stmt.order_by(Ontology.name)
 
-    groups = None
-    sections = None
-    if filtered:
-        pagination = db.paginate(
-            stmt,
-            page=page,
-            per_page=per_page,
-            error_out=False
-        )
-        ontologies = pagination.items
-        display_ontologies = ontologies
-    else:
-        pagination = None
+    if not filtered:
         ontologies = db.session.execute(stmt).scalars().all()
-        groups = categories.group_ontologies(
-            ontologies, collapse_threshold=current_app.config.get(
-                'INDEX_COLLAPSE_THRESHOLD', categories.DEFAULT_COLLAPSE_THRESHOLD))
-        sections = categories.group_by_family(groups)
-        # Entity counts are only rendered for rows shown inline
-        display_ontologies = [o for g in groups if not g.collapsed for o in g.ontologies]
+        partition = stack.partition(ontologies)
+        case_groups = categories.group_ontologies(partition.cases)
+        publications = () if current_app.config.get('ANONYMOUS_MODE', True) else load_publications()
+        return render_template('index.html',
+                               stack=partition,
+                               counts=headline_counts(db.session),
+                               case_group=case_groups[0] if case_groups else None,
+                               publications=publications,
+                               total_count=len(ontologies))
 
-    _prefetch_entity_counts(display_ontologies)
+    pagination = db.paginate(
+        stmt,
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+    ontologies = pagination.items
+    _prefetch_entity_counts(ontologies)
 
-    # Get counts for filter badges (unfiltered totals per category)
-    source_counts = dict(db.session.execute(
-        select(Ontology.source_system, func.count(Ontology.id))
-        .group_by(Ontology.source_system)
-    ).all())
-    type_counts = dict(db.session.execute(
-        select(Ontology.ontology_type, func.count(Ontology.id))
-        .group_by(Ontology.ontology_type)
-    ).all())
     # Unfiltered repository total: lets the template distinguish "no ontologies
-    # exist" (onboarding) from "no ontologies match this filter" (zero results)
-    total_count = sum(source_counts.values())
+    # exist" from "no ontologies match this filter" (zero results)
+    total_count = db.session.execute(select(func.count(Ontology.id))).scalar() or 0
 
     return render_template('index.html',
+                         stack=None,
                          ontologies=ontologies,
-                         groups=groups,
-                         sections=sections,
                          pagination=pagination,
-                         filtered=filtered,
                          current_source=source_system,
                          current_type=ontology_type,
                          current_category=category,
                          current_subcategory=subcategory,
                          category_info=categories.category_info,
-                         source_counts=source_counts,
-                         type_counts=type_counts,
                          total_count=total_count)
 
 

@@ -92,36 +92,9 @@ class TestGrouping:
         assert keys == ['Foundation', 'ProEthica Framework', 'Cases', 'Domain', 'Professional Codes',
                         'Sandbox', cat.UNCATEGORIZED.key]
 
-    def test_family_sections(self):
-        """ProEthica Framework and Cases fold into one ProEthica section at the
-        position of the first; everything else is a section of its own."""
-        sections = cat.group_by_family(cat.group_ontologies(self._corpus()))
-        keys = [(s.family.key if s.family else None, [g.key for g in s.groups]) for s in sections]
-        assert keys == [
-            (None, ['Foundation']),
-            ('ProEthica', ['ProEthica Framework', 'Cases']),
-            (None, ['Domain']),
-            (None, ['Professional Codes']),
-            (None, ['Sandbox']),
-            (None, [cat.UNCATEGORIZED.key]),
-        ]
-        proethica = sections[1]
-        assert proethica.count == 1 + 16 and proethica.key == 'ProEthica'
-        assert [g.category.section_label for g in proethica.groups] == ['Framework', 'Cases']
+    def test_labels(self):
         assert cat.category_info('Cases').label == 'ProEthica Cases'
-
-    def test_family_section_appears_even_with_one_member(self):
-        groups = cat.group_ontologies([ont('proethica-case-1', 'case', 'proethica')])
-        sections = cat.group_by_family(groups)
-        assert len(sections) == 1 and sections[0].family.key == 'ProEthica'
-        assert [g.key for g in sections[0].groups] == ['Cases']
-
-    def test_collapse_threshold(self):
-        groups = {g.key: g for g in cat.group_ontologies(self._corpus(), collapse_threshold=12)}
-        assert groups['Cases'].collapsed is True
-        assert groups['Foundation'].collapsed is False
-        groups = {g.key: g for g in cat.group_ontologies(self._corpus(), collapse_threshold=100)}
-        assert groups['Cases'].collapsed is False
+        assert cat.category_info('Foundation').label == 'Foundation'
 
     def test_subgroups_sorted_with_unlabelled_last(self):
         groups = {g.key: g for g in cat.group_ontologies(self._corpus(16))}
@@ -137,45 +110,4 @@ class TestGrouping:
 
     def test_category_info_for_unknown_key(self):
         info = cat.category_info('Sandbox')
-        assert info.key == info.label == 'Sandbox' and info.icon
-
-
-@pytest.mark.unit
-class TestFamilyContract:
-    """group_by_family on synthetic groups, independent of the real catalog."""
-
-    @staticmethod
-    def _g(key, family=None):
-        return cat.Group(category=cat.Category(key, key, 'bi-x', 'secondary', family=family, short_label=key))
-
-    def test_section_anchored_at_first_member_and_keeps_input_order(self):
-        groups = [self._g('A', 'ProEthica'), self._g('B'), self._g('C', 'ProEthica'), self._g('D')]
-        sections = cat.group_by_family(groups)
-        assert [(s.family.key if s.family else None, [g.key for g in s.groups]) for s in sections] == [
-            ('ProEthica', ['A', 'C']), (None, ['B']), (None, ['D'])]
-
-    def test_unknown_family_key_falls_back_to_standalone(self):
-        sections = cat.group_by_family([self._g('X', 'NoSuchFamily'), self._g('Y')])
-        assert [s.family for s in sections] == [None, None]
-        assert [s.key for s in sections] == ['X', 'Y']
-
-    def test_empty_corpus_has_no_sections(self):
-        assert cat.group_by_family([]) == []
-        assert [(s.family, [g.key for g in s.groups])
-                for s in cat.group_by_family(cat.group_ontologies([ont('bfo', 'upper', 'external')]))] == [(None, ['Foundation'])]
-
-    def test_counts_and_labels(self):
-        sections = cat.group_by_family([self._g('A', 'ProEthica'), self._g('C', 'ProEthica')])
-        assert sections[0].count == 0 and sections[0].key == 'ProEthica'
-        assert cat.category_info('Foundation').section_label == 'Foundation'
-        assert cat.category_info('Sandbox').section_label == 'Sandbox'
-
-    def test_catalog_invariants(self):
-        """Every Category.family names a declared Family, every Family has members,
-        and every family member carries a short_label for its nested heading."""
-        assert {c.family for c in cat.CATEGORIES if c.family} <= set(cat.FAMILY_BY_KEY)
-        for f in cat.FAMILIES:
-            assert any(c.family == f.key for c in cat.CATEGORIES), f.key
-        for c in cat.CATEGORIES:
-            if c.family:
-                assert c.short_label, c.key
+        assert info.key == info.label == 'Sandbox' and info.description == ''

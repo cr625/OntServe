@@ -256,6 +256,35 @@ def create_app(config_name=None):
         """Make app config available in templates."""
         return {'config': app.config}
 
+    # The ProEthica stack drives the navbar: its levels in stack order, the
+    # cases category, and the item of the current page.
+    from services import proethica_stack
+    from services.ontology_categories import case_id_from_name
+
+    def _nav_active():
+        from flask import has_request_context, request
+        if not has_request_context():
+            return None
+        name = (request.view_args or {}).get('ontology_name')
+        if name:
+            level = proethica_stack.level_for(name)
+            if level:
+                return level.key
+            return 'cases' if case_id_from_name(name) else None
+        if request.endpoint == 'main.index' and request.args.get('category') == proethica_stack.CASES_CATEGORY:
+            return 'cases'
+        if request.endpoint == 'main.search':
+            return 'search'
+        return None
+
+    @app.context_processor
+    def inject_stack():
+        return {
+            'STACK_LEVELS': proethica_stack.LEVELS,
+            'CASES_CATEGORY': proethica_stack.CASES_CATEGORY,
+            'nav_active': _nav_active(),
+        }
+
     # Add render_props as a Jinja global (available in macros too)
     from web.entity_display import render_entity_properties
     app.jinja_env.globals['render_props'] = render_entity_properties

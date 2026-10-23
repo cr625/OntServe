@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "macros/ontology_list.html" import SOURCE_STYLES, TYPE_STYLES %}
+{% from "macros/ontology_list.html" import SOURCE_LABELS, TYPE_LABELS %}
 
 {% block title %}Settings - {{ ontology.name }} - OntServe{% endblock %}
 
@@ -65,8 +65,8 @@
                                     <div class="mb-3">
                                         <label for="ontologyType" class="form-label">Type</label>
                                         <select class="form-select" id="ontologyType" name="ontology_type">
-                                            {% for key, style in TYPE_STYLES.items() %}
-                                            <option value="{{ key }}" {{ 'selected' if ontology.ontology_type == key else '' }}>{{ style[0] }}</option>
+                                            {% for key, label in TYPE_LABELS.items() %}
+                                            <option value="{{ key }}" {{ 'selected' if ontology.ontology_type == key else '' }}>{{ label }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -75,8 +75,8 @@
                                     <div class="mb-3">
                                         <label for="sourceSystem" class="form-label">Source</label>
                                         <select class="form-select" id="sourceSystem" name="source_system">
-                                            {% for key, style in SOURCE_STYLES.items() %}
-                                            <option value="{{ key }}" {{ 'selected' if ontology.source_system == key else '' }}>{{ style[0] }}</option>
+                                            {% for key, label in SOURCE_LABELS.items() %}
+                                            <option value="{{ key }}" {{ 'selected' if ontology.source_system == key else '' }}>{{ label }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
