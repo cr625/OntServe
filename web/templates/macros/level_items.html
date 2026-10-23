@@ -1,0 +1,67 @@
+{# Items of the ProEthica level pages: links to classes, the component
+   heading and index, and one node of the intermediate subclass tree. The
+   builders are in web/level_views.py. No concept colours here: the nine
+   colours belong to the case pages. #}
+
+{# A class reference from ClassIndex.ref: linked when its ontology is loaded,
+   plain text otherwise (a BFO or IAO parent). #}
+{% macro ref_link(ref) %}
+{%- if ref and ref.ontology -%}
+<a href="{{ url_for('ontology.entity_detail', ontology_name=ref.ontology, fragment=ref.fragment) }}">{{ ref.label }}</a>
+{%- elif ref -%}
+{{ ref.label }}
+{%- endif -%}
+{% endmacro %}
+
+{% macro item_link(item, extra_class='') %}
+<a href="{{ url_for('ontology.entity_detail', ontology_name=item.ontology, fragment=item.fragment) }}" class="{{ extra_class }}">{{ item.label }}</a>
+{%- endmacro %}
+
+{% macro also_under(refs) %}
+{% if refs %}<span class="small text-body-secondary">also under {% for r in refs %}{{ ref_link(r) }}{% if not loop.last %}, {% endif %}{% endfor %}</span>{% endif %}
+{% endmacro %}
+
+{# The letter of a component, neutral. #}
+{% macro component_letter(letter) %}
+{% if letter %}<span class="component-letter" title="D-tuple component {{ letter }}">{{ letter }}</span>{% endif %}
+{% endmacro %}
+
+{% macro group_id(group) %}component-{{ (group.letter or 'other')|lower }}{% endmacro %}
+
+{# Anchor links to the component sections with their counts. #}
+{% macro component_index(groups, label='Components') %}
+<nav class="component-index mb-4" aria-label="{{ label }}">
+    <ul class="list-inline mb-0">
+        {% for group in groups %}
+        <li class="list-inline-item mb-1">
+            <a href="#{{ group_id(group) }}" class="chip">{% if group.letter %}<span class="fw-semibold">{{ group.letter }}</span> {% endif %}{{ group.label }} <span class="chip-count">{{ group.count }}</span></a>
+        </li>
+        {% endfor %}
+    </ul>
+</nav>
+{% endmacro %}
+
+{% macro component_heading(group, tag='h2', size='h4') %}
+<{{ tag }} class="{{ size }} d-flex align-items-baseline gap-2 mb-2">
+    {{ component_letter(group.letter) }}<span>{{ group.label }}</span>
+    <span class="fs-6 fw-normal text-body-secondary">{{ group.count }}</span>
+</{{ tag }}>
+{% endmacro %}
+
+{# One class of the intermediate tree, its definition clamped to two lines,
+   then its subclasses. #}
+{% macro tree_node(node) %}
+<li>
+    <div class="tree-row">
+        {{ item_link(node, 'fw-semibold') }}
+        {% if node.under %}<span class="small text-body-secondary">under {{ ref_link(node.under) }}</span>{% endif %}
+        {{ also_under(node.also_under) }}
+        {% if node.definition %}<div class="small text-body-secondary line-clamp-2">{{ node.definition }}</div>{% endif %}
+    </div>
+    {% if node.children %}
+    <ul class="taxonomy-tree">
+        {% for child in node.children %}{{ tree_node(child) }}{% endfor %}
+    </ul>
+    {% endif %}
+</li>
+{% endmacro %}

@@ -1,0 +1,35 @@
+{% extends "level_base.html" %}
+{% from "macros/level_items.html" import component_index, component_heading, group_id, tree_node, ref_link %}
+
+{# Intermediate: the asserted subclass tree under each core component
+   (level_views.build_taxonomy). #}
+{% block level_body %}
+<p class="text-body-secondary">
+    {{ taxonomy.total }} classes, each under the core component it specializes. A class sits under its
+    primary parent; its other parents are listed as "also under". Deprecated classes are left out.
+</p>
+
+{{ component_index(taxonomy.groups) }}
+
+{% for group in taxonomy.groups %}
+<section class="mb-5 level-group" id="{{ group_id(group) }}">
+    {{ component_heading(group) }}
+    {% if group.component %}
+    <p class="small text-body-secondary mb-2">Kinds of {{ ref_link(group.component) }} (core).</p>
+    {% elif not group.letter %}
+    <p class="small text-body-secondary mb-2">Classes outside the nine components.</p>
+    {% endif %}
+
+    {% if group.nodes %}
+    <ul class="taxonomy-tree taxonomy-root">
+        {% for node in group.nodes %}{{ tree_node(node) }}{% endfor %}
+    </ul>
+    {% elif group.core_kinds %}
+    <p class="mb-0">Intermediate adds no kinds here. Core defines
+        {% for kind in group.core_kinds %}{{ ref_link(kind) }}{% if loop.revindex == 2 %} and {% elif not loop.last %}, {% endif %}{% endfor %}.</p>
+    {% else %}
+    <p class="mb-0">Intermediate adds no kinds here. The class is {{ ref_link(group.component) }} in core.</p>
+    {% endif %}
+</section>
+{% endfor %}
+{% endblock %}

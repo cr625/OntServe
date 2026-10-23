@@ -165,6 +165,11 @@ class TestNavbar:
         html = client.get('/').get_data(as_text=True)
         assert '<title>OntServe, ontology server for ProEthica</title>' in html
         assert 'Unified Ontology Server' not in html
+        # The home page states the server once, in its heading; other pages keep the footer
+        body = html[html.index('<body'):]
+        assert body.lower().count('ontology server for proethica') == 1
+        assert '<footer' not in body
+        assert '<footer' in client.get('/search').get_data(as_text=True)
 
 
 @pytest.mark.integration

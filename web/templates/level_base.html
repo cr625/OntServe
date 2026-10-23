@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{# The level pages that render from the entity rows: the intermediate taxonomy,
+   the intermediate-extended catalog and the engineering-ethics standards view
+   (web/level_views.py). Core uses ontology_detail.html with the same header. #}
+{% from "macros/page_header.html" import level_header with context %}
+{% from "macros/reasoning_panel.html" import render_reasoning_panel %}
+
+{% block title %}{{ level.label }} - OntServe{% endblock %}
+
+{% block content %}
+{{ level_header(ontology, level) }}
+
+{% block level_body %}{% endblock %}
+
+<div class="row mt-5">
+    <div class="col-lg-8">
+        {{ render_reasoning_panel(ontology.name) }}
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/reasoning-panel.js') }}"></script>
+{% endblock %}

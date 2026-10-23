@@ -2,15 +2,17 @@
 {% from "macros/ontology_list.html" import subset_chip, reasoned_chip %}
 {% from "macros/entity_display.html" import render_entity_properties, render_entity_properties_compact %}
 {% from "macros/reasoning_panel.html" import render_reasoning_panel %}
+{% from "macros/page_header.html" import level_header with context %}
+{% from "macros/level_items.html" import component_letter %}
 
 {% block title %}{{ ontology.name }} - OntServe{% endblock %}
 
 {% block extra_css %}
 <style>
     .entity-list {
-        /* Full list displays; the page scrolls. The tab badges promise a count
+        /* Full list displays; the page scrolls. The tab counts promise a number
            and the pane delivers all of it (previously a 400px inner scrollbox
-           showed ~7 items against a badge of 58). */
+           showed ~7 items against a count of 58). */
     }
 
     .ttl-content {
@@ -34,266 +36,73 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
+        {% if level %}
+        {{ level_header(ontology, level) }}
+        {% else %}
         <!-- Ontology header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1>
+        {% set version = ontology.current_version %}
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+            <div class="page-heading">
+                {% if schema_of %}<p class="small text-body-secondary mb-1">Schema view</p>{% endif %}
+                <h1 class="mb-1">
                     {{ ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else
                     ontology.name }}
-                    {% if ontology.current_version %}
-                    <span class="badge bg-secondary ms-2">v{{ ontology.current_version.version_number }}</span>
-                    {% if ontology.current_version.version_tag and 'reasoned' in ontology.current_version.version_tag %}
-                    {{ reasoned_chip('ms-1') }}
-                    {% endif %}
-                    {% endif %}
-                    {% if ontology.meta_data and ontology.meta_data.get('stub') %}
-                    {{ subset_chip('ms-1') }}
-                    {% endif %}
+                    {% if version and version.version_tag and 'reasoned' in version.version_tag %}{{ reasoned_chip('ms-1') }}{% endif %}
+                    {% if ontology.meta_data and ontology.meta_data.get('stub') %}{{ subset_chip('ms-1') }}{% endif %}
                 </h1>
                 {% if ontology.meta_data and ontology.meta_data.original_name and ontology.meta_data.original_name !=
                 ontology.name %}
-                <p class="text-info">
-                    <small><i class="bi bi-info-circle"></i> URI-safe name: <code>{{ ontology.name }}</code> (original:
-                        "{{ ontology.meta_data.original_name }}")</small>
-                </p>
+                <p class="small text-body-secondary mb-1">URI-safe name: <code>{{ ontology.name }}</code> (original:
+                    "{{ ontology.meta_data.original_name }}")</p>
                 {% endif %}
-                <p class="text-muted">
-                    <code>{{ ontology.base_uri }}</code>
-                    {% if ontology.source_url %}
-                    | <a href="{{ ontology.source_url }}" target="_blank">
-                        <i class="bi bi-link-45deg"></i> Source URL
-                    </a>
-                    {% endif %}
-                    {% if ontology.current_version %}
-                    | <small>
-                        Version {{ ontology.current_version.version_number }}
-                        {% if ontology.current_version.version_tag %}
-                        ({{ ontology.current_version.version_tag }})
-                        {% endif %}
-                        - {{ ontology.current_version.created_at.strftime('%Y-%m-%d') if
-                        ontology.current_version.created_at else 'Unknown date' }}
-                    </small>
-                    {% endif %}
+                <p class="small text-body-secondary mb-0">
+                    <code class="text-body-secondary">{{ ontology.base_uri }}</code>
+                    {% if ontology.source_url %}&middot; <a href="{{ ontology.source_url }}" target="_blank">Source URL</a>{% endif %}
+                    {% if version %}&middot; version {{ version.version_number }}{% if version.version_tag %} ({{ version.version_tag }}){% endif %}{% if version.created_at %}, {{ version.created_at.strftime('%Y-%m-%d') }}{% endif %}{% endif %}
                 </p>
             </div>
-            <div class="btn-group" role="group">
-                {% if current_user.is_authenticated and current_user.can_perform_action('edit') %}
-                <a href="{{ url_for('ontology.ontology_settings', ontology_name=ontology.name) }}"
-                    class="btn btn-outline-primary">
-                    <i class="bi bi-gear"></i> Settings
-                </a>
-                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal"
-                    data-bs-target="#tagVersionModal">
-                    <i class="bi bi-tag"></i> Tag Version
-                </button>
-                <a href="{{ url_for('ontology.edit_ontology', ontology_name=ontology.name) }}" class="btn btn-primary">
-                    <i class="bi bi-pencil-square"></i> Edit TTL
-                </a>
+            <div class="d-flex flex-wrap gap-2 page-actions">
+                <a href="{{ url_for('ontology.ontology_content', ontology_name=ontology.name) }}"
+                    class="btn btn-sm btn-outline-secondary" target="_blank">View TTL</a>
+                {% if schema_of %}
+                <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}"
+                    class="btn btn-sm btn-outline-secondary">{{ schema_of }} view</a>
                 {% endif %}
                 <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}"
-                    class="btn btn-success">
-                    <i class="bi bi-diagram-3"></i> Visualize
-                </a>
-                <a href="{{ url_for('ontology.ontology_content', ontology_name=ontology.name) }}"
-                    class="btn btn-outline-secondary" target="_blank">
-                    <i class="bi bi-file-code"></i> View Raw TTL
-                </a>
+                    class="btn btn-sm btn-outline-secondary">Visualize</a>
+                {% if current_user.is_authenticated and current_user.can_perform_action('edit') %}
+                <a href="{{ url_for('ontology.ontology_settings', ontology_name=ontology.name) }}"
+                    class="btn btn-sm btn-outline-secondary">Settings</a>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                    data-bs-target="#tagVersionModal">Tag Version</button>
+                <a href="{{ url_for('ontology.edit_ontology', ontology_name=ontology.name) }}"
+                    class="btn btn-sm btn-outline-secondary">Edit TTL</a>
+                {% endif %}
                 {% if current_user.is_authenticated and current_user.can_perform_action('delete') %}
-                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
-                    data-bs-target="#deleteOntologyModal">
-                    <i class="bi bi-trash"></i> Delete
-                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                    data-bs-target="#deleteOntologyModal">Delete</button>
                 {% endif %}
             </div>
         </div>
+        {% endif %}
 
         <!-- Description -->
-        {% if ontology.description %}
-        <div class="alert alert-light">
-            {{ ontology.description }}
-        </div>
+        {% if ontology.description and not level %}
+        <p class="mb-3">{{ ontology.description }}</p>
         {% endif %}
 
-        <!-- Version Info Alert for Reasoned Versions -->
+        <!-- Reasoned version note -->
         {% if ontology.current_version and ontology.current_version.meta_data and
         ontology.current_version.meta_data.reasoning %}
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle-fill"></i> <strong>This is a reasoned version</strong>
-            <br>
-            <small>
-                Applied {{ ontology.current_version.meta_data.reasoning.reasoner_type }} reasoning on {{
-                ontology.current_version.created_at.strftime('%Y-%m-%d %H:%M') if ontology.current_version.created_at
-                else 'unknown date' }}
-                <br>
-                Inferred: {{ ontology.current_version.meta_data.reasoning.classes_after -
-                ontology.current_version.meta_data.reasoning.classes_before }} new classes,
-                {{ ontology.current_version.meta_data.reasoning.properties_after -
-                ontology.current_version.meta_data.reasoning.properties_before }} new properties,
-                {{ ontology.current_version.meta_data.reasoning.inferred_relationships|length if
-                ontology.current_version.meta_data.reasoning.inferred_relationships else 0 }} new relationships
-            </small>
-        </div>
-        {% endif %}
-
-        <!-- Calculate variables needed throughout the template -->
-        {% set total_entities = entities.classes|length + entities.properties|length + entities.individuals|length %}
-        {% set entities_with_definitions = (entities.classes + entities.properties +
-        entities.individuals)|selectattr('comment')|list|length %}
-        {% set llm_generated = (entities.classes + entities.properties +
-        entities.individuals)|selectattr('properties')|map('from_json')|selectattr('generated_definition')|list|length
-        %}
-        {% set authoritative_sources = (entities.classes + entities.properties +
-        entities.individuals)|selectattr('properties')|map('from_json')|selectattr('dc:source')|list|length
-        %}
-        {% set high_confidence_entities = [] %}
-        {% for entity in (entities.classes + entities.properties + entities.individuals) %}
-        {% if entity.properties %}
-        {% set props = entity.properties|from_json if entity.properties is string else
-        entity.properties %}
-        {% if props and props.confidence and props.confidence|float > 0.8 %}
-        {% set _ = high_confidence_entities.append(entity) %}
-        {% endif %}
-        {% endif %}
-        {% endfor %}
-        {% set high_confidence = high_confidence_entities|length %}
-
-        <!-- Ontology-specific Banner (driven by display_config) -->
-        {% if stats.show_banner %}
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-{{ stats.banner.color or 'primary' }}">
-                    <div class="card-header bg-{{ stats.banner.color or 'primary' }} text-white">
-                        <h5 class="mb-0">
-                            <i class="bi {{ stats.banner.icon or 'bi-layers' }}"></i> {{ stats.banner.title }}
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        {% if stats.category_counts %}
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="text-center">
-                                    <div class="display-4 text-{{ stats.banner.color or 'primary' }}">{{ stats.class_count }}</div>
-                                    <small class="text-muted">{{ stats.banner.subtitle or 'Total Classes' }}</small>
-                                </div>
-                            </div>
-                            <div class="col-md-9">
-                                {% if stats.display_config.featured_categories %}
-                                <h6 class="text-muted mb-3">Entity Categories</h6>
-                                <div class="row">
-                                    {% for cat in stats.display_config.featured_categories %}
-                                    <div class="col-md-4 mb-2">
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi {{ cat.icon or 'bi-circle' }} me-2" style="color: {{ cat.color }};"></i>
-                                            <div>
-                                                <strong>{{ cat.label }}:</strong>
-                                                <span class="text-muted">{{ stats.category_counts.get(cat.label, 0) }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                                {% if stats.display_config.description %}
-                                <div class="mt-2">
-                                    <small class="text-muted">{{ stats.display_config.description }}</small>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% else %}
-                        <p class="mb-0">{{ stats.banner.subtitle or '' }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% elif entities_with_definitions > 0 %}
-        <!-- Enrichment Status card removed - can be restored later if needed -->
-        {# comment starts here
-        <!-- Original Enrichment Summary for other ontologies -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-success">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-check-circle-fill"></i> Ontology Enrichment Status
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="text-center">
-                                    <div class="display-4 text-success">{{ ((entities_with_definitions / total_entities
-                                        * 100) if total_entities > 0 else 0)|round(1) }}%</div>
-                                    <small class="text-muted">Definition Coverage</small>
-                                </div>
-                            </div>
-                            <div class="col-md-9">
-                                <div class="row">
-
-                                    <div class="col-md-4">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="bi bi-robot text-info me-2"></i>
-                                            <div>
-                                                <div class="fw-bold">{{ llm_generated }}</div>
-                                                <small class="text-muted">LLM Generated</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="bi bi-bookmark-check text-primary me-2"></i>
-                                            <div>
-                                                <div class="fw-bold">{{ authoritative_sources }}</div>
-                                                <small class="text-muted">Authoritative Sources</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="bi bi-shield-check text-success me-2"></i>
-                                            <div>
-                                                <div class="fw-bold">{{ high_confidence }}</div>
-                                                <small class="text-muted">High Confidence (>80%)</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Enrichment Methods -->
-                                <div class="mt-3">
-                                    <h6 class="text-muted">Enrichment Methods Used:</h6>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        {% if llm_generated > 0 %}
-                                        <span class="badge bg-info">
-                                            <i class="bi bi-robot"></i> LLM Definition Generation
-                                        </span>
-                                        {% endif %}
-                                        {% if authoritative_sources > 0 %}
-                                        <span class="badge bg-primary">
-                                            <i class="bi bi-bookmark-check"></i> Professional Ethics Codes
-                                        </span>
-                                        {% endif %}
-                                        {% if ontology.name in ['Terminological Foundations', 'engineering-ethics'] %}
-                                        <span class="badge bg-secondary">
-                                            <i class="bi bi-file-earmark-text"></i> Technical Standards Integration
-                                        </span>
-                                        {% endif %}
-                                        {% if ontology.current_version and ontology.current_version.version_tag and
-                                        'definitions-integrated' in ontology.current_version.version_tag %}
-                                        <span class="badge bg-success">
-                                            <i class="bi bi-file-code"></i> TTL Integration
-                                        </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        comment ends here #}
+        {% set reasoning = ontology.current_version.meta_data.reasoning %}
+        <p class="small text-body-secondary mb-3">
+            {{ reasoned_chip() }}
+            {{ reasoning.reasoner_type }} reasoning applied on {{ ontology.current_version.created_at.strftime('%Y-%m-%d %H:%M')
+            if ontology.current_version.created_at else 'an unknown date' }}; inferred
+            {{ reasoning.classes_after - reasoning.classes_before }} new classes,
+            {{ reasoning.properties_after - reasoning.properties_before }} new properties and
+            {{ reasoning.inferred_relationships|length if reasoning.inferred_relationships else 0 }} new relationships.
+        </p>
         {% endif %}
 
         {% set axiom_count = stats.axioms.subclass|length + stats.axioms.property_constraints|length + stats.axioms.equivalent|length + stats.axioms.disjoint|length + stats.axioms.all_disjoint|length %}
@@ -301,37 +110,39 @@
         {% set default_tab = 'schema' if has_schema else ('individuals' if stats.individual_count > 0 else 'schema') %}
 
         {% if stats.framework %}
-        <!-- Core nine-component framework overview (core-framework display_style) -->
-        <div class="card mb-4 border-primary">
-            <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between flex-wrap">
-                <h5 class="mb-0"><i class="bi bi-grid-3x3-gap-fill"></i> Nine-Component Framework</h5>
-                <code class="text-white small">D = ( R &middot; P &middot; O &middot; S &middot; Rs &middot; A &middot; E &middot; Ca &middot; Cs )</code>
+        <!-- Core: the nine components above the schema tabs -->
+        <section class="mb-4" id="components" aria-labelledby="components-heading">
+            <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-2">
+                <h2 id="components-heading" class="h4 mb-0">Nine components</h2>
+                <code class="small text-body-secondary">D = ( R &middot; P &middot; O &middot; S &middot; Rs &middot; A &middot; E &middot; Ca &middot; Cs )</code>
             </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    {% for c in stats.framework %}
-                    {% set m = concept_meta(c.fragment) %}
-                    <div class="col-md-4">
-                        <div class="border rounded h-100 p-2" style="border-left: 4px solid {{ m.color if m else '#0d6efd' }} !important;">
-                            <div class="d-flex align-items-center mb-1">
-                                <span class="badge me-2" style="background: {{ m.color if m else '#0d6efd' }};" title="D-tuple component {{ c.letter }}">{{ c.letter }}</span>
-                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=c.fragment) }}" class="fw-bold text-decoration-none">{{ c.name }}</a>
-                                {% if c.grounding_frag %}
-                                <a href="{{ url_for('ontology.entity_detail', ontology_name='bfo', fragment=c.grounding_frag) }}" class="badge bg-light text-muted border text-decoration-none ms-auto" title="Foundational grounding">{{ c.grounding_label }}</a>
-                                {% endif %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+                {% for c in stats.framework %}
+                <div class="col">
+                    <div class="card h-100 component-card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-baseline gap-2 mb-1">
+                                {{ component_letter(c.letter) }}
+                                <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=c.fragment) }}" class="fw-semibold text-decoration-none">{{ c.name }}</a>
                             </div>
-                            {% if c.definition %}<div class="small text-muted">{{ c.definition }}</div>{% endif %}
+                            {% if c.grounding_frag %}
+                            <div class="small text-body-secondary mb-1">Grounded in
+                                <a href="{{ url_for('ontology.entity_detail', ontology_name=('iao' if c.grounding_frag.startswith('IAO_') else 'bfo'), fragment=c.grounding_frag) }}">{{ c.grounding_label }}</a></div>
+                            {% endif %}
+                            {% if c.definition %}<div class="small">{{ c.definition }}</div>{% endif %}
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-                <hr class="my-3">
-                <div class="small text-muted d-flex flex-wrap gap-3">
-                    <span><i class="bi bi-diagram-2 me-1"></i><strong>Dependency:</strong> Role &rarr; adheres to Principle &rarr; derives Obligation</span>
-                    <span><i class="bi bi-shuffle me-1"></i><strong>Defeasibility:</strong> competesWith &middot; prevailsOver &middot; defeasibleUnder</span>
-                </div>
+                {% endfor %}
             </div>
-        </div>
+            <p class="small text-body-secondary mt-3 mb-0">
+                Dependency: Role &rarr; adheres to Principle &rarr; derives Obligation. Defeasibility: competesWith,
+                prevailsOver, defeasibleUnder.
+            </p>
+        </section>
+        {% endif %}
+        {% if level %}
+        <h2 class="h4 mt-4 mb-2" id="schema">Schema</h2>
         {% endif %}
 
         <!-- Tabs for different views -->
@@ -340,44 +151,35 @@
                 <button class="nav-link {{ 'active' if default_tab == 'schema' }}" id="schema-tab" data-bs-toggle="tab" data-bs-target="#schema"
                     type="button" title="Class definitions (TBox)">
                     <i class="bi bi-box"></i> Classes
-                    <span class="badge bg-primary ms-1">{{ stats.class_count }}</span>
+                    <span class="tab-count">{{ stats.class_count }}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties-pane"
                     type="button" title="Property definitions (TBox)">
                     <i class="bi bi-arrow-left-right"></i> Properties
-                    <span class="badge bg-success ms-1">{{ stats.property_count }}</span>
+                    <span class="tab-count">{{ stats.property_count }}</span>
                 </button>
             </li>
-            {% if stats.category_entities %}
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="concepts-tab" data-bs-toggle="tab" data-bs-target="#concepts"
-                    type="button" title="Domain concepts organized by the Nine-Component Framework categories">
-                    <i class="bi bi-grid-3x3-gap"></i> Concepts
-                    <span class="badge bg-primary ms-1">{{ stats.category_total }}</span>
-                </button>
-            </li>
-            {% endif %}
             <li class="nav-item" role="presentation">
                 <button class="nav-link {{ 'active' if default_tab == 'individuals' }}" id="individuals-tab" data-bs-toggle="tab" data-bs-target="#individuals"
                     type="button" title="Named individuals/instances (ABox in description logic)">
                     <i class="bi bi-collection"></i> Individuals
-                    <span class="badge bg-secondary ms-1">{{ stats.individual_count }}</span>
+                    <span class="tab-count">{{ stats.individual_count }}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="axioms-tab" data-bs-toggle="tab" data-bs-target="#axioms"
                     type="button" title="Logical axioms: subsumption hierarchy and property constraints">
                     <i class="bi bi-arrow-left-right"></i> Axioms
-                    <span class="badge bg-secondary ms-1">{{ axiom_count }}</span>
+                    <span class="tab-count">{{ axiom_count }}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="versions-tab" data-bs-toggle="tab" data-bs-target="#versions"
                     type="button">
                     <i class="bi bi-clock-history"></i> Versions
-                    <span class="badge bg-secondary ms-1">{{ versions|length }}</span>
+                    <span class="tab-count">{{ versions|length }}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -389,9 +191,9 @@
         </ul>
 
         {% if case_filter %}
-        <div class="alert alert-info d-flex align-items-center justify-content-between py-2 mb-3">
-            <span><i class="bi bi-funnel-fill me-1"></i> Filtered to entities discovered in <strong>Case {{ case_filter }}</strong> ({{ entities.classes|length }} classes, {{ entities.individuals|length }} individuals)</span>
-            <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-info">Clear filter</a>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 border rounded px-3 py-2 mb-3" role="status">
+            <span>Filtered to entities discovered in <strong>Case {{ case_filter }}</strong> ({{ entities.classes|length }} classes, {{ entities.individuals|length }} individuals)</span>
+            <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name, view='standard') }}" class="btn btn-sm btn-outline-secondary">Clear filter</a>
         </div>
         {% endif %}
 
@@ -404,7 +206,7 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0"><i class="bi bi-box"></i> Classes</h5>
-                                <span class="badge bg-primary">{{ stats.class_count }}</span>
+                                <span class="text-body-secondary">{{ stats.class_count }}</span>
                             </div>
                             <div class="card-body p-0">
                                 <div class="entity-list list-group list-group-flush">
@@ -423,7 +225,7 @@
                                     {% for cls in framework_sorted %}
                                     <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=cls.uri|extract_name) }}"
                                        class="list-group-item list-group-item-action border-0 border-bottom">
-                                        <strong>{{ cls.label }}</strong> <span class="badge bg-secondary">{{ cls.dtuple }}</span>
+                                        <strong>{{ cls.label }}</strong> {{ component_letter(cls.dtuple) }}
                                         {% if cls.comment %}
                                         <p class="text-muted small mb-1 mt-1">{{ cls.comment }}</p>
                                         {% endif %}
@@ -460,7 +262,7 @@
                                     {% for entity in fw_rows %}
                                     <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.uri|extract_name) }}"
                                        class="list-group-item list-group-item-action border-0 border-bottom">
-                                        <strong>{{ entity.label or entity.uri|extract_name }}</strong> <span class="badge bg-secondary">{{ entity.properties.get('dtupleComponent') }}</span>
+                                        <strong>{{ entity.label or entity.uri|extract_name }}</strong> {{ component_letter(entity.properties.get('dtupleComponent')) }}
                                         {% if entity.comment %}
                                         <p class="text-muted small mb-1 mt-1">{{ entity.comment }}</p>
                                         {% endif %}
@@ -503,7 +305,7 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0"><i class="bi bi-arrow-left-right"></i> Properties</h5>
-                                <span class="badge bg-success">{{ stats.property_count }}</span>
+                                <span class="text-body-secondary">{{ stats.property_count }}</span>
                             </div>
                             <div class="card-body p-0">
                                 <div class="entity-list list-group list-group-flush">
@@ -520,10 +322,10 @@
                                         {% if prop.domain or prop.range %}
                                         <div class="mt-1">
                                             {% if prop.domain %}
-                                            <span class="badge bg-info me-1">Domain: {{ prop.domain|extract_name }}</span>
+                                            <span class="small text-body-secondary me-2">Domain: {{ prop.domain|extract_name }}</span>
                                             {% endif %}
                                             {% if prop.range %}
-                                            <span class="badge bg-success">Range: {{ prop.range|extract_name }}</span>
+                                            <span class="small text-body-secondary">Range: {{ prop.range|extract_name }}</span>
                                             {% endif %}
                                         </div>
                                         {% endif %}
@@ -574,15 +376,15 @@
                                        class="list-group-item list-group-item-action border-0 border-bottom">
                                         <strong>{{ entity.label or entity.uri|extract_name }}</strong>
                                         {% for characteristic in meta.get('characteristics', []) %}
-                                        <span class="badge bg-secondary ms-1">{{ characteristic }}</span>
+                                        <span class="chip ms-1">{{ characteristic }}</span>
                                         {% endfor %}
                                         {% if entity.domain or entity.range %}
                                         <div class="mt-1">
                                             {% if entity.domain %}
-                                            <span class="badge bg-info me-1">Domain{{ ' (soft)' if meta.get('soft_typing') }}: {{ entity.domain|extract_name }}</span>
+                                            <span class="small text-body-secondary me-2">Domain{{ ' (soft)' if meta.get('soft_typing') }}: {{ entity.domain|extract_name }}</span>
                                             {% endif %}
                                             {% if entity.range %}
-                                            <span class="badge bg-success">Range{{ ' (soft)' if meta.get('soft_typing') }}: {{ entity.range|extract_name }}</span>
+                                            <span class="small text-body-secondary">Range{{ ' (soft)' if meta.get('soft_typing') }}: {{ entity.range|extract_name }}</span>
                                             {% endif %}
                                         </div>
                                         {% endif %}
@@ -603,47 +405,6 @@
                 </div>
             </div>
 
-            <!-- Concepts Tab (Category-grouped entities for ProEthica) -->
-            {% if stats.category_entities %}
-            <div class="tab-pane fade" id="concepts" role="tabpanel">
-                <div class="row">
-                    {% for cat_label, cat_data in stats.category_entities.items() %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card h-100">
-                            <div class="card-header" style="background-color: {{ cat_data.color }}20; border-left: 4px solid {{ cat_data.color }};">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0">
-                                        <i class="bi {{ cat_data.icon }}" style="color: {{ cat_data.color }};"></i>
-                                        {{ cat_label }}
-                                    </h6>
-                                    <span class="badge" style="background-color: {{ cat_data.color }};">{{ cat_data.count }}</span>
-                                </div>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
-                                    {% for entity in cat_data.entities %}
-                                    <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=entity.uri|extract_name) }}"
-                                       class="list-group-item list-group-item-action py-2">
-                                        <strong class="small">{{ entity.label }}</strong>
-                                        {% if entity.comment %}
-                                        <p class="text-muted small mb-0 mt-1" style="font-size: 0.75rem;">{{ entity.comment[:80] }}{% if entity.comment|length > 80 %}...{% endif %}</p>
-                                        {% endif %}
-                                    </a>
-                                    {% endfor %}
-                                    {% if not cat_data.entities %}
-                                    <div class="list-group-item text-muted small text-center py-3">
-                                        No {{ cat_label|lower }} found
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
             <!-- Individuals Tab (Named Instances) -->
             <div class="tab-pane fade {{ 'show active' if default_tab == 'individuals' }}" id="individuals" role="tabpanel">
                 <div class="row">
@@ -651,7 +412,7 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0"><i class="bi bi-collection"></i> Named Individuals</h5>
-                                <span class="badge text-bg-warning">{{ stats.individual_count }}</span>
+                                <span class="text-body-secondary">{{ stats.individual_count }}</span>
                             </div>
                             <div class="card-body">
                                 {% if stats.from_ttl and stats.ttl_individuals %}
@@ -689,8 +450,8 @@
                                     {% endfor %}
                                 </div>
                                 {% else %}
-                                <div class="alert alert-info mb-0">
-                                    <i class="bi bi-info-circle"></i> No named individuals (instances) found in this ontology.
+                                <div class="text-body-secondary mb-0">
+                                    No named individuals (instances) found in this ontology.
                                     <p class="mb-0 mt-2 small text-muted">
                                         The ABox contains assertions about specific instances. This ontology primarily defines the TBox (classes and properties).
                                     </p>
@@ -710,7 +471,7 @@
                         <div class="card h-100">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0"><i class="bi bi-diagram-3"></i> Subsumption Hierarchy</h6>
-                                <span class="badge bg-secondary">{{ stats.axioms.subclass|length }}</span>
+                                <span class="text-body-secondary">{{ stats.axioms.subclass|length }}</span>
                             </div>
                             <div class="card-body p-0">
                                 <div style="max-height: 350px; overflow-y: auto;">
@@ -751,7 +512,7 @@
                         <div class="card h-100">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0"><i class="bi bi-arrow-left-right"></i> Property Constraints</h6>
-                                <span class="badge bg-info">{{ stats.axioms.property_constraints|length }}</span>
+                                <span class="text-body-secondary">{{ stats.axioms.property_constraints|length }}</span>
                             </div>
                             <div class="card-body p-0">
                                 <div style="max-height: 350px; overflow-y: auto;">
@@ -770,14 +531,14 @@
                                                 <td><code class="small">{{ constraint.property }}</code></td>
                                                 <td>
                                                     {% if constraint.domain %}
-                                                    <span class="badge bg-info">{{ constraint.domain }}</span>
+                                                    <code class="small">{{ constraint.domain }}</code>
                                                     {% else %}
                                                     <span class="text-muted">-</span>
                                                     {% endif %}
                                                 </td>
                                                 <td>
                                                     {% if constraint.range %}
-                                                    <span class="badge bg-success">{{ constraint.range }}</span>
+                                                    <code class="small">{{ constraint.range }}</code>
                                                     {% else %}
                                                     <span class="text-muted">-</span>
                                                     {% endif %}
@@ -821,7 +582,7 @@
                                 <ul class="list-unstyled">
                                     {% for ads in stats.axioms.all_disjoint %}
                                     <li class="mb-2">
-                                        <span class="badge bg-secondary me-1">{{ ads.members|length }}-way</span>
+                                        <span class="text-body-secondary me-1">{{ ads.members|length }}-way:</span>
                                         {% for m in ads.members %}<code class="small">{{ m }}</code>{% if not loop.last %}<span class="text-muted"> | </span>{% endif %}{% endfor %}
                                     </li>
                                     {% endfor %}
@@ -881,15 +642,14 @@
                         </thead>
                         <tbody>
                             {% for version in versions %}
-                            <tr
-                                class="{% if version.is_current %}table-success{% elif version.is_draft %}table-warning{% endif %}">
+                            <tr>
                                 <td>
                                     <strong>v{{ version.version_number }}</strong>
                                     {% if version.is_current %}
-                                    <span class="badge bg-success ms-1">Current</span>
+                                    <span class="chip ms-1">Current</span>
                                     {% endif %}
                                     {% if version.is_tagged_release %}
-                                    <span class="badge text-bg-warning ms-1"><i class="bi bi-tag-fill"></i></span>
+                                    <span class="chip ms-1">Tagged</span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -901,9 +661,9 @@
                                 </td>
                                 <td>
                                     {% if version.is_draft %}
-                                    <span class="badge text-bg-warning">Draft</span>
+                                    <span class="chip">Draft</span>
                                     {% else %}
-                                    <span class="badge bg-primary">Published</span>
+                                    Published
                                     {% endif %}
                                 </td>
                                 <td>{{ version.created_at.strftime('%Y-%m-%d %H:%M') if version.created_at else '-' }}
@@ -939,380 +699,9 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="alert alert-info">No version history available</div>
+                <p class="text-body-secondary">No version history available</p>
                 {% endif %}
             </div>
-
-            <!-- Inferred Relationships Tab -->
-            {% if ontology.current_version and ontology.current_version.meta_data and
-            ontology.current_version.meta_data.reasoning %}
-            <div class="tab-pane fade" id="reasoning" role="tabpanel">
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <div class="alert alert-info">
-                            <h5><i class="bi bi-info-circle-fill"></i> Reasoning Summary</h5>
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <strong>Reasoner Used:</strong><br>
-                                    <span class="badge bg-primary">{{
-                                        ontology.current_version.meta_data.reasoning.reasoner_type }}</span>
-                                </div>
-                                <div class="col-md-3">
-                                    <strong>Classes Added:</strong><br>
-                                    <span class="badge bg-success">+{{
-                                        ontology.current_version.meta_data.reasoning.classes_after -
-                                        ontology.current_version.meta_data.reasoning.classes_before }}</span>
-                                </div>
-                                <div class="col-md-3">
-                                    <strong>Properties Added:</strong><br>
-                                    <span class="badge bg-info">+{{
-                                        ontology.current_version.meta_data.reasoning.properties_after -
-                                        ontology.current_version.meta_data.reasoning.properties_before }}</span>
-                                </div>
-                                <div class="col-md-3">
-                                    <strong>Relationships:</strong><br>
-                                    <span class="badge text-bg-warning">{{
-                                        ontology.current_version.meta_data.reasoning.hierarchical_relationships }}
-                                        total</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {% if ontology.current_version.meta_data.reasoning.inferred_relationships %}
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="bi bi-arrow-left-right"></i> Inferred Relationships ({{
-                            ontology.current_version.meta_data.reasoning.inferred_relationships|length }})</h5>
-                        <p class="mb-0 text-muted">These relationships were automatically discovered by the reasoner</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" id="relationshipSearch"
-                                    placeholder="Search relationships..." onkeyup="filterRelationships()">
-                            </div>
-                            <div class="col-md-6">
-                                <select class="form-select" id="relationshipTypeFilter"
-                                    onchange="filterRelationships()">
-                                    <option value="">All relationship types</option>
-                                    {% set relationship_types =
-                                    ontology.current_version.meta_data.reasoning.inferred_relationships |
-                                    map(attribute='type') | unique %}
-                                    {% for rel_type in relationship_types %}
-                                    <option value="{{ rel_type }}">{{ rel_type }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-striped" id="relationshipsTable">
-                                <thead>
-                                    <tr>
-                                        <th>Subject (Child)</th>
-                                        <th>Relationship</th>
-                                        <th>Object (Parent)</th>
-                                        <th>Description</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for rel in ontology.current_version.meta_data.reasoning.inferred_relationships %}
-                                    <tr class="relationship-row" data-type="{{ rel.type }}" data-child="{{ rel.child }}"
-                                        data-parent="{{ rel.parent }}">
-                                        <td>
-                                            <code class="text-primary clean-uri"
-                                                data-full-uri="{{ rel.child }}">{{ rel.child|extract_name }}</code>
-                                            <br><small class="text-muted full-uri">{{ rel.child }}</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-secondary">{{ rel.type }}</span>
-                                        </td>
-                                        <td>
-                                            <code class="text-success clean-uri"
-                                                data-full-uri="{{ rel.parent }}">{{ rel.parent|extract_name }}</code>
-                                            <br><small class="text-muted full-uri">{{ rel.parent }}</small>
-                                        </td>
-                                        <td>
-                                            <small class="text-muted relationship-description"
-                                                data-child="{{ rel.child }}" data-parent="{{ rel.parent }}"
-                                                data-type="{{ rel.type }}">
-                                                {% if rel.type == 'subClassOf' %}
-                                                "{{ rel.child|extract_name }}" is a subclass of "{{
-                                                rel.parent|extract_name }}"
-                                                {% else %}
-                                                Inferred {{ rel.type }} relationship
-                                                {% endif %}
-                                            </small>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="mt-3" id="relationshipCount">
-                            Showing {{ ontology.current_version.meta_data.reasoning.inferred_relationships|length }}
-                            relationships
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i> No detailed relationship information available for this
-                    reasoning session.
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            <!-- Enrichment Details Tab -->
-            {% if entities_with_definitions > 0 %}
-            <div class="tab-pane fade" id="enrichment" role="tabpanel">
-                <div class="row">
-                    <div class="col-12">
-                        <h4><i class="bi bi-stars"></i> Ontology Enrichment Analysis</h4>
-                        <p class="text-muted">This ontology has been systematically enriched using multiple approaches
-                            to provide comprehensive professional definitions for engineering ethics concepts.</p>
-                    </div>
-                </div>
-
-                <!-- Enrichment Statistics -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="card border-success">
-                            <div class="card-body text-center">
-                                <h2 class="text-success">{{ ((entities_with_definitions / total_entities * 100) if
-                                    total_entities > 0 else 0)|round(1) }}%</h2>
-                                <h5>Coverage Rate</h5>
-                                <small class="text-muted">{{ entities_with_definitions }} of {{ total_entities }}
-                                    entities</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-info">
-                            <div class="card-body text-center">
-                                {% set confidence_values = [] %}
-                                {% for entity in (entities.classes + entities.properties + entities.individuals) %}
-                                {% if entity.properties %}
-                                {% set props = entity.properties|from_json if entity.properties is string else
-                                entity.properties %}
-                                {% if props and props.confidence %}
-                                {% set _ = confidence_values.append(props.confidence) %}
-                                {% endif %}
-                                {% endif %}
-                                {% endfor %}
-                                {% set avg_confidence = ((confidence_values|sum / confidence_values|length) * 100) if
-                                confidence_values|length > 0 else 0 %}
-                                <h2 class="text-info">{{ avg_confidence|round(1) if avg_confidence else 'N/A' }}%</h2>
-                                <h5>Avg Confidence</h5>
-                                <small class="text-muted">LLM-generated definitions</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-warning">
-                            <div class="card-body text-center">
-                                {% set professional_entities = [] %}
-                                {% for entity in (entities.classes + entities.properties + entities.individuals) %}
-                                {% if entity.properties and 'professional' in (entity.properties|string) %}
-                                {% set _ = professional_entities.append(entity) %}
-                                {% endif %}
-                                {% endfor %}
-                                {% set professional_sources = authoritative_sources + professional_entities|length %}
-                                <h2 class="text-warning">{{ professional_sources }}</h2>
-                                <h5>Professional Sources</h5>
-                                <small class="text-muted">Ethics codes & standards</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Enrichment Methods Breakdown -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5><i class="bi bi-graph-up"></i> Enrichment Methods</h5>
-                        <div class="list-group">
-                            {% if llm_generated > 0 %}
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="bi bi-robot text-info me-2"></i>
-                                        <strong>LLM Definition Generation</strong>
-                                        <br><small class="text-muted">AI-powered professional definitions using
-                                            Claude</small>
-                                    </div>
-                                    <span class="badge bg-info rounded-pill">{{ llm_generated }}</span>
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            {% if authoritative_sources > 0 %}
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="bi bi-bookmark-check text-primary me-2"></i>
-                                        <strong>Professional Ethics Codes</strong>
-                                        <br><small class="text-muted">ASCE, IEEE, ASME, NSPE codes with dc:source
-                                            attribution</small>
-                                    </div>
-                                    <span class="badge bg-primary rounded-pill">{{ authoritative_sources }}</span>
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            {% if ontology.name in ['Terminological Foundations', 'engineering-ethics'] %}
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="bi bi-file-earmark-text text-secondary me-2"></i>
-                                        <strong>Technical Standards Integration</strong>
-                                        <br><small class="text-muted">ISO, IEC, ANSI standards with proper
-                                            attribution</small>
-                                    </div>
-                                    <span class="badge bg-secondary rounded-pill">
-                                        {% if ontology.name == 'Terminological Foundations' %}15{% else %}31{% endif %}
-                                    </span>
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            {% if ontology.current_version and ontology.current_version.version_tag and
-                            'definitions-integrated' in ontology.current_version.version_tag %}
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <i class="bi bi-file-code text-success me-2"></i>
-                                        <strong>TTL Content Integration</strong>
-                                        <br><small class="text-muted">Definitions embedded in RDF using rdfs:comment &
-                                            skos:definition</small>
-                                    </div>
-                                    <span class="badge bg-success rounded-pill">✓</span>
-                                </div>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <h5><i class="bi bi-clipboard-data"></i> Quality Metrics</h5>
-                        <div class="card">
-                            <div class="card-body">
-                                <dl class="row">
-                                    <dt class="col-sm-8">High Confidence Definitions (>80%):</dt>
-                                    <dd class="col-sm-4"><span class="badge bg-success">{{ high_confidence }}</span>
-                                    </dd>
-
-                                    <dt class="col-sm-8">Authoritative Source Citations:</dt>
-                                    <dd class="col-sm-4"><span class="badge bg-primary">{{ authoritative_sources
-                                            }}</span></dd>
-
-                                    <dt class="col-sm-8">Professional Context Provided:</dt>
-                                    <dd class="col-sm-4"><span class="badge bg-info">{{ entities_with_definitions
-                                            }}</span></dd>
-
-                                    {% if ontology.current_version and ontology.current_version.version_tag and
-                                    'definitions-integrated' in ontology.current_version.version_tag %}
-                                    <dt class="col-sm-8">External System Accessibility:</dt>
-                                    <dd class="col-sm-4"><span class="badge bg-success">TTL Embedded</span></dd>
-                                    {% endif %}
-                                </dl>
-
-                                {% if ontology.name == 'proethica-intermediate' %}
-                                <div class="alert alert-info mt-3">
-                                    <i class="bi bi-info-circle"></i>
-                                    <strong>ProEthica Integration:</strong> This ontology serves as the core ethical
-                                    framework for the ProEthica concept extraction system, with {{
-                                    entities_with_definitions }} professionally defined concepts ready for annotation
-                                    and analysis.
-                                </div>
-                                {% endif %}
-
-                                {% if ontology.name in ['ASCE Code of Ethics', 'IEEE Code of Ethics', 'ASME Code of
-                                Ethics'] %}
-                                <div class="alert alert-primary mt-3">
-                                    <i class="bi bi-award"></i>
-                                    <strong>Professional Authority:</strong> All definitions in this ontology are
-                                    derived from official professional engineering ethics codes and represent
-                                    authoritative industry standards.
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sample Enriched Entities -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <h5><i class="bi bi-eye"></i> Sample Enriched Entities</h5>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Entity</th>
-                                        <th>Type</th>
-                                        <th>Definition Preview</th>
-                                        <th>Enrichment Source</th>
-                                        <th>Quality</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for entity in (entities.classes + entities.properties +
-                                    entities.individuals)[:10] %}
-                                    {% if entity.comment %}
-                                    <tr>
-                                        <td><strong>{{ entity.label or entity.uri|extract_name }}</strong></td>
-                                        <td>
-                                            <span class="badge text-bg-light">{{ entity.entity_type|title }}</span>
-                                        </td>
-                                        <td>
-                                            <small>{{ entity.comment[:100] }}{% if entity.comment|length > 100 %}...{%
-                                                endif %}</small>
-                                        </td>
-                                        <td>
-                                            {% if entity.properties %}
-                                            {% set props = entity.properties|from_json if entity.properties is string
-                                            else entity.properties %}
-                                            {% if props['dc:source'] %}
-                                            <span class="badge bg-primary">Authoritative</span>
-                                            {% elif props.generated_definition %}
-                                            <span class="badge bg-info">LLM Generated</span>
-                                            {% else %}
-                                            <span class="badge bg-secondary">Manual</span>
-                                            {% endif %}
-                                            {% else %}
-                                            <span class="badge bg-secondary">Unknown</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if entity.properties %}
-                                            {% set props = entity.properties|from_json if entity.properties is string
-                                            else entity.properties %}
-                                            {% if props.confidence %}
-                                            <span class="badge bg-success">{{ (props.confidence * 100)|round(0)
-                                                }}%</span>
-                                            {% elif props['dc:source'] %}
-                                            <span class="badge bg-success">100%</span>
-                                            {% else %}
-                                            <span class="badge bg-secondary">N/A</span>
-                                            {% endif %}
-                                            {% else %}
-                                            <span class="badge bg-secondary">N/A</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endif %}
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
 
             <!-- Metadata Tab -->
             <div class="tab-pane fade" id="metadata" role="tabpanel">

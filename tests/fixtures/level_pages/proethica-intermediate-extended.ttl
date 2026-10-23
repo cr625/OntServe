@@ -1,0 +1,45 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix proeth: <http://proethica.org/ontology/intermediate#> .
+@prefix proeth-core: <http://proethica.org/ontology/core#> .
+@prefix proeth-prov: <http://proethica.org/provenance#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# Test fixture for the intermediate-extended catalog (tests/integration/test_level_pages.py):
+# four case-discovered classes, one with two parents, one discovered in two cases,
+# one parented directly on a core component.
+
+<http://proethica.org/ontology/intermediate-extended> a owl:Ontology ;
+    rdfs:label "Intermediate-extended fixture" .
+
+proeth:FixtureDoubtState a owl:Class ;
+    rdfs:label "Fixture Doubt State"@en ;
+    rdfs:subClassOf proeth:EpistemicState ;
+    skos:definition "A state of doubt used as a test fixture." ;
+    proeth-prov:discoveredInCase 7 ;
+    proeth-prov:firstDiscoveredInCase 7 ;
+    proeth-prov:sourceText "Engineer A was unsure whether the software output was accurate." .
+
+proeth:FixtureLicensingState a owl:Class ;
+    rdfs:label "Fixture Licensing State"@en ;
+    rdfs:subClassOf proeth:RegulatoryState, proeth:EpistemicState ;
+    skos:definition "A licensing state used as a test fixture." ;
+    proeth-prov:discoveredInCase 7, 8 ;
+    proeth-prov:firstDiscoveredInCase 8 ;
+    proeth-prov:sourceText "The board noted that the license had lapsed." .
+
+proeth:FixtureEstimatingCapability a owl:Class ;
+    rdfs:label "Fixture Estimating Capability"@en ;
+    rdfs:subClassOf proeth-core:Capability ;
+    skos:definition "A capability used as a test fixture." ;
+    proeth-prov:discoveredInCase 72 ;
+    proeth-prov:firstDiscoveredInCase 72 ;
+    proeth-prov:sourceText "Engineer B prepared the cost estimate." .
+
+proeth:FixtureNeighborRole a owl:Class ;
+    rdfs:label "Fixture Neighbor Role"@en ;
+    rdfs:subClassOf proeth:ParticipantRole ;
+    skos:definition "A participant role used as a test fixture." ;
+    proeth-prov:discoveredInCase 8 ;
+    proeth-prov:firstDiscoveredInCase 8 ;
+    proeth-prov:sourceText "A neighbor complained about the drainage." .

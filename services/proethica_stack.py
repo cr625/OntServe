@@ -24,8 +24,13 @@ from services import ontology_categories as categories
 VIEWS = ('framework', 'taxonomy', 'catalog', 'standards')
 
 # The nine components of D = (R, P, O, S, Rs, A, E, Ca, Cs), in tuple order,
-# as the proeth-core:dtupleComponent annotation spells them.
+# as the proeth-core:dtupleComponent annotation spells them, with the plural
+# headings the level pages group by.
 DTUPLE_ORDER: Tuple[str, ...] = ('R', 'P', 'O', 'S', 'Rs', 'A', 'E', 'Ca', 'Cs')
+COMPONENT_LABELS: Dict[str, str] = {
+    'R': 'Roles', 'P': 'Principles', 'O': 'Obligations', 'S': 'States', 'Rs': 'Resources',
+    'A': 'Actions', 'E': 'Events', 'Ca': 'Capabilities', 'Cs': 'Constraints',
+}
 
 
 @dataclass(frozen=True)

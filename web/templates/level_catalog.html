@@ -1,0 +1,58 @@
+{% extends "level_base.html" %}
+{% from "macros/level_items.html" import component_index, component_heading, group_id, item_link, also_under, ref_link %}
+
+{# Intermediate-extended: the classes minted from cases, grouped by component
+   and then by primary parent (level_views.build_catalog). ?case=N keeps the
+   classes discovered in case N, with the groups open. #}
+{% block level_body %}
+{% if catalog.case is not none %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3" role="status">
+    <span>{{ catalog.total }} class{{ '' if catalog.total == 1 else 'es' }} discovered in
+        <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name='proethica-case-' ~ catalog.case) }}">Case {{ catalog.case }}{% if catalog.case_title %}: {{ catalog.case_title }}{% endif %}</a></span>
+    <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary ms-auto">All cases</a>
+</div>
+{% else %}
+<p class="text-body-secondary">
+    {{ catalog.total }} classes discovered in {{ catalog.case_count }} cases. Each class is grouped under the
+    intermediate or core kind it specializes and shows the case it was first found in and its source passage.
+</p>
+{% endif %}
+
+{% if catalog.groups %}
+{{ component_index(catalog.groups) }}
+{% endif %}
+
+{% for group in catalog.groups %}
+<section class="mb-5 level-group" id="{{ group_id(group) }}">
+    {{ component_heading(group) }}
+    {% for family in group.families %}
+    <details class="catalog-family"{% if catalog.case is not none %} open{% endif %}>
+        <summary>
+            <span class="fw-semibold">{% if family.parent %}{{ family.parent.label }}{% else %}No parent{% endif %}</span>
+            <span class="text-body-secondary">{{ family.count }}</span>
+        </summary>
+        {% if family.parent and family.parent.ontology %}
+        <p class="small text-body-secondary mb-2">Subclasses of {{ ref_link(family.parent) }}.</p>
+        {% endif %}
+        <ul class="list-unstyled catalog-list">
+            {% for entry in family.entries %}
+            <li class="catalog-entry">
+                {{ item_link(entry, 'fw-semibold') }}
+                {{ also_under(entry.also_under) }}
+                {% if entry.first %}
+                <div class="small text-body-secondary">
+                    First found in
+                    {% if entry.first.title %}<a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=entry.first.name) }}">Case {{ entry.first.num }}: {{ entry.first.title }}</a>{% else %}Case {{ entry.first.num }}{% endif %}{% if entry.further %}, and in {{ entry.further }} further case{{ '' if entry.further == 1 else 's' }}{% endif %}
+                </div>
+                {% endif %}
+                {% if entry.excerpt %}<blockquote class="catalog-excerpt small mb-0">{{ entry.excerpt }}</blockquote>{% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </details>
+    {% endfor %}
+</section>
+{% else %}
+<p class="text-body-secondary">No classes{% if catalog.case is not none %} were discovered in this case{% endif %}.</p>
+{% endfor %}
+{% endblock %}

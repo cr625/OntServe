@@ -1,0 +1,62 @@
+{# The header of the ProEthica level pages (services.proethica_stack): the
+   stack trail, the level title and role, the IRI and current version, quiet
+   actions, and the ontologies behind the level. STACK_LEVELS is a Jinja
+   global; import these macros "with context" for current_user. #}
+
+{% macro stack_trail(current_key) %}
+<nav class="small mb-2" aria-label="ProEthica stack">
+    <span class="text-body-secondary">ProEthica stack:</span>
+    {% for lvl in STACK_LEVELS %}
+    {% if lvl.key == current_key %}<strong aria-current="page">{{ lvl.label }}</strong>{% else %}<a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=lvl.ontology) }}">{{ lvl.label }}</a>{% endif %}
+    {% if not loop.last %}<span class="text-body-secondary" aria-hidden="true">&rsaquo;</span>{% endif %}
+    {% endfor %}
+</nav>
+{% endmacro %}
+
+{# The IRI and the current version with its date, as one muted line. #}
+{% macro version_line(ontology) %}
+{% set version = ontology.current_version %}
+<p class="small text-body-secondary mb-0">
+    <span class="font-monospace">{{ ontology.name }}</span>
+    &middot; <code class="text-body-secondary">{{ ontology.base_uri }}</code>
+    {% if version %}&middot; version {{ version.version_number }}{% if version.created_at %}, {{ version.created_at.strftime('%Y-%m-%d') }}{% endif %}{% endif %}
+</p>
+{% endmacro %}
+
+{# View TTL, the Schema view (or the way back to the level view), Visualize,
+   and for a signed-in editor Settings and Edit TTL. #}
+{% macro quiet_actions(ontology, schema_view=false, level_label=none) %}
+<div class="d-flex flex-wrap gap-2 page-actions">
+    <a href="{{ url_for('ontology.ontology_content', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary" target="_blank">View TTL</a>
+    {% if schema_view %}
+    <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary">{{ level_label }} view</a>
+    {% else %}
+    <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name, view='standard') }}" class="btn btn-sm btn-outline-secondary">Schema view</a>
+    {% endif %}
+    <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary">Visualize</a>
+    {% if current_user.is_authenticated and current_user.can_perform_action('edit') %}
+    <a href="{{ url_for('ontology.ontology_settings', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary">Settings</a>
+    <a href="{{ url_for('ontology.edit_ontology', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary">Edit TTL</a>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro level_header(ontology, level) %}
+<header class="mb-4">
+    {{ stack_trail(level.key) }}
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+        <div class="page-heading">
+            <h1 class="mb-1">{{ level.label }}</h1>
+            <p class="mb-1">{{ level.role }}</p>
+            {{ version_line(ontology) }}
+        </div>
+        {{ quiet_actions(ontology) }}
+    </div>
+    {% if level.support %}
+    <p class="small mt-2 mb-0">
+        <span class="text-body-secondary">Supporting ontologies:</span>
+        {% for name in level.support %}<a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=name) }}">{{ name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+</header>
+{% endmacro %}

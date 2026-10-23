@@ -1,14 +1,14 @@
 """
 Helper functions for computing ontology statistics.
 
-Provides generic stats computation from TTL content when OntologyEntity
-records aren't populated, and display_config based customization.
+Provides the stats of the generic ontology page: counts from the entity rows
+or, when an ontology has none, from its TTL, and the axioms of the Axioms tab.
 """
 
-from rdflib import Graph, RDF, RDFS, OWL, Namespace, BNode, URIRef
+from rdflib import Graph, RDF, RDFS, OWL, BNode
 from rdflib.collection import Collection
-from collections import defaultdict
-import re
+
+from web.level_views import GROUNDING_LABELS as _GROUNDING_LABELS, framework_grid
 
 
 def compute_stats_from_ttl(ttl_content: str) -> dict:
@@ -143,68 +143,6 @@ def compute_stats_from_ttl(ttl_content: str) -> dict:
     }
 
 
-def _category_entities_from_graph(g, prefix: str) -> list:
-    """Entities for one category, from a merged ontology graph.
-
-    A category is the direct subclasses of its core (or intermediate)
-    class. Action and Event keep their categories in the core layer
-    (origin subclasses for Event; Action itself is the category), so
-    when no subclass exists the category class is the single entry.
-    Deprecated classes are not served as category members.
-    """
-    PROETH_CORE = Namespace('http://proethica.org/ontology/core#')
-    PROETH = Namespace('http://proethica.org/ontology/intermediate#')
-
-    uris = []
-    for parent in (PROETH_CORE[prefix], PROETH[prefix]):
-        for s in g.subjects(RDFS.subClassOf, parent):
-            if isinstance(s, BNode) or str(s) in uris:
-                continue
-            if (s, OWL.deprecated, None) in g and any(
-                    str(v).lower() == 'true' for v in g.objects(s, OWL.deprecated)):
-                continue
-            uris.append(str(s))
-
-    if not uris:
-        category_uri = PROETH_CORE[prefix]
-        if (category_uri, RDF.type, OWL.Class) in g:
-            uris = [str(category_uri)]
-
-    entities = []
-    for uri in uris:
-        ref = URIRef(uri)
-        entity_label = g.value(ref, RDFS.label)
-        comment = g.value(ref, RDFS.comment)
-        entities.append({
-            'uri': uri,
-            'label': str(entity_label) if entity_label else extract_local_name(uri),
-            'comment': str(comment) if comment else None
-        })
-    entities.sort(key=lambda x: x['label'])
-    return entities
-
-
-def _parse_category_graph(ttl_content: str, extra_ttl_content: str = None):
-    g = Graph()
-    try:
-        g.parse(data=ttl_content, format='turtle')
-    except Exception:
-        return None
-    if extra_ttl_content:
-        try:
-            g.parse(data=extra_ttl_content, format='turtle')
-        except Exception:
-            pass
-    return g
-
-
-def compute_category_counts(ttl_content: str, categories: list,
-                            extra_ttl_content: str = None) -> dict:
-    """Entity counts by category; identical classification to the Concepts tab."""
-    entities = compute_category_entities(ttl_content, categories, extra_ttl_content)
-    return {label: data['count'] for label, data in entities.items()}
-
-
 def extract_local_name(uri: str) -> str:
     """Extract local name from URI."""
     if '#' in uri:
@@ -239,42 +177,6 @@ def humanize_domain_range(graph, node, full_uri=False):
                     return sep.join(members)
         return None
     return str(node) if full_uri else extract_local_name(str(node))
-
-
-def compute_category_entities(ttl_content: str, categories: list,
-                              extra_ttl_content: str = None) -> dict:
-    """Compute entities grouped by category for the Concepts tab.
-
-    Args:
-        ttl_content: Raw TTL string
-        categories: List of category configs with 'prefix' keys
-        extra_ttl_content: Optional TTL merged into the graph (the core
-            ontology, which carries the Action and Event categories)
-
-    Returns:
-        Dict mapping category labels to lists of entities
-    """
-    if not ttl_content or not categories:
-        return {}
-
-    g = _parse_category_graph(ttl_content, extra_ttl_content)
-    if g is None:
-        return {}
-
-    result = {}
-    for cat in categories:
-        prefix = cat.get('prefix', '')
-        label = cat.get('label', prefix)
-        entities = _category_entities_from_graph(g, prefix)
-        result[label] = {
-            'entities': entities,
-            'count': len(entities),
-            'color': cat.get('color', '#6c757d'),
-            'icon': cat.get('icon', 'bi-circle'),
-            'prefix': prefix
-        }
-
-    return result
 
 
 def compute_axioms(ttl_content: str) -> dict:
@@ -391,107 +293,25 @@ def compute_axioms(ttl_content: str) -> dict:
     }
 
 
-def get_display_config(ontology) -> dict:
-    """Get display configuration from ontology meta_data.
+def build_stats_context(ontology, entities: dict, relationships: dict, level=None) -> dict:
+    """Build the stats context of the generic ontology page.
 
-    Args:
-        ontology: Ontology model instance
-
-    Returns:
-        Display config dict or empty dict
-    """
-    if not ontology.meta_data:
-        return {}
-
-    return ontology.meta_data.get('display_config', {})
-
-
-# The nine components in canonical D-tuple order: D = (R, P, O, S, Rs, A, E, Ca, Cs).
-_DTUPLE_ORDER = ['R', 'P', 'O', 'S', 'Rs', 'A', 'E', 'Ca', 'Cs']
-
-# Readable labels for the BFO/IAO upper classes the core components ground in
-# (stable reference data; the core backbone uses these seven).
-_GROUNDING_LABELS = {
-    'BFO_0000023': 'BFO role',
-    'BFO_0000020': 'BFO specifically dependent continuant',
-    'BFO_0000015': 'BFO process',
-    'BFO_0000016': 'BFO disposition',
-    'BFO_0000040': 'BFO material entity',
-    'IAO_0000033': 'IAO directive information entity',
-    'IAO_0000030': 'IAO information content entity',
-}
-
-_SKOS_NS = Namespace('http://www.w3.org/2004/02/skos/core#')
-_CORE_NS = Namespace('http://proethica.org/ontology/core#')
-
-
-def compute_dtuple_framework(ttl_content: str) -> list:
-    """Ordered list of the proethica-core classes carrying a dtupleComponent
-    annotation (the nine framework components), for the core 'framework' overview.
-
-    Each item: {letter, name, fragment, definition, grounding_frag, grounding_label}.
-    Returns [] for ontologies that carry no dtupleComponent annotations.
-    """
-    g = Graph()
-    try:
-        g.parse(data=ttl_content, format='turtle')
-    except Exception:
-        return []
-    out = []
-    _IAO_DEF = Namespace('http://purl.obolibrary.org/obo/IAO_')['0000115']
-    for subj in g.subjects(_CORE_NS.dtupleComponent, None):
-        letter = next(g.objects(subj, _CORE_NS.dtupleComponent), None)
-        frag = str(subj).rsplit('#', 1)[-1].rsplit('/', 1)[-1]
-        label = next(g.objects(subj, RDFS.label), None)
-        # Same precedence as the entity extractor's serving field (iao:0000115
-        # first), so the framework cards and the Classes tab show the SAME
-        # canonical definition text rather than two different annotations.
-        definition = (next(g.objects(subj, _IAO_DEF), None)
-                      or next(g.objects(subj, _SKOS_NS.definition), None)
-                      or next(g.objects(subj, RDFS.comment), None))
-        grounding_frag = grounding_label = None
-        for parent in g.objects(subj, RDFS.subClassOf):
-            pf = str(parent).rsplit('/', 1)[-1]
-            if pf in _GROUNDING_LABELS:
-                grounding_frag, grounding_label = pf, _GROUNDING_LABELS[pf]
-                break
-        text = str(definition) if definition else ''
-        out.append({
-            'letter': str(letter) if letter else '',
-            'name': str(label) if label else frag,
-            'fragment': frag,
-            'definition': (text[:150].rstrip() + '...') if len(text) > 150 else text,
-            'grounding_frag': grounding_frag,
-            'grounding_label': grounding_label,
-        })
-    order = {ltr: i for i, ltr in enumerate(_DTUPLE_ORDER)}
-    out.sort(key=lambda c: order.get(c['letter'], 99))
-    return out
-
-
-def build_stats_context(ontology, entities: dict, relationships: dict) -> dict:
-    """Build complete stats context for template.
-
-    Combines OntologyEntity data with display_config and TTL-based fallback.
+    Counts come from the OntologyEntity rows, with a TTL fallback when the
+    ontology has none. ``level`` (services.proethica_stack.Level) is set when
+    the page renders a ProEthica level; the core level adds the D-tuple grid,
+    built from the class rows.
 
     Args:
         ontology: Ontology model instance
         entities: Dict from route handler (classes, properties, individuals)
         relationships: Dict from route handler
+        level: the stack level the page renders, or None
 
     Returns:
-        Enhanced stats context dict
+        Stats context dict
     """
-    display_config = get_or_create_display_config(ontology)
-
-    # Check if we have entity data
     has_entities = bool(entities.get('classes') or entities.get('properties') or entities.get('individuals'))
-
-    stats = {
-        'display_config': display_config,
-        'display_style': display_config.get('display_style', 'default'),
-        'has_entities': has_entities,
-    }
+    stats = {'has_entities': has_entities}
 
     # If no entities but we have TTL content, compute from TTL
     if not has_entities and ontology.current_content:
@@ -511,103 +331,16 @@ def build_stats_context(ontology, entities: dict, relationships: dict) -> dict:
         stats['property_count'] = len(entities.get('properties', []))
         stats['individual_count'] = len(entities.get('individuals', []))
 
-    # Category counts and entities (for domain-specific views like ProEthica)
-    featured_categories = display_config.get('featured_categories', [])
-    if featured_categories and ontology.current_content:
-        # Action and Event categories live in the core layer; merge it so
-        # all nine categories resolve in the presentation.
-        core_content = None
-        if ontology.name != 'proethica-core':
-            try:
-                from sqlalchemy import select
-
-                from web.models import Ontology, db
-
-                core = db.session.execute(
-                    select(Ontology).where(Ontology.name == 'proethica-core')
-                ).scalar_one_or_none()
-                if core is not None:
-                    core_content = core.current_content
-            except Exception:
-                core_content = None
-        stats['category_entities'] = compute_category_entities(
-            ontology.current_content,
-            featured_categories,
-            extra_ttl_content=core_content
-        )
-        stats['category_counts'] = {
-            label: data['count']
-            for label, data in stats['category_entities'].items()
-        }
-        # Calculate total entities in categories
-        stats['category_total'] = sum(
-            cat_data['count'] for cat_data in stats['category_entities'].values()
-        )
-    else:
-        stats['category_entities'] = {}
-        stats['category_total'] = 0
-
     # Axioms (subClassOf, equivalentClass, disjointWith, property constraints)
     if ontology.current_content:
         stats['axioms'] = compute_axioms(ontology.current_content)
     else:
         stats['axioms'] = {'subclass': [], 'equivalent': [], 'disjoint': [], 'all_disjoint': [], 'property_constraints': []}
 
-    # Banner config
-    stats['banner'] = display_config.get('banner', {})
-    stats['show_banner'] = bool(stats['banner'].get('title'))
-
-    # Core nine-component framework overview (the D-tuple grid above the tabs)
-    if stats['display_style'] == 'core-framework' and ontology.current_content:
-        stats['framework'] = compute_dtuple_framework(ontology.current_content)
+    # Core: the nine components above the schema tabs
+    if level is not None and level.view == 'framework':
+        stats['framework'] = framework_grid(entities.get('classes', []))
     else:
         stats['framework'] = []
 
     return stats
-
-
-# Default display configs for known ontologies
-DEFAULT_DISPLAY_CONFIGS = {
-    'proethica-intermediate': {
-        'display_style': 'proethica',
-        'banner': {
-            'title': 'ProEthica Intermediate Layer',
-            'subtitle': 'Nine-Component Framework for Professional Ethics',
-            'icon': 'bi-layers',
-            'color': 'primary'
-        },
-        'featured_categories': [
-            {'label': 'Roles', 'prefix': 'Role', 'color': '#0d6efd', 'icon': 'bi-person-badge'},
-            {'label': 'Principles', 'prefix': 'Principle', 'color': '#fd7e14', 'icon': 'bi-compass'},
-            {'label': 'Obligations', 'prefix': 'Obligation', 'color': '#dc3545', 'icon': 'bi-clipboard-check'},
-            {'label': 'States', 'prefix': 'State', 'color': '#6f42c1', 'icon': 'bi-flag'},
-            {'label': 'Resources', 'prefix': 'Resource', 'color': '#20c997', 'icon': 'bi-book'},
-            {'label': 'Actions', 'prefix': 'Action', 'color': '#198754', 'icon': 'bi-lightning'},
-            {'label': 'Events', 'prefix': 'Event', 'color': '#ffc107', 'icon': 'bi-calendar-event'},
-            {'label': 'Capabilities', 'prefix': 'Capability', 'color': '#0dcaf0', 'icon': 'bi-gear'},
-            {'label': 'Constraints', 'prefix': 'Constraint', 'color': '#6c757d', 'icon': 'bi-exclamation-triangle'}
-        ],
-        'description': 'Bridges core ethical concepts with domain-specific professional ethics knowledge.'
-    },
-    'proethica-core': {
-        'display_style': 'core-framework',
-    },
-}
-
-
-def get_or_create_display_config(ontology) -> dict:
-    """Get display config, falling back to defaults for known ontologies.
-
-    Args:
-        ontology: Ontology model instance
-
-    Returns:
-        Display config dict
-    """
-    # First check meta_data
-    config = get_display_config(ontology)
-    if config:
-        return config
-
-    # Fall back to defaults for known ontologies
-    return DEFAULT_DISPLAY_CONFIGS.get(ontology.name, {})

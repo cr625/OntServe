@@ -1,0 +1,92 @@
+{% extends "level_base.html" %}
+{% from "macros/level_items.html" import component_heading, item_link, ref_link %}
+
+{# Engineering ethics: the standards (individuals typed with a kind of
+   core:Resource), the compliance vocabulary by component, and the case
+   structure template (level_views.build_standards). #}
+{% block level_body %}
+<section class="mb-5" id="standards">
+    <h2 class="h4 d-flex align-items-baseline gap-2 mb-2">Standards <span class="fs-6 fw-normal text-body-secondary">{{ standards.standards|length }}</span></h2>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle standards-table">
+            <thead>
+                <tr>
+                    <th>Standard</th>
+                    <th>Identifier</th>
+                    <th>Publisher</th>
+                    <th>Source</th>
+                    <th>Applicable domains</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in standards.standards %}
+                <tr>
+                    <td>
+                        {{ item_link(s) }}
+                        {% if s.kind %}<div class="small text-body-secondary">{{ ref_link(s.kind) }}</div>{% endif %}
+                    </td>
+                    <td class="small">{{ s.identifier or '-' }}</td>
+                    <td class="small">{{ s.publisher or '-' }}</td>
+                    <td class="small">{% if s.source %}<a href="{{ s.source }}" target="_blank" rel="noopener">{{ s.source_host or s.source }}</a>{% else %}-{% endif %}</td>
+                    <td class="small">{{ s.domains|join(', ') or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% if standards.vocabulary %}
+<section class="mb-5" id="vocabulary">
+    <h2 class="h4 d-flex align-items-baseline gap-2 mb-1">Standards-compliance vocabulary <span class="fs-6 fw-normal text-body-secondary">{{ standards.vocabulary_count }}</span></h2>
+    <p class="small text-body-secondary">Classes for complying with the standards, grouped by the core component they specialize.</p>
+    {% for group in standards.vocabulary %}
+    <div class="mb-3 level-group">
+        {{ component_heading({'letter': group.letter, 'label': group.label, 'count': group.classes|length}, tag='h3', size='h6') }}
+        <ul class="list-unstyled mb-0 vocabulary-list">
+            {% for c in group.classes %}
+            <li class="mb-2">
+                {{ item_link(c, 'fw-semibold') }}
+                {% if c.definition %}<div class="small text-body-secondary line-clamp-2">{{ c.definition }}</div>{% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+{% if standards.structure_classes or standards.structure_individuals %}
+<section class="mb-5" id="case-structure">
+    <h2 class="h4 mb-1">Case structure template</h2>
+    <p class="small text-body-secondary">The sections of an NSPE case, typed with the proethica-cases vocabulary.</p>
+    {% if standards.structure_classes %}
+    <h3 class="h6">Section types</h3>
+    <ul class="list-unstyled">
+        {% for c in standards.structure_classes %}
+        <li class="mb-1">{{ item_link(c) }}{% if c.kind %} <span class="small text-body-secondary">{{ ref_link(c.kind) }}</span>{% endif %}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if standards.structure_individuals %}
+    <h3 class="h6">Sections</h3>
+    <ul class="list-unstyled mb-0">
+        {% for i in standards.structure_individuals %}
+        <li class="mb-1">{{ item_link(i) }}{% if i.kind %} <span class="small text-body-secondary">{{ ref_link(i.kind) }}</span>{% endif %}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if standards.other_individuals %}
+<section class="mb-5" id="other-individuals">
+    <h2 class="h4">Other individuals</h2>
+    <ul class="list-unstyled mb-0">
+        {% for i in standards.other_individuals %}
+        <li class="mb-1">{{ item_link(i) }}{% if i.kind %} <span class="small text-body-secondary">{{ ref_link(i.kind) }}</span>{% endif %}</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+{% endblock %}

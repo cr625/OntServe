@@ -9,6 +9,8 @@ import rdflib
 
 from web.models import db, Ontology, OntologyEntity, OntologyVersion
 from services import ontology_categories as categories
+from services import proethica_stack as stack
+from web import level_views
 from web.ontology_stats import build_stats_context
 from web.entity_extraction import extract_entities_from_content
 from web.ontology_routes.helpers import (
@@ -28,6 +30,26 @@ from web.ontology_routes.helpers import (
     entity_incoming_edges,
     entity_case_provenance,
 )
+
+
+# The level pages that render from the entity rows (web/level_views.py). Core
+# ('framework') keeps the generic page, which adds the D-tuple grid.
+LEVEL_TEMPLATES = {
+    'taxonomy': 'level_taxonomy.html',
+    'catalog': 'level_catalog.html',
+    'standards': 'level_standards.html',
+}
+
+
+def _render_level_page(ontology, level):
+    context = {'ontology': ontology, 'level': level}
+    if level.view == 'taxonomy':
+        context['taxonomy'] = level_views.build_taxonomy(db.session)
+    elif level.view == 'catalog':
+        context['catalog'] = level_views.build_catalog(db.session, case=request.args.get('case', type=int))
+    else:
+        context['standards'] = level_views.build_standards(db.session)
+    return render_template(LEVEL_TEMPLATES[level.view], **context)
 
 
 def register_detail_routes(bp):
@@ -168,14 +190,19 @@ def register_detail_routes(bp):
         # Browser request - show detail page
         current_app.logger.info(f"Browser request for {ontology_name}, showing detail page")
 
+        # ?view=standard requests the generic page (the Schema view) for a
+        # level or a case ontology
+        view_mode = request.args.get('view', 'auto')
+
+        level = stack.level_for(ontology.name) if view_mode != 'standard' else None
+        if level is not None and level.view in LEVEL_TEMPLATES:
+            return _render_level_page(ontology, level)
+
         # Get all entities for this ontology
         stmt = select(OntologyEntity).where(
             OntologyEntity.ontology_id == ontology.id
         )
         all_entities = db.session.execute(stmt).scalars().all()
-
-        # Check if user explicitly requested standard view
-        view_mode = request.args.get('view', 'auto')
 
         # Check if this is a case ontology (use case view by default for cases)
         from web.case_display import is_case_ontology, organize_entities_for_case, get_domain_from_ontology
@@ -195,7 +222,7 @@ def register_detail_routes(bp):
             # -> concept. Joins the case TTL with the NSPE Code of Ethics ontology.
             from web.case_citations import build_citation_chain, build_conclusions
             nspe_ont = db.session.execute(
-                select(Ontology).where(Ontology.name == 'NSPE Code of Ethics')
+                select(Ontology).where(Ontology.name == stack.CASES_CODE)
             ).scalars().first()
             citations = build_citation_chain(
                 ontology.current_content,
@@ -303,11 +330,19 @@ def register_detail_routes(bp):
         ).order_by(OntologyVersion.created_at.desc())
         versions = db.session.execute(stmt).scalars().all()
 
-        # Build enhanced stats context with display_config support
-        stats = build_stats_context(ontology, entities, relationships)
+        # Counts, axioms and, on the core level page, the D-tuple grid
+        stats = build_stats_context(ontology, entities, relationships, level=level)
+
+        # The Schema view of a level or case ontology links back to its page
+        schema_of = None
+        if view_mode == 'standard':
+            home = stack.level_for(ontology.name)
+            schema_of = home.label if home else ('Case' if categories.case_id_from_name(ontology.name) else None)
 
         return render_template('ontology_detail.html',
                              ontology=ontology,
+                             level=level,
+                             schema_of=schema_of,
                              entities=entities,
                              relationships=relationships,
                              versions=versions,

@@ -3,6 +3,9 @@
 
 {% block title %}{% if stack %}{{ super() }}{% else %}Ontologies - OntServe{% endif %}{% endblock %}
 
+{# The home page names the server in its heading, so it carries no footer. #}
+{% block footer %}{% if not stack %}{{ super() }}{% endif %}{% endblock %}
+
 {% block content %}
 {% if stack %}
 {# The home page: the ProEthica stack (services.proethica_stack), the cases,
