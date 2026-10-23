@@ -99,6 +99,14 @@ default:
       collapsed: false
       max_preview: 30
 
+    - id: case_documents
+      title: Case Documents
+      description: The reports, data, drawings and photographs that the participants produce, hold or consult within the case events, as distinct from the Resources above, the professional knowledge sources the case draws on
+      entity_types: [CaseDocument]
+      icon: bi-file-earmark-text
+      collapsed: false
+      max_preview: 10
+
     - id: decision_points
       title: Decision Points
       description: Key decision moments in the case

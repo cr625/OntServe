@@ -642,6 +642,7 @@ def organize_entities_for_case(entities: List[Any], domain: str = None) -> Dict[
 PAGE_BLOCK_ORDER = [
     'agents',            # the actors (core:Agent, cases:DeliberativeBody) the graph hangs on
     'nine_concepts',     # the extracted entities (foundation)
+    'case_documents',    # the documents of the case events (proeth:CaseDocument), not Resources
     'competition',       # panel: how the obligations compete / prevail
     'citations',         # panel: NSPE provisions grounding the conclusions
     'decision_points',

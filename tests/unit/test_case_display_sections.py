@@ -75,6 +75,25 @@ def test_agents_section_precedes_the_nine_concepts():
     assert result["stats"]["individuals"] == 4
 
 
+def test_case_documents_have_their_own_section():
+    """A proeth:CaseDocument (2026-10-23) is a document of the case events, not a Resource: it
+    has its own section after the nine components instead of the Other catch-all."""
+    doc = _ind("Groundwater_Monitoring_Data", PROETH + "CaseDocument",
+               types=[PROETH + "CaseDocument"], label="Groundwater Monitoring Data")
+    result = organize_entities_for_case(ENTITIES + [doc], "engineering")
+    ids = [s["id"] for s in result["sections"]]
+    assert ids.index("nine_concepts") < ids.index("case_documents")
+    section = next(s for s in result["sections"] if s["id"] == "case_documents")
+    assert [e.label for e in section["entities"]] == ["Groundwater Monitoring Data"]
+    assert "other" not in ids
+    nine = next(s for s in result["sections"] if s["id"] == "nine_concepts")
+    resources = next(s for s in nine["subsections"] if s["id"] == "resources")
+    assert resources["entities"] == []
+    # the page lists the section right after the nine components
+    block_ids = [b["id"] for b in build_ordered_blocks(result["sections"])]
+    assert block_ids.index("case_documents") == block_ids.index("nine_concepts") + 1
+
+
 def test_bare_class_redeclarations_become_types_used_not_cards():
     result = organize_entities_for_case(ENTITIES, "engineering")
     nine = next(s for s in result["sections"] if s["id"] == "nine_concepts")
