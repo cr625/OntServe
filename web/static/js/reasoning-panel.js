@@ -71,9 +71,8 @@
         let html = '';
         if (data.consistent) {
             html += `
-                <div class="alert alert-success py-2 mb-3">
-                    <i class="bi bi-check-circle me-1"></i>
-                    <strong>Consistent.</strong>
+                <div class="border rounded px-3 py-2 mb-3">
+                    <span class="chip me-1"><i class="bi bi-check-circle"></i> Consistent</span>
                     ${(data.nothing_entities || []).length} disjointness violation(s),
                     ${data.inferred_type_count || 0} inferred type assertion(s),
                     ${data.inferred_subclass_count || 0} inferred subclass relation(s)
@@ -81,9 +80,8 @@
                 </div>`;
         } else {
             html += `
-                <div class="alert alert-danger py-2 mb-3">
-                    <i class="bi bi-x-circle me-1"></i>
-                    <strong>Inconsistent.</strong>
+                <div class="border rounded px-3 py-2 mb-3">
+                    <span class="chip me-1"><i class="bi bi-x-circle"></i> Inconsistent</span>
                     ${data.error_explanation ? esc(data.error_explanation) : ''}
                 </div>`;
             const inc = data.inconsistency_explanation;
@@ -101,7 +99,7 @@
                 html += `
                     <div class="mb-3" style="min-width: 0;">
                         <div style="overflow-wrap: anywhere;">
-                            <span class="badge bg-success me-1">derived</span>
+                            <span class="chip me-1">derived</span>
                             <strong><code>${esc(statementLabel(e))}</code></strong>
                         </div>
                         ${e.error
@@ -148,12 +146,12 @@
                 if (data.success) {
                     render(data);
                 } else {
-                    body.innerHTML = `<div class="alert alert-warning py-2 mb-0">
+                    body.innerHTML = `<div class="border rounded px-3 py-2 mb-0">
                         Reasoning failed: ${esc(data.error || data.message || 'unknown error')}</div>`;
                 }
             })
             .catch(err => {
-                body.innerHTML = `<div class="alert alert-warning py-2 mb-0">
+                body.innerHTML = `<div class="border rounded px-3 py-2 mb-0">
                     Request failed: ${esc(err)}</div>`;
             })
             .finally(() => {

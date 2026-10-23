@@ -8,7 +8,7 @@
         <div class="error-page">
             <h1 class="display-1 text-muted">404</h1>
             <h2 class="mb-4">
-                <i class="bi bi-exclamation-triangle text-warning"></i> Page Not Found
+                Page Not Found
             </h2>
             <p class="lead mb-4">
                 The page you're looking for doesn't exist or has been moved.
@@ -17,15 +17,17 @@
             <div class="mb-4">
                 <p>Here are some helpful links:</p>
                 <div class="d-flex justify-content-center gap-3">
-                    <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">
                         <i class="bi bi-house"></i> Go Home
                     </a>
                     <a href="{{ url_for('main.search') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-search"></i> Search
                     </a>
+                    {% if current_user.is_authenticated %}
                     <a href="{{ url_for('ontology.import_ontology') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-upload"></i> Import Ontology
                     </a>
+                    {% endif %}
                 </div>
             </div>
             

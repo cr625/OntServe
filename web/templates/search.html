@@ -25,7 +25,7 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
+                    <button type="submit" class="btn btn-outline-primary w-100">
                         <i class="bi bi-search"></i> Search
                     </button>
                 </div>
@@ -34,9 +34,9 @@
         
         {% if query %}
         <!-- Search results -->
-        <div class="alert alert-info">
+        <p class="text-body-secondary" role="status">
             Found {{ results.ontologies|length + results.entities|length }} results for "{{ query }}"
-        </div>
+        </p>
         
         <!-- Ontology results -->
         {% if results.ontologies %}
@@ -73,19 +73,17 @@
                 </thead>
                 <tbody>
                     {% for entity in results.entities %}
-                    <tr onclick="window.location='{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=entity.ontology.name) }}'" style="cursor: pointer;">
+                    <tr>
                         <td>
-                            <strong>{{ entity.label or entity.uri|extract_name }}</strong>
+                            <a href="{{ url_for('ontology.entity_detail', ontology_name=entity.ontology.name, fragment=entity.uri|extract_name) }}"><strong>{{ entity.label or entity.uri|extract_name }}</strong></a>
                             {% if entity.comment %}
                             <br><small class="text-muted">{{ entity.comment[:100] }}...</small>
                             {% endif %}
                         </td>
                         <td>
-                            <span class="badge bg-{{ 'success' if entity.entity_type == 'class' else 'info' if entity.entity_type == 'property' else 'warning' }}">
-                                {{ entity.entity_type }}
-                            </span>
+                            <span class="chip">{{ entity.entity_type }}</span>
                         </td>
-                        <td>{{ entity.ontology.name }}</td>
+                        <td><a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=entity.ontology.name) }}">{{ entity.ontology.name }}</a></td>
                         <td><code class="small">{{ entity.uri[:50] }}...</code></td>
                     </tr>
                     {% endfor %}
@@ -95,16 +93,14 @@
         {% endif %}
         
         {% if not results.ontologies and not results.entities %}
-        <div class="alert alert-warning">
-            No results found for "{{ query }}". Try a different search term.
-        </div>
+        <p class="text-body-secondary">No results found for "{{ query }}". Try a different search term.</p>
         {% endif %}
         
         {% else %}
         <!-- No search performed yet -->
-        <div class="alert alert-info">
-            <h4 class="alert-heading">Search Tips</h4>
-            <ul>
+        <div class="border rounded p-3">
+            <h2 class="h5">Search tips</h2>
+            <ul class="mb-0">
                 <li>Search for ontology names, IDs, or descriptions</li>
                 <li>Find entities by their labels, comments, or URIs</li>
                 <li>Use the filter to search only ontologies or entities</li>

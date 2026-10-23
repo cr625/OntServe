@@ -277,8 +277,7 @@
             // Show current divergence from latest tag
             if (data.current_divergence_pct !== null && data.current_divergence_pct !== undefined) {
                 const pct = data.current_divergence_pct;
-                const color = pct === 0 ? 'success' : pct < 10 ? 'info' : pct < 30 ? 'warning' : 'danger';
-                divergenceEl.innerHTML = `<span class="badge bg-${color}">Divergence since last tag: ${pct}%</span>`;
+                divergenceEl.innerHTML = `<span class="small text-body-secondary">Divergence since last tag: ${pct}%</span>`;
             } else {
                 divergenceEl.innerHTML = '';
             }
@@ -294,10 +293,10 @@
 
             data.versions.forEach(v => {
                 const divBadge = v.divergence_pct !== null && v.divergence_pct !== undefined
-                    ? `<span class="badge bg-${v.divergence_pct === 0 ? 'success' : v.divergence_pct < 10 ? 'info' : v.divergence_pct < 30 ? 'warning' : 'danger'}">${v.divergence_pct}%</span>`
+                    ? `<span>${v.divergence_pct}%</span>`
                     : '<span class="text-muted">--</span>';
 
-                const currentBadge = v.is_current ? ' <span class="badge bg-success">Current</span>' : '';
+                const currentBadge = v.is_current ? ' <span class="chip">Current</span>' : '';
                 const date = v.created_at ? new Date(v.created_at).toLocaleDateString() : '-';
                 const summary = v.change_summary ? (v.change_summary.length > 80 ? v.change_summary.substring(0, 80) + '...' : v.change_summary) : '-';
 

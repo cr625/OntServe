@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "macros/entity_display.html" import render_iri_target %}
+{% from "macros/level_items.html" import component_letter %}
 {% from "macros/component_sections.html" import property_structure, definition_card, defined_as_card, relationships_block, class_hierarchy_card, mappings_card, source_evidence_card, children_card, used_in_cases_card, ttl_card %}
 
 {% block title %}{{ entity.label or fragment }} - {{ ontology.name }} - OntServe{% endblock %}
@@ -7,12 +8,9 @@
 {% block extra_css %}
 <style>
     .entity-header {
-        border-left: 4px solid;
+        border-left: 3px solid var(--bs-border-color);
         padding-left: 1rem;
     }
-    .entity-header.type-class { border-color: #0d6efd; }
-    .entity-header.type-property { border-color: #198754; }
-    .entity-header.type-individual { border-color: #6f42c1; }
 
     /* Wider, left-aligned tooltips for the Property structure info icons */
     .desc-tip .tooltip-inner { max-width: 360px; text-align: left; }
@@ -64,7 +62,7 @@
     }
 
     .version-banner {
-        border-left: 4px solid #ffc107;
+        border-left: 3px solid var(--bs-border-color);
     }
 
     .edit-form .form-control:focus {
@@ -113,19 +111,17 @@
 
     {% if version_tag %}
     <!-- Versioned view banner -->
-    <div class="alert alert-warning version-banner mb-3">
-        <div class="d-flex justify-content-between align-items-center">
+    <div class="border rounded px-3 py-2 version-banner mb-3" role="status">
+        <div class="d-flex justify-content-between align-items-center gap-2">
             <div>
-                <i class="bi bi-clock-history"></i>
-                <strong>Historical version</strong> -- viewing this entity as of tag <code>{{ version_tag }}</code>
+                <span class="chip me-1">Historical version</span>
+                viewing this entity as of tag <code>{{ version_tag }}</code>
                 {% if version_date %}
-                <small class="text-muted">({{ version_date }})</small>
+                <small class="text-body-secondary">({{ version_date }})</small>
                 {% endif %}
             </div>
             <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=fragment) }}"
-               class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-arrow-right"></i> View current version
-            </a>
+               class="btn btn-sm btn-outline-secondary">View current version</a>
         </div>
     </div>
     {% endif %}
@@ -134,27 +130,22 @@
     {% set cc = materialized_category(entity) %}
     {% set cm = concept_meta(cc) if cc else none %}
     {% set comp = concept_meta(fragment) if entity.entity_type == 'class' else none %}
-    <div class="entity-header type-{{ entity.entity_type }} mb-4"{% if cm %} style="border-color: {{ cm.color }};"{% endif %}>
+    <div class="entity-header type-{{ entity.entity_type }} mb-4">
         <div class="d-flex justify-content-between align-items-start">
             <div>
                 <h1 class="mb-1">{{ entity.label or fragment }}</h1>
                 <div class="mb-2">
                     {% if entity.entity_type == 'individual' and cm %}
-                    <span class="badge" style="background: {{ cm.color }};" title="{{ cm.name }} (one of the 9 concepts)">
-                        {{ cm.abbrev }} &middot; {{ cm.name }}
-                    </span>
-                    <span class="badge bg-light text-muted border">Individual</span>
+                    <span title="{{ cm.name }} (one of the 9 concepts)">{{ component_letter(cm.abbrev) }} {{ cm.name }}</span>
+                    <span class="chip ms-1">Individual</span>
                     {% else %}
                     {% if comp %}
                     <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment='DTupleFramework') }}"
-                       class="badge text-decoration-none" style="background: {{ comp.color }};"
-                       title="D-tuple component {{ comp.abbrev }}; click for the framework">
-                        {{ comp.abbrev }} &middot; D-tuple component
+                       class="text-decoration-none me-1" title="D-tuple component {{ comp.abbrev }}; click for the framework">
+                        {{ component_letter(comp.abbrev) }} D-tuple component
                     </a>
                     {% endif %}
-                    <span class="badge bg-{{ 'primary' if entity.entity_type == 'class' else 'success' if entity.entity_type == 'property' else 'secondary' }}">
-                        {{ entity.entity_type|capitalize }}
-                    </span>
+                    <span class="chip">{{ entity.entity_type|capitalize }}</span>
                     {% endif %}
                 </div>
                 <code class="text-muted small">{{ entity.uri }}</code>
@@ -209,7 +200,7 @@
                         {% for t in _others %}
                         {% set t_frag = t.split('#')[-1].split('/')[-1] %}
                         <a href="{{ url_for('ontology.entity_detail', ontology_name=ontology.name, fragment=t_frag) }}"
-                           class="badge bg-light text-secondary border text-decoration-none me-1"
+                           class="chip me-1"
                            title="{{ t }}">{{ t_frag | split_pascal }}</a>
                         {% endfor %}
                     </div>
@@ -258,7 +249,7 @@
                             {% for c in case_provenance %}
                             <li>
                                 <a href="{{ c.url }}">Case {{ c.num }}: {{ c.title }}</a>
-                                {% if c.first and case_provenance|length > 1 %}<span class="badge text-bg-light border ms-1">first</span>{% endif %}
+                                {% if c.first and case_provenance|length > 1 %}<span class="chip ms-1">first</span>{% endif %}
                             </li>
                             {% endfor %}
                         </ul>
@@ -485,8 +476,8 @@
 
             {% if version_tag %}
             <!-- Version info for historical views -->
-            <div class="card mb-3 border-warning">
-                <div class="card-header bg-warning bg-opacity-10"><h6 class="mb-0">Version Info</h6></div>
+            <div class="card mb-3">
+                <div class="card-header"><h6 class="mb-0">Version Info</h6></div>
                 <div class="card-body">
                     <div class="property-row">
                         <div class="property-key">Tag</div>
