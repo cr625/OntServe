@@ -5,6 +5,7 @@ Handles index page, health check, search, and error handlers.
 """
 
 import logging
+import time
 from functools import lru_cache
 from pathlib import Path
 
@@ -34,6 +35,20 @@ def load_publications():
         return ()
     return tuple(p for p in data.get('publications') or []
                  if isinstance(p, dict) and p.get('title'))
+
+
+_counts_cache = {'at': 0.0, 'value': None}
+
+
+def cached_headline_counts():
+    """headline_counts, kept per process for HEADLINE_COUNTS_TTL seconds: the
+    counts change only when a sync or a commit rewrites the entity rows."""
+    ttl = current_app.config.get('HEADLINE_COUNTS_TTL', 300)
+    now = time.monotonic()
+    if _counts_cache['value'] is None or now - _counts_cache['at'] >= ttl:
+        _counts_cache['value'] = headline_counts(db.session)
+        _counts_cache['at'] = now
+    return _counts_cache['value']
 
 
 @main_bp.route('/')
@@ -80,7 +95,7 @@ def index():
         publications = () if current_app.config.get('ANONYMOUS_MODE', True) else load_publications()
         return render_template('index.html',
                                stack=partition,
-                               counts=headline_counts(db.session),
+                               counts=cached_headline_counts(),
                                case_group=case_groups[0] if case_groups else None,
                                publications=publications,
                                total_count=len(ontologies))
@@ -99,8 +114,7 @@ def index():
                                case_decades=decades[0].subgroups if decades else [],
                                case_total=len(all_cases),
                                current_category=category,
-                               current_subcategory=subcategory,
-                               total_count=len(candidates))
+                               current_subcategory=subcategory)
 
     pagination = db.paginate(
         stmt,

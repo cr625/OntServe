@@ -512,3 +512,8 @@ a.chip.active {
 .rel-target-link:hover {
     text-decoration: underline;
 }
+
+/* Long IRIs in page headers wrap instead of widening the page on a phone */
+.page-heading code {
+    overflow-wrap: anywhere;
+}

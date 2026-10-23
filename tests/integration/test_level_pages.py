@@ -159,7 +159,8 @@ class TestCore:
         letters = re.findall(r'class="component-letter" title="[^"]*" style="background: (#[0-9a-f]{6});', grid)
         assert len(letters) == 9 and letters[0] == '#0d6efd'
         assert 'Grounded in' in grid and 'border-left' not in grid
-        assert '<h2 class="h4 mt-4 mb-2" id="schema">Schema</h2>' in main
+        assert '<h2 class="h4 mt-4 mb-2" id="schema-heading">Schema</h2>' in main
+        assert main.count('id="schema"') == 1   # the Classes pane the tab targets
         assert 'class="tab-count"' in main and 'class="badge' not in main
 
     def test_turtle_by_content_negotiation(self, client, seeded):

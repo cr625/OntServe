@@ -5,7 +5,6 @@
 
 {% set md = ontology.meta_data or {} %}
 {% set display_title = md.get('display_name') %}
-{% set case_id = ontology.name.rsplit('-', 1)[-1] if ontology.name.startswith('proethica-case-') else none %}
 
 {% block title %}{{ display_title or ontology.name }} - Case - OntServe{% endblock %}
 

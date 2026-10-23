@@ -41,6 +41,9 @@ class Config:
     # Pagination
     ONTOLOGIES_PER_PAGE = 20
     ENTITIES_PER_PAGE = 50
+
+    # Seconds a worker keeps the headline counts of the home page
+    HEADLINE_COUNTS_TTL = 300
     
     # File upload settings
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
@@ -103,6 +106,7 @@ class TestingConfig(Config):
     WTF_CSRF_ENABLED = False
     # The suite exercises the full pages; tests of the withheld state set it.
     ANONYMOUS_MODE = False
+    HEADLINE_COUNTS_TTL = 0
 
     # Storage directories for testing
     ONTSERVE_STORAGE_DIR = '/tmp/ontserve_test_storage'

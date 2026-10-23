@@ -11,6 +11,9 @@
         border-left: 3px solid var(--bs-border-color);
         padding-left: 1rem;
     }
+    /* A long IRI wraps instead of widening the page on a phone */
+    .entity-header > .d-flex > div { min-width: 0; }
+    .entity-header code { overflow-wrap: anywhere; }
 
     /* Wider, left-aligned tooltips for the Property structure info icons */
     .desc-tip .tooltip-inner { max-width: 360px; text-align: left; }

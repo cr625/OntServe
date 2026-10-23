@@ -236,15 +236,16 @@ def headline_counts(session) -> Dict[str, int]:
 
     rows = load_class_rows(session, [core, intermediate, standards])
     index = ClassIndex(rows)
-    extended_count = session.execute(
-        select(func.count(OntologyEntity.id))
+    # Only the deprecated flag of each extended class, not its whole properties JSON
+    extended_flags = session.execute(
+        select(OntologyEntity.properties['deprecated'])
         .join(Ontology, Ontology.id == OntologyEntity.ontology_id)
         .where(OntologyEntity.entity_type == 'class', Ontology.name == extended)
-    ).scalar() or 0
+    ).scalars().all()
     return {
         'core': len(index.letters),
         'intermediate': sum(1 for r in rows if r.ontology == intermediate and not is_deprecated(r)),
-        'extended': extended_count,
+        'extended': sum(1 for flag in extended_flags if str(flag).lower() != 'true'),
         'engineering-ethics': sum(1 for r in _individual_rows(session, standards) if is_standard(r, index)),
     }
 
@@ -322,6 +323,25 @@ def taxonomy_from_rows(rows: List[Any]) -> Dict[str, Any]:
 
     def size(n: Dict[str, Any]) -> int:
         return 1 + sum(size(c) for c in n['children'])
+
+    # A primary-parent cycle inside intermediate is reached from no root; its
+    # first class by label becomes a root, so the trees cover every live class once.
+    reached = set()
+
+    def mark(start: Any) -> None:
+        pending = [start]
+        while pending:
+            row = pending.pop()
+            if row.uri not in reached:
+                reached.add(row.uri)
+                pending.extend(children.get(row.uri, []))
+
+    for row in roots:
+        mark(row)
+    for row in sorted(own, key=_label_key):
+        if row.uri not in reached:
+            roots.append(row)
+            mark(row)
 
     by_letter: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for r in sorted(roots, key=_label_key):
@@ -423,6 +443,11 @@ def _humanize(value: Any) -> str:
     return str(value).replace('_', ' ')
 
 
+def _web_url(value: Any) -> Optional[str]:
+    url = str(value or '').strip()
+    return url if urlparse(url).scheme in ('http', 'https') else None
+
+
 def build_standards(session) -> Dict[str, Any]:
     ee = _ontology('engineering-ethics')
     rows = load_class_rows(session, [_ontology('core'), _ontology('intermediate'), ee, stack.CASES_VOCABULARY])
@@ -451,6 +476,8 @@ def standards_from_rows(rows: List[Any], individuals: List[Any]) -> Dict[str, An
                 'identifier': props.get('identifier'),
                 'publisher': props.get('publisher'),
                 'source': props.get('source'),
+                # A link only for an http(s) source; anything else (javascript:, data:) stays text
+                'source_url': _web_url(props.get('source')),
                 'source_host': urlparse(str(props.get('source') or '')).netloc.removeprefix('www.'),
                 'domains': [_humanize(d) for d in (domains if isinstance(domains, list) else [domains])],
                 'kind': index.ref(r.parent_uri),

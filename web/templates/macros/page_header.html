@@ -23,16 +23,12 @@
 </p>
 {% endmacro %}
 
-{# View TTL, the Schema view (or the way back to the level view), Visualize,
-   and for a signed-in editor Settings and Edit TTL. #}
-{% macro quiet_actions(ontology, schema_view=false, level_label=none) %}
+{# View TTL, the Schema view, Visualize, and for a signed-in editor Settings
+   and Edit TTL. Tag Version and Delete are on the Schema view, with their dialogs. #}
+{% macro quiet_actions(ontology) %}
 <div class="d-flex flex-wrap gap-2 page-actions">
     <a href="{{ url_for('ontology.ontology_content', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary" target="_blank">View TTL</a>
-    {% if schema_view %}
-    <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary">{{ level_label }} view</a>
-    {% else %}
     <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name, view='standard') }}" class="btn btn-sm btn-outline-secondary">Schema view</a>
-    {% endif %}
     <a href="{{ url_for('ontology_editor.visualize_ontology', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary">Visualize</a>
     {% if current_user.is_authenticated and current_user.can_perform_action('edit') %}
     <a href="{{ url_for('ontology.ontology_settings', ontology_name=ontology.name) }}" class="btn btn-sm btn-outline-secondary">Settings</a>

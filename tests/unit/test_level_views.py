@@ -108,6 +108,21 @@ class TestTaxonomy:
         assert taxonomy['total'] == len(live) == sum(g['count'] for g in taxonomy['groups'])
 
 
+def test_primary_parent_cycle_keeps_its_classes():
+    rows = [
+        SimpleNamespace(uri=CORE + 'Role', label='Role', comment=None, parent_uri=None,
+                        properties={'dtupleComponent': 'R'}, ontology='proethica-core'),
+        SimpleNamespace(uri=INT + 'A', label='A', comment=None, parent_uri=INT + 'B',
+                        properties={}, ontology='proethica-intermediate'),
+        SimpleNamespace(uri=INT + 'B', label='B', comment=None, parent_uri=INT + 'A',
+                        properties={}, ontology='proethica-intermediate'),
+    ]
+    view = taxonomy_from_rows(rows)
+    labels = {lab for g in view['groups'] for lab in _all_labels(g['nodes'])}
+    assert labels == {'A', 'B'}
+    assert view['total'] == 2 == sum(g['count'] for g in view['groups'])
+
+
 @pytest.mark.unit
 class TestFrameworkGrid:
 
@@ -200,10 +215,13 @@ class TestStandards:
             SimpleNamespace(uri='urn:x#NSPEFacts', label='Facts', comment=None,
                             parent_uri=CASES + 'CaseSection', properties={'sectionOrder': 1}),
         ]
+        individuals[1].properties = {'source': 'javascript:alert(1)'}
         view = standards_from_rows(classes, individuals)
         assert [s['label'] for s in view['standards']] == ['ISO 26262', 'Section 508']
-        iso = view['standards'][0]
+        iso, section508 = view['standards']
         assert iso['source_host'] == 'iso.org' and iso['domains'] == ['automotive engineering']
+        assert iso['source_url'] == 'https://www.iso.org/standard/68383.html'
+        assert section508['source_url'] is None   # only http(s) sources become links
         assert [i['label'] for i in view['structure_individuals']] == ['Facts']
         assert [c['label'] for c in view['structure_classes']] == ['DissentingSection']
         assert [(g['label'], len(g['classes'])) for g in view['vocabulary']] == [('States', 1)]

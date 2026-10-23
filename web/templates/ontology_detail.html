@@ -5,7 +5,7 @@
 {% from "macros/page_header.html" import level_header with context %}
 {% from "macros/level_items.html" import component_letter %}
 
-{% block title %}{{ ontology.name }} - OntServe{% endblock %}
+{% block title %}{{ level.label if level else ontology.name }} - OntServe{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -142,7 +142,7 @@
         </section>
         {% endif %}
         {% if level %}
-        <h2 class="h4 mt-4 mb-2" id="schema">Schema</h2>
+        <h2 class="h4 mt-4 mb-2" id="schema-heading">Schema</h2>
         {% endif %}
 
         <!-- Tabs for different views -->
@@ -759,8 +759,8 @@
     </div>
 </div>
 
-<!-- Delete Ontology Modal -->
-{% if current_user.is_authenticated and current_user.can_perform_action('delete') %}
+{# Delete Ontology Modal: the generic page only; a level page links to it as its Schema view #}
+{% if not level and current_user.is_authenticated and current_user.can_perform_action('delete') %}
 <div class="modal fade" id="deleteOntologyModal" tabindex="-1" aria-labelledby="deleteOntologyModalLabel"
     aria-hidden="true">
     <div class="modal-dialog">
@@ -823,8 +823,8 @@
 </div>
 {% endif %}
 
-<!-- Tag Version Modal -->
-{% if current_user.is_authenticated and current_user.can_perform_action('edit') %}
+{# Tag Version Modal: the generic page only, as the Delete dialog #}
+{% if not level and current_user.is_authenticated and current_user.can_perform_action('edit') %}
 <div class="modal fade" id="tagVersionModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">

@@ -260,6 +260,7 @@ def register_detail_routes(bp):
 
             return render_template('ontology_case.html',
                                  ontology=ontology,
+                                 case_id=case_id,
                                  proethica_case_url=proethica_case_url,
                                  case_vocabulary=case_vocabulary,
                                  case_sections=case_data['sections'],
