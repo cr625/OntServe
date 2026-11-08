@@ -1,0 +1,34 @@
+# Full upper-level ontologies for the BFO hub collection, hosted beside the
+# ProEthica subset rows. Paths are relative to ~/dev/physical/alignment/sources;
+# release, license and checksum follow its SOURCES.md.
+category: Foundation
+collection: hub
+retrieved: "2026-11-08"
+ontologies:
+
+  - name: information-artifact-ontology
+    display_name: Information Artifact Ontology (IAO)
+    subcategory: Upper ontologies
+    files:
+      - path: obo/iao.owl
+        url: http://purl.obolibrary.org/obo/iao/2026-03-30/iao.owl
+        format: rdf
+        sha256: c27ff2964a2ad8165bc365698b628aae95108411384aa4450e6e1b1e82bf0f41
+    drop_imports: []
+    credit:
+      title: Information Artifact Ontology (release 2026-03-30)
+      creators: ["Alan Ruttenberg", "Barry Smith", "Werner Ceusters", "Chris Mungall", "James A. Overton"]
+      publisher: OBO Foundry
+      license: {id: CC-BY-4.0, url: "https://creativecommons.org/licenses/by/4.0/"}
+      source:
+        repository: https://github.com/information-artifact-ontology/IAO
+        commit: null
+        paths: [iao.owl]
+        url: http://purl.obolibrary.org/obo/iao/2026-03-30/iao.owl
+      homepage: https://obofoundry.org/ontology/iao.html
+      citation:
+        text: "Information Artifact Ontology (IAO), release 2026-03-30. The creators listed are a selection of the dc:contributor names in the ontology header."
+        doi: null
+        url: http://purl.obolibrary.org/obo/iao.owl
+      modifications: Converted from RDF/XML to Turtle.
+      redistribution: hosted

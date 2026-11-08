@@ -56,6 +56,15 @@ collections:
       - Terminological Foundations
       - w3c-prov-o
 
+  hub:
+    title: BFO hub
+    description: >-
+      The upper-level hub of the BFO-as-hub alignment, hosted in full: the
+      Information Artifact Ontology, with BFO 2020, the Relations Ontology and
+      IOF Core to follow. The ProEthica rows keep their own subset copies.
+    landing: generic
+    default_visibility: public
+
   robotics:
     title: Robotics and Automation
     description: >-
