@@ -1,9 +1,15 @@
 """
 Ontology import service.
 
-Handles content acquisition (URL/file), format detection, vocabulary
-conversion, reasoning-based import, and database persistence. Extracted
-from web/ontology_routes.py import_ontology().
+Handles content acquisition (URL/file), format detection, conversion to
+Turtle, vocabulary conversion, reasoning-based import, and database
+persistence. Extracted from web/ontology_routes.py import_ontology().
+
+The acquired content is converted to Turtle once (utils.rdf_conversion), so
+the importers parse Turtle and the stored version holds Turtle whatever the
+source format: RDF/XML, Turtle, N-Triples, N3, JSON-LD, OWL functional syntax
+or OWL/XML. The format of the source is kept in the metadata as
+``source_format``.
 """
 
 import os
@@ -20,6 +26,7 @@ from sqlalchemy import select
 
 from web.models import db, Ontology, OntologyEntity, OntologyVersion
 from web.entity_extraction import extract_entities_from_content
+from utils.rdf_conversion import TURTLE, detect_format, to_turtle
 from utils.vocabulary_converter import VocabularyConverter, is_vocabulary_convertible
 
 logger = logging.getLogger(__name__)
@@ -57,9 +64,12 @@ def execute_import(req: ImportRequest) -> ImportResult:
     # --- Acquire content ---
     source, content, filename = _acquire_content(req)
 
-    # --- Detect format ---
-    format_hint = _detect_format(req.format_hint, filename, content)
-    logger.info("Detected format: %s", format_hint)
+    # --- Detect format and convert to Turtle (ConversionError is a ValueError) ---
+    source_format = _detect_format(req.format_hint, filename, content)
+    logger.info("Detected format: %s", source_format)
+    content = to_turtle(content, source_format,
+                        public_id=req.source_url if req.source_type == 'url' else None)
+    format_hint = TURTLE
 
     # --- Vocabulary conversion (optional) ---
     content = _maybe_convert_vocabulary(content, format_hint, req.name)
@@ -67,20 +77,17 @@ def execute_import(req: ImportRequest) -> ImportResult:
     # --- Run import ---
     if req.use_reasoning:
         result = _import_with_reasoning(
-            source, content, req.source_type, req.name,
-            req.description, format_hint, req.reasoner_type,
+            content, req.name, req.description, req.reasoner_type,
         )
     else:
-        result = _import_basic(
-            source, content, req.source_type, req.name,
-            req.description, format_hint,
-        )
+        result = _import_basic(content, req.name, req.description)
 
     if not result['success']:
         return ImportResult(
             success=False,
             message=f"Import failed: {result.get('message', 'Unknown error')}",
         )
+    _record_source(result, source, source_format)
 
     # --- Persist to database ---
     return _persist_import(
@@ -125,36 +132,11 @@ def _acquire_content(req: ImportRequest) -> tuple[str, str, str]:
 # Format detection
 # ---------------------------------------------------------------------------
 
-_EXTENSION_MAP = {
-    '.ttl': 'turtle',
-    '.rdf': 'xml',
-    '.xml': 'xml',
-    '.owl': 'xml',
-    '.n3': 'n3',
-    '.jsonld': 'json-ld',
-    '.json': 'json-ld',
-    '.nt': 'nt',
-}
-
-
 def _detect_format(hint: str, filename: str, content: str) -> str:
-    """Auto-detect serialization format from hint, filename, or content."""
-    if hint:
-        return hint
-
-    if filename:
-        for ext, fmt in _EXTENSION_MAP.items():
-            if filename.endswith(ext):
-                return fmt
-
-    if '@prefix' in content or '@base' in content:
-        return 'turtle'
-    if '<?xml' in content or '<rdf:RDF' in content or 'xmlns:rdf' in content:
-        return 'xml'
-    if content.strip().startswith('{'):
-        return 'json-ld'
-
-    return 'turtle'
+    """Serialization format from the form hint, else the file extension, else
+    the content (utils.rdf_conversion.detect_format). A .owl file may hold
+    RDF/XML, OWL/XML or functional syntax, so its content decides."""
+    return detect_format(filename=filename, content=content, hint=hint)
 
 
 # ---------------------------------------------------------------------------
@@ -190,10 +172,17 @@ def _maybe_convert_vocabulary(content: str, format_hint: str, name: Optional[str
 # Import execution
 # ---------------------------------------------------------------------------
 
-def _import_with_reasoning(
-    source, content, source_type, name, description, format_hint, reasoner_type,
-):
-    """Import with OWL reasoning via OwlreadyImporter."""
+def _write_temp_turtle(content: str) -> str:
+    """Path of a temporary .ttl file holding ``content``. The caller removes it."""
+    with tempfile.NamedTemporaryFile(
+        mode='w', suffix='.ttl', delete=False, encoding='utf-8',
+    ) as tmp:
+        tmp.write(content)
+        return tmp.name
+
+
+def _import_with_reasoning(content, name, description, reasoner_type):
+    """Import the Turtle content with OWL reasoning via OwlreadyImporter."""
     from importers.owlready_importer import OwlreadyImporter
 
     importer = OwlreadyImporter()
@@ -204,54 +193,45 @@ def _import_with_reasoning(
 
     logger.info("Using OwlreadyImporter with %s reasoning", reasoner_type)
 
-    if source_type == 'url':
-        return importer.import_from_url(
-            source, name=name, description=description, format=format_hint,
-        )
-
-    with tempfile.NamedTemporaryFile(
-        mode='w', suffix=f'.{format_hint}', delete=False,
-    ) as tmp:
-        tmp.write(content)
-        tmp_path = tmp.name
-
+    tmp_path = _write_temp_turtle(content)
     try:
         return importer.import_from_file(
-            tmp_path, name=name, description=description, format=format_hint,
+            tmp_path, name=name, description=description, format=TURTLE,
         )
     finally:
         os.unlink(tmp_path)
 
 
-def _import_basic(source, content, source_type, name, description, format_hint):
-    """Import without reasoning via OntologyManager."""
+def _import_basic(content, name, description):
+    """Import the Turtle content without reasoning via OntologyManager."""
     logger.info("Using basic OntologyManager (no reasoning)")
     manager = current_app.ontology_manager
 
-    if source_type == 'upload':
-        with tempfile.NamedTemporaryFile(
-            mode='w', suffix=f'.{format_hint}', delete=False,
-        ) as tmp:
-            tmp.write(content)
-            tmp_path = tmp.name
-        try:
-            result = manager.import_ontology(
-                source=tmp_path, importer_type='prov', name=name,
-                description=description, format=format_hint, source_type='file',
-            )
-            if result.get('success'):
-                result['content'] = content
-            return result
-        finally:
-            os.unlink(tmp_path)
+    tmp_path = _write_temp_turtle(content)
+    try:
+        result = manager.import_ontology(
+            source=tmp_path, importer_type='prov', name=name,
+            description=description, format=TURTLE, source_type='file',
+        )
+        if result.get('success'):
+            result['content'] = content
+        return result
+    finally:
+        os.unlink(tmp_path)
 
-    result = manager.import_ontology(
-        source=source, importer_type='prov', name=name,
-        description=description, format=format_hint, source_type='url',
-    )
-    if result.get('success'):
-        result['content'] = content
-    return result
+
+def _record_source(result, source, source_format):
+    """Replace the temporary file the importers read with the real source in
+    the importer metadata, and record the format of the source."""
+    metadata = result.setdefault('metadata', {})
+    metadata.pop('source_file', None)
+    if str(metadata.get('source_url', '')).startswith('file://'):
+        metadata.pop('source_url')
+    metadata['source'] = source
+    if not source.startswith('uploaded://'):
+        metadata['source_url'] = source
+    metadata['format'] = TURTLE
+    metadata['source_format'] = source_format
 
 
 # ---------------------------------------------------------------------------
@@ -331,7 +311,8 @@ def _persist_import(result, req, source, content, format_hint) -> ImportResult:
         meta_data={
             'source': source,
             'source_type': req.source_type,
-            'format': result['metadata'].get('format', format_hint),
+            'format': format_hint,
+            'source_format': result['metadata'].get('source_format'),
             'import_date': datetime.now(timezone.utc).isoformat(),
             **reasoning_metadata,
         },

@@ -1,0 +1,34 @@
+# Fixture of another collection (tests/integration/test_collection_isolation.py).
+# It shares fragments, labels and one IRI with proethica-core, links a class and
+# a property into the core hierarchy, carries individuals typed with classes
+# named Argument and DecisionPoint, and its name contains "-case-". Its name
+# sorts before every ProEthica ontology.
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix core: <http://proethica.org/ontology/core#> .
+@prefix robo: <http://example.org/robot-case-study#> .
+
+<http://example.org/robot-case-study> a owl:Ontology ;
+    rdfs:comment "Robot case study fixture." .
+
+robo:Agent a owl:Class ; rdfs:label "Agent" ; rdfs:comment "A robot agent." .
+robo:Action a owl:Class ; rdfs:label "Action" ; rdfs:comment "A robot action." .
+robo:Role a owl:Class ; rdfs:label "Role" ; rdfs:comment "A robot role." .
+robo:State a owl:Class ; rdfs:label "State" ; rdfs:comment "A robot state." .
+robo:Argument a owl:Class ; rdfs:label "Argument" .
+robo:DecisionPoint a owl:Class ; rdfs:label "Decision point" .
+
+core:Action a owl:Class ;
+    rdfs:label "Redeclared action" ;
+    rdfs:comment "The IRI of the core Action, declared again with other text." .
+
+robo:GraspAction a owl:Class ;
+    rdfs:label "Grasp action" ;
+    rdfs:subClassOf core:Action .
+
+robo:graspTarget a owl:ObjectProperty ;
+    rdfs:label "grasp target" ;
+    rdfs:domain core:Action .
+
+robo:argument1 a owl:NamedIndividual, robo:Argument ; rdfs:label "Argument 1" .
+robo:decision1 a owl:NamedIndividual, robo:DecisionPoint ; rdfs:label "Decision 1" .

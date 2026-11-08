@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}{{ collection.title }} - OntServe{% endblock %}
+
+{% block extra_css %}{% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}{% endblock %}
+
+{% macro creators_line(creators) -%}
+{%- if creators|length > 3 -%}{{ creators[:3]|join(', ') }} and {{ creators|length - 3 }} other{{ 's' if creators|length > 4 }}
+{%- else -%}{{ creators|join(', ') }}{%- endif -%}
+{%- endmacro %}
+
+{% block content %}
+{# The landing page of a collection (web/main_routes._render_landing): its
+   ontologies by category and subcategory, each with the summary of its
+   credit (services.ontology_credit.credit_for). #}
+<nav class="small mb-2" aria-label="Collections">
+    <a href="{{ collections_url }}">Collections</a>
+    <span class="text-body-secondary" aria-hidden="true">&rsaquo;</span>
+    <span aria-current="page">{{ collection.title }}</span>
+</nav>
+<div class="mb-4">
+    <h1 class="mb-1">{{ collection.title }}</h1>
+    {% if collection.description %}<p class="lead text-body-secondary mb-1">{{ collection.description }}</p>{% endif %}
+    <p class="small text-body-secondary mb-0">
+        {{ member_count }} ontolog{{ 'y' if member_count == 1 else 'ies' }}
+        {% if uses %}&middot; uses {% for u in uses %}<a href="{{ url_for('main.collection_landing', key=u.key) }}">{{ u.title }}</a>{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}
+    </p>
+</div>
+
+{% if not groups %}
+<p class="text-body-secondary">No ontology belongs to this collection.</p>
+{% endif %}
+
+{% for group in groups %}
+<section class="mb-4"{% if group.label %} aria-label="{{ group.label }}"{% endif %}>
+    {% if group.label %}<h2 class="h4 mb-3">{{ group.label }}</h2>{% endif %}
+    {% for sub, rows in group.subgroups %}
+    {% if sub or group.labelled %}<h3 class="h6 text-body-secondary mt-3 mb-2">{{ sub or 'Other' }}</h3>{% endif %}
+    <ul class="list-unstyled mb-0">
+        {% for ontology in rows %}
+        {% set credit = credits.get(ontology.name) %}
+        {% set md = ontology.meta_data or {} %}
+        <li class="mb-3 collection-member" id="member-{{ ontology.name }}">
+            <a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}" class="fw-semibold">{{ md.get('display_name') or ontology.name }}</a>
+            <span class="small font-monospace text-body-secondary ms-1">{{ ontology.name }}</span>
+            {% if credit and credit.redistribution == 'reference-only' %}<span class="chip ms-1" title="OntServe lists this ontology with its credit and links to its source">Not hosted</span>{% endif %}
+            {% if ontology.description %}<div class="small text-body-secondary">{{ ontology.description|truncate(220) }}</div>{% endif %}
+            {% if credit %}
+            {% set source = credit.source or {} %}
+            {% set link = source.url or source.repository or credit.homepage %}
+            <div class="small">
+                {% if credit.creators %}{{ creators_line(credit.creators) }}{% endif %}
+                {% if credit.license and credit.license.id %}{% if credit.creators %} &middot; {% endif %}{% if credit.license.id == 'none stated' %}no license stated{% else %}{{ credit.license.id }}{% endif %}{% endif %}
+                {% if link %} &middot; <a href="{{ link }}">source</a>{% endif %}
+            </div>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endfor %}
+</section>
+{% endfor %}
+{% endblock %}

@@ -7,6 +7,8 @@
 # ===== Core RDF and Ontology Processing =====
 rdflib>=7.4.0
 owlready2>=0.46
+# Reads OWL functional syntax and OWL/XML for the conversion to Turtle (utils/rdf_conversion.py)
+py-horned-owl>=2.0.0
 # Note: Java JDK 11+ required for Owlready2 reasoners (HermiT, Pellet)
 
 # ===== Web Framework =====

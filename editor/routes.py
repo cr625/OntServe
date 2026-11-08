@@ -644,6 +644,16 @@ def create_editor_blueprint(storage_backend=None, config: Dict[str, Any] = None)
         """
         from .reasoning_service import ReasoningRequest, execute_reasoning
 
+        # The harness merges the ProEthica foundation, core and intermediate
+        # with the target, a recipe of the ProEthica scope only
+        # (services.collections, the reasoning setting of a collection).
+        from services import collections as coll
+        target = db.session.execute(
+            select(Ontology).where(Ontology.name == ontology_name)).scalars().first()
+        if target is not None and coll.policy_for(target).reasoning != 'proethica_merged':
+            return jsonify({'success': False,
+                            'error': 'The collection of this ontology has no reasoning recipe.'}), 400
+
         data = request.get_json() or {}
         scope = data.get('scope', 'merged')
         if scope not in ('merged', 'local'):

@@ -124,3 +124,54 @@ class TestGrouping:
     def test_category_info_for_unknown_key(self):
         info = cat.category_info('Sandbox')
         assert info.key == info.label == 'Sandbox' and info.description == ''
+
+
+@pytest.mark.unit
+class TestCollectionCategories:
+
+    def test_robotics_rule(self):
+        r = cat.resolve(ont('soma', 'base', 'external', {'collection': 'robotics'}))
+        assert (r.category, r.explicit, r.rule_category) == ('Robotics and Automation', False,
+                                                             'Robotics and Automation')
+
+    def test_physical_systems_rule(self):
+        r = cat.resolve(ont('ps-arm', 'base', 'manual', {'collection': 'physical-systems'}))
+        assert r.category == 'Physical Systems' and not r.explicit
+
+    def test_collection_rules_come_before_type_and_source(self):
+        # DUL is an upper ontology, but a row of the collection stays in it
+        assert cat.resolve(ont('dul', 'upper', 'external', {'collection': 'robotics'})).category \
+            == 'Robotics and Automation'
+        assert cat.resolve(ont('ifc-roles', 'base', 'external')).category == 'External Vocabularies'
+
+    def test_explicit_values_still_win(self):
+        r = cat.resolve(ont('soma', 'base', 'external', {'collection': 'robotics',
+                                                         'category': 'Robotics and Automation',
+                                                         'subcategory': 'Activities and manipulation'}))
+        assert (r.category, r.subcategory, r.explicit) == ('Robotics and Automation',
+                                                           'Activities and manipulation', True)
+
+    def test_unknown_collection_falls_through(self):
+        assert cat.resolve(ont('x', 'base', 'external', {'collection': 'chemistry'})).category \
+            == 'External Vocabularies'
+
+    def test_catalog_entries(self):
+        robotics, physical = cat.category_info('Robotics and Automation'), cat.category_info('Physical Systems')
+        assert robotics.header_credit and physical.header_credit
+        assert not any(cat.category_info(k).header_credit for k in
+                       ('Foundation', 'ProEthica Framework', 'Cases', 'Domain', 'Professional Codes',
+                        'External Vocabularies'))
+        keys = cat.known_category_keys()
+        assert keys.index('External Vocabularies') < keys.index('Robotics and Automation') \
+            < keys.index('Physical Systems')
+
+    def test_group_order(self):
+        rows = [ont('soma', 'base', 'external', {'collection': 'robotics'}),
+                ont('ps-arm', 'base', 'manual', {'collection': 'physical-systems'}),
+                ont('ifc-roles', 'base', 'external'), ont('mystery', 'base', 'manual')]
+        assert [g.key for g in cat.group_ontologies(rows)] == [
+            'External Vocabularies', 'Robotics and Automation', 'Physical Systems', cat.UNCATEGORIZED.key]
+
+    def test_slugify(self):
+        assert cat.slugify('Robotics and Automation') == 'robotics-and-automation'
+        assert cat.slugify(' Physical  Systems ') == 'physical-systems'

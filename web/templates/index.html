@@ -6,6 +6,10 @@
 {# The home page names the server in its heading, so it carries no footer. #}
 {% block footer %}{% if not stack %}{{ super() }}{% endif %}{% endblock %}
 
+{# The landing page of the ProEthica collection, also at / when / renders it
+   (config/collections.yaml, home), names its canonical URL. #}
+{% block extra_css %}{% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}{% endblock %}
+
 {% block content %}
 {% if stack %}
 {# The home page: the ProEthica stack (services.proethica_stack), the cases,

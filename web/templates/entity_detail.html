@@ -132,7 +132,7 @@
     <!-- Entity Header -->
     {% set cc = materialized_category(entity) %}
     {% set cm = concept_meta(cc) if cc else none %}
-    {% set comp = concept_meta(fragment) if entity.entity_type == 'class' else none %}
+    {% set comp = concept_meta(fragment) if entity.entity_type == 'class' and 'proethica.org/ontology' in (entity.uri or '') else none %}{# the nine components are ProEthica classes: a hosted Role or State (DUL, SOMA) carries no badge #}
     <div class="entity-header type-{{ entity.entity_type }} mb-4">
         <div class="d-flex justify-content-between align-items-start">
             <div>

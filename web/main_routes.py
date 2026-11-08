@@ -1,7 +1,8 @@
 """
 Main routes for OntServe web application.
 
-Handles index page, health check, search, and error handlers.
+Handles the home page, the collections index and landing pages, health check,
+search, and error handlers.
 """
 
 import logging
@@ -10,13 +11,16 @@ from functools import lru_cache
 from pathlib import Path
 
 import yaml
-from flask import Blueprint, render_template, request, jsonify, current_app
+from flask import Blueprint, abort, render_template, request, jsonify, current_app, redirect, url_for
+from flask_login import current_user
 from sqlalchemy import select, func, or_
 
 from web.models import db, Ontology, OntologyEntity
 from web.level_views import headline_counts
+from services import collections as coll
 from services import ontology_categories as categories
 from services import proethica_stack as stack
+from services.ontology_credit import credit_for
 
 logger = logging.getLogger(__name__)
 
@@ -51,14 +55,101 @@ def cached_headline_counts():
     return _counts_cache['value']
 
 
+def collections_index_url():
+    """The URL of the collections index: / when / renders it, else /collections."""
+    return url_for('main.index') if coll.get_config().home == coll.HOME_INDEX else url_for('main.collections_index')
+
+
+def _all_ontologies():
+    return db.session.execute(select(Ontology).order_by(Ontology.name)).scalars().all()
+
+
+def _render_stack(canonical_url=None):
+    """The landing page of the ProEthica collection: the ProEthica stack
+    (services.proethica_stack) over the ontologies of the ProEthica scope, the
+    four levels with their headline counts, the cases by decade, and every
+    other ontology of the scope in a Reference list."""
+    config = coll.get_config()
+    scope = coll.proethica_scope(config)
+    ontologies = [o for o in _all_ontologies() if coll.resolve(o, config) in scope]
+    partition = stack.partition(ontologies)
+    case_groups = categories.group_ontologies(partition.cases)
+    publications = () if current_app.config.get('ANONYMOUS_MODE', True) else load_publications()
+    return render_template('index.html',
+                           stack=partition,
+                           counts=cached_headline_counts(),
+                           case_group=case_groups[0] if case_groups else None,
+                           publications=publications,
+                           total_count=len(ontologies),
+                           canonical_url=canonical_url)
+
+
+def _render_index(canonical_url=None):
+    """The collections index: the default collection first and in full, then
+    the other collections. Signed-in users also see the collections that are
+    not public and the ontologies of no collection."""
+    config = coll.get_config()
+    ontologies = _all_ontologies()
+    signed_in = current_user.is_authenticated
+    entries = coll.index_entries(ontologies, include_private=signed_in, config=config)
+    lead = next((e for e in entries if e.collection.key == config.default_collection), None)
+    others = [e for e in entries if e is not lead]
+    cases = [o for o in lead.ontologies if o.category == stack.CASES_CATEGORY] if lead else []
+    return render_template('collections.html',
+                           lead=lead,
+                           others=others,
+                           case_count=len(cases),
+                           unassigned=coll.unassigned(ontologies, config) if signed_in else [],
+                           canonical_url=canonical_url)
+
+
+def _render_landing(collection, canonical_url=None):
+    """The landing page of one collection: the ProEthica stack, or the
+    members by category and subcategory with the summary of their credit."""
+    if collection.landing == 'proethica_stack':
+        return _render_stack(canonical_url)
+    config = coll.get_config()
+    groups = coll.landing_groups(collection.key, _all_ontologies(), config)
+    members = [o for group in groups for _, rows in group.subgroups for o in rows]
+    return render_template('collection_landing.html',
+                           collection=collection,
+                           groups=groups,
+                           credits={o.name: credit_for(o) for o in members},
+                           member_count=len(members),
+                           uses=[config.get(key) for key in collection.uses],
+                           canonical_url=canonical_url)
+
+
+@main_bp.route('/collections')
+def collections_index():
+    """The collections index, at / as well when / renders it (config/collections.yaml, home)."""
+    config = coll.get_config()
+    return _render_index(url_for('main.index') if config.home == coll.HOME_INDEX else None)
+
+
+@main_bp.route('/collections/<key>')
+def collection_landing(key):
+    """The landing page of a collection. A collection that is not public
+    answers signed-in users only. The default collection carries a canonical
+    link to / when / renders its landing page."""
+    config = coll.get_config()
+    collection = config.get(key)
+    if collection is None or not (collection.public or current_user.is_authenticated):
+        abort(404)
+    at_home = config.home == coll.HOME_DEFAULT and key == config.default_collection
+    return _render_landing(collection, url_for('main.index') if at_home else None)
+
+
 @main_bp.route('/')
 def index():
     """Home page.
 
-    Unfiltered: the ProEthica stack (services.proethica_stack): the four
-    levels with their headline counts, the cases by decade, and every other
-    ontology in a Reference list. With any filter (source, type, category,
-    subcategory): the flat paginated table.
+    Unfiltered: the collections index, or the landing page of the default
+    collection (config/collections.yaml, home). A link with ``origin`` naming
+    a collection (ProEthica links /?origin=proethica) is redirected to the
+    landing page of that collection. With any filter (source, type, category,
+    subcategory): the flat paginated table, or the case index for a category
+    listed as cases.
     """
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config['ONTOLOGIES_PER_PAGE']
@@ -89,16 +180,14 @@ def index():
     stmt = stmt.order_by(Ontology.name)
 
     if not filtered:
-        ontologies = db.session.execute(stmt).scalars().all()
-        partition = stack.partition(ontologies)
-        case_groups = categories.group_ontologies(partition.cases)
-        publications = () if current_app.config.get('ANONYMOUS_MODE', True) else load_publications()
-        return render_template('index.html',
-                               stack=partition,
-                               counts=cached_headline_counts(),
-                               case_group=case_groups[0] if case_groups else None,
-                               publications=publications,
-                               total_count=len(ontologies))
+        config = coll.get_config()
+        origin = config.get(request.args.get('origin'))
+        home_landing = config.home == coll.HOME_DEFAULT
+        if origin and not (home_landing and origin.key == config.default_collection):
+            return redirect(url_for('main.collection_landing', key=origin.key))
+        if home_landing:
+            return _render_landing(config.get(config.default_collection))
+        return _render_index()
 
     # A category listed as 'cases' renders the case index: every matching case on
     # one page, newest NSPE case first, with the decades of the whole category.

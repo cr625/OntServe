@@ -66,6 +66,12 @@ def create_app(config_name=None):
     init_db(app)
     migrate = Migrate(app, db)
 
+    # Pages of an ontology limit their entity queries to its collection scope
+    # (web/collection_scope.py)
+    from flask_sqlalchemy.session import Session as _FlaskSQLAlchemySession
+    from web import collection_scope
+    collection_scope.install(_FlaskSQLAlchemySession)
+
     # Auto-sync ontology entities from TTL files on startup
     with app.app_context():
         try:
@@ -259,15 +265,38 @@ def create_app(config_name=None):
     # The ProEthica stack drives the navbar and the page headers: its levels in
     # stack order and the cases category are globals (macros see them too), the
     # navbar item of the current page comes from the context processor.
+    from services import collections as coll
     from services import proethica_stack
     from services.ontology_categories import case_id_from_name
     app.jinja_env.globals['STACK_LEVELS'] = proethica_stack.LEVELS
     app.jinja_env.globals['CASES_CATEGORY'] = proethica_stack.CASES_CATEGORY
 
-    def _nav_active():
+    def _page_collection():
+        """The collection of the current page when it lies outside the
+        ProEthica scope (services.collections): the landing page of such a
+        collection, or the page of one of its ontologies. None otherwise."""
         from flask import has_request_context, request
         if not has_request_context():
             return None
+        args = request.view_args or {}
+        if request.endpoint == 'main.collection_landing':
+            key = args.get('key')
+        elif args.get('ontology_name'):
+            from sqlalchemy import select
+            from web.models import Ontology
+            row = db.session.execute(
+                select(Ontology).where(Ontology.name == args['ontology_name'])).scalars().first()
+            key = coll.resolve(row) if row is not None else None
+        else:
+            return None
+        return None if key in coll.proethica_scope() else coll.get_config().get(key)
+
+    def _nav_active(page_collection):
+        from flask import has_request_context, request
+        if not has_request_context():
+            return None
+        if page_collection is not None:
+            return 'collection'
         name = (request.view_args or {}).get('ontology_name')
         if name:
             level = proethica_stack.level_for(name)
@@ -276,13 +305,25 @@ def create_app(config_name=None):
             return 'cases' if case_id_from_name(name) else None
         if request.endpoint == 'main.index' and request.args.get('category') == proethica_stack.CASES_CATEGORY:
             return 'cases'
+        if request.endpoint == 'main.collections_index':
+            return 'collections'
+        if (request.endpoint == 'main.index' and coll.get_config().home == coll.HOME_INDEX
+                and not any(request.args.get(k) for k in ('source', 'type', 'category', 'subcategory'))):
+            return 'collections'
         if request.endpoint == 'main.search':
             return 'search'
         return None
 
     @app.context_processor
     def inject_stack():
-        return {'nav_active': _nav_active()}
+        from flask import has_request_context
+        from web.main_routes import collections_index_url
+        if not has_request_context():
+            return {'nav_active': None, 'page_collection': None, 'collections_url': None}
+        page_collection = _page_collection()
+        return {'nav_active': _nav_active(page_collection),
+                'page_collection': page_collection,
+                'collections_url': collections_index_url()}
 
     # Add render_props as a Jinja global (available in macros too)
     from web.entity_display import render_entity_properties

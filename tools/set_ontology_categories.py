@@ -2,20 +2,25 @@
 """
 Set the explicit category / subcategory of ontologies (metadata.category and
 metadata.subcategory, the values services.ontology_categories.resolve() reads
-before falling back to its rule defaults).
+before falling back to its rule defaults), and the explicit collection
+(metadata.collection, which services.collections.resolve() reads first, a key
+of config/collections.yaml).
 
 Usage:
     # one ontology
     python tools/set_ontology_categories.py --set proethica-case-7 --category Cases --subcategory 2020s
 
-    # many, from a manifest {"<ontology name>": {"category", "subcategory", "case_number", "clear": [...]}, ...}
+    # one collection
+    python tools/set_ontology_categories.py --set semantic-change-ontology --collection shared
+
+    # many, from a manifest {"<ontology name>": {"category", "subcategory", "case_number", "collection", "clear": [...]}, ...}
     # (ProEthica produces the case manifest: proethica/scripts/export_case_categories_manifest.py)
     python tools/set_ontology_categories.py --manifest tools/migrations/case_categories.json
 
     # clear an explicit value (rule default applies again)
     python tools/set_ontology_categories.py --set proethica-case-7 --clear subcategory
 
-    # report the resolved classification of every ontology
+    # report the resolved classification and collection of every ontology
     python tools/set_ontology_categories.py --report
 
 Idempotent: unchanged rows are not rewritten. Uses the same config bootstrap as
@@ -43,6 +48,7 @@ from sqlalchemy import select  # noqa: E402
 
 from web.app_config import config as flask_config  # noqa: E402
 from web.models import db, init_db, Ontology  # noqa: E402
+from services import collections as coll  # noqa: E402
 from services import ontology_categories as categories  # noqa: E402
 
 
@@ -53,12 +59,17 @@ def make_app() -> Flask:
     return app
 
 
-def apply(session, name: str, category=None, subcategory=None, clear=(), case_number=None) -> str:
+def apply(session, name: str, category=None, subcategory=None, clear=(), case_number=None,
+          collection=None) -> str:
     ont = session.execute(select(Ontology).where(Ontology.name == name)).scalar_one_or_none()
     if ont is None:
         return f'{name}: NOT FOUND'
+    if collection and coll.get_config().get(str(collection).strip()) is None:
+        return f'{name}: UNKNOWN COLLECTION {collection}'
     md = dict(ont.meta_data or {})
     before = dict(md)
+    if collection is not None:
+        categories.set_explicit(md, categories.COLLECTION_KEY, collection)
     if category is not None:
         categories.set_explicit(md, categories.CATEGORY_KEY, category)
     if subcategory is not None:
@@ -70,7 +81,8 @@ def apply(session, name: str, category=None, subcategory=None, clear=(), case_nu
     if md == before:
         return f'{name}: unchanged'
     ont.meta_data = md   # reassign: db.JSON is not mutation-tracked
-    return f'{name}: {before.get("category")}/{before.get("subcategory")} -> {md.get("category")}/{md.get("subcategory")}'
+    return (f'{name}: {before.get("category")}/{before.get("subcategory")}/{before.get("collection")} -> '
+            f'{md.get("category")}/{md.get("subcategory")}/{md.get("collection")}')
 
 
 def main(argv=None):
@@ -78,9 +90,13 @@ def main(argv=None):
     ap.add_argument('--set', metavar='NAME', help='ontology name to update')
     ap.add_argument('--category')
     ap.add_argument('--subcategory')
-    ap.add_argument('--clear', action='append', choices=list(categories.EXPLICIT_KEYS), default=[])
-    ap.add_argument('--manifest', type=Path, help='JSON file: {name: {category, subcategory, case_number, clear}}')
-    ap.add_argument('--report', action='store_true', help='print resolved classification for all ontologies')
+    ap.add_argument('--collection', help='a collection key of config/collections.yaml (blank clears)')
+    ap.add_argument('--clear', action='append',
+                    choices=list(categories.EXPLICIT_KEYS) + [categories.COLLECTION_KEY], default=[])
+    ap.add_argument('--manifest', type=Path,
+                    help='JSON file: {name: {category, subcategory, case_number, collection, clear}}')
+    ap.add_argument('--report', action='store_true',
+                    help='print the resolved classification and collection of all ontologies')
     ap.add_argument('--dry-run', action='store_true')
     args = ap.parse_args(argv)
 
@@ -93,16 +109,24 @@ def main(argv=None):
                 print(f'== {grp.category.label} ({grp.count})')
                 for sub, n in grp.subgroups:
                     print(f'   {sub or "(none)"}: {n}')
+            scope = coll.proethica_scope()
+            for entry in coll.index_entries(onts, include_private=True):
+                where = 'ProEthica scope' if entry.collection.key in scope else 'own scope'
+                print(f'== collection {entry.collection.key} ({entry.count}, {where})')
+            rest = coll.unassigned(onts)
+            print(f'== no collection ({len(rest)}, ProEthica scope): '
+                  + (', '.join(o.name for o in rest) or '-'))
             return 0
 
         lines = []
         if args.set:
-            lines.append(apply(session, args.set, args.category, args.subcategory, args.clear))
+            lines.append(apply(session, args.set, args.category, args.subcategory, args.clear,
+                               collection=args.collection))
         if args.manifest:
             manifest = json.loads(args.manifest.read_text())
             for name, spec in manifest.items():
                 lines.append(apply(session, name, spec.get('category'), spec.get('subcategory'),
-                                   spec.get('clear', []), spec.get('case_number')))
+                                   spec.get('clear', []), spec.get('case_number'), spec.get('collection')))
         if not lines:
             ap.error('nothing to do: pass --set, --manifest or --report')
         for line in lines:

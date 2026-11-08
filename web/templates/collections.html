@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}OntServe, ontology server{% endblock %}
+
+{% block extra_css %}{% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}{% endblock %}
+
+{# The index names the server in its heading, so it carries no footer. #}
+{% block footer %}{% endblock %}
+
+{% block content %}
+{# The collections index (web/main_routes._render_index): the default
+   collection of config/collections.yaml first and in full, then the other
+   collections. #}
+<div class="mb-4">
+    <h1 class="mb-1">OntServe</h1>
+    <p class="lead text-body-secondary mb-0">Ontology server</p>
+</div>
+
+{% if lead %}
+{% set c = lead.collection %}
+<section class="card mb-4 stack-card" id="collection-{{ c.key }}" aria-labelledby="collection-{{ c.key }}-heading">
+    <div class="card-body">
+        <h2 class="h3 card-title mb-2" id="collection-{{ c.key }}-heading">
+            <a href="{{ url_for('main.collection_landing', key=c.key) }}">{{ c.title }}</a>
+        </h2>
+        {% if c.description %}<p class="card-text mb-3">{{ c.description }}</p>{% endif %}
+        {% if c.landing == 'proethica_stack' %}
+        <ul class="list-inline mb-2" aria-label="Levels and cases of {{ c.title }}">
+            {% for level in STACK_LEVELS %}
+            <li class="list-inline-item mb-1"><a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=level.ontology) }}" class="chip">{{ level.label }}</a></li>
+            {% endfor %}
+            {% if case_count %}
+            <li class="list-inline-item mb-1"><a href="{{ url_for('main.index', category=CASES_CATEGORY) }}" class="chip">Cases <span class="chip-count">{{ case_count }}</span></a></li>
+            {% endif %}
+        </ul>
+        {% endif %}
+        <div class="stack-count">{{ lead.count }} ontolog{{ 'y' if lead.count == 1 else 'ies' }}</div>
+    </div>
+</section>
+{% endif %}
+
+{% if others %}
+<section class="mb-4" aria-labelledby="other-collections-heading">
+    <h2 id="other-collections-heading" class="h5 mb-3">Other collections</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+        {% for entry in others %}
+        {% set c = entry.collection %}
+        <div class="col">
+            <div class="card h-100 stack-card" id="collection-{{ c.key }}">
+                <div class="card-body d-flex flex-column">
+                    <h3 class="h5 card-title mb-1">
+                        <a href="{{ url_for('main.collection_landing', key=c.key) }}" class="stretched-link">{{ c.title }}</a>
+                        {% if not c.public %}<span class="chip ms-1" title="Listed for signed-in users only">Private</span>{% endif %}
+                    </h3>
+                    {% if c.description %}<p class="card-text small mb-3">{{ c.description }}</p>{% endif %}
+                    <div class="stack-count mt-auto">{{ entry.count }} ontolog{{ 'y' if entry.count == 1 else 'ies' }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% if unassigned %}
+<section class="mb-4" id="unassigned" aria-labelledby="unassigned-heading">
+    <h2 id="unassigned-heading" class="h6">Ontologies of no collection</h2>
+    <p class="small text-body-secondary mb-2">Shown to signed-in users. A collection can be set on the settings page of each ontology.</p>
+    <ul class="list-inline mb-0">
+        {% for ontology in unassigned %}
+        <li class="list-inline-item"><a href="{{ url_for('ontology.ontology_detail_or_uri_resolution', ontology_name=ontology.name) }}">{{ ontology.name }}</a></li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+{% endblock %}

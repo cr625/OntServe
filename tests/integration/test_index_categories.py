@@ -1,5 +1,7 @@
-"""The home page (the ProEthica stack), the flat list of the category filters,
-the category settings and the navbar."""
+"""The landing page of the ProEthica collection (the stack page at
+/collections/proethica, which / rendered before it became the collections
+index), the flat list of the category filters, the category settings and the
+navbar."""
 
 import re
 from urllib.parse import quote
@@ -8,6 +10,8 @@ import pytest
 from sqlalchemy import select
 
 from services import proethica_stack as stack
+
+STACK_URL = '/collections/proethica'
 
 # Rows the home page needs beyond the levels: the case vocabulary and code,
 # one support ontology, one reference ontology.
@@ -78,7 +82,7 @@ def _href(name):
 class TestStackHome:
 
     def test_levels_in_stack_order(self, client, case_names):
-        r = client.get('/')
+        r = client.get(STACK_URL)
         assert r.status_code == 200
         main = _main(r.get_data(as_text=True))
         positions = [main.index(f'id="level-{lvl.key}"') for lvl in stack.LEVELS]
@@ -87,7 +91,7 @@ class TestStackHome:
             assert lvl.role in main
 
     def test_no_repository_chrome(self, client, case_names):
-        main = _main(client.get('/').get_data(as_text=True))
+        main = _main(client.get(STACK_URL).get_data(as_text=True))
         assert 'aria-label="Source filter"' not in main and 'aria-label="Type filter"' not in main
         assert 'Total Ontologies' not in main and 'text-bg-' not in main
         assert 'Import Ontology' not in main
@@ -101,7 +105,7 @@ class TestStackHome:
             o.meta_data = {**saved, 'subcategory': '1990s'}
             db.session.commit()
         try:
-            cases = _element(client.get('/').get_data(as_text=True), 'section', 'cases')
+            cases = _element(client.get(STACK_URL).get_data(as_text=True), 'section', 'cases')
             assert 'href="/?category=Cases&amp;subcategory=1990s"' in cases
             assert 'href="/?category=Cases"' in cases
             assert _href(stack.CASES_VOCABULARY) in cases and _href(stack.CASES_CODE) in cases
@@ -112,29 +116,42 @@ class TestStackHome:
                 db.session.commit()
 
     def test_bfo_only_in_the_closed_reference_list(self, client, case_names):
-        main = _main(client.get('/').get_data(as_text=True))
+        main = _main(client.get(STACK_URL).get_data(as_text=True))
         reference = _element(main, 'details', 'reference')
         assert reference is not None and not re.match(r'<details[^>]*\bopen\b', reference)
         assert _href('bfo') in reference
         assert main.count(_href('bfo')) == 1
 
     def test_each_ontology_once(self, client, app, case_names):
+        """Each ontology of the ProEthica scope once, and no ontology of another collection."""
+        from services import collections as coll
         from web.models import db, Ontology
         with app.app_context():
-            names = db.session.execute(select(Ontology.name)).scalars().all()
-        main = _main(client.get('/').get_data(as_text=True))
-        for name in names:
-            # Case ontologies are counted in the Cases region, not listed
-            expected = 0 if name in case_names or name.startswith('proethica-case-') else 1
-            assert main.count(_href(name)) == expected, name
+            db.session.add(Ontology(name='ext-outside-scope', base_uri='http://example.org/outside#',
+                                    source_system='external', meta_data={'collection': 'robotics'}))
+            db.session.commit()
+            rows = db.session.execute(select(Ontology)).scalars().all()
+            scope = {o.name: coll.resolve(o) in coll.proethica_scope() for o in rows}
+        try:
+            main = _main(client.get(STACK_URL).get_data(as_text=True))
+            assert not scope['ext-outside-scope']
+            for name, in_scope in scope.items():
+                # Case ontologies are counted in the Cases region, not listed
+                listed = in_scope and name not in case_names and not name.startswith('proethica-case-')
+                assert main.count(_href(name)) == (1 if listed else 0), name
+        finally:
+            with app.app_context():
+                db.session.delete(db.session.execute(
+                    select(Ontology).where(Ontology.name == 'ext-outside-scope')).scalar_one())
+                db.session.commit()
 
     def test_publications_follow_anonymous_mode(self, client, app, case_names):
         app.config['ANONYMOUS_MODE'] = True
         try:
-            assert 'id="publications"' not in client.get('/').get_data(as_text=True)
+            assert 'id="publications"' not in client.get(STACK_URL).get_data(as_text=True)
         finally:
             app.config['ANONYMOUS_MODE'] = False
-        html = client.get('/').get_data(as_text=True)
+        html = client.get(STACK_URL).get_data(as_text=True)
         assert 'id="publications"' in html
         assert 'Metadata Terminology Standardization for AI-Assisted Materials Science Research' in html
         assert '(in press)' in html
@@ -144,14 +161,14 @@ class TestStackHome:
 class TestNavbar:
 
     def test_navbar_reads_the_stack(self, client, case_names):
-        nav = _nav(client.get('/').get_data(as_text=True))
+        nav = _nav(client.get(STACK_URL).get_data(as_text=True))
         for lvl in stack.LEVELS:
             assert _href(lvl.ontology) in nav and f'>{lvl.nav_label}</a>' in nav
         assert '>Cases</a>' in nav and '>Search</a>' in nav
         assert '> Home' not in nav and 'bi-house' not in nav
 
     def test_anonymous_navbar_has_no_filled_badge(self, client, case_names):
-        nav = _nav(client.get('/').get_data(as_text=True))
+        nav = _nav(client.get(STACK_URL).get_data(as_text=True))
         assert 'text-bg-' not in nav and 'bg-info' not in nav and 'bg-warning' not in nav
         assert '>Import</a>' not in nav
 
@@ -162,7 +179,7 @@ class TestNavbar:
         assert re.search(r'class="nav-link active" aria-current="page"\s+href="/search"', nav)
 
     def test_title_and_footer(self, client, case_names):
-        html = client.get('/').get_data(as_text=True)
+        html = client.get(STACK_URL).get_data(as_text=True)
         assert '<title>OntServe, ontology server for ProEthica</title>' in html
         assert 'Unified Ontology Server' not in html
         # The home page states the server once, in its heading; other pages keep the footer
@@ -226,7 +243,7 @@ class TestFlatList:
             assert names == [name]
             assert 'class="chip active" aria-current="page">Test Decade' in main
             # The home page advertises the subcategory as a decade chip
-            assert 'subcategory=Test+Decade' in client.get('/').get_data(as_text=True)
+            assert 'subcategory=Test+Decade' in client.get(STACK_URL).get_data(as_text=True)
         finally:
             with app.app_context():
                 o = db.session.execute(select(Ontology).where(Ontology.name == name)).scalar_one()

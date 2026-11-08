@@ -171,10 +171,21 @@ def definitional_entity_for_uri(uri):
     Preference order: the canonical upper ontology for BFO/IAO IRIs, then
     definitional stores (ontology_type upper/core/base/domain) over derived ones
     (extracted, case), then non-case ontologies, with the ontology name as the
-    deterministic tie-break. Returns None when the URI is unknown."""
+    deterministic tie-break. Returns None when the URI is unknown.
+
+    Rows of the ProEthica scope (services.collections) come first: a row of
+    another collection answers only for a URI that no ontology of the scope
+    declares, so a hosted ontology that redeclares a ProEthica, BFO or RO IRI
+    does not change what /resolve returns for it."""
     rows = db.session.execute(
         select(OntologyEntity).where(OntologyEntity.uri == uri)
     ).scalars().all()
+    if len(rows) > 1:
+        from services import collections as coll
+        config = coll.get_config()
+        scope = coll.proethica_scope(config)
+        in_scope = [e for e in rows if e.ontology is None or coll.resolve(e.ontology, config) in scope]
+        rows = in_scope or rows
     if len(rows) <= 1:
         return rows[0] if rows else None
     canon = _canonical_upper_ontology(uri)

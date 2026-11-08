@@ -18,6 +18,11 @@ category; the flat list of ``/?category=`` filters by it.
 Adding a category: append a ``Category`` to ``CATEGORIES`` and, if it should be
 inferred, a rule to ``DEFAULT_RULES``. Ontologies that match no rule fall into
 ``UNCATEGORIZED``.
+
+Rows imported by tools/import_external_collection.py carry the key of their
+collection (config/collections.yaml) in ``metadata.collection``. The first two
+rules map the keys of the two collections named after a category to that
+category, so such a row keeps its category when its explicit value is cleared.
 """
 
 import re
@@ -30,6 +35,8 @@ EXPLICIT_KEYS = (CATEGORY_KEY, SUBCATEGORY_KEY)   # the settable classification 
 # Other metadata keys the sync fills from ProEthica case headers (see ontology_sync_service)
 CASE_NUMBER_KEY = 'case_number'
 DISPLAY_NAME_KEY = 'display_name'
+# The collection an external row was imported from (tools/import_external_collection.py)
+COLLECTION_KEY = 'collection'
 
 @dataclass(frozen=True)
 class Category:
@@ -37,7 +44,16 @@ class Category:
     label: str           # heading and filter-banner text
     description: str = ''
     listing: str = 'table'   # the flat list of /?category=: 'table', or 'cases' (the case index)
+    # True when a row of this category without a credit block takes its credit
+    # from its ontology header (services.ontology_credit)
+    header_credit: bool = False
 
+
+ROBOTICS_CATEGORY = 'Robotics and Automation'
+PHYSICAL_SYSTEMS_CATEGORY = 'Physical Systems'
+# Keys of the collections of these two categories (config/collections.yaml)
+ROBOTICS_COLLECTION = 'robotics'
+PHYSICAL_SYSTEMS_COLLECTION = 'physical-systems'
 
 UNCATEGORIZED = Category(
     key='Uncategorized', label='Uncategorized',
@@ -62,6 +78,13 @@ CATEGORIES: Tuple[Category, ...] = (
              'Codes of ethics of professional societies, imported as vocabularies.'),
     Category('External Vocabularies', 'External Vocabularies',
              'Other external vocabularies and curated subsets.'),
+    Category(ROBOTICS_CATEGORY, ROBOTICS_CATEGORY,
+             'Ontologies from robotics and automation research, with the credit of their '
+             'authors and a link to their source.',
+             header_credit=True),
+    Category(PHYSICAL_SYSTEMS_CATEGORY, PHYSICAL_SYSTEMS_CATEGORY,
+             'Ontologies developed in the PhysicalSystems project.',
+             header_credit=True),
     UNCATEGORIZED,
 )
 
@@ -77,6 +100,12 @@ CATEGORY_ORDER: Dict[str, int] = {c.key: i for i, c in enumerate(CATEGORIES)}
 # service (auto-create typing), the case page (ProEthica back-link) and links.
 CASE_NAME_RE = re.compile(r'^proethica-case-(\d+)$')
 _CODE_NAME = re.compile(r'code of ethics', re.IGNORECASE)
+
+
+def slugify(label: Any) -> str:
+    """'Robotics and Automation' -> 'robotics-and-automation': the folder of the
+    files of a category under ontologies/external/, and the form of a collection key."""
+    return re.sub(r'[^a-z0-9]+', '-', str(label or '').lower()).strip('-')
 
 
 def case_id_from_name(name: Any) -> Optional[str]:
@@ -113,9 +142,16 @@ def _meta(obj: Any) -> Dict[str, Any]:
     return md if isinstance(md, dict) else {}
 
 
+def collection_of(obj: Any) -> Optional[str]:
+    """The collection key stored on a row (metadata.collection), or None."""
+    return _clean(_meta(obj).get(COLLECTION_KEY))
+
+
 Rule = Tuple[Callable[[Any], bool], str, Optional[str]]
 
 DEFAULT_RULES: Sequence[Rule] = (
+    (lambda o: collection_of(o) == ROBOTICS_COLLECTION, ROBOTICS_CATEGORY, None),
+    (lambda o: collection_of(o) == PHYSICAL_SYSTEMS_COLLECTION, PHYSICAL_SYSTEMS_CATEGORY, None),
     (lambda o: _attr(o, 'ontology_type') == 'case', 'Cases', None),
     (lambda o: _attr(o, 'ontology_type') == 'upper', 'Foundation', None),
     (lambda o: _attr(o, 'ontology_type') == 'domain', 'Domain', None),

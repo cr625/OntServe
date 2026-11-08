@@ -681,7 +681,23 @@ def build_entity_rows(ontology_id, g, base_parents=None, now=None):
         captured_uris.add(uri_str)
         entity_counts[entity_type] = entity_counts.get(entity_type, 0) + 1
 
+    for entity in new_entities:
+        _fit_label(entity)
     return new_entities, entity_counts
+
+
+# ontology_entities.label is VARCHAR(255)
+LABEL_MAX = 255
+
+
+def _fit_label(entity):
+    """Cut a label longer than the column to LABEL_MAX characters, the last one
+    an ellipsis, and hash the stored values. SOMA writes a definition of 576
+    characters into the rdfs:label of definesEventType, which Postgres rejects
+    for the whole batch. The full text stays in the version content."""
+    if entity.label and len(entity.label) > LABEL_MAX:
+        entity.label = entity.label[:LABEL_MAX - 1] + '\u2026'
+        entity.content_hash = OntologyEntity.compute_content_hash(entity.uri, entity.label, entity.comment)
 
 
 def _json_literal_value(obj):

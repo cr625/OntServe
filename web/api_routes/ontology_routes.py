@@ -76,6 +76,13 @@ def register_ontology(bp):
             data = request.get_json()
             old_name = ontology.name
 
+            # A collection must be one of config/collections.yaml (blank clears it)
+            if 'collection' in data:
+                from services import collections as coll
+                value = (data.get('collection') or '').strip()
+                if value and coll.get_config().get(value) is None:
+                    return jsonify({'success': False, 'error': f'Unknown collection: {value}'}), 400
+
             # Validate new name if changed
             new_name = data.get('name', ontology.name)
             if new_name != old_name:
@@ -107,6 +114,8 @@ def register_ontology(bp):
             for key in categories.EXPLICIT_KEYS:
                 if key in data:
                     categories.set_explicit(md, key, data.get(key))
+            if 'collection' in data:
+                categories.set_explicit(md, categories.COLLECTION_KEY, data.get('collection'))
             md['last_metadata_update'] = datetime.now(timezone.utc).isoformat()
             md['updated_by'] = current_user.username
             ontology.meta_data = md

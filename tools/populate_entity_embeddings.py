@@ -17,6 +17,11 @@ Usage:
     python tools/populate_entity_embeddings.py --force  # re-embed all rows
 
 Idempotent by default: only rows where embedding IS NULL are processed.
+
+Only ontologies whose collection receives embeddings are processed
+(``embeddings`` in config/collections.yaml, services/collections.py): the
+duplicate matcher of ProEthica reads every class row that has an embedding,
+so the classes of another collection stay without one.
 """
 
 import argparse
@@ -29,10 +34,12 @@ from pathlib import Path
 script_dir = Path(__file__).parent
 ontserve_root = script_dir.parent
 web_dir = ontserve_root / "web"
-if str(ontserve_root) not in sys.path:
-    sys.path.insert(0, str(ontserve_root))
+# ontserve_root must precede web_dir: both contain a `services` package, and the
+# root one carries collections (web/services would shadow it).
 if str(web_dir) not in sys.path:
     sys.path.insert(0, str(web_dir))
+if str(ontserve_root) not in sys.path:
+    sys.path.insert(0, str(ontserve_root))
 
 logging.basicConfig(
     level=logging.INFO,
@@ -88,7 +95,8 @@ def populate(entity_type: str | None, batch_size: int, dry_run: bool, force: boo
     config_spec.loader.exec_module(web_config_module)
     config = web_config_module.config
 
-    from models import db, OntologyEntity
+    from models import db, Ontology, OntologyEntity
+    from services import collections as coll
     from sentence_transformers import SentenceTransformer
 
     app = Flask(__name__)
@@ -113,6 +121,15 @@ def populate(entity_type: str | None, batch_size: int, dry_run: bool, force: boo
                 raise SystemExit(f"Unknown ontology name(s): {', '.join(missing)}")
             query = query.filter(OntologyEntity.ontology_id.in_(list(found.values())))
             logger.info("Restricting to ontologies: %s", ", ".join(ontology_names))
+        # Collections without embeddings (config/collections.yaml) are skipped
+        ontologies = db.session.execute(db.select(Ontology)).scalars().all()
+        skipped = sorted(o.name for o in ontologies if not coll.embeddings_allowed(o))
+        allowed = [o.id for o in ontologies if coll.embeddings_allowed(o)]
+        if skipped:
+            logger.info("Skipping %d ontologies of collections without embeddings: %s",
+                        len(skipped), ", ".join(skipped))
+        query = query.filter(OntologyEntity.ontology_id.in_(allowed))
+
         if not force:
             query = query.filter(OntologyEntity.embedding.is_(None))
 

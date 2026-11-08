@@ -4,6 +4,7 @@
 {% from "macros/reasoning_panel.html" import render_reasoning_panel %}
 {% from "macros/page_header.html" import level_header with context %}
 {% from "macros/level_items.html" import component_letter %}
+{% from "macros/credit_panel.html" import credit_panel %}
 
 {% block title %}{{ level.label if level else ontology.name }} - OntServe{% endblock %}
 
@@ -43,7 +44,7 @@
         {% set version = ontology.current_version %}
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
             <div class="page-heading">
-                {% if schema_of %}<p class="small text-body-secondary mb-1">Schema view</p>{% endif %}
+                {% if schema_of %}<p class="small text-body-secondary mb-1">Schema view</p>{% endif %}{% if page_collection %}<nav class="small mb-1" aria-label="Collection"><a href="{{ url_for('main.collection_landing', key=page_collection.key) }}">{{ page_collection.title }}</a></nav>{% endif %}
                 <h1 class="mb-1">
                     {{ ontology.meta_data.display_name if ontology.meta_data and ontology.meta_data.display_name else
                     ontology.name }}
@@ -90,6 +91,11 @@
         {% if ontology.description and not level %}
         <p class="mb-3">{{ ontology.description }}</p>
         {% endif %}
+        {#- Source and credit: only rows with credit data (services.ontology_credit),
+            so the ProEthica pages render as before #}
+        {%- if credit %}
+        {{ credit_panel(credit) }}
+        {%- endif %}
 
         <!-- Reasoned version note -->
         {% if ontology.current_version and ontology.current_version.meta_data and
@@ -748,8 +754,10 @@
 
         {# Only for the proethica stack: the harness reasons over the merged
            proethica graph, which is meaningless on external ontology pages
-           (BFO, IAO, RO, PROV-O). Width-matched to the col-md-8 entity column. #}
-        {% if ontology.name.startswith('proethica') or ontology.name.startswith('engineering') %}
+           (BFO, IAO, RO, PROV-O) and on the ontologies of other collections
+           (proethica_reasoning, from services.collections.policy_for).
+           Width-matched to the col-md-8 entity column. #}
+        {% if proethica_reasoning and (ontology.name.startswith('proethica') or ontology.name.startswith('engineering')) %}
         <div class="row">
             <div class="col-md-8">
                 {{ render_reasoning_panel(ontology.name) }}

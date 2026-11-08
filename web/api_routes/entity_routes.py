@@ -79,13 +79,25 @@ def register_entities(bp):
             OntologyEntity.content_hash,
             OntologyEntity.label,
             OntologyEntity.comment,
-            OntologyEntity.updated_at
+            OntologyEntity.updated_at,
+            OntologyEntity.ontology_id
         ).where(OntologyEntity.uri.in_(entity_uris))
 
         rows = db.session.execute(stmt).all()
 
+        # Rows of the ProEthica scope only (services.collections): ProEthica
+        # compares these hashes with the ones it stored at commit, so a row of
+        # another collection that declares the same URI must not answer.
+        from services import collections as coll
+        ontology_ids = {row[-1] for row in rows}
+        scoped = set(coll.ids_in_scope(
+            db.session.execute(select(Ontology).where(Ontology.id.in_(ontology_ids))).scalars().all(),
+            coll.proethica_scope())) if ontology_ids else set()
+
         entities = {}
-        for uri, content_hash, label, comment, updated_at in rows:
+        for uri, content_hash, label, comment, updated_at, ontology_id in rows:
+            if ontology_id not in scoped:
+                continue
             entities[uri] = {
                 'content_hash': content_hash,
                 'label': label,

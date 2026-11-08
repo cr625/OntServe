@@ -1,0 +1,19 @@
+@prefix dev: <http://example.org/device#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://example.org/device> a owl:Ontology ;
+    rdfs:comment "Devices." ;
+    owl:imports <http://example.org/upper> .
+
+dev:Device a owl:Class ;
+    rdfs:label "Device" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty dev:hasPart ;
+            owl:someValuesFrom dev:Part ] .
+
+dev:Part a owl:Class ;
+    rdfs:label "Part" .
+
+dev:hasPart a owl:ObjectProperty ;
+    rdfs:label "has part" .

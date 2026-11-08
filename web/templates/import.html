@@ -26,7 +26,7 @@
                         <input type="url" class="form-control" id="source_url" name="source_url"
                             placeholder="https://www.w3.org/ns/prov.ttl">
                         <div class="form-text">
-                            Enter the URL to fetch the ontology (TTL, RDF, OWL, N3, JSON-LD formats supported)
+                            Enter the URL to fetch the ontology (Turtle, RDF/XML, N-Triples, N3, JSON-LD, OWL functional syntax or OWL/XML). The stored version is Turtle.
                         </div>
                     </div>
 
@@ -34,9 +34,9 @@
                     <div class="mb-3" id="file_input" style="display: none;">
                         <label for="ontology_file" class="form-label">Upload Ontology File</label>
                         <input type="file" class="form-control" id="ontology_file" name="ontology_file"
-                            accept=".ttl,.rdf,.owl,.n3,.jsonld,.json,.xml">
+                            accept=".ttl,.rdf,.owl,.n3,.nt,.jsonld,.json,.xml,.ofn,.owx">
                         <div class="form-text">
-                            Upload an ontology file (TTL, RDF/XML, OWL, N3, JSON-LD formats supported)
+                            Upload an ontology file (Turtle, RDF/XML, N-Triples, N3, JSON-LD, OWL functional syntax or OWL/XML). The stored version is Turtle.
                         </div>
                     </div>
 
@@ -49,6 +49,8 @@
                             <option value="n3">Notation3 (.n3)</option>
                             <option value="json-ld">JSON-LD (.jsonld)</option>
                             <option value="nt">N-Triples (.nt)</option>
+                            <option value="ofn">OWL functional syntax (.ofn, .owl)</option>
+                            <option value="owx">OWL/XML (.owx, .owl)</option>
                         </select>
                     </div>
 

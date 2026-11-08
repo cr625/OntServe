@@ -1,0 +1,71 @@
+{# The Source and credit panel of the generic ontology page. The credit block
+   comes from services.ontology_credit.credit_for: the block stored on the row,
+   or the ontology header for a category with header credit. #}
+{% macro credit_panel(credit) %}
+{% set source = credit.source or {} %}
+{% set link = source.url or source.repository or credit.homepage %}
+<section class="card mb-3" id="credit" aria-labelledby="credit-heading">
+    <div class="card-body">
+        <h2 class="h5 card-title" id="credit-heading">Source and credit</h2>
+        {% if credit.redistribution == 'reference-only' %}
+        <p class="mb-2" id="credit-reference-only">OntServe does not host the content of this ontology, which is available at <a href="{{ link }}">{{ link }}</a>.</p>
+        {% endif %}
+        <dl class="row small mb-0">
+            {% if credit.title %}
+            <dt class="col-sm-3">Title</dt>
+            <dd class="col-sm-9">{{ credit.title }}</dd>
+            {% endif %}
+            {% if credit.creators %}
+            <dt class="col-sm-3">Creators</dt>
+            <dd class="col-sm-9">{{ credit.creators|join(', ') }}</dd>
+            {% endif %}
+            {% if credit.publisher %}
+            <dt class="col-sm-3">Publisher</dt>
+            <dd class="col-sm-9">{{ credit.publisher }}</dd>
+            {% endif %}
+            {% if credit.version %}
+            <dt class="col-sm-3">Version</dt>
+            <dd class="col-sm-9">{{ credit.version }}</dd>
+            {% endif %}
+            {% if credit.license and credit.license.id %}
+            <dt class="col-sm-3">License</dt>
+            <dd class="col-sm-9">{% if credit.license.id == 'none stated' %}No license stated in the source{% elif credit.license.url %}<a href="{{ credit.license.url }}">{{ credit.license.id }}</a>{% else %}{{ credit.license.id }}{% endif %}</dd>
+            {% endif %}
+            {% if source.repository or source.url %}
+            <dt class="col-sm-3">Source</dt>
+            <dd class="col-sm-9">
+                {% if source.repository %}<a href="{{ source.repository }}">{{ source.repository }}</a>{% if source.commit %} at commit <code>{{ source.commit[:12] }}</code>{% endif %}{% endif %}
+                {% if source.paths %}<div>Files {% for path in source.paths %}<code>{{ path }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+                {% if source.url and source.url != source.repository %}<div><a href="{{ source.url }}">{{ source.url }}</a></div>{% endif %}
+            </dd>
+            {% endif %}
+            {% if credit.homepage %}
+            <dt class="col-sm-3">Homepage</dt>
+            <dd class="col-sm-9"><a href="{{ credit.homepage }}">{{ credit.homepage }}</a></dd>
+            {% endif %}
+            {% if credit.citation and credit.citation.text %}
+            <dt class="col-sm-3">Cite as</dt>
+            <dd class="col-sm-9">{{ credit.citation.text }}{% if credit.citation.doi %} <a href="https://doi.org/{{ credit.citation.doi }}">doi:{{ credit.citation.doi }}</a>{% elif credit.citation.url %} <a href="{{ credit.citation.url }}">{{ credit.citation.url }}</a>{% endif %}</dd>
+            {% endif %}
+            {% if credit.used_in %}
+            <dt class="col-sm-3">Used in</dt>
+            <dd class="col-sm-9">
+                <ul class="list-unstyled mb-0">
+                    {% for use in credit.used_in %}
+                    <li>{{ use.text }}{% if use.reasoner %} (reasoner {{ use.reasoner }}){% endif %}</li>
+                    {% endfor %}
+                </ul>
+            </dd>
+            {% endif %}
+            {% if credit.modifications %}
+            <dt class="col-sm-3">Changes in OntServe</dt>
+            <dd class="col-sm-9">{{ credit.modifications }}</dd>
+            {% endif %}
+            {% if credit.retrieved %}
+            <dt class="col-sm-3">Retrieved</dt>
+            <dd class="col-sm-9">{{ credit.retrieved }}</dd>
+            {% endif %}
+        </dl>
+    </div>
+</section>
+{% endmacro %}

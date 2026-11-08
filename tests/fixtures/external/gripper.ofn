@@ -1,0 +1,23 @@
+Prefix(:=<http://example.org/gripper#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)
+Prefix(dc:=<http://purl.org/dc/elements/1.1/>)
+Prefix(dcterms:=<http://purl.org/dc/terms/>)
+Prefix(dev:=<http://example.org/device#>)
+
+Ontology(<http://example.org/gripper>
+Import(<http://example.org/device>)
+Import(<http://example.org/upper>)
+Annotation(dcterms:title "Gripper Ontology")
+Annotation(dc:creator "Ada Lovelace")
+Annotation(rdfs:comment "A gripper module in OWL functional syntax.")
+
+Declaration(Class(:Gripper))
+Declaration(Class(:Finger))
+Declaration(ObjectProperty(:hasFinger))
+SubClassOf(:Gripper dev:Device)
+SubClassOf(:Gripper ObjectSomeValuesFrom(:hasFinger :Finger))
+AnnotationAssertion(rdfs:label :Gripper "Gripper")
+AnnotationAssertion(rdfs:label :Finger "Finger"@en)
+AnnotationAssertion(rdfs:comment :Gripper "A device that grasps and holds objects.")
+)

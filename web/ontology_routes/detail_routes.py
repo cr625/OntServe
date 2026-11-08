@@ -8,8 +8,11 @@ from sqlalchemy import select, func
 import rdflib
 
 from web.models import db, Ontology, OntologyEntity, OntologyVersion
+from services import collections as coll
 from services import ontology_categories as categories
 from services import proethica_stack as stack
+from services.ontology_credit import credit_for
+from web import collection_scope
 from web import level_views
 from web.ontology_stats import build_stats_context
 from web.entity_extraction import extract_entities_from_content
@@ -190,6 +193,12 @@ def register_detail_routes(bp):
         # Browser request - show detail page
         current_app.logger.info(f"Browser request for {ontology_name}, showing detail page")
 
+        # Entity queries of this page see the collection scope of the ontology
+        # (web.collection_scope), and the ProEthica views apply to the ProEthica
+        # scope only (services.collections.policy_for)
+        collection_scope.activate(ontology)
+        policy = coll.policy_for(ontology)
+
         # ?view=standard requests the generic page (the Schema view) for a
         # level or a case ontology
         view_mode = request.args.get('view', 'auto')
@@ -207,7 +216,7 @@ def register_detail_routes(bp):
         # Check if this is a case ontology (use case view by default for cases)
         from web.case_display import is_case_ontology, organize_entities_for_case, get_domain_from_ontology
 
-        if view_mode != 'standard' and is_case_ontology(ontology_name, all_entities):
+        if view_mode != 'standard' and policy.case_view and is_case_ontology(ontology_name, all_entities):
             # Use case view
             current_app.logger.info(f"Using case view for {ontology_name}")
             domain = get_domain_from_ontology(ontology_name)
@@ -349,10 +358,16 @@ def register_detail_routes(bp):
             home = stack.level_for(ontology.name)
             schema_of = home.label if home else ('Case' if categories.case_id_from_name(ontology.name) else None)
 
+        # Source and credit panel of the generic page: None for a row without
+        # credit data, which covers every ProEthica ontology
+        credit = credit_for(ontology) if level is None else None
+
         return render_template('ontology_detail.html',
                              ontology=ontology,
                              level=level,
                              schema_of=schema_of,
+                             credit=credit,
+                             proethica_reasoning=policy.reasoning == 'proethica_merged',
                              entities=entities,
                              relationships=relationships,
                              versions=versions,
@@ -369,10 +384,11 @@ def register_detail_routes(bp):
         from web.case_display import (is_case_ontology, organize_entities_for_case,
                                       get_domain_from_ontology, class_label_index, type_uris_used)
         ontology = db.one_or_404(select(Ontology).where(Ontology.name == ontology_name))
+        collection_scope.activate(ontology)
         all_entities = db.session.execute(
             select(OntologyEntity).where(OntologyEntity.ontology_id == ontology.id)
         ).scalars().all()
-        if not is_case_ontology(ontology_name, all_entities):
+        if not (coll.policy_for(ontology).case_view and is_case_ontology(ontology_name, all_entities)):
             abort(404)
         case_data = organize_entities_for_case(all_entities, get_domain_from_ontology(ontology_name))
         section = next((s for s in case_data['sections'] if s['id'] == section_id), None)
@@ -406,6 +422,13 @@ def register_detail_routes(bp):
         """Entity detail page showing current state of an entity."""
         stmt = select(Ontology).where(Ontology.name == ontology_name)
         ontology = db.session.execute(stmt).scalar_one_or_none()
+
+        # Every entity query of the page, the fallback below included, sees the
+        # collection scope of the requested ontology (the ProEthica scope when the
+        # name is unknown), so a ProEthica link does not land on an ontology of
+        # another collection that shares the fragment (DUL and SOMA define Agent,
+        # Role, Task and others)
+        collection_scope.activate(ontology)
 
         entity = find_entity_by_fragment(ontology, fragment) if ontology else None
 
@@ -602,9 +625,14 @@ def register_detail_routes(bp):
             for o in db.session.execute(select(Ontology)).scalars()
             if (o.meta_data or {}).get(categories.SUBCATEGORY_KEY)
         })
+        collections_config = coll.get_config()
+        default_collection = collections_config.get(coll.resolve(ontology, explicit=False))
         return render_template('ontology_settings.html', ontology=ontology,
                                explicit_category=md.get(categories.CATEGORY_KEY),
                                explicit_subcategory=md.get(categories.SUBCATEGORY_KEY),
                                default_category=ontology.classification.rule_category,
                                category_options=categories.known_category_keys(),
-                               subcategory_options=used_subs)
+                               subcategory_options=used_subs,
+                               explicit_collection=md.get(categories.COLLECTION_KEY),
+                               default_collection=default_collection,
+                               collection_options=collections_config.collections)

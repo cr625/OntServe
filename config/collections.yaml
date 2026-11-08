@@ -1,0 +1,75 @@
+# Collections of OntServe (services/collections.py). A collection groups the
+# ontologies of one project or source and carries their policy. Categories
+# (services/ontology_categories.py) classify ontologies within a collection.
+#
+# home: what / renders without query parameters. "index" lists the
+# collections, "default_collection" renders the landing page of
+# default_collection, which also comes first and in full on the index.
+home: index
+default_collection: proethica
+
+collections:
+  # Collection keys and their fields:
+  #   title, description    heading and text of the index card and the landing page
+  #   landing               proethica_stack (services/proethica_stack.py) or generic
+  #   uses                  collections whose ontologies this one imports or references
+  #   default_visibility    public collections are listed on the index. The landing
+  #                         page of another collection answers signed-in users only.
+  #   embeddings            class rows receive embeddings (tools/populate_entity_embeddings.py)
+  #   reasoning             proethica_merged (validation/pellet_validate.py) or none
+  #   case_view             case ontologies render with the case page
+  #   categories            categories whose ontologies belong to the collection
+  #   members               ontology names that no rule assigns
+  proethica:
+    title: ProEthica
+    description: >-
+      The ontologies of ProEthica, a case-based reasoning system for professional
+      ethics: four levels of vocabulary, one ontology for each analysed NSPE case,
+      and the codes of ethics that the cases cite.
+    landing: proethica_stack
+    uses: [shared]
+    default_visibility: public
+    embeddings: true
+    reasoning: proethica_merged
+    case_view: true
+    members:
+      - ASCE Code of Ethics
+      - ASME Code of Ethics
+      - IEEE Code of Ethics
+      - IFC Integration for Engineering Ethics
+      - ifc-roles
+
+  shared:
+    title: Shared ontologies
+    description: >-
+      Upper-level ontologies and vocabularies that other collections import or
+      reference, such as BFO, IAO and the Relations Ontology.
+    landing: generic
+    default_visibility: public
+    embeddings: true
+    members:
+      - bfo
+      - iao
+      - Information Artifact Ontology 2020
+      - Relations Ontology 2015
+      - semantic-change-ontology
+      - Terminological Foundations
+      - w3c-prov-o
+
+  robotics:
+    title: Robotics and Automation
+    description: >-
+      Ontologies from robotics and automation research, with the credit of their
+      authors and a link to their source.
+    landing: generic
+    uses: [shared]
+    default_visibility: public
+    categories: [Robotics and Automation]
+
+  physical-systems:
+    title: Physical Systems
+    description: Ontologies developed in the PhysicalSystems project.
+    landing: generic
+    uses: [robotics, shared]
+    default_visibility: private
+    categories: [Physical Systems]

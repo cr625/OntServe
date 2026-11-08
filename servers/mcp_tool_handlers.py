@@ -10,11 +10,12 @@ import json
 import logging
 import time
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any, List, Optional, Set
 
 from storage.postgresql_storage import StorageError
 from servers.mcp_source_text_integration import enhance_entity_submission_with_source_text
 from core.entity_patterns import infer_category_from_type, build_ontology_priority_sql
+from services import collections as coll
 
 logger = logging.getLogger(__name__)
 
@@ -442,45 +443,7 @@ class MCPToolHandlers:
         logger.debug("Looking up entity by URI: %s", uri)
 
         try:
-            query = """
-                SELECT
-                    e.uri,
-                    e.label,
-                    e.comment,
-                    e.entity_type,
-                    e.parent_uri,
-                    e.properties,
-                    o.name as source_ontology
-                FROM ontology_entities e
-                JOIN ontologies o ON e.ontology_id = o.id
-                WHERE e.uri = %s
-                LIMIT 1
-            """
-            result = await asyncio.to_thread(
-                self.storage._execute_query, query, (uri,), fetch_one=True,
-            )
-
-            if not result and "#" in uri:
-                fragment = uri.split("#")[-1]
-                query_fragment = """
-                    SELECT
-                        e.uri,
-                        e.label,
-                        e.comment,
-                        e.entity_type,
-                        e.parent_uri,
-                        e.properties,
-                        o.name as source_ontology
-                    FROM ontology_entities e
-                    JOIN ontologies o ON e.ontology_id = o.id
-                    WHERE e.uri LIKE %s
-                    ORDER BY o.name
-                    LIMIT 1
-                """
-                result = await asyncio.to_thread(
-                    self.storage._execute_query,
-                    query_fragment, (f"%#{fragment}",), fetch_one=True,
-                )
+            result = await asyncio.to_thread(self._entity_row_by_uri, uri)
 
             if not result:
                 return {"error": "Entity not found", "uri": uri, "found": False}
@@ -494,6 +457,46 @@ class MCPToolHandlers:
     # ------------------------------------------------------------------
     # get_entities_by_uris
     # ------------------------------------------------------------------
+
+    def _entity_row_by_uri(self, uri: str) -> Optional[dict]:
+        """The row of get_entity_by_uri: the URI itself, else (for a URI with a
+        '#') the first row by ontology name whose URI ends with the fragment.
+        Both lookups keep to the ProEthica scope (_first_in_scope)."""
+        query = """
+            SELECT
+                e.uri,
+                e.label,
+                e.comment,
+                e.entity_type,
+                e.parent_uri,
+                e.properties,
+                o.name as source_ontology
+            FROM ontology_entities e
+            JOIN ontologies o ON e.ontology_id = o.id
+            WHERE e.uri = %s {scope}
+            LIMIT 1
+        """
+        result = self._first_in_scope(query, (uri,))
+
+        if not result and "#" in uri:
+            fragment = uri.split("#")[-1]
+            query_fragment = """
+                SELECT
+                    e.uri,
+                    e.label,
+                    e.comment,
+                    e.entity_type,
+                    e.parent_uri,
+                    e.properties,
+                    o.name as source_ontology
+                FROM ontology_entities e
+                JOIN ontologies o ON e.ontology_id = o.id
+                WHERE e.uri LIKE %s {scope}
+                ORDER BY o.name
+                LIMIT 1
+            """
+            result = self._first_in_scope(query_fragment, (f"%#{fragment}",))
+        return result
 
     async def handle_get_entities_by_uris(self, arguments: dict) -> dict:
         """Retrieve definitions for multiple entities at once (max 20)."""
@@ -532,7 +535,10 @@ class MCPToolHandlers:
         rows = await asyncio.to_thread(
             self.storage._execute_query, query, (uris,), fetch_all=True,
         ) or []
-        found_by_uri = {row["uri"]: row for row in rows}
+        # Rows of the ProEthica scope only, in the order of the query
+        outside = await asyncio.to_thread(
+            self._names_outside_scope, {row.get("source_ontology") for row in rows})
+        found_by_uri = {row["uri"]: row for row in rows if row.get("source_ontology") not in outside}
 
         entities = []
         not_found = []
@@ -544,8 +550,13 @@ class MCPToolHandlers:
                 entities.append(formatted)
             elif "#" in uri:
                 # Fragment fallback for URIs with different base but same fragment
-                result = await self.handle_get_entity_by_uri({"uri": uri})
-                if result.get("found"):
+                try:
+                    row = await asyncio.to_thread(self._entity_row_by_uri, uri)
+                except Exception as e:
+                    logger.error("Error looking up entity by URI: %s", e)
+                    row = None
+                if row:
+                    result = self._format_entity_result(row)
                     result.pop("found", None)
                     entities.append(result)
                 else:
@@ -589,13 +600,11 @@ class MCPToolHandlers:
                     o.name as source_ontology
                 FROM ontology_entities e
                 JOIN ontologies o ON e.ontology_id = o.id
-                WHERE LOWER(e.label) = LOWER(%s)
+                WHERE LOWER(e.label) = LOWER(%s) {{scope}}
                 ORDER BY {priority_sql}
                 LIMIT 1
             """
-            result = await asyncio.to_thread(
-                self.storage._execute_query, query, (label,), fetch_one=True,
-            )
+            result = await asyncio.to_thread(self._first_in_scope, query, (label,))
 
             if not result:
                 return {"error": "Entity not found", "label": label, "found": False}
@@ -609,6 +618,46 @@ class MCPToolHandlers:
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
+
+    # The entity lookups answer from the ontologies of the ProEthica scope
+    # (services.collections) only, so an ontology of another collection that
+    # declares the same IRI, fragment or label does not answer a ProEthica lookup.
+
+    def _names_outside_scope(self, names: Set[str]) -> Set[str]:
+        """The names, among ``names``, of ontologies outside the ProEthica scope."""
+        names = sorted(n for n in names if n)
+        if not names:
+            return set()
+        rows = self.storage._execute_query(
+            "SELECT name, ontology_type, source_system, metadata FROM ontologies WHERE name = ANY(%s)",
+            (names,), fetch_all=True,
+        ) or []
+        config = coll.get_config()
+        keys = coll.proethica_scope(config)
+        return {row.get("name") for row in rows if coll.resolve(row, config) not in keys}
+
+    def _scope_ids(self) -> List[int]:
+        """The ids of the ontologies of the ProEthica scope."""
+        rows = self.storage._execute_query(
+            "SELECT id, name, ontology_type, source_system, metadata FROM ontologies",
+            fetch_all=True,
+        ) or []
+        config = coll.get_config()
+        keys = coll.proethica_scope(config)
+        return [row.get("id") for row in rows if coll.resolve(row, config) in keys]
+
+    def _first_in_scope(self, query: str, params: tuple) -> Optional[dict]:
+        """The row of ``query`` with its ``{scope}`` slot empty. When that row
+        comes from an ontology outside the ProEthica scope, the row of the
+        query limited to the scope instead. A lookup whose row lies in the
+        scope therefore runs the query without the slot and returns its row."""
+        row = self.storage._execute_query(query.replace("{scope}", ""), params, fetch_one=True)
+        if row is None or row.get("source_ontology") not in self._names_outside_scope(
+                {row.get("source_ontology")}):
+            return row
+        return self.storage._execute_query(
+            query.replace("{scope}", "AND o.id = ANY(%s)"), params + (self._scope_ids(),), fetch_one=True,
+        )
 
     def _format_entity_result(self, result: dict,
                               include_properties: bool = False) -> dict:

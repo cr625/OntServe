@@ -1,0 +1,406 @@
+# External ontologies from robotics research, with source, licence and credit.
+# Paths are relative to ~/dev/physical/ontologies. URLs are pinned to the commit
+# that was downloaded on the retrieval date.
+category: Robotics and Automation
+retrieved: "2026-11-07"
+ontologies:
+
+  - name: dul
+    display_name: DOLCE+DnS Ultralite (SOMA variant)
+    subcategory: Upper ontologies
+    files:
+      - path: soma/owl/DUL.owl
+        url: https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/DUL.owl
+        format: ofn
+    drop_imports: []
+    credit:
+      title: DOLCE+DnS Ultralite for SOMA (version 3.34)
+      creators: ["Aldo Gangemi"]
+      publisher: "Collaborative Research Center EASE, University of Bremen (variant distributed with SOMA)"
+      license: {id: LGPL-3.0-only, url: "https://www.gnu.org/licenses/lgpl-3.0.html"}
+      source:
+        repository: https://github.com/ease-crc/soma
+        commit: 5d27187e587a7b91e82361e3c52b05eb5d933dd3
+        paths: [owl/DUL.owl]
+        url: https://github.com/ease-crc/soma/tree/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl
+      homepage: http://www.ontologydesignpatterns.org/ont/dul/DUL.owl
+      citation:
+        text: "Gangemi, A. DOLCE+DnS Ultralite (DUL). The variant hosted here is the one distributed with SOMA, IRI http://www.ease-crc.org/ont/DUL.owl."
+        doi: null
+        url: http://www.ontologydesignpatterns.org/ont/dul/DUL.owl
+      modifications: Converted from OWL functional syntax to Turtle.
+      used_in:
+        - {text: "SOMA (Beßler et al. 2021) and KnowRob 2.0 (Beetz et al. 2018)", reasoner: "SWI-Prolog in KnowRob"}
+        - {text: "OCRA (Olivares-Alarcos et al. 2022), through its import of the original DUL", reasoner: "KnowRob with rosprolog, or Owlready2"}
+      redistribution: hosted
+
+  - name: soma
+    display_name: SOMA (Socio-physical Model of Activities)
+    subcategory: Activities and manipulation
+    files:
+      - {path: soma/owl/SOMA.owl, url: "https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA.owl", format: ofn}
+      - {path: soma/owl/SOMA-ACT.owl, url: "https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA-ACT.owl", format: ofn}
+      - {path: soma/owl/SOMA-AGENT.owl, url: "https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA-AGENT.owl", format: ofn}
+      - {path: soma/owl/SOMA-IO.owl, url: "https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA-IO.owl", format: ofn}
+      - {path: soma/owl/SOMA-NEEM.owl, url: "https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA-NEEM.owl", format: ofn}
+      - {path: soma/owl/SOMA-OBJ.owl, url: "https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA-OBJ.owl", format: ofn}
+      - {path: soma/owl/SOMA-PROC.owl, url: "https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA-PROC.owl", format: ofn}
+      - {path: soma/owl/SOMA-SAY.owl, url: "https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA-SAY.owl", format: ofn}
+      - {path: soma/owl/SOMA-STATE.owl, url: "https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA-STATE.owl", format: ofn}
+      - {path: soma/owl/SOMA-WF.owl, url: "https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA-WF.owl", format: ofn}
+    drop_imports:
+      - http://www.ease-crc.org/ont/SOMA.owl
+      - http://www.ease-crc.org/ont/SOMA-ACT.owl
+      - http://www.ease-crc.org/ont/SOMA-AGENT.owl
+      - http://www.ease-crc.org/ont/SOMA-IO.owl
+      - http://www.ease-crc.org/ont/SOMA-NEEM.owl
+      - http://www.ease-crc.org/ont/SOMA-OBJ.owl
+      - http://www.ease-crc.org/ont/SOMA-PROC.owl
+      - http://www.ease-crc.org/ont/SOMA-SAY.owl
+      - http://www.ease-crc.org/ont/SOMA-STATE.owl
+      - http://www.ease-crc.org/ont/SOMA-WF.owl
+    credit:
+      title: SOMA, Socio-physical Model of Activities
+      creators: ["Daniel Beßler", "Robert Porzel", "Mihai Pomarlan", "Abhijit Vyas", "Sebastian Höffner", "Michael Beetz", "Rainer Malaka", "John Bateman"]
+      publisher: "Collaborative Research Center EASE, University of Bremen"
+      license: {id: LGPL-3.0-only, url: "https://www.gnu.org/licenses/lgpl-3.0.html"}
+      source:
+        repository: https://github.com/ease-crc/soma
+        commit: 5d27187e587a7b91e82361e3c52b05eb5d933dd3
+        paths: [owl/SOMA.owl, owl/SOMA-ACT.owl, owl/SOMA-AGENT.owl, owl/SOMA-IO.owl, owl/SOMA-NEEM.owl, owl/SOMA-OBJ.owl, owl/SOMA-PROC.owl, owl/SOMA-SAY.owl, owl/SOMA-STATE.owl, owl/SOMA-WF.owl]
+        url: https://github.com/ease-crc/soma/tree/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl
+      homepage: https://ease-crc.org/soma/
+      citation:
+        text: "Beßler, D., Porzel, R., Pomarlan, M., Vyas, A., Höffner, S., Beetz, M., Malaka, R. and Bateman, J. (2021). Foundations of the Socio-physical Model of Activities (SOMA) for Autonomous Robotic Agents. In Formal Ontology in Information Systems (FOIS 2021), IOS Press."
+        doi: 10.3233/FAIA210379
+        url: https://arxiv.org/abs/2011.11972
+      modifications: "The SOMA core and the nine modules imported by SOMA-ALL are merged into one ontology and converted from OWL functional syntax to Turtle. The imports between the merged modules are removed. The import of DUL remains."
+      used_in:
+        - {text: "KnowRob 2.0 (Beetz et al. 2018) and the CRAM cognitive architecture", reasoner: "SWI-Prolog with the semantic web library"}
+      redistribution: hosted
+
+  - name: soma-home
+    display_name: SOMA-HOME (household environments)
+    subcategory: Activities and manipulation
+    files:
+      - {path: soma/owl/SOMA-HOME.owl, url: "https://raw.githubusercontent.com/ease-crc/soma/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA-HOME.owl", format: ofn}
+    drop_imports: []
+    credit:
+      title: SOMA-HOME, concepts specific to home environments
+      creators: ["Daniel Beßler", "Robert Porzel", "Mihai Pomarlan", "Abhijit Vyas", "Sebastian Höffner", "Michael Beetz", "Rainer Malaka", "John Bateman"]
+      publisher: "Collaborative Research Center EASE, University of Bremen"
+      license: {id: LGPL-3.0-only, url: "https://www.gnu.org/licenses/lgpl-3.0.html"}
+      source:
+        repository: https://github.com/ease-crc/soma
+        commit: 5d27187e587a7b91e82361e3c52b05eb5d933dd3
+        paths: [owl/SOMA-HOME.owl]
+        url: https://github.com/ease-crc/soma/blob/5d27187e587a7b91e82361e3c52b05eb5d933dd3/owl/SOMA-HOME.owl
+      homepage: https://ease-crc.org/soma/
+      citation:
+        text: "Beßler, D. et al. (2021). Foundations of the Socio-physical Model of Activities (SOMA) for Autonomous Robotic Agents. FOIS 2021, IOS Press."
+        doi: 10.3233/FAIA210379
+        url: https://arxiv.org/abs/2011.11972
+      modifications: Converted from OWL functional syntax to Turtle.
+      used_in:
+        - {text: "KnowRob household manipulation tasks", reasoner: "SWI-Prolog in KnowRob"}
+      redistribution: hosted
+
+  - name: knowrob
+    display_name: KnowRob ontology
+    subcategory: Activities and manipulation
+    files:
+      - {path: knowrob/owl/knowrob.owl, url: "https://raw.githubusercontent.com/knowrob/knowrob/d03b865927d8634cef30e2e4ef9b60e948777b35/owl/knowrob.owl", format: rdfxml}
+    drop_imports: []
+    credit:
+      title: KnowRob ontology
+      creators: ["Technical University of Munich", "University of Bremen"]
+      publisher: "Institute for Artificial Intelligence, University of Bremen"
+      license: {id: CC-BY-3.0, url: "https://creativecommons.org/licenses/by/3.0/"}
+      source:
+        repository: https://github.com/knowrob/knowrob
+        commit: d03b865927d8634cef30e2e4ef9b60e948777b35
+        paths: [owl/knowrob.owl]
+        url: https://github.com/knowrob/knowrob/blob/d03b865927d8634cef30e2e4ef9b60e948777b35/owl/knowrob.owl
+      homepage: https://www.knowrob.org/
+      citation:
+        text: "Beetz, M., Beßler, D., Haidu, A., Pomarlan, M., Bozcuoğlu, A. K. and Bartels, G. (2018). KnowRob 2.0 — A 2nd Generation Knowledge Processing Framework for Cognition-Enabled Robotic Agents. In IEEE International Conference on Robotics and Automation (ICRA 2018)."
+        doi: 10.1109/ICRA.2018.8460964
+        url: null
+      modifications: Converted from RDF/XML to Turtle.
+      used_in:
+        - {text: "KnowRob 2.0 (Beetz et al. 2018)", reasoner: "SWI-Prolog, OWL semantics in Prolog rules with negation as failure for closed-world checks"}
+        - {text: "Ontological physics-based motion planning for manipulation (arXiv:1709.09271)", reasoner: "KnowRob Prolog predicates over OWL, with a physics-based motion planner"}
+      redistribution: hosted
+
+  - name: knowrob-urdf
+    display_name: KnowRob URDF ontology
+    subcategory: Robot description and capabilities
+    files:
+      - {path: knowrob/owl/URDF.owl, url: "https://raw.githubusercontent.com/knowrob/knowrob/d03b865927d8634cef30e2e4ef9b60e948777b35/owl/URDF.owl", format: rdfxml}
+    drop_imports: []
+    credit:
+      title: URDF ontology of KnowRob (robot links and joints)
+      creators: ["University of Bremen"]
+      publisher: "Institute for Artificial Intelligence, University of Bremen"
+      license: {id: BSD-3-Clause, url: "https://github.com/knowrob/knowrob/blob/d03b865927d8634cef30e2e4ef9b60e948777b35/LICENSE"}
+      source:
+        repository: https://github.com/knowrob/knowrob
+        commit: d03b865927d8634cef30e2e4ef9b60e948777b35
+        paths: [owl/URDF.owl]
+        url: https://github.com/knowrob/knowrob/blob/d03b865927d8634cef30e2e4ef9b60e948777b35/owl/URDF.owl
+      homepage: https://www.knowrob.org/
+      citation:
+        text: "Beetz, M. et al. (2018). KnowRob 2.0 — A 2nd Generation Knowledge Processing Framework for Cognition-Enabled Robotic Agents. ICRA 2018."
+        doi: 10.1109/ICRA.2018.8460964
+        url: null
+      modifications: Converted from RDF/XML to Turtle.
+      used_in:
+        - {text: "KnowRob robot models", reasoner: "SWI-Prolog in KnowRob"}
+      redistribution: hosted
+
+  - name: knowrob-srdl2
+    display_name: SRDL2 (Semantic Robot Description Language)
+    subcategory: Robot description and capabilities
+    files:
+      - {path: knowrob/owl/srdl2.owl, url: "https://raw.githubusercontent.com/knowrob/knowrob/d03b865927d8634cef30e2e4ef9b60e948777b35/owl/srdl2.owl", format: rdfxml}
+      - {path: knowrob/owl/srdl2-comp.owl, url: "https://raw.githubusercontent.com/knowrob/knowrob/d03b865927d8634cef30e2e4ef9b60e948777b35/owl/srdl2-comp.owl", format: rdfxml}
+      - {path: knowrob/owl/srdl2-cap.owl, url: "https://raw.githubusercontent.com/knowrob/knowrob/d03b865927d8634cef30e2e4ef9b60e948777b35/owl/srdl2-cap.owl", format: rdfxml}
+    drop_imports:
+      - http://knowrob.org/kb/srdl2-comp.owl
+      - http://knowrob.org/kb/srdl2-cap.owl
+    credit:
+      title: SRDL2, robot components and capabilities
+      creators: ["Lars Kunze", "Tobias Roehm", "Michael Beetz"]
+      publisher: "Institute for Artificial Intelligence, University of Bremen"
+      license: {id: BSD-3-Clause, url: "https://github.com/knowrob/knowrob/blob/d03b865927d8634cef30e2e4ef9b60e948777b35/LICENSE"}
+      source:
+        repository: https://github.com/knowrob/knowrob
+        commit: d03b865927d8634cef30e2e4ef9b60e948777b35
+        paths: [owl/srdl2.owl, owl/srdl2-comp.owl, owl/srdl2-cap.owl]
+        url: https://github.com/knowrob/knowrob/tree/d03b865927d8634cef30e2e4ef9b60e948777b35/owl
+      homepage: https://www.knowrob.org/
+      citation:
+        text: "Kunze, L., Roehm, T. and Beetz, M. (2011). Towards Semantic Robot Description Languages. In IEEE International Conference on Robotics and Automation (ICRA 2011), 5589-5595. SRDL2 is a re-implementation of SRDL in KnowRob."
+        doi: 10.1109/ICRA.2011.5980170
+        url: null
+      modifications: "The SRDL2 core, component and capability ontologies are merged into one ontology and converted from RDF/XML to Turtle."
+      used_in:
+        - {text: "Matching action requirements to robot capabilities in KnowRob and RoboEarth", reasoner: "SWI-Prolog in KnowRob"}
+      redistribution: hosted
+
+  - name: ieee-1872-cora
+    display_name: CORA (IEEE 1872-2015 Core Ontology for Robotics and Automation)
+    subcategory: Standards
+    files:
+      - {path: cora-ieee1872/cora.owl, url: "https://raw.githubusercontent.com/srfiorini/IEEE1872-owl/ffb6613350b28c3a710f8daf2a1e9e953ded7ed8/cora.owl", format: rdfxml}
+      - {path: cora-ieee1872/cora-bare.owl, url: "https://raw.githubusercontent.com/srfiorini/IEEE1872-owl/ffb6613350b28c3a710f8daf2a1e9e953ded7ed8/cora-bare.owl", format: rdfxml}
+      - {path: cora-ieee1872/sumo-cora.owl, url: "https://raw.githubusercontent.com/srfiorini/IEEE1872-owl/ffb6613350b28c3a710f8daf2a1e9e953ded7ed8/sumo-cora.owl", format: rdfxml}
+      - {path: cora-ieee1872/corax.owl, url: "https://raw.githubusercontent.com/srfiorini/IEEE1872-owl/ffb6613350b28c3a710f8daf2a1e9e953ded7ed8/corax.owl", format: rdfxml}
+      - {path: cora-ieee1872/rparts.owl, url: "https://raw.githubusercontent.com/srfiorini/IEEE1872-owl/ffb6613350b28c3a710f8daf2a1e9e953ded7ed8/rparts.owl", format: rdfxml}
+      - {path: cora-ieee1872/annotation.owl, url: "https://raw.githubusercontent.com/srfiorini/IEEE1872-owl/ffb6613350b28c3a710f8daf2a1e9e953ded7ed8/annotation.owl", format: rdfxml}
+    drop_imports:
+      - http://purl.org/ieee1872-owl/cora-bare
+      - http://purl.org/ieee1872-owl/sumo-cora
+      - http://purl.org/ieee1872-owl/corax
+      - http://purl.org/ieee1872-owl/rparts
+      - http://purl.org/ieee1872-owl/annotation
+      - http://purl.org/ieee1872-owl/cora
+    credit:
+      title: CORA, Core Ontology for Robotics and Automation (OWL implementation of IEEE 1872-2015)
+      creators: ["Sandro Rama Fiorini", "Vitor Fortes Rey"]
+      publisher: "IEEE RAS Ontologies for Robotics and Automation Working Group (standard), Phi-Robotics Research Group, UFRGS (OWL implementation)"
+      license: {id: CC-BY-4.0, url: "https://creativecommons.org/licenses/by/4.0/"}
+      source:
+        repository: https://github.com/srfiorini/IEEE1872-owl
+        commit: ffb6613350b28c3a710f8daf2a1e9e953ded7ed8
+        paths: [cora.owl, cora-bare.owl, sumo-cora.owl, corax.owl, rparts.owl, annotation.owl]
+        url: https://github.com/srfiorini/IEEE1872-owl
+      homepage: https://github.com/srfiorini/IEEE1872-owl
+      citation:
+        text: "Prestes, E., Carbonera, J. L., Fiorini, S. R., Jorge, V. A. M., Abel, M., Madhavan, R., Locoro, A., Gonçalves, P., Barreto, M. E., Habib, M., Chibani, A., Gérard, S., Amirat, Y. and Schlenoff, C. (2013). Towards a core ontology for robotics and automation. Robotics and Autonomous Systems 61(11), 1193-1204. The ontology is standardized as IEEE 1872-2015, whose text is copyright of the IEEE Standards Association."
+        doi: 10.1016/j.robot.2013.04.005
+        url: null
+      modifications: "CORA, CORA-bare, the SUMO subset, CORAX, RPARTS and the annotation ontology are merged into one ontology and converted from RDF/XML to Turtle. The OWL version is a manual translation of the SUO-KIF axioms of the standard and admits models the standard excludes."
+      used_in:
+        - {text: "PMK (Diab et al. 2019), perception and manipulation knowledge for task and motion planning", reasoner: "SWI-Prolog over OWL"}
+        - {text: "Bernardo et al. (2023), motion planning of a manipulator through semantic knowledge-based reasoning", reasoner: "SWRL rules with Pellet through Owlready2, SPARQL queries, ROSPlan"}
+      redistribution: hosted
+
+  - name: ieee-1872-pos
+    display_name: POS (IEEE 1872-2015 position ontology)
+    subcategory: Standards
+    files:
+      - {path: cora-ieee1872/pos.owl, url: "https://raw.githubusercontent.com/srfiorini/IEEE1872-owl/ffb6613350b28c3a710f8daf2a1e9e953ded7ed8/pos.owl", format: rdfxml}
+    drop_imports: []
+    credit:
+      title: POS, position and orientation ontology of IEEE 1872-2015 (OWL implementation)
+      creators: ["Sandro Rama Fiorini", "Vitor Fortes Rey"]
+      publisher: "IEEE RAS Ontologies for Robotics and Automation Working Group (standard), Phi-Robotics Research Group, UFRGS (OWL implementation)"
+      license: {id: CC-BY-4.0, url: "https://creativecommons.org/licenses/by/4.0/"}
+      source:
+        repository: https://github.com/srfiorini/IEEE1872-owl
+        commit: ffb6613350b28c3a710f8daf2a1e9e953ded7ed8
+        paths: [pos.owl]
+        url: https://github.com/srfiorini/IEEE1872-owl
+      homepage: https://github.com/srfiorini/IEEE1872-owl
+      citation:
+        text: "Carbonera, J. L., Fiorini, S. R., Prestes, E., Jorge, V. A. M., Abel, M., Madhavan, R., Locoro, A., Gonçalves, P., Haidegger, T., Barreto, M. E. and Schlenoff, C. (2013). Defining positioning in a core ontology for robotics. In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS 2013), 1867-1872."
+        doi: 10.1109/IROS.2013.6696603
+        url: null
+      modifications: Converted from RDF/XML to Turtle.
+      used_in: []
+      redistribution: hosted
+
+  - name: ieee-1872-2-aur
+    display_name: AuR (IEEE 1872.2-2021 Autonomous Robotics Ontology)
+    subcategory: Standards
+    files:
+      - {path: aur-ieee1872.2/AuR_IEEE1872-2.ttl, url: "https://raw.githubusercontent.com/hsu-aut/industrialstandard-odp-ieee1872-2/e51f1d0b0ad0412cd945e34bee45989254121d6c/AuR_IEEE1872-2.ttl", format: turtle}
+    drop_imports: []
+    credit:
+      title: Ontology design pattern for IEEE 1872.2-2021, Autonomous Robotics (version 3.0.0)
+      creators: ["Institute of Automation, Helmut Schmidt University Hamburg"]
+      publisher: "Institute of Automation, Helmut Schmidt University Hamburg (OWL version), IEEE RAS Autonomous Robotics Working Group (standard)"
+      license: {id: MIT, url: "https://github.com/hsu-aut/industrialstandard-odp-ieee1872-2/blob/e51f1d0b0ad0412cd945e34bee45989254121d6c/LICENSE"}
+      source:
+        repository: https://github.com/hsu-aut/industrialstandard-odp-ieee1872-2
+        commit: e51f1d0b0ad0412cd945e34bee45989254121d6c
+        paths: [AuR_IEEE1872-2.ttl]
+        url: https://github.com/hsu-aut/industrialstandard-odp-ieee1872-2
+      homepage: https://standards.ieee.org/ieee/1872.2/7094/
+      citation:
+        text: "IEEE Std 1872.2-2021, IEEE Standard for Autonomous Robotics (AuR) Ontology. An overview of the standard appeared in IEEE Robotics and Automation Magazine (2021)."
+        doi: 10.1109/MRA.2021.3095993
+        url: https://standards.ieee.org/ieee/1872.2/7094/
+      modifications: None. The source is Turtle.
+      used_in: []
+      redistribution: hosted
+
+  - name: adas-map
+    display_name: ADAS Map Ontology
+    subcategory: Automated driving
+    files:
+      - {path: adas/MapOnto.owl, url: "https://www.ai.iee.eng.isct.ac.jp/ADAS/MapOnto.owl", format: rdfxml}
+    drop_imports: []
+    credit: &adas_credit
+      title: "Kyutech-NII-TTI Core: Map Ontology (v0.04)"
+      creators: ["Lihua Zhao", "Yutaka Sasaki", "Hiroaki Wagatsuma", "Ryutaro Ichise"]
+      publisher: "Ichise Laboratory, National Institute of Informatics"
+      license: {id: CC-BY-NC-SA-4.0, url: "https://creativecommons.org/licenses/by-nc-sa/4.0/"}
+      source:
+        repository: null
+        commit: null
+        paths: [MapOnto.owl]
+        url: https://www.ai.iee.eng.isct.ac.jp/ADAS/index.html
+      homepage: https://www.ai.iee.eng.isct.ac.jp/ADAS/index.html
+      citation:
+        text: "Zhao, L., Ichise, R., Liu, Z., Mita, S. and Sasaki, Y. (2017). Ontology-Based Driving Decision Making: A Feasibility Study at Uncontrolled Intersections. IEICE Transactions on Information and Systems E100-D(7), 1425-1439."
+        doi: 10.1587/transinf.2016EDP7337
+        url: null
+      modifications: Converted from RDF/XML to Turtle.
+      used_in:
+        - {text: "Zhao et al. (2015, 2017), driving decisions at uncontrolled intersections and narrow roads", reasoner: "SWRL right-of-way rules with Pellet, SPARQL and C-SPARQL, about 99 ms per decision"}
+      redistribution: hosted
+
+  - name: adas-control
+    display_name: ADAS Control Ontology
+    subcategory: Automated driving
+    files:
+      - {path: adas/ControlOnto.owl, url: "https://www.ai.iee.eng.isct.ac.jp/ADAS/ControlOnto.owl", format: rdfxml}
+    drop_imports: []
+    credit:
+      <<: *adas_credit
+      title: "Kyutech-NII-TTI Core: Control Ontology (v0.04)"
+      source: {repository: null, commit: null, paths: [ControlOnto.owl], url: "https://www.ai.iee.eng.isct.ac.jp/ADAS/index.html"}
+
+  - name: adas-car
+    display_name: ADAS Car Ontology
+    subcategory: Automated driving
+    files:
+      - {path: adas/CarOnto.owl, url: "https://www.ai.iee.eng.isct.ac.jp/ADAS/CarOnto.owl", format: rdfxml}
+    drop_imports: []
+    credit:
+      <<: *adas_credit
+      title: "Kyutech-NII-TTI Core: Car Ontology (v0.04)"
+      source: {repository: null, commit: null, paths: [CarOnto.owl], url: "https://www.ai.iee.eng.isct.ac.jp/ADAS/index.html"}
+
+  # The three ontologies below state no licence. OntServe lists them with credit
+  # and a link to the source, without hosting their content.
+
+  - name: pmk
+    display_name: PMK (Perception and Manipulation Knowledge)
+    subcategory: Activities and manipulation
+    files:
+      - {path: pmk/PMK/interfaceprologcpp/owl/pmk_merged.owl, url: "https://raw.githubusercontent.com/MohammedDiab1/PMK/7930437d238b16ec91d6bad86d5cb24603d686ca/PMK/interfaceprologcpp/owl/pmk_merged.owl", format: rdfxml}
+    drop_imports: []
+    credit:
+      title: PMK, Perception and Manipulation Knowledge
+      creators: ["Mohammed Diab", "Aliakbar Akbari", "Muhayy Ud Din", "Jan Rosell"]
+      publisher: "Institute of Industrial and Control Engineering, Universitat Politècnica de Catalunya"
+      license: {id: none stated, url: null}
+      source:
+        repository: https://github.com/MohammedDiab1/PMK
+        commit: 7930437d238b16ec91d6bad86d5cb24603d686ca
+        paths: [PMK/interfaceprologcpp/owl/pmk_merged.owl, PMK/interfaceprologcpp/prolog/]
+        url: https://github.com/MohammedDiab1/PMK
+      homepage: https://github.com/MohammedDiab1/PMK
+      citation:
+        text: "Diab, M., Akbari, A., Ud Din, M. and Rosell, J. (2019). PMK, A Knowledge Processing Framework for Autonomous Robotics Perception and Manipulation. Sensors 19(5), 1166."
+        doi: 10.3390/s19051166
+        url: null
+      modifications: Not hosted.
+      used_in:
+        - {text: "Diab et al. (2019), task and motion planning for tabletop manipulation", reasoner: "SWI-Prolog over OWL, queried by task and motion planners"}
+      redistribution: reference-only
+
+  - name: ocra
+    display_name: OCRA (Ontology for Collaborative Robotics and Adaptation)
+    subcategory: Collaboration and adaptation
+    files:
+      - {path: ocra/owl/ont/ocra.owl, url: "http://www.iri.upc.edu/groups/perception/OCRA/ont/ocra.owl", format: rdfxml}
+    drop_imports: []
+    credit:
+      title: OCRA, Ontology for Collaborative Robotics and Adaptation
+      creators: ["Alberto Olivares-Alarcos", "Sergi Foix", "Stefano Borgo", "Guillem Alenyà"]
+      publisher: "Institut de Robòtica i Informàtica Industrial (CSIC-UPC)"
+      license: {id: none stated, url: null}
+      source:
+        repository: https://github.com/albertoOA/know_cra
+        commit: 50dcfc5fad253cdc7a716995772036fed10767f2
+        paths: [owl/ont/, prolog/useful_queries_ocra.pl]
+        url: https://www.iri.upc.edu/groups/perception/OCRA
+      homepage: https://www.iri.upc.edu/groups/perception/OCRA
+      citation:
+        text: "Olivares-Alarcos, A., Foix, S., Borgo, S. and Alenyà, G. (2022). OCRA, An ontology for collaborative robotics and adaptation. Computers in Industry 138, 103627."
+        doi: 10.1016/j.compind.2022.103627
+        url: null
+      modifications: "Not hosted. The core file states no licence. The application ontologies and Prolog queries in know_cra are under AGPL-3.0."
+      used_in:
+        - {text: "Olivares-Alarcos et al. (2022, 2023), collaboration and plan adaptation, explanatory narratives", reasoner: "KnowRob with rosprolog, or Owlready2"}
+      redistribution: reference-only
+
+  - name: ontobrep
+    display_name: OntoBREP (CAD boundary representation and geometric constraints)
+    subcategory: Geometry and assembly
+    files:
+      - {path: ontobrep/owl/ontobrep.owl, url: "https://raw.githubusercontent.com/OntoBREP/ontobrep/de543ffbd840e6e9fcc1c0cece78c8d60fb74c8f/owl/ontobrep.owl", format: rdfxml}
+    drop_imports: []
+    credit:
+      title: OntoBREP, an ontology for CAD data based on a boundary representation
+      creators: ["Alexander Perzylo", "Nikhil Somani", "Markus Rickert", "Alois Knoll"]
+      publisher: "fortiss, research institute associated with the Technical University of Munich"
+      license: {id: none stated, url: null}
+      source:
+        repository: https://github.com/OntoBREP/ontobrep
+        commit: de543ffbd840e6e9fcc1c0cece78c8d60fb74c8f
+        paths: [owl/ontobrep.owl]
+        url: https://github.com/OntoBREP/ontobrep
+      homepage: https://github.com/OntoBREP/ontobrep
+      citation:
+        text: "Perzylo, A., Somani, N., Rickert, M. and Knoll, A. (2015). An ontology for CAD data and geometric constraints as a link between product models and semantic robot task descriptions. In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS 2015), 4197-4203."
+        doi: 10.1109/IROS.2015.7353971
+        url: null
+      modifications: Not hosted.
+      used_in:
+        - {text: "Perzylo et al. (2015), Wildgrube et al. (2019), constraint-based assembly programming", reasoner: "assembly poses derived from the geometric constraints by the robot programming framework of fortiss"}
+      redistribution: reference-only
